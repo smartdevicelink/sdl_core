@@ -35,7 +35,6 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
-./src/audio_pass_thru_thread_impl.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc

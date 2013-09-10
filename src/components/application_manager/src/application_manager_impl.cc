@@ -37,7 +37,7 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_chaining.h"
-#include "application_manager/audio_pass_thru_thread_impl.h"
+#include "audio_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
 #include "request_watchdog/request_watchdog.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -63,25 +63,24 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-    : audio_pass_thru_flag_(false),
-      perform_audio_thread_(NULL),
-      is_distracting_driver_(false),
-      is_vr_session_strated_(false),
-      hmi_cooperating_(false),
-      is_all_apps_allowed_(true),
-      ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
-      vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
-      tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
-      vehicle_type_(NULL),
-      hmi_handler_(NULL),
-      mobile_handler_(NULL),
-      connection_handler_(NULL),
-      watchdog_(NULL),
-      from_mobile_thread_(NULL),
-      to_mobile_thread_(NULL),
-      from_hmh_thread_(NULL),
-      to_hmh_thread_(NULL),
-      hmi_so_factory_(NULL) {
+  : audio_pass_thru_flag_(false),
+    is_distracting_driver_(false),
+    is_vr_session_strated_(false),
+    hmi_cooperating_(false),
+    is_all_apps_allowed_(true),
+    ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vehicle_type_(NULL),
+    hmi_handler_(NULL),
+    mobile_handler_(NULL),
+    connection_handler_(NULL),
+    watchdog_(NULL),
+    from_mobile_thread_(NULL),
+    to_mobile_thread_(NULL),
+    from_hmh_thread_(NULL),
+    to_hmh_thread_(NULL),
+    hmi_so_factory_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   from_mobile_thread_ = new threads::Thread(
       "application_manager::FromMobileThreadImpl",
@@ -134,9 +133,6 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
-  if (perform_audio_thread_) {
-    delete perform_audio_thread_;
-  }
 
   if (vehicle_type_) {
     delete vehicle_type_;
@@ -747,40 +743,63 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
 
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != audioManager_) {
-    audioManager_->startMicrophoneRecording(
-        std::string("record.wav"),
-        static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-        max_duration,
-        static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample));
+    audioManager_->startMicrophoneRecording(std::string("record.wav"),
+         static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+         max_duration,
+         static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+         static_cast<unsigned int>(session_key),
+         static_cast<unsigned int>(correlation_id));
   }
-
-  LOG4CXX_ERROR(logger_, "START RECORD SENDER");
-  AudioPassThruThreadImpl* thread_impl = new AudioPassThruThreadImpl(
-      "record.wav", static_cast<unsigned int>(session_key),
-      static_cast<unsigned int>(correlation_id),
-      static_cast<unsigned int>(max_duration),
-      static_cast<SamplingRate>(sampling_rate),
-      static_cast<AudioCaptureQuality>(bits_per_sample),
-      static_cast<AudioType>(audio_type));
-
-  thread_impl->Init();
-  perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
-                                              thread_impl);
-
-  perform_audio_thread_->start();  // WithOptions(
-  // threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
-void ApplicationManagerImpl::StopAudioPassThruThread() {
-  if (!perform_audio_thread_) {
+void ApplicationManagerImpl::sendAudioPassThroughNotification(
+    unsigned int session_key_,
+    unsigned int correlation_id_,
+    std::vector<unsigned char> binaryData) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  smart_objects::SmartObject* on_audio_pass = NULL;
+  on_audio_pass = new smart_objects::SmartObject();
+
+  if (NULL == on_audio_pass) {
+    LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
+
     return;
   }
 
-  if (NULL != perform_audio_thread_) {
-    perform_audio_thread_->stop();
-    delete perform_audio_thread_;
-    perform_audio_thread_ = NULL;
+  LOG4CXX_INFO_EXT(logger_, "Fill smart object");
+
+  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::message_type] =
+      application_manager::MessageType::kNotification;
+  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::correlation_id] =
+      static_cast<int>(correlation_id_);
+
+  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::connection_key] =
+      static_cast<int>(session_key_);
+  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::function_id] =
+      mobile_apis::FunctionID::OnAudioPassThruID;
+
+  LOG4CXX_INFO_EXT(logger_, "Fill binary data");
+  // binary data
+  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::binary_data] =
+      smart_objects::SmartObject(binaryData);
+
+  LOG4CXX_INFO_EXT(logger_, "After fill binary data");
+
+  if(audio_pass_thru_flag()) {
+
+    LOG4CXX_INFO_EXT(logger_, "Send data");
+
+    CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*on_audio_pass));
+    command->Init();
+    command->Run();
+    command->CleanUp();
   }
+
+}
+
+void ApplicationManagerImpl::StopAudioPassThru() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   if (NULL != audioManager_) {
     audioManager_->stopMicrophoneRecording();

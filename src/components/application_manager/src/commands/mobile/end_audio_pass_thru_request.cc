@@ -51,13 +51,12 @@ void EndAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
 
   if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
-    ApplicationManagerImpl::instance()->StopAudioPassThruThread();
+    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                         smart_objects::SmartObject(smart_objects::SmartType_Map),
-                         true, 1);
-
-    ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
+                             smart_objects::SmartObject(smart_objects::SmartType_Map),
+                             true, 1);
+    ApplicationManagerImpl::instance()->StopAudioPassThru();
   } else {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "No PerformAudioPassThru is now active");

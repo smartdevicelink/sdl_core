@@ -338,7 +338,11 @@ class ApplicationManagerImpl : public ApplicationManager,
   /*
    * @brief Terminates audio pass thru thread
    */
-  void StopAudioPassThruThread();
+  void StopAudioPassThru();
+
+  void sendAudioPassThroughNotification(unsigned int session_key_,
+                                        unsigned int correlation_id_,
+                                        std::vector<unsigned char> binaryData);
 
   std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
@@ -440,7 +444,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   std::set<Application*> application_list_;
   MessageChain message_chaining_;
   bool audio_pass_thru_flag_;
-  threads::Thread* perform_audio_thread_;
   bool is_distracting_driver_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
