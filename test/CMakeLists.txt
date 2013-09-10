@@ -70,6 +70,7 @@ set(LIBRARIES
     Utils
     rt
     ${GSTREAMER_gstreamer_LIBRARY}
+    Libusb-1.0.16
 )
 
 add_executable("test_suit" "./test_suit.cc")

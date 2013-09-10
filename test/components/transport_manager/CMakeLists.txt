@@ -7,6 +7,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16/libusb/
 )
 
 set (LIBRARIES
@@ -20,7 +21,7 @@ set (LIBRARIES
     jsoncpp
     rt
     avahi-client
-    #    usb-1.0
+    Libusb-1.0.16
 )
 
 set (SOURCES
@@ -46,4 +47,4 @@ add_executable("test_DnssdServiceDiscovery" "src/test_dnssd_service_browser.cc")
 target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})
 add_test(test_DnssdServiceDiscovery, ./test_DnssdServiceDiscovery.sh)
 
-target_link_libraries("test_TransportManagerTest" TransportManager)
+target_link_libraries("test_TransportManagerTest" TransportManager  Libusb-1.0.16)

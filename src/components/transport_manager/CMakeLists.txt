@@ -3,7 +3,7 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include
   ../connection_handler/include
-  ../../thirdPartyLibs/libusbx
+  ../../thirdPartyLibs/libusbx-1.0.16
 )
 
 set (SOURCES

@@ -37,7 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER_H_
 
 #include <pthread.h>
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 

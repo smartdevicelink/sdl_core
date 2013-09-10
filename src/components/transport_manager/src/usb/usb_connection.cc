@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 
 #include "transport_manager/usb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
