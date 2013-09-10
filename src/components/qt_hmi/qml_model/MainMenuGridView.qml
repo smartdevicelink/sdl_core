@@ -23,10 +23,9 @@ GridView
         }
     }
 
-    width: 4 * cellWidth
-    height: 2 * cellHeight
-    cellWidth: 221
-    cellHeight: 149
+    anchors.fill: parent
+    cellWidth: width / 4
+    cellHeight: height / 2
     highlightFollowsCurrentItem: false
     snapMode: GridView.SnapToRow
     flickableDirection: Flickable.AutoFlickDirection

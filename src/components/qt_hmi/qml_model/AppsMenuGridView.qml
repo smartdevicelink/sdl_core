@@ -21,13 +21,10 @@ GridView
         }
     }
 
+    anchors.fill: parent
     id: appsMenuGridview
-    x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
-    width: 3 * cellWidth
-    height: 2 * cellHeight
-    cellWidth: 221
-    cellHeight: 149
+    cellWidth: width / 3
+    cellHeight: height / 2
     highlightFollowsCurrentItem: false
     snapMode: GridView.SnapToRow
     flickableDirection: Flickable.AutoFlickDirection
@@ -43,15 +40,16 @@ GridView
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                caption.text = name
-                mainScreen.state = name
+                //caption.text = name
+                //mainScreen.state = name
+                menuContainer.source = qml
             }
         }
 
         Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter;}
         Text  {
-            text: name;
-            color: "white"
+            //text: name;
+            //color: "white"
             anchors.baseline: parent.bottom;
             anchors.horizontalCenter: parent.horizontalCenter
         }

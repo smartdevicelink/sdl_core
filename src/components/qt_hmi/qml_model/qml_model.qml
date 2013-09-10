@@ -83,6 +83,8 @@ Rectangle {
         id: menuContainer
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
+        width: 884
+        height: 298
     }
 
     PowerSwitcher {
