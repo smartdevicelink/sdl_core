@@ -120,6 +120,12 @@ public class USBTransport extends SyncTransport {
      */
     private UsbAccessory mAccessory = null;
     /**
+     * FileDescriptor that owns the input and output streams. We have to keep
+     * it, otherwise it will be garbage collected and the streams will become
+     * invalid.
+     */
+    private ParcelFileDescriptor mParcelFD = null;
+    /**
      * Data input stream to read data from USB accessory.
      */
     private InputStream mInputStream = null;
@@ -309,6 +315,14 @@ public class USBTransport extends SyncTransport {
                             } catch (IOException e) {
                                 logW("Can't close input stream", e);
                                 mInputStream = null;
+                            }
+                        }
+                        if (mParcelFD != null) {
+                            try {
+                                mParcelFD.close();
+                            } catch (IOException e) {
+                                logW("Can't close file descriptor", e);
+                                mParcelFD = null;
                             }
                         }
 
@@ -597,11 +611,9 @@ public class USBTransport extends SyncTransport {
             switch (state) {
                 case LISTENING:
 
-                    FileDescriptor fd;
                     synchronized (USBTransport.this) {
-                        final ParcelFileDescriptor parcelFD =
-                                getUsbManager().openAccessory(mAccessory);
-                        if (parcelFD == null) {
+                        mParcelFD = getUsbManager().openAccessory(mAccessory);
+                        if (mParcelFD == null) {
                             if (isInterrupted()) {
                                 logW("Can't open accessory, and thread is interrupted");
                             } else {
@@ -612,7 +624,7 @@ public class USBTransport extends SyncTransport {
                             }
                             return false;
                         }
-                        fd = parcelFD.getFileDescriptor();
+                        FileDescriptor fd = mParcelFD.getFileDescriptor();
                         mInputStream = new FileInputStream(fd);
                         mOutputStream = new FileOutputStream(fd);
                     }
