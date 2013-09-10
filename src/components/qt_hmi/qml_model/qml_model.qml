@@ -27,7 +27,30 @@ Rectangle {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
         }
+
         Text{
+            Text{
+                text: "__"
+                color: "#1d81d5"
+                font.pixelSize: 25
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: parent.y - 55
+            }
+            Text{
+                text: "__"
+                color: "#1d81d5"
+                font.pixelSize: 25
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: parent.y - 60
+            }
+            Text{
+                text: "__"
+                color: "#1d81d5"
+                font.pixelSize: 25
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: parent.y - 65
+            }
+
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
@@ -42,6 +65,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
         }
+
         Text{
             text: "12:50";
             color: "#1d81d5"
@@ -62,6 +86,8 @@ Rectangle {
     }
 
     PowerSwitcher {
+        x: parent.x + 50
+        anchors.verticalCenter: parent.verticalCenter
         onSwitched: {
             if (sw === "on") {
                 mainScreen.state = "Main"

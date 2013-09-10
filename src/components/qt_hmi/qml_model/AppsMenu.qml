@@ -3,15 +3,12 @@ import QtQuick 2.0
 ListModel
 {
     ListElement {
-        name: "Install"
-        icon: "res/apps.png"
+        icon: "res/install_apps.png"
     }
     ListElement {
-        name: "Find"
-        icon: "res/apps.png"
+        icon: "res/find_apps.png"
     }
     ListElement {
-        name: "Change"
-        icon: "res/apps.png"
+        icon: "res/change_devices.png"
     }
 }
