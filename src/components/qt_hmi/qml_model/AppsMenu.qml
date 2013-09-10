@@ -15,4 +15,12 @@ ListModel
         icon: "res/change_devices.png"
         qml: "ChangeDeviceView.qml"
     }
+    ListElement {
+        text: "Vehicle Info"
+        icon: "res/app_vehicle_info.png"
+    }
+    ListElement {
+        text: "911 Assist"
+        icon: "res/app_911_assist.png"
+    }
 }
