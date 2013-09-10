@@ -50,6 +50,15 @@ ListFilesResponse::~ListFilesResponse() {
 void ListFilesResponse::Run() {
   LOG4CXX_INFO(logger_, "ListFilesResponse::Run");
 
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
+  }
+
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<int>(file_system::AvailableSpace());
   Application* application = ApplicationManagerImpl::instance()->application(
