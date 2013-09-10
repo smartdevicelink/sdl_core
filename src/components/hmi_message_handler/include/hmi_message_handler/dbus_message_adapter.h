@@ -36,45 +36,63 @@
 #include <string>
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/dbus_message_controller.h"
+#include "smart_objects/smart_object.h"
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace hmi_message_handler {
 
-class DBusMessageAdapter : public HMIMessageAdapter,
-  public DBusMessageController {
-  public:
-    explicit DBusMessageAdapter(HMIMessageHandler* handler);
-    ~DBusMessageAdapter();
-    void sendMessageToHMI(
-      utils::SharedPtr<application_manager::Message> message);
+/**
+ * \brief adapter for DBus
+ */
+class DBusMessageAdapter
+    : public HMIMessageAdapter,
+      public DBusMessageController {
+ public:
+  explicit DBusMessageAdapter(HMIMessageHandler* handler);
+  ~DBusMessageAdapter();
+  void sendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
 
-    /*Methods from CMessageBrokerController*/
-    /**
-     * \brief Called on receiving response message from RPCBus.
-     * \param method Name of corresponding request method that was sent previously to RPCBus.
-     * \param root Received Json object.
-     */
-    void processResponse(std::string method, Json::Value& root);
+  /**
+   * \brief subscribes to signals
+   */
+  void subscribeTo();
 
-    /**
-     * \brief Called on receiving request message from RPCBus.
-     * \param root Received Json object.
-     */
-    void processRequest(Json::Value& root);
+ private:
+  static const std::string SDL_SERVICE_NAME;
+  static const std::string SDL_OBJECT_PATH;
+  static const std::string HMI_SERVICE_NAME;
+  static const std::string HMI_OBJECT_PATH;
 
-    /**
-     * \brief Called on receiving notification message from RPCBus.
-     * \param root Received Json object.
-     */
-    void processNotification(Json::Value& root);
+  /**
+   * \brief sends request to HMI
+   * \param obj request
+   */
+  void Request(smart_objects::SmartObject& obj);
 
-    void subscribeTo();
+  /**
+   * \brief sends notification to HMI
+   * \param obj notification
+   */
+  void Notification(smart_objects::SmartObject& obj);
 
-  protected:
-    void processRecievedfromMB(Json::Value& root);
+  /**
+   * \brief sends response to HMI
+   * \param obj response
+   */
+  void Response(smart_objects::SmartObject& obj);
 
-  private:
-    static const std::string SERVICE_NAME;
-    static const std::string PATH;
+  /**
+   * \brief sends error response to HMI
+   * \param obj error
+   */
+  void ErrorResponse(smart_objects::SmartObject& obj);
+
+  /**
+   * \brief sends message to core
+   * \param obj
+   */
+  void SendMessageToCore(smart_objects::SmartObject& obj);
 };
 
 }  // namespace hmi_message_handler

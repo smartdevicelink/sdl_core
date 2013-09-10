@@ -34,19 +34,37 @@
 
 #include <string>
 
+#include "interfaces/HMI_API.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "hmi_message_handler/dbus_message_controller.h"
+#include "formatters/CSmartFactory.hpp"
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {
 
-const std::string DBusMessageAdapter::SERVICE_NAME = "sdl.core.api";
-const std::string DBusMessageAdapter::PATH = "/dbus";
+const std::string DBusMessageAdapter::SDL_SERVICE_NAME = "com.ford.sdl";
+const std::string DBusMessageAdapter::SDL_OBJECT_PATH = "/com/ford/sdl/api";
+const std::string DBusMessageAdapter::HMI_SERVICE_NAME = "com.ford.hmi";
+const std::string DBusMessageAdapter::HMI_OBJECT_PATH = "/com/ford/hmi/api";
+
+std::vector<std::string> &split(const std::string &s, char delim,
+                                std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
 DBusMessageAdapter::DBusMessageAdapter(
     HMIMessageHandler* handler)
     : HMIMessageAdapter(handler),
-      DBusMessageController(SERVICE_NAME, PATH) {
-  LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
+      DBusMessageController(SDL_SERVICE_NAME, SDL_OBJECT_PATH,
+                            HMI_SERVICE_NAME, HMI_OBJECT_PATH) {
+  LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");
 }
 
 DBusMessageAdapter::~DBusMessageAdapter() {
@@ -54,89 +72,106 @@ DBusMessageAdapter::~DBusMessageAdapter() {
 
 void DBusMessageAdapter::sendMessageToHMI(
     utils::SharedPtr<application_manager::Message> message) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
+  LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
-  Json::Reader reader;
-  Json::Value json_value;
-  if (!reader.parse(message->json_message(), json_value, false)) {
-    LOG4CXX_ERROR(logger_, "Received invalid json string");
-    return;
+  smart_objects::SmartObject smart;
+
+  switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
+    case hmi_apis::messageType::request:
+      Request(smart);
+      break;
+    case hmi_apis::messageType::notification:
+      Notification(smart);
+      break;
+    case hmi_apis::messageType::response:
+      Response(smart);
+      break;
+    case hmi_apis::messageType::error_response:
+      ErrorResponse(smart);
+      break;
+    case hmi_apis::messageType::INVALID_ENUM:
+    default:
+      LOG4CXX_INFO(logger_, "Message type is invalid");
   }
-
-  SendJsonMessage(json_value);
 }
 
 void DBusMessageAdapter::subscribeTo() {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::subscribeTo");
-  DBusMessageController::subscribeTo("Buttons.OnButtonEvent");
-  DBusMessageController::subscribeTo("Buttons.OnButtonPress");
-  DBusMessageController::subscribeTo("UI.OnCommand");
-  DBusMessageController::subscribeTo("VR.OnCommand");
-  DBusMessageController::subscribeTo("BasicCommunication.OnReady");
-  DBusMessageController::subscribeTo("UI.OnDriverDistraction");
-  DBusMessageController::subscribeTo("UI.OnSystemContext");
-  DBusMessageController::subscribeTo("UI.OnAppActivated");
-  DBusMessageController::subscribeTo("BasicCommunication.OnAppDeactivated");
-  DBusMessageController::subscribeTo("BasicCommunication.OnStartDeviceDiscovery");
-  DBusMessageController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
-  DBusMessageController::subscribeTo("BasicCommunication.OnFindApplications");
-  DBusMessageController::subscribeTo("BasicCommunication.OnAppActivated");
-  DBusMessageController::subscribeTo("BasicCommunication.OnExitApplication");
-  DBusMessageController::subscribeTo("BasicCommunication.OnExitAllApplications");
-  DBusMessageController::subscribeTo("BasicCommunication.OnDeviceChosen");
-  DBusMessageController::subscribeTo("UI.OnLanguageChange");
-  DBusMessageController::subscribeTo("VR.OnLanguageChange");
-  DBusMessageController::subscribeTo("TTS.OnLanguageChange");
-  DBusMessageController::subscribeTo("VehicleInfo.OnVehicleData");
-  DBusMessageController::subscribeTo("UI.OnTBTClientState");
+  DBusMessageController::subscribeTo("Buttons", "OnButtonEvent");
+  DBusMessageController::subscribeTo("Buttons", "OnButtonPress");
+  DBusMessageController::subscribeTo("UI", "OnCommand");
+  DBusMessageController::subscribeTo("VR", "OnCommand");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnReady");
+  DBusMessageController::subscribeTo("UI", "OnDriverDistraction");
+  DBusMessageController::subscribeTo("UI", "OnSystemContext");
+  DBusMessageController::subscribeTo("UI", "OnAppActivated");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnAppDeactivated");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnStartDeviceDiscovery");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnUpdateDeviceList");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnFindApplications");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnAppActivated");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnExitApplication");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnExitAllApplications");
+  DBusMessageController::subscribeTo("BasicCommunication", "OnDeviceChosen");
+  DBusMessageController::subscribeTo("UI", "OnLanguageChange");
+  DBusMessageController::subscribeTo("VR", "OnLanguageChange");
+  DBusMessageController::subscribeTo("TTS", "OnLanguageChange");
+  DBusMessageController::subscribeTo("VehicleInfo", "OnVehicleData");
+  DBusMessageController::subscribeTo("UI", "OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
-void DBusMessageAdapter::processResponse(
-  std::string method, Json::Value& root) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processResponse");
-  processRecievedfromMB(root);
-}
-
-void DBusMessageAdapter::processRequest(Json::Value& root) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRequest");
-  processRecievedfromMB(root);
-}
-
-void DBusMessageAdapter::processNotification(Json::Value& root) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processNotification");
-  processRecievedfromMB(root);
-}
-
-void DBusMessageAdapter::processRecievedfromMB(Json::Value& root) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRecievedfromMB");
-  if (root.isNull()) {
-    // LOG
-    return;
-  }
-
-  Json::FastWriter writer;
-  std::string message_string = writer.write(root);
-
-  if (message_string.empty()) {
-    // LOG
-    return;
-  }
+void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
+  LOG4CXX_INFO(logger_, "DBusMessageAdapter::SendMessageToCore");
 
   if (!handler()) {
-    // WARNING
+    LOG4CXX_WARN(logger_, "DBusMessageAdapter hasn't handler");
     return;
   }
 
-  application_manager::Message* message =
-    new application_manager::Message;
-  // message->set_message_type()
-  message->set_json_message(message_string);
-  message->set_protocol_version(
-    application_manager::ProtocolVersion::kHMI);
+  application_manager::Message* message = new application_manager::Message;
+  message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+  // TODO(KKolodiy): insert smart object "obj" to message
+//  message->set_json_message(message_string);
 
   handler()->onMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");
+}
+
+void DBusMessageAdapter::Request(smart_objects::SmartObject& obj) {
+  obj[sos::S_PARAMS][sos::S_FUNCTION_ID].getSchema()
+      .unapplySchema(obj[sos::S_PARAMS][sos::S_FUNCTION_ID]);
+  std::string destination = obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asString();
+  std::vector<std::string> elems;
+  split(destination, '.', elems);
+  if (elems.size() > 2) {
+    uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
+    MethodCall(id, HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
+  }
+}
+
+void DBusMessageAdapter::Notification(smart_objects::SmartObject& obj) {
+  obj[sos::S_PARAMS][sos::S_FUNCTION_ID].getSchema()
+        .unapplySchema(obj[sos::S_PARAMS][sos::S_FUNCTION_ID]);
+  std::string destination = obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asString();
+  std::vector<std::string> elems;
+  split(destination, '.', elems);
+  if (elems.size() > 2) {
+    uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
+    Signal(id, HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
+  }
+}
+
+void DBusMessageAdapter::Response(smart_objects::SmartObject& obj) {
+  uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
+  MethodReturn(id, obj[sos::S_MSG_PARAMS]);
+}
+
+void DBusMessageAdapter::ErrorResponse(smart_objects::SmartObject& obj) {
+  std::string error = "";
+  std::string description = "";
+  uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
+  Error(id, error, description);
 }
 
 }  // namespace hmi_message_handler

@@ -35,8 +35,9 @@
 
 #include <string>
 #include <map>
-#include "json/json.h"
 #include "hmi_message_handler/dbus_adapter.h"
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace hmi_message_handler {
 
@@ -44,77 +45,41 @@ class DBusAdapter;
 
 class DBusMessageController : public DBusAdapter {
  public:
-  DBusMessageController(const std::string& serviceName, const std::string& path);
+  /**
+   * \brief constructs DBus message controller
+   * \param sdlServiceName name of service SDL
+   * \param sdlObjectPath path of object SDL
+   * \param hmiServiceName name of service HMI
+   * \param hmiObjectPath path of object HMI
+   */
+  DBusMessageController(const std::string& sdlServiceName,
+                        const std::string& sdlObjectPath,
+                        const std::string& hmiServiceName,
+                        const std::string& hmiObjectPath);
 
+  /**
+   * \brief destructs DBus message controller
+   */
   virtual ~DBusMessageController();
 
   /**
-   * \brief subscribes controller to the property changing.
-   * \param property property name in format ComponentName.PropertyName.
+   * \brief subscribes to the DBus signal.
+   * \param interface name of interface in HMI
+   * \param signal name of signal
    */
-  void subscribeTo(std::string property);
+  void subscribeTo(const std::string& interface, const std::string& signal);
 
   /**
-   * \brief send Json message.
-   * \param message JSON message.
+   * \brief Method for receiving thread.
    */
-  void SendJsonMessage(const Json::Value& message);
+  void* MethodForReceiverThread(void*);
 
+ protected:
   /**
-   * \brief checks is message notification or not.
-   * \param root JSON message.
-   * \return true if notification.
+   * \brief sends message to core
+   * \param obj
    */
-  bool isNotification(const Json::Value& root);
-
-  /**
-   * \brief checks is message response or not.
-   * \param root JSON message.
-   * \return true if response.
-   */
-  bool isResponse(const Json::Value& root);
-
-  /**
-   * \brief Send data.
-   * \param data data to send
-   */
-  void Send(const std::string& data);
-
-  /**
-   * \brief Receive data from the network.
-   * \param data if data is received it will put in this reference
-   * \note This method will blocked until data comes.
-   */
-  void Recv(std::string& data);
-
-  /**
-   * \brief pure virtual method to process response.
-   * \param method method name which has been called.
-   * \param root JSON message.
-   */
-  virtual void processResponse(std::string method, Json::Value& root) = 0;
-
-  /**
-   * \brief pure virtual method to process request.
-   * \param root JSON message.
-   */
-  virtual void processRequest(Json::Value& root) = 0;
-
-  /**
-   * \brief Process notification message.
-   * \brief Notify subscribers about property change.
-   * expected notification format example:
-   * \code
-   * {"jsonrpc": "2.0", "method": "<ComponentName>.<NotificationName>", "params": <list of params>}
-   * \endcode
-   * \param root JSON message.
-   */
-  virtual void processNotification(Json::Value& root) = 0;
-
-  /**
-  * \brief Method for receiving thread.
-  */
-  void* MethodForReceiverThread(void * arg);
+  virtual void SendMessageToCore(smart_objects::SmartObject& obj) = 0;
 
  private:
   /**
@@ -123,38 +88,14 @@ class DBusMessageController : public DBusAdapter {
   int mControllersIdStart;
 
   /**
+   * \brief Current id's value.
+   */
+  int mControllersIdCurrent;
+
+  /**
   * \brief Already sent messages Methods to recognize esponses: MessageId:MethodName.
   */
   std::map<std::string, std::string> mWaitResponseQueue;
-
-  /**
-   * \brief JSON reader.
-   */
-  Json::Reader m_reader;
-
-  /**
-   * \brief JSON writer.
-   */
-  Json::FastWriter m_writer;
-
-  /**
-   * \brief JSON writer.
-   */
-  Json::FastWriter m_receiverWriter;
-
-  /**
-   * \brief Method for receiving messages without tcp packeting.
-   * \param message received data
-   */
-  void onMessageReceived(Json::Value message);
-
-  /**
-   * \brief Checks message.
-   * \param root JSON message.
-   * \param error JSON message to fill in case of any errors.
-   * \return true if message is good.
-   */
-  bool checkMessage(Json::Value& root, Json::Value& error);
 
   /**
    * \brief searches Method by id in mWaitResponseQueue.
@@ -162,6 +103,12 @@ class DBusMessageController : public DBusAdapter {
    * \return string method name or "" in case not found.
    */
   std::string findMethodById(std::string id);
+
+  /**
+   * \brief generates new message id from diapason mControllersIdStart - (mControllersIdStart+999).
+   * \return next id for message
+   */
+  int getNextMessageId();
 };
 
 }  // namespace hmi_message_handler
