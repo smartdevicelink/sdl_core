@@ -24,35 +24,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.PlayerControllsView
- * @desc Video player visual representation
+ * @name SDL.NavigationView
+ * @desc Navigation component
  * @category View
- * @filesource app/view/player/PlayerView.js
+ * @filesource app/view/navigationView.js
  * @version 1.0
  */
 SDL.NavigationView = Em.ContainerView.create( {
     /** View Id */
     elementId: 'navigationView',
 
-    afterRender: function(){
-        //SDL.SDLController.startVideo();
-    },
-
     classNameBindings: [
         'SDL.States.navigation.active:active_state:inactive_state'
     ],
 
     childViews: [
-        'windowText',
-        'videoView'
+        'videoView',
+        SDL.BaseNavigationView
     ],
-
-    windowText: SDL.Label.extend( {
-
-        classNames: 'windowText',
-
-        content: 'Navigation'
-    }),
 
     videoView: Ember.View.extend({
         templateName: "video",
