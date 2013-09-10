@@ -8,7 +8,7 @@ Item {
         model: ApplicationListModel {}
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: searchDeviceText.height
+        //y: searchDeviceText.height
         width:parent.width
         height:parent.height
 
@@ -27,9 +27,7 @@ Item {
             MouseArea {
               anchors.fill: parent
               onClicked: {
-                    caption.text = name
-                    mainScreen.state = name
-                    menuContainer.source = qml
+                  menuContainer.source = "SDLPlayerView.qml"
                 }
             }
             Image { id:sdlIcon;source: icon}
