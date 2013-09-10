@@ -71,6 +71,12 @@ void SyncPDataRequest::Run() {
 
   const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 
+  if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+    LOG4CXX_ERROR(logger_, "Mandatory param are missed!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   const std::vector<unsigned char> char_vector_pdata =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
