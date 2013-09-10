@@ -18,7 +18,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         y: searchDeviceText.height
         width:parent.width
-        height:parent.height //- searchDeviceText.height
+        height:parent.height - searchDeviceText.height
+
 
         //highlightFollowsCurrentItem: false
         //flickableDirection: Flickable.AutoFlickDirection
@@ -62,6 +63,23 @@ Item {
                     to: 1
                     duration: 300
                 }
+            }
+        }
+    }
+
+    Text{
+        id: backtext
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: changeDeviceListView.height
+        text: "Back"
+        color: "#1d81d5"
+        font.pixelSize: 30
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+                caption.text = name
+                mainScreen.state = name
+                menuContainer.source = qml
             }
         }
     }
