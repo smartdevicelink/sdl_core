@@ -30,7 +30,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   AudioManager
-  usb-1.0
+  Libusb-1.0.16
 )
 
 # required to find 'glibconfig.h'
