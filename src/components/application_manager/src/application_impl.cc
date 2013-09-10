@@ -162,7 +162,8 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it; ++it) {
+      app_files_.end() != it;
+      ++it) {
     if (0 == it->file_name.compare(file_name)) {
       app_icon_path_ = file_name;
       return true;
@@ -186,7 +187,8 @@ bool ApplicationImpl::HasBeenActivated() const {
 bool ApplicationImpl::AddFile(const std::string& file_name,
                               bool is_persistent) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it; ++it) {
+      app_files_.end() != it;
+      ++it) {
     if (0 == file_name.compare(it->file_name)) {
       return false;
     }
@@ -198,7 +200,8 @@ bool ApplicationImpl::AddFile(const std::string& file_name,
 
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it; ++it) {
+      app_files_.end() != it;
+      ++it) {
     if (0 == it->file_name.compare(file_name)) {
       app_files_.erase(it);
       return true;

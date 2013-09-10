@@ -166,7 +166,9 @@ bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
     const connection_handler::DeviceHandle device_handle) {
   bool result = false;
   for (std::vector<transport_manager::DeviceInfo>::const_iterator it_in =
-      device_list.begin(); it_in != device_list.end(); ++it_in) {
+      device_list.begin();
+      it_in != device_list.end();
+      ++it_in) {
     if (it_in->device_handle() == device_handle) {
       result = true;
       break;

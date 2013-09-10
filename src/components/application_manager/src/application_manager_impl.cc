@@ -193,7 +193,8 @@ Application* ApplicationManagerImpl::application(int app_id) {
 Application* ApplicationManagerImpl::active_application() const {
   // TODO(DK) : check driver distraction
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     if ((*it)->IsFullscreen()) {
       return *it;
     }
@@ -218,7 +219,8 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
     unsigned int vehicle_info) {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     if ((*it)->IsSubscribedToIVI(vehicle_info)) {
       result.push_back(*it);
     }
@@ -229,7 +231,8 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
 std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     if ((*it)->SupportsNavigation()) {
       result.push_back(*it);
     }
@@ -301,7 +304,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
     message[strings::msg_params][strings::app_name].asString();
 
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     if ((*it)->app_id() == app_id) {
       LOG4CXX_ERROR(logger_, "Application has been registered already.");
       utils::SharedPtr<smart_objects::SmartObject> response(
@@ -408,7 +412,8 @@ bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
 void ApplicationManagerImpl::UnregisterAllApplications(bool hmi_off) {
   applications_.clear();
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     delete (*it);
   }
   application_list_.clear();
@@ -437,7 +442,8 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
   bool is_new_app_media = application->is_media_application();
 
   for (std::set<Application*>::iterator it = application_list_.begin();
-      application_list_.end() != it; ++it) {
+      application_list_.end() != it;
+      ++it) {
     Application* app = *it;
     if (app->app_id() == application->app_id()) {
       if (app->IsFullscreen()) {

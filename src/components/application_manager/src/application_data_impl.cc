@@ -366,7 +366,8 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
     const std::string& name) {
-  for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
+  for (SubMenuMap::iterator it = sub_menu_.begin();
+      sub_menu_.end() != it;
       ++it) {
     smart_objects::SmartObject* menu = it->second;
     if ((*menu)[strings::menu_name] == name) {

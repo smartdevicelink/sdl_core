@@ -49,8 +49,9 @@ void ToHMIThreadImpl::threadMain() {
     while (!handler_->messages_to_hmi_.empty()) {
       MessageSharedPointer message = handler_->messages_to_hmi_.pop();
 
-      for (std::set<HMIMessageAdapter*>::iterator it = handler_
-          ->message_adapters_.begin(); it != handler_->message_adapters_.end();
+      for (std::set<HMIMessageAdapter*>::iterator it =
+          handler_->message_adapters_.begin();
+          it != handler_->message_adapters_.end();
           ++it) {
         (*it)->sendMessageToHMI(message);
       }
