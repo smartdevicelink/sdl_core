@@ -2,11 +2,28 @@ import QtQuick 2.0
 
 Item {
     anchors.fill: parent
-    Text{
+
+    Text {
+
+        SequentialAnimation {
+            running: true;
+            loops: 8
+            PropertyAction { target: searchDeviceText; property: "text"; value: "Searching devices" }
+            PauseAnimation { duration: 200 }
+            PropertyAction { target: searchDeviceText; property: "text"; value: "Searching devices." }
+            PauseAnimation { duration: 200 }
+            PropertyAction { target: searchDeviceText; property: "text"; value: "Searching devices.." }
+            PauseAnimation { duration: 200 }
+            PropertyAction { target: searchDeviceText; property: "text"; value: "Searching devices..." }
+            PauseAnimation { duration: 200 }
+            onStopped: {
+                searchDeviceText.text = "Searching devices done"
+            }
+        }
+
         //anchors.left: parent.left
         width: parent.width
         id: searchDeviceText
-        text: "Search Devices"
         color: "#1d81d5"
         font.pixelSize: 40
     }
