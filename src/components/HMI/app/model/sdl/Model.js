@@ -336,10 +336,10 @@ SDL.SDLModel = Em.Object
          */
         playVideo: function(){
             if (SDL.SDLModel.naviVideo === null) {
-                console.log(document.getElementById("html5Player"));
                 SDL.SDLModel.naviVideo = document.getElementById("html5Player");
                 SDL.SDLModel.naviVideo.src = "http://content.bitsontherun.com/videos/nfSyO85Q-27m5HpIu.webm";
             }
+
             SDL.SDLModel.naviVideo.play();
         },
 
