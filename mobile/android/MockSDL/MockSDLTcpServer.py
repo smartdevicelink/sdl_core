@@ -1,7 +1,7 @@
 import socket
 
 
-TCP_IP = '192.168.42.182'
+TCP_IP = '192.168.42.47'
 TCP_PORT = 12345
 BUFFER_SIZE = 112  # Normally 1024, but we want fast response
 status = ["off", "connected", "singleFrameHeaderReceived"]
@@ -70,7 +70,7 @@ def dataEchange():
         if currentStatus == "singleFrameHeaderReceived":
             currentData += data
             if len(currentData) >= 112:
-                #conn.send(mobileNavAck())
+                conn.send(mobileNavAck())
                 currentStatus = "connected"
     conn.close()
 
@@ -101,7 +101,7 @@ def singleSendData():
 
 
 def mobileNavAck():
-    return str(bytearray([32, 11, 5, 48, 0, 0, 0, 0, 0, 0, 0, 48]))
+    return str(bytearray([32, 11, 6, 48, 0, 0, 0, 0, 0, 0, 0, 48]))
 
 
 def startSessionNAck():
