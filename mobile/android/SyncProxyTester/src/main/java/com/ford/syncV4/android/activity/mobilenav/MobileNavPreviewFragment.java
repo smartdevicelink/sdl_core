@@ -19,6 +19,7 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     private CheckBoxState videoCheckBoxState;
     private CheckBoxState mobileNavSessionCheckBoxState;
     private MockVideoDataSource videoDataSource;
+    private Button dataStreamingButton;
 
     public MockVideoDataSource getVideoDataSource() {
         return videoDataSource;
@@ -60,6 +61,7 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     }
 
     private void initiateVideoCheckBox(View view) {
+        dataStreamingButton = (Button) getView().findViewById(R.id.file_streaming);
         CheckBox box = (CheckBox) view.findViewById(R.id.videoStreamingCheckBox);
         videoCheckBoxState = new VideoCheckBoxState(box, getActivity());
         videoCheckBoxState.setStateOff();
@@ -106,12 +108,14 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         box.setChecked(false);
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(false);
+        dataStreamingButton.setEnabled(false);
     }
 
     public void setMobileNaviStateOn(){
         mobileNavSessionCheckBoxState.setStateOn();
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(true);
+        dataStreamingButton.setEnabled(true);
     }
 
     @Override
@@ -135,4 +139,13 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
     }
 
 
+    public void dataStreamingStarted() {
+        dataStreamingButton.setEnabled(false);
+        dataStreamingButton.setText("Data is streaming");
+    }
+
+    public void dataStreamingStopped() {
+        dataStreamingButton.setEnabled(true);
+        dataStreamingButton.setText("Start File Streaming");
+    }
 }

@@ -22,6 +22,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte [], Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        mListener.onStartReading();
     }
 
     @Override
@@ -41,7 +42,6 @@ public class StaticFileReader extends AsyncTask<Integer, byte [], Void> {
         while ((length = is.read(buffer))>0){
             mListener.onDataReceived(buffer);
         }
-        // Close the stream
             is.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,10 +56,12 @@ public class StaticFileReader extends AsyncTask<Integer, byte [], Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
+        mListener.onEndReading();
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
+        mListener.onCancelReading();
     }
 }

@@ -1,7 +1,7 @@
 import socket
 
 
-TCP_IP = '172.30.138.110'
+TCP_IP = '172.30.138.65'
 TCP_PORT = 12345
 BUFFER_SIZE = 112  # Normally 1024, but we want fast response
 status = ["off", "connected", "singleFrameHeaderReceived"]

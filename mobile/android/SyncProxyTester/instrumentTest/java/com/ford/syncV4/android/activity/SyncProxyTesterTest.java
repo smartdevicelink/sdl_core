@@ -36,6 +36,11 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
     public void testStaticFileReader() throws Exception {
         StaticFileReader staticFileReader = new StaticFileReader(getActivity(), new DataReaderListener() {
             @Override
+            public void onStartReading() {
+
+            }
+
+            @Override
             public void onDataReceived(final byte[] data) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -43,6 +48,16 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
                         assertNotNull(data);
                     }
                 });
+
+            }
+
+            @Override
+            public void onCancelReading() {
+
+            }
+
+            @Override
+            public void onEndReading() {
 
             }
         });
