@@ -39,7 +39,6 @@
 #include "application_manager/message_chaining.h"
 #include "audio_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
-#include "request_watchdog/request_watchdog.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
@@ -75,12 +74,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_handler_(NULL),
     mobile_handler_(NULL),
     connection_handler_(NULL),
-    watchdog_(NULL),
     from_mobile_thread_(NULL),
     to_mobile_thread_(NULL),
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
-    hmi_so_factory_(NULL) {
+    hmi_so_factory_(NULL),
+    request_ctrl() {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   from_mobile_thread_ = new threads::Thread(
       "application_manager::FromMobileThreadImpl",
@@ -136,13 +135,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   if (vehicle_type_) {
     delete vehicle_type_;
-  }
-
-  if (watchdog_) {
-    watchdog_->RemoveListener(this);
-
-    // TODO(AK): Is it correct?
-    delete watchdog_;
   }
 
   if (from_mobile_thread_) {
@@ -979,20 +971,6 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
   }
 }
 
-void ApplicationManagerImpl::onTimeoutExpired(
-    request_watchdog::RequestInfo info) {
-  printf("\n\n\n!!!!!onTimeoutExpired!!!!!\n\n\n");
-
-  RemoveMobileRequestFromMessageChain(info.correlationID_, info.connectionID_);
-  /*watchdog_->removeRequest(info.connectionID_,
-   info.correlationID_);*/
-
-  smart_objects::SmartObject* result = MessageHelper::CreateNegativeResponse(
-      info.connectionID_, info.functionID_, info.correlationID_,
-      mobile_api::Result::TIMED_OUT);
-  ManageMobileCommand(result);
-}
-
 void ApplicationManagerImpl::set_hmi_message_handler(
     hmi_message_handler::HMIMessageHandler* handler) {
   hmi_handler_ = handler;
@@ -1006,15 +984,6 @@ void ApplicationManagerImpl::set_mobile_message_handler(
 void ApplicationManagerImpl::set_connection_handler(
     connection_handler::ConnectionHandler* handler) {
   connection_handler_ = handler;
-}
-
-void ApplicationManagerImpl::set_watchdog(
-    request_watchdog::Watchdog* watchdog) {
-  LOG4CXX_INFO(logger_, "set_watchdog");
-  DCHECK(watchdog);
-  watchdog_ = watchdog;
-
-  watchdog_->AddListener(this);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1051,11 +1020,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
-    // Check to prevent deadlock in watchdog
-    watchdog_->removeRequest(
-        msg_to_mobile[strings::params][strings::connection_key],
-        msg_to_mobile[strings::params][strings::correlation_id]);
-  }
+    request_ctrl.terminateRequest(
+        msg_to_mobile[strings::params][strings::correlation_id].asInt());
+   }
 
   messages_to_mobile_.push(message_to_send);
 }
@@ -1132,6 +1099,12 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   }
 
   if (command->Init()) {
+
+    if ((*message)[strings::params][strings::message_type].asInt() ==
+          mobile_apis::messageType::request) {
+      request_ctrl.addRequest(command);
+    }
+
     command->Run();
     if (command->CleanUp()) {
       return true;
@@ -1384,25 +1357,6 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     return;
   }
 
-  smart_objects::SmartObject& cmd_from_mobile = *so_from_mobile;
-  if (!watchdog_) {
-    watchdog_ = request_watchdog::RequestWatchdog::instance();
-    DCHECK(watchdog_);
-    watchdog_->AddListener(this);
-  }
-  unsigned int default_timeout =
-      profile::Profile::instance()->default_timeout();
-  LOG4CXX_INFO(
-      logger_,
-      "Adding request to watchdog. Default timeout is " << default_timeout);
-  watchdog_->addRequest(
-      request_watchdog::RequestInfo(
-          cmd_from_mobile[strings::params][strings::function_id],
-          cmd_from_mobile[strings::params][strings::connection_key],
-          cmd_from_mobile[strings::params][strings::correlation_id],
-          default_timeout));
-
-  LOG4CXX_INFO(logger_, "Added request to watchdog.");
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }

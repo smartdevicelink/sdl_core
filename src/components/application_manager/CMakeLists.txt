@@ -44,6 +44,7 @@ set (SOURCES
 ./src/from_hmh_thread_impl.cc
 ./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
+./src/request_controller.cc
 )
 
 set (POLICIES_MANAGER

@@ -43,6 +43,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
+#include "application_manager/request_controller.h"
 #include "audio_manager/audio_manager_impl.h"
 
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -51,7 +52,7 @@
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 
-#include "request_watchdog/watchdog_subscriber.h"
+
 #include "formatters/CSmartFactory.hpp"
 
 #include "interfaces/HMI_API.h"
@@ -108,7 +109,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     public hmi_message_handler::HMIMessageObserver,
     public mobile_message_handler::MobileMessageObserver,
     public connection_handler::ConnectionHandlerObserver,
-    public request_watchdog::WatchdogSubscriber, public HMICapabilities {
+    public HMICapabilities {
  public:
   ~ApplicationManagerImpl();
   static ApplicationManagerImpl* instance();
@@ -357,7 +358,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   void set_mobile_message_handler(
       mobile_message_handler::MobileMessageHandler* handler);
   void set_connection_handler(connection_handler::ConnectionHandler* handler);
-  void set_watchdog(request_watchdog::Watchdog* watchdog);
 
   ///////////////////////////////////////////////////////
 
@@ -390,8 +390,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   void OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
                                 int session_key, int first_session_key);
   void OnSessionEndedCallback(int session_key, int first_session_key);
-
-  void onTimeoutExpired(request_watchdog::RequestInfo);
 
  private:
   ApplicationManagerImpl();
@@ -457,7 +455,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   mobile_message_handler::MobileMessageHandler* mobile_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  request_watchdog::Watchdog* watchdog_;
+
 
   policies_manager::PoliciesManager policies_manager_;
 
@@ -481,6 +479,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   static log4cxx::LoggerPtr logger_;
   static unsigned int message_chain_current_id_;
   static const unsigned int message_chain_max_id_;
+  request_controller::RequestController         request_ctrl;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
