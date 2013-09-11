@@ -300,8 +300,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
             "jsonrpc": "2.0",
             "method": "Navigation.OnTBTClientState",
             "params": {
-                "state": state,
-                "appID": appID
+                "state": state
             }
         };
         this.client.send(JSONMessage);

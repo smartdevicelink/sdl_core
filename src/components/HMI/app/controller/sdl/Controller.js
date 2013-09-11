@@ -242,8 +242,7 @@ SDL.SDLController = Em.Object
          */
         tbtClientStateSelected: function(state) {
 
-            FFW.Navigation.onTBTClientState(state,
-                SDL.SDLAppController.model.appID);
+            FFW.Navigation.onTBTClientState(state);
         },
         /**
          * Method to sent notification with selected reason of Exit Application
