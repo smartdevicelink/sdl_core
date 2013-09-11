@@ -17,7 +17,7 @@ Item {
             PropertyAction { target: searchDeviceText; property: "text"; value: "Searching devices..." }
             PauseAnimation { duration: 200 }
             onStopped: {
-                searchDeviceText.text = "Searching devices done"
+                searchDeviceText.text = "Search device done"
             }
         }
 
@@ -89,6 +89,11 @@ Item {
         text: "Back"
         color: "#1d81d5"
         font.pixelSize: 30
+        Image{
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: backtext.verticalCenter
+            source: "res/buttons/long_oval_btn.png"
+        }
         MouseArea {
           anchors.fill: parent
           onClicked: {
