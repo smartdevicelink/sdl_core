@@ -31,25 +31,25 @@
  * @version 1.0
  */
 
-// Extend base Em.State object
-Em.State.reopen( {
+    // Extend base Em.State object
+Em.State.reopen({
 
     // used for determine display status
     active: false,
 
-    enter: function() {
+    enter: function () {
 
         this.set('active', true);
     },
 
-    exit: function() {
+    exit: function () {
 
         this.set('active', false);
     }
 });
 
 // State Manager class
-var StateManager = Em.StateManager.extend( {
+var StateManager = Em.StateManager.extend({
 
     // default state
     initialState: 'home',
@@ -62,14 +62,14 @@ var StateManager = Em.StateManager.extend( {
     /**
      * Method used for determine previous currentState and make
      */
-    goToStates: function(stateName) {
+    goToStates: function (stateName) {
 
         this.set('nextState', stateName);
         this.transitionTo(stateName);
     },
 
     /** Go to parent state */
-    back: function() {
+    back: function () {
 
         if (this.currentState.parentState.hasOwnProperty('name')) {
             this.goToStates(this.currentState.parentState.get('path'));
@@ -81,74 +81,73 @@ var StateManager = Em.StateManager.extend( {
     },
 
     /** Home state */
-    home: Em.State.create( {
+    home: Em.State.create({
 
     }),
 
     /** Climate state */
-    climate: Em.State.create( {
+    climate: Em.State.create({
 
     }),
 
     /** info state */
-    info: Em.State.create( {
+    info: Em.State.create({
 
-        exit: function() {
+        exit: function () {
 
-            SDL.InfoController.set('activeState', SDL.States.currentState
-                .get('path'));
+            SDL.InfoController.set('activeState', SDL.States.currentState.get('path'));
             this._super();
         },
 
-        services: Em.State.create( {
+        services: Em.State.create({
 
         }),
 
-        travelLink: Em.State.create( {
+        travelLink: Em.State.create({
 
         }),
 
-        alerts: Em.State.create( {
+        alerts: Em.State.create({
 
         }),
 
-        calendar: Em.State.create( {
+        calendar: Em.State.create({
 
         }),
 
-        apps: Em.State.create( {
+        apps: Em.State.create({
 
             /**
              * Calls function from BasicCommunicationRPC to get new list of
              * applications
              */
-            enter: function() {
+            enter: function () {
 
                 this._super();
                 FFW.BasicCommunication.OnFindApplications();
             }
         }),
 
-        devicelist: Em.State.create( {
+        devicelist: Em.State.create({
             /**
              * Calls function to clear device list on DeviceListView
              */
-            enter: function() {
+            enter: function () {
 
                 this._super();
                 SDL.DeviceListView.clearDeviceList();
             }
         }),
 
-        nonMedia: Em.State.create( {
-            enter: function() {
+        nonMedia: Em.State.create({
+            enter: function () {
 
                 this._super();
 
                 SDL.NonMediaController.restoreCurrentApp();
             },
 
-            exit: function() {
+            exit: function () {
 
                 this._super();
 
@@ -158,32 +157,31 @@ var StateManager = Em.StateManager.extend( {
     }),
 
     /** settings state */
-    settings: Em.State.create( {
+    settings: Em.State.create({
 
     }),
 
     /** Media state */
-    media: Em.State.create( {
+    media: Em.State.create({
 
-        exit: function() {
+        exit: function () {
 
-            SDL.MediaController.set('activeState', SDL.States.currentState
-                .get('path'));
+            SDL.MediaController.set('activeState', SDL.States.currentState.get('path'));
             this._super();
         },
 
-        player: Em.State.create( {}),
+        player: Em.State.create({}),
 
-        sdlmedia: Em.State.create( {
+        sdlmedia: Em.State.create({
 
-            enter: function() {
+            enter: function () {
 
                 this._super();
 
                 SDL.SDLMediaController.restoreCurrentApp();
             },
 
-            exit: function() {
+            exit: function () {
 
                 this._super();
 
@@ -194,15 +192,18 @@ var StateManager = Em.StateManager.extend( {
     }),
 
     /** Navigation state */
-    navigation: Em.State.create( {
-        enter: function() {
+    navigation: Em.State.create({
+
+        baseNavigation: Em.State.create({}),
+
+        enter: function () {
 
             this._super();
 
             SDL.SDLModel.playVideo();
         },
 
-        exit: function() {
+        exit: function () {
 
             this._super();
 
@@ -211,9 +212,9 @@ var StateManager = Em.StateManager.extend( {
     }),
 
     /** Phone state */
-    phone: Em.State.create( {
+    phone: Em.State.create({
 
-        dialpad: Em.State.create( {
+        dialpad: Em.State.create({
 
         })
     })

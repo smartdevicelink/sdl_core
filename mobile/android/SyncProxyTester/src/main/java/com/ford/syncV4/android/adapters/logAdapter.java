@@ -1,9 +1,9 @@
 package com.ford.syncV4.android.adapters;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 public class logAdapter extends MessageAdapter {
 	private String logTag;
@@ -28,8 +28,10 @@ public class logAdapter extends MessageAdapter {
     	if(fullUIDebug) addMessageToUI(m);
 	}
     public void logMessage (final Object m, Boolean addToUI) {
-		Log.i(logTag, m.toString());		
-    	addMessageToUI(m);
+		Log.i(logTag, m.toString());
+        if(addToUI){
+    	    addMessageToUI(m);
+        }
     }
     public void logMessage (final Object m, Integer type) {
     	if (m instanceof String) {
