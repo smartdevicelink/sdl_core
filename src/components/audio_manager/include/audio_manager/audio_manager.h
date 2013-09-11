@@ -40,26 +40,27 @@ namespace audio_manager {
 class string;
 
 class AudioManager {
- public:
+  public:
+    virtual void SetProtocolHandler(
+      protocol_handler::ProtocolHandler* protocol_hndlr) = 0;
+    virtual void addA2DPSource(const sockaddr& device) = 0;
+    virtual void removeA2DPSource(const sockaddr& device) = 0;
+    virtual void playA2DPSource(const sockaddr& device) = 0;
+    virtual void stopA2DPSource(const sockaddr& device) = 0;
 
-  virtual void addA2DPSource(const sockaddr& device) = 0;
-  virtual void removeA2DPSource(const sockaddr& device) = 0;
-  virtual void playA2DPSource(const sockaddr& device) = 0;
-  virtual void stopA2DPSource(const sockaddr& device) = 0;
+    virtual void addA2DPSource(const std::string& device) = 0;
+    virtual void removeA2DPSource(const std::string& device) = 0;
+    virtual void playA2DPSource(const std::string& device) = 0;
+    virtual void stopA2DPSource(const std::string& device) = 0;
 
-  virtual void addA2DPSource(const std::string& device) = 0;
-  virtual void removeA2DPSource(const std::string& device) = 0;
-  virtual void playA2DPSource(const std::string& device) = 0;
-  virtual void stopA2DPSource(const std::string& device) = 0;
+    virtual void startMicrophoneRecording(const std::string& outputFileName,
+                                          mobile_apis::SamplingRate::eType type,
+                                          int duration,
+                                          mobile_apis::BitsPerSample::eType) = 0;
+    virtual void stopMicrophoneRecording() = 0;
 
-  virtual void startMicrophoneRecording(const std::string& outputFileName,
-               mobile_apis::SamplingRate::eType type,
-               int duration,
-               mobile_apis::BitsPerSample::eType) = 0;
-  virtual void stopMicrophoneRecording() = 0;
-
-  virtual ~AudioManager() {
-  }
+    virtual ~AudioManager() {
+    }
 };
 
 }  //  namespace audio_manager

@@ -39,6 +39,7 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "audio_manager/audio_manager.h"
 #include "audio_manager/from_mic_to_file_recorder_thread.h"
 #include "audio_manager/a2dp_source_player_thread.h"
@@ -49,10 +50,13 @@ namespace audio_manager {
 // specific implementations if there are several different audio source
 // types present.
 
-class AudioManagerImpl : AudioManager,
-    protocol_handler::ProtocolObserver {
+class AudioManagerImpl : public AudioManager,
+  public protocol_handler::ProtocolObserver {
   public:
     static AudioManager* getAudioManager();
+
+    virtual void SetProtocolHandler(
+      protocol_handler::ProtocolHandler* protocol_hndlr);
 
     virtual void addA2DPSource(const sockaddr& device);
     virtual void removeA2DPSource(const sockaddr& device);
@@ -90,6 +94,7 @@ class AudioManagerImpl : AudioManager,
     std::string sockAddr2SourceAddr(const sockaddr& device);
 
     const std::string kH264FileName;
+    protocol_handler::ProtocolHandler* protocol_handler_;
 
     DISALLOW_COPY_AND_ASSIGN(AudioManagerImpl);
 };

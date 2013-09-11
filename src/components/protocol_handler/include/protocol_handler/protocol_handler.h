@@ -35,8 +35,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
+#include "protocol_handler/raw_message.h"
 #include "utils/shared_ptr.h"
-#include "transport_manager/common.h"
 
 /**
  *\namespace NsProtocolHandler
