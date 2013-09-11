@@ -51,6 +51,12 @@ set (POLICIES_MANAGER
 ./src/policies_manager/policies_manager.cc
 )
 
+set (EVENT_ENGINE
+./src/event_engine/event.cc
+./src/event_engine/event_observer.cc
+./src/event_engine/event_dispatcher.cc
+)
+
 set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_impl.cc
 ./src/commands/command_request_impl.cc
@@ -283,5 +289,5 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_find_applications.cc
 )
 
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
 target_link_libraries ("ApplicationManager" log4cxx)

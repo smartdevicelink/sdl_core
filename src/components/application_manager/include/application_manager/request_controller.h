@@ -43,53 +43,53 @@ namespace application_manager {
 
 namespace request_controller {
 
-/**
+/*
  * @brief Typedef for active mobile request
  *
- **/
+ */
 typedef utils::SharedPtr<commands::Command> Request;
 
-/**
+/*
  * @brief RequestController class is used to control currently active mobile
  * requests.
- **/
+ */
 class RequestController: public request_watchdog::WatchdogSubscriber  {
  public:
 
-  /**
+  /*
    * @brief Class constructor
    *
-   **/
+   */
   RequestController();
 
-  /**
+  /*
    * @brief Class destructor
    *
-   **/
+   */
   virtual ~RequestController();
 
-  /**
+  /*
    * @brief Adds request to queue
    *
    * @param request Active mobile request
    *
-   **/
+   */
   void addRequest(const Request& request);
 
-  /**
+  /*
    * @brief Removes request from queue
    *
    * @param mobile_corellation_id Active mobile request correlation ID
    *
-   **/
+   */
   void terminateRequest(unsigned int mobile_correlation_id);
 
-  /**
+  /*
    * @brief Notify subscriber that expired entry should be removed
    * using Watchdog::removeRequest(int connection_key, int correlation_id)
    *
    * @param RequestInfo Request related information
-   **/
+   */
   void onTimeoutExpired(request_watchdog::RequestInfo info);
 
  protected:
