@@ -52,7 +52,7 @@ Item {
                 MouseArea {
                   anchors.fill: parent
                   onClicked: {
-                      menuContainer.source = "ApplicationListView.qml"
+                      menuContainer.go("ApplicationListView.qml")
                     }
                 }
                 text: name
@@ -97,7 +97,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = mainScreen.backURI
+              menuContainer.back()
             }
         }
     }

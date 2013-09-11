@@ -46,8 +46,8 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = mainScreen.backURI
-            }
+              menuContainer.back()
+          }
         }
     }
 }

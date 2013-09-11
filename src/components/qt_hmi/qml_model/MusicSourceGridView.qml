@@ -17,7 +17,7 @@ GridView
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
-                menuContainer.source = qml
+                menuContainer.go(qml)
             }
         }
 
@@ -40,7 +40,7 @@ GridView
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = mainScreen.backURI
+              menuContainer.back()
             }
         }
     }

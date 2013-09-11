@@ -44,7 +44,7 @@ Column {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                menuContainer.source = qml
+                                menuContainer.go(qml)
                             }
                         }
                 }

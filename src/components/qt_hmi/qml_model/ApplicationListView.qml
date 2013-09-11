@@ -33,7 +33,7 @@ Item {
                 MouseArea {
                   anchors.fill: parent
                   onClicked: {
-                      menuContainer.source = "SDLPlayerView.qml"
+                      menuContainer.go("SDLPlayerView.qml")
                     }
                 }
             }
@@ -56,7 +56,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = mainScreen.backURI
+              menuContainer.back()
             }
         }
     }

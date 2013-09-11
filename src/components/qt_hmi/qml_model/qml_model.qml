@@ -3,8 +3,6 @@ import com.ford.hmi_framework 1.0
 
 Rectangle {
     id: mainScreen
-    property string backURI: ""
-    property string currentURI: ""
     width: 1480
     height: 768
     color: "black"
@@ -22,7 +20,7 @@ Rectangle {
         onSwitched: {
             if (sw === "on") {
                 mainScreen.state = "Main"
-                menuContainer.source = "MainMenuGridView.qml"
+                menuContainer.go("MainMenuGridView.qml")
             } else {
                 mainScreen.state = ""
                 menuContainer.source = ""
@@ -57,7 +55,7 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    menuContainer.source = "MainMenuGridView.qml"
+                    menuContainer.go("MainMenuGridView.qml")
                 }
             }
 
@@ -89,9 +87,19 @@ Rectangle {
         width: 884
         height: 298
 
-        onSourceChanged: {
-            mainScreen.backURI = mainScreen.currentURI
-            mainScreen.currentURI = source
+        ListModel {
+            id: urlStack
+        }
+
+        function go(path) {
+            urlStack.append({ url: source.toString(), index: 10 })
+            source = path
+        }
+
+        function back() {
+            var item = urlStack.get(urlStack.count - 1)
+            source = item.url
+            urlStack.remove(item)
         }
     }
 
@@ -186,6 +194,7 @@ Rectangle {
                             GradientStop { position: pressed ? 1.0 : 0.0; color: "#2c2c2c" }
                             GradientStop { position: pressed ? 0.0 : 1.0; color: "black" }
                         }
+
                         Text {
                             text: (1 + index) % 10
                             font.pixelSize: 30
