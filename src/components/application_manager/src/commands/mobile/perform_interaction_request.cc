@@ -47,8 +47,10 @@ namespace application_manager {
 namespace commands {
 
 PerformInteractionRequest::PerformInteractionRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  const MessageSharedPtr& message): CommandRequestImpl(message),
+  EventObserver("PerformInteractionRequest") {
+
+  subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -148,6 +150,17 @@ void PerformInteractionRequest::Run() {
   SendTTSSpeakRequest(app);
 
   // TODO(DK): need to implement timeout TTS speak request.
+}
+
+void PerformInteractionRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::on_event");
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VR_OnCommand: {
+      LOG4CXX_INFO(logger_, "\n\n\nPerformInteractionRequest::on_event VR_OnCommand\n\n\n");
+      break;
+    }
+  }
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(

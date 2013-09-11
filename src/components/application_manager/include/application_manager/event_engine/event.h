@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
 
-#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -46,7 +46,7 @@ class Event {
  public:
 
   // Typedef for possible Event ID's from mobile_apis functionID enum
-  typedef mobile_apis::FunctionID::eType EventID;
+  typedef hmi_apis::FunctionID::eType EventID;
 
   /*
    * @brief Constructor with parameters
@@ -109,7 +109,7 @@ class Event {
 
  private:
 
-  EventID                         id_;
+  EventID                        id_;
   smart_objects::SmartObject     response_so;
 
   /*

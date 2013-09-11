@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -46,7 +47,9 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public CommandRequestImpl {
+class PerformInteractionRequest : public CommandRequestImpl,
+  public event_engine::EventObserver {
+
  public:
 
   /*
@@ -75,6 +78,13 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
 
  private:
   /*

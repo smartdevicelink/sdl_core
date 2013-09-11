@@ -53,8 +53,8 @@ set (POLICIES_MANAGER
 
 set (EVENT_ENGINE
 ./src/event_engine/event.cc
-./src/event_engine/event_observer.cc
 ./src/event_engine/event_dispatcher.cc
+./src/event_engine/event_observer.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES

@@ -32,7 +32,6 @@
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/event_engine/event_dispatcher.h"
 
 namespace application_manager {
 namespace event_engine {

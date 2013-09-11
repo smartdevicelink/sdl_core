@@ -32,10 +32,11 @@
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -81,6 +82,10 @@ void OnVRCommandNotification::Run() {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
+
+  event_engine::Event event(hmi_apis::FunctionID::VR_OnCommand);
+  event.set_smart_object(*message_);
+  event.raise();
 
   /* check if perform interaction is active
    * if it is active we should sent to HMI DeleteCommand request
