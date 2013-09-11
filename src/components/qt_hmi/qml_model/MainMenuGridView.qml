@@ -42,7 +42,6 @@ GridView
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
-                caption.text = name
                 mainScreen.state = name
                 menuContainer.source = qml
             }
