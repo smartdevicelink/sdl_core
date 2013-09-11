@@ -149,6 +149,21 @@ Rectangle {
         }
 
         Column {
+            MaskedContainer {
+                ButtonImage {
+                    id: vrButton
+                    source: "res/controlButtons/vr.png"
+                    pressed: "res/controlButtons/vr_pressed.png"
+                }
+                onPressed: {
+                    vrButton.pressedOpacity = 1
+                    hardwareButtons.pressButton("Vr")
+                }
+                onReleased: {
+                    vrButton.pressedOpacity = 0
+                    hardwareButtons.releaseButton("Vr")
+                }
+            }
             Grid {
                 columns: 5
                 rows: 2
@@ -181,10 +196,6 @@ Rectangle {
                         }
                     }
                 }
-            }
-
-            MaskedContainer {
-
             }
         }
     }
