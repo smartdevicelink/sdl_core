@@ -37,7 +37,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.DataReaderListener;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
+import com.ford.syncV4.android.activity.mobilenav.StaticFileReader;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -3772,32 +3774,86 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onVideButtonAction(View v){
         byte[] data = new byte[100];
-        sendMobileNaviData(data);
+        sendMobileNaviData(data, true);
     }
 
-    public void sendMobileNaviData(byte[] data) {
+    public void sendMobileNaviData(byte[] data, boolean addToUI) {
         if (ProxyService.getInstance().getProxyInstance() != null) {
             if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
                 if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
                     try {
                         ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
                     } catch (SyncException e) {
-                        _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), true);
+                        _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), addToUI);
                     }
                 } else {
-                    _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", true);
+                    _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", addToUI);
                 }
             } else {
-                _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", true);
+                _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", addToUI);
             }
         } else {
-            _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", true);
+            _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", addToUI);
         }
     }
 
     public void onVideoStreamingCheckBoxAction(View checkBox) {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.onVideoStreamingCheckBoxAction(checkBox);
+    }
+
+    public void onFileStreamingAction(View v){
+        startFileStreaming();
+    }
+
+    private void startFileStreaming(){
+        final MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+        StaticFileReader staticFileReader = new StaticFileReader(this, new DataReaderListener() {
+            @Override
+            public void onStartReading() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fr.dataStreamingStarted();
+                    }
+                });
+            }
+
+            @Override
+            public void onDataReceived(final byte[] data) {
+                sendMobileNaviData(data, false);
+              /*  runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendMobileNaviData(data, false);
+                    }
+                });*/
+
+            }
+
+            @Override
+            public void onCancelReading() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fr.dataStreamingStopped();
+                    }
+                });
+            }
+
+            @Override
+            public void onEndReading() {
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fr.dataStreamingStopped();
+                    }
+                });
+
+            }
+        });
+        staticFileReader.execute(R.raw.test_video);
     }
 }
 
