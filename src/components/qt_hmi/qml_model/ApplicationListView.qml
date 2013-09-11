@@ -24,20 +24,18 @@ Item {
         delegate: Item{
             width: parent.width
             height: sdlIcon.height
-            MouseArea {
-              anchors.fill: parent
-              onClicked: {
-                  menuContainer.source = "SDLPlayerView.qml"
-                }
-            }
             Image { id:sdlIcon;source: icon}
             Text  {
                 x: sdlIcon.width
                 text: name
                 color: "#1d81d5"
                 font.pixelSize: 40
-                //anchors.baseline: parent.bottom;
-                //anchors.horizontalCenter: parent.horizontalCenter
+                MouseArea {
+                  anchors.fill: parent
+                  onClicked: {
+                      menuContainer.source = "SDLPlayerView.qml"
+                    }
+                }
             }
         }
 
@@ -58,7 +56,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = "ChangeDeviceView.qml"
+              menuContainer.source = mainScreen.backURI
             }
         }
     }

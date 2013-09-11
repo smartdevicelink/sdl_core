@@ -3,35 +3,27 @@ import QtQuick 2.0
 ListModel
 {
     ListElement {
-        name: "ambient"
-        icon: "res/vehicle/Ambient Lighti Icon.png"
+        name: "AM"
+        icon: "res/buttons/long_oval_btn.png"
     }
     ListElement {
-        name: "cal"
-        icon: "res/vehicle/cal.png"
+        name: "Sirius"
+        icon: "res/buttons/long_oval_btn.png"
     }
     ListElement {
-        name: "ev"
-        icon: "res/vehicle/EV Icon.png"
+        name: "BT Audio"
+        icon: "res/buttons/long_oval_btn.png"
     }
     ListElement {
-        name: "folders"
-        icon: "res/vehicle/folders.png"
+        name: "FM"
+        icon: "res/buttons/long_oval_btn.png"
     }
     ListElement {
-        name: "key"
-        icon: "res/vehicle/key_car.png"
+        name: "CD"
+        icon: "res/buttons/long_oval_btn.png"
     }
     ListElement {
-        name: "mcs"
-        icon: "res/vehicle/MCS Icon.png"
-    }
-    ListElement {
-        name: "sun"
-        icon: "res/vehicle/sun.png"
-    }
-    ListElement {
-        name: "sync"
-        icon: "res/vehicle/SYNC Services.png"
+        name: "iPod"
+        icon: "res/buttons/long_oval_btn.png"
     }
 }

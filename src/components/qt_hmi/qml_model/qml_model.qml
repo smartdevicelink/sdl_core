@@ -2,6 +2,8 @@ import QtQuick 2.0
 
 Rectangle {
     id: mainScreen
+    property string backURI: ""
+    property string currentURI: ""
     width: 1360
     height: 768
     color: "black"
@@ -85,6 +87,11 @@ Rectangle {
         y: (parent.height - height) / 2
         width: 884
         height: 298
+
+        onSourceChanged: {
+            mainScreen.backURI = mainScreen.currentURI
+            mainScreen.currentURI = source
+        }
     }
 
     PowerSwitcher {

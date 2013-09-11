@@ -17,9 +17,11 @@ Column {
                 }
                 ListElement{
                     name: "Device 1"
+                    qml: "ChangeDeviceView.qml"
                 }
                 ListElement{
                     name: "Options"
+                    qml: "SDLPlayerOptionsListView.qml"
                 }
                 ListElement{
                     name: "Browse"
@@ -32,12 +34,6 @@ Column {
                         anchors.verticalCenter: parent.verticalCenter
                         source: "res/buttons/long_oval_btn.png"
                     }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            menuContainer.source = qml
-                        }
-                    }
 
                     Text{
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -45,6 +41,12 @@ Column {
                         color: "#1d81d5"
                         text: name
                         font.pixelSize: 20
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                menuContainer.source = qml
+                            }
+                        }
                 }
             }
         }
@@ -119,7 +121,7 @@ Column {
             font.pixelSize: 18
         }
     }
-    Row{
+    Item{
         width: parent.width
         height: parent.height / 4
         Row{
@@ -127,15 +129,44 @@ Column {
             y: -70
             anchors.horizontalCenter: parent.horizontalCenter
             Image {
+                id: prevBtnImage
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        prevBtnImage.source = "res/buttons/player_prev_pressed_btn.png"
+                    }
+                    onReleased: {
+                        prevBtnImage.source = "res/buttons/player_prev_btn.png"
+                    }
+                }
                 source: "res/buttons/player_prev_btn.png"
                 anchors.verticalCenter: parent.verticalCenter
             }
             Image {
-                id: playBtn
+                id: playBtnImage
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        playBtnImage.source = "res/buttons/player_play_pressed_btn.png"
+                    }
+                    onReleased: {
+                        playBtnImage.source = "res/buttons/player_play_btn.png"
+                    }
+                }
                 source: "res/buttons/player_play_btn.png"
                 anchors.verticalCenter: parent.verticalCenter
             }
             Image {
+                id: nextBtnImage
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        nextBtnImage.source = "res/buttons/player_next_pressed_btn.png"
+                    }
+                    onReleased: {
+                        nextBtnImage.source = "res/buttons/player_next_btn.png"
+                    }
+                }
                 source: "res/buttons/player_next_btn.png"
                 anchors.verticalCenter: parent.verticalCenter
             }

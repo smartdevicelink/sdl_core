@@ -97,7 +97,7 @@ Item {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              menuContainer.source = "AppsMenuGridView.qml"
+              menuContainer.source = mainScreen.backURI
             }
         }
     }
