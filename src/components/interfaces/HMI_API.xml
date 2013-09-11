@@ -1017,6 +1017,7 @@
   <param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
 	<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
   </param>
+</struct>
   
 <struct name="Coordinate">
   <param name="xCoord" type="Integer" mandatory="true">
@@ -1227,13 +1228,13 @@
 <struct name="HeadLampStatus">
   <param name="lowBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the low beam lamps.</description>
-</param>
+  </param>
   <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.</description>
-</param>
-<param name="ambientLightSensorStatus" type="AmbientLightStatus">
+  </param>
+  <param name="ambientLightSensorStatus" type="AmbientLightStatus">
     <description>Status of the ambient light sensor.</description>
-</param>
+  </param>
 </struct>
 
 <struct name="TireStatus">
