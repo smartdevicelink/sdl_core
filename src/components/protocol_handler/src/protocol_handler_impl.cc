@@ -645,16 +645,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
   const RawMessagePtr& original_message,
   int connection_key,
   const RawMessagePtr& recieved_msg) {
-  LOG4CXX_INFO(logger_, "Handling map streaming message");
-
   recieved_msg->set_fully_binary(true);
 
   int messsages_for_session = message_over_navi_session_.count(
                                 connection_key);
   ++messsages_for_session;
+  LOG4CXX_INFO(logger_, "Handling map streaming message. This is "
+               << messsages_for_session << "th message for " << connection_key);
+
   if (kPeriodForNaviAck == messsages_for_session) {
-    message_over_navi_session_.erase(connection_key);
     SendMobileNaviAck(original_message, connection_key);
+    //message_over_navi_session_.erase(connection_key);
   } else {
     message_over_navi_session_.insert(std::pair<int, RawMessagePtr>(
                                         connection_key, recieved_msg));

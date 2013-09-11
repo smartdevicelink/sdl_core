@@ -56,10 +56,19 @@ AudioManager* AudioManagerImpl::getAudioManager() {
 AudioManagerImpl::AudioManagerImpl()
 // Six hex-pairs + five underscores + '\n'
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
-    kH264FileName("h264file.data") {
+    kH264FileName("h264file.mp4"),
+    protocol_handler_(NULL) {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
+  protocol_handler_ = NULL;
+}
+
+void AudioManagerImpl::SetProtocolHandler(
+  protocol_handler::ProtocolHandler* protocol_hndlr) {
+  DCHECK(protocol_hndlr);
+  protocol_handler_ = protocol_hndlr;
+  protocol_handler_->AddProtocolObserver(this);
 }
 
 void AudioManagerImpl::addA2DPSource(const std::string& device) {
@@ -204,6 +213,7 @@ void AudioManagerImpl::stopMicrophoneRecording() {
 
 void AudioManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to message.");
     NOTREACHED();
