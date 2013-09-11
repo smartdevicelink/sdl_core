@@ -60,6 +60,13 @@ class CommandRequestImpl : public CommandImpl {
   virtual void Run();
 
   /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut() const;
+
+  /*
    * @brief Retrieves request ID
    */
   inline int function_id() const;

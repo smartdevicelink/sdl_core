@@ -104,10 +104,27 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   list_mutex_.unlock();
 }
 
-void RequestController::onTimeoutExpired(request_watchdog::RequestInfo) {
+void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
   LOG4CXX_INFO(logger_, "RequestController::onTimeoutExpired()");
 
-  // TODO(DK): CommandRequestImpl onTimeOut
+  list_mutex_.lock();
+
+  std::list<Request>::iterator it = request_list_.begin();
+  for (; request_list_.end() != it; ++it) {
+    const commands::CommandRequestImpl* request_impl =
+        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+
+    if (request_impl->correlation_id() == info.correlationID_ &&
+        request_impl->connection_key() == info.connectionID_) {
+
+      request_impl->onTimeOut();
+      watchdog_->removeRequest(info.connectionID_, info.correlationID_);
+      request_list_.erase(it);
+      break;
+    }
+  }
+
+  list_mutex_.unlock();
 }
 
 }  //  namespace request_controller

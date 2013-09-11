@@ -90,7 +90,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    *
    * @param RequestInfo Request related information
    **/
-  void onTimeoutExpired(request_watchdog::RequestInfo);
+  void onTimeoutExpired(request_watchdog::RequestInfo info);
 
  protected:
 

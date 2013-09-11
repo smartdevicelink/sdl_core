@@ -34,6 +34,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
+#include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -59,6 +60,16 @@ bool CommandRequestImpl::CleanUp() {
 void CommandRequestImpl::Run() {
 }
 
+void CommandRequestImpl::onTimeOut() const {
+  LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
+
+  smart_objects::SmartObject* response =
+    MessageHelper::CreateNegativeResponse(connection_key(), function_id(),
+    correlation_id(), mobile_api::Result::TIMED_OUT);
+
+  ApplicationManagerImpl::instance()->ManageMobileCommand(response);
+}
+
 void CommandRequestImpl::SendResponse(
     const bool success, const mobile_apis::Result::eType& result_code,
     const char* info, const NsSmart::SmartObject* response_params) const {
@@ -72,16 +83,13 @@ void CommandRequestImpl::SendResponse(
   NsSmartDeviceLink::NsSmartObjects::SmartObject& response = *result;
 
   response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
+  response[strings::params][strings::correlation_id] = correlation_id();
   response[strings::params][strings::protocol_type] =
       CommandImpl::mobile_protocol_type_;
   response[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;
-  response[strings::params][strings::connection_key] =
-      (*message_)[strings::params][strings::connection_key];
-  response[strings::params][strings::function_id] =
-      (*message_)[strings::params][strings::function_id];
+  response[strings::params][strings::connection_key] = connection_key();
+  response[strings::params][strings::function_id] = function_id();
 
   if (response_params) {
     response[strings::msg_params] = *response_params;
