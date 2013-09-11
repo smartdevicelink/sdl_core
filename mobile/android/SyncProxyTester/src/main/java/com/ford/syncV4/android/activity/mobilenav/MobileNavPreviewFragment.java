@@ -133,4 +133,6 @@ public class MobileNavPreviewFragment extends Fragment implements VideoDataListe
         Log.i(logTag, "video streaming stopped");
 
     }
+
+
 }
