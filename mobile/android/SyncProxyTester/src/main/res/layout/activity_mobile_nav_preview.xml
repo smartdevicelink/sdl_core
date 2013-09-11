@@ -15,16 +15,6 @@
         android:hint="@string/mobile_navi_hint"
         android:onClick="onMobileNaviCheckBoxAction" />
 
-    <CheckBox
-        android:id="@+id/videoStreamingCheckBox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/mobileNavCheckBox"
-        android:checked="false"
-        android:hint="@string/video_streaming_hint"
-
-        android:visibility="gone" />
 
     <Button
         android:layout_width="fill_parent"
@@ -33,7 +23,7 @@
         android:enabled="false"
         android:onClick="onVideButtonAction"
         android:id="@+id/videobutton"
-        android:layout_below="@+id/videoStreamingCheckBox"
+        android:layout_below="@+id/mobileNavCheckBox"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true" />
 
