@@ -1,19 +1,21 @@
 TEMPLATE = lib
-TARGET = hmiframework
+TARGET = HmiFramework
 QT += qml quick
 CONFIG += qt plugin
 
 TARGET = $$qtLibraryTarget($$TARGET)
-uri = com.ford.hmiframework
+uri = com.ford.hmi_framework
 
 # Input
 SOURCES += \
-    hmi_framework_plugin.cpp \
-    hmi_framework.cpp
+    attributedmouseevent.cpp \
+    hmi_plugin.cpp \
+    masked_container.cpp
 
 HEADERS += \
-    hmi_framework_plugin.h \
-    hmi_framework.h
+    attributedmouseevent.h \
+    masked_container.h \
+    hmi_plugin.h
 
 OTHER_FILES = qmldir
 
@@ -27,10 +29,11 @@ OTHER_FILES = qmldir
 
 qmldir.files = qmldir
 unix {
-    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
+#    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
+    installPath = ../../qml_model/com/ford/hmi_framework
     qmldir.path = $$installPath
     target.path = $$installPath
     INSTALLS += target qmldir
 }
-
 QMAKE_LIBDIR += /usr/lib/i386-linux-gnu/mesa
+
