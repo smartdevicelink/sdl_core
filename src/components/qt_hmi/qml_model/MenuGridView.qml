@@ -1,5 +1,6 @@
 import QtQuick 2.0
 
+
 GridView
 {
     id: menuGridView
@@ -47,6 +48,9 @@ GridView
             anchors.fill: parent
             onClicked: {
                 menuContainer.go(qml)
+                if(qml === "AMFMPlayerView.qml"){
+                    menuContainer.item.radioType = "AM"
+                }
             }
         }
 
