@@ -40,16 +40,31 @@ GridView {
     anchors.centerIn: parent
 
     delegate: Item {
-        width: 200
-        height: 80
+        width: navigationMenuGridView.cellWidth
+        height: navigationMenuGridView.cellHeight
 
         Image { source: icon; anchors.centerIn: parent }
-        Text {color: "steelblue"; text: title; anchors.centerIn: parent }
+        Text {color: "#1d81d5"; text: title; anchors.centerIn: parent; font.pixelSize: 20 }
         MouseArea {
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
                 menuContainer.source = qml
+            }
+        }
+    }
+
+    Text{
+        id: closeText
+        anchors.horizontalCenter: parent.horizontalCenter
+        y:250
+        text: "Close"
+        color: "#1d81d5"
+        font.pixelSize: 25
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+              menuContainer.go("NavigationNoRouteGridView.qml")
             }
         }
     }

@@ -29,6 +29,30 @@ Rectangle {
         }
     }
 
+    Loader {
+        id: menuContainer
+        x: 160
+        anchors.verticalCenter: parent.verticalCenter
+        width: 780
+        height: 298
+
+
+        ListModel {
+            id: urlStack
+        }
+
+        function go(path) {
+            urlStack.append({ url: source.toString(), index: 10 })
+            source = path
+        }
+
+        function back() {
+            var item = urlStack.get(urlStack.count - 1)
+            source = item.url
+            urlStack.remove(item)
+        }
+    }
+
     Item {
         id: headerMenu
         x: menuContainer.x + menuContainer.width / 2 - 400
@@ -76,30 +100,6 @@ Rectangle {
         }
 
         visible: mainScreen.state !== ""
-    }
-
-    Loader {
-        id: menuContainer
-        x: 160
-        anchors.verticalCenter: parent.verticalCenter
-        width: 780
-        height: 298
-
-
-        ListModel {
-            id: urlStack
-        }
-
-        function go(path) {
-            urlStack.append({ url: source.toString(), index: 10 })
-            source = path
-        }
-
-        function back() {
-            var item = urlStack.get(urlStack.count - 1)
-            source = item.url
-            urlStack.remove(item)
-        }
     }
 
     HardwareButtons {
