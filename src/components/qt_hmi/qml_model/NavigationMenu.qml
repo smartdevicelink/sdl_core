@@ -9,7 +9,7 @@ ListModel
     ListElement {
         title: "Keyboard"
         icon: "res/buttons/long_oval_btn.png"
-        qml: "NavigationKeyboardGridView.qml"
+        qml: "NavigationKeyboard.qml"
     }
     ListElement {
         title: "Favorites"
