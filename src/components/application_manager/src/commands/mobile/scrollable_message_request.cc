@@ -62,7 +62,15 @@ void ScrollabelMessageRequest::Run() {
     return;
   }
 
-  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);

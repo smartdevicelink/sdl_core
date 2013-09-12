@@ -133,7 +133,6 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
-  LOG4CXX_INFO(logger_, "In locked state.");
 
   requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
                    date_time::DateTime::getCurrentTime()));
@@ -247,7 +246,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     instance->requestsMapMutex_.lock();
 
     it = instance->requests_.begin();
-    it_temp = instance->requests_.begin();
 
     while (it != instance->requests_.end()) {
       LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
@@ -268,18 +266,12 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
                      << "\n CustomTimeOut : " << (*it).first.customTimeout_
                      << "\n");
 
-        //instance->requestsMapMutex_.unlock();
+        instance->requestsMapMutex_.unlock();
         instance->notifySubscribers(it->first);
-        //instance->requestsMapMutex_.lock();
-        if (instance->requests_.begin() == it) {
-          instance->requests_.erase(it);
-          it_temp = instance->requests_.begin();
-        } else {
-          instance->requests_.erase(it);
-        }
-        it = it_temp;
+        instance->requestsMapMutex_.lock();
+
       }
-      it_temp = it++;
+      it++;
     }
 
     instance->requestsMapMutex_.unlock();

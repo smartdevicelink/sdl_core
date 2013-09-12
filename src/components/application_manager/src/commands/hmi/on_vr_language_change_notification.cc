@@ -71,6 +71,11 @@ void OnVRLanguageChangeNotification::Run() {
     if (app->language() != (*message_)[strings::msg_params]
         [strings::language].asInt()) {
       app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
+
+      MessageHelper::SendDeleteCommandRequestToHMI(app);
+      MessageHelper::SendRemoveVrCommandsOnUnregisterApp(app);
+
+      MessageHelper::SendOnAppUnregNotificationToHMI(app);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app->app_id(),
         mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);

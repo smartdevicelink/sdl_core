@@ -518,4 +518,19 @@ void ConnectionHandlerImpl::StartTransportManager() {
   transport_manager_->Visibility(true);
 }
 
+void ConnectionHandlerImpl::CloseConnection(unsigned int key) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection");
+  if (!transport_manager_) {
+    LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
+    return;
+  }
+
+  unsigned int connection_handle = 0;
+  unsigned char session_id = 0;
+  PairFromKey(key, &connection_handle,
+              &session_id);
+
+  transport_manager_->Disconnect(connection_handle);
+}
+
 }/* namespace connection_handler */

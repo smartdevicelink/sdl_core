@@ -62,6 +62,9 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
+  MessageHelper::SendDeleteCommandRequestToHMI(application);
+  MessageHelper::SendRemoveVrCommandsOnUnregisterApp(application);
+
   MessageHelper::SendOnAppUnregNotificationToHMI(application);
 
   if (!app_manager->UnregisterApplication(

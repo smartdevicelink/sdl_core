@@ -54,8 +54,8 @@ class MobileCommandFactory {
   static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
 
  private:
-   MobileCommandFactory();
-   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
+  MobileCommandFactory();
+  DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
 
 }  // namespace application_manager

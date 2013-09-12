@@ -81,6 +81,18 @@ SDL.SDLAppController = Em.Object.create( {
     },
 
     /**
+     * Comparison function for sort array of buttons in options list by 'position' parameter
+     *
+     * @param {Number}
+     */
+    buttonsSort: function(arrayId) {
+
+        this.model.commandsList[arrayId].sort(function(a,b) {
+            return a.position - b.position;
+        })
+    },
+
+    /**
      * Handeler for command button press
      * 
      * @param element:

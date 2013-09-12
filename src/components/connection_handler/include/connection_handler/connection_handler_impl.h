@@ -222,6 +222,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
     virtual void StartTransportManager();
 
+    virtual void CloseConnection(unsigned int key);
+
   private:
     /**
      * \brief Default class constructor

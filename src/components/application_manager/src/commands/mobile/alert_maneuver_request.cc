@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -51,8 +50,8 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 void AlertManeuverRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
 
-  if ((!(*message_)[strings::params].keyExists(strings::soft_buttons)) &&
-      (!(*message_)[strings::params].keyExists(strings::tts_chunks))) {
+  if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
     LOG4CXX_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -67,8 +66,6 @@ void AlertManeuverRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
-  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);

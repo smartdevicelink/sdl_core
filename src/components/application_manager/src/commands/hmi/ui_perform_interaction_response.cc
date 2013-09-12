@@ -81,7 +81,7 @@ void UIPerformInteractionResponse::Run() {
 
   if (app->is_perform_interaction_active()) {
     const PerformChoiceSetMap& choice_set_map =
-      app->GetPerformInteractionChoiceSetMap();
+      app->performinteraction_choice_set_map();
 
     if (mobile_apis::InteractionMode::MANUAL_ONLY !=
         app->perform_interaction_mode()) {

@@ -103,7 +103,7 @@ bool OnVRCommandNotification::PerformInteractionHandling(
   int cmd_id = (*message_)[strings::msg_params][strings::cmd_id].asInt();
 
   const PerformChoiceSetMap& choice_set_map =
-    app->GetPerformInteractionChoiceSetMap();
+    app->performinteraction_choice_set_map();
   bool choice_id_chosen = false;
 
   LOG4CXX_INFO(logger_, "If command was choice id");

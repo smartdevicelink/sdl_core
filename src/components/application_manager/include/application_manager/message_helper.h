@@ -40,7 +40,6 @@
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
-
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
@@ -49,7 +48,7 @@ namespace mobile_api = mobile_apis;
  * @brief Typedef for HMI TextFieldName type
  */
 typedef enum {
-  MAIN_FILED1              = 0,
+  MAIN_FILED1 = 0,
   MAIN_FILED2,
   MAIN_FILED3,
   MAIN_FILED4,
@@ -77,7 +76,7 @@ typedef enum {
  * be published and subscribed to
  */
 typedef enum {
-  GPS                      = 0,
+  GPS = 0,
   SPEED,
   RPM,
   FUELLEVEL,
@@ -124,8 +123,7 @@ class MessageHelper {
      *@param application_impl application with changed HMI status
      *
      **/
-    static void SendHMIStatusNotification(
-      const Application& application_impl);
+    static void SendHMIStatusNotification(const Application& application_impl);
 
     /**
      * @brief Sends OnAppRegistered notification to HMI
@@ -148,6 +146,12 @@ class MessageHelper {
     static void SendVrCommandsOnRegisterAppToHMI(Application* app);
 
     /**
+     * @brief Removes Vr Synonyms of application name from HMI
+     * when unregistering application.
+     */
+    static void SendRemoveVrCommandsOnUnregisterApp(Application* app);
+
+    /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
      *
      *@param connection_key Connection key
@@ -168,8 +172,7 @@ class MessageHelper {
 
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,
-      mobile_apis::Result::eType result,
-      unsigned int correlation_id,
+      mobile_apis::Result::eType result, unsigned int correlation_id,
       unsigned int connection_key);
 
     /*
@@ -198,8 +201,7 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(const Application* app);
     static void SendChangeRegistrationRequestToHMI(const Application* app);
     static void SendAddVRCommandToHMI(
-      unsigned int cmd_id,
-      const smart_objects::SmartObject& vr_commands,
+      unsigned int cmd_id, const smart_objects::SmartObject& vr_commands,
       unsigned int app_id);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(Application* const app);
@@ -209,9 +211,7 @@ class MessageHelper {
     static void ResetGlobalproperties(Application* const app);
 
     static smart_objects::SmartObject* CreateNegativeResponse(
-      unsigned int connection_key,
-      int function_id,
-      unsigned int correlation_id,
+      unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 
     /*
@@ -232,9 +232,6 @@ class MessageHelper {
     static bool PrintSmartObject(
       smart_objects::SmartObject& object);
 
-    static void VerifySoftButtons(smart_objects::SmartObject& message,
-                                  const Application* app);
-
     template<typename From, typename To>
     static To ConvertEnumAPINoCheck(const From& input) {
       return static_cast<To>(input);
@@ -244,9 +241,12 @@ class MessageHelper {
     static smart_objects::SmartObject* CreateChangeRegistration(
       int function_id, int language, unsigned int app_id);
     static smart_objects::SmartObject* CreateGeneralVrCommand();
+    static void SendRemoveCommandToHMI(int function_id,
+                                       int command_id,
+                                       unsigned int app_id);
     MessageHelper();
 
-    static const VehicleData      vehicle_data_;
+    static const VehicleData vehicle_data_;
     DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 

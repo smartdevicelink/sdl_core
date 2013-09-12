@@ -58,6 +58,13 @@ void AlertRequest::Run() {
     (*message_)[strings::params][strings::connection_key].asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
+  if (ApplicationManagerImpl::instance()->vr_session_started())
+  {
+    LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -75,7 +82,15 @@ void AlertRequest::Run() {
     return;
   }
 
-  MessageHelper::VerifySoftButtons((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
+                          verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
 
   SendAlertRequest(app->app_id());
   SendPlayToneNotification(app->app_id());

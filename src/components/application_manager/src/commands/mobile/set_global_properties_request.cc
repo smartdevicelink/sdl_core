@@ -81,7 +81,7 @@ void SetGlobalPropertiesRequest::Run() {
   // by default counter is 1 for TTS request. If only one param specified
   // for TTS REJECT response will be sent
   unsigned int chaining_counter = 1;
-  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) ||
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
     ++chaining_counter;
   }
@@ -148,19 +148,28 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   // check TTS params
-  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) &&
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt) ||
       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
 
-    app->set_help_prompt(
-        (*message_)[strings::msg_params].getElement(strings::help_promt));
-    app->set_timeout_prompt(
-      (*message_)[strings::msg_params].getElement(strings::timeout_promt));
+    if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
+      app->set_help_prompt(
+              (*message_)[strings::msg_params].getElement(strings::help_promt));
+    }
+
+    if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+      app->set_timeout_prompt(
+        (*message_)[strings::msg_params].getElement(strings::timeout_promt));
+    }
 
     smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::help_prompt] = (*app->help_promt());
-    msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
+      msg_params[strings::help_prompt] = (*app->help_promt());
+    }
+    if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+      msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    }
     msg_params[strings::app_id] = app->app_id();
 
     CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,

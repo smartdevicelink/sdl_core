@@ -39,11 +39,11 @@
 
 namespace application_manager {
 
-Message SmartObjectToMessage
-(NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object);
+Message SmartObjectToMessage(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object);
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject
-(const Message& message);
+NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject(
+    const Message& message);
 
 }  // namespace application_manager
 
