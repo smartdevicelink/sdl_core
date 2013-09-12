@@ -5,6 +5,7 @@ ListModel
     ListElement {
         name: "Climate"
         icon: "res/snow.png"
+        qml: "ClimateControlView.qml"
     }
 
     ListElement {
@@ -27,7 +28,8 @@ ListModel
 
     ListElement {
         name: "Phone"
-        icon: "res/phone.png"
+        icon: "res/phone/phone.png"
+        qml: "PhoneMenuGridView.qml"
     }
 
     ListElement {

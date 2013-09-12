@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Column {
+    id: climateControlBtn
     spacing: 25
     anchors.fill: parent
     Item{
