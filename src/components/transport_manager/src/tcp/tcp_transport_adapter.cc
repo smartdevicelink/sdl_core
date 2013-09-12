@@ -1,5 +1,5 @@
 /**
- * \file tcp_transport_adapter.cpp
+ * \file tcp_transport_adapter.cc
  * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company

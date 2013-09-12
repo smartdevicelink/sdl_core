@@ -1,6 +1,6 @@
 /**
  * \file transport_adapter_listener_impl.cc
- * \brief Listener class source file.
+ * \brief TransportAdapterListenerImpl class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

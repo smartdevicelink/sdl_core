@@ -1,6 +1,6 @@
 /**
- * \file transport_manager_impl.cpp
- * \brief TransportManager class source file.
+ * \file transport_manager_impl.cc
+ * \brief TransportManagerImpl class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

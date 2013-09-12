@@ -1,6 +1,6 @@
 /*
  * \file transport_manager_default.cc
- * \brief
+ * \brief TransportManagerDefault class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

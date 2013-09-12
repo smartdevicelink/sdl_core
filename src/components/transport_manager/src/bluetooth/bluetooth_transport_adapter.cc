@@ -1,6 +1,6 @@
 /**
- * \file BluetoothAdapter.cpp
- * \brief BluetoothAdapter class source file.
+ * \file bluetooth_transport_adapter.cc
+ * \brief BluetoothTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

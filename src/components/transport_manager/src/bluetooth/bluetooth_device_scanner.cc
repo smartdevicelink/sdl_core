@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_device_scanner.cc
- * \brief BluetoothAdapter class header file.
+ * \brief BluetoothDeviceScanner class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

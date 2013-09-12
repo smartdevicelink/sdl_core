@@ -1,6 +1,6 @@
 /**
- * \file transport_adapter_socket_communication.cc
- * \brief Implementation of classes responsible for communication over sockets.
+ * \file threaded_socket_connection.cc
+ * \brief ThreadedSocketConnection class source file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

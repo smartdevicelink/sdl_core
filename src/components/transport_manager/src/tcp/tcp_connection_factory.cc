@@ -1,6 +1,6 @@
 /**
  * \file tcp_connection_factory.cc
- * \brief
+ * \brief TcpConnectionFactory class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

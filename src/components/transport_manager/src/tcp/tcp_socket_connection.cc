@@ -1,6 +1,6 @@
 /**
- * \file tcp_transport_adapter.cpp
- * \brief TcpTransportAdapter class source file.
+ * \file tcp_socket_connection.cc
+ * \brief TcpSocketConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
