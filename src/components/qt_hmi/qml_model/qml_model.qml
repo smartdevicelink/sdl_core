@@ -20,7 +20,8 @@ Rectangle {
         onSwitched: {
             if (sw === "on") {
                 mainScreen.state = "Main"
-                menuContainer.go("MainMenuGridView.qml")
+                menuContainer.go("AMFMPlayerView.qml")
+                menuContainer.item.radioType = "AM"
             } else {
                 mainScreen.state = ""
                 menuContainer.source = ""

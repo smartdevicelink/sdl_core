@@ -18,6 +18,8 @@ GridView
             anchors.fill: parent
             onClicked: {
                 menuContainer.go(qml)
+                if(menuContainer.item.radioType !== undefined) menuContainer.item.radioType = name;
+                if(menuContainer.item.playerType !== undefined) menuContainer.item.playerType = name;
             }
         }
 
