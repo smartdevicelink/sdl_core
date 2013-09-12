@@ -3,7 +3,6 @@ import QtQuick 2.0
 GridView{
         id: navigationNoRouteGridView
 
-
     anchors.fill: parent
 
     Image {
@@ -55,19 +54,18 @@ GridView{
 
     Image{
         id: destSearch
-        source: "res/buttons/longest_oval_btn.png"
+        source: "res/buttons/long_oval_btn.png"
         x:600
         y:320
 
         Image{
             anchors.verticalCenter: parent.verticalCenter
-            x:15
+            x:20
             source: "res/nav/destIcon.png"
         }
         Text{
-            anchors.verticalCenter: parent.verticalCenter
-            x:40
-            text: "Destination"
+            anchors.centerIn: parent
+            text: "Cancel"
             color: "#1d81d5"
             font.pixelSize: 20
         }
@@ -76,10 +74,62 @@ GridView{
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
-                menuContainer.go("NavigationMenuGridView.qml")
+                menuContainer.go("NavigationNoRouteGridView.qml")
             }
         }
     }
+
+    Image{
+        id: currentStreet
+        source: "res/nav/current_street.png"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y:250
+
+        Text{
+            anchors.centerIn: parent
+            text: "East Capital St. NE"
+            color: "White"
+            font.pixelSize: 18
+        }
+
+    }
+
+    Image{
+        x:0
+        y:320
+        id: mute
+        source: "res/buttons/mute.png"
+
+    }
+
+    Image{
+        x:85
+        y:339.5
+        source: "res/nav/turnArrow.png"
+    }
+
+    Text{
+        x:130
+        y:339.5
+        text: "0.2 mi on Cherry Hill Rd."
+        color: "White"
+        font.pixelSize: 20
+    }
+
+    Text{
+        x:450
+        y:339.5
+        text: "2 hrs 27 min"
+        color: "White"
+        font.pixelSize: 20
+    }
+
+
+
+
+
+
+
 
 
 
