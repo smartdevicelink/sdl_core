@@ -1,5 +1,5 @@
 /**
- * \file tcp_adapter.cpp
+ * \file tcp_transport_adapter.cpp
  * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
@@ -37,7 +37,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/dnssd_service_browser.h"

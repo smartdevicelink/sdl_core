@@ -1,5 +1,5 @@
 /**
- * \file bluetooth_adapter.h
+ * \file bluetooth_socket_connection.h
  * \brief BluetoothSocketConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company

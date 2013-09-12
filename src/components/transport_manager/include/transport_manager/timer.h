@@ -87,7 +87,7 @@ class Timer {
   /**
    * @brief Stop timer.
    */
-  void stop();
+  void Stop();
 
  private:
   pthread_t thread_;

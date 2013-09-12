@@ -1,6 +1,6 @@
 /**
- * \file bluetooth_adapter.h
- * \brief BluetoothAdapter class header file.
+ * \file tcp_transport_adapter.h
+ * \brief TcpTransportAdapter class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
@@ -42,23 +42,30 @@ namespace transport_manager {
 namespace transport_adapter {
 
 /**
- * @brief Device adapter that use bluetooth transport.
+ * @brief Transport adapter that use TCP transport.
  */
-class BluetoothTransportAdapter : public TransportAdapterImpl {
+class TcpTransportAdapter : public TransportAdapterImpl {
  public:
   /**
    * @brief Constructor.
    */
-  BluetoothTransportAdapter();
+  TcpTransportAdapter();
 
   /**
    * @brief Destructor.
    */
-  virtual ~BluetoothTransportAdapter();
+  virtual ~TcpTransportAdapter();
+
+  /**
+   * @brief Default port.
+   */
+  static const uint16_t default_port = 12345;
  protected:
 
   /**
    * @brief Return type of device.
+   *
+   * @return String with device type.
    */
   virtual DeviceType GetDeviceType() const;
 };
@@ -66,4 +73,4 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER

@@ -42,7 +42,7 @@
 #include <set>
 #include <bluetooth/bluetooth.h>
 
-#include "transport_manager/bluetooth/bluetooth_adapter.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 

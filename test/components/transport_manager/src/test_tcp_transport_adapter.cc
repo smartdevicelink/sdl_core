@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/mock_transport_adapter_listener.h"
 

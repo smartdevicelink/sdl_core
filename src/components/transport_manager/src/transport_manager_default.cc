@@ -35,8 +35,8 @@
 
 #include "transport_manager/transport_manager_default.h"
 
-#include "transport_manager/bluetooth/bluetooth_adapter.h"
-#include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 //#include "transport_manager/usb/usb_aoa_adapter.h"
 
 
