@@ -22,7 +22,7 @@ Image {
 
     //x: (parent.width - width) / 2
     //y: 10
-    source: state === "off" ? "res/buttons/key_9_9.png" : "res/buttons/keyPressed_9_9.png";
+    source: state === "off" ? "res/buttons/round_btn.png" : "res/buttons/round_pressed_btn.png";
     Text {
         id: onOffCaption
         color: "white"

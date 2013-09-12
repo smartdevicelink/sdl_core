@@ -9,6 +9,7 @@ ListModel
     ListElement {
         name: "Sirius"
         icon: "res/buttons/long_oval_btn.png"
+        qml: "SiriusPlayerView.qml"
     }
     ListElement {
         name: "BT Audio"
