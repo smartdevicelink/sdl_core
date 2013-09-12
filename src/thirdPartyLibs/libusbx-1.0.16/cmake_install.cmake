@@ -1,4 +1,4 @@
-# Install script for directory: /home/aleshin/work/applink/src/thirdPartyLibs/libusbx-1.0.16
+# Install script for directory: /home/nkhlopkov/code/v1/src/thirdPartyLibs/libusbx-1.0.16
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

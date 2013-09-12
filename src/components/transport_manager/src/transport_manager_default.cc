@@ -37,12 +37,12 @@
 
 #include "transport_manager/bluetooth/bluetooth_adapter.h"
 #include "transport_manager/tcp/tcp_adapter.h"
-//#include "transport_manager/usb/usb_aoa_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 
 
 using transport_manager::transport_adapter::BluetoothTransportAdapter;
 using transport_manager::transport_adapter::TcpTransportAdapter;
-//using transport_manager::transport_adapter::UsbAoaAdapter;
+using transport_manager::transport_adapter::UsbAoaAdapter;
 
 namespace transport_manager {
 
