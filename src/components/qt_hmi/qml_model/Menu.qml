@@ -10,7 +10,7 @@ ListModel
     ListElement {
         name: "Navigation"
         icon: "res/arrow.png"
-        qml: "NavigationMenuGridView.qml"
+        qml: "NavigationNoRouteGridView.qml"
     }
 
     ListElement {

@@ -44,7 +44,7 @@ GridView {
         height: 80
 
         Image { source: icon; anchors.centerIn: parent }
-        Text {color: "steelblue"; text: title; anchors.centerIn: parent }
+        Text {color: "#1d81d5"; text: title; anchors.centerIn: parent; font.pixelSize: 20 }
         MouseArea {
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent

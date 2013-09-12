@@ -12,7 +12,6 @@ Item {
             x:37.5
             y:122.5
             Image {
-                //x: parent.x + 69
                 Text{
                     anchors.centerIn: parent
                     text: "Q"
@@ -24,7 +23,6 @@ Item {
                 source: "res/buttons/key_9_9.png"
              }
             Image {
-               // x: parent.x + 69
                 Text{
                     anchors.centerIn: parent
                     text: "W"
@@ -36,7 +34,6 @@ Item {
                 source: "res/buttons/key_9_9.png"
              }
             Image {
-              //  x: parent.x + 69
                 Text{
                     anchors.centerIn: parent
                     text: "E"
@@ -367,10 +364,22 @@ Item {
                 id: spacelearBtn
                 source: "res/buttons/key_9_9.png"
              }
-
-
-
         }
+
+        Image {
+            x:710
+            y:30
+            Text{
+                anchors.centerIn: parent
+                text: "Go"
+                color: "#1d81d5"
+                font.pixelSize: 25
+            }
+            id: goBtn
+            source: "res/buttons/TuneBtn_8_8.png"
+        }
+
+
 
 
 }
