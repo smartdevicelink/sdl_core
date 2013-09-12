@@ -74,7 +74,8 @@ void SliderResponse::Run() {
       const smart_objects::SmartObject& request_params = msg_chain->data();
 
       (*message_)[strings::msg_params][strings::slider_position] =
-          request_params[strings::msg_params][strings::position];
+          request_params.getElement(
+          strings::msg_params).getElement(strings::position);
 
       SendResponse(false);
     }
