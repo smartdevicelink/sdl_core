@@ -44,57 +44,66 @@ namespace {
 const char kRpcsKey[] = "rpcs";
 const char kHmiLevelsKey[] = "hmi_levels";
 
-std::map<std::string, FunctionID::eType> kFunctionIDs { {
-    "RegisterAppInterface", FunctionID::RegisterAppInterfaceID }, {
-    "UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID }, {
-    "SetGlobalProperties", FunctionID::SetGlobalPropertiesID }, {
-    "ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID }, {
-    "AddCommand", FunctionID::AddCommandID }, { "DeleteCommand",
-    FunctionID::DeleteCommandID }, { "AddSubMenu", FunctionID::AddSubMenuID }, {
-    "DeleteSubMenu", FunctionID::DeleteSubMenuID }, {
-    "CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID }, {
-    "PerformInteraction", FunctionID::PerformInteractionID }, {
-    "DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID }, {
-    "Alert", FunctionID::AlertID }, { "Show", FunctionID::ShowID }, { "Speak",
-    FunctionID::SpeakID }, { "SetMediaClockTimer",
-    FunctionID::SetMediaClockTimerID }, { "EncodedSyncPData",
-    FunctionID::EncodedSyncPDataID }, { "SyncPData", FunctionID::SyncPDataID },
-    { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID }, {
-        "EndAudioPassThru", FunctionID::EndAudioPassThruID }, {
-        "SubscribeButton", FunctionID::SubscribeButtonID }, {
-        "UnsubscribeButton", FunctionID::UnsubscribeButtonID }, {
-        "SubscribeVehicleData", FunctionID::SubscribeVehicleDataID }, {
-        "UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID }, {
-        "GetVehicleData", FunctionID::GetVehicleDataID }, { "ReadDID",
-        FunctionID::ReadDIDID }, { "GetDTCs", FunctionID::GetDTCsID }, {
-        "ScrollableMessage", FunctionID::ScrollableMessageID }, { "Slider",
-        FunctionID::SliderID }, { "ShowConstantTBT",
-        FunctionID::ShowConstantTBTID }, { "AlertManeuver",
-        FunctionID::AlertManeuverID }, { "UpdateTurnList",
-        FunctionID::UpdateTurnListID }, { "ChangeRegistration",
-        FunctionID::ChangeRegistrationID }, { "GenericResponse",
-        FunctionID::GenericResponseID }, { "PutFile", FunctionID::PutFileID }, {
-        "DeleteFile", FunctionID::DeleteFileID }, { "ListFiles",
-        FunctionID::ListFilesID }, { "SetAppIcon", FunctionID::SetAppIconID }, {
-        "SetDisplayLayout", FunctionID::SetDisplayLayoutID }, { "OnHMIStatus",
-        FunctionID::OnHMIStatusID }, { "OnAppInterfaceUnregistered",
-        FunctionID::OnAppInterfaceUnregisteredID }, { "OnButtonEvent",
-        FunctionID::OnButtonEventID }, { "OnButtonPress",
-        FunctionID::OnButtonPressID }, { "OnVehicleData",
-        FunctionID::OnVehicleDataID }, { "OnCommand", FunctionID::OnCommandID },
-    { "OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID }, {
-        "OnTBTClientState", FunctionID::OnTBTClientStateID }, {
-        "OnPermissionsChange", FunctionID::OnPermissionsChangeID }, {
-        "OnAudioPassThru", FunctionID::OnAudioPassThruID }, {
-        "OnLanguageChange", FunctionID::OnLanguageChangeID }, {
-        "OnDriverDistraction", FunctionID::OnDriverDistractionID }, {
-        "OnSyncPData", FunctionID::EncodedSyncPDataID } };
+std::map<std::string, FunctionID::eType> kFunctionIDs {
+  { "RegisterAppInterface", FunctionID::RegisterAppInterfaceID },
+  { "UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID },
+  { "SetGlobalProperties", FunctionID::SetGlobalPropertiesID },
+  { "ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID },
+  { "AddCommand", FunctionID::AddCommandID },
+  { "DeleteCommand", FunctionID::DeleteCommandID },
+  { "AddSubMenu", FunctionID::AddSubMenuID },
+  { "DeleteSubMenu", FunctionID::DeleteSubMenuID },
+  { "CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID },
+  { "PerformInteraction", FunctionID::PerformInteractionID },
+  { "DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID },
+  { "Alert", FunctionID::AlertID },
+  { "Show", FunctionID::ShowID },
+  { "Speak", FunctionID::SpeakID },
+  { "SetMediaClockTimer", FunctionID::SetMediaClockTimerID },
+  { "EncodedSyncPData", FunctionID::EncodedSyncPDataID },
+  { "SyncPData", FunctionID::SyncPDataID },
+  { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID },
+  { "EndAudioPassThru", FunctionID::EndAudioPassThruID },
+  { "SubscribeButton", FunctionID::SubscribeButtonID },
+  { "UnsubscribeButton", FunctionID::UnsubscribeButtonID },
+  { "SubscribeVehicleData", FunctionID::SubscribeVehicleDataID },
+  { "UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID },
+  { "GetVehicleData", FunctionID::GetVehicleDataID },
+  { "ReadDID", FunctionID::ReadDIDID },
+  { "GetDTCs", FunctionID::GetDTCsID },
+  { "ScrollableMessage", FunctionID::ScrollableMessageID },
+  { "Slider", FunctionID::SliderID },
+  { "ShowConstantTBT", FunctionID::ShowConstantTBTID },
+  { "AlertManeuver", FunctionID::AlertManeuverID },
+  { "UpdateTurnList", FunctionID::UpdateTurnListID },
+  { "ChangeRegistration", FunctionID::ChangeRegistrationID },
+  { "GenericResponse", FunctionID::GenericResponseID },
+  { "PutFile", FunctionID::PutFileID },
+  { "DeleteFile", FunctionID::DeleteFileID },
+  { "ListFiles",  FunctionID::ListFilesID },
+  { "SetAppIcon", FunctionID::SetAppIconID },
+  { "SetDisplayLayout", FunctionID::SetDisplayLayoutID },
+  { "OnHMIStatus", FunctionID::OnHMIStatusID },
+  { "OnAppInterfaceUnregistered", FunctionID::OnAppInterfaceUnregisteredID },
+  { "OnButtonEvent", FunctionID::OnButtonEventID },
+  { "OnButtonPress", FunctionID::OnButtonPressID },
+  { "OnVehicleData", FunctionID::OnVehicleDataID },
+  { "OnCommand", FunctionID::OnCommandID },
+  { "OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID },
+  { "OnTBTClientState", FunctionID::OnTBTClientStateID },
+  { "OnPermissionsChange", FunctionID::OnPermissionsChangeID },
+  { "OnAudioPassThru", FunctionID::OnAudioPassThruID },
+  { "OnLanguageChange", FunctionID::OnLanguageChangeID },
+  { "OnDriverDistraction", FunctionID::OnDriverDistractionID },
+  { "OnSyncPData", FunctionID::EncodedSyncPDataID }
+};
 
-std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels { { "FULL",
-    mobile_apis::HMILevel::HMI_FULL }, { "LIMITED",
-    mobile_apis::HMILevel::HMI_LIMITED }, { "BACKGROUND",
-    mobile_apis::HMILevel::HMI_BACKGROUND }, { "NONE",
-    mobile_apis::HMILevel::HMI_NONE } };
+std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels {
+  { "FULL", mobile_apis::HMILevel::HMI_FULL },
+  { "LIMITED", mobile_apis::HMILevel::HMI_LIMITED },
+  { "BACKGROUND", mobile_apis::HMILevel::HMI_BACKGROUND },
+  { "NONE", mobile_apis::HMILevel::HMI_NONE }
+};
 }  // namespace
 
 namespace application_manager {

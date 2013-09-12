@@ -229,7 +229,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   for (std::set<Application*>::iterator it = application_list_.begin();
       application_list_.end() != it;
       ++it) {
-    if ((*it)->SupportsNavigation()) {
+    if ((*it)->allowed_support_navigation()) {
       result.push_back(*it);
     }
   }
@@ -446,7 +446,7 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
         LOG4CXX_WARN(logger_, "Application is already active.");
         return false;
       }
-      if (application->HasBeenActivated()) {
+      if (application->has_been_activated()) {
         MessageHelper::SendAppDataToHMI(application);
       } else {
         MessageHelper::SendChangeRegistrationRequestToHMI(application);

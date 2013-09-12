@@ -93,11 +93,11 @@ void ApplicationImpl::MakeNotAudible() {
   audio_streaming_state_ = mobile_api::AudioStreamingState::NOT_AUDIBLE;
 }
 
-bool ApplicationImpl::SupportsNavigation() const {
+bool ApplicationImpl::allowed_support_navigation() const {
   return allowed_support_navigation_;
 }
 
-void ApplicationImpl::AllowNavigation(bool allow) {
+void ApplicationImpl::set_allowed_support_navigation(bool allow) {
   allowed_support_navigation_ = allow;
 }
 
@@ -180,7 +180,7 @@ void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_ = device;
 }
 
-bool ApplicationImpl::HasBeenActivated() const {
+bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
 
