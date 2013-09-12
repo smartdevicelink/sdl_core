@@ -29,6 +29,8 @@ ListModel
     ListElement {
         name: "keyboard"
         icon: "res/phone/keypad.png"
+        qml: "PhoneKeyboardGridView.qml"
+
     }
     ListElement {
         name: "more"

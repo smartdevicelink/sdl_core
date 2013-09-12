@@ -123,15 +123,4 @@ GridView{
         color: "White"
         font.pixelSize: 20
     }
-
-
-
-
-
-
-
-
-
-
-
 }

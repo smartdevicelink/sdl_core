@@ -21,7 +21,7 @@ GridView{
             anchors.centerIn: parent
             text: "-"
             color: "white"
-            font.pixelSize: 30
+            font.pixelSize: 20
         }
     }
 
@@ -32,10 +32,11 @@ GridView{
         y:10
 
         Text{
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             text: "+"
             color: "white"
-            font.pixelSize: 30
+            font.pixelSize: 20
         }
     }
 
