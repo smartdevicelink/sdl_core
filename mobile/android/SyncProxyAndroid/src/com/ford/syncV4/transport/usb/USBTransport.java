@@ -34,8 +34,6 @@ import java.io.OutputStream;
  * the other side is not connected. Conversely, if one side simply disconnects,
  * the other side will NOT be notified and unblocked from reading data until
  * some data is sent again or the USB is physically disconnected.
- *
- * TODO: use State pattern
  */
 public class USBTransport extends SyncTransport {
     /**
