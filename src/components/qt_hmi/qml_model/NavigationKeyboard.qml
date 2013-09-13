@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 GridView {
     id: navigationKeyboard
@@ -10,7 +11,13 @@ GridView {
         Row {
             x:(navigationKeyboard.width - 63*10) / 2
             y:(navigationKeyboard.height - 63*3) / 2
-            Image {
+            CircleBtn{
+                imgOff: "../res/buttons/preset_btn.png"
+                imgOn: "../res/buttons/preset_pressed_btn.png"
+                text: "Q"
+                pixelSize: 25
+            }
+            /*Image {
                 Text{
                     anchors.centerIn: parent
                     text: "Q"
@@ -20,7 +27,7 @@ GridView {
 
                 id: qBtn
                 source: "res/buttons/preset_btn.png"
-             }
+             }*/
             Image {
                 Text{
                     anchors.centerIn: parent
@@ -389,7 +396,7 @@ GridView {
             id: closeText
             anchors.horizontalCenter: parent.horizontalCenter
             y:250
-            text: "Close"
+            text: "CLOSE"
             color: "#1d81d5"
             font.pixelSize: 25
             MouseArea {

@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 Column {
     spacing: 25
@@ -9,44 +10,20 @@ Column {
     Item{
         width: parent.width
         height: parent.height * 0.25
-        Image{
+        LongOvalBtn {
+            text: radioType + " Radio"
+            pixelSize: 20
+            dest: "MusicSourceGridView.qml"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("MusicSourceGridView.qml")
-                }
-            }
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: radioType + " Radio"
-                font.pixelSize: 20
-            }
         }
 
-        Image{
+        LongOvalBtn {
+            text: "Tune"
+            pixelSize: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: "Tune"
-                font.pixelSize: 20
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    //menuContainer.go(qml)
-                }
-            }
         }
-
     }
     Row{
         spacing: 40
@@ -85,50 +62,51 @@ Column {
 
                 }
             }
-            Image {
-                source: "res/buttons/long_oval_btn.png"
+            LongOvalBtn {
+                id: hdBtn
                 visible: radioType === "AM" ? false: true
                 Row{
+                    id: row
                     anchors.verticalCenter: parent.verticalCenter
                     x: parent.x + 20
                     spacing: 5
-                    Image {
-                        id: hdImg
-                        state: "on"
-                        anchors.verticalCenter: parent.verticalCenter
-                        source:"res/hd_logo_on.png"
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                if(hdImg.state === "on"){
-                                    hdImg.state = "off"
-                                    hdImg.source = "res/hd_logo_off.png"
-                                } else {
-                                    hdImg.state = "on"
-                                    hdImg.source = "res/hd_logo_on.png"
-                                }
-
-                            }
+                    property int selected: 0
+                    MouseArea {
+                        onClicked: {
+                            //todo: change color of text
                         }
                     }
+
+                    Image {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source:"res/hd_logo_on.png"
+                    }
                     Text {
+                        id: one
+                        anchors.verticalCenter: parent.verticalCenter
                         text: "1"
                         color: "white"
                         font.pixelSize: 25
                     }
                     Text {
+                        id: two
+                        anchors.verticalCenter: parent.verticalCenter
                         text: "2"
-                        color: "#1d81d5"
+                        color: parent.selected == 1 ? "white" : "#1d81d5"
                         font.pixelSize: 25
                     }
                     Text {
+                        id: three
+                        anchors.verticalCenter: parent.verticalCenter
                         text: "3"
-                        color: "#1d81d5"
+                        color: parent.selected == 2 ? "white" : "#1d81d5"
                         font.pixelSize: 25
                     }
                     Text {
+                        id: fourth
+                        anchors.verticalCenter: parent.verticalCenter
                         text: "4"
-                        color: "#1d81d5"
+                        color: parent.selected == 3 ? "white" : "#1d81d5"
                         font.pixelSize: 25
                     }
                 }

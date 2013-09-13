@@ -21,7 +21,7 @@ Rectangle {
             if (sw === "on") {
                 mainScreen.state = "Main"
                 menuContainer.go("AMFMPlayerView.qml")
-                menuContainer.item.radioType = "AM"
+                menuContainer.item.radioType = "FM"
             } else {
                 mainScreen.state = ""
                 menuContainer.source = ""
@@ -58,37 +58,42 @@ Rectangle {
         x: menuContainer.x + menuContainer.width / 2 - 400
         y: 120
         width: 800
-        height: 80
+        height: 55
+
         Text{
             text: "75°";
             color: "#1d81d5"
             font.pixelSize: 25;
-            width: parent.width / parent.columns
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Text {
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("MainMenuGridView.qml")
-                }
-            }
+        Item {
+            width: childrenRect.width
+            height: parent.height
+            anchors.horizontalCenter: headerMenu.horizontalCenter
             Text {
                 text: "≡"
                 color: "#1d81d5"
                 font.pixelSize: 25
                 anchors.horizontalCenter: parent.horizontalCenter
-                y: parent.y - 55
+                anchors.top: parent.top
             }
 
-            text: "MENU";
-            color: "#1d81d5"
-            font.pixelSize: 25
-            width: parent.width / parent.columns
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            Text {
+                text: "MENU";
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                color: "#1d81d5"
+                font.pixelSize: 25
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    menuContainer.go("main_menu/MainMenuGridView.qml")
+                }
+            }
         }
 
         Text{
