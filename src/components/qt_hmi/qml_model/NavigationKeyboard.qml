@@ -137,26 +137,16 @@ GridView {
                 text: "L"
                 pixelSize: 25
             }
-
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
-                MouseArea{
-
-                  anchors.fill: parent
-                  onPressed: {
-                      mouse.accepted = false
-                      hoverImg.source = "res/nav/delete_icon_black.png"
-                  }
-                  onReleased: {
-                      mouse.accepted = false
-                      hoverImg.source = "res/nav/delete_icon.png"
-                  }
-             }
+                onIsPressedChanged: {
+                    hoverImg.source = isPressed ? "res/nav/delete_icon_black.png" : "res/nav/delete_icon.png";
+                }
                 Image{
                     id: hoverImg
-                   anchors.centerIn: parent
-                   source: "res/nav/delete_icon.png"
+                    anchors.centerIn: parent
+                    source: "res/nav/delete_icon.png"
                 }
             }
         }
