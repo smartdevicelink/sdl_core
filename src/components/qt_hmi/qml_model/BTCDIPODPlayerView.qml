@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 Column {
     spacing: 25
@@ -7,44 +8,20 @@ Column {
     Item{
         width: parent.width
         height: parent.height * 0.25
-        Image{
+        LongOvalBtn {
+            text: playerType
+            pixelSize: 20
+            dest: "MusicSourceGridView.qml"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("MusicSourceGridView.qml")
-                }
-            }
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: playerType
-                font.pixelSize: 20
-            }
         }
 
-        Image{
+        LongOvalBtn {
+            text: "Browse"
+            pixelSize: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: "Browse"
-                font.pixelSize: 20
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    //menuContainer.go(qml)
-                }
-            }
         }
-
     }
     Row{
         spacing: 50

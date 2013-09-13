@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import ".."
 
 MenuGridView
 {
@@ -7,5 +8,5 @@ MenuGridView
     columns: 4
     rows: 2
 
-    model: Menu {}
+    model: MainMenuListModel {}
 }

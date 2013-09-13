@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 Column {
     id: climateControlBtn
@@ -7,44 +8,20 @@ Column {
     Item{
         width: parent.width
         height: parent.height / 4
-        Image{
+        LongOvalBtn {
+            text: "Sirius"
+            pixelSize: 20
+            dest: "MusicSourceGridView.qml"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("MusicSourceGridView.qml")
-                }
-            }
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: "Sirius"
-                font.pixelSize: 20
-            }
         }
 
-        Image{
+        LongOvalBtn {
+            text: "Tune"
+            pixelSize: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: "Tune"
-                font.pixelSize: 20
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    //menuContainer.go(qml)
-                }
-            }
         }
-
     }
     Row{
         spacing: 50
