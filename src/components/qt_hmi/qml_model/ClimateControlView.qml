@@ -1,10 +1,13 @@
 import QtQuick 2.0
 Item{
     anchors.fill: parent
+
     Item{
-        x: 100
+        x: centralItem.x - childrenRect.width - 40
         anchors.verticalCenter: centralItem.verticalCenter
-        width: 200
+        width: childrenRect.width
+        height: childrenRect.height
+
         Column {
             Row {
                 ClimateControlBtn {name: "heated_seat"}
@@ -19,30 +22,35 @@ Item{
 
     Item{
         id: centralItem
-        width: 100
-        height: 100
+        width: childrenRect.width
+        height: childrenRect.height
         anchors.horizontalCenter: parent.horizontalCenter
+
         Column{
             ClimateControlBtn {name: "defrost"; state: "on"}
             ClimateControlBtn {name: "face"; state: "on"}
             ClimateControlBtn {name: "feet"}
         }
+
     }
 
     Item {
-        x: 500
-        anchors.verticalCenter: centralItem.verticalCenter + 100
-        width: 100
-        height: 200
+        x: centralItem.x + centralItem.width + 40
+        anchors.verticalCenter: centralItem.verticalCenter
+        width: childrenRect.width
+        height: childrenRect.height
         Item {
+            id: dualBtn
+            width: childrenRect.width
+            height: childrenRect.height
             anchors.verticalCenter: parent.verticalCenter
             ClimateControlBtn {txt: "Dual"; state: "on"}
         }
         Item {
-            x: 100
-            y: 50
-            width: 100
-            height: 100
+            x: dualBtn.width
+            anchors.verticalCenter: parent.verticalCenter
+            width: childrenRect.width
+            height: childrenRect.height
             Column {
                     ClimateControlBtn {name: "heated_seat"}
                     ClimateControlBtn {name: "AC"}
