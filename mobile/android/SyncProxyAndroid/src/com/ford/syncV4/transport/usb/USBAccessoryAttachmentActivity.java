@@ -63,6 +63,10 @@ public class USBAccessoryAttachmentActivity extends Activity {
                     new Intent(USBTransport.ACTION_USB_ACCESSORY_ATTACHED);
             usbAccessoryAttachedIntent.putExtra(UsbManager.EXTRA_ACCESSORY,
                     intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY));
+            usbAccessoryAttachedIntent
+                    .putExtra(UsbManager.EXTRA_PERMISSION_GRANTED,
+                            intent.getParcelableExtra(
+                                    UsbManager.EXTRA_PERMISSION_GRANTED));
             sendBroadcast(usbAccessoryAttachedIntent);
         }
 

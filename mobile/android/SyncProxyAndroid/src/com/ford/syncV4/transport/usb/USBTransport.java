@@ -97,8 +97,18 @@ public class USBTransport extends SyncTransport {
                     disconnect(msg, new SyncException(msg,
                             SyncExceptionCause.SYNC_USB_DETACHED));
                 } else if (ACTION_USB_PERMISSION.equals(action)) {
-                    logI("Permission granted for accessory " + accessory);
-                    openAccessory(accessory);
+                    boolean permissionGranted = intent.getBooleanExtra(
+                            UsbManager.EXTRA_PERMISSION_GRANTED, false);
+                    if (permissionGranted) {
+                        logI("Permission granted for accessory " + accessory);
+                        openAccessory(accessory);
+                    } else {
+                        final String msg =
+                                "Permission denied for accessory " + accessory;
+                        logW(msg);
+                        disconnect(msg, new SyncException(msg,
+                                SyncExceptionCause.SYNC_USB_PERMISSION_DENIED));
+                    }
                 }
             } else {
                 logW("Accessory is null");
@@ -612,7 +622,16 @@ public class USBTransport extends SyncTransport {
                 case LISTENING:
 
                     synchronized (USBTransport.this) {
-                        mParcelFD = getUsbManager().openAccessory(mAccessory);
+                        try {
+                            mParcelFD =
+                                    getUsbManager().openAccessory(mAccessory);
+                        } catch (SecurityException e) {
+                            final String msg =
+                                    "Have no permission to open the accessory";
+                            logE(msg, e);
+                            disconnect(msg, e);
+                            return false;
+                        }
                         if (mParcelFD == null) {
                             if (isInterrupted()) {
                                 logW("Can't open accessory, and thread is interrupted");
@@ -723,6 +742,10 @@ public class USBTransport extends SyncTransport {
                 res.append(tr.toString());
             }
             logW(res.toString());
+        }
+
+        private void logE(String s, Throwable tr) {
+            DebugTool.logError(s, tr);
         }
     }
 }
