@@ -38,7 +38,7 @@
 namespace hmi_message_handler {
 class HMIMessageSender {
  public:
-  virtual void sendMessageToHMI(
+  virtual void SendMessageToHMI(
       utils::SharedPtr<application_manager::Message> message) = 0;
 };
 

@@ -94,9 +94,9 @@ MobileMessageHandlerImpl* MobileMessageHandlerImpl::instance() {
   return MobileMessageHandlerImpl::self_;
 }
 
-void MobileMessageHandlerImpl::setProtocolHandler(
+void MobileMessageHandlerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* protocolHandler) {
-  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl setProtocolHandler()");
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl set_protocol_handler()");
   DCHECK(protocolHandler);
   protocol_handler_ = protocolHandler;
 }

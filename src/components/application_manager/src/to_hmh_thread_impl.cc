@@ -57,7 +57,7 @@ void ToHMHThreadImpl::threadMain() {
         continue;
       }
 
-      handler_->hmi_handler_->sendMessageToHMI(message);
+      handler_->hmi_handler_->SendMessageToHMI(message);
       LOG4CXX_INFO(logger_, "Message from hmi given away.");
     }
     handler_->messages_to_hmh_.wait();

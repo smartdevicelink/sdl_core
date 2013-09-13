@@ -53,7 +53,7 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
  public:
   static MobileMessageHandlerImpl* instance();
 
-  void setProtocolHandler(protocol_handler::ProtocolHandler* protocolHandler);
+  void set_protocol_handler(protocol_handler::ProtocolHandler* protocolHandler);
   void OnMessageReceived(const protocol_handler::RawMessage* message);
   void SendMessageToMobileApp(const MobileMessage& message);
 

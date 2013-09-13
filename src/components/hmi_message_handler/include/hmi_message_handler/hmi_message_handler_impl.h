@@ -51,12 +51,12 @@ class HMIMessageHandlerImpl : public HMIMessageHandler {
  public:
   static HMIMessageHandlerImpl* instance();
   ~HMIMessageHandlerImpl();
-  void onMessageReceived(MessageSharedPointer message);
-  void sendMessageToHMI(MessageSharedPointer message);
-  void setMessageObserver(HMIMessageObserver* observer);
-  void onErrorSending(MessageSharedPointer message);
-  void addHMIMessageAdapter(HMIMessageAdapter* adapter);
-  void removeHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void OnMessageReceived(MessageSharedPointer message);
+  void SendMessageToHMI(MessageSharedPointer message);
+  void set_message_observer(HMIMessageObserver* observer);
+  void OnErrorSending(MessageSharedPointer message);
+  void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
 
  private:
   HMIMessageHandlerImpl();

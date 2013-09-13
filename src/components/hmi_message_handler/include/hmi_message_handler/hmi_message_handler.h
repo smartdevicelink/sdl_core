@@ -47,8 +47,8 @@ class HMIMessageAdapter;
 class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
  public:
   virtual ~HMIMessageHandler() {}
-  virtual void addHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
-  virtual void removeHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+  virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+  virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
 };
 
 }  // namespace hmi_message_handler

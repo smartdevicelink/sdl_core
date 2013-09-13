@@ -341,8 +341,8 @@ class ApplicationManagerImpl : public ApplicationManager,
    */
   void StopAudioPassThru();
 
-  void sendAudioPassThroughNotification(unsigned int session_key_,
-                                        unsigned int correlation_id_,
+  void SendAudioPassThroughNotification(unsigned int session_key,
+                                        unsigned int correlation_id,
                                         std::vector<unsigned char> binaryData);
 
   std::string GetDeviceName(connection_handler::DeviceHandle handle);
@@ -381,9 +381,9 @@ class ApplicationManagerImpl : public ApplicationManager,
    */
   virtual void OnMobileMessageReceived(const MobileMessage& message);
 
-  void onMessageReceived(
+  void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
-  void onErrorSending(utils::SharedPtr<application_manager::Message> message);
+  void OnErrorSending(utils::SharedPtr<application_manager::Message> message);
 
   void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
   void RemoveDevice(const connection_handler::DeviceHandle device_handle);

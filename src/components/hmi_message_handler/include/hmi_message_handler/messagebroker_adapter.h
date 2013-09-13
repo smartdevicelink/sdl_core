@@ -45,7 +45,7 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
  public:
   explicit MessageBrokerAdapter(HMIMessageHandler* handler);
   ~MessageBrokerAdapter();
-  void sendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
+  void SendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
 
   /*Methods from CMessageBrokerController*/
   /**
@@ -67,10 +67,10 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
    */
   void processNotification(Json::Value& root);
 
-  void subscribeTo();
+  void SubscribeTo();
 
  protected:
-  void processRecievedfromMB(Json::Value& root);
+  void ProcessRecievedFromMB(Json::Value& root);
 
  private:
   static const std::string ADDRESS;

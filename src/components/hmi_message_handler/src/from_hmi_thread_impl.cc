@@ -57,7 +57,7 @@ void FromHMIThreadImpl::threadMain() {
         continue;
       }
 
-      handler_->observer_->onMessageReceived(message);
+      handler_->observer_->OnMessageReceived(message);
       LOG4CXX_INFO(logger_, "Message from hmi given away.");
     }
     handler_->messages_from_hmi_.wait();

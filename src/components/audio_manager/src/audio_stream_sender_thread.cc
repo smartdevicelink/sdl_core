@@ -129,7 +129,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     offset_ = offset_ + to - from;
 
     application_manager::ApplicationManagerImpl::instance()->
-        sendAudioPassThroughNotification(session_key_, correlation_id_,
+        SendAudioPassThroughNotification(session_key_, correlation_id_,
                                          std::vector<unsigned char>(from, to));
      binaryData.clear();
    }

@@ -37,9 +37,9 @@ namespace hmi_message_handler {
 
 class HMIMessageObserver {
  public:
-  virtual void onMessageReceived(
+  virtual void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message) = 0;
-  virtual void onErrorSending(
+  virtual void OnErrorSending(
       utils::SharedPtr<application_manager::Message> message) = 0;
 };
 }

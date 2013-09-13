@@ -80,8 +80,8 @@ HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   }
 }
 
-void HMIMessageHandlerImpl::onMessageReceived(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onMessageReceived()");
+void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~OnMessageReceived()");
   if (!observer_) {
     // TODO(PV): WARNING
     return;
@@ -89,31 +89,31 @@ void HMIMessageHandlerImpl::onMessageReceived(MessageSharedPointer message) {
   messages_from_hmi_.push(message);
 }
 
-void HMIMessageHandlerImpl::sendMessageToHMI(MessageSharedPointer message) {
+void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~sendMessageToHMI()");
   messages_to_hmi_.push(message);
 }
 
-void HMIMessageHandlerImpl::setMessageObserver(HMIMessageObserver* observer) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~setMessageObserver()");
+void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver* observer) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~SetMessageObserver()");
   observer_ = observer;
 }
 
-void HMIMessageHandlerImpl::onErrorSending(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~onErrorSending()");
+void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~OnErrorSending()");
   if (!observer_) {
     // TODO(PV): WARNING
     return;
   }
-  observer_->onErrorSending(message);
+  observer_->OnErrorSending(message);
 }
 
-void HMIMessageHandlerImpl::addHMIMessageAdapter(HMIMessageAdapter* adapter) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~addHMIMessageAdapter()");
+void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~AddHMIMessageAdapter()");
   message_adapters_.insert(adapter);
 }
 
-void HMIMessageHandlerImpl::removeHMIMessageAdapter(
+void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~removeHMIMessageAdapter()");
   message_adapters_.erase(adapter);

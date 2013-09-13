@@ -53,7 +53,7 @@ void ToHMIThreadImpl::threadMain() {
           handler_->message_adapters_.begin();
           it != handler_->message_adapters_.end();
           ++it) {
-        (*it)->sendMessageToHMI(message);
+        (*it)->SendMessageToHMI(message);
       }
     }
     handler_->messages_to_hmi_.wait();

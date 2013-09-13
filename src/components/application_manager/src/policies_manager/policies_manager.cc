@@ -122,7 +122,7 @@ PoliciesManager::PoliciesManager() {
 PoliciesManager::~PoliciesManager() {
 }
 
-bool PoliciesManager::init() {
+bool PoliciesManager::Init() {
   std::string json_string;
   std::string policies_file_name = profile::Profile::instance()
       ->policies_file_name();
@@ -173,7 +173,7 @@ bool PoliciesManager::init() {
   return true;
 }
 
-bool PoliciesManager::is_valid_hmi_status(FunctionID::eType function,
+bool PoliciesManager::IsValidHmiStatus(FunctionID::eType function,
                                           mobile_apis::HMILevel::eType status) {
   if (items_.find(function) == items_.end()) {
     return false;

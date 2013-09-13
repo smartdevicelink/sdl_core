@@ -49,7 +49,7 @@ MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
 MessageBrokerAdapter::~MessageBrokerAdapter() {
 }
 
-void MessageBrokerAdapter::sendMessageToHMI(
+void MessageBrokerAdapter::SendMessageToHMI(
     utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
   /*if (!message) {
@@ -70,20 +70,20 @@ void MessageBrokerAdapter::sendMessageToHMI(
 void MessageBrokerAdapter::processResponse(std::string method,
                                            Json::Value& root) {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processResponse");
-  processRecievedfromMB(root);
+  ProcessRecievedFromMB(root);
 }
 
 void MessageBrokerAdapter::processRequest(Json::Value& root) {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRequest");
-  processRecievedfromMB(root);
+  ProcessRecievedFromMB(root);
 }
 
 void MessageBrokerAdapter::processNotification(Json::Value& root) {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processNotification");
-  processRecievedfromMB(root);
+  ProcessRecievedFromMB(root);
 }
 
-void MessageBrokerAdapter::subscribeTo() {
+void MessageBrokerAdapter::SubscribeTo() {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::subscribeTo");
   MessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
   MessageBrokerController::subscribeTo("Buttons.OnButtonPress");
@@ -111,8 +111,8 @@ void MessageBrokerAdapter::subscribeTo() {
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
-void MessageBrokerAdapter::processRecievedfromMB(Json::Value& root) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRecievedfromMB");
+void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::ProcessRecievedFromMB");
   if (root.isNull()) {
     // LOG
     return;
@@ -136,7 +136,7 @@ void MessageBrokerAdapter::processRecievedfromMB(Json::Value& root) {
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
 
-  handler()->onMessageReceived(message);
+  handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");
 }
 

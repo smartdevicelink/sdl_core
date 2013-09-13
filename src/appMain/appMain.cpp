@@ -124,7 +124,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
     new hmi_message_handler::MessageBrokerAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter);
   if (!mb_adapter->Connect()) {
     LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
@@ -154,7 +154,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   th3->Start(false);
 
   mb_adapter->registerController();
-  mb_adapter->subscribeTo();
+  mb_adapter->SubscribeTo();
 
   return true;
 }
@@ -292,8 +292,8 @@ int main(int argc, char** argv) {
   transport_manager->AddEventListener(protocol_handler);
   transport_manager->AddEventListener(connection_handler);
 
-  mmh->setProtocolHandler(protocol_handler);
-  hmi_handler->setMessageObserver(app_manager);
+  mmh->set_protocol_handler(protocol_handler);
+  hmi_handler->set_message_observer(app_manager);
 
   protocol_handler->set_session_observer(connection_handler);
   protocol_handler->set_protocol_observer(mmh);

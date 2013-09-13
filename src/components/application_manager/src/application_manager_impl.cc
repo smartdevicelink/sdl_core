@@ -105,7 +105,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     return;
   }
 
-  if (!policies_manager_.init()) {
+  if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
   }
@@ -744,9 +744,9 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
   }
 }
 
-void ApplicationManagerImpl::sendAudioPassThroughNotification(
-    unsigned int session_key_,
-    unsigned int correlation_id_,
+void ApplicationManagerImpl::SendAudioPassThroughNotification(
+    unsigned int session_key,
+    unsigned int correlation_id,
     std::vector<unsigned char> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -764,10 +764,10 @@ void ApplicationManagerImpl::sendAudioPassThroughNotification(
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::message_type] =
       application_manager::MessageType::kNotification;
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::correlation_id] =
-      static_cast<int>(correlation_id_);
+      static_cast<int>(correlation_id);
 
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::connection_key] =
-      static_cast<int>(session_key_);
+      static_cast<int>(session_key);
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::function_id] =
       mobile_apis::FunctionID::OnAudioPassThruID;
 
@@ -896,9 +896,9 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   messages_from_mobile_.push(message);
 }
 
-void ApplicationManagerImpl::onMessageReceived(
+void ApplicationManagerImpl::OnMessageReceived(
     utils::SharedPtr<application_manager::Message> message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::onMessageReceived");
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
 
   DCHECK(message);
   if (!message) {
@@ -909,7 +909,7 @@ void ApplicationManagerImpl::onMessageReceived(
   messages_from_hmh_.push(message);
 }
 
-void ApplicationManagerImpl::onErrorSending(
+void ApplicationManagerImpl::OnErrorSending(
     utils::SharedPtr<application_manager::Message> message) {
   return;
 }
@@ -1081,7 +1081,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       return false;
     }
 
-    if (!policies_manager_.is_valid_hmi_status(function_id, app->hmi_level())) {
+    if (!policies_manager_.IsValidHmiStatus(function_id, app->hmi_level())) {
       LOG4CXX_WARN(
           logger_,
           "Request blocked by policies. " << "FunctionID: "

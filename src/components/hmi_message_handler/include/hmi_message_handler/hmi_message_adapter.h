@@ -64,7 +64,7 @@ class HMIMessageAdapter : public HMIMessageSender {
    * For example, Adapter for MessageBroker will use it to subscribe to notifications
    * from HMI.
    */
-  virtual void subscribeTo() = 0;
+  virtual void SubscribeTo() = 0;
   inline virtual HMIMessageHandler* handler() const {
     return handler_;
   }
