@@ -389,7 +389,7 @@ GridView {
             id: closeText
             anchors.horizontalCenter: parent.horizontalCenter
             y:250
-            text: "Close"
+            text: "CLOSE"
             color: "#1d81d5"
             font.pixelSize: 25
             MouseArea {
