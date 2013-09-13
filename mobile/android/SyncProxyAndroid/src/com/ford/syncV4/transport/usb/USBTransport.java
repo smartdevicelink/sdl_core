@@ -97,7 +97,11 @@ public class USBTransport extends SyncTransport {
             if (accessory != null) {
                 if (ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
                     logI("Accessory " + accessory + " attached");
-                    connectToAccessory(accessory);
+                    if (isAccessorySupported(accessory)) {
+                        connectToAccessory(accessory);
+                    } else {
+                        logW("Attached accessory is not supported!");
+                    }
                 } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED
                         .equals(action)) {
                     logI("Accessory " + accessory + " detached");
