@@ -15,7 +15,7 @@ ListModel
     ListElement {
         title: "Favorites"
         icon: "res/buttons/long_oval_btn.png"
-        qml: "ChangeDeviceView.qml"
+        qml: ""
     }
     ListElement {
         title: "Work"
