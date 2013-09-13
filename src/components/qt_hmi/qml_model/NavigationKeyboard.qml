@@ -1,142 +1,53 @@
 import QtQuick 2.0
 import "./controls"
 
-GridView {
-    id: navigationKeyboard
-
-    width: 780
-    height: 298
+Item {
+    id: navKeyboard
     anchors.fill: parent
 
+    anchors.centerIn: parent
+    width: navKeyboard.buttonWidth * 11
+    height: navKeyboard.buttonHeight * 3
+
+    Column {
+        anchors.centerIn: parent
         Row {
-            x:(navigationKeyboard.width - 63*10) / 2
-            y:(navigationKeyboard.height - 63*3) / 2
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "Q"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "W"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "E"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "R"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "T"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "Y"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "U"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "I"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "O"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "P"
-                pixelSize: 25
+            id: upperRow
+            property string qWERTY : "QWERTYUIOP"
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            Repeater{
+                model: 10
+                CircleBtn{
+                    imgOff: "../res/buttons/preset_btn.png"
+                    imgOn: "../res/buttons/preset_pressed_btn.png"
+                    text: upperRow.qWERTY.charAt(index)
+                    pixelSize: 25
+                }
             }
         }
-
         Row {
-            x:(navigationKeyboard.width - 63*11) / 2
-            y:(navigationKeyboard.height - 63*3) / 2 + 63
+            id: middleRow
+            property string aSDFGH : "ASDFGHJKL"
+            anchors.horizontalCenter: parent.horizontalCenter
 
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "123"
-                pixelSize: 20
+                pixelSize: 15
             }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "A"
-                pixelSize: 25
+            //--------------
+            Repeater{
+                model: 9
+                CircleBtn{
+                    imgOff: "../res/buttons/preset_btn.png"
+                    imgOn: "../res/buttons/preset_pressed_btn.png"
+                    text: middleRow.aSDFGH.charAt(index)
+                    pixelSize: 25
+                }
             }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "S"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "D"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "F"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "G"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "H"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "J"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "K"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "L"
-                pixelSize: 25
-            }
+            //--------------
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
@@ -150,110 +61,78 @@ GridView {
                 }
             }
         }
+        Row{
+            id: lowerRow
+            property string zXCVBN : "ZXCVBNM"
+            anchors.horizontalCenter: parent.horizontalCenter
 
-        Row {
-            x:(navigationKeyboard.width - 63*10) / 2
-            y:(navigationKeyboard.height - 63*3) / 2 + 126
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "!@#"
                 pixelSize: 15
             }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "Z"
-                pixelSize: 25
+            //-----------------
+            Repeater{
+                model: 7
+                CircleBtn{
+                    imgOff: "../res/buttons/preset_btn.png"
+                    imgOn: "../res/buttons/preset_pressed_btn.png"
+                    text: lowerRow.zXCVBN.charAt(index)
+                    pixelSize: 25
+                }
             }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "X"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "C"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "V"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "B"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "N"
-                pixelSize: 25
-            }
-            CircleBtn{
-                imgOff: "../res/buttons/preset_btn.png"
-                imgOn: "../res/buttons/preset_pressed_btn.png"
-                text: "M"
-                pixelSize: 25
-            }
+            //----------------
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "Clear"
-                pixelSize: 15
+                pixelSize: 12
             }
+            //----------------
             CircleBtn{
                 imgOff: "../res/buttons/preset_btn.png"
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "Space"
-                pixelSize: 15
+                pixelSize: 12
             }
         }
 
-        Image {
-            anchors.right: parent.right
-            anchors.top: parent.top
-            Text{
-                anchors.centerIn: parent
-                text: "Go"
-                color: "#1d81d5"
-                font.pixelSize: 25
-            }
-            id: goBtn
-            source: "res/buttons/short_oval_btn.png"
+    } // column
 
-            MouseArea {
-                cursorShape: Qt.PointingHandCursor
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("NavigationInRouteGridView.qml")
-                }
-            }
-        }
-
+   Image {
+        anchors.right: parent.right
+        anchors.top: parent.top
         Text{
-            id: closeText
-            anchors.horizontalCenter: parent.horizontalCenter
-            y:250
-            text: "CLOSE"
+            anchors.centerIn: parent
+            text: "Go"
             color: "#1d81d5"
             font.pixelSize: 25
-            MouseArea {
-              anchors.fill: parent
-              onClicked: {
-                  menuContainer.go("NavigationMenuGridView.qml")
-                }
+        }
+        id: goBtn
+        source: "res/buttons/short_oval_btn.png"
+
+        MouseArea {
+            cursorShape: Qt.PointingHandCursor
+            anchors.fill: parent
+            onClicked: {
+                menuContainer.go("NavigationInRouteGridView.qml")
             }
         }
+    }
 
+    Text{
+        id: closeText
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        text: "CLOSE"
+        color: "#1d81d5"
+        font.pixelSize: 20
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+              menuContainer.go("NavigationMenuGridView.qml")
+            }
+        }
+    }
 }
-
-
-
-

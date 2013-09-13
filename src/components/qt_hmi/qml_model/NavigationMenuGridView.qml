@@ -9,27 +9,30 @@ Item {
         id: navMenuGridView
         model: NavigationMenu {}
 
-        property int buttonWidth: 163
-        property int buttonHeight: 65
+        LongOvalBtn {
+            id: lob
+            visible: false
+        }
 
-        width: 3*buttonWidth
-        height: 2*buttonHeight
+        width: 3*lob.width
+        height: 2*lob.height
+
         columns: 3
         rows: 2
 
         delegate: Item {
             id: cell
-            width: navMenuGridView.cellWidth
-            height: navMenuGridView.cellHeight
+            width: button.width
+            height: button.height
 
             LongOvalBtn {
+                id: button
                 text: title
                 pixelSize: 20
                 dest: qml
                 anchors.centerIn: parent
             }
         }
-
     }
 
     Text{
