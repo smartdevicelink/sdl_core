@@ -1,48 +1,26 @@
 import QtQuick 2.0
 import "./controls"
 
-Item{
+Item {
     anchors.fill: parent
 
-    GridView {
-        anchors.fill: parent
-        id: navigationMenuGridView
+    MenuGridView {
+        anchors.centerIn: parent
+        id: navMenuGridView
         model: NavigationMenu {}
 
-        populate: Transition {
-            id: populateTransition;
-            SequentialAnimation {
-                PropertyAction  {
-                    property: "opacity";
-                    value: 0
-                }
-                PauseAnimation {
-                    duration: populateTransition.ViewTransition.index * 100;
-                }
-                NumberAnimation {
-                    properties: "opacity"
-                    from: 0
-                    to: 1
-                    duration: 300
-                }
-            }
-        }
+        property int buttonWidth: 163
+        property int buttonHeight: 65
 
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 3
-
-
-        property int columns: 3
-        property int rows: 3
-
-        cellWidth: width / columns
-        cellHeight: height / rows
-
-        anchors.centerIn: parent
+        width: 3*buttonWidth
+        height: 2*buttonHeight
+        columns: 3
+        rows: 2
 
         delegate: Item {
-            width: navigationMenuGridView.cellWidth
-            height: navigationMenuGridView.cellHeight
+            id: cell
+            width: navMenuGridView.cellWidth
+            height: navMenuGridView.cellHeight
 
             LongOvalBtn {
                 text: title
@@ -52,20 +30,21 @@ Item{
             }
         }
 
-   }
+    }
+
     Text{
         id: closeText
         anchors.horizontalCenter: parent.horizontalCenter
         y:250
         text: "CLOSE"
         color: "#1d81d5"
-        font.pixelSize: 25
+        font.pixelSize: 20
         MouseArea {
           anchors.fill: parent
           onClicked: {
               menuContainer.go("NavigationNoRouteGridView.qml")
             }
         }
-    }
 
+    }
 }
