@@ -9,6 +9,25 @@ GridView
 
     model: MusicSourceModel {}
 
+    populate: Transition {
+        id: populateTransition;
+        SequentialAnimation {
+            PropertyAction  {
+                property: "opacity";
+                value: 0
+            }
+            PauseAnimation {
+                duration: populateTransition.ViewTransition.index * 100;
+            }
+            NumberAnimation {
+                properties: "opacity"
+                from: 0
+                to: 1
+                duration: 300
+            }
+        }
+    }
+
     delegate: Item {
         width: musicSourceGridView.cellWidth
         height: musicSourceGridView.cellHeight

@@ -1,6 +1,6 @@
 import QtQuick 2.0
 
-GridView{
+Item{
         id: navigationNoRouteGridView
 
     anchors.fill: parent
@@ -94,12 +94,29 @@ GridView{
 
     }
 
-    Image{
-        x:0
-        y:320
-        id: mute
-        source: "res/buttons/mute.png"
+    Item{
+        id: muteBtn
+        //state: "off"
+        x:32.5
+        y:352.5
 
+        Image{
+           anchors.centerIn: parent
+
+           id: muteBtnImg
+           source: "res/nav/mute_off.png"
+                MouseArea{
+                  anchors.fill: parent
+                  onClicked: if (muteBtnImg.state === "off") {
+                                   muteBtnImg.state = "on"
+                                   muteBtnImg.source = "res/nav/mute_off.png"
+                             }
+                             else {
+                                 muteBtnImg.source = "res/nav/mute_on.png"
+                                 muteBtnImg.state = "off"
+                             }
+                }
+         }
     }
 
     Image{
