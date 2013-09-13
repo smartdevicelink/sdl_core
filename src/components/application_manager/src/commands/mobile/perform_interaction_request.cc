@@ -47,9 +47,9 @@ namespace application_manager {
 namespace commands {
 
 PerformInteractionRequest::PerformInteractionRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message),
+  const MessageSharedPtr& message)
+: CommandRequestImpl(message),
   EventObserver("PerformInteractionRequest") {
-
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
 }
 
@@ -114,6 +114,10 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
+      if (!CheckVrHelpItemPositions(app)) {
+        return;
+      }
+
       app->set_perform_interaction_active(correlation_id);
       SendVRAddCommandRequest(app);
       SendUIPerformInteractionRequest(app);
@@ -132,6 +136,10 @@ void PerformInteractionRequest::Run() {
     case InteractionMode::VR_ONLY: {
       LOG4CXX_INFO(logger_, "Interaction Mode: VR_ONLY");
       if (!CheckChoiceSetVRSynonyms(app)) {
+        return;
+      }
+
+      if (!CheckVrHelpItemPositions(app)) {
         return;
       }
 
@@ -157,7 +165,11 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VR_OnCommand: {
-      LOG4CXX_INFO(logger_, "\n\n\nPerformInteractionRequest::on_event VR_OnCommand\n\n\n");
+      LOG4CXX_INFO(logger_,"Received VR_OnCommand event");
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
       break;
     }
   }
@@ -449,6 +461,31 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
     }
   }
 
+  return true;
+}
+
+bool PerformInteractionRequest::CheckVrHelpItemPositions(
+    Application* const app) {
+
+  if (!(*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    LOG4CXX_INFO(logger_, ""
+        "PerformInteractionRequest::CheckVrHelpItemPositions vr_help omitted");
+    return true;
+  }
+
+  smart_objects::SmartObject& vr_help =
+      (*message_)[strings::msg_params][strings::vr_help];
+
+  int position = 1;
+  for (size_t i = 0; i < vr_help.length(); ++i) {
+    if (position != vr_help[i][strings::position].asInt()) {
+      LOG4CXX_ERROR(logger_, "Non-sequential vrHelp item position");
+      SendResponse(false, mobile_apis::Result::REJECTED,
+                   "Non-sequential vrHelp item position");
+      return false;
+    }
+    ++position;
+  }
   return true;
 }
 

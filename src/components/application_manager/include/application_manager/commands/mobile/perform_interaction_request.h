@@ -143,6 +143,17 @@ class PerformInteractionRequest : public CommandRequestImpl,
    */
   bool CheckChoiceSetVRSynonyms(Application* const app);
 
+  /*
+   * @brief Checks if request with non-sequential positions of vrHelpItems
+   * SDLAQ-CRS-466
+   *
+   * @param app_id Application ID
+   *
+   * @return TRUE if vrHelpItems positions are sequential,
+   * otherwise FALSE
+   */
+  bool CheckVrHelpItemPositions(Application* const app);
+
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 

@@ -38,7 +38,7 @@ namespace event_engine {
 
 Event::Event(const EventID& id)
 : id_(id)
-, response_so() {
+, response_so_() {
 }
 
 Event::~Event() {
@@ -49,7 +49,7 @@ void Event::raise() {
 }
 
 void Event::set_smart_object(smart_objects::SmartObject& so) {
-  response_so = so;
+  response_so_ = so;
 }
 
 }
