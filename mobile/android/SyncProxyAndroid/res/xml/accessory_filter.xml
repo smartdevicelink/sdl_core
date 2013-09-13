@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+    <!-- The values here must match those in the USBTransport class to work
+    properly -->
     <usb-accessory
-            model="HMI"
             manufacturer="Ford"
+            model="HMI"
             version="1.0"/>
 </resources>

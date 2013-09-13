@@ -65,6 +65,16 @@ public class USBTransport extends SyncTransport {
      */
     private final static String ACCESSORY_MANUFACTURER = "Ford";
     /**
+     * Model name of the accessory we want to connect to. Must be the same as
+     * in accessory_filter.xml to work properly.
+     */
+    private final static String ACCESSORY_MODEL = "HMI";
+    /**
+     * Version of the accessory we want to connect to. Must be the same as in
+     * accessory_filter.xml to work properly.
+     */
+    private final static String ACCESSORY_VERSION = "1.0";
+    /**
      * Prefix string to indicate debug output.
      */
     private static final String DEBUG_PREFIX = "DEBUG: ";
@@ -391,8 +401,7 @@ public class USBTransport extends SyncTransport {
         if (accessories != null) {
             logD("Found total " + accessories.length + " accessories");
             for (UsbAccessory accessory : accessories) {
-                if (ACCESSORY_MANUFACTURER
-                        .equals(accessory.getManufacturer())) {
+                if (isAccessorySupported(accessory)) {
                     connectToAccessory(accessory);
                     break;
                 }
@@ -400,6 +409,21 @@ public class USBTransport extends SyncTransport {
         } else {
             logI("No connected accessories found");
         }
+    }
+
+    /**
+     * Checks if the specified connected USB accessory is what we expect.
+     *
+     * @param accessory Accessory to check
+     * @return true if the accessory is right
+     */
+    private boolean isAccessorySupported(UsbAccessory accessory) {
+        boolean manufacturerMatches =
+                ACCESSORY_MANUFACTURER.equals(accessory.getManufacturer());
+        boolean modelMatches = ACCESSORY_MODEL.equals(accessory.getModel());
+        boolean versionMatches =
+                ACCESSORY_VERSION.equals(accessory.getVersion());
+        return manufacturerMatches && modelMatches && versionMatches;
     }
 
     /**
