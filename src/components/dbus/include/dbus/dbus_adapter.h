@@ -29,8 +29,8 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_ADAPTER_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_ADAPTER_H_
 
 #include <string>
 #include "utils/logger.h"
@@ -43,7 +43,7 @@ struct DBusMessageIter;
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-namespace hmi_message_handler {
+namespace dbus {
 
 /**
  * \brief class for work with DBus
@@ -76,7 +76,7 @@ class DBusAdapter {
    * \brief return schema messages for DBus
    * \return schema
    */
-  const dbus_schema::DBusSchema& get_schema() const;
+  const DBusSchema& get_schema() const;
 
  protected:
   static log4cxx::LoggerPtr logger_;
@@ -145,7 +145,7 @@ class DBusAdapter {
   /**
    * \brief schema messages and arguments for DBus
    */
-  dbus_schema::DBusSchema schema_;
+  DBusSchema schema_;
 
   /**
    * \brief processes call of method and fill obj
@@ -182,7 +182,7 @@ class DBusAdapter {
    * \param args map of arguments
    * \return true if success
    */
-  bool SetArguments(DBusMessage* msg, const dbus_schema::ListArgs& rules,
+  bool SetArguments(DBusMessage* msg, const ListArgs& rules,
                     smart_objects::SmartObject& args);
 
   /**
@@ -245,9 +245,9 @@ class DBusAdapter {
    * @param msg DBus message
    * @return true if success
    */
-  bool GetArgs(DBusMessage* msg);
+  bool GetArguments(DBusMessage* msg);
 };
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_ADAPTER_H_

@@ -32,7 +32,7 @@
 
 #include "dbus/dbus_message_controller.h"
 
-namespace hmi_message_handler {
+namespace dbus {
 
 DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
                                              const std::string& sdlObjectPath,
@@ -88,4 +88,4 @@ int DBusMessageController::getNextMessageId()
    }
 }
 
-}  // namespace hmi_message_handler
+}  // namespace dbus

@@ -47,7 +47,7 @@ namespace hmi_message_handler {
  */
 class DBusMessageAdapter
     : public HMIMessageAdapter,
-      public DBusMessageController {
+      public dbus::DBusMessageController {
  public:
   explicit DBusMessageAdapter(HMIMessageHandler* handler);
   ~DBusMessageAdapter();
