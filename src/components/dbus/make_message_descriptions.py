@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from xml.etree import ElementTree
+from copy import copy
 from ford_xml_parser import FordXmlParser
 
 
@@ -10,9 +11,11 @@ namespace = namespace_name + '::'
 class Impl(FordXmlParser):
     def write_param_definition(self, param_var_name, param, out, interface):
         if param.array:
-            param.array = False
-            self.write_param_definition(param_var_name + '_array', param, out, interface)
-            param.array = True
+            tmp_param = copy(param)
+            tmp_param.array = False
+            tmp_param.mandatory = True
+            dbus_sig = self.convert_to_dbus_type(tmp_param, interface)
+            self.write_param_definition(param_var_name + '_array', tmp_param, out, interface)
 
         if param.type in ['Integer', 'String', 'Boolean', 'Float']:
             param_type = param.type
@@ -25,12 +28,12 @@ class Impl(FordXmlParser):
 
         if param.array: out.write('const ' + namespace + 'ArrayDescription ')
         elif param_type in self.structs: out.write('const ' + namespace + 'StructDescription ')
-        elif param_type in self.enums: out.write('const ' + namespace + 'EnumDescription ')
+        #elif param_type in self.enums: out.write('const ' + namespace + 'Enum ')
         else: out.write('const ' + namespace + 'ParameterDescription ')
 
         out.write(param_var_name + " = {\n")
 
-        if param_type in self.structs or param_type in self.enums or param.array:
+        if param_type in self.structs or param.array:
             out.write("  {\n")
             shift = ' ' * 4
         else:
@@ -52,15 +55,15 @@ class Impl(FordXmlParser):
         else:
             out.write(shift + "false\n")
 
-        if param_type in self.structs or param_type in self.enums or param.array:
+        if param_type in self.structs or param.array:
             out.write("  },\n")
             if param.array:
                 out.write("  (const " + namespace + "ParameterDescription*)&" + param_var_name + "_array,\n")
-                out.write("  \"dbus_signature\"\n")
+                out.write("  \"" + dbus_sig + "\"\n")
             elif param_type in self.structs:
                 out.write("  Structs::" + param_type[0] + "__" + param_type[1] + "__parameters\n")
-            elif param_type in self.enums:
-                out.write("  Enums::" + param_type[0] + "__" + param_type[1] + "__entries\n")
+            #elif param_type in self.enums:
+            #    out.write("  Enums::" + param_type[0] + "__" + param_type[1] + "__entries\n")
 
         out.write("};\n")
 
@@ -157,9 +160,9 @@ class Impl(FordXmlParser):
 
     def make_message_descriptions(self, out):
         self.write_struct_params_declarations(out)
-        self.write_enum_entries_declarations(out)
+        #self.write_enum_entries_declarations(out)
         self.write_struct_params_definitions(out)
-        self.write_enum_entries_definitions(out)
+        #self.write_enum_entries_definitions(out)
         self.write_message_definitions(out)
 
 
