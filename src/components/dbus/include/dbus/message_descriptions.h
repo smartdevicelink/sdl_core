@@ -27,6 +27,7 @@ struct StructDescription {
   const ParameterDescription** parameters;
 };
 
+/*
 struct EnumDescription {
   const ParameterDescription base;
   struct Entry {
@@ -35,6 +36,7 @@ struct EnumDescription {
   };
   const Entry** entries;
 };
+*/
 
 struct MessageDescription {
   const char* interface;

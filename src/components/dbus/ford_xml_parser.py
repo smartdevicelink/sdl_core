@@ -70,7 +70,7 @@ class FordXmlParser:
             else:
                 param_type = (interface, param_type[0])
 
-            if param_type in self.enums: restype = 'u' # D-Bus 32-bit unsigned int
+            if param_type in self.enums: restype = 'i' # D-Bus 32-bit signed int
             elif param_type in self.structs: restype = self.convert_struct_to_dbus(param_type)
             else: raise RuntimeError('Unknown type: ' + param.type)
 
