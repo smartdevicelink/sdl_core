@@ -8,13 +8,18 @@
 namespace ford_message_descriptions
 {
 
-enum ParameterType {Integer, Boolean, Float, String, Struct, Enum};
+enum ParameterType {Integer, Boolean, Float, String, Struct, Enum, Array};
 
 struct ParameterDescription {
   const char* name;
   const ParameterType type;
-  const bool is_array;
   const bool obligatory;
+};
+
+struct ArrayDescription {
+  const ParameterDescription base;
+  const ParameterDescription* element;
+  const char* element_dbus_signature;
 };
 
 struct StructDescription {
