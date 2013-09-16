@@ -64,6 +64,9 @@ void ShowRequest::Run() {
     return;
   }
 
+  MessageHelper::AddSoftButtonsDefaultSystemAction(
+      (*message_)[strings::msg_params]);
+
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 

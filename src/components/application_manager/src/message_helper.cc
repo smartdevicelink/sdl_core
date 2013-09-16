@@ -38,6 +38,7 @@
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -1021,6 +1022,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   }  // all other types shoudn't be processed
 
   return mobile_apis::Result::SUCCESS;
+}
+
+void MessageHelper::AddSoftButtonsDefaultSystemAction(
+    smart_objects::SmartObject& msg_params) {
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    smart_objects::SmartObject& soft_buttons =
+        msg_params[strings::soft_buttons];
+
+    for (int i = 0; i < soft_buttons.length(); i++) {
+        if (!soft_buttons[i].keyExists(strings::system_action)) {
+          soft_buttons[i][strings::system_action] =
+              mobile_apis::SystemAction::DEFAULT_ACTION;
+        }
+    }
+  }
 }
 
 // TODO(VS): change printf to logger

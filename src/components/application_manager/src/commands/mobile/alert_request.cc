@@ -70,6 +70,9 @@ void AlertRequest::Run() {
     return;
   }
 
+  MessageHelper::AddSoftButtonsDefaultSystemAction(
+      (*message_)[strings::msg_params]);
+
   // check if mandatory params(alertText1 and TTSChunk) specified
   if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1))
       && (!(*message_)[strings::msg_params].keyExists(strings::alert_text2))

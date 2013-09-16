@@ -230,6 +230,10 @@ class MessageHelper {
   static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, const Application* app);
 
+  static void AddSoftButtonsDefaultSystemAction(
+      smart_objects::SmartObject& msg_params);
+
+
 
   /*
    * @brief Verify application and tts name in RefisterAppInterface request msg_params

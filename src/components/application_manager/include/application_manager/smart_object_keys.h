@@ -193,6 +193,7 @@ const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
 const char slider_position[] = "sliderPosition";
+const char system_action[] = "systemAction";
 }  // namespace strings
 
 namespace mobile_notification {
