@@ -112,6 +112,12 @@ void AddCommandRequest::Run() {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
     }
+
+    if (!CheckVRCommandsNames()) {
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+
     ++chaining_counter;
   }
 
@@ -203,6 +209,22 @@ bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
       }
     }
   }
+  return true;
+}
+
+bool AddCommandRequest::CheckVRCommandsNames() {
+  for (size_t i = 0;
+       i < (*message_)[strings::msg_params][strings::vr_commands].length();
+       ++i) {
+    const std::string& str =
+        (*message_)[strings::msg_params][strings::vr_commands][i].asString();
+
+    if (std::string::npos == str.find_first_not_of(' ')) {
+      LOG4CXX_INFO(logger_, "Invalid command name.");
+      return false;
+    }
+  }
+
   return true;
 }
 
