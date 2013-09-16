@@ -73,6 +73,7 @@ void DBusMessageAdapter::sendMessageToHMI(
     utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
+  // TODO(KKolodiy): get smart object from message
   smart_objects::SmartObject smart;
 
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {

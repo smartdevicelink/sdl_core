@@ -139,7 +139,7 @@ class DBusAdapter {
   std::string hmi_object_path_;
   DBusConnection* conn_;
 
-  void Reply(DBusMessage* msg, DBusConnection* conn, std::string& message);
+//  void Reply(DBusMessage* msg, DBusConnection* conn, std::string& message);
 
  private:
   /**
@@ -192,41 +192,53 @@ class DBusAdapter {
    * \param param value of argument
    * \return true if success
    */
-  inline bool SetOneArgument(DBusMessage* msg,
+  inline bool SetOneArgument(DBusMessageIter* iter,
                        const ford_message_descriptions::ParameterDescription* rules,
                        smart_objects::SmartObject& param);
 
   /**
-   * Sets value for argument by recursive
+   * Sets value for argument
    * @param msg DBus message
    * @param rules description for argument
    * @param param value of argument
    * @return true if success
    */
-  bool SetValue(DBusMessage* msg,
+  bool SetValue(DBusMessageIter* iter,
                 const ford_message_descriptions::ParameterDescription* rules,
                 smart_objects::SmartObject& param);
 
   /**
    * Sets value for every element of argument
-   * @param msg DBus message
+   * @param iter DBus message iter
    * @param rules description for argument
    * @param param array values of argument
    * @return true if success
    */
-  bool SetArrayValue(DBusMessage* msg,
-                     const ford_message_descriptions::ParameterDescription* rules,
+  bool SetArrayValue(DBusMessageIter* iter,
+                     const ford_message_descriptions::ArrayDescription* rules,
                      smart_objects::SmartObject& param);
 
   /**
-   * Sets undefined value for argument.
-   * Undefined value is struct bool, value
+   * Sets struct value for argument
+   * @param iter DBus message iter
+   * @param rules description for argument
+   * @param param structure
+   * @return true if success
+   */
+  bool SetStructValue(DBusMessageIter* iter,
+                      const ford_message_descriptions::StructDescription* rules,
+                      smart_objects::SmartObject& param);
+
+  /**
+   * Sets optional value for argument.
+   * Optional param is struct bool, value
    * @param msg DBus message
    * @param rules description for argument
    * @return true if success
    */
-  bool SetUndefinedValue(DBusMessage* msg,
-                        const ford_message_descriptions::ParameterDescription* rules);
+  bool SetOptionalValue(DBusMessageIter* iter,
+                        const ford_message_descriptions::ParameterDescription* rules,
+                        smart_objects::SmartObject &param);
 
   /**
    * \brief gets arguments from message
@@ -234,14 +246,6 @@ class DBusAdapter {
    * @return true if success
    */
   bool GetArgs(DBusMessage* msg);
-
-//  bool SetBasicArg(DBusMessageIter* args,
-//                   dbus_schema::ParameterDescription* rule,
-//                   smart_objects::SmartObject& obj);
-//
-//  bool SetArrayArg(DBusMessageIter* args,
-//                   dbus_schema::ParameterDescription* rule,
-//                   smart_objects::SmartObject& obj);
 };
 
 }  // namespace hmi_message_handler
