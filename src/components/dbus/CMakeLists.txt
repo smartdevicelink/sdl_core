@@ -20,8 +20,8 @@ add_library("DBus" ${SOURCES})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  COMMAND python make_message_descriptions.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
+  COMMAND python codegen/make_message_descriptions.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml codegen/make_message_descriptions.py
 )
 
 target_link_libraries ("DBus")

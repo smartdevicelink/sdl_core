@@ -77,3 +77,4 @@ class FordXmlParser:
         if param.array: restype = 'a' + restype
         if not param.mandatory: restype = '(b' + restype + ')'
         return restype
+
