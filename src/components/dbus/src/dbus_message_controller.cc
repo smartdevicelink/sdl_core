@@ -30,10 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "hmi_message_handler/dbus_message_controller.h"
-#include "CMessageBroker.hpp"
-
-using NsMessageBroker::ErrorCode;
+#include "dbus/dbus_message_controller.h"
 
 namespace hmi_message_handler {
 

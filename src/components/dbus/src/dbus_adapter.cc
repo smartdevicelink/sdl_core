@@ -30,12 +30,14 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "hmi_message_handler/dbus_adapter.h"
+#include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
+
+using ford_message_descriptions::ParameterDescription;
 
 namespace hmi_message_handler {
 
-log4cxx::LoggerPtr DBusAdapter::logger_   =
+log4cxx::LoggerPtr DBusAdapter::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
@@ -129,7 +131,7 @@ void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
 
   reply = dbus_message_new_method_return(msg);
 
-  SetArgs(reply, schema_.getListArgs(m_id, hmi_apis::messageType::response), obj);
+  SetArguments(reply, schema_.getListArgs(m_id, hmi_apis::messageType::response), obj);
 
   if (!dbus_connection_send(conn_, reply, &serial)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed return method (Can't send message)");
@@ -202,7 +204,7 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
     return;
   }
 
-  SetArgs(msg, schema_.getListArgs(m_id, hmi_apis::messageType::request), obj);
+  SetArguments(msg, schema_.getListArgs(m_id, hmi_apis::messageType::request), obj);
 
   if (!dbus_connection_send_with_reply(conn_, msg, &pending, -1)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Can't send message)");
@@ -243,7 +245,7 @@ void DBusAdapter::Signal(uint id, const std::string& interface,
     return;
   }
 
-  SetArgs(msg, schema_.getListArgs(m_id, hmi_apis::messageType::notification), obj);
+  SetArguments(msg, schema_.getListArgs(m_id, hmi_apis::messageType::notification), obj);
 
   if (!dbus_connection_send(conn_, msg, &serial)) {
     LOG4CXX_WARN(logger_, "DBus: Failed emit signal (Out Of Memory)");
@@ -306,14 +308,69 @@ void DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
 //   }
 }
 
-bool DBusAdapter::SetArgs(DBusMessage* msg,
-                          const dbus_schema::ListArgs& rules,
-                          smart_objects::SmartObject& obj) {
-  DBusMessageIter args;
-
-  dbus_message_iter_init_append(msg, &args);
-
+bool DBusAdapter::SetArguments(DBusMessage* msg,
+                               const dbus_schema::ListArgs& rules,
+                               smart_objects::SmartObject& args) {
+  DBusMessageIter iter;
+  dbus_message_iter_init_append(msg, &iter);
+  size_t size = rules.size();
+  for (size_t i = 0; i < size; ++i) {
+    smart_objects::SmartObject& param = args[rules[i]->name];
+    if (!SetOneArgument(msg, rules[i], param)) {
+      return false;
+    }
+  }
   return true;
+}
+
+bool DBusAdapter::SetOneArgument(DBusMessage* msg,
+                                 const ParameterDescription* rules,
+                                 smart_objects::SmartObject& param) {
+  if (param.isValid()) {
+    if (rules->is_array) {
+      return SetArrayValue(msg, rules, param);
+    } else {
+      return SetValue(msg, rules, param);
+    }
+  } else if (rules->obligatory) {
+    LOG4CXX_WARN(logger_, "DBus: Argument '" << rules->name << "' is obligatory!");
+    return false;
+  } else {
+    return SetUndefinedValue(msg, rules);
+  }
+}
+
+bool DBusAdapter::SetValue(
+    DBusMessage* msg,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject& param) {
+  switch (rules->type) {
+    case ford_message_descriptions::ParameterType::Struct:
+//      SetStruct(msg, rules, param);
+      break;
+    case ford_message_descriptions::ParameterType::Enum:
+      break;
+//    case ford_message_descriptions::ParameterType::
+  }
+  return false;
+}
+
+bool DBusAdapter::SetUndefinedValue(
+    DBusMessage* msg,
+    const ford_message_descriptions::ParameterDescription* rules) {
+  // TODO(KKolodiy) implement this
+  return false;
+}
+
+bool DBusAdapter::SetArrayValue(
+    DBusMessage* msg,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject& param) {
+//  if (param.getType() != smart_objects::SmartArray) {
+//
+//    return false;
+//  }
+  return false;
 }
 
 bool DBusAdapter::GetArgs(DBusMessage* msg) {

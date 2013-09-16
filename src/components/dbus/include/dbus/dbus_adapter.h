@@ -35,7 +35,7 @@
 #include <string>
 #include "utils/logger.h"
 #include "smart_objects/smart_object.h"
-#include "dbus_schema/schema.h"
+#include "dbus/schema.h"
 
 struct DBusConnection;
 struct DBusMessage;
@@ -179,11 +179,54 @@ class DBusAdapter {
    * \brief sets arguments to message
    * \param msg DBus message
    * \param rules list of rules for arguments
-   * \param obj map of arguments
+   * \param args map of arguments
    * \return true if success
    */
-  bool SetArgs(DBusMessage* msg, const dbus_schema::ListArgs& rules,
-               smart_objects::SmartObject& obj);
+  bool SetArguments(DBusMessage* msg, const dbus_schema::ListArgs& rules,
+                    smart_objects::SmartObject& args);
+
+  /**
+   * \brief Sets one argument to message
+   * \param msg DBus message
+   * \param rules description for argument
+   * \param param value of argument
+   * \return true if success
+   */
+  inline bool SetOneArgument(DBusMessage* msg,
+                       const ford_message_descriptions::ParameterDescription* rules,
+                       smart_objects::SmartObject& param);
+
+  /**
+   * Sets value for argument by recursive
+   * @param msg DBus message
+   * @param rules description for argument
+   * @param param value of argument
+   * @return true if success
+   */
+  bool SetValue(DBusMessage* msg,
+                const ford_message_descriptions::ParameterDescription* rules,
+                smart_objects::SmartObject& param);
+
+  /**
+   * Sets value for every element of argument
+   * @param msg DBus message
+   * @param rules description for argument
+   * @param param array values of argument
+   * @return true if success
+   */
+  bool SetArrayValue(DBusMessage* msg,
+                     const ford_message_descriptions::ParameterDescription* rules,
+                     smart_objects::SmartObject& param);
+
+  /**
+   * Sets undefined value for argument.
+   * Undefined value is struct bool, value
+   * @param msg DBus message
+   * @param rules description for argument
+   * @return true if success
+   */
+  bool SetUndefinedValue(DBusMessage* msg,
+                        const ford_message_descriptions::ParameterDescription* rules);
 
   /**
    * \brief gets arguments from message
