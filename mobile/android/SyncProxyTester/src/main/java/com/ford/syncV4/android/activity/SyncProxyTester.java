@@ -3788,19 +3788,24 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
                     } catch (SyncException e) {
                         _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), addToUI);
-
-                        staticFileReader.cancel(true);
+                        cancelStreaming();
                     }
                 } else {
                     _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", addToUI);
-                    staticFileReader.cancel(true);
+                    cancelStreaming();
                 }
             } else {
                 _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", addToUI);
-                staticFileReader.cancel(true);
+                cancelStreaming();
             }
         } else {
             _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", addToUI);
+            cancelStreaming();
+        }
+    }
+
+    private void cancelStreaming() {
+        if (staticFileReader != null){
             staticFileReader.cancel(true);
         }
     }
