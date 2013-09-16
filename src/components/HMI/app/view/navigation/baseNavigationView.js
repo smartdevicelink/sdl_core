@@ -44,11 +44,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         'mainField3',
         'mainField4',
         'mainField5',
-        'mainField6'/*,
-        'softButton1',
-        'softButton2',
-        'softButton3',
-        'softButton4'  */
+        'mainField6'
     ],
 
     mainField1: null,
