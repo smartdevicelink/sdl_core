@@ -81,7 +81,7 @@
     <element name="PRESET_8"/>
     <element name="PRESET_9"/>
     <element name="CUSTOM_BUTTON"/>
-	<element name="SEARCH" platform="MobileNav" />
+	<element name="SEARCH"/>
 </enum>
 
 <enum name="ButtonEventMode">
@@ -213,14 +213,12 @@
 
 <enum name="LayoutMode">
   <description>For touchscreen interactions, the mode of how the choices are presented.</description>
-  <element name="ICON" />
-  <description>
-   	This mode causes the interaction to display the previous set of choices as icons.
-  </description>
-  <element name="LIST" />
-  <description>
-   	This mode causes the interaction to display the previous set of choices as a list.
-  </description>
+  <element name="ICON">
+    <description>This mode causes the interaction to display the previous set of choices as icons.</description>
+  </element>
+  <element name="LIST">
+    <description>This mode causes the interaction to display the previous set of choices as a list.</description>
+  </element>
 </enum>
 
 <enum name="DeactivateReason">
@@ -409,9 +407,7 @@
   <element name="sliderFooter">
     <description> Footer text for slider</description>
   </element>
-  <element name="timeToDestination">
-    <description> ?????? </description>
-  </element>
+  <element name="timeToDestination"/>
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
@@ -799,6 +795,65 @@
   </element>
 </enum>
 
+<enum name="KeyboardLayout">
+  <description>Enumeration listing possible keyboard layouts.</description>
+  <element name="QWERTY" />
+  <element name="QWERTZ" />
+  <element name="AZERTY" />    
+</enum>
+
+<enum name="KeyboardEvent">
+  <description>Enumeration listing possible keyboard events.</description>
+  <element name="KEYPRESS" />
+  <element name="ENTRY_SUBMITTED" />
+  <element name="ENTRY_CANCELLED" />
+  <element name="ENTRY_ABORTED" />    
+</enum>
+
+<enum name="KeypressMode">
+  <description>Enumeration listing possible keyboard events.</description>
+  <element name="SINGLE_KEYPRESS">
+    <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
+  </element>
+  <element name="QUEUE_KEYPRESSES">
+    <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>    
+  </element>
+  <element name="RESEND_CURRENT_ENTRY">
+    <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
+  </element>
+</enum>
+
+<enum name="PredefinedLayout">
+  <description>Predefined screen layout.</description>
+  <element name="DEFAULT" rootscreen="true">
+  	<description>Default media / non-media screen. Can be set as a root screen.</description>
+  </element>
+  <element name="MEDIA" rootscreen="true">
+   	<description>Default Media screen. Can be set as a root screen.</description>
+  </element>
+  <element name="NON-MEDIA" rootscreen="true">
+   	<description>Default Non-media screen. Can be set as a root screen.</description>
+  </element>
+  <element name="ONSCREEN_PRESETS" rootscreen="true">
+   	<description>Custom root media screen containing app-defined onscreen presets. Can be set as a root screen.</description>
+  </element>
+  <element name="NAV_FULLSCREEN_MAP" rootscreen="true">
+  	<description>Custom root template screen containing full screen map with navigation controls. Can be set as a root screen.</description>
+  </element>
+</enum>
+
+<enum name="AmbientLightStatus">
+  <description>Reflects the status of the ambient light sensor.</description>
+  <element name="NIGHT" />
+  <element name="TWILIGHT_1" />
+  <element name="TWILIGHT_2" />
+  <element name="TWILIGHT_3" />
+  <element name="TWILIGHT_4" />
+  <element name="DAY" />
+  <element name="UNKNOWN" />
+  <element name="INVALID" />
+</enum>
+
 <!-- End of IVI part-->
 
 <struct name="ButtonCapabilities">
@@ -920,10 +975,10 @@
   <param name="image" type="Common.Image" mandatory="false">
 	<description> The image for representing the choice </description>
   </param>
-  <param name="secondaryText" maxlength="500" type="String" mandatory="false" platform="MobileNav" scope="partner">
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
     <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
   </param>
-  <param name="tertiaryText" maxlength="500" type="String" mandatory="false" platform="MobileNav" scope="partner">
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
     <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
   </param>
   <param name="secondaryImage" type="Image" mandatory="false">
@@ -961,7 +1016,7 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
-  <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true">
+  <param name="imageFields" type="ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
     <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
@@ -970,7 +1025,7 @@
   <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="true">
     <description>List of supported image types (static/dynamic).</description>
   </param>
-  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" platform="MobileNav" scope="partner">
+  <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true" scope="partner">
     <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
   </param>
   <param name="screenParams" type="Common.ScreenParams" mandatory="false">
@@ -999,10 +1054,10 @@
 </struct>
 
 <struct name="ImageField">
-  <param name="name" type="ImageFieldName">
+  <param name="name" type="ImageFieldName" mandatory="true">
     <description>The name that identifies the field. See ImageFieldName.</description>
   </param>
-  <param name="imageTypeSupported" type="FileType" maxlength = "100" array="true">
+  <param name="imageTypeSupported" type="FileType" maxlength="100" array="true" mandatory="false" minsize="1">
     <description>The image types that are supported in this field. See FileType.</description>
   </param>
   <param name="imageResolution" type="ImageResolution">
@@ -1045,7 +1100,7 @@
   </param>
 </struct>
 
-<struct name="ScreenParams" platform="MobileNav" scope="partner">
+<struct name="ScreenParams">
   <param name="resolution" type="ImageResolution" mandatory="true">
     <description>The resolution of the prescribed screen area.</description>
   </param>    
@@ -1089,53 +1144,6 @@
     <description>e.g. SE</description>
   </param>
 </struct>
-
-<enum name="KeyboardLayout" platform="MobileNav">
-  <description>Enumeration listing possible keyboard layouts.</description>
-  <element name="QWERTY" />
-  <element name="QWERTZ" />
-  <element name="AZERTY" />    
-</enum>
-
-<enum name="KeyboardEvent" platform="MobileNav">
-  <description>Enumeration listing possible keyboard events.</description>
-  <element name="KEYPRESS" />
-  <element name="ENTRY_SUBMITTED" />
-  <element name="ENTRY_CANCELLED" />
-  <element name="ENTRY_ABORTED" />    
-</enum>
-
-<enum name="KeypressMode" platform="MobileNav">
-  <description>Enumeration listing possible keyboard events.</description>
-  <element name="SINGLE_KEYPRESS">
-    <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
-  </element>
-  <element name="QUEUE_KEYPRESSES">
-    <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>    
-  </element>
-  <element name="RESEND_CURRENT_ENTRY">
-    <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
-  </element>
-</enum>
-
-<enum name="PredefinedLayout" platform="documentation">
-  <description>Predefined screen layout.</description>
-  <element name="DEFAULT" rootscreen="true">
-  	<description>Default media / non-media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="MEDIA" rootscreen="true">
-   	<description>Default Media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="NON-MEDIA" rootscreen="true">
-   	<description>Default Non-media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="ONSCREEN_PRESETS" rootscreen="true">
-   	<description>Custom root media screen containing app-defined onscreen presets. Can be set as a root screen.</description>
-  </element>
-  <element name="NAV_FULLSCREEN_MAP" rootscreen="true">
-  	<description>Custom root template screen containing full screen map with navigation controls. Can be set as a root screen.</description>
-  </element>
-</enum>
 
 <struct name="DeviceInfo">
   <param name="name" type="String" mandatory="true">
@@ -1232,7 +1240,7 @@
   <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.</description>
   </param>
-  <param name="ambientLightSensorStatus" type="AmbientLightStatus">
+  <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="true">
     <description>Status of the ambient light sensor.</description>
   </param>
 </struct>
@@ -1261,18 +1269,6 @@
     <description>The status of the inner right rear.</description>
 </param>
 </struct>
-
-<enum name="AmbientLightStatus">
-  <description>Reflects the status of the ambient light sensor.</description>
-  <element name="NIGHT" />
-  <element name="TWILIGHT_1" />
-  <element name="TWILIGHT_2" />
-  <element name="TWILIGHT_3" />
-  <element name="TWILIGHT_4" />
-  <element name="DAY" />
-  <element name="UNKNOWN" />
-  <element name="INVALID" />
-</enum>
 
 <struct name="BeltStatus">
   <param name="driverBeltDeployed" type="Common.VehicleDataEventStatus" mandatory="false">
@@ -1715,7 +1711,7 @@
       <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
         <description>App defined SoftButtons</description>
       </param>
-	  <param name="progressIndicator" type="Boolean" mandatory="false" platform="MobileNav">
+	  <param name="progressIndicator" type="Boolean" mandatory="false">
         <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1837,7 +1833,7 @@
       <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
         <description>Timeout in milliseconds.</description>
       </param>
-	  <param name="choiceLayout" type="LayoutMode" mandatory="false" platform="MobileNav">
+	  <param name="choiceLayout" type="LayoutMode" mandatory="false">
         <description>See LayoutMode.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1874,10 +1870,10 @@
       <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
 	  </param>
-	  <param name="menuTitle" maxlength="500" type="String" mandatory="false" platform="MobileNav">
+	  <param name="menuTitle" maxlength="500" type="String" mandatory="false">
         <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
       </param>
-      <param name="menuIcon" type="Image" platform="MobileNav">
+      <param name="menuIcon" type="Image">
         <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1976,45 +1972,12 @@
     </function>
     <function name="SetAppIcon" messagetype="response">
     </function>
-	<function name="ShowCustomForm" messagetype="request" platform="MobileNav">
-      <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
-      <param name="customFormID" type="String" maxlength="500" mandatory="true">
-        <description>
-			Predefined or dynamically created screen layout.
-			Currently only predefined forms are defined.
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen      		
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
-				"NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.      		
-				"NAV_POI_MENU" - Custom template containing app-defined POI options.
-				"NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
-				"NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).      		      		
-        </description>
-      </param>
-      <param name="parentFormID" type="String" maxlength="500" defvalue="DEFAULT" mandatory="false">
-        <description>
-			Parent screen of predefined form to display.
-			Currently only predefined forms are defined.
-			If not provided, then set to "DEFAULT".
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen      	
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.      		
-        </description>
-      </param>
-    </function>
-    <function name="ShowCustomForm" messagetype="response" platform="MobileNav" >
-      <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-        <description>Provides additional human readable info regarding the result.</description>
-      </param>
-    </function>
-    <function name="ShowKeyboard" messagetype="request" platform="MobileNav">
+    <function name="ShowKeyboard" messagetype="request">
       <description>Configures and populates on-screen keyboard.</description>
       <param name="language" type="Language" mandatory="true">
         <description>The keyboard language.</description>
       </param> 
-      <param name="keyboardLayout" type="KeyboardLayout" mandatory="true" >
+      <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true" >
         <description>Desired keyboard layout.</description>
       </param>     
       <param name="sendDynamicEntry" type="Boolean" mandatory="false">
@@ -2031,15 +1994,15 @@
         <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
       </param>   
     </function>
-    <function name="ShowKeyboard" messagetype="response" platform="MobileNav">
-      <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+    <function name="ShowKeyboard" messagetype="response">
+      <param name="info" type="String" maxlength="1000" mandatory="false">
         <description>Provides additional human readable info regarding the result.</description>
       </param>    
     </function>
-	<function name="OnKeyboardInput" messagetype="notification" platform="MobileNav">
+	<function name="OnKeyboardInput" messagetype="notification">
       <description>On-screen keyboard event.</description>
       <description>Can be full string or individual keypresses depending on keyboard mode.</description>
-      <param name="event" type="KeyboardEvent" mandatory="true">
+      <param name="event" type="Common.KeyboardEvent" mandatory="true">
         <description>On-screen keyboard input data.</description>
       </param>    
       <param name="data" type="String" maxlength="500" mandatory="false">
@@ -2049,15 +2012,15 @@
         <description>For entry cancelled and entry aborted events, this data param will be omitted.</description>
       </param>
     </function>
-    <function name="OnTouchEvent" messagetype="notification" platform="MobileNav">
+    <function name="OnTouchEvent" messagetype="notification">
       <description>Notifies about touch events on the screen's prescribed area</description>
-	  <param name="eventType" type="TouchEvent" mandatory="true">
+	  <param name="eventType" type="Common.TouchEvent" mandatory="true">
 		<description>Type of event - start, move, stop, etc.</description>
 	  </param>
-	  <param name="touchLists" type="TouchLists" mandatory="false">
+	  <param name="touchLists" type="Common.TouchLists" mandatory="false">
 		<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
 	  </param>
-	  <param name="info" type="TouchEventInfo" mandatory="true">
+	  <param name="info" type="Common.TouchEventInfo" mandatory="true">
  		<description>Coordinate of the touch, radius of touch input and input ID.</description>
       </param>
     </function>	
