@@ -124,17 +124,25 @@ void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
   }
 
   DBusMessage* reply;
-  DBusMessageIter args;
 
   dbus_uint32_t serial = id;
   char* param;
 
   reply = dbus_message_new_method_return(msg);
 
-  SetArguments(reply, schema_.getListArgs(m_id, hmi_apis::messageType::response), obj);
+  const dbus_schema::ListArgs& args = schema_.getListArgs(
+      m_id,
+      hmi_apis::messageType::response);
+  if (!SetArguments(reply, args, obj)) {
+    LOG4CXX_ERROR(logger_, "DBus: Failed return method (Signature is wrong)");
+    dbus_message_unref(msg);
+    return;
+  }
+
 
   if (!dbus_connection_send(conn_, reply, &serial)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed return method (Can't send message)");
+    dbus_message_unref(msg);
     return;
   }
   dbus_connection_flush(conn_);
@@ -162,20 +170,20 @@ void DBusAdapter::Error(uint id, const std::string& name,
   dbus_message_unref(msg);
 }
 
-void DBusAdapter::Reply(DBusMessage* msg, DBusConnection* conn,
-                        std::string& message) {
-  DBusMessageIter args;
-  char* param;
-
-  if (!dbus_message_iter_init(msg, &args)) {
-    LOG4CXX_WARN(logger_, "DBus: Failed call method (Message has no arguments!)");
-  } else if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-    LOG4CXX_WARN(logger_, "DBus: Failed call method (Argument is not string!)");
-  } else {
-    dbus_message_iter_get_basic(&args, &param);
-    message = param;
-  }
-}
+//void DBusAdapter::Reply(DBusMessage* msg, DBusConnection* conn,
+//                        std::string& message) {
+//  DBusMessageIter args;
+//  char* param;
+//
+//  if (!dbus_message_iter_init(msg, &args)) {
+//    LOG4CXX_WARN(logger_, "DBus: Failed call method (Message has no arguments!)");
+//  } else if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
+//    LOG4CXX_WARN(logger_, "DBus: Failed call method (Argument is not string!)");
+//  } else {
+//    dbus_message_iter_get_basic(&args, &param);
+//    message = param;
+//  }
+//}
 
 void DBusAdapter::MethodCall(uint id, const std::string& interface,
                              const std::string& method,
@@ -204,14 +212,23 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
     return;
   }
 
-  SetArguments(msg, schema_.getListArgs(m_id, hmi_apis::messageType::request), obj);
+  const dbus_schema::ListArgs& args = schema_.getListArgs(
+      m_id,
+      hmi_apis::messageType::request);
+  if (!SetArguments(msg, args, obj)) {
+    LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
+    dbus_message_unref(msg);
+    return;
+  }
 
   if (!dbus_connection_send_with_reply(conn_, msg, &pending, -1)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Can't send message)");
+    dbus_message_unref(msg);
     return;
   }
   if (NULL == pending) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Pending Null)");
+    dbus_message_unref(msg);
     return;
   }
   dbus_connection_flush(conn_);
@@ -315,62 +332,157 @@ bool DBusAdapter::SetArguments(DBusMessage* msg,
   dbus_message_iter_init_append(msg, &iter);
   size_t size = rules.size();
   for (size_t i = 0; i < size; ++i) {
-    smart_objects::SmartObject& param = args[rules[i]->name];
-    if (!SetOneArgument(msg, rules[i], param)) {
+    smart_objects::SmartObject& param = const_cast<smart_objects::SmartObject&>(
+        args.getElement(rules[i]->name));
+    if (!SetOneArgument(&iter, rules[i], param)) {
       return false;
     }
   }
   return true;
 }
 
-bool DBusAdapter::SetOneArgument(DBusMessage* msg,
+bool DBusAdapter::SetOneArgument(DBusMessageIter* iter,
                                  const ParameterDescription* rules,
                                  smart_objects::SmartObject& param) {
-  if (param.isValid()) {
-    if (rules->is_array) {
-      return SetArrayValue(msg, rules, param);
+  if (rules->obligatory) {
+    if (param.isValid()) {
+      return SetValue(iter, rules, param);
     } else {
-      return SetValue(msg, rules, param);
+      LOG4CXX_WARN(logger_, "DBus: Argument '" << rules->name << "' is obligatory!");
+      return false;
     }
-  } else if (rules->obligatory) {
-    LOG4CXX_WARN(logger_, "DBus: Argument '" << rules->name << "' is obligatory!");
-    return false;
   } else {
-    return SetUndefinedValue(msg, rules);
+    return SetOptionalValue(iter, rules, param);
   }
 }
 
 bool DBusAdapter::SetValue(
-    DBusMessage* msg,
+    DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
+  int type = 0;
+  void* value = 0;
+  int integerValue = 0;
+  double floatValue = 0;
+  bool booleanValue = false;
+  const char* stringValue;
   switch (rules->type) {
+    case ford_message_descriptions::ParameterType::Array:
+      return SetArrayValue(
+          iter,
+          reinterpret_cast<const ford_message_descriptions::ArrayDescription*>(rules),
+          param);
+      break;
     case ford_message_descriptions::ParameterType::Struct:
-//      SetStruct(msg, rules, param);
+      return SetStructValue(
+          iter,
+          reinterpret_cast<const ford_message_descriptions::StructDescription*>(rules),
+          param);
       break;
     case ford_message_descriptions::ParameterType::Enum:
+    case ford_message_descriptions::ParameterType::Integer:
+      type = DBUS_TYPE_UINT32;
+      integerValue = param.asInt();
+      value = &integerValue;
       break;
-//    case ford_message_descriptions::ParameterType::
+    case ford_message_descriptions::ParameterType::Float:
+      type = DBUS_TYPE_DOUBLE;
+      floatValue = param.asDouble();
+      value = &floatValue;
+      break;
+    case ford_message_descriptions::ParameterType::Boolean:
+      type = DBUS_TYPE_BOOLEAN;
+      booleanValue = param.asBool();
+      value = &booleanValue;
+      break;
+    case ford_message_descriptions::ParameterType::String:
+      type = DBUS_TYPE_STRING;
+      stringValue = param.asString().c_str();
+      value = &stringValue;
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument");
+      return false;
   }
-  return false;
+  return dbus_message_iter_append_basic(iter, type, value);
 }
 
-bool DBusAdapter::SetUndefinedValue(
-    DBusMessage* msg,
-    const ford_message_descriptions::ParameterDescription* rules) {
-  // TODO(KKolodiy) implement this
-  return false;
+bool DBusAdapter::SetOptionalValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject &param) {
+  DBusMessageIter sub_iter;
+  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL, &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't open container type (STRUCT) for optional parameter");
+    return false;
+  }
+
+  ford_message_descriptions::ParameterDescription flagRules = {
+      "flag",
+      ford_message_descriptions::Boolean,
+      true
+  };
+  smart_objects::SmartObject flag(param.isValid());
+  SetValue(&sub_iter, &flagRules, flag);
+  if (!SetValue(&sub_iter, rules, param)) {
+    return false;
+  }
+
+  if (!dbus_message_iter_close_container(iter, &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't close container type (STRUCT) for optional parameter");
+    return false;
+  }
+  return true;
 }
 
 bool DBusAdapter::SetArrayValue(
-    DBusMessage* msg,
-    const ford_message_descriptions::ParameterDescription* rules,
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ArrayDescription* rules,
     smart_objects::SmartObject& param) {
-//  if (param.getType() != smart_objects::SmartArray) {
-//
-//    return false;
-//  }
-  return false;
+  DBusMessageIter sub_iter;
+  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_ARRAY,
+                                        rules->element_dbus_signature,
+                                        &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't open container type (ARRAY)");
+    return false;
+  }
+  size_t size = param.length();
+  for (size_t i = 0; i < size; ++i) {
+    if (!SetValue(&sub_iter, rules->element, param[i])) {
+      return false;
+    }
+  }
+  if (!dbus_message_iter_close_container(iter, &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't close container type (ARRAY)");
+    return false;
+  }
+  return true;
+}
+
+bool DBusAdapter::SetStructValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::StructDescription* rules,
+    smart_objects::SmartObject& structure) {
+  DBusMessageIter sub_iter;
+  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL, &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't open container type (STRUCT)");
+    return false;
+  }
+  const ParameterDescription** entry;
+  entry = rules->parameters;
+  while (entry != NULL) {
+    smart_objects::SmartObject& param = const_cast<smart_objects::SmartObject&>(
+            structure.getElement((*entry)->name));
+    if (!SetOneArgument(&sub_iter, *entry, param)) {
+      return false;
+    }
+    entry++;
+  }
+  if (!dbus_message_iter_close_container(iter, &sub_iter)) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't close container type (STRUCT)");
+    return false;
+  }
+  return true;
 }
 
 bool DBusAdapter::GetArgs(DBusMessage* msg) {
@@ -393,99 +505,9 @@ bool DBusAdapter::GetArgs(DBusMessage* msg) {
   return true;
 }
 
-//bool DBusAdapter::SetBasicArg(DBusMessageIter* args,
-//                              dbus_schema::ParameterDescription* rule,
-//                              smart_objects::SmartObject& obj) {
-//  int type = 0;
-//  void* value;
-//  dbus_int32_t integerValue;
-//  dbus_bool_t booleanValue;
-//  double floatValue;
-//  const char* stringValue;
-//  switch (rule->type) {
-//    case ford_message_descriptions::Integer:
-//      type = DBUS_TYPE_INT32;
-//      integerValue = obj.asInt();
-//      value = &integerValue;
-//    break;
-//    case ford_message_descriptions::Boolean:
-//      type = DBUS_TYPE_BOOLEAN;
-//      booleanValue = obj.asBool();
-//      value = &booleanValue;
-//    break;
-//    case ford_message_descriptions::Float:
-//      type = DBUS_TYPE_DOUBLE;
-//      floatValue = obj.asDouble();
-//      value = &floatValue;
-//    break;
-//    case ford_message_descriptions::String:
-//      type = DBUS_TYPE_STRING;
-//      stringValue = obj.asString().c_str();
-//      value = &stringValue;
-//    break;
-//    default: {
-//      LOG4CXX_WARN(logger_, "DBus: Failed set basic argument (Unknown type)");
-//      return false;
-//    }
-//  }
-//
-//  if (rule->obligatory) {
-//
-//  }
-//  if (!dbus_message_iter_append_basic(args, type, value)) {
-//    LOG4CXX_WARN(logger_, "DBus: Failed set basic argument");
-//    return false;
-//  }
-//  return true;
-//}
-
 const dbus_schema::DBusSchema& DBusAdapter::get_schema() const {
   return schema_;
 }
-
-//bool DBusAdapter::SetArrayArg(DBusMessageIter* args,
-//                              dbus_schema::ParameterDescription* rule,
-//                              smart_objects::SmartObject& obj) {
-//  int type = 0;
-//  void* value;
-//  dbus_int32_t* integerValue;
-//  dbus_bool_t* booleanValue;
-//  double* floatValue;
-//  const char** stringValue;
-//  size_t size;
-//  switch (rule->type) {
-//    case ford_message_descriptions::Integer:
-//      type = DBUS_TYPE_INT32;
-//      size = ForeachBaseArray<dbus_int32_t>(obj, &integerValue);
-//      value = &integerValue;
-//    break;
-//    case ford_message_descriptions::Boolean:
-//      type = DBUS_TYPE_BOOLEAN;
-//      size = ForeachBaseArray<dbus_bool_t>(obj, &booleanValue);
-//      value = &booleanValue;
-//    break;
-//    case ford_message_descriptions::Float:
-//      type = DBUS_TYPE_DOUBLE;
-//      size = ForeachBaseArray<double>(obj, &floatValue);
-//      value = &floatValue;
-//    break;
-//    case ford_message_descriptions::String:
-//      type = DBUS_TYPE_STRING;
-//      size = ForeachBaseArray<const char*>(obj, &stringValue);
-//      value = &stringValue;
-//    break;
-//    default: {
-//      LOG4CXX_WARN(logger_, "DBus: Failed set basic argument (Unknown type)");
-//      return false;
-//    }
-//  }
-//
-//  if (!dbus_message_iter_append_fixed_array(args, type, value, size)) {
-//    LOG4CXX_WARN(logger_, "DBus: Failed set basic argument");
-//    return false;
-//  }
-//  return true;
-//}
 
 }  // namespace hmi_message_handler
 
