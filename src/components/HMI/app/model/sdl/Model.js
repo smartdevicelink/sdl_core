@@ -337,7 +337,7 @@ SDL.SDLModel = Em.Object
         playVideo: function(){
             if (this.naviVideo === null) {
                 this.naviVideo = document.getElementById("html5Player");
-                this.naviVideo.src = "http://html5videocreator.github.io/data/images/happyfit2.webm";
+                this.naviVideo.src = "http://127.0.0.1:8000/live";
             }
 
             SDL.SDLModel.naviVideo.play();
