@@ -52,6 +52,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel
                 alignment: "text-align:left"
             }));
 
+            this.set('constantTBTParams', null);
+
             this.set('isPlaying', true);
 
             this.set('commandsList', []);

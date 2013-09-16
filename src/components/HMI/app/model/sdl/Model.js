@@ -335,9 +335,9 @@ SDL.SDLModel = Em.Object
          * Video player trigger to start playing video
          */
         playVideo: function(){
-            if (SDL.SDLModel.naviVideo === null) {
-                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
-                SDL.SDLModel.naviVideo.src = "http://content.bitsontherun.com/videos/nfSyO85Q-27m5HpIu.webm";
+            if (this.naviVideo === null) {
+                this.naviVideo = document.getElementById("html5Player");
+                this.naviVideo.src = "http://html5videocreator.github.io/data/images/happyfit2.webm";
             }
 
             SDL.SDLModel.naviVideo.play();
@@ -360,7 +360,8 @@ SDL.SDLModel = Em.Object
          */
         tbtActivate: function(params) {
 
-            SDL.TurnByTurnView.activate(params);
+            SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
+            SDL.TurnByTurnView.activate(params.appID);
         },
 
         /**

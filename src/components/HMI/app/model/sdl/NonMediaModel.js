@@ -50,6 +50,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
                 alignment: "text-align:left"
             }));
 
+            this.set('constantTBTParams', null);
+
             // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
 
             this.set('commandsList', []);

@@ -92,18 +92,6 @@ SDL.SDLController = Em.Object
         },
 
         /**
-         * Method starts on navigation init
-         * creates video object and set video stream to source
-         */
-        startVideo: function(){
-            if (SDL.SDLModel.naviVideo === null) {
-                console.log(document.getElementById("html5Player"));
-                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
-                SDL.SDLModel.naviVideo.src = "http://content.bitsontherun.com/videos/nfSyO85Q-27m5HpIu.webm";
-            }
-        },
-
-        /**
          * Notify SDLCore that HMI is ready and all components are registered
          * 
          * @type {String}

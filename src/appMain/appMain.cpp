@@ -317,10 +317,10 @@ int main(int argc, char** argv) {
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-  if (!InitHmi()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitHmi successful");
+  //if (!InitHmi()) { 
+  //  exit(EXIT_FAILURE);
+  //}
+  //LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
 

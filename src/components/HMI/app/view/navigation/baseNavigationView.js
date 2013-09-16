@@ -44,109 +44,122 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         'mainField3',
         'mainField4',
         'mainField5',
-        'mainField6',
+        'mainField6'/*,
         'softButton1',
         'softButton2',
         'softButton3',
-        'softButton4'
+        'softButton4'  */
     ],
+
+    mainField1: null,
+    mainField2: null,
+    mainField3: null,
+    mainField4: null,
+    mainField5: null,
+    mainField6: null,
+
+    activate: function(appID){
+
+        var naviParams = SDL.SDLController.getApplicationModel(appID).constantTBTParams;
+
+        if (naviParams) {
+
+            for ( var i = 0; i < naviParams.navigationTexts.length; i++) {
+                switch (naviParams.navigationTexts[i].fieldName) {
+                    case 'navigationText1': {
+                        this.set('mainField1',
+                            naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    case 'navigationText2': {
+                        this.set('mainField2',
+                            naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    case 'ETA': {
+                        this.set('mainField4', naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    case 'totalDistance': {
+                        this.set('mainField5',
+                            naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    case 'navigationText': {
+                        this.set('mainField6',
+                            naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    case 'timeToDestination': {
+                        this.set('mainField3',
+                            naviParams.navigationTexts[i].fieldText);
+                        break;
+                    }
+                    default :{
+                        break;
+                    }
+                }
+            }
+
+            if (naviParams.softButtons) {
+                for ( var i = 0; i < naviParams.softButtons.length; i++) {
+                    this.get('childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
+                            text: naviParams.softButtons[i].text,
+                            icon: naviParams.softButtons[i].image ? naviParams.softButtons[i].image.value : "",
+                            templateName: naviParams.softButtons[i].image ? 'rightText' : 'text',
+                            groupName: "NaviBase",
+                            classNameBindings: ['isHighlighted:isHighlighted'],
+                            isHighlighted: naviParams.softButtons[i].isHighlighted ? true : false,
+                            softButtonID: naviParams.softButtons[i].softButtonID,
+                            systemAction: naviParams.softButtons[i].systemAction,
+                            classNames: 'softButton softButton'  + i + 1,
+                            appID: appID
+                        }));
+                }
+            }
+        }
+    }.observes('SDL.States.navigation.baseNavigation.active'),
 
     mainField1: SDL.Label.extend({
 
         classNames: 'mainField1 mainField',
 
-        content: 'mainField1'
+        contentBinding: 'this.parentView.mainField1'
     }),
 
     mainField2: SDL.Label.extend({
 
         classNames: 'mainField2 mainField',
 
-        content: 'mainField2'
+        contentBinding: 'this.parentView.mainField2'
     }),
 
     mainField3: SDL.Label.extend({
 
         classNames: 'mainField3 mainField',
 
-        content: 'mainField3'
+        contentBinding: 'this.parentView.mainField3'
     }),
 
     mainField4: SDL.Label.extend({
 
         classNames: 'mainField4 mainField',
 
-        content: 'mainField4'
+        contentBinding: 'this.parentView.mainField4'
     }),
 
     mainField5: SDL.Label.extend({
 
         classNames: 'mainField5 mainField',
 
-        content: 'mainField5'
+        contentBinding: 'this.parentView.mainField5'
     }),
 
     mainField6: SDL.Label.extend({
 
         classNames: 'mainField6 mainField',
 
-        content: 'mainField6'
-    }),
-
-    softButton1: SDL.Button.extend(SDL.PresetEventsCustom, {
-        systemAction     : null,
-        groupName        : "NaviBase",
-        classNameBindings: ['isHighlighted:isHighlighted'],
-        isHighlighted    : false,
-        softButtonID     : null,
-        icon             : "",
-        text             : this.elementId,
-        classNames       : 'list-item softButton softButton1',
-        elementId        : 'softButton1',
-        templateName     : 'text',
-        appID            : null
-    }),
-
-    softButton2: SDL.Button.extend(SDL.PresetEventsCustom, {
-        systemAction     : null,
-        groupName        : "NaviBase",
-        classNameBindings: ['isHighlighted:isHighlighted'],
-        isHighlighted    : false,
-        softButtonID     : null,
-        icon             : "",
-        text             : this.elementId,
-        classNames       : 'list-item softButton softButton2',
-        elementId        : 'softButton2',
-        templateName     : 'text',
-        appID            : null
-    }),
-
-    softButton3: SDL.Button.extend(SDL.PresetEventsCustom, {
-        systemAction     : null,
-        groupName        : "NaviBase",
-        classNameBindings: ['isHighlighted:isHighlighted'],
-        isHighlighted    : false,
-        softButtonID     : null,
-        icon             : "",
-        text             : this.elementId,
-        classNames       : 'list-item softButton softButton3',
-        elementId        : 'softButton3',
-        templateName     : 'text',
-        appID            : null
-    }),
-
-    softButton4: SDL.Button.extend(SDL.PresetEventsCustom, {
-        systemAction     : null,
-        groupName        : "NaviBase",
-        classNameBindings: ['isHighlighted:isHighlighted'],
-        isHighlighted    : false,
-        softButtonID     : null,
-        icon             : "",
-        text             : this.elementId,
-        classNames       : 'list-item softButton softButton4',
-        elementId        : 'softButton4',
-        templateName     : 'text',
-        appID            : null
+        contentBinding: 'this.parentView.mainField6'
     })
 
 });

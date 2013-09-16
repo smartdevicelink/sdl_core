@@ -823,25 +823,6 @@
   </element>
 </enum>
 
-<enum name="PredefinedLayout">
-  <description>Predefined screen layout.</description>
-  <element name="DEFAULT" rootscreen="true">
-  	<description>Default media / non-media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="MEDIA" rootscreen="true">
-   	<description>Default Media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="NON-MEDIA" rootscreen="true">
-   	<description>Default Non-media screen. Can be set as a root screen.</description>
-  </element>
-  <element name="ONSCREEN_PRESETS" rootscreen="true">
-   	<description>Custom root media screen containing app-defined onscreen presets. Can be set as a root screen.</description>
-  </element>
-  <element name="NAV_FULLSCREEN_MAP" rootscreen="true">
-  	<description>Custom root template screen containing full screen map with navigation controls. Can be set as a root screen.</description>
-  </element>
-</enum>
-
 <enum name="AmbientLightStatus">
   <description>Reflects the status of the ambient light sensor.</description>
   <element name="NIGHT" />
@@ -852,6 +833,15 @@
   <element name="DAY" />
   <element name="UNKNOWN" />
   <element name="INVALID" />
+</enum>
+
+<enum name="FileType">
+  <description>Enumeration listing possible file types.</description>
+  <element name="GRAPHIC_BMP" />   
+  <element name="GRAPHIC_JPEG" />   
+  <element name="GRAPHIC_PNG" />
+  <element name="AUDIO_WAVE" />   
+  <element name="AUDIO_MP3" />
 </enum>
 
 <!-- End of IVI part-->
@@ -1007,6 +997,42 @@
   <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
 </struct>
 
+<struct name="ImageResolution">
+  <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000">
+    <description>The image resolution width.</description>
+  </param>
+  <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
+    <description>The image resolution height.</description>
+  </param>
+</struct>
+
+<struct name="ImageField">
+  <param name="name" type="ImageFieldName" mandatory="true">
+    <description>The name that identifies the field. See ImageFieldName.</description>
+  </param>
+  <param name="imageTypeSupported" type="Common.FileType" maxsize="100" array="true" mandatory="false" minsize="1">
+    <description>The image types that are supported in this field. See FileType.</description>
+  </param>
+  <param name="imageResolution" type="Common.ImageResolution">
+    <description>The image resolution of this field.</description>
+  </param>
+</struct>
+
+<struct name="TouchEventCapabilities">
+  <param name="pressAvailable" type="Boolean" mandatory="true"></param>
+  <param name="multiTouchAvailable" type="Boolean" mandatory="true"></param>
+  <param name="doublePressAvailable" type="Boolean" mandatory="true"></param>
+</struct>
+
+<struct name="ScreenParams">
+  <param name="resolution" type="Common.ImageResolution" mandatory="true">
+    <description>The resolution of the prescribed screen area.</description>
+  </param>    
+  <param name="touchEventAvailable" type="Common.TouchEventCapabilities" mandatory="false">
+    <description>Types of screen touch events available in screen area.</description>    
+  </param>    
+</struct>
+
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
   <param name="displayType" type="Common.DisplayType" mandatory="true">
@@ -1016,7 +1042,7 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
-  <param name="imageFields" type="ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
+  <param name="imageFields" type="Common.ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
     <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
@@ -1053,18 +1079,6 @@
   </param>
 </struct>
 
-<struct name="ImageField">
-  <param name="name" type="ImageFieldName" mandatory="true">
-    <description>The name that identifies the field. See ImageFieldName.</description>
-  </param>
-  <param name="imageTypeSupported" type="FileType" maxlength="100" array="true" mandatory="false" minsize="1">
-    <description>The image types that are supported in this field. See FileType.</description>
-  </param>
-  <param name="imageResolution" type="ImageResolution">
-    <description>The image resolution of this field.</description>
-  </param>
-</struct>
-
 <struct name="TouchLists">
   <param name="touches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
 	<description>List of fingers currently on screen</description>
@@ -1089,7 +1103,7 @@
 </struct>
 
 <struct name="TouchEventInfo">
-  <param name="id" type="Integer" mandatory="false" mivalue="0" maxvalue="9">
+  <param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
 	<description>Finger / stylus ID</description>
   </param>
   <param name="point" type="Coordinate" mandatory="true">
@@ -1098,15 +1112,6 @@
   <param name="area" type="TouchArea" mandatory="false">
 	<description>Describe the ellipse approximating touch input shape</description>
   </param>
-</struct>
-
-<struct name="ScreenParams">
-  <param name="resolution" type="ImageResolution" mandatory="true">
-    <description>The resolution of the prescribed screen area.</description>
-  </param>    
-  <param name="touchEventAvailable" type="TouchEventCapabilities" mandatory="false">
-    <description>Types of screen touch events available in screen area.</description>    
-  </param>    
 </struct>
 
 <struct name="TextFieldStruct">
@@ -1833,7 +1838,7 @@
       <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
         <description>Timeout in milliseconds.</description>
       </param>
-	  <param name="choiceLayout" type="LayoutMode" mandatory="false">
+	  <param name="choiceLayout" type="Common.LayoutMode" mandatory="false">
         <description>See LayoutMode.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1873,7 +1878,7 @@
 	  <param name="menuTitle" maxlength="500" type="String" mandatory="false">
         <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
       </param>
-      <param name="menuIcon" type="Image">
+      <param name="menuIcon" type="Common.Image">
         <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1974,7 +1979,7 @@
     </function>
     <function name="ShowKeyboard" messagetype="request">
       <description>Configures and populates on-screen keyboard.</description>
-      <param name="language" type="Language" mandatory="true">
+      <param name="language" type="Common.Language" mandatory="true">
         <description>The keyboard language.</description>
       </param> 
       <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true" >
