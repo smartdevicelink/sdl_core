@@ -11,10 +11,17 @@ include_directories (
 
 set (SOURCES
   ./src/schema.cc
-  ./src/ford_message_descriptions.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
   ./src/dbus_message_controller.cc
   ./src/dbus_adapter.cc
 )
 
 add_library("DBus" ${SOURCES})
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
+  COMMAND python make_message_descriptions.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
+)
+
 target_link_libraries ("DBus")

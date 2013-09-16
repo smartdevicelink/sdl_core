@@ -36,7 +36,7 @@
 #include <vector>
 #include <utility>
 
-#include "dbus/ford_message_descriptions.h"
+#include "dbus/message_descriptions.h"
 #include "interfaces/HMI_API.h"
 
 namespace dbus_schema {
