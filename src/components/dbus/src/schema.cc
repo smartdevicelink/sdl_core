@@ -33,7 +33,7 @@
 
 #include <algorithm>
 
-namespace dbus_schema {
+namespace dbus {
 
 struct Description {
   MessageId id;

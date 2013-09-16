@@ -39,7 +39,7 @@
 #include "dbus/message_descriptions.h"
 #include "interfaces/HMI_API.h"
 
-namespace dbus_schema {
+namespace dbus {
 
 using ford_message_descriptions::ParameterDescription;
 using ford_message_descriptions::MessageDescription;
@@ -65,6 +65,6 @@ class DBusSchema {
   Messages msgs_;
 };
 
-}  // namespace dbus_schema
+}  // namespace dbus
 
 #endif  // SRC_COMPONENTS_DBUS_SCHEMA_INCLUDE_DBUS_SCHEMA_SCHEMA_H_

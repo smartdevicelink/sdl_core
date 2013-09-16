@@ -39,7 +39,7 @@
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-namespace hmi_message_handler {
+namespace dbus {
 
 class DBusAdapter;
 
@@ -111,6 +111,6 @@ class DBusMessageController : public DBusAdapter {
   int getNextMessageId();
 };
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 
 #endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_MESSAGE_CONTROLLER_H_

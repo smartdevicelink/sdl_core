@@ -35,7 +35,7 @@
 
 using ford_message_descriptions::ParameterDescription;
 
-namespace hmi_message_handler {
+namespace dbus {
 
 log4cxx::LoggerPtr DBusAdapter::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
@@ -116,8 +116,8 @@ void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
   std::string interface = dbus_message_get_interface(msg);
   std::string method; // TODO(KKolodiy): where get name of method?
 
-  dbus_schema::MessageName name(interface, method);
-  dbus_schema::MessageId m_id = schema_.getMessageId(name);
+  MessageName name(interface, method);
+  MessageId m_id = schema_.getMessageId(name);
   if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
     return;
@@ -130,9 +130,8 @@ void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
 
   reply = dbus_message_new_method_return(msg);
 
-  const dbus_schema::ListArgs& args = schema_.getListArgs(
-      m_id,
-      hmi_apis::messageType::response);
+  const ListArgs& args = schema_.getListArgs(m_id,
+                                             hmi_apis::messageType::response);
   if (!SetArguments(reply, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed return method (Signature is wrong)");
     dbus_message_unref(msg);
@@ -193,8 +192,8 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
     return;
   }
 
-  dbus_schema::MessageName name(interface, method);
-  dbus_schema::MessageId m_id = schema_.getMessageId(name);
+  MessageName name(interface, method);
+  MessageId m_id = schema_.getMessageId(name);
   if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
     return;
@@ -212,9 +211,8 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
     return;
   }
 
-  const dbus_schema::ListArgs& args = schema_.getListArgs(
-      m_id,
-      hmi_apis::messageType::request);
+  const ListArgs& args = schema_.getListArgs(m_id,
+                                             hmi_apis::messageType::request);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
     dbus_message_unref(msg);
@@ -245,8 +243,8 @@ void DBusAdapter::Signal(uint id, const std::string& interface,
     return;
   }
 
-  dbus_schema::MessageName name(interface, signal);
-  dbus_schema::MessageId m_id = schema_.getMessageId(name);
+  MessageName name(interface, signal);
+  MessageId m_id = schema_.getMessageId(name);
   if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
     return;
@@ -326,7 +324,7 @@ void DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
 }
 
 bool DBusAdapter::SetArguments(DBusMessage* msg,
-                               const dbus_schema::ListArgs& rules,
+                               const ListArgs& rules,
                                smart_objects::SmartObject& args) {
   DBusMessageIter iter;
   dbus_message_iter_init_append(msg, &iter);
@@ -485,7 +483,7 @@ bool DBusAdapter::SetStructValue(
   return true;
 }
 
-bool DBusAdapter::GetArgs(DBusMessage* msg) {
+bool DBusAdapter::GetArguments(DBusMessage* msg) {
 //DBusMessage* reply;
 //   DBusMessageIter args;
 //   DBusConnection* conn;
@@ -505,9 +503,9 @@ bool DBusAdapter::GetArgs(DBusMessage* msg) {
   return true;
 }
 
-const dbus_schema::DBusSchema& DBusAdapter::get_schema() const {
+const DBusSchema& DBusAdapter::get_schema() const {
   return schema_;
 }
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 
