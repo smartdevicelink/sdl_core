@@ -45,9 +45,11 @@ GridView
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
-                menuContainer.go(qml)
-                if(qml === "AMFMPlayerView.qml"){
-                    menuContainer.item.radioType = "AM"
+                if(qml !== ""){
+                    menuContainer.go(qml)
+                    if(qml === "AMFMPlayerView.qml"){
+                        menuContainer.item.radioType = "AM"
+                    }
                 }
             }
         }

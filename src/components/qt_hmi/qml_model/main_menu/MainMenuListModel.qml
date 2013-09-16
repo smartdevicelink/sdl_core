@@ -41,6 +41,7 @@ ListModel
     ListElement {
         name: "Preferences"
         icon: "res/gear.png"
+        qml: ""
     }
 
 }

@@ -40,5 +40,6 @@ ListModel
     ListElement {
         name: "more"
         icon: "res/phone/more.png"
+        qml: ""
     }
 }

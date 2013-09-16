@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 Item {
     anchors.fill: parent
@@ -30,6 +31,7 @@ Item {
 
     ListView {
         id: changeDeviceListView
+        //anchors.fill: parent
         model: ChangeDeviceModel {}
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -82,23 +84,5 @@ Item {
         }
     }
 
-    Text{
-        id: backtext
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: changeDeviceListView.height
-        text: "Back"
-        color: "#1d81d5"
-        font.pixelSize: 30
-        Image{
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: backtext.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-        }
-        MouseArea {
-          anchors.fill: parent
-          onClicked: {
-              menuContainer.back()
-            }
-        }
-    }
+    BackBtn{anchors.top: parent.bottom}
 }

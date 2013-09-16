@@ -1,10 +1,12 @@
 import QtQuick 2.0
+import "./controls"
 
-Item {
+Item{
     anchors.fill: parent
     property alias contactsListView: contactsListView
 
     ListView {
+        anchors.fill: parent
         anchors.centerIn: parent
         width: parent.width - 100
         height: parent.height
@@ -52,24 +54,5 @@ Item {
         }
 
     }
-
-    /*Text{
-        id: backtext
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: contanctsListView.height
-        text: "Back"
-        color: "#1d81d5"
-        font.pixelSize: 30
-        Image{
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: backtext.verticalCenter
-            source: "res/buttons/long_oval_btn.png"
-        }
-        MouseArea {
-          anchors.fill: parent
-          onClicked: {
-              menuContainer.back()
-            }
-        }
-    }*/
+    BackBtn{y: parent.height + contactsListView.spacing}
 }
