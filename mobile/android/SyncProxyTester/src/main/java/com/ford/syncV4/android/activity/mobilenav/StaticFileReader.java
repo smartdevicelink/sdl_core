@@ -39,7 +39,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte [], Void> {
         byte[] buffer = new byte[100];
         int length;
         try {
-        while ((length = is.read(buffer))>0){
+        while ((length = is.read(buffer))>0 && !isCancelled()){
             mListener.onDataReceived(buffer);
         }
             is.close();
@@ -64,4 +64,6 @@ public class StaticFileReader extends AsyncTask<Integer, byte [], Void> {
         super.onCancelled();
         mListener.onCancelReading();
     }
+
+
 }

@@ -271,6 +271,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
+    private StaticFileReader staticFileReader;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -410,6 +411,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         loadMessageSelectCount();
 
         isFirstActivityRun = false;
+
+
     }
 
     private void loadMessageSelectCount() {
@@ -3785,15 +3788,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
                     } catch (SyncException e) {
                         _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), addToUI);
+
+                        staticFileReader.cancel(true);
                     }
                 } else {
                     _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", addToUI);
+                    staticFileReader.cancel(true);
                 }
             } else {
                 _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", addToUI);
+                staticFileReader.cancel(true);
             }
         } else {
             _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", addToUI);
+            staticFileReader.cancel(true);
         }
     }
 
@@ -3807,8 +3815,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void startFileStreaming(){
+        createStaticFileReader();
+        staticFileReader.execute(R.raw.test_video);
+    }
+
+
+    private void createStaticFileReader(){
         final MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        StaticFileReader staticFileReader = new StaticFileReader(this, new DataReaderListener() {
+        staticFileReader = new StaticFileReader(this, new DataReaderListener() {
             @Override
             public void onStartReading() {
                 runOnUiThread(new Runnable() {
@@ -3821,7 +3835,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
             @Override
             public void onDataReceived(final byte[] data) {
-                sendMobileNaviData(data, false);
+                sendMobileNaviData(data, true);
               /*  runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -3853,7 +3867,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
             }
         });
-        staticFileReader.execute(R.raw.test_video);
     }
 }
 
