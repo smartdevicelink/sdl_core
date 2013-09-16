@@ -12,6 +12,7 @@ GridView {
             y:(navigationKeyboard.height - 63*3) / 2
             Image {
                 Text{
+                    id: aBtnText
                     anchors.centerIn: parent
                     text: "A"
                     color: "#1d81d5"
@@ -20,6 +21,14 @@ GridView {
 
                 id: aBtn
                 source: "res/buttons/preset_btn.png"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        menuContainer.go("ContactsListView.qml")
+                        menuContainer.item.contactsListView.setCurrent(aBtnText.text)
+                    }
+                }
+
              }
             Image {
                 Text{
@@ -298,12 +307,20 @@ GridView {
              }
             Image {
                 Text{
+                    id: zBtnText
                     anchors.centerIn: parent
                     text: "Z"
                     color: "#1d81d5"
                     font.pixelSize: 25
                 }
 
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        menuContainer.go("ContactsListView.qml")
+                        menuContainer.item.contactsListView.setCurrent(zBtnText.text)
+                    }
+                }
                 id: zBtn
                 source: "res/buttons/preset_btn.png"
              }
