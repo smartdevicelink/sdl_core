@@ -24,8 +24,6 @@ GridView
         }
     }
 
-    anchors.fill: parent
-
     property int columns: 4
     property int rows: 2
 
