@@ -36,7 +36,6 @@
 
 #include "interfaces/HMI_API.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
-#include "hmi_message_handler/dbus_message_controller.h"
 #include "formatters/CSmartFactory.hpp"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
