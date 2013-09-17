@@ -33,6 +33,8 @@
 
 #include "application_manager/commands/mobile/delete_file_response.h"
 #include "utils/file_system.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -47,9 +49,12 @@ DeleteFileResponse::~DeleteFileResponse() {
 
 void DeleteFileResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileResponse::Run");
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+        .asUInt();
+    Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpace());
+      static_cast<int>(file_system::AvailableSpaceApp(app->name()));
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

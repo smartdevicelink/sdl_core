@@ -59,7 +59,7 @@ void PutFileRequest::Run() {
     return;
   }
 
-  uint64_t free_space = file_system::AvailableSpace();
+  unsigned int free_space = file_system::AvailableSpaceApp(application->name());
 
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name];

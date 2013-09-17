@@ -67,7 +67,7 @@ void SyncPDataRequest::Run() {
     return;
   }
 
-  unsigned int free_space = file_system::AvailableSpace();
+  unsigned int free_space = file_system::AvailableSpaceApp(app->name());
 
   const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 

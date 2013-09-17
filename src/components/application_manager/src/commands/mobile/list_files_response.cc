@@ -58,9 +58,6 @@ void ListFilesResponse::Run() {
       return;
     }
   }
-
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpace());
   Application* application = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key]);
   if (!application) {
@@ -68,6 +65,8 @@ void ListFilesResponse::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+  (*message_)[strings::msg_params][strings::space_available] =
+        static_cast<int>(file_system::AvailableSpaceApp(application->name()));
   if (file_system::DirectoryExists(application->name())) {
     const std::string full_directory_path = file_system::FullPath(
         application->name());
