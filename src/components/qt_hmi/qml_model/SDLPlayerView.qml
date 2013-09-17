@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "./controls"
 
 Column {
     spacing: 25
@@ -25,29 +26,18 @@ Column {
                 }
                 ListElement{
                     name: "Browse"
+                    qml: ""
                 }
             }
             delegate:  Item{
                     width: parent.width / 4
-                    Image{
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        source: "res/buttons/long_oval_btn.png"
-                    }
-
-                    Text{
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: "#1d81d5"
+                    LongOvalBtn {
                         text: name
-                        font.pixelSize: 20
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                menuContainer.go(qml)
-                            }
-                        }
-                }
+                        pixelSize: 20
+                        dest: qml
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
             }
         }
     }
