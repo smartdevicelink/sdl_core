@@ -1,117 +1,66 @@
 import QtQuick 2.0
 import com.ford.hmi_framework 1.0
+import "./controls"
+import "./views"
 
-Rectangle {
-    id: mainScreen
-    width: 1520
+Rectangle{
+    width: 1600
     height: 768
+    property string startQml: "./views/AMFMPlayerView.qml"
+    property int margin: 20
+    property int minWidth: 600
+    property int minHieght: 400
     color: "black"
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            //Qt.quit();
-        }
-    }
-
-    PowerSwitcher {
-        x: parent.x + 50
+    Item {
+        id: mainScreen
+        width: parent.width * 0.62 < minWidth ? minWidth : parent.width * 0.62
         anchors.verticalCenter: parent.verticalCenter
-        onSwitched: {
-            if (sw === "on") {
-                mainScreen.state = "Main"
-                menuContainer.go("AMFMPlayerView.qml")
-                menuContainer.item.radioType = "FM"
-            } else {
-                mainScreen.state = ""
-                menuContainer.source = ""
+        anchors.left: parent.left
+        height: parent.height < minHieght ? minHieght : parent.height
+        visible: false
+
+        Item{
+            height: parent.height * 0.25
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            HeaderMenu{}
+        }
+
+        Loader {
+            id: contentLoader
+            height: parent.height * 0.75
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+
+            source:startQml
+
+            ListModel {
+                id: urlStack
             }
-        }
-    }
 
-    Loader {
-        id: menuContainer
-        x: 160
-        anchors.verticalCenter: parent.verticalCenter
-        width: 780
-        height: 298
+            function go(path) {
+                urlStack.append({ url: source.toString(), index: 10 })
+                source = path
+            }
 
-
-        ListModel {
-            id: urlStack
-        }
-
-        function go(path) {
-            urlStack.append({ url: source.toString(), index: 10 })
-            source = path
-        }
-
-        function back() {
-            var item = urlStack.get(urlStack.count - 1)
-            source = item.url
-            urlStack.remove(item)
+            function back() {
+                var item = urlStack.get(urlStack.count - 1)
+                source = item.url
+                urlStack.remove(item)
+            }
         }
     }
 
     Item {
-        id: headerMenu
-        x: menuContainer.x + menuContainer.width / 2 - 400
-        y: 120
-        width: 800
-        height: 55
-
-        Text{
-            text: "75°";
-            color: "#1d81d5"
-            font.pixelSize: 25;
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Item {
-            width: childrenRect.width
-            height: parent.height
-            anchors.horizontalCenter: headerMenu.horizontalCenter
-            Text {
-                text: "≡"
-                color: "#1d81d5"
-                font.pixelSize: 25
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-            }
-
-            Text {
-                text: "MENU";
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                color: "#1d81d5"
-                font.pixelSize: 25
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    menuContainer.go("main_menu/MainMenuGridView.qml")
-                }
-            }
-        }
-
-        Text{
-            text: "12:50";
-            color: "#1d81d5"
-            font.pixelSize: 25;
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        visible: mainScreen.state !== ""
-    }
-
-    HardwareButtons {
-        id: hardwareButtons
-
-        x: menuContainer.x + menuContainer.width + 20
+        id: hwBtnScreen
+        width: parent.width * 0.38
         anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        height: parent.height
+        HardwareButtonsView {}
     }
 }
 
