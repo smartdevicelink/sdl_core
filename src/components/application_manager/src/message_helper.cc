@@ -117,8 +117,13 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   message[strings::msg_params][strings::application][strings::app_name] =
       application_impl.name();
 
-  message[strings::msg_params][strings::application][strings::ngn_media_screen_app_name] =
+  const smart_objects::SmartObject* ngn_media_screen_name =
       application_impl.ngn_media_screen_name();
+
+  if (ngn_media_screen_name) {
+    message[strings::msg_params][strings::application]
+           [strings::ngn_media_screen_app_name] = *ngn_media_screen_name;
+  }
 
   message[strings::msg_params][strings::application][strings::icon] =
       application_impl.app_icon_path();
@@ -137,8 +142,12 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   message[strings::msg_params][strings::application][strings::is_media_application] =
       application_impl.is_media_application();
 
-  message[strings::msg_params][strings::application][strings::app_type] =
-      application_impl.app_types();
+  const smart_objects::SmartObject* app_type = application_impl.app_types();
+
+  if (app_type) {
+    message[strings::msg_params][strings::application][strings::app_type] =
+        *app_type;
+  }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
