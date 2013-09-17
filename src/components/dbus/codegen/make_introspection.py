@@ -81,6 +81,11 @@ in_tree_root = in_tree.getroot()
 out_tree_root = ElementTree.Element('node', attrib={'name':node_name})
 out_tree = ElementTree.ElementTree(out_tree_root)
 
+#D-bus functions
+el = ElementTree.SubElement(out_tree_root, 'interface', attrib={'name':'org.freedesktop.DBus.Introspectable'})
+el = ElementTree.SubElement(el, 'method', attrib={'name':'Introspect'})
+el = ElementTree.SubElement(el, 'arg', attrib={'type':'s','name':'xml_data','direction':'out'})
+
 impl = Impl(in_tree_root)
 impl.convert_to_introspection(out_tree_root)
 
