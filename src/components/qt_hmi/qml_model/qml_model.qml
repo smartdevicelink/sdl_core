@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import com.ford.hmi_framework 1.0
+import sdl.core.api 1.0
 import "./controls"
 import "./views"
 
@@ -61,6 +62,9 @@ Rectangle{
         anchors.right: parent.right
         height: parent.height
         HardwareButtonsView {}
+    }
+
+    Api {
     }
 }
 
