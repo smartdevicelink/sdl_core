@@ -168,6 +168,7 @@ void DBusMessageAdapter::Response(smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::ErrorResponse(smart_objects::SmartObject& obj) {
+  // TODO(KKolodiy): get error and description
   std::string error = "";
   std::string description = "";
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();

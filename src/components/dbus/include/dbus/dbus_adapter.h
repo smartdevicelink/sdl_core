@@ -126,7 +126,7 @@ class DBusAdapter {
   bool AddMatch(const std::string& rule);
 
   /**
-   * \brief processes message from DBus if queue isn't empty
+   * \brief processes incoming message from DBus if queue isn't empty
    * and fill obj
    * \param obj object for send to core
    * \return true if message processed
@@ -139,8 +139,6 @@ class DBusAdapter {
   std::string hmi_object_path_;
   DBusConnection* conn_;
 
-//  void Reply(DBusMessage* msg, DBusConnection* conn, std::string& message);
-
  private:
   /**
    * \brief schema messages and arguments for DBus
@@ -148,32 +146,36 @@ class DBusAdapter {
   DBusSchema schema_;
 
   /**
-   * \brief processes call of method and fill obj
+   * \brief processes incoming call of method and fill obj
    * \param msg message from DBus
    * \param obj object for send to core
+   * \return true if success
    */
-  void ProcessMethodCall(DBusMessage* msg, smart_objects::SmartObject& obj);
+  bool ProcessMethodCall(DBusMessage* msg, smart_objects::SmartObject& obj);
 
   /**
-   * \brief processes return of method and fill obj
+   * \brief processes incoming return of method and fill obj
    * \param msg message from DBus
    * \param obj object for send to core
+   * \return true if success
    */
-  void ProcessMethodReturn(DBusMessage* msg, smart_objects::SmartObject& obj);
+  bool ProcessMethodReturn(DBusMessage* msg, smart_objects::SmartObject& obj);
 
   /**
-   * \brief processes error and fill obj
+   * \brief processes incoming error and fill obj
    * \param msg message from DBus
    * \param obj object for send to core
+   * \return true if success
    */
-  void ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj);
+  bool ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj);
 
   /**
-   * \brief processes signal and fill obj
+   * \brief processes incoming signal and fill obj
    * \param msg message from DBus
    * \param obj object for send to core
+   * \return true if success
    */
-  void ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj);
+  bool ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj);
 
   /**
    * \brief sets arguments to message
@@ -192,7 +194,7 @@ class DBusAdapter {
    * \param param value of argument
    * \return true if success
    */
-  inline bool SetOneArgument(DBusMessageIter* iter,
+  bool SetOneArgument(DBusMessageIter* iter,
                        const ford_message_descriptions::ParameterDescription* rules,
                        smart_objects::SmartObject& param);
 
@@ -246,6 +248,12 @@ class DBusAdapter {
    * @return true if success
    */
   bool GetArguments(DBusMessage* msg);
+
+  /**
+   * \brief processes request on introspect
+   * \param msg DBus message
+   */
+  void Introspect(DBusMessage* msg);
 };
 
 }  // namespace dbus

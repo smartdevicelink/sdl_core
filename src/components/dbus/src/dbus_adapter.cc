@@ -35,10 +35,22 @@
 
 using ford_message_descriptions::ParameterDescription;
 
+extern char introspection_xml[];
+
 namespace dbus {
 
 log4cxx::LoggerPtr DBusAdapter::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+
+std::vector<std::string> &split(const std::string &s, char delim,
+                                std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
 DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
                          const std::string& sdlObjectPath,
@@ -92,14 +104,12 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
   msg = dbus_connection_pop_message(conn_);
   if (NULL != msg) {
     switch (dbus_message_get_type(msg)) {
-      case DBUS_MESSAGE_TYPE_METHOD_CALL: ProcessMethodCall(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_METHOD_RETURN: ProcessMethodReturn(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_ERROR: ProcessError(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_SIGNAL: ProcessSignal(msg, obj); break;
+      case DBUS_MESSAGE_TYPE_METHOD_CALL: return ProcessMethodCall(msg, obj); break;
+      case DBUS_MESSAGE_TYPE_METHOD_RETURN: return ProcessMethodReturn(msg, obj); break;
+      case DBUS_MESSAGE_TYPE_ERROR: return ProcessError(msg, obj); break;
+      case DBUS_MESSAGE_TYPE_SIGNAL: return ProcessSignal(msg, obj); break;
       default: return false;
     }
-    dbus_message_unref(msg);
-    return true;
   }
   return false;
 }
@@ -166,23 +176,8 @@ void DBusAdapter::Error(uint id, const std::string& name,
   dbus_connection_flush(conn_);
 
   dbus_message_unref(error);
-  dbus_message_unref(msg);
+//  dbus_message_unref(msg);
 }
-
-//void DBusAdapter::Reply(DBusMessage* msg, DBusConnection* conn,
-//                        std::string& message) {
-//  DBusMessageIter args;
-//  char* param;
-//
-//  if (!dbus_message_iter_init(msg, &args)) {
-//    LOG4CXX_WARN(logger_, "DBus: Failed call method (Message has no arguments!)");
-//  } else if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-//    LOG4CXX_WARN(logger_, "DBus: Failed call method (Argument is not string!)");
-//  } else {
-//    dbus_message_iter_get_basic(&args, &param);
-//    message = param;
-//  }
-//}
 
 void DBusAdapter::MethodCall(uint id, const std::string& interface,
                              const std::string& method,
@@ -273,44 +268,60 @@ void DBusAdapter::Signal(uint id, const std::string& interface,
 }
 
 bool DBusAdapter::AddMatch(const std::string& rule) {
+  LOG4CXX_INFO(logger_, "Subscription: " << rule);
   DBusError err;
   dbus_bus_add_match(conn_, rule.c_str(), &err);
   dbus_connection_flush(conn_);
   if (dbus_error_is_set(&err)) {
     std::string str = "DBus: Failed add match rule";
-    LOG4CXX_WARN(logger_, str.append(" (").append(err.message).append(")"));
+    LOG4CXX_WARN(logger_, str.append(" (").append(err.name).append(")"));
     return false;
   }
   return true;
 }
 
-void DBusAdapter::ProcessMethodCall(DBusMessage* msg, smart_objects::SmartObject& obj) {
-  std::string name = dbus_message_get_member(msg);
-  LOG4CXX_INFO(logger_, "DBus: name of method" << name);
+bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
+                                    smart_objects::SmartObject& obj) {
+  std::string method = dbus_message_get_member(msg);
+  std::string interface = dbus_message_get_interface(msg);
+  LOG4CXX_INFO(logger_, "DBus: name of method " << interface << " " << method);
+
+  if (interface == "org.freedesktop.DBus.Introspectable" &&
+      method == "Introspect") {
+    LOG4CXX_INFO(logger_, "DBus: INTROSPECT");
+    Introspect(msg);
+    return false;
+  }
 
   // TODO(KKolodiy): push msg
 
-//  if (NULL != msg &&
-//      TRUE == dbus_message_is_method_call(msg, sdl_service_name_.c_str(), "send")) {
-//    Reply(msg, conn_, message);
-//    dbus_message_unref(msg);
-//    LOG4CXX_INFO(logger_, message);
-//    return true;
-//  }
-//  return false;
+  std::vector<std::string> elems;
+  split(interface, '.', elems);
+  MessageName name(elems.back(), method);
+  MessageId m_id = schema_.getMessageId(name);
+  if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
+    LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
+    return false;
+  }
 
-
+  const ListArgs args = schema_.getListArgs(name, hmi_apis::messageType::request);
+  Error(0, "NOKIA", "JBL + NOKIA");
+  return false;
 }
 
-void DBusAdapter::ProcessMethodReturn(DBusMessage* msg, smart_objects::SmartObject& obj) {
+bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg, smart_objects::SmartObject& obj) {
+//  dbus_message_unref(msg);
+  return false;
 }
 
-void DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj) {
+bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj) {
+//  dbus_message_unref(msg);
+  return false;
 }
 
-void DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj) {
+bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj) {
   std::string name = dbus_message_get_member(msg);
-  LOG4CXX_INFO(logger_, "DBus: name of method" << name);
+  LOG4CXX_INFO(logger_, "DBus: name of method " << name);
 
   // read the parameters
 //   if (!dbus_message_iter_init(msg, &args))
@@ -321,6 +332,8 @@ void DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
 //      dbus_message_iter_get_basic(&args, &sigvalue);
 //      printf("Got Signal with value %s\n", sigvalue);
 //   }
+//  dbus_message_unref(msg);
+  return false;
 }
 
 bool DBusAdapter::SetArguments(DBusMessage* msg,
@@ -505,6 +518,26 @@ bool DBusAdapter::GetArguments(DBusMessage* msg) {
 
 const DBusSchema& DBusAdapter::get_schema() const {
   return schema_;
+}
+
+void DBusAdapter::Introspect(DBusMessage* msg) {
+  DBusMessage *reply;
+
+  dbus_uint32_t serial = dbus_message_get_serial(msg);
+  reply = dbus_message_new_method_return(msg);
+  if (!reply) {
+    LOG4CXX_WARN(logger_, "DBus: Failed return method for introspection");
+    return;
+  }
+
+  DBusMessageIter iter;
+  dbus_message_iter_init_append(reply, &iter);
+  char* value = introspection_xml;
+  dbus_message_iter_append_basic(&iter, DBUS_TYPE_STRING, &value);
+  dbus_connection_send(conn_, reply, &serial);
+  dbus_connection_flush(conn_);
+  dbus_message_unref(reply);
+  dbus_message_unref(msg);
 }
 
 }  // namespace dbus

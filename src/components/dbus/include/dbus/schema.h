@@ -48,7 +48,7 @@ struct Description;
 
 typedef hmi_apis::FunctionID::eType MessageId;
 typedef hmi_apis::messageType::eType MessageType;
-typedef std::pair<std::string, std::string> MessageName;
+typedef std::pair<std::string, std::string> MessageName; // interface, message
 typedef std::vector<const ParameterDescription*> ListArgs;
 typedef std::vector<const Description*> Messages;
 
