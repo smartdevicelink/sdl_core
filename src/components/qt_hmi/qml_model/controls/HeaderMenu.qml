@@ -4,6 +4,9 @@ import com.ford.hmi_framework 1.0
 Item {
     id: headerMenu
     anchors.fill: parent
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
+    anchors.topMargin: 30
 
     Text{
         text: "75°";

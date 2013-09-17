@@ -25,7 +25,9 @@ Item {
     }
 
     Column {
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 50
         Row {
             MaskedContainer {
                 ButtonImage {
@@ -69,11 +71,6 @@ Item {
                         pressed = null
                     }
                 }
-            }
-
-            Item {
-                width: 20
-                height: 1
             }
 
             Column {
