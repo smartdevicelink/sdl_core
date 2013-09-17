@@ -4,11 +4,20 @@ import "./controls"
 Item {
     id: navKeyboard
     anchors.fill: parent
-
     anchors.centerIn: parent
-    width: navKeyboard.buttonWidth * 11
-    height: navKeyboard.buttonHeight * 3
 
+    // Text line with input text
+    TextInput{
+        id: inputText
+        anchors.top:parent.top
+        anchors.margins: 10
+        anchors.left:parent.left
+        maximumLength: 30
+        color: "#1d81d5"
+        font.pixelSize: 30
+    }
+
+    // Keyboard
     Column {
         anchors.centerIn: parent
         Row {
@@ -23,6 +32,10 @@ Item {
                     imgOn: "../res/buttons/preset_pressed_btn.png"
                     text: upperRow.qWERTY.charAt(index)
                     pixelSize: 25
+
+                    onClicked: {
+                        inputText.text += upperRow.qWERTY.charAt(index)
+                    }
                 }
             }
         }
@@ -45,6 +58,10 @@ Item {
                     imgOn: "../res/buttons/preset_pressed_btn.png"
                     text: middleRow.aSDFGH.charAt(index)
                     pixelSize: 25
+
+                    onClicked: {
+                        inputText.text += middleRow.aSDFGH.charAt(index)
+                    }
                 }
             }
             //--------------
@@ -58,6 +75,10 @@ Item {
                     id: hoverImg
                     anchors.centerIn: parent
                     source: "res/nav/delete_icon.png"
+                }
+
+                onClicked: {
+                    inputText.text = inputText.text.substring(0,inputText.text.length - 1)
                 }
             }
         }
@@ -80,6 +101,10 @@ Item {
                     imgOn: "../res/buttons/preset_pressed_btn.png"
                     text: lowerRow.zXCVBN.charAt(index)
                     pixelSize: 25
+
+                    onClicked: {
+                        inputText.text += lowerRow.zXCVBN.charAt(index)
+                    }
                 }
             }
             //----------------
@@ -88,6 +113,10 @@ Item {
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "Clear"
                 pixelSize: 12
+
+                onClicked: {
+                    inputText.text = ""
+                }
             }
             //----------------
             CircleBtn{
@@ -95,26 +124,43 @@ Item {
                 imgOn: "../res/buttons/preset_pressed_btn.png"
                 text: "Space"
                 pixelSize: 12
+
+                onClicked: {
+                    inputText.text += " "
+                }
             }
         }
 
     } // column
 
    Image {
+        id: goBtn
         anchors.right: parent.right
         anchors.top: parent.top
+
+        source: "res/buttons/short_oval_btn.png"
+
         Text{
+            id: goText
             anchors.centerIn: parent
             text: "Go"
             color: "#1d81d5"
             font.pixelSize: 25
         }
-        id: goBtn
-        source: "res/buttons/short_oval_btn.png"
 
         MouseArea {
-            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
+
+            onPressed: {
+                goBtn.source = "res/buttons/short_oval_btn_pressed.png"
+                goText.color = "black"
+            }
+
+            onReleased: {
+                goBtn.source = "res/buttons/short_oval_btn.png"
+                goText.color = "#1d81d5"
+            }
+
             onClicked: {
                 menuContainer.go("NavigationInRouteGridView.qml")
             }
@@ -135,4 +181,6 @@ Item {
             }
         }
     }
+
+
 }

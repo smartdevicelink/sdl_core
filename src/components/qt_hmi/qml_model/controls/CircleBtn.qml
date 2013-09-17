@@ -10,6 +10,12 @@ Image {
     property string imgOff: "../res/buttons/round_btn.png"
     property string imgOn: "../res/buttons/round_pressed_btn.png"
 
+    signal clicked()
+    function wasClicked()
+    {
+        clicked()
+    }
+
     Text {
         anchors.centerIn: parent
         id: btnText
@@ -32,6 +38,7 @@ Image {
             if(dest !== ""){
                 menuContainer.go(dest)
             }
+            circleBtn.wasClicked()
         }
     }
 }
