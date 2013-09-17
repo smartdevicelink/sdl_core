@@ -44,9 +44,9 @@ namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 namespace hmi_message_handler {
 
 const std::string DBusMessageAdapter::SDL_SERVICE_NAME = "com.ford.sdl";
-const std::string DBusMessageAdapter::SDL_OBJECT_PATH = "/com/ford/sdl/api";
+const std::string DBusMessageAdapter::SDL_OBJECT_PATH = "/";
 const std::string DBusMessageAdapter::HMI_SERVICE_NAME = "com.ford.hmi";
-const std::string DBusMessageAdapter::HMI_OBJECT_PATH = "/com/ford/hmi/api";
+const std::string DBusMessageAdapter::HMI_OBJECT_PATH = "/";
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems) {
@@ -74,6 +74,7 @@ void DBusMessageAdapter::sendMessageToHMI(
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
   // TODO(KKolodiy): get smart object from message
+  return;
   smart_objects::SmartObject smart;
 
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
@@ -134,7 +135,7 @@ void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
   // TODO(KKolodiy): insert smart object "obj" to message
 //  message->set_json_message(message_string);
 
-  handler()->onMessageReceived(message);
+//  handler()->onMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");
 }
 

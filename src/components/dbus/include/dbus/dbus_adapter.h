@@ -199,44 +199,45 @@ class DBusAdapter {
                        smart_objects::SmartObject& param);
 
   /**
-   * Sets value for argument
-   * @param msg DBus message
-   * @param rules description for argument
-   * @param param value of argument
-   * @return true if success
+   * \brief sets value for argument
+   * \param msg DBus message
+   * \param rules description for argument
+   * \param param value of argument
+   * \return true if success
    */
   bool SetValue(DBusMessageIter* iter,
                 const ford_message_descriptions::ParameterDescription* rules,
                 smart_objects::SmartObject& param);
 
   /**
-   * Sets value for every element of argument
-   * @param iter DBus message iter
-   * @param rules description for argument
-   * @param param array values of argument
-   * @return true if success
+   * \brief sets value for every element of argument
+   * \param iter DBus message iter
+   * \param rules description for argument
+   * \param param array values of argument
+   * \return true if success
    */
   bool SetArrayValue(DBusMessageIter* iter,
                      const ford_message_descriptions::ArrayDescription* rules,
                      smart_objects::SmartObject& param);
 
   /**
-   * Sets struct value for argument
-   * @param iter DBus message iter
-   * @param rules description for argument
-   * @param param structure
-   * @return true if success
+   * \brief sets struct value for argument
+   * \param iter DBus message iter
+   * \param rules description for argument
+   * \param param structure
+   * \return true if success
    */
   bool SetStructValue(DBusMessageIter* iter,
                       const ford_message_descriptions::StructDescription* rules,
                       smart_objects::SmartObject& param);
 
   /**
-   * Sets optional value for argument.
+   * \brief sets optional value for argument.
    * Optional param is struct bool, value
-   * @param msg DBus message
-   * @param rules description for argument
-   * @return true if success
+   * \param msg DBus message
+   * \param rules description for argument
+   * \param param value of optional argument
+   * \return true if success
    */
   bool SetOptionalValue(DBusMessageIter* iter,
                         const ford_message_descriptions::ParameterDescription* rules,
@@ -244,10 +245,69 @@ class DBusAdapter {
 
   /**
    * \brief gets arguments from message
-   * @param msg DBus message
-   * @return true if success
+   * \param msg DBus message
+   * \param rules list of rules for arguments
+   * \param args map of arguments
+   * \return true if success
    */
-  bool GetArguments(DBusMessage* msg);
+  bool GetArguments(DBusMessage* msg, const ListArgs& rules,
+                    smart_objects::SmartObject& args);
+
+  /**
+   * \brief gets one argument from message
+   * \param iter DBus message iter
+   * \param rules description for argument
+   * \param args map of arguments
+   * \return true if success
+   */
+  bool GetOneArgument(DBusMessageIter* iter,
+                      const ford_message_descriptions::ParameterDescription* rules,
+                      smart_objects::SmartObject &args);
+
+  /**
+   * \brief gets value for argument
+   * \param msg DBus message
+   * \param rules description for argument
+   * \param param value of argument
+   * \return true if success
+   */
+  bool GetValue(DBusMessageIter* iter,
+                const ford_message_descriptions::ParameterDescription* rules,
+                smart_objects::SmartObject& param);
+
+  /**
+   * \brief gets value for every element of argument
+   * \param iter DBus message iter
+   * \param rules description for argument
+   * \param param array values of argument
+   * \return true if success
+   */
+  bool GetArrayValue(DBusMessageIter* iter,
+                     const ford_message_descriptions::ArrayDescription* rules,
+                     smart_objects::SmartObject& param);
+
+  /**
+   * \brief gets struct value for argument
+   * \param iter DBus message iter
+   * \param rules description for argument
+   * \param param structure
+   * \return true if success
+   */
+  bool GetStructValue(DBusMessageIter* iter,
+                      const ford_message_descriptions::StructDescription* rules,
+                      smart_objects::SmartObject& param);
+
+  /**
+   * \brief gets optional value for argument.
+   * Optional param is struct bool, value
+   * \param msg DBus message
+   * \param rules description for argument
+   * \param param value of optional argument
+   * \return true if success
+   */
+  bool GetOptionalValue(DBusMessageIter* iter,
+                        const ford_message_descriptions::ParameterDescription* rules,
+                        smart_objects::SmartObject &param);
 
   /**
    * \brief processes request on introspect

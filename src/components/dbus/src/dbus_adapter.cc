@@ -270,13 +270,12 @@ void DBusAdapter::Signal(uint id, const std::string& interface,
 bool DBusAdapter::AddMatch(const std::string& rule) {
   LOG4CXX_INFO(logger_, "Subscription: " << rule);
   DBusError err;
-  dbus_bus_add_match(conn_, rule.c_str(), &err);
+  dbus_bus_add_match(conn_, rule.c_str(), NULL);
   dbus_connection_flush(conn_);
-  if (dbus_error_is_set(&err)) {
-    std::string str = "DBus: Failed add match rule";
-    LOG4CXX_WARN(logger_, str.append(" (").append(err.name).append(")"));
-    return false;
-  }
+//  if (dbus_error_is_set(&err)) {
+//    LOG4CXX_WARN(logger_, "DBus: Failed add match rule");
+//    return false;
+//  }
   return true;
 }
 
@@ -305,7 +304,12 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
   }
 
   const ListArgs args = schema_.getListArgs(name, hmi_apis::messageType::request);
-  Error(0, "NOKIA", "JBL + NOKIA");
+  if (GetArguments(msg, args, obj)) {
+    return true;
+  } else {
+    Error(0, "NOKIA", "JBL + NOKIA");
+    return false;
+  }
   return false;
 }
 
@@ -321,7 +325,7 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
 
 bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj) {
   std::string name = dbus_message_get_member(msg);
-  LOG4CXX_INFO(logger_, "DBus: name of method " << name);
+  LOG4CXX_INFO(logger_, "DBus: name of signal " << name);
 
   // read the parameters
 //   if (!dbus_message_iter_init(msg, &args))
@@ -496,28 +500,176 @@ bool DBusAdapter::SetStructValue(
   return true;
 }
 
-bool DBusAdapter::GetArguments(DBusMessage* msg) {
-//DBusMessage* reply;
-//   DBusMessageIter args;
-//   DBusConnection* conn;
-//   bool stat = true;
-//   dbus_uint32_t level = 21614;
-//   dbus_uint32_t serial = 0;
-//   char* param = "";
-//
-//   // read the arguments
-//   if (!dbus_message_iter_init(msg, &args))
-//      fprintf(stderr, "Message has no arguments!\n");
-//   else if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args))
-//      fprintf(stderr, "Argument is not string!\n");
-//   else
-//      dbus_message_iter_get_basic(&args, &param);
-//   printf("Method called with %s\n", param);
+bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
+                               smart_objects::SmartObject& args) {
+  DBusMessageIter iter;
+  dbus_message_iter_init(msg, &iter);
+  size_t size = rules.size();
+  for (size_t i = 0; i < size; ++i) {
+    if (!GetOneArgument(&iter, rules[i], args)) {
+      return false;
+    }
+  }
   return true;
 }
 
 const DBusSchema& DBusAdapter::get_schema() const {
   return schema_;
+}
+
+bool DBusAdapter::GetOneArgument(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject& args) {
+  if (rules->obligatory) {
+    return GetValue(iter, rules, args[rules->name]);
+  } else {
+    if (!GetOptionalValue(iter, rules, args[rules->name])) {
+      args.erase(rules->name);
+    }
+    return true; // for optional argument always true
+  }
+}
+
+bool DBusAdapter::GetValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject& param) {
+  int type = dbus_message_iter_get_arg_type(iter);
+  switch (rules->type) {
+    case ford_message_descriptions::ParameterType::Array:
+      if (type == DBUS_TYPE_ARRAY) {
+        return GetArrayValue(
+            iter,
+            reinterpret_cast<const ford_message_descriptions::ArrayDescription*>(rules),
+            param);
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    case ford_message_descriptions::ParameterType::Struct:
+      if (type == DBUS_TYPE_STRUCT) {
+        return GetStructValue(
+            iter,
+            reinterpret_cast<const ford_message_descriptions::StructDescription*>(rules),
+            param);
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    case ford_message_descriptions::ParameterType::Enum:
+    case ford_message_descriptions::ParameterType::Integer:
+      if (type == DBUS_TYPE_UINT32) {
+        dbus_int32_t integerValue;
+        dbus_message_iter_get_basic(iter, &integerValue);
+        smart_objects::SmartObject value(integerValue);
+        param = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    case ford_message_descriptions::ParameterType::Float:
+      if (type == DBUS_TYPE_DOUBLE) {
+        double floatValue;
+        dbus_message_iter_get_basic(iter, &floatValue);
+        smart_objects::SmartObject value(floatValue);
+        param = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    case ford_message_descriptions::ParameterType::Boolean:
+      if (type == DBUS_TYPE_BOOLEAN) {
+        bool booleanValue;
+        dbus_message_iter_get_basic(iter, &booleanValue);
+        smart_objects::SmartObject value(booleanValue);
+        param = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    case ford_message_descriptions::ParameterType::String:
+      if (type == DBUS_TYPE_STRING) {
+        const char* stringValue;
+        dbus_message_iter_get_basic(iter, &stringValue);
+        smart_objects::SmartObject value(std::string(stringValue));
+        param = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
+        return false;
+      }
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument");
+      return false;
+  }
+  return true;
+}
+
+bool DBusAdapter::GetArrayValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ArrayDescription* rules,
+    smart_objects::SmartObject& param) {
+  smart_objects::SmartObject array(smart_objects::SmartType_Array);
+  int i = 0;
+  DBusMessageIter sub_iter;
+  dbus_message_iter_recurse(iter, &sub_iter);
+  while (dbus_message_iter_get_element_type(&sub_iter) != DBUS_TYPE_INVALID) {
+    if (!GetValue(&sub_iter, rules->element, array[i])) {
+      return false;
+    }
+    dbus_message_iter_next(&sub_iter);
+    i++;
+  }
+  param = array;
+  return true;
+}
+
+bool DBusAdapter::GetStructValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::StructDescription* rules,
+    smart_objects::SmartObject& param) {
+  DBusMessageIter sub_iter;
+  dbus_message_iter_recurse(iter, &sub_iter);
+  const ParameterDescription** entry;
+  entry = rules->parameters;
+  smart_objects::SmartObject structure(smart_objects::SmartType_Map);
+  while (entry != NULL) {
+    if (!GetOneArgument(&sub_iter, *entry, structure)) {
+      return false;
+    }
+    entry++;
+  }
+  param = structure;
+  return true;
+}
+
+bool DBusAdapter::GetOptionalValue(
+    DBusMessageIter* iter,
+    const ford_message_descriptions::ParameterDescription* rules,
+    smart_objects::SmartObject& param) {
+  DBusMessageIter sub_iter;
+  dbus_message_iter_recurse(iter, &sub_iter);
+
+  ford_message_descriptions::ParameterDescription flagRules = {
+      "flag",
+      ford_message_descriptions::Boolean,
+      true
+  };
+  smart_objects::SmartObject flag;
+  if (GetValue(&sub_iter, &flagRules, flag)) {
+    return false;
+  }
+  if (flag.asBool()) {
+    return GetValue(&sub_iter, rules, param);
+  } else {
+    return false;
+  }
 }
 
 void DBusAdapter::Introspect(DBusMessage* msg) {
