@@ -68,7 +68,7 @@ std::string DBusMessageController::findMethodById(std::string id) {
 }
 
 void* DBusMessageController::MethodForReceiverThread(void*) {
-  smart_objects::SmartObject obj;
+  smart_objects::SmartObject obj(smart_objects::SmartType_Map);
   while (true) {
     if (DBusAdapter::Process(obj)) {
       SendMessageToCore(obj);
