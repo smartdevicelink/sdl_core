@@ -8,7 +8,7 @@ LongOvalBtn {
 
     onIsPressedChanged: {
         if(isPressed == false){
-              menuContainer.back()
+              contentLoader.back()
         }
     }
 }

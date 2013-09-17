@@ -28,7 +28,7 @@ Image {
         }
         onClicked: {
             if(dest !== ""){
-                menuContainer.go(dest)
+                contentLoader.go(dest)
             }
         }
     }
