@@ -1,60 +1,52 @@
 import QtQuick 2.0
+import "./controls"
+
 Item{
+    id: climatMenu
     anchors.fill: parent
 
-    Item{
-        x: centralItem.x - childrenRect.width - 40
-        anchors.verticalCenter: centralItem.verticalCenter
-        width: childrenRect.width
-        height: childrenRect.height
+    Column {
+        id: leftItem
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 1/4*parent.width - useThisToGetButtonSize.width
 
-        Column {
-            Row {
-                ClimateControlBtn {name: "heated_seat"}
-                ClimateControlBtn {name: "heated_wheel"}
-            }
-            Row {
-                ClimateControlBtn {name: "AC"}
-                ClimateControlBtn {name: "headed_dash"}
-            }
+        Row {
+            ClimateControlBtn {name: "heated_seat"}
+            ClimateControlBtn {name: "heated_wheel"}
+        }
+        Row {
+            ClimateControlBtn {name: "AC"}
+            ClimateControlBtn {name: "headed_dash"}
         }
     }
 
-    Item{
+    Column{
         id: centralItem
-        width: childrenRect.width
-        height: childrenRect.height
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+
+        ClimateControlBtn {id: useThisToGetButtonSize; name: "defrost"; state: "on"}
+        ClimateControlBtn {name: "face"; state: "on"}
+        ClimateControlBtn {name: "feet"}
+    }
+
+    Row {
+        id: rightItem
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        anchors.rightMargin: 1/4*parent.width - useThisToGetButtonSize.width
+
+        ClimateControlBtn {
+            anchors.verticalCenter: parent.verticalCenter
+            txt: "Dual"
+            state: "on"
+        }
 
         Column{
-            ClimateControlBtn {name: "defrost"; state: "on"}
-            ClimateControlBtn {name: "face"; state: "on"}
-            ClimateControlBtn {name: "feet"}
-        }
-
-    }
-
-    Item {
-        x: centralItem.x + centralItem.width + 40
-        anchors.verticalCenter: centralItem.verticalCenter
-        width: childrenRect.width
-        height: childrenRect.height
-        Item {
-            id: dualBtn
-            width: childrenRect.width
-            height: childrenRect.height
-            anchors.verticalCenter: parent.verticalCenter
-            ClimateControlBtn {txt: "Dual"; state: "on"}
-        }
-        Item {
-            x: dualBtn.width
-            anchors.verticalCenter: parent.verticalCenter
-            width: childrenRect.width
-            height: childrenRect.height
-            Column {
-                    ClimateControlBtn {name: "heated_seat"}
-                    ClimateControlBtn {name: "AC"}
-            }
+            ClimateControlBtn {name: "heated_seat"}
+            ClimateControlBtn {name: "AC"}
         }
     }
+
 }

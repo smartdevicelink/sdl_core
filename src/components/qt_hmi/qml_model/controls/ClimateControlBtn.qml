@@ -11,14 +11,14 @@ Item
     state: "off"
     Image {
         id: climateBtnImg
-        source: climateControlBtn.state === "off" ? "res/climate/climate_round_off_btn.png" : "res/climate/climate_round_on_btn.png"
+        source: climateControlBtn.state === "off" ? "../res/climate/climate_round_off_btn.png" : "../res/climate/climate_round_on_btn.png"
 
         Image {
             id: hoverImg
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             property string st: climateControlBtn.state === "off" ? "_off" : "_on"
-            source: climateControlBtn.name === "" ? "": "res/climate/" + climateControlBtn.name + st + ".png"
+            source: climateControlBtn.name === "" ? "": "../res/climate/" + climateControlBtn.name + st + ".png"
         }
         Text {
             id: hoverText
@@ -34,21 +34,21 @@ Item
             onClicked: {
                 if(climateControlBtn.state === "on") {
                     climateControlBtn.state = "off"
-                    climateBtnImg.source = "res/climate/climate_round_off_btn.png"
+                    climateBtnImg.source = "../res/climate/climate_round_off_btn.png"
                     if(climateControlBtn.txt != "") {
                         hoverText.color = "#1d81d5"
                     }
                     if(climateControlBtn.name != "") {
-                        hoverImg.source = "res/climate/" + climateControlBtn.name + "_off.png"
+                        hoverImg.source = "../res/climate/" + climateControlBtn.name + "_off.png"
                     }
                 } else {
                     climateControlBtn.state = "on"
-                    climateBtnImg.source = "res/climate/climate_round_on_btn.png"
+                    climateBtnImg.source = "../res/climate/climate_round_on_btn.png"
                     if(climateControlBtn.txt != "") {
                         hoverText.color = "black"
                     }
                     if(climateControlBtn.name != "") {
-                        hoverImg.source = "res/climate/" + climateControlBtn.name + "_on.png"
+                        hoverImg.source = "../res/climate/" + climateControlBtn.name + "_on.png"
                     }
                 }
             }
