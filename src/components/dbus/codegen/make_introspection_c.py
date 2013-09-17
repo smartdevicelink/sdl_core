@@ -8,7 +8,7 @@ args = arg_parser.parse_args()
 in_file = open(args.infile, "rb")
 out_file = open(args.outfile, "w")
 
-out_file.write("const char introspection_xml[] = {")
+out_file.write("char introspection_xml[] = {")
 
 cnt = 0
 for char in in_file.read():
