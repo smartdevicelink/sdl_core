@@ -188,15 +188,9 @@ Item {
             anchors.fill: parent
 
             onPressed: {
-                cancel.source = "res/buttons/long_oval_btn_pressed.png"
-                cancelIcon.source = "res/nav/dest_icon_black.png"
+                cancel.source = "res/buttons/long_oval_pressed_btn.png"
+                destIcon.source = "res/nav/dest_icon_black.png"
                 cancelText.color = "black"
-            }
-
-            onReleased: {
-                cancel.source = "res/buttons/longest_oval_btn.png"
-                cancelIcon.source = "res/nav/dest_icon.png"
-                cancelText.color = "#1d81d5"
             }
 
             onClicked: {
