@@ -267,16 +267,10 @@ void DBusAdapter::Signal(uint id, const std::string& interface,
   LOG4CXX_INFO(logger_, "DBus: Success emit signal");
 }
 
-bool DBusAdapter::AddMatch(const std::string& rule) {
+void DBusAdapter::AddMatch(const std::string& rule) {
   LOG4CXX_INFO(logger_, "Subscription: " << rule);
-  DBusError err;
   dbus_bus_add_match(conn_, rule.c_str(), NULL);
   dbus_connection_flush(conn_);
-//  if (dbus_error_is_set(&err)) {
-//    LOG4CXX_WARN(logger_, "DBus: Failed add match rule");
-//    return false;
-//  }
-  return true;
 }
 
 bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
@@ -693,4 +687,3 @@ void DBusAdapter::Introspect(DBusMessage* msg) {
 }
 
 }  // namespace dbus
-
