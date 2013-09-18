@@ -28,10 +28,10 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H_
 
 #include "utils/threads/thread_delegate.h"
 #include "application_manager/application_manager_impl.h"
@@ -39,18 +39,18 @@
 namespace application_manager {
 
 class ToHMHThreadImpl : public threads::ThreadDelegate {
-  public:
-    explicit ToHMHThreadImpl(ApplicationManagerImpl* handler);
-    ~ToHMHThreadImpl();
+ public:
+  explicit ToHMHThreadImpl(ApplicationManagerImpl* handler);
+  ~ToHMHThreadImpl();
 
-    void threadMain();
+  void threadMain();
 
-  private:
-    ApplicationManagerImpl* handler_;
-    static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(ToHMHThreadImpl);
+ private:
+  ApplicationManagerImpl* handler_;
+  static log4cxx::LoggerPtr logger_;
+  DISALLOW_COPY_AND_ASSIGN(ToHMHThreadImpl);
 };
 
 }  //  namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_SRC_TO_HMH_THREAD_IMPL_H_

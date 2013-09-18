@@ -35,7 +35,8 @@
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
-
+#include <stdlib.h>
+#include <cstdio>
 #include <limits>
 #include <algorithm>
 #include <sstream>
@@ -515,7 +516,8 @@ std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string(
       return *(m_data.str_value);
     case SmartType_Integer:
       char val[20];
-      return itoa(m_data.unsigned_int_value, val, 10);
+      sprintf(val,"%d",m_data.unsigned_int_value);
+      return val;
       //break;
     case SmartType_Character:
       return std::string(1, m_data.char_value);

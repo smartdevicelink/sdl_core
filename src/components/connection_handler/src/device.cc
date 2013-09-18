@@ -41,12 +41,15 @@
  */
 namespace connection_handler {
 
-log4cxx::LoggerPtr Device::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ConnectionHandler"));
+log4cxx::LoggerPtr Device::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("ConnectionHandler"));
 
-Device::Device(DeviceHandle device_handle, std::string user_friendly_name)
+Device::Device(DeviceHandle device_handle,
+               const std::string& user_friendly_name,
+               const std::string& mac_address)
     : device_handle_(device_handle),
-      user_friendly_name_(user_friendly_name) {
+      user_friendly_name_(user_friendly_name),
+      mac_address_(mac_address) {
 }
 
 Device::~Device() {

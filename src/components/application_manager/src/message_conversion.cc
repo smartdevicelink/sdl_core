@@ -33,7 +33,7 @@
 #include "application_manager/message_conversion.h"
 #include "application_manager/smart_object_keys.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
-//#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
+// #include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
 #include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API.h"
 
@@ -41,74 +41,74 @@ namespace application_manager {
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-Message SmartObjectToMessage
-(NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object)  {
+Message SmartObjectToMessage(
+    NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object) {
   Message message;
 
   /*message.set_connection_key(
-      (*smart_object)[strings::params][strings::connection_key]);
-  message.set_protocol_version(static_cast<ProtocolVersion>(
-      ((*smart_object)[strings::params][strings::protocol_version].asInt())));
+   (*smart_object)[strings::params][strings::connection_key]);
+   message.set_protocol_version(static_cast<ProtocolVersion>(
+   ((*smart_object)[strings::params][strings::protocol_version].asInt())));
 
-  if ((*smart_object)[strings::msg_params].keyExists(strings::binary_data))  {
-    BinaryData* binaryData = new BinaryData(
-        (*smart_object)[strings::msg_params][strings::binary_data].asBinary());
+   if ((*smart_object)[strings::msg_params].keyExists(strings::binary_data))  {
+   BinaryData* binaryData = new BinaryData(
+   (*smart_object)[strings::msg_params][strings::binary_data].asBinary());
 
-    message.set_binary_data(binaryData);
-  }
+   message.set_binary_data(binaryData);
+   }
 
-  std::string output_json_string;
-  bool result = false;
+   std::string output_json_string;
+   bool result = false;
 
-  namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+   namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-  if (ProtocolVersion::kV2 ==
-      (*smart_object)[strings::params][strings::protocol_version].asInt()) {
-    result = formatters::CFormatterJsonSDLRPCv2::toString(*smart_object,
-                                                         output_json_string);
+   if (ProtocolVersion::kV2 ==
+   (*smart_object)[strings::params][strings::protocol_version].asInt()) {
+   result = formatters::CFormatterJsonSDLRPCv2::toString(*smart_object,
+   output_json_string);
 
-    message.set_correlation_id(
-        (*smart_object)[strings::params][strings::correlation_id]);
-    message.set_function_id(
-        (*smart_object)[strings::params][strings::function_id]);
-    message.set_message_type(static_cast<MessageType>(
-        (*smart_object)[strings::params][strings::message_type].asInt()));
-  } else if (ProtocolVersion::kV1 ==
-      (*smart_object)[strings::params][strings::protocol_version].asInt()) {
-    result = formatters::CFormatterJsonALRPCv1::toString(*smart_object,
-                                                         output_json_string);
-  }
+   message.set_correlation_id(
+   (*smart_object)[strings::params][strings::correlation_id]);
+   message.set_function_id(
+   (*smart_object)[strings::params][strings::function_id]);
+   message.set_message_type(static_cast<MessageType>(
+   (*smart_object)[strings::params][strings::message_type].asInt()));
+   } else if (ProtocolVersion::kV1 ==
+   (*smart_object)[strings::params][strings::protocol_version].asInt()) {
+   result = formatters::CFormatterJsonALRPCv1::toString(*smart_object,
+   output_json_string);
+   }
 
-  if (result) {
-    message.set_json_message(output_json_string);
-  }*/
+   if (result) {
+   message.set_json_message(output_json_string);
+   }*/
 
   return message;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject
-(const Message& message)  {
+NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject(
+    const Message& message) {
   NsSmartDeviceLink::NsSmartObjects::SmartObject smart_object;
 
-  if (ProtocolVersion::kV2 == message.protocol_version())  {
+  if (ProtocolVersion::kV2 == message.protocol_version()) {
     /*formatters::CFormatterJsonSDLRPCv2::fromString<int, MessageType>(
-      message.json_message(),
-      smart_object,
-      message.function_id(),
-      message.type(),
-      message.correlation_id());*/
-  } else if (ProtocolVersion::kHMI == message.protocol_version())  {
+     message.json_message(),
+     smart_object,
+     message.function_id(),
+     message.type(),
+     message.correlation_id());*/
+  } else if (ProtocolVersion::kHMI == message.protocol_version()) {
     /*formatters::FormatterJsonRpc::FromString < hmi_apis::FunctionID::eType,
-               hmi_apis::messageType::eType > (message.json_message(),
-                   smart_object);*/
+     hmi_apis::messageType::eType > (message.json_message(),
+     smart_object);*/
   }
 
-  smart_object[strings::params][strings::connection_key] =
-    message.connection_key();
+  smart_object[strings::params][strings::connection_key] = message
+      .connection_key();
 
-  if (message.has_binary_data())  {
-    smart_object[strings::msg_params][strings::binary_data] =
-      message.binary_data();
+  if (message.has_binary_data()) {
+    smart_object[strings::msg_params][strings::binary_data] = message
+        .binary_data();
   }
 
   return smart_object;

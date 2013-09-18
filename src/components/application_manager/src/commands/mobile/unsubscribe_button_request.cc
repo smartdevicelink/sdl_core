@@ -43,7 +43,8 @@ namespace commands {
 namespace str = strings;
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
@@ -52,8 +53,7 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->application(
+  Application* app = ApplicationManagerImpl::instance()->application(
       (*message_)[str::params][str::connection_key]);
 
   if (NULL == app) {
@@ -62,12 +62,12 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id =
-      (*message_)[str::msg_params][str::button_name].asUInt();
+  const unsigned int btn_id = (*message_)[str::msg_params][str::button_name]
+      .asUInt();
 
   if (!app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
-    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 

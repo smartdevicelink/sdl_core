@@ -40,7 +40,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     classNameBindings:
         [
-            'SDL.SDLModel.VRActive:active'
+            'SDL.SDLModel.VRActive:active',
+            'SDL.SDLModel.VRHelpListActivated:move'
         ],
 
     childViews:
@@ -75,26 +76,6 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
         classNames: 'popUp'
     } ),
-
-    AddActivateApp: function( appID, appName ) {
-
-        this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-            action: 'onActivateSDLApp',
-            target: 'SDL.SDLController',
-            text: appName,
-            appName: appName,
-            activeAppId: appID,
-            classNames: 'list-item',
-            templateName: 'text'
-        } ) );
-
-    },
-
-    DeleteActivateApp: function( appID ) {
-
-        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'activeAppId', appID ) );
-
-    },
 
     AddCommand: function( commandID, vrCommands, appID ) {
 
@@ -142,6 +123,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
     }.observes('SDL.TransitionIterator.ready'),
 
     onActivate: function() {
+        SDL.SDLController.VRMove();
     	SDL.SDLController.onSystemContextChange();
     	if (this.VRActive) {
     		FFW.VR.Started();

@@ -39,7 +39,10 @@ public class ProtocolFrameHeaderFactory {
 		return msg;
 	}
 
-	public static ProtocolFrameHeader createEndSession(SessionType serviceType, byte sessionID, int messageID, byte version) {
+	public static ProtocolFrameHeader createEndSession(SessionType serviceType,
+                                                       byte sessionID, int messageID,
+                                                       byte version,
+                                                       int dataLength) {
 		ProtocolFrameHeader msg = new ProtocolFrameHeader();
 		msg.setVersion(version);
 		msg.setFrameType(FrameType.Control);
@@ -47,6 +50,7 @@ public class ProtocolFrameHeaderFactory {
 		msg.setSessionID(sessionID);
 		msg.setFrameData(FrameDataControlFrameType.EndSession.value());
 		msg.setMessageID(messageID);
+        msg.setDataSize(dataLength);
 
 		return msg;
 	}

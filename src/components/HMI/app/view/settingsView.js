@@ -35,22 +35,19 @@ SDL.SettingsView = Em.ContainerView.create( {
     /** View Id */
     elementId: 'settingsView',
 
-    classNameBindings:
-        [
-             'SDL.States.settings.active:active_state:inactive_state'
-        ],
+    classNameBindings: [
+        'SDL.States.settings.active:active_state:inactive_state'
+    ],
 
-    childViews:
-        [
-            'windowText'
-        ],
-
+    childViews: [
+        'windowText'
+    ],
 
     windowText: SDL.Label.extend( {
-    
-        classNames: 'windowText',
-    
-        content: 'Settings'
-    } )
 
-} );
+        classNames: 'windowText',
+
+        content: 'Settings'
+    })
+
+});

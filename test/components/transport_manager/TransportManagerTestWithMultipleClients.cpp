@@ -39,7 +39,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "../../../src/components/TransportManager/src/IDeviceAdapter.hpp"
+#include "../../../src/components/TransportManager/src/ITransportAdapter.hpp"
 #include "../../../src/components/TransportManager/src/CTransportManager.hpp"
 #include "TransportManager/ITransportManagerDataListener.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
@@ -87,17 +87,17 @@ namespace test { namespace components { namespace TransportManager { namespace T
      * @brief Class that represents custom device adapter that will send known data
      *        and check it's methods calls
      **/
-    class MockDeviceAdapter : public IDeviceAdapter
+    class MockTransportAdapter : public ITransportAdapter
     {
     public:
-        MockDeviceAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator)
+        MockTransportAdapter(ITransportAdapterListener & Listener, IHandleGenerator & HandleGenerator)
         : mListener(Listener)
         , mHandleGenerator(HandleGenerator)
         , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
         {
         }
 
-        virtual EDeviceType getDeviceType(void ) const
+        virtual EDeviceType GetDeviceType(void ) const
         {
             return DeviceBluetooth;
         }
@@ -206,7 +206,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         }
 
     protected:
-        IDeviceAdapterListener & mListener;
+        ITransportAdapterListener & mListener;
         IHandleGenerator & mHandleGenerator;
         Logger mLogger;
     };
@@ -389,38 +389,38 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         }
 
-        virtual void initializeDeviceAdapters()
+        virtual void initializeTransportAdapters()
         {
             // Preparing custom device adapter
-            mpDeviceAdapter = new MockDeviceAdapter(*this, *this);
+            mpTransportAdapter = new MockTransportAdapter(*this, *this);
 
-            EXPECT_CALL(*mpDeviceAdapter, run()).Times(1);
-            EXPECT_CALL(*mpDeviceAdapter, scanForNewDevices())
+            EXPECT_CALL(*mpTransportAdapter, run()).Times(1);
+            EXPECT_CALL(*mpTransportAdapter, scanForNewDevices())
                 .Times(1)
-                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doScanForNewDevices))
+                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doScanForNewDevices))
             ;
 
-            EXPECT_CALL(*mpDeviceAdapter, connectDevice(Data::DeviceHandle))
+            EXPECT_CALL(*mpTransportAdapter, connectDevice(Data::DeviceHandle))
                 .Times(Data::NumberOfClients)
-                .WillRepeatedly(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doConnectDevice))
+                .WillRepeatedly(Invoke(mpTransportAdapter, &MockTransportAdapter::doConnectDevice))
             ;
 
-            EXPECT_CALL(*mpDeviceAdapter, sendFrame(Data::ConnectionHandle, _, 512, _))
+            EXPECT_CALL(*mpTransportAdapter, sendFrame(Data::ConnectionHandle, _, 512, _))
                 .Times(Data::TotalNumberOfCalls)
-                .WillRepeatedly(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doSendFrame))
+                .WillRepeatedly(Invoke(mpTransportAdapter, &MockTransportAdapter::doSendFrame))
             ;
 
-            EXPECT_CALL(*mpDeviceAdapter, disconnectDevice(Data::DeviceHandle))
+            EXPECT_CALL(*mpTransportAdapter, disconnectDevice(Data::DeviceHandle))
                 .Times(1)
-                .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doDisconnectDevice))
+                .WillOnce(Invoke(mpTransportAdapter, &MockTransportAdapter::doDisconnectDevice))
             ;
 
-            addDeviceAdapter(mpDeviceAdapter);
-            LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
+            addTransportAdapter(mpTransportAdapter);
+            LOG4CPLUS_INFO_EXT(mLogger, "Transport adapters initialized");
         }
 
     protected:
-        MockDeviceAdapter *mpDeviceAdapter;
+        MockTransportAdapter *mpTransportAdapter;
         Logger mLogger;
     };
 
@@ -492,7 +492,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
     // ----------------------- TESTS ----------------------- //
 
-    TEST(test_TestWithCorrectDeviceAdapter, CorrectDeviceAdapterBehavior)
+    TEST(test_TestWithCorrectTransportAdapter, CorrectTransportAdapterBehavior)
     {
         Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest"));
 

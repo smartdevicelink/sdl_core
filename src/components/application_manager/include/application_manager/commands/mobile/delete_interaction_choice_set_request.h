@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+class Application;
+
 namespace commands {
 
 /**
@@ -64,6 +66,14 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /*
+   * @brief Check if requested choice set ID in use by perform interaction
+   *
+   * @param app mobile application
+   */
+  bool ChoiceSetInUse(const Application* app);
+
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };
 

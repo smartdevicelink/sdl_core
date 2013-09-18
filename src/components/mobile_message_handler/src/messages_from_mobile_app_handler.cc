@@ -61,6 +61,7 @@ void MessagesFromMobileAppHandler::threadMain() {
 
       application_manager::Message* outgoing_message =
           new application_manager::Message;
+      // TODO(AK): change this
       if (message->protocol_version() == 1) {
         outgoing_message = handler->HandleIncomingMessageProtocolV1(message);
       } else if (message->protocol_version() == 2) {

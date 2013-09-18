@@ -1,7 +1,6 @@
 /**
  * CSS for sdl aplications
  */
- 
 .ffw_list_menu {
 	left: 440px;
 	width: 158px;
@@ -19,15 +18,16 @@
 	height: 49px;
 	border-bottom: 1px solid #393939;
 	line-height: 50px;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: flex;
 }
 
 .ffw_list_menu .ffw-button span {
-	margin-left: 20px;
-	height: 50px;
-	width: 120px;
-	position: absolute;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    height: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
 }
 
 .ffw_list_menu .content {
@@ -36,7 +36,7 @@
 
 .ffw_list_menu .ffw-button.hidden {
 	display: none;
-} 
+}
 
 .sdl-window {
 	width: 800px;
@@ -44,7 +44,25 @@
 	background-color: #000;
 	z-index: 1;
 }
- 
+
+/**
+ * Important Class for SoftButtons Highlightening
+ */
+.isHighlighted{
+	color: gold;
+}
+
+.softButton .ico{
+    width: 50px;
+    height: 49px;
+    -webkit-flex: 0 0 50px;
+    float: left;
+}
+
+.softButton .right_text{
+    padding-left: 5px !important;
+}
+
 .sdl-window .back-button {
 	top: 80px;
 	left: 5px;
@@ -59,8 +77,7 @@
 	margin-left: 8px;
 }
 
-#info_apps_deviceList_view .deviceListLabel,
-.sdl-window .caption-text {
+#info_apps_deviceList_view .deviceListLabel,.sdl-window .caption-text {
 	top: 80px;
 	left: 75px;
 	width: 620px;
@@ -72,7 +89,7 @@
 	padding-left: 15px;
 	padding-right: 15px;
 }
- 
+
 #info_nonMedia {
 	z-index: 1001;
 }
@@ -114,29 +131,29 @@
 }
 
 #info_nonMedia .presets {
-    top: 220px;
-    width: 420px;
-    height: 80px;
+	top: 220px;
+	width: 420px;
+	height: 80px;
 }
 
 #info_nonMedia .presets .ffw-button {
-    width: 138px;
-    height: 38px;
-    position: relative;
-    float: left;
-    line-height: 40px;
-    border-bottom: 1px solid #393939;
-    border-right: 1px solid #393939;
-    border-top: 1px solid #222;
-    border-left: 1px solid #222;
-    text-align: center;
+	width: 138px;
+	height: 38px;
+	position: relative;
+	float: left;
+	line-height: 40px;
+	border-bottom: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #222;
+	border-left: 1px solid #222;
+	text-align: center;
 }
 
-#info_nonMedia .app_image img{
+#info_nonMedia .app_image img {
 	border: 1px solid #393939;
 }
 
-#sdl_options .list{
+#sdl_options .list {
 	width: 650px;
 	height: 251px;
 	border-radius: 2px;
@@ -145,20 +162,16 @@
 }
 
 /*#sdl_view_container .list-content,*/
-#sdl_options .list-content{
+#sdl_options .list-content {
 	width: 590px;
 }
 
-.rightTextButton{
-	margin-left: 0px !important;
-	left: 50px;
-	position: absolute;
+#VRPopUp.move{
+	left: 800px;
 }
 
-#VRPopUp span,
-#info_apps_deviceList_list .list-content span,
-#sdl_view_container .list-content span,
-#sdl_options .list-content span{
+#VRPopUp span,#info_apps_deviceList_list .list-content span,#sdl_view_container .list-content span,#sdl_options .list-content span
+	{
 	margin-left: 15px;
 	position: absolute;
 	text-overflow: ellipsis;
@@ -167,8 +180,8 @@
 }
 
 #sdl_options .list-content .ico {
-    height: 49px;
-    float: left;
+	height: 49px;
+	float: left;
 }
 
 #info_nonMedia_options_submenu {
@@ -180,7 +193,7 @@
 	left: 0px;
 }
 
-#sdl_media_presetButtons .preset-item > span {
+#sdl_media_presetButtons .preset-item>span {
 	z-index: 202;
 	display: block;
 	position: absolute;
@@ -194,40 +207,39 @@
 	color: white;
 }
 
-#sdl_view_container .preset-items{
+#sdl_view_container .preset-items {
 	width: 468px;
 }
 
-#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,
-#sdl_view_container .main-preset-buttons-wraper .preset-item.a6{
+#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
+	{
 	width: 155px;
 }
 
-#sdl_view_container .player_controllsV2{
+#sdl_view_container .player_controllsV2 {
 	top: 241px !important;
 	height: 48px;
 }
 
-#sdl_view_container .player_controllsV2 .ffw-button{
+#sdl_view_container .player_controllsV2 .ffw-button {
 	height: 48px;
 }
 
-#sdl_view_container .player_controllsV2 img{
+#sdl_view_container .player_controllsV2 img {
 	margin-top: -26px;
 }
 
-
 /* ScrollableMessage */
-#ScrollableMessage.ScrollableMessage{
+#ScrollableMessage.ScrollableMessage {
 	left: 0;
 	top: 0;
-	width:	800px;
+	width: 800px;
 	height: 480px;
 	/*z-index: 1000;*/
 	background: url(../images/media/bg.png) no-repeat;
 }
 
-#ScrollableMessage.active{
+#ScrollableMessage.active {
 	opacity: 1;
 	display: block;
 }
@@ -240,7 +252,7 @@
 	border-radius: 2px;
 }
 
-#ScrollableMessage .titleText{
+#ScrollableMessage .titleText {
 	top: 80px;
 	left: 75px;
 	width: 620px;
@@ -249,7 +261,7 @@
 	padding: 15px;
 }
 
-#ScrollableMessage .scrollableText{
+#ScrollableMessage .scrollableText {
 	position: absolute;
 	width: 525px;
 	height: 251px;
@@ -259,7 +271,7 @@
 	overflow: hidden;
 }
 
-#ScrollableMessage .scrollableText-content{
+#ScrollableMessage .scrollableText-content {
 	border: none;
 	width: 474px;
 }
@@ -278,7 +290,7 @@
 	left: 25px !important;
 }
 
-#ScrollableMessage .scrollableTextArea{
+#ScrollableMessage .scrollableTextArea {
 	margin: 0px;
 	/*height: 251px;*/
 	width: 469px;
@@ -291,9 +303,7 @@
 	position: absolute;
 }
 
-
 /* SDL Slider */
-
 .slider-header {
 	top: 167px;
 	left: 145px;
@@ -335,25 +345,24 @@
 	display: inline-block;
 }
 
- 
-#slider_view .ledContainer{
+#slider_view .ledContainer {
 	position: relative;
 	display: inline-block;
 	border: 1px solid #393939;
 	height: 38px;
 }
 
- 
- #slider_view .control.minus .ico {
-	 top: 19px;
-	 left: 20px;
-	 position: absolute;
- }
- #slider_view .control.plus .ico {
-	 top: 12px;
-	 left: 20px;
-	 position: absolute;
- }
+#slider_view .control.minus .ico {
+	top: 19px;
+	left: 20px;
+	position: absolute;
+}
+
+#slider_view .control.plus .ico {
+	top: 12px;
+	left: 20px;
+	position: absolute;
+}
 
 #slider_view .led {
 	width: 12px;
@@ -363,6 +372,7 @@
 	background-position: -4px 0;
 	display: inline-block;
 }
+
 #slider_view .led-inactive {
 	background: url("../images/common/seat-inact-led.png") no-repeat;
 	background-position: 3px 8px;
@@ -372,11 +382,11 @@
 	display: inline-block;
 }
 
-
 /* 	SDL Perform Interaction Choise,
 	SDL TBT Turn List */
 #tbtTurnListView .list,
-#perform_interaction_view .list{
+#perform_interaction_view .list,
+#vr_help_list_view .list {
 	position: absolute;
 	width: 650px;
 	height: 251px;
@@ -384,15 +394,20 @@
 	left: 75px;
 	top: 154px;
 }
+
 #tbtTurnListView .list span,
-#perform_interaction_view .list span{
+#perform_interaction_view .list span,
+#vr_help_list_view .list span{
 	margin-left: 15px;
 }
+
 #tbtTurnListView .list-content,
-#perform_interaction_view .list-content{
+#perform_interaction_view .list-content,
+#vr_help_list_view .list-content {
 	width: 578px;
 }
-#sdl_view_container .cd_logo{
+
+#sdl_view_container .cd_logo {
 	position: absolute;
 	top: 90px;
 	right: 10px;
@@ -401,7 +416,8 @@
 	width: 109px;
 	height: 109px;
 }
-#sdl_view_container .cd_logoV2{
+
+#sdl_view_container .cd_logoV2 {
 	position: absolute;
 	top: 70px;
 	right: 10px;
@@ -410,15 +426,18 @@
 	width: 109px;
 	height: 109px;
 }
-#sdl_view_container .timeV2{
+
+#sdl_view_container .timeV2 {
 	top: 155px;
 }
-#sdl_view_container .textLimit{
+
+#sdl_view_container .textLimit {
 	width: 460px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
-#VRButton.VRButton{
+
+#VRButton.VRButton {
 	background: url(../images/home/controlButtons/vr.png) no-repeat;
 	width: 89px;
 	height: 90px;
@@ -426,10 +445,12 @@
 	top: 2px;
 	-webkit-transition: 0.2s;
 }
-#VRButton.pressed{
+
+#VRButton.pressed {
 	background: url(../images/home/controlButtons/vr_pressed.png) no-repeat;
 }
-#vehicleInfoButton.vehicleInfoButton{
+
+#vehicleInfoButton.vehicleInfoButton {
 	width: 117px;
 	height: 48px;
 	left: 1059px;
@@ -437,16 +458,26 @@
 	text-align: center;
 	line-height: 48px;
 }
-#tbtClientStateButton.tbtClientStateButton{
+
+#tbtClientStateButton.tbtClientStateButton {
 	width: 158px;
 	height: 48px;
-	left: 1018px;
+	left: 865px;
 	top: 418px;
 	text-align: center;
 	line-height: 48px;
 }
-#tbtClientStateView,
-#VehicleInfo{
+
+#exitApp.exitApp {
+	width: 135px;
+	height: 48px;
+	left: 1043px;
+	top: 418px;
+	text-align: center;
+	line-height: 48px;
+}
+
+#exitAppView,#tbtClientStateView,#VehicleInfo {
 	opacity: 0;
 	left: 50px;
 	width: 700px;
@@ -459,8 +490,9 @@
 	display: none;
 	border: 1px solid white;
 }
-#tbtClientStateView .tbtClientStateLabel,
-#VehicleInfo .vehicleInfoLabel{
+
+#exitAppView .exitAppViewLabel,#tbtClientStateView .tbtClientStateLabel,#VehicleInfo .vehicleInfoLabel
+	{
 	top: 10px;
 	width: 600px;
 	left: 35px;
@@ -468,13 +500,14 @@
 	padding: 15px;
 	background: #393939;
 }
-#tbtClientStateView.active,
-#VehicleInfo.active{
+
+#exitAppView.active,#tbtClientStateView.active,#VehicleInfo.active {
 	opacity: 1;
 	display: block;
 }
-#tbtClientStateView .tbtClientState, 
-#VehicleInfo .prndl{
+
+#exitAppView .exitAppViewTitle,#tbtClientStateView .tbtClientState,#VehicleInfo .prndl
+	{
 	top: 70px;
 	width: 600px;
 	left: 40px;
@@ -482,8 +515,9 @@
 	padding: 10px;
 	background: #535353;
 }
-#tbtClientStateView .tbtClientStateSelect,
-#VehicleInfo .prndlSelect{
+
+#exitAppView .exitAppViewSelect,#tbtClientStateView .tbtClientStateSelect,#VehicleInfo .prndlSelect
+	{
 	top: 125px;
 	position: absolute;
 	width: 150px;
@@ -492,11 +526,13 @@
 	color: white;
 	background: #393939;
 }
-#tbtClientStateView .tbtClientStateSelect option,
-#VehicleInfo .prndlSelect option{
+
+#exitAppView .exitAppViewSelect option,#tbtClientStateView .tbtClientStateSelect option,#VehicleInfo .prndlSelect option
+	{
 	background: #393939;
 }
-#VehicleInfo .ecu1Title{
+
+#VehicleInfo .ecu1Title {
 	top: 180px;
 	width: 600px;
 	left: 40px;
@@ -504,28 +540,32 @@
 	padding: 10px;
 	background: #535353;
 }
-#VehicleInfo .ecu1{
+
+#VehicleInfo .ecu1 {
 	top: 233px;
 	width: 80px;
 	left: 65px;
 	height: 20px;
 	padding: 10px;
 }
-#VehicleInfo .ecu2{
+
+#VehicleInfo .ecu2 {
 	top: 265px;
 	width: 80px;
 	left: 65px;
 	height: 20px;
 	padding: 10px;
 }
-#VehicleInfo .ecu1Data{
+
+#VehicleInfo .ecu1Data {
 	top: 233px;
 	width: 485px;
 	left: 155px;
 	height: 20px;
 	padding: 10px;
 }
-#VehicleInfo .ecu2Data{
+
+#VehicleInfo .ecu2Data {
 	top: 265px;
 	width: 485px;
 	left: 155px;
@@ -534,9 +574,8 @@
 }
 
 /* Alert, AudioPassThruPopUp popup*/
-#AlertManeuverPopUp.AlertManeuverPopUp,
-#AudioPassThruPopUp.AudioPassThruPopUp,
-#AlertPopUp.AlertPopUp{
+#AlertManeuverPopUp.AlertManeuverPopUp,#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
+	{
 	opacity: 0;
 	left: 200px;
 	width: 400px;
@@ -549,9 +588,9 @@
 	border-radius: 6px;
 	display: none;
 }
-#AlertManeuverPopUp .applicationName,
-#AudioPassThruPopUp .applicationName,
-#AlertPopUp .applicationName{
+
+#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
+	{
 	width: 380px;
 	left: 10px;
 	text-align: center;
@@ -560,22 +599,24 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#AlertPopUp .alertPopUpImage{
+
+#AlertPopUp .alertPopUpImage {
 	width: 83px;
 	height: 74px;
 	background: url(../images/sdl/Warning.png) no-repeat;
 	top: 45px;
 	left: 10px;
 }
-#AudioPassThruPopUp .audioPassThruImage{
+
+#AudioPassThruPopUp .audioPassThruImage {
 	width: 83px;
 	height: 74px;
 	background: url(../images/home/controlButtons/vrImage.png) no-repeat;
 	top: 45px;
 	left: 25px;
 }
-#AudioPassThruPopUp .message1,
-#AlertPopUp .message1{
+
+#AudioPassThruPopUp .message1,#AlertPopUp .message1 {
 	top: 37px;
 	left: 105px;
 	width: 285px;
@@ -586,8 +627,8 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#AudioPassThruPopUp .message2,
-#AlertPopUp .message2{
+
+#AudioPassThruPopUp .message2,#AlertPopUp .message2 {
 	top: 70px;
 	left: 105px;
 	width: 285px;
@@ -598,8 +639,8 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#AudioPassThruPopUp .message3,
-#AlertPopUp .message3{
+
+#AudioPassThruPopUp .message3,#AlertPopUp .message3 {
 	top: 100px;
 	left: 105px;
 	width: 285px;
@@ -610,15 +651,15 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#AlertManeuverPopUp.AlertManeuverActive,
-#AudioPassThruPopUp.AudioPassThruActive,
-#AlertPopUp.AlertActive{
+
+#AlertManeuverPopUp.AlertManeuverActive,#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
+	{
 	opacity: 1;
 	display: block;
 }
-#AlertManeuverPopUp .softButton,
-#AudioPassThruPopUp .softButton,
-#AlertPopUp .softButton{
+
+#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+	{
 	border: 1px solid #393939;
 	border-radius: 3px;
 	height: 42px;
@@ -630,72 +671,87 @@
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
-#AlertManeuverPopUp .closeButton{
+
+#AlertManeuverPopUp .closeButton {
 	width: 170px;
 	top: 180px;
 	left: 110px;
 }
-#AlertPopUp .alertSoftButtons{
+
+#AlertPopUp .alertSoftButtons {
 	margin-left: 8px;
 	top: 120px;
 	width: 386px;
 }
-#AlertManeuverPopUp .one,
-#softButton0.one{
+
+#AlertManeuverPopUp .one,#softButton0.one {
 	margin-top: 42px;
 	width: 362px;
 }
-#softButton0.two{
+
+#softButton0.two {
 	margin-top: 42px;
 	width: 170px;
 }
-#softButton1.two{
+
+#softButton1.two {
 	margin-top: 42px;
 	width: 170px;
 }
-#softButton0.three{
+
+#softButton0.three {
 	width: 170px;
 }
-#AudioPassThruPopUp .buttonDone,
-#softButton1.three{
+
+#AudioPassThruPopUp .buttonDone,#softButton1.three {
 	width: 170px;
 }
-#AudioPassThruPopUp .buttonCancel,
-#softButton2.three{
+
+#AudioPassThruPopUp .buttonCancel,#softButton2.three {
 	width: 362px;
 }
-#softButton0.four{
+
+#softButton0.four {
 	width: 170px;
 }
-#softButton1.four{
+
+#softButton1.four {
 	width: 170px;
 }
-#softButton2.four{
+
+#softButton2.four {
 	width: 170px;
 }
-#softButton3.four{
+
+#softButton3.four {
 	width: 170px;
 }
-#AudioPassThruPopUp .buttonRetry{
+
+#AudioPassThruPopUp .buttonRetry {
 	top: 120px;
 	width: 175px;
 }
-#AudioPassThruPopUp .buttonDone{
+
+#AudioPassThruPopUp .buttonDone {
 	top: 120px;
 	width: 175px;
 }
-#AudioPassThruPopUp .buttonCancel{
+
+#AudioPassThruPopUp .buttonCancel {
 	top: 120px;
 	width: 372px;
 }
-#info_leftMenu_sdl{
+
+#info_leftMenu_sdl {
 	font-size: 18px;
 	line-height: 48px;
 }
-#info_leftMenu_sdl img{
+
+#info_leftMenu_sdl img {
 	float: left;
 }
-#info_leftMenu_sdl span{
+
+#info_leftMenu_sdl span {
 	float: left;
 	position: relative;
 	width: 100px;
@@ -705,18 +761,20 @@
 }
 
 /* TurnByTurnView */
-#TurnByTurnView.TurnByTurnView{
+#TurnByTurnView.TurnByTurnView {
 	top: 48px;
 	height: 384px;
 	left: 153px;
 	width: 647px;
 }
-#TurnByTurnView .caption-text{
+
+#TurnByTurnView .caption-text {
 	left: 5px;
 	width: 607px;
 	top: 15px;
 }
-#TurnByTurnView .totalDistanceLabel{
+
+#TurnByTurnView .totalDistanceLabel {
 	height: 20px;
 	background: #393939;
 	padding: 15px;
@@ -724,7 +782,8 @@
 	top: 80px;
 	width: 170px;
 }
-#TurnByTurnView .etaLabel{
+
+#TurnByTurnView .etaLabel {
 	height: 20px;
 	background: #393939;
 	padding: 15px;
@@ -732,47 +791,68 @@
 	top: 80px;
 	width: 170px;
 }
-#TurnByTurnView .turnList{
+
+#TurnByTurnView .turnList {
 	left: 5px;
 	top: 145px;
 	width: 379px;
 	padding: 10px;
 	text-align: center;
 }
-#TurnByTurnView .ffw_list_menu{
+
+#TurnByTurnView .ffw_list_menu {
 	height: 198px;
 	top: 200px;
 	left: 5px;
 	width: 401px;
 	border: none;
 }
-#TurnByTurnView .ffw-button{
+
+#TurnByTurnView .ffw-button {
 	border-radius: 3px;
 	border: 1px solid #393939;
 	margin-bottom: 5px;
 	text-align: center;
 	font-size: 20px;
 }
-#turnList img{
-    margin-top: -10px;
+
+
+#TurnByTurnView .ffw-button .text {
+    margin: auto;
 }
-#TurnByTurnView .homeScreen{
+
+#TurnByTurnView .turnList .arrow-ico {
+	margin-top: -13px;
+}
+
+#turnList img {
+	margin-top: -10px;
+}
+
+#TurnByTurnView .homeScreen {
 	left: 440px;
 	top: 312px;
 	padding: 0 0 0 5px;
 	width: 195px;
 }
-#TurnByTurnView .homeScreen > img{
+
+#TurnByTurnView .homeScreen span {
+	width: 140px;
+}
+
+#TurnByTurnView .homeScreen>img {
 	float: left;
 	width: 50px;
 	height: 50px;
 }
-#TurnByTurnView .homeScreen > span{
+
+#TurnByTurnView .homeScreen>span {
 	float: left;
 	line-height: 50px;
 	padding-left: 5px;
 }
-#TurnByTurnView .navigationText2{
+
+#TurnByTurnView .navigationText2 {
 	left: 440px;
 	top: 269px;
 	width: 182px;
@@ -780,7 +860,8 @@
 	height: 20px;
 	background: #393939;
 }
-#TurnByTurnView .turnIcon{
+
+#TurnByTurnView .turnIcon {
 	border: 1px solid #222;
 	top: 64px;
 	left: 440px;
@@ -790,21 +871,22 @@
 	background-repeat: no-repeat;
 }
 
-#tbtTurnListList .list-content .label > img{
+#tbtTurnListList .list-content .label>img {
 	width: 50px;
 	height: 50px;
 	float: left;
 }
-#info_apps_list .ffw-button{
+
+#info_apps_list .ffw-button {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-#sdl_view_container{
-	z-index:501;
+#sdl_view_container {
+	z-index: 501;
 }
 
-#sdl_view_container .title{
+#sdl_view_container .title {
 	top: 79px;
 	font-size: 38px;
 	left: 7px;
@@ -812,7 +894,7 @@
 	height: 44px;
 }
 
-#sdl_view_container .album{
+#sdl_view_container .album {
 	top: 123px;
 	font-size: 26px;
 	left: 10px;
@@ -820,7 +902,7 @@
 	height: 32px;
 }
 
-#sdl_view_container .artist{
+#sdl_view_container .artist {
 	top: 155px;
 	font-size: 26px;
 	left: 10px;
@@ -828,13 +910,13 @@
 	height: 32px;
 }
 
-#sdl_view_container .player_controlls{
+#sdl_view_container .player_controlls {
 	top: 292px;
 	left: 165px;
 }
 
 /* SDL Slider*/
-#media_sdl_slider_view{
+#media_sdl_slider_view {
 	width: 800px;
 	height: 480px;
 	z-index: 1000;
@@ -849,7 +931,7 @@
 	border-radius: 2px;
 }
 
-#media_sdl_slider_view .initialText{
+#media_sdl_slider_view .initialText {
 	top: 80px;
 	left: 75px;
 	width: 620px;
@@ -859,7 +941,7 @@
 }
 
 /* SDL Perform Interaction Choise */
-#media_app_perform_interaction_view{
+#media_app_perform_interaction_view {
 	width: 800px;
 	height: 480px;
 	z-index: 1000;
@@ -874,7 +956,7 @@
 	border-radius: 2px;
 }
 
-#media_app_perform_interaction_view .list{
+#media_app_perform_interaction_view .list {
 	position: absolute;
 	width: 629px;
 	height: 251px;
@@ -883,7 +965,7 @@
 	top: 154px;
 }
 
-#media_app_perform_interaction_view .initialText{
+#media_app_perform_interaction_view .initialText {
 	top: 80px;
 	left: 75px;
 	width: 620px;
@@ -892,12 +974,12 @@
 	padding: 15px;
 }
 
-#media_app_perform_interaction_view .list-content{
+#media_app_perform_interaction_view .list-content {
 	width: 578px;
 }
 
 /* SDL Media Options */
-#media_app_options_view{
+#media_app_options_view {
 	width: 800px;
 	height: 480px;
 	z-index: 2002;
@@ -912,7 +994,7 @@
 	border-radius: 2px;
 }
 
-#media_app_options_view .list{
+#media_app_options_view .list {
 	position: absolute;
 	width: 650px;
 	height: 251px;
@@ -921,7 +1003,7 @@
 	top: 154px;
 }
 
-#media_app_options_view .optionsLabel{
+#media_app_options_view .optionsLabel {
 	top: 80px;
 	left: 75px;
 	width: 620px;
@@ -930,6 +1012,6 @@
 	padding: 15px;
 }
 
-#media_app_options_view .list-content{
+#media_app_options_view .list-content {
 	width: 578px;
 }

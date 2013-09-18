@@ -36,7 +36,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -58,9 +58,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "TransportManager/ITransportManager.hpp"
-#include "TransportManager/ITransportManagerDeviceListener.hpp"
-
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_default.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
@@ -70,6 +69,10 @@
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
+
+#ifdef __cplusplus
+extern "C" void __gcov_flush();
+#endif
 
 namespace {
 
@@ -125,7 +128,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
     new hmi_message_handler::MessageBrokerAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter);
   if (!mb_adapter->Connect()) {
     LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
@@ -155,7 +158,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   th3->Start(false);
 
   mb_adapter->registerController();
-  mb_adapter->subscribeTo();
+  mb_adapter->SubscribeTo();
 
   return true;
 }
@@ -245,6 +248,15 @@ bool InitHmi() {
 }
 }
 
+void flushCoverageInfo() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                  log4cxx::Logger::getLogger("appMain"));
+  LOG4CXX_INFO(logger, "Flush code coverage info");
+#ifdef __cplusplus
+  __gcov_flush();
+#endif
+}
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -252,21 +264,72 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char** argv) {
+
   // --------------------------------------------------------------------------
   // Logger initialization
 
-  /*log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));*/
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
   //log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-  /*LOG4CXX_INFO(logger, " Application started!");*/
+
+  bool shouldReturn = false;
+  bool shouldFlush = false;
+  int next_option;
+
+  const char* const short_options = "hf";
+  const struct option long_options[] = {
+      { "help",     0, NULL, 'h' },
+      { "flush",    0, NULL, 'f' },
+      { NULL,       0, NULL, 0   }
+  };
+
+  do
+  {
+    next_option = getopt_long(argc, argv, short_options,
+                                long_options, NULL);
+
+    switch(next_option) {
+    case 'h':
+      LOG4CXX_INFO(logger, "-h or --help");
+      shouldReturn = true;
+      break;
+    case 'f':
+      LOG4CXX_INFO(logger, "-f or --flush flag");
+      // -f or --flush flag
+      shouldFlush = true;
+      break;
+    case '?':
+      LOG4CXX_INFO(logger, "Wrong input");
+      shouldReturn = true;
+      break;
+    case -1:
+      LOG4CXX_INFO(logger, "No more options");
+      break;
+    default:
+      break;
+    }
+  }
+  while (next_option != -1);
+
+  // Check shouldReturn fist
+  if(shouldReturn) {
+    return 0;
+  }
+
+  if(shouldFlush) {
+    flushCoverageInfo();
+    return 0;
+  }
+
+  LOG4CXX_INFO(logger, " Application started!");
 
   // --------------------------------------------------------------------------
   // Components initialization
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  NsSmartDeviceLink::NsTransportManager::ITransportManager* transport_manager =
-    NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
+  ::transport_manager::TransportManager* transport_manager =
+    ::transport_manager::TransportManagerDefault::Instance();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
@@ -289,11 +352,12 @@ int main(int argc, char** argv) {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  transport_manager->addDataListener(protocol_handler);
-  transport_manager->addDeviceListener(connection_handler);
+  transport_manager->SetProtocolHandler(protocol_handler);
+  transport_manager->AddEventListener(protocol_handler);
+  transport_manager->AddEventListener(connection_handler);
 
-  mmh->setProtocolHandler(protocol_handler);
-  hmi_handler->setMessageObserver(app_manager);
+  mmh->set_protocol_handler(protocol_handler);
+  hmi_handler->set_message_observer(app_manager);
 
   protocol_handler->set_session_observer(connection_handler);
   protocol_handler->set_protocol_observer(mmh);

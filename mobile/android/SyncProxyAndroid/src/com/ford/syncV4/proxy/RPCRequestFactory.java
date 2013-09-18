@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -50,6 +51,17 @@ public class RPCRequestFactory {
 		EncodedSyncPData msg = new EncodedSyncPData();
 		msg.setCorrelationID(correlationID);
 		msg.setData(data);
+		return msg;
+	}
+	
+	public static SyncPData buildSyncPData(
+			byte[] data, Integer correlationID) {
+		
+		if(data == null) return null;
+		
+		SyncPData msg = new SyncPData();
+		msg.setCorrelationID(correlationID);
+		msg.setSyncPData(data);
 		return msg;
 	}
 	

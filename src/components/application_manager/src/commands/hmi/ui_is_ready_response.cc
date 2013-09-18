@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIIsReadyResponse::UIIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIIsReadyResponse::~UIIsReadyResponse() {
@@ -45,7 +46,15 @@ UIIsReadyResponse::~UIIsReadyResponse() {
 void UIIsReadyResponse::Run() {
   LOG4CXX_INFO(logger_, "UIIsReadyResponse::Run");
 
-  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+  DCHECK(message_);
+  smart_objects::SmartObject& object = *message_;
+
+  bool is_available = false;
+
+  if (object[strings::msg_params].keyExists(strings::available)) {
+    is_available = object[strings::msg_params][strings::available].asBool();
+  }
+  ApplicationManagerImpl::instance()->set_is_ui_cooperating(is_available);
 }
 
 }  // namespace commands

@@ -99,7 +99,7 @@ SDL.TBTClientStateView = Em.ContainerView.create( {
          */
         click: function() {
 
-            SDL.SDLController.tbtClientStateSeleced( this.selection.name );
+            SDL.SDLController.tbtClientStateSelected( this.selection.name );
 
         }
     } ),

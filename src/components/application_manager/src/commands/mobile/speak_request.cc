@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 SpeakRequest::~SpeakRequest() {
@@ -51,24 +51,22 @@ SpeakRequest::~SpeakRequest() {
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
 
-  Application* app =
-    application_manager::ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+  Application* app = application_manager::ApplicationManagerImpl::instance()
+      ->application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application " << app->name() <<
-                      " is not registered.");
+    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true, 1);
 }
 
 }  // namespace commands

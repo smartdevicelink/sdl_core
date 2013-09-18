@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -33,19 +32,19 @@
  * 
  */
 
-FFW.VR = FFW.RPCObserver.create({
-    
+FFW.VR = FFW.RPCObserver.create( {
+
     /**
      * If true then VR is present and ready to communicate with SDL.
-     *
+     * 
      * @type {Boolean}
      */
     isReady: false,
-    
+
     /*
      * access to basic RPC functionality
      */
-    client: FFW.RPCClient.create({
+    client: FFW.RPCClient.create( {
         componentName: "VR"
     }),
 
@@ -53,13 +52,16 @@ FFW.VR = FFW.RPCObserver.create({
      * connect to RPC bus
      */
     connect: function() {
-        this.client.connect(this, 500);
+
+        this.client.connect(this, 500); // Magic number is unique identifier for
+        // component
     },
 
     /*
      * disconnect from RPC bus
      */
     disconnect: function() {
+
         this.client.disconnect();
     },
 
@@ -68,6 +70,7 @@ FFW.VR = FFW.RPCObserver.create({
      * time
      */
     onRPCRegistered: function() {
+
         Em.Logger.log("FFW.VR.onRPCRegistered");
         this._super();
     },
@@ -76,6 +79,7 @@ FFW.VR = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
      */
     onRPCUnregistered: function() {
+
         Em.Logger.log("FFW.VR.onRPCUnregistered");
         this._super();
     },
@@ -94,6 +98,7 @@ FFW.VR = FFW.RPCObserver.create({
      * to
      */
     onRPCResult: function(response) {
+
         Em.Logger.log("FFW.VR.onRPCResult");
         this._super();
     },
@@ -102,6 +107,7 @@ FFW.VR = FFW.RPCObserver.create({
      * handle RPC erros here
      */
     onRPCError: function(error) {
+
         Em.Logger.log("FFW.VR.onRPCError");
         this._super();
     },
@@ -110,6 +116,7 @@ FFW.VR = FFW.RPCObserver.create({
      * handle RPC notifications here
      */
     onRPCNotification: function(notification) {
+
         Em.Logger.log("FFW.VR.onRPCNotification");
         this._super();
     },
@@ -118,6 +125,7 @@ FFW.VR = FFW.RPCObserver.create({
      * send notification when command was triggered
      */
     onCommand: function(element) {
+
         Em.Logger.log("FFW.VR.onCommand");
 
         var JSONMessage = {
@@ -136,107 +144,122 @@ FFW.VR = FFW.RPCObserver.create({
      * handle RPC requests here
      */
     onRPCRequest: function(request) {
+
         Em.Logger.log("FFW.VR.onRPCRequest");
         if (this.validationCheck(request)) {
-	
-	        switch(request.method){
-	            case "VR.AddCommand": {
-	
-	                SDL.SDLModel.addCommandVR(request.params);
-	
-	                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
-	            case "VR.DeleteCommand": {
-	
-	                SDL.SDLModel.deleteCommandVR(request.params.cmdID);
-	
-	                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
-	            case "VR.GetSupportedLanguages": {
-	                
-	            	Em.Logger.log("FFW." + request.method + "Response");
-	
-	                var JSONMessage = {
-	                    "jsonrpc": "2.0",
-	                    "id": request.id,
-	                    "result": {
-	                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-	                        "method": "VR.GetSupportedLanguages",
-	                        "languages": SDL.SDLModel.sdlLanguagesList
-	                    }
-	                };
-	                this.client.send(JSONMessage);
-	
-	                break;
-	            }
-	            case "VR.GetLanguage": {
-	                
-	            	Em.Logger.log("FFW." + request.method + "Response");
-	
-	                var JSONMessage = {
-	                    "jsonrpc": "2.0",
-	                    "id": request.id,
-	                    "result": {
-	                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum) from SDL
-	                        "method": "VR.GetLanguage",
-	                        "language": SDL.SDLModel.hmiTTSVRLanguage
-	                    }
-	                };
-	                this.client.send(JSONMessage);
-	
-	                break;
-	            }
-	            case "VR.ChangeRegistration": {
-	
-	                SDL.SDLModel.changeRegistrationTTSVR(request.params.language);
-	
-	                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-	
-	                break;
-	            }
-	            case "VR.IsReady": {
-	                
-	            	Em.Logger.log("FFW." + request.method + "Response");
-	                
-	                // send repsonse
-	                var JSONMessage = {
-	                    "jsonrpc": "2.0",
-	                    "id": request.id,
-	                    "result": {
-	                        "available": this.get('isReady'),
-	                        "code": 0,
-	                        "method" : "VR.IsReady"
-	                    }
-	                };
-	                
-	                this.client.send(JSONMessage);
-	                
-	                break;
-	            }
-	
-	            default: {
-	                // statements_def
-	                break;
-	            }
-	        }
+
+            switch (request.method) {
+            case "VR.AddCommand": {
+
+                SDL.SDLModel.addCommandVR(request.params);
+
+                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method);
+
+                break;
+            }
+            case "VR.DeleteCommand": {
+
+                SDL.SDLModel.deleteCommandVR(request.params.cmdID);
+
+                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method);
+
+                break;
+            }
+            case "VR.GetSupportedLanguages": {
+
+                Em.Logger.log("FFW." + request.method + "Response");
+
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type
+                        // (enum)
+                        // from SDL
+                        "method": "VR.GetSupportedLanguages",
+                        "languages": SDL.SDLModel.sdlLanguagesList
+                    }
+                };
+                this.client.send(JSONMessage);
+
+                break;
+            }
+            case "VR.GetLanguage": {
+
+                Em.Logger.log("FFW." + request.method + "Response");
+
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"], // type
+                        // (enum)
+                        // from SDL
+                        "method": "VR.GetLanguage",
+                        "language": SDL.SDLModel.hmiTTSVRLanguage
+                    }
+                };
+                this.client.send(JSONMessage);
+
+                break;
+            }
+            case "VR.ChangeRegistration": {
+
+                SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
+
+                this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method);
+
+                break;
+            }
+            case "VR.IsReady": {
+
+                Em.Logger.log("FFW." + request.method + "Response");
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "available": this.get('isReady'),
+                        "code": 0,
+                        "method": "VR.IsReady"
+                    }
+                };
+
+                this.client.send(JSONMessage);
+
+                break;
+            }
+
+            default: {
+                // statements_def
+                break;
+            }
+            }
         }
     },
 
     /**
      * Send error response from onRPCRequest
-     * @param {Number} resultCode
-     * @param {Number} id
-     * @param {String} method
+     * 
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
      */
     sendError: function(resultCode, id, method, message) {
 
         Em.Logger.log("FFW." + method + "Response");
 
-        if(resultCode != SDL.SDLModel.resultCode["SUCCESS"]){
+        if (resultCode != SDL.SDLModel.resultCode["SUCCESS"]) {
 
             // send repsonse
             var JSONMessage = {
@@ -245,7 +268,7 @@ FFW.VR = FFW.RPCObserver.create({
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "message": message,
-                    "data":{
+                    "data": {
                         "method": method
                     }
                 }
@@ -256,15 +279,19 @@ FFW.VR = FFW.RPCObserver.create({
 
     /**
      * send response from onRPCRequest
-     * @param {Number} resultCode
-     * @param {Number} id
-     * @param {String} method
+     * 
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
      */
     sendVRResult: function(resultCode, id, method) {
 
         Em.Logger.log("FFW." + method + "Response");
 
-        if(resultCode === SDL.SDLModel.resultCode["SUCCESS"]){
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
 
             // send repsonse
             var JSONMessage = {
@@ -283,6 +310,7 @@ FFW.VR = FFW.RPCObserver.create({
      * send notification when command was triggered from VR
      */
     onChoise: function(commandID) {
+
         Em.Logger.log("FFW.VR.PerformInteraction");
 
         var JSONMessage = {
@@ -300,6 +328,7 @@ FFW.VR = FFW.RPCObserver.create({
      * Initiated by VR module to let SDL know that VR session has started.
      */
     Started: function() {
+
         Em.Logger.log("FFW.VR.Started");
 
         var JSONMessage = {
@@ -313,6 +342,7 @@ FFW.VR = FFW.RPCObserver.create({
      * Initiated by VR module to let SDL know that VR session has stopped.
      */
     Stopped: function() {
+
         Em.Logger.log("FFW.VR.Stopped");
 
         var JSONMessage = {
@@ -326,6 +356,7 @@ FFW.VR = FFW.RPCObserver.create({
      * send notification when command was triggered
      */
     onCommand: function(commandID, appID) {
+
         Em.Logger.log("FFW.VR.onCommand");
 
         var JSONMessage = {
@@ -343,6 +374,7 @@ FFW.VR = FFW.RPCObserver.create({
      * Notifies if sdl VR components language was changed
      */
     OnLanguageChange: function(lang) {
+
         Em.Logger.log("FFW.VR.OnLanguageChange");
 
         // send repsonse

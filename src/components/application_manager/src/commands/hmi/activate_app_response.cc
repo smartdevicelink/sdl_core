@@ -36,7 +36,7 @@ namespace application_manager {
 namespace commands {
 
 ActivateAppResponse::ActivateAppResponse(
-    const MessageSharedPtr& message): ResponseToHMI(message) {
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
 ActivateAppResponse::~ActivateAppResponse() {
@@ -44,8 +44,6 @@ ActivateAppResponse::~ActivateAppResponse() {
 
 void ActivateAppResponse::Run() {
   LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
-
-  SendResponse();
 }
 
 }  // namespace commands

@@ -31,13 +31,12 @@
  */
 #include "application_manager/commands/hmi/close_popup_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupResponse::ClosePopupResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 ClosePopupResponse::~ClosePopupResponse() {

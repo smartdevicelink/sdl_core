@@ -1,3 +1,11 @@
+find_package(Gstreamer-1.0 REQUIRED)
+find_package(Glib-2.0 REQUIRED)
+
+# required to find 'glibconfig.h'
+find_package(PkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+add_definitions(${GLIB2_CFLAGS})
+
 include_directories (
   ./include/
   ../utils/include/
@@ -6,12 +14,18 @@ include_directories (
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
+  ../audio_manager/include
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../TransportManager/include/
+  ../audio_manager/include/
+  ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
+  /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
@@ -21,7 +35,6 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
-./src/audio_pass_thru_thread_impl.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
@@ -31,10 +44,17 @@ set (SOURCES
 ./src/from_hmh_thread_impl.cc
 ./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
+./src/request_controller.cc
 )
 
 set (POLICIES_MANAGER
 ./src/policies_manager/policies_manager.cc
+)
+
+set (EVENT_ENGINE
+./src/event_engine/event.cc
+./src/event_engine/event_dispatcher.cc
+./src/event_engine/event_observer.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -128,11 +148,12 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
+./src/commands/mobile/sync_pdata_request.cc
+./src/commands/mobile/sync_pdata_response.cc
+./src/commands/mobile/on_sync_pdata_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES
-./src/commands/hmi/request_from_hmi.cc
-./src/commands/hmi/response_to_hmi.cc
 ./src/commands/hmi/request_to_hmi.cc
 ./src/commands/hmi/response_from_hmi.cc
 ./src/commands/hmi/notification_to_hmi.cc
@@ -141,24 +162,21 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/allow_app_request.cc
 ./src/commands/hmi/allow_app_response.cc
-./src/commands/hmi/mixing_audio_supported_request.cc
-./src/commands/hmi/mixing_audio_supported_response.cc
-./src/commands/hmi/get_app_list_request.cc
-./src/commands/hmi/get_app_list_response.cc
-./src/commands/hmi/get_device_list_request.cc
-./src/commands/hmi/get_device_list_response.cc
-./src/commands/hmi/exit_all_applications_request.cc
-./src/commands/hmi/exit_all_applications_response.cc
-./src/commands/hmi/exit_application_request.cc
-./src/commands/hmi/exit_application_response.cc
-./src/commands/hmi/start_device_discovery_request.cc
-./src/commands/hmi/start_device_discovery_response.cc
-./src/commands/hmi/close_popup_request.cc
-./src/commands/hmi/close_popup_response.cc
-./src/commands/hmi/exit_application_request.cc
-./src/commands/hmi/exit_application_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/mixing_audio_supported_request.cc
+./src/commands/hmi/mixing_audio_supported_response.cc
+./src/commands/hmi/update_app_list_request.cc
+./src/commands/hmi/update_app_list_response.cc
+./src/commands/hmi/on_update_device_list.cc
+./src/commands/hmi/update_device_list_request.cc
+./src/commands/hmi/update_device_list_response.cc
+./src/commands/hmi/on_exit_all_applications_notification.cc
+./src/commands/hmi/on_exit_application_notification.cc
+./src/commands/hmi/on_start_device_discovery.cc
+./src/commands/hmi/close_popup_request.cc
+./src/commands/hmi/close_popup_response.cc
+./src/commands/hmi/on_app_activated_notification.cc
 ./src/commands/hmi/button_get_capabilities_request.cc
 ./src/commands/hmi/button_get_capabilities_response.cc
 ./src/commands/hmi/vr_is_ready_request.cc
@@ -219,10 +237,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_perform_audio_pass_thru_response.cc
 ./src/commands/hmi/ui_end_audio_pass_thru_request.cc
 ./src/commands/hmi/ui_end_audio_pass_thru_response.cc
-./src/commands/hmi/ui_create_interaction_choice_set_request.cc
-./src/commands/hmi/ui_create_interaction_choice_set_response.cc
-./src/commands/hmi/ui_delete_interaction_choice_set_request.cc
-./src/commands/hmi/ui_delete_interaction_choice_set_response.cc
 ./src/commands/hmi/ui_perform_interaction_request.cc
 ./src/commands/hmi/ui_perform_interaction_response.cc
 ./src/commands/hmi/ui_set_icon_request.cc
@@ -231,6 +245,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
+./src/commands/hmi/ui_show_vr_help_request.cc
+./src/commands/hmi/ui_show_vr_help_response.cc
 ./src/commands/hmi/vi_is_ready_request.cc
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
@@ -252,7 +268,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
-./src/commands/hmi/on_device_list_updated_notification.cc
+./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/on_app_registered_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
@@ -270,6 +286,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_button_press_notification.cc
 ./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
+./src/commands/hmi/on_find_applications.cc
 )
 
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
+target_link_libraries ("ApplicationManager" log4cxx)

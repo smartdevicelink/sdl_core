@@ -28,17 +28,17 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "./from_mobile_thread_impl.h"
 
 namespace application_manager {
 
-log4cxx::LoggerPtr FromMobileThreadImpl::logger_   =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+log4cxx::LoggerPtr FromMobileThreadImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("ApplicationManager"));
 
 FromMobileThreadImpl::FromMobileThreadImpl(ApplicationManagerImpl* handler)
-  : handler_(handler) {
+    : handler_(handler) {
   DCHECK(handler);
 }
 

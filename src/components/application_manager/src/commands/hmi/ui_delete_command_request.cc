@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIDeleteCommandRequest::UIDeleteCommandRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIDeleteCommandRequest::UIDeleteCommandRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIDeleteCommandRequest::~UIDeleteCommandRequest() {

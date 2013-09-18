@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-ListFilesResponse::ListFilesResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+ListFilesResponse::ListFilesResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 ListFilesResponse::~ListFilesResponse() {
@@ -50,41 +50,37 @@ ListFilesResponse::~ListFilesResponse() {
 void ListFilesResponse::Run() {
   LOG4CXX_INFO(logger_, "ListFilesResponse::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
-
+  // check if response false
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
+    }
+  }
+  Application* application = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
   if (!application) {
-    (*message_)[strings::msg_params][strings::success] = false;
-    (*message_)[strings::msg_params][strings::result_code] =
-      mobile_apis::Result::APPLICATION_NOT_REGISTERED;
-  } else {
-    if (!file_system::DirectoryExists(application->name())) {
-      (*message_)[strings::msg_params][strings::success] = false;
-      (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::GENERIC_ERROR;
-    } else {
-      const std::string full_directory_path =
-        file_system::FullPath(application->name());
-      std::vector<std::string> list_files =
-        file_system::ListFiles(full_directory_path);
-      if (!list_files.empty()) {
-        int i = 0;
-        for (std::vector<std::string>::iterator it = list_files.begin();
-             list_files.end() != it; ++it) {
-          (*message_)[strings::msg_params][strings::filenames][i] = *it;
-          ++i;
-        }
-      } else {
-        (*message_)[strings::msg_params][strings::success] = false;
-        (*message_)[strings::msg_params][strings::result_code] =
-          mobile_apis::Result::GENERIC_ERROR;
+    LOG4CXX_ERROR(logger_, "Application not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+  (*message_)[strings::msg_params][strings::space_available] =
+        static_cast<int>(file_system::AvailableSpaceApp(application->name()));
+  if (file_system::DirectoryExists(application->name())) {
+    const std::string full_directory_path = file_system::FullPath(
+        application->name());
+    std::vector < std::string > list_files = file_system::ListFiles(
+        full_directory_path);
+    if (!list_files.empty()) {
+      int i = 0;
+      for (std::vector<std::string>::iterator it = list_files.begin();
+          list_files.end() != it; ++it) {
+        (*message_)[strings::msg_params][strings::filenames][i] = *it;
+        ++i;
       }
     }
   }
-
-  (*message_)[strings::msg_params][strings::space_available] =
-    static_cast<int>(file_system::AvailableSpace());
   SendResponse(true);
 }
 

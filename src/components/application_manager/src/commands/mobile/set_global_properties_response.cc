@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 SetGlobalPropertiesResponse::SetGlobalPropertiesResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 SetGlobalPropertiesResponse::~SetGlobalPropertiesResponse() {
@@ -61,10 +62,10 @@ void SetGlobalPropertiesResponse::Run() {
   }
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -73,14 +74,17 @@ void SetGlobalPropertiesResponse::Run() {
 
   // we need to retrieve stored response code before message chain decrase
   const hmi_apis::Common_Result::eType result_ui =
-    msg_chain->ui_response_result();
-  const hmi_apis::Common_Result::eType result_tts =
-    msg_chain->tts_response_result();
+      msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_tts = msg_chain
+      ->tts_response_result();
 
   if (!IsPendingResponseExist()) {
-
-    if ((hmi_apis::Common_Result::SUCCESS == result_ui) &&
-        (hmi_apis::Common_Result::SUCCESS == result_tts)) {
+    if (((hmi_apis::Common_Result::SUCCESS == result_ui)
+        && (hmi_apis::Common_Result::SUCCESS == result_tts))
+        || ((hmi_apis::Common_Result::SUCCESS == result_ui)
+            && (hmi_apis::Common_Result::INVALID_ENUM == result_tts))
+        || ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
+            && (hmi_apis::Common_Result::SUCCESS == result_tts))) {
       SendResponse(true);
     } else {
       // TODO: check ui and tts response code

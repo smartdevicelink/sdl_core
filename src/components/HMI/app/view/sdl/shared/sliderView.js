@@ -65,9 +65,13 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
-    deactivate: function() {
+    deactivate: function(ABORTED) {
         this._super();
-        FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        if (ABORTED === true) {
+            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        } else {
+            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        }
     },
 
     adjustControl: Em.ContainerView.extend( {
@@ -139,7 +143,7 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      * dynamic footer mode
      */
     changeFooterText: function() {
-        if( this.footerLabel.data.length > 1 ){
+        if( this.footerLabel.data && this.footerLabel.data.length > 1 ){
             this.set( 'footerLabel.content', this.footerLabel.data[this.adjustControl.sliderValue.value - 1] );
         }
     }.observes( 'adjustControl.sliderValue.value' )

@@ -5,11 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-/**
- * 
- * @author skhare3
- *
- */
+
 public class EncodedSyncPData extends RPCRequest {
 	public EncodedSyncPData() {
         super("EncodedSyncPData");

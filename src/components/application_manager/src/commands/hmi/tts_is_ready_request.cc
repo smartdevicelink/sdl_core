@@ -32,13 +32,12 @@
 
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-TTSIsReadyRequest::TTSIsReadyRequest(
-    const MessageSharedPtr& message): RequestToHMI(message) {
+TTSIsReadyRequest::TTSIsReadyRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 TTSIsReadyRequest::~TTSIsReadyRequest() {

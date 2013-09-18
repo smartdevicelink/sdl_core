@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESET_GLOBAL_PROPERTIES_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESET_GLOBAL_PROPERTIES_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -42,7 +42,7 @@ namespace application_manager {
 class Application;
 
 namespace commands {
-//  TODO(DK): Include GlobalProperty header
+// TODO(DK): Include GlobalProperty header
 /*
  * @brief Names of all global properties that should be unset.
  */
@@ -57,71 +57,71 @@ enum GlobalProperty {
  * @brief ResetGlobalPropertiesRequest command class
  **/
 class ResetGlobalPropertiesRequest : public CommandRequestImpl {
-  public:
-    /**
-     * @brief ResetGlobalPropertiesRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief ResetGlobalPropertiesRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief ResetGlobalPropertiesRequest class destructor
-     **/
-    virtual ~ResetGlobalPropertiesRequest();
+  /**
+   * @brief ResetGlobalPropertiesRequest class destructor
+   **/
+  virtual ~ResetGlobalPropertiesRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    /*
-     * @brief Sets default value of the HELPPROMT global property
-     * to the first vrCommand of each Command Menu registered in application
-     *
-     * @param app Registered application
-     * @param is_timeout_promp Flag indicating that timeout prompt
-     * should be reset
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    bool ResetHelpPromt(Application* const app);
+ private:
+  /*
+   * @brief Sets default value of the HELPPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   * @param is_timeout_promp Flag indicating that timeout prompt
+   * should be reset
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetHelpPromt(Application* const app);
 
-    /*
-     * @brief  Sets default value of the TIMEOUTPROMT global property
-     * to the first vrCommand of each Command Menu registered in application
-     *
-     * @param app Registered application
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    bool ResetTimeoutPromt(Application* const app);
+  /*
+   * @brief  Sets default value of the TIMEOUTPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetTimeoutPromt(Application* const app);
 
-    /*
-     * @brief Sets default value of the VRHELPTITLE global property
-     * to the application name
-     *
-     * @param app Registered application
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    bool ResetVrHelpTitle(Application* const app);
+  /*
+   * @brief Sets default value of the VRHELPTITLE global property
+   * to the application name
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetVrHelpTitle(Application* const app);
 
-    /*
-     * @brief Sets default value of the VRHELPITEMS global property
-     * to value equal to registered command -1(default command “Help / Cancel”.)
-     *
-     * @param app Registered application
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    bool ResetVrHelpItems(Application* const app);
+  /*
+   * @brief Sets default value of the VRHELPITEMS global property
+   * to value equal to registered command -1(default command “Help / Cancel”.)
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetVrHelpItems(Application* const app);
 
-    DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
+  DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_RESET_GLOBAL_PROPERTIES_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_

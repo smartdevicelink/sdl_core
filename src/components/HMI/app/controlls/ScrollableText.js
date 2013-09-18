@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,157 +31,179 @@
  * @version 1.0
  */
 
-SDL.ScrollableText = Em.ContainerView.extend( {
+SDL.ScrollableText = Em.ContainerView
+    .extend( {
 
-    classNames: 'scrollableText',
+        classNames: 'scrollableText',
 
-    /** flag for scrollbar */
-    disableScrollbar: false,
+        /** flag for scrollbar */
+        disableScrollbar: false,
 
-    /** Set count of items at one time */
-    itemsOnPage: 0,
+        /** Set count of items at one time */
+        itemsOnPage: 0,
 
-    /** Speed of scrolling in milliseconds */
-    scrollBarSpeed: 200,
+        /** Speed of scrolling in milliseconds */
+        scrollBarSpeed: 200,
 
-    /** Number of columns on page */
-    columnsNumber: 1,
+        /** Number of columns on page */
+        columnsNumber: 1,
 
-    itemheight: 50,
+        itemheight: 50,
 
-    /** Current scroll page */
-    currentPage: 0,
+        /** Current scroll page */
+        currentPage: 0,
 
-    /** Css style of scrollableText */
-    scrollableTextScrollingAttributes: '',
+        /** Css style of scrollableText */
+        scrollableTextScrollingAttributes: '',
 
-    /** Css style of line-height of rows */
-    linesHeght: 23,
+        /** Css style of line-height of rows */
+        linesHeght: 23,
 
-    linesCount: 1,
+        linesCount: 1,
 
-    scrollHeight: null,
+        scrollHeight: null,
 
-    scrollableTextCount: function() {
-        if( $( '#' + this.get( 'childViews' )[1].elementId ) ){
-            $( '#' + this.get( 'childViews' )[1].elementId ).removeAttr( 'style' );
-            this.set( 'scrollHeight', $( '#' + this.get( 'childViews' )[1].elementId )[0].scrollHeight );
-            $( '#' + this.get( 'childViews' )[1].elementId ).height( this.scrollHeight );
-            this.set( 'linesCount', $( '#' + this.get( 'childViews' )[1].elementId )[0].scrollHeight / this.linesHeght );
-        }
-    },
+        scrollableTextCount: function() {
 
-    /** Pages count */
-    pageCount: function() {
-        return Math.ceil( this.get( 'linesCount' ) / this.get( 'itemsOnPage' ) );
-    }.property( 'linesCount', 'itemsOnPage' ),
+            if ($('#' + this.get('childViews')[1].elementId)) {
+                $('#' + this.get('childViews')[1].elementId)
+                    .removeAttr('style');
+                this.set('scrollHeight', $('#'
+                    + this.get('childViews')[1].elementId)[0].scrollHeight);
+                $('#' + this.get('childViews')[1].elementId)
+                    .height(this.scrollHeight);
+                this.set('linesCount', $('#'
+                    + this.get('childViews')[1].elementId)[0].scrollHeight
+                    / this.linesHeght);
+            }
+        },
 
-    scrollableTextHeight: function() {
-        return this.itemsOnPage * this.itemheight;
-    }.property( 'itemsOnPage' ),
+        /** Pages count */
+        pageCount: function() {
 
-    /** Action of element "sb-top" which show previous scrollableText page */
-    sbUp: function() {
-        if( this.get( 'currentPage' ) > 0 ){
-            this.set( 'currentPage', this.get( 'currentPage' ) - 1 );
-        }
-    },
+            return Math.ceil(this.get('linesCount') / this.get('itemsOnPage'));
+        }.property('linesCount', 'itemsOnPage'),
 
-    /** Action of element "sb-bottom" which show previous scrollableText page */
-    sbDown: function() {
-        if( this.get( 'currentPage' ) < this.get( 'pageCount' ) - 1 ){
-            this.set( 'currentPage', this.get( 'currentPage' ) + 1 );
-        }
-    },
+        scrollableTextHeight: function() {
 
-    /** Scroll content according to current page */
-    onCurrentPageChange: function() {
-        this.set( 'scrollableTextScrollingAttributes', 'height: ' + this.scrollHeight + 'px; top: ' + ( this.get( 'currentPage' ) * this.itemsOnPage * ( -23 ) ) + 'px' );
-    }.observes( 'currentPage' ),
+            return this.itemsOnPage * this.itemheight;
+        }.property('itemsOnPage'),
 
-    /** Method for delete certain item from scrollableText */
-    deleteItem: function( id ) {
-        this.items.splice( id, 1 );
-        this.scrollableText.refresh();
-    },
+        /** Action of element "sb-top" which show previous scrollableText page */
+        sbUp: function() {
 
-    /** scrollableText components */
-    childViews:
-        [
+            if (this.get('currentPage') > 0) {
+                this.set('currentPage', this.get('currentPage') - 1);
+            }
+        },
+
+        /** Action of element "sb-bottom" which show previous scrollableText page */
+        sbDown: function() {
+
+            if (this.get('currentPage') < this.get('pageCount') - 1) {
+                this.set('currentPage', this.get('currentPage') + 1);
+            }
+        },
+
+        /** Scroll content according to current page */
+        onCurrentPageChange: function() {
+
+            this.set('scrollableTextScrollingAttributes', 'height: '
+                + this.scrollHeight + 'px; top: '
+                + (this.get('currentPage') * this.itemsOnPage * (-23)) + 'px');
+        }.observes('currentPage'),
+
+        /** Method for delete certain item from scrollableText */
+        deleteItem: function(id) {
+
+            this.items.splice(id, 1);
+            this.scrollableText.refresh();
+        },
+
+        /** scrollableText components */
+        childViews: [
             'scrollbar',
         // 'scrollableText'
         ],
 
-    refreshTextArea: function() {
-        if( this.get( 'childViews' )[1] ){
-            this.get( 'childViews' ).removeObject( this.get( 'childViews' )[1] );
-        }
+        refreshTextArea: function() {
 
-        $( '#scrollableTextArea' ).height( 23 );
-        this.set( 'scrollHeight', 23 );
-        this.set( 'linesCount', 1 );
-        this.set( 'currentPage', 0 );
+            if (this.get('childViews')[1]) {
+                this.get('childViews').removeObject(this.get('childViews')[1]);
+            }
 
-        this.get( 'childViews' ).pushObject( Ember.TextArea.create( {
+            $('#scrollableTextArea').height(23);
+            this.set('scrollHeight', 23);
+            this.set('linesCount', 1);
+            this.set('currentPage', 0);
 
-            classNames: 'scrollableTextArea',
+            this
+                .get('childViews')
+                .pushObject(Ember.TextArea
+                    .create( {
 
-            elementId: 'scrollableTextArea',
+                        classNames: 'scrollableTextArea',
 
-            scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
+                        elementId: 'scrollableTextArea',
 
-            attributeBindings:
-                [
+                        scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
+
+                        attributeBindings: [
+                            'scrollableTextStyle:style'
+                        ],
+
+                        valueBinding: 'this.parentView.items',
+
+                        actionDown: function() {
+
+                            return false;
+                        },
+
+                        didInsertElement: function() {
+
+                            this.get('parentView').scrollableTextCount();
+                        }
+                    }));
+        }.observes('items'),
+
+        /** scrollableText view */
+        scrollableText: Ember.TextArea
+            .extend( {
+
+                classNames: 'scrollableTextArea',
+
+                elementId: 'scrollableTextArea',
+
+                scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
+
+                attributeBindings: [
                     'scrollableTextStyle:style'
                 ],
 
-            valueBinding: 'this.parentView.items',
+                valueBinding: 'this.parentView.items',
 
-            actionDown: function() {
-                return false;
-            },
+                actionDown: function() {
 
-            didInsertElement: function() {
-                this.get( 'parentView' ).scrollableTextCount();
-            }
-        } ) );
-    }.observes( 'items' ),
+                    return false;
+                },
 
-    /** scrollableText view */
-    scrollableText: Ember.TextArea.extend( {
+                didInsertElement: function() {
 
-        classNames: 'scrollableTextArea',
+                    this._parentView.scrollableTextCount();
+                },
 
-        elementId: 'scrollableTextArea',
+                refresh: function() {
 
-        scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
+                    this.rerender();
+                }.observes('_parentView.items')
 
-        attributeBindings:
-            [
-                'scrollableTextStyle:style'
-            ],
+            }),
 
-        valueBinding: 'this.parentView.items',
-
-        actionDown: function() {
-            return false;
-        },
-
-        didInsertElement: function() {
-            this._parentView.scrollableTextCount();
-        },
-
-        refresh: function() {
-            this.rerender();
-        }.observes( '_parentView.items' )
-
-    } ),
-
-    /** Scrollbar view */
-    scrollbar: SDL.ScrollBar.extend( {
-        currentPageBinding: 'parentView.currentPage',
-        pageCountBinding: 'parentView.pageCount',
-        scrollableTextHeightBinding: 'parentView.scrollableTextHeight',
-        scrollBarIsDisabledBinding: 'parentView.disableScrollbar'
-    } )
-} );
+        /** Scrollbar view */
+        scrollbar: SDL.ScrollBar.extend( {
+            currentPageBinding: 'parentView.currentPage',
+            pageCountBinding: 'parentView.pageCount',
+            scrollableTextHeightBinding: 'parentView.scrollableTextHeight',
+            scrollBarIsDisabledBinding: 'parentView.disableScrollbar'
+        })
+    });

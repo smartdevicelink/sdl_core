@@ -45,7 +45,8 @@ namespace commands {
 namespace str = strings;
 
 SubscribeVehicleDataRequest::SubscribeVehicleDataRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
@@ -76,31 +77,32 @@ void SubscribeVehicleDataRequest::Run() {
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
-        true == (*message_)[str::msg_params][it->first].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first)
+        && true == (*message_)[str::msg_params][it->first].asBool()) {
       ++items_to_subscribe;
       response_params[it->first][strings::data_type] = it->second;
 
       if (app->SubscribeToIVI(static_cast<unsigned int>(it->second))) {
         ++subscribed_items;
         response_params[it->first][strings::result_code] =
-          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+            mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
       } else {
         response_params[it->first][strings::result_code] =
-          mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
+            mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
       }
     }
   }
 
   if (0 == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE,
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "Provided VehicleData is empty", &response_params);
   } else if (subscribed_items == items_to_subscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Subscribed on provided VehicleData", &response_params);
   } else if (0 == subscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "Already subscribed on all VehicleData", &response_params);
+    SendResponse(false, mobile_apis::Result::IGNORED,
+                 "Already subscribed on provided VehicleData",
+                 &response_params);
   } else if (subscribed_items < items_to_subscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,
                  "Already subscribed on some VehicleData", &response_params);

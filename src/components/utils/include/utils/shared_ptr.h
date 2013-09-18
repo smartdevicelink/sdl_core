@@ -114,6 +114,8 @@ class SharedPtr {
      **/
     SharedPtr<ObjectType>& operator =(const SharedPtr<ObjectType>& Other);
 
+    bool operator ==(const SharedPtr<ObjectType>& Other) const;
+
     /**
      * @brief Assignment operator.
      *
@@ -148,6 +150,7 @@ class SharedPtr {
     operator bool() const;
     void reset();
     void reset(ObjectType* other);
+    ObjectType* get() const;
 
     /**
      * @return true if mObject not NULL
@@ -155,6 +158,8 @@ class SharedPtr {
     bool valid() const;
 
   private:
+    void reset_impl(ObjectType* other);
+
     // TSharedPtr needs access to other TSharedPtr private members
     // for shared pointers type casts.
     template<typename OtherObjectType>
@@ -222,6 +227,12 @@ utils::SharedPtr<ObjectType>::operator=(const SharedPtr<ObjectType>& Other) {
 }
 
 template<typename ObjectType>
+inline bool utils::SharedPtr<ObjectType>::operator ==(
+  const SharedPtr<ObjectType>& Other) const {
+  return (mObject == Other.mObject);
+}
+
+template<typename ObjectType>
 template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>&
 utils::SharedPtr<ObjectType>::operator=(
@@ -257,12 +268,17 @@ utils::SharedPtr<ObjectType>::operator bool() const {
 
 template<typename ObjectType> void
 utils::SharedPtr<ObjectType>::reset() {
-  reset(0);
+  reset_impl(0);
 }
 
 template<typename ObjectType> void
 utils::SharedPtr<ObjectType>::reset(ObjectType* other) {
   DCHECK(other);
+  reset_impl(other);
+}
+
+template<typename ObjectType> void
+utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
   dropReference();
   mObject = other;
   mReferenceCounter = new unsigned int(1);
@@ -279,6 +295,11 @@ inline void SharedPtr<ObjectType>::dropReference(void) {
       mReferenceCounter = 0;
     }
   }
+}
+
+template<typename ObjectType>
+ObjectType* SharedPtr<ObjectType>::get() const {
+  return mObject;
 }
 
 template<typename ObjectType>

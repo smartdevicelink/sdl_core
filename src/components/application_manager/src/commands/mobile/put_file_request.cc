@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-PutFileRequest::PutFileRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+PutFileRequest::PutFileRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 PutFileRequest::~PutFileRequest() {
@@ -50,41 +50,40 @@ PutFileRequest::~PutFileRequest() {
 void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* application = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  uint64_t free_space = file_system::AvailableSpace();
+  unsigned int free_space = file_system::AvailableSpaceApp(application->name());
 
   const std::string& sync_file_name =
-    (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name];
 
   bool is_persistent_file = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file =
-      (*message_)[strings::msg_params][strings::persistent_file];
+        (*message_)[strings::msg_params][strings::persistent_file];
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     LOG4CXX_ERROR(logger_, "Binary data empty");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   const std::vector<unsigned char> file_data =
-    (*message_)[strings::params][strings::binary_data].asBinary();
+      (*message_)[strings::params][strings::binary_data].asBinary();
   LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
   if (free_space > file_data.size()) {
-    std::string relative_file_path =
-      file_system::CreateDirectory(application->name());
+    std::string relative_file_path = file_system::CreateDirectory(
+        application->name());
     relative_file_path += "/";
     relative_file_path += sync_file_name;
 
@@ -94,6 +93,7 @@ void PutFileRequest::Run() {
 
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
+      LOG4CXX_ERROR(logger_, "Unable to save file");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {

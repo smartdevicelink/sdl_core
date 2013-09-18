@@ -43,18 +43,18 @@ namespace application_manager {
 namespace commands {
 
 ScrollabelMessageRequest::ScrollabelMessageRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
-
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
-ScrollabelMessageRequest::~ScrollabelMessageRequest(){
+ScrollabelMessageRequest::~ScrollabelMessageRequest() {
 }
 
 void ScrollabelMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
-  Application* app = application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = application_manager::ApplicationManagerImpl::instance()
+      ->application((*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -62,20 +62,33 @@ void ScrollabelMessageRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  MessageHelper::AddSoftButtonsDefaultSystemAction(
+      (*message_)[strings::msg_params]);
+
+  mobile_apis::Result::eType verification_result =
+      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != verification_result) {
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "MessageHelper::VerifyImageFiles return " << verification_result);
+    SendResponse(false, verification_result);
+    return;
+  }
+
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[hmi_request::message_text][hmi_request::field_name] =
-    TextFieldName::SCROLLABLE_MSG_BODY;
+      TextFieldName::SCROLLABLE_MSG_BODY;
   msg_params[hmi_request::message_text][hmi_request::field_text] =
-    (*message_)[strings::msg_params][strings::scroll_message_body];
+      (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
 
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
     msg_params[strings::timeout] =
         (*message_)[strings::msg_params][strings::timeout];
-  }
-  else {
+  } else {
     msg_params[strings::timeout] = 30000;
   }
 
@@ -84,8 +97,8 @@ void ScrollabelMessageRequest::Run() {
         (*message_)[strings::msg_params][strings::soft_buttons];
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage,
-                   msg_params, true, 1);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, msg_params, true,
+                   1);
 }
 
 }  // namespace commands

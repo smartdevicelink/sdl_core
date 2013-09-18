@@ -75,11 +75,10 @@ public class WiProProtocol extends AbstractProtocol {
 	} // end-method
 
 	public void EndProtocolSession(SessionType sessionType, byte sessionID) {
-		ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(sessionType, sessionID, 0x00, _version);
-		//byte[] data = new byte[4];
-		//data = BitConverter.intToByteArray(hashID);
-		//handleProtocolFrameToSend(header, data, 0, data.length);
-		sendFrameToTransport(header);
+        byte[] data = BitConverter.intToByteArray(hashID);
+		ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(
+                sessionType, sessionID, hashID, _version, data.length);
+		handleProtocolFrameToSend(header, data, 0, data.length);
 	} // end-method
 
 	public void SendMessage(ProtocolMessage protocolMsg) {	
@@ -134,10 +133,16 @@ public class WiProProtocol extends AbstractProtocol {
 				
 				int currentOffset = 0;
 				byte frameSequenceNumber = 0;
-				
+
 				for (int i = 0; i < frameCount; i++) {
 					if (i < (frameCount - 1)) {
-						frameSequenceNumber = (byte)(i + 1);
+						++frameSequenceNumber;
+						if (frameSequenceNumber ==
+								ProtocolFrameHeader.FrameDataFinalConsecutiveFrame) {
+							// we can't use 0x00 as frameSequenceNumber, because
+							// it's reserved for the last frame
+							++frameSequenceNumber;
+						}
 					} else {
 						frameSequenceNumber = ProtocolFrameHeader.FrameDataFinalConsecutiveFrame;
 					} // end-if
@@ -364,12 +369,22 @@ public class WiProProtocol extends AbstractProtocol {
 					_messageLocks.put(header.getSessionID(), messageLock);
 				}
 				//hashID = BitConverter.intFromByteArray(data, 0);
-				handleProtocolSessionStarted(header.getSessionType(), header.getSessionID(), _version, "");				
+                if (_version == 2) {
+                    hashID = header.getMessageID();
+                }
+                handleProtocolSessionStarted(header.getSessionType(),
+                        header.getSessionID(), _version, "");
 			} else if (header.getFrameData() == FrameDataControlFrameType.StartSessionNACK.getValue()) {
 				handleProtocolError("Got StartSessionNACK for protocol sessionID=" + header.getSessionID(), null);
 			} else if (header.getFrameData() == FrameDataControlFrameType.EndSession.getValue()) {
 				//if (hashID == BitConverter.intFromByteArray(data, 0)) 
-					handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+				if (_version == 2) {
+					if (hashID == header.getMessageID()) {
+						handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+                    }
+				} else {
+                    handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+                }
 			}
 		} // end-method
 				

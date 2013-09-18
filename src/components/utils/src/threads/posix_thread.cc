@@ -108,7 +108,9 @@ void Thread::stop() {
     return;
   }
 
-  delegate_->exitThreadMain();
+  if(NULL != delegate_) {
+    delegate_->exitThreadMain();
+  }
 
   // Wait for the thread to exit.  It should already have terminated but make
   // sure this assumption is valid.

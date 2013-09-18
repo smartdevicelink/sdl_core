@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
 #include <map>
+#include <string>
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
@@ -47,7 +48,7 @@ namespace mobile_api = mobile_apis;
  * @brief Typedef for HMI TextFieldName type
  */
 typedef enum {
-  MAIN_FILED1              = 0,
+  MAIN_FILED1 = 0,
   MAIN_FILED2,
   MAIN_FILED3,
   MAIN_FILED4,
@@ -75,7 +76,7 @@ typedef enum {
  * be published and subscribed to
  */
 typedef enum {
-  GPS                      = 0,
+  GPS = 0,
   SPEED,
   RPM,
   FUELLEVEL,
@@ -115,81 +116,153 @@ typedef std::map<const char*, VehicleDataType> VehicleData;
  * @brief MessageHelper class
  **/
 class MessageHelper {
-  public:
-    /**
-     * @brief Sends HMI status notification to mobile
-     *
-     *@param application_impl application with changed HMI status
-     *
-     **/
-    static void SendHMIStatusNotification(
+ public:
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   *@param application_impl application with changed HMI status
+   *
+   **/
+  static void SendHMIStatusNotification(const Application& application_impl);
+
+  /**
+   * @brief Sends OnAppRegistered notification to HMI
+   *
+   *@param application_impl application with changed HMI status
+   *
+   **/
+  static void SendOnAppRegisteredNotificationToHMI(
       const Application& application_impl);
 
-    /**
-     * @brief Sends OnDeviceListUpdated notification to HMI
-     *
-     *@param device_list Device list
-     *
-     **/
-    static void SendDeviceListUpdatedNotificationToHMI(
-      const std::set<connection_handler::Device>& devices);
+  /**
+   * @brief Sendss Vr Command 'Help'
+   */
+  static void SendHelpVrCommand();
 
-    /**
-     * @brief Sends OnAppRegistered notification to HMI
-     *
-     *@param application_impl application with changed HMI status
-     *
-     **/
-    static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl);
+  /**
+   * @brief Send Vr Synonyms of application name to HMI
+   * so that app can be activated via VR.
+   */
+  static void SendVrCommandsOnRegisterAppToHMI(Application* app);
 
-    /**
-     * @brief Sends OnAppInterfaceUnregistered notification to mobile
-     *
-     *@param connection_key Connection key
-     *@param reason Reason
-     *
-     **/
-    static void SendOnAppInterfaceUnregisteredNotificationToMobile(
+  /**
+   * @brief Removes Vr Synonyms of application name from HMI
+   * when unregistering application.
+   */
+  static void SendRemoveVrCommandsOnUnregisterApp(Application* app);
+
+  /**
+   * @brief Sends OnAppInterfaceUnregistered notification to mobile
+   *
+   *@param connection_key Connection key
+   *@param reason Reason
+   *
+   **/
+  static void SendOnAppInterfaceUnregisteredNotificationToMobile(
       int connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
-    /*
-     * @brief Retrieve vehicle data map for param name in mobile request
-     * to VehicleDataType
-     *
-     * @return VehicleData reference
-     */
-    static const VehicleData& vehicle_data();
+  /*
+   * @brief Retrieve vehicle data map for param name in mobile request
+   * to VehicleDataType
+   *
+   * @return VehicleData reference
+   */
+  static const VehicleData& vehicle_data();
 
-    /*
-     * @brief Prepare GetDeviceListResponse
-     *
-     *
-     * @param devices Devices list
-     *
-     */
-    static smart_objects::SmartObject* CreateDeviceListSO(
+  static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
+      mobile_apis::FunctionID::eType function_id,
+      mobile_apis::Result::eType result, unsigned int correlation_id,
+      unsigned int connection_key);
+
+  /*
+   * @brief Prepare GetDeviceListResponse
+   *
+   *
+   * @param devices Devices list
+   *
+   */
+  static smart_objects::SmartObject* CreateDeviceListSO(
       const connection_handler::DeviceList& devices);
 
-    static smart_objects::SmartObject* CreateSetAppIcon(
+  static smart_objects::SmartObject* CreateModuleInfoSO(
+      unsigned int function_id);
+
+  static smart_objects::SmartObject* CreateSetAppIcon(
       const std::string& path_to_icon, unsigned int app_id);
 
-    static void SendAppDataToHMI(const Application* app);
-    static void RemoveAppDataFromHMI(const Application* app);
+  static void SendAppDataToHMI(const Application* app);
+  static void SendGlobalPropertiesToHMI(const Application* app);
 
-    // TODO(PV): Implement
+  static void SendShowVrHelpToHMI(const Application* app);
+
+  static void SendShowRequestToHMI(const Application* app);
+  static void SendShowConstantTBTRequestToHMI(const Application* app);
+  static void SendAddCommandRequestToHMI(const Application* app);
+  static void SendChangeRegistrationRequestToHMI(const Application* app);
+  static void SendAddVRCommandToHMI(
+      unsigned int cmd_id, const smart_objects::SmartObject& vr_commands,
+      unsigned int app_id);
+  static void SendAddSubMenuRequestToHMI(const Application* app);
+  static void RemoveAppDataFromHMI(Application* const app);
+  static void SendOnAppUnregNotificationToHMI(Application* const app);
+  static void SendDeleteCommandRequestToHMI(Application* const app);
+  static void SendDeleteSubMenuRequestToHMI(Application* const app);
+  static void ResetGlobalproperties(Application* const app);
+
+    static void SendActivateAppToHMI(Application* const app);
+
     static smart_objects::SmartObject* CreateNegativeResponse(
-      unsigned int connection_key,
-      int function_id,
-      unsigned int correlation_id,
+      unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 
-  private:
-    MessageHelper();
+  /*
+   * @brief Finds "Image" structure in request and verify image file presence
+   *                      in Core.
+   *
+   * @param message SmartObject with request
+   *
+   * @param app current application
+   *
+   * @return verification result
+   *
+   */
+  static mobile_apis::Result::eType VerifyImageFiles(
+      smart_objects::SmartObject& message, const Application* app);
 
-    static const VehicleData      vehicle_data_;
-    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
+  static void AddSoftButtonsDefaultSystemAction(
+      smart_objects::SmartObject& msg_params);
+
+
+
+  /*
+   * @brief Verify application and tts name in RefisterAppInterface request msg_params
+   *
+   * @param message msg_params
+   *
+   *
+   * @return verification result
+   *
+   */
+  static bool VerifyApplicationName(smart_objects::SmartObject& msg_params);
+
+  static bool PrintSmartObject(smart_objects::SmartObject& object);
+
+  template<typename From, typename To>
+  static To ConvertEnumAPINoCheck(const From& input) {
+    return static_cast<To>(input);
+  }
+
+ private:
+  static smart_objects::SmartObject* CreateChangeRegistration(
+      int function_id, int language, unsigned int app_id);
+  static smart_objects::SmartObject* CreateGeneralVrCommand();
+  static void SendRemoveCommandToHMI(int function_id, int command_id,
+                                     unsigned int app_id);
+  MessageHelper();
+
+  static const VehicleData vehicle_data_;
+  DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 }  // namespace application_manager

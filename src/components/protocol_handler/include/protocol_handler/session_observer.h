@@ -38,10 +38,8 @@
 
 #include <list>
 #include <string>
-
-#include "TransportManager/ITransportManager.hpp"
-
-using NsSmartDeviceLink::NsTransportManager::tConnectionHandle;
+#include "transport_manager/transport_manager.h"
+#include "connection_handler/connection_handler.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -58,48 +56,51 @@ class SessionObserver {
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
-     * \param connectionHandle Connection identifier whithin which session
+     * \param connection_handle Connection identifier whithin which session
      * has to be started.
      * \return int Id (number) of new session if successful otherwise -1.
      */
-    virtual int onSessionStartedCallback(tConnectionHandle connectionHandle) = 0;
+    virtual unsigned int OnSessionStartedCallback(
+      transport_manager::ConnectionUID connection_handle) = 0;
 
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
-     * \param connectionHandle Connection identifier whithin which session exists
+     * \param connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return int -1 if operation fails session key otherwise
+     * \return unsigned int 0 if operation fails session key otherwise
      */
-    virtual int onSessionEndedCallback(tConnectionHandle connectionHandle,
-                                       unsigned char sessionId,
-                                       unsigned int hashCode) = 0;
+    virtual unsigned int OnSessionEndedCallback(
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char sessionId,
+      unsigned int hashCode) = 0;
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
      * whithin which session exists and session number.
-     * \param  connectionHandle Connection identifier whithin which session exists
+     * \param  connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session
-     * \return int Unique key for session
+     * \return unsigned int Unique key for session
      */
-    virtual int keyFromPair(tConnectionHandle connectionHandle,
-                            unsigned char sessionId) = 0;
+    virtual unsigned int KeyFromPair(
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char sessionId) = 0;
 
     /**
      * \brief Returns connection identifier and session number from given
      * session key
      * \param key Unique key used by other components as session identifier
-     * \param connectionHandle Returned: Connection identifier whithin which
+     * \param connection_handle Returned: Connection identifier whithin which
      * session exists
      * \param sessionId Returned: Number of session
      */
-    // TODO(AK): Is this a non-const reference?
-    // If so, make const or use a pointer.
-    virtual void pairFromKey(int key, tConnectionHandle& connectionHandle,
-                             unsigned char& sessionId) = 0;
+    virtual void PairFromKey(
+      unsigned int key,
+      transport_manager::ConnectionUID* connection_handle,
+      unsigned char* sessionId) = 0;
 
     /**
      * \brief information about given Connection Key.
@@ -109,11 +110,10 @@ class SessionObserver {
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    // TODO(AK): Is this a non-const reference?
-    // If so, make const or use a pointer.
-    virtual int GetDataOnSessionKey(int key, int& app_id,
-                                    std::list<int>& sessions_list,
-                                    int& device_id) = 0;
+    virtual int GetDataOnSessionKey(unsigned int key,
+                                    unsigned int* app_id,
+                                    std::list<int>* sessions_list,
+                                    unsigned int* device_id) = 0;
 
     /**
      * \brief information about given Connection Key.
@@ -123,10 +123,10 @@ class SessionObserver {
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    // TODO(AK): Is this a non-const reference?
-    // If so, make const or use a pointer.
-    virtual int GetDataOnDeviceID(int device_id, std::string& device_name,
-                                  std::list<int>& applications_list) = 0;
+    virtual int GetDataOnDeviceID(
+        unsigned int device_handle,
+      std::string* device_name,
+      std::list<unsigned int>* applications_list) = 0;
 
   protected:
     /**

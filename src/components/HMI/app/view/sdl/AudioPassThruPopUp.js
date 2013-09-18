@@ -151,20 +151,17 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
             this.set( 'appName', SDL.SDLController.getApplicationModel( data.appID ).appName );
 
             for (var i = 0; i < data.audioPassThruDisplayTexts.length; i++) {
-                switch (data.audioPassThruDisplayTexts[i]) {
+                switch (data.audioPassThruDisplayTexts[i].fieldName) {
                     case 'audioPassThruDisplayText1': {
-                        this.appInfo.set('content1', data.audioPassThruDisplayTexts[i].fieldText);
+                        this.set('content1', data.audioPassThruDisplayTexts[i].fieldText);
                         break;
                     }
                     case 'audioPassThruDisplayText2': {
-                        this.appInfo.set('content2', data.audioPassThruDisplayTexts[i].fieldText);
+                        this.set('content2', data.audioPassThruDisplayTexts[i].fieldText);
                         break;
                     }
                 }
             }
-            
-            this.set( 'content1', data.audioPassThruDisplayText1 );
-            this.set( 'content2', data.audioPassThruDisplayText2 );
 
             clearTimeout( this.timer );
             this.timer = setTimeout( function() {

@@ -2,15 +2,14 @@
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -36,54 +35,52 @@ SDL.BottomControls = Em.ContainerView.extend( {
 
     elementId: 'app_bottom_controlls',
 
-    childViews:
-        [
-            'information',
-            'home',
-            'settings'
-        ],
+    childViews: [
+        'information', 'home', 'settings'
+    ],
 
     information: Em.View.extend( {
         elementId: 'info_but',
-        classNameBindings:
-            [
-                'SDL.States.info.active:selected'
-            ],
+        classNameBindings: [
+            'SDL.States.info.active:selected'
+        ],
 
-        template: Em.Handlebars.compile( '<div id="info_but_click"></div>' ),
+        template: Em.Handlebars.compile('<div id="info_but_click"></div>'),
 
-        actionDown: function( event ) {
-            if( !SDL.States.info.active ){
-                SDL.States.goToStates( SDL.InfoController.activeState );
+        actionDown: function(event) {
+
+            if (!SDL.States.info.active) {
+                SDL.States.goToStates(SDL.InfoController.activeState);
             }
         }
-    } ),
+    }),
 
     home: Em.View.extend( {
         elementId: 'home_but',
-        classNameBindings:
-            [
-                'SDL.States.home.active:selected'
-            ],
+        classNameBindings: [
+            'SDL.States.home.active:selected'
+        ],
 
-        template: Em.Handlebars.compile( '<div id="home_but_click"></div>' ),
+        template: Em.Handlebars.compile('<div id="home_but_click"></div>'),
 
-        actionDown: function( event ) {
-            SDL.States.goToStates( 'home' );
+        actionDown: function(event) {
+
+            SDL.States.goToStates('home');
         }
-    } ),
+    }),
 
     settings: Em.View.extend( {
         elementId: 'setting_but',
 
         classNameBindings: 'SDL.States.settings.active:selected',
 
-        template: Em.Handlebars.compile( '<div id="setting_but_click"></div>' ),
+        template: Em.Handlebars.compile('<div id="setting_but_click"></div>'),
 
-        actionDown: function( event ) {
-            if( !SDL.States.settings.active ){
-                SDL.States.goToStates( 'settings' );
+        actionDown: function(event) {
+
+            if (!SDL.States.settings.active) {
+                SDL.States.goToStates('settings');
             }
         }
-    } )
-} );
+    })
+});

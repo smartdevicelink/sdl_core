@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
@@ -51,9 +52,8 @@ DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
 void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -61,8 +61,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int choise_set_id = (*message_)[strings::msg_params]
-                            [strings::interaction_choice_set_id].asInt();
+  const int choise_set_id =
+      (*message_)[strings::msg_params]
+                  [strings::interaction_choice_set_id].asInt();
 
   if (!app->FindChoiceSet(choise_set_id)) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
@@ -70,8 +71,14 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (ChoiceSetInUse(app)) {
+    LOG4CXX_ERROR_EXT(logger_, "Choice set currently in use");
+    SendResponse(false, mobile_apis::Result::IN_USE);
+    return;
+  }
+
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[strings::interaction_choice_set_id] = choise_set_id;
   msg_params[strings::app_id] = app->app_id();
@@ -80,7 +87,27 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
   /*CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
-                   msg_params, true);*/
+   msg_params, true);*/
+}
+
+bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(const Application* app) {
+  if (app->is_perform_interaction_active()) {
+    // retrieve stored choice sets for perform interaction
+    const PerformChoiceSetMap& choice_set_map = app
+        ->performinteraction_choice_set_map();
+
+    PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+    for (; choice_set_map.end() != it; ++it) {
+      if (it->first
+          == (*message_)[strings::msg_params]
+                         [strings::interaction_choice_set_id].asInt()) {
+        LOG4CXX_ERROR_EXT(logger_,
+                          "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace commands

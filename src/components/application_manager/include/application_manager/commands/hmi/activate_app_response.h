@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
 
-#include "application_manager/commands/hmi/response_to_hmi.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
@@ -42,31 +42,31 @@ namespace commands {
 /**
  * @brief ActivateAppResponse command class
  **/
-class ActivateAppResponse : public ResponseToHMI {
- public:
-  /**
-   * @brief ActivateAppResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit ActivateAppResponse(const MessageSharedPtr& message);
+class ActivateAppResponse : public ResponseFromHMI {
+  public:
+    /**
+     * @brief ActivateAppResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit ActivateAppResponse(const MessageSharedPtr& message);
 
-  /**
-   * @brief ActivateAppResponse class destructor
-   **/
-  virtual ~ActivateAppResponse();
+    /**
+     * @brief ActivateAppResponse class destructor
+     **/
+    virtual ~ActivateAppResponse();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_

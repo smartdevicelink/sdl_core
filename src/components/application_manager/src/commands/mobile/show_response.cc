@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 ShowResponse::ShowResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 ShowResponse::~ShowResponse() {

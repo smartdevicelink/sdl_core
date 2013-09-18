@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 CommandResponseImpl::CommandResponseImpl(const MessageSharedPtr& message)
-  : CommandImpl(message) {
+    : CommandImpl(message) {
 }
 
 CommandResponseImpl::~CommandResponseImpl() {
@@ -57,13 +57,17 @@ void CommandResponseImpl::Run() {
 }
 
 void CommandResponseImpl::SendResponse(
-  bool success,
-  const mobile_apis::Result::eType& result_code) {
+    bool success, const mobile_apis::Result::eType& result_code) {
   LOG4CXX_INFO(logger_, "Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::msg_params][strings::success] = success;
+
+  if ((*message_)[strings::params].keyExists(hmi_response::message)) {
+    (*message_)[strings::msg_params][strings::info] =
+        (*message_)[strings::params][hmi_response::message];
+  }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
@@ -87,27 +91,29 @@ void CommandResponseImpl::SendResponse(
 bool CommandResponseImpl::IsPendingResponseExist() {
   bool result = true;
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   unsigned int mobile_correlation_id = 0;
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   int connection_key = 0;
   if (msg_chain) {
     connection_key = msg_chain->connection_key();
+  } else {
+    LOG4CXX_INFO(logger_, "There is no pending response.");
+    return false;
   }
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
+      correlation_id, mobile_correlation_id)) {
     result = false;
     // change correlation id to mobile
     (*message_)[strings::params][strings::correlation_id] =
-      mobile_correlation_id;
+        mobile_correlation_id;
 
-    (*message_)[strings::params][strings::connection_key] =
-      connection_key;
+    (*message_)[strings::params][strings::connection_key] = connection_key;
   }
 
   return result;

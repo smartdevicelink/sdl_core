@@ -55,8 +55,8 @@ CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
 
   int app_id = message_data[strings::params][strings::connection_key];
 
-  Application* application = ApplicationManagerImpl::instance()->
-                             application(app_id);
+  Application* application = ApplicationManagerImpl::instance()->application(
+      app_id);
 
   if (!application) {
     return command;
@@ -64,12 +64,11 @@ CommandSharedPtr CreateCommand(const MessageSharedPtr& message) {
 
   switch (function_id) {
     case function_ids::UnregisterAppInterfaceID: {
-      if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kRequest) {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kRequest) {
         command.reset(new commands::UnregisterAppInterfaceRequest(message));
       } else {
-        command.reset(
-          new commands::UnregisterAppInterfaceResponse(message));
+        command.reset(new commands::UnregisterAppInterfaceResponse(message));
       }
       break;
     }

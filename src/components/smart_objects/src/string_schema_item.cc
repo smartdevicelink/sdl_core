@@ -37,10 +37,11 @@
 
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 
-utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
-                                                                                                                                         const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
+utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem> NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinLength,
+                                                                                                                                    const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
+                                                                                                                                    const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue)
 {
-    return new NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem(MaxLength, DefaultValue);
+    return new NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem(MinLength, MaxLength, DefaultValue);
 }
 
 NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
@@ -51,8 +52,17 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     {
         result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
 
+        size_t minLength;
         size_t maxLength;
         std::string value = Object;
+
+        if (true == mMinLength.getValue(minLength))
+        {
+            if (value.size() < minLength)
+            {
+                result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
+            }
+        }
 
         if (true == mMaxLength.getValue(maxLength))
         {
@@ -61,6 +71,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
                 result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
             }
         }
+
     }
     else
     {
@@ -100,8 +111,10 @@ void smart_objects_ns::CStringSchemaItem::BuildObjectBySchema(
 
 }
 
-NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
-                                                                const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue):
+NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::CStringSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MinLength,
+                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t> & MaxLength,
+                                                                        const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string> & DefaultValue):
+mMinLength(MinLength),
 mMaxLength(MaxLength),
 mDefaultValue(DefaultValue)
 {

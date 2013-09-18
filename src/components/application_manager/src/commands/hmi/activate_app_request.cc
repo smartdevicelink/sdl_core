@@ -31,15 +31,13 @@
  */
 
 #include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 ActivateAppRequest::ActivateAppRequest(
-  const MessageSharedPtr& message): RequestFromHMI(message) {
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
 ActivateAppRequest::~ActivateAppRequest() {
@@ -48,27 +46,7 @@ ActivateAppRequest::~ActivateAppRequest() {
 void ActivateAppRequest::Run() {
   LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::msg_params][strings::app_id]);
-
-  (*message_)[strings::msg_params].erase(strings::app_id);
-  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
-
-  if (!application) {
-    (*message_)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::INVALID_DATA;
-  } else {
-    if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
-      (*message_)[strings::params][hmi_response::code] =
-        hmi_apis::Common_Result::SUCCESS;
-    } else {
-      (*message_)[strings::params][hmi_response::code] =
-        hmi_apis::Common_Result::GENERIC_ERROR;
-    }
-  }
-
-  SendResponseToHMI();
+  SendRequest();
 }
 
 }  // namespace commands

@@ -59,19 +59,22 @@ void AudioManagerTest::SetUp() {
 void AudioManagerTest::TearDown() {
 }
 
-//TEST_F(AudioManagerTest, RecordMicrophoneStream) {
-//  audio_manager::AudioManager* audioManager =
-//      audio_manager::AudioManagerImpl::getAudioManager();
-//
-//  audioManager->startMicrophoneRecording(std::string("record.wav"), 5);
-//
-//  usleep(40000000);
-//
-//   Sleep for 15 sec
-//  usleep(15000000);
-//
-//  audioManager->stopMicrophoneRecording();
-//}
+TEST_F(AudioManagerTest, RecordMicrophoneStream) {
+  audio_manager::AudioManager* audioManager =
+      audio_manager::AudioManagerImpl::getAudioManager();
+
+  audioManager->startMicrophoneRecording(std::string("record.wav"),
+                     mobile_apis::SamplingRate::SamplingRate_44KHZ,
+                                                                 5,
+                  mobile_apis::BitsPerSample::BitsPerSample_16_BIT);
+
+  usleep(40000000);
+
+  // Sleep for 15 sec
+  usleep(15000000);
+
+  audioManager->stopMicrophoneRecording();
+}
 
 TEST_F(AudioManagerTest, AddAndPlayStream) {
   audio_manager::AudioManager* audioManager =
@@ -93,7 +96,7 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
   device_two.sa_data[4] = 0x48;
   device_two.sa_data[5] = 0x27;
 
-  device = device_one;
+  device = device_two;
 
   audioManager->addA2DPSource(device);
   audioManager->playA2DPSource(device);

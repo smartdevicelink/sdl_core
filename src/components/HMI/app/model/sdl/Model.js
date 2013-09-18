@@ -1,17 +1,16 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  · Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  · Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *  · Neither the name of the Ford Motor Company nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
- *
+ * modification, are permitted provided that the following conditions are met: ·
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. · Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. · Neither the name of the Ford Motor Company nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,7 +31,7 @@
  * @version 1.0
  */
 
-SDL.SDLModel = Em.Object.create( {
+SDL.SDLModel = Em.Object.create({
 
     /**
      * Flag to indicate AudioPassThruPopUp activity
@@ -40,6 +39,16 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Boolean}
      */
     AudioPassThruState: false,
+
+    /**
+     * Current device information
+     *
+     * @param {Object}
+     */
+    CurrDeviceInfo: {
+        "name": null,
+        "id"  : null
+    },
 
     /**
      * Driver Distraction State
@@ -70,100 +79,123 @@ SDL.SDLModel = Em.Object.create( {
     phoneCall: false,
 
     /**
+     * Flag to be set true when VRHelpList are activated
+     *
+     * @param {Boolean}
+     */
+    VRHelpListActivated: false,
+
+    /**
      * Default values for global properties
      */
     globalPropertiesDefault: {
-        helpPrompt:
-            [
-                {
-                    "text": "Some text for help prompt",
-                    "type": "TEXT"
-                }
-            ],
+        helpPrompt: [
+            {
+                "text": "Some text for help prompt",
+                "type": "TEXT"
+            }
+        ],
 
-        timeoutPrompt:
-            [
-                {
-                    "text": "Some text for timeout prompt",
-                    "type": "TEXT"
-                }
-            ]
+        timeoutPrompt: [
+            {
+                "text": "Some text for timeout prompt",
+                "type": "TEXT"
+            }
+        ]
     },
 
     /**
      * List of states for OnTBTClientState notification
      */
-    tbtClientStates:[
+    tbtClientStates: [
         {
             name: "ROUTE_UPDATE_REQUEST",
-            id: 0
+            id  : 0
         },
         {
             name: "ROUTE_ACCEPTED",
-            id: 1
+            id  : 1
         },
         {
             name: "ROUTE_REFUSED",
-            id: 2
+            id  : 2
         },
         {
             name: "ROUTE_CANCELLED",
-            id: 3
+            id  : 3
         },
         {
             name: "ETA_REQUEST",
-            id: 4
+            id  : 4
         },
         {
             name: "NEXT_TURN_REQUEST",
-            id: 5
+            id  : 5
         },
         {
             name: "ROUTE_STATUS_REQUEST",
-            id: 6
+            id  : 6
         },
         {
             name: "ROUTE_SUMMARY_REQUEST",
-            id: 7
+            id  : 7
         },
         {
             name: "TRIP_STATUS_REQUEST",
-            id: 8
+            id  : 8
         },
         {
             name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
-            id: 9
+            id  : 9
+        }
+    ],
+
+    /**
+     * List of states for ExitApplication notification
+     */
+    exitAppState: [
+        {
+            name: "IGNITION_OFF",
+            id  : 0
+        },
+        {
+            name: "MASTER_RESET",
+            id  : 1
+        },
+        {
+            name: "FACTORY_DEFAULTS",
+            id  : 2
         }
     ],
 
     /**
      * Enum with result codes for RPC
      */
-    resultCode:{
-        "SUCCESS":0,
-        "UNSUPPORTED_REQUEST":1,
-        "UNSUPPORTED_RESOURCE":2,
-        "DISALLOWED":3,
-        "REJECTED":4,
-        "ABORTED":5,
-        "IGNORED":6,
-        "RETRY":7,
-        "IN_USE":8,
-        "DATA_NOT_AVAILABLE":9,
-        "TIMED_OUT":10,
-        "INVALID_DATA":11,
-        "CHAR_LIMIT_EXCEEDED":12,
-        "INVALID_ID":13,
-        "DUPLICATE_NAME":14,
-        "APPLICATION_NOT_REGISTERED":15,
-        "WRONG_LANGUAGE":16,
-        "OUT_OF_MEMORY":17,
-        "TOO_MANY_PENDING_REQUESTS":18,
-        "NO_APPS_REGISTERED":19,
-        "NO_DEVICES_CONNECTED":20,
-        "WARNINGS":21,
-        "GENERIC_ERROR":22,
-        "USER_DISALLOWED":23
+    resultCode: {
+        "SUCCESS"                   : 0,
+        "UNSUPPORTED_REQUEST"       : 1,
+        "UNSUPPORTED_RESOURCE"      : 2,
+        "DISALLOWED"                : 3,
+        "REJECTED"                  : 4,
+        "ABORTED"                   : 5,
+        "IGNORED"                   : 6,
+        "RETRY"                     : 7,
+        "IN_USE"                    : 8,
+        "DATA_NOT_AVAILABLE"        : 9,
+        "TIMED_OUT"                 : 10,
+        "INVALID_DATA"              : 11,
+        "CHAR_LIMIT_EXCEEDED"       : 12,
+        "INVALID_ID"                : 13,
+        "DUPLICATE_NAME"            : 14,
+        "APPLICATION_NOT_REGISTERED": 15,
+        "WRONG_LANGUAGE"            : 16,
+        "OUT_OF_MEMORY"             : 17,
+        "TOO_MANY_PENDING_REQUESTS" : 18,
+        "NO_APPS_REGISTERED"        : 19,
+        "NO_DEVICES_CONNECTED"      : 20,
+        "WARNINGS"                  : 21,
+        "GENERIC_ERROR"             : 22,
+        "USER_DISALLOWED"           : 23
     },
 
     /**
@@ -180,6 +212,42 @@ SDL.SDLModel = Em.Object.create( {
      * @type object
      */
     registeredApps: [],
+
+    /**
+     * List of registered components
+     *
+     * @type object
+     */
+    registeredComponents: [
+        {
+            type : "UI",
+            state: false
+        },
+        {
+            type : "TTS",
+            state: false
+        },
+        {
+            type : "VR",
+            state: false
+        },
+        {
+            type : "BasicCommunication",
+            state: false
+        },
+        {
+            type : "VehicleInfo",
+            state: false
+        },
+        {
+            type : "Buttons",
+            state: false
+        },
+        {
+            type : "Navigation",
+            state: false
+        }
+    ],
 
     /**
      * List of icons
@@ -211,7 +279,7 @@ SDL.SDLModel = Em.Object.create( {
      * @type {Object}
      */
     globalProperties: {
-        helpPrompt: [],
+        helpPrompt   : [],
         timeoutPrompt: []
     },
 
@@ -234,39 +302,20 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @type {Array}
      */
-    sdlLanguagesList:
-        [
-            'EN-US',
-            'ES-MX',
-            'FR-CA',
-            'DE-EU',
-            'ES-EU',
-            'EN-EU',
-            'RU-RU',
-            'TR-TR',
-            'PL-EU',
-            'FR-EU',
-            'IT-EU',
-            'SV-EU',
-            'PT-EU',
-            'NL-EU',
-            'EN-AU',
-            'ZH-CN',
-            'ZH-TW',
-            'JA-JP',
-            'AR-SA',
-            'KO-KR'
-        ],
+    sdlLanguagesList: [
+        'EN-US', 'ES-MX', 'FR-CA', 'DE-DE', 'ES-ES', 'EN-GB', 'RU-RU', 'TR-TR', 'PL-PL', 'FR-FR', 'IT-IT', 'SV-SE', 'PT-PT', 'NL-NL', 'ZH-TW', 'JA-JP', 'AR-SA', 'KO-KR', 'PT-BR', 'CS-CZ', 'DA-DK', 'NO-NO'
+    ],
 
     /**
      * Method to open Phone view and dial phone number
      *
      * @param {Object}
      */
-    dialNumber: function( params ) {
-        this.set( 'phoneCall', true );
-        SDL.States.goToStates( 'phone.dialpad' );
-        SDL.PhoneModel.set( 'dialpadNumber', params.number );
+    dialNumber: function (params) {
+
+        this.set('phoneCall', true);
+        SDL.States.goToStates('phone.dialpad');
+        SDL.PhoneModel.set('dialpadNumber', params.number);
         SDL.PhoneController.onDialCall();
     },
 
@@ -275,8 +324,9 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Object}
      */
-    tbtActivate: function( params ) {
-        SDL.TurnByTurnView.activate( params );
+    tbtActivate: function (params) {
+
+        SDL.TurnByTurnView.activate(params);
     },
 
     /**
@@ -284,19 +334,35 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Object}
      */
-    tbtTurnListUpdate: function( params ) {
-        SDL.SDLController.getApplicationModel( params.appID ).turnList = params.turnList;
-        SDL.TBTTurnList.updateList( params.appID );
+    tbtTurnListUpdate: function (params) {
+
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.TBTTurnList.updateList(params.appID);
     },
 
     /**
-     * Method to set language for UI component with parameters sent from SDLCore
-     * to UIRPC
+     * Method to VRHelpList on UI with request parameters
+     * It opens VrHelpList PopUp with current list of readable VR commands
+     *
+     * @param {Object}
+     */
+    ShowVrHelp: function (params) {
+
+        SDL.VRHelpListView.showVRHelp(params);
+    },
+
+    /**
+     * Method to set language for UI component with parameters sent from
+     * SDLCore to UIRPC
      *
      * @type {String} lang
      */
-    changeRegistrationUI: function( lang ) {
-        SDL.SDLAppController.model.set( 'UILanguage', lang );
+    changeRegistrationUI: function (lang, appID) {
+
+        if (SDL.SDLController.getApplicationModel(appID)) {
+            SDL.SDLController.getApplicationModel(appID).set('UILanguage', lang);
+        }
     },
 
     /**
@@ -305,30 +371,32 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @type {String} lang
      */
-    changeRegistrationTTSVR: function( lang ) {
-        SDL.SDLAppController.model.set( 'TTSVRLanguage', lang );
+    changeRegistrationTTSVR: function (lang, appID) {
+
+        if (SDL.SDLController.getApplicationModel(appID)) {
+            SDL.SDLController.getApplicationModel(appID).set('TTSVRLanguage', lang);
+        }
     },
 
     /**
-     * Method to add activation button to VR commands and set device parameters
-     * to model
+     * Method to add activation button to VR commands and set device
+     * parameters to model
      *
      * @param {Object}
      */
-    onAppRegistered: function( params ) {
+    onAppRegistered: function (params) {
+
         var applicationType = 1;
 
-        if( SDL.SDLController.getApplicationModel( params.appID ) ){
+        if (SDL.SDLController.getApplicationModel(params.appID)) {
             return;
         }
 
-        if( params.isMediaApplication ){
+        if (params.isMediaApplication) {
             applicationType = 0;
         }
 
-        SDL.SDLController.registerApplication( params, applicationType );
-
-        SDL.VRPopUp.AddActivateApp( params.appID, params.appName );
+        SDL.SDLController.registerApplication(params, applicationType);
     },
 
     /**
@@ -337,12 +405,11 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Object}
      */
-    onAppUnregistered: function( params ) {
-        if( SDL.SDLController.getApplicationModel( params.appID ) ){
+    onAppUnregistered: function (params) {
 
-            SDL.VRPopUp.DeleteActivateApp( params.appID );
+        if (SDL.SDLController.getApplicationModel(params.appID)) {
 
-            SDL.SDLController.unregisterApplication( params.appID );
+            SDL.SDLController.unregisterApplication(params.appID);
         }
     },
 
@@ -350,19 +417,22 @@ SDL.SDLModel = Em.Object.create( {
      * SDL UI ScrolableMessage activation function dependent of Driver
      * Distraction toggle state
      *
-     * @param {Object} params Object with parameters come from SDLCore.
-     * @param {Number} messageRequestId Identification of unique request
+     * @param {Object}
+     *            params Object with parameters come from SDLCore.
+     * @param {Number}
+     *            messageRequestId Identification of unique request
      */
-    onSDLScrolableMessage: function( params, messageRequestId ) {
+    onSDLScrolableMessage: function (request, messageRequestId) {
 
-        if( !SDL.ScrollableMessage.active ){
-            if( SDL.SDLModel.driverDistractionState ){
+        if (!SDL.ScrollableMessage.active) {
+            if (SDL.SDLModel.driverDistractionState) {
                 SDL.DriverDistraction.activate();
-            }else{
-                SDL.ScrollableMessage.activate( SDL.SDLController.getApplicationModel( params.appID ).appName, params, messageRequestId );
+                FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'DD mode is active!');
+            } else {
+                SDL.ScrollableMessage.activate(SDL.SDLController.getApplicationModel(request.params.appID).appName, request.params, messageRequestId);
             }
-        }else{
-            SDL.SDLController.scrollableMessageResponse( 'REJECTED', messageRequestId );
+        } else {
+            FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Higher priority request is being processed on HMI!');
         }
 
     },
@@ -372,16 +442,16 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Object}
      */
-    resetProperties: function( params ) {
+    resetProperties: function (params) {
 
         var i, len = params.properties.length;
-        for( i = 0; i < len; i++ ){
-            if( params.properties[i] == "HELPPROMPT" ){
-                this.set( 'globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt );
+        for (i = 0; i < len; i++) {
+            if (params.properties[i] == "HELPPROMPT") {
+                this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
             }
 
-            if( params.properties[i] == "TIMEOUTPROMPT" ){
-                this.set( 'globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt );
+            if (params.properties[i] == "TIMEOUTPROMPT") {
+                this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
             }
         }
     },
@@ -389,26 +459,29 @@ SDL.SDLModel = Em.Object.create( {
     /**
      * setGlobalProperties
      *
-     * @param {Object} message Object with parameters come from SDLCore.
+     * @param {Object}
+     *            message Object with parameters come from SDLCore.
      */
-    setProperties: function( message ) {
+    setProperties: function (message) {
 
-        //this.set( 'globalProperties.helpPrompt', message.helpPrompt );
-        //this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
+        this.set('globalProperties.helpPrompt', message.helpPrompt);
+        this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
 
     },
 
     /**
-     * Method to call handler from model to show list of avaliable applications
+     * Method to call handler from model to show list of avaliable
+     * applications
      *
-     * @param {Object} appList
+     * @param {Object}
+     *            appList
      */
-    onGetAppList: function( appList ) {
+    onGetAppList: function (appList) {
 
         var i = 0, len = appList.length;
-        for( i = 0; i < len; i++ ){
-            if( appList[i] ){
-                SDL.SDLModel.onAppRegistered( appList[i] );
+        for (i = 0; i < len; i++) {
+            if (appList[i]) {
+                SDL.SDLModel.onAppRegistered(appList[i]);
             }
         }
 
@@ -418,109 +491,133 @@ SDL.SDLModel = Em.Object.create( {
      * Method to call function from DeviceListView to show list of connected
      * devices
      *
-     * @param {Object} params
+     * @param {Object}
+     *            params
      */
-    onGetDeviceList: function( params ) {
-        if( SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length ){
-            SDL.DeviceListView.ShowDeviceList( params );
+    onGetDeviceList: function (params) {
+
+        if (SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
+            SDL.DeviceListView.ShowDeviceList(params);
         }
     },
 
     /**
      * SDL UI SetAppIcon handler
      *
-     * @param {Object} message
-     * @param {Number} id
-     * @param {String} method
+     * @param {Object}
+     *            message
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
      */
-    onSDLSetAppIcon: function( message, id, method ) {
+    onSDLSetAppIcon: function (message, id, method) {
+
         var img = new Image();
-        img.onload = function() {
+        img.onload = function () {
+
             // code to set the src on success
-            SDL.SDLController.getApplicationModel( message.appID ).set( 'appIcon', message.syncFileName );
-            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["SUCCESS"], id, method );
+            SDL.SDLController.getApplicationModel(message.appID).set('appIcon', message.syncFileName.value);
+            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], id, method);
         };
-        img.onerror = function( event ) {
+        img.onerror = function (event) {
+
             // doesn't exist or error loading
-            FFW.UI.sendUIResult( SDL.SDLModel.resultCode["INVALID_DATA"], id, method );
+            FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
             return false;
         };
 
-        img.src = message.syncFileName;
+        img.src = message.syncFileName.value;
     },
 
     /**
      * SDL UI Alert Maneuver response handler show popup window
      *
-     * @param {Object} message Object with parameters come from SDLCore
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
      */
-    onNavigationAlertManeuver: function( message ) {
-        SDL.AlertManeuverPopUp.AlertManeuverActive( message );
+    onNavigationAlertManeuver: function (message) {
+
+        SDL.AlertManeuverPopUp.AlertManeuverActive(message);
     },
 
     /**
      * SDL UI Alert response handler show popup window
      *
-     * @param {Object} message Object with parameters come from SDLCore
-     * @param {Number} alertRequestId Id of current handled request
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
+     * @param {Number}
+     *            alertRequestId Id of current handled request
      */
-    onUIAlert: function( message, alertRequestId ) {
+    onUIAlert: function (message, alertRequestId) {
 
-        if( !SDL.AlertPopUp.active ){
-            SDL.AlertPopUp.AlertActive( message, alertRequestId );
-        }else{
-            SDL.SDLController.alertResponse( this.resultCode['REJECTED'], alertRequestId );
+        if (!SDL.AlertPopUp.active) {
+            SDL.AlertPopUp.AlertActive(message, alertRequestId);
+        } else {
+            SDL.SDLController.alertResponse(this.resultCode['REJECTED'], alertRequestId);
         }
     },
 
     /**
      * SDL UI PerformInteraction response handler show popup window
      *
-     * @param {Object} message Object with parameters come from SDLCore
-     * @param {Number} performInteractionRequestId Id of current handled request
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
+     * @param {Number}
+     *            performInteractionRequestId Id of current handled request
      */
-    uiPerformInteraction: function( message, performInteractionRequestId ) {
-        if( !SDL.InteractionChoicesView.active ){
-            SDL.SDLController.getApplicationModel( message.appID ).onPreformInteraction( message, performInteractionRequestId );
-        }else{
-            SDL.SDLController.interactionChoiseCloseResponse( 'ABORTED', performInteractionRequestId );
+    uiPerformInteraction: function (message, performInteractionRequestId) {
+
+        if (!message) {
+            SDL.SDLAppController.model.onPreformInteraction(message, performInteractionRequestId);
+        } else {
+
+            if (!SDL.InteractionChoicesView.active) {
+                SDL.SDLController.getApplicationModel(message.appID).onPreformInteraction(message, performInteractionRequestId);
+            } else {
+                SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"], performInteractionRequestId);
+            }
         }
     },
 
     /**
      * SDL UI Slider response handler show popup window
      *
-     * @param {Object} message Object with parameters come from SDLCore
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
      */
-    uiSlider: function( message ) {
+    uiSlider: function (message) {
 
-        if( !SDL.SliderView.active ){
-            SDL.SDLController.getApplicationModel( message.params.appID ).onSlider( message );
-        }else{
-            FFW.UI.sendSliderResult( 'ABORTED', message.id );
+        if (!SDL.SliderView.active) {
+            SDL.SDLController.getApplicationModel(message.params.appID).onSlider(message);
+        } else {
+            FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
         }
     },
 
     /**
      * SDL UI AudioPassThru response handler show popup window
      *
-     * @param {Object} message Object with parameters come from SDLCore.
+     * @param {Object}
+     *            message Object with parameters come from SDLCore.
      */
-    UIPerformAudioPassThru: function( message ) {
-        this.set( 'AudioPassThruData', message );
-        this.set( 'AudioPassThruState', true );
+    UIPerformAudioPassThru: function (message) {
+
+        this.set('AudioPassThruData', message);
+        this.set('AudioPassThruState', true);
     },
 
     /**
      * Method ends processing of AudioPassThru and call AudioPassThru UI
      * response handler
      */
-    UIEndAudioPassThru: function() {
-        if( this.AudioPassThruState ){
-            FFW.UI.sendUIResult( this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru" );
-            SDL.SDLController.performAudioPassThruResponse( this.resultCode["SUCCESS"] );
-        }else{
-            FFW.UI.sendUIResult( this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru" );
+    UIEndAudioPassThru: function () {
+
+        if (this.AudioPassThruState) {
+            FFW.UI.sendUIResult(this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru");
+            SDL.SDLController.performAudioPassThruResponse(this.resultCode["SUCCESS"]);
+        } else {
+            FFW.UI.sendError(this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
         }
     },
 
@@ -530,27 +627,30 @@ SDL.SDLModel = Em.Object.create( {
      * @param {Object}
      * @param {Number}
      */
-    onPrompt: function( ttsChunks ) {
+    onPrompt: function (ttsChunks) {
+
         var message = '';
-        if( ttsChunks ){
-            for( var i = 0; i < ttsChunks.length; i++ ){
+        if (ttsChunks) {
+            for (var i = 0; i < ttsChunks.length; i++) {
                 message += ttsChunks[i].text + '\n';
             }
-            SDL.TTSPopUp.ActivateTTS( message );
+            SDL.TTSPopUp.ActivateTTS(message);
         }
     },
-    
+
     /**
      * Play audio file on PlayTone notification
      */
-    onPlayTone: function() {
-    	SDL.Audio.play('audio/initial.wav');
+    onPlayTone: function () {
+
+        SDL.Audio.play('audio/initial.wav');
     },
 
     /**
      * Prompt deactivation
      */
-    TTSStopSpeaking: function() {
+    TTSStopSpeaking: function () {
+
         SDL.TTSPopUp.DeactivateTTS();
     },
 
@@ -560,8 +660,14 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Object}
      */
-    addCommandVR: function( message ) {
-        SDL.VRPopUp.AddCommand( message.cmdID, message.vrCommands, message.appID );
+    addCommandVR: function (message) {
+
+        var appId = 0;
+        if ("appID" in message) {
+            appId = message.appID;
+        }
+
+        SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appId);
     },
 
     /**
@@ -570,44 +676,54 @@ SDL.SDLModel = Em.Object.create( {
      *
      * @param {Number}
      */
-    deleteCommandVR: function( commandID ) {
-        SDL.VRPopUp.DeleteCommand( commandID );
+    deleteCommandVR: function (commandID) {
+
+        SDL.VRPopUp.DeleteCommand(commandID);
     },
 
-    onDeactivateApp: function( target, appID ) {
+    onDeactivateApp: function (target, appID) {
 
-        /**
-         * Close Options menu if opened
-         */
-        if( SDL.OptionsView.active ){
-            SDL.OptionsView.set( 'active', false );
+        if (SDL.SDLController.getApplicationModel(appID)) {
+            /**
+             * Close Options menu if opened
+             */
+            if (SDL.OptionsView.active) {
+                SDL.OptionsView.set('active', false);
+            }
+
+            var dest = target.split('.'), reason;
+
+            switch (dest[0]) {
+                case 'media':
+                {
+                    reason = 'AUDIO';
+                    break;
+                }
+                case "phone":
+                {
+                    reason = 'PHONEMENU';
+                    break;
+                }
+                case "navigation":
+                {
+                    reason = 'NAVIGATIONMAP';
+                    break;
+                }
+                case "settings":
+                {
+                    reason = 'SYNCSETTINGS';
+                    break;
+                }
+                default:
+                {
+                    reason = 'GENERAL';
+                    break;
+                }
+            }
+
+            SDL.TurnByTurnView.deactivate();
+
+            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
         }
-
-        var dest = target.split( '.' ), reason;
-
-        switch( dest[0] ){
-            case 'media': {
-                reason = 'AUDIO';
-                break;
-            }
-            case "phone": {
-                reason = 'PHONEMENU';
-                break;
-            }
-            case "navigation": {
-                reason = 'NAVIGATIONMAP';
-                break;
-            }
-            case "settings": {
-                reason = 'SYNCSETTINGS';
-                break;
-            }
-            default: {
-                reason = 'GENERAL';
-                break;
-            }
-        }
-
-        FFW.BasicCommunication.DeactivateApp( reason, appID );
     }
-} );
+});

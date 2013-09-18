@@ -44,22 +44,20 @@ namespace commands {
 void GenericResponse::Run() {
   /*NsSmartDeviceLink::NsSmartObjects::SmartObject response;
 
-  response[strings::params][strings::correlation_id] =
-      (*message_)[strings::params][strings::correlation_id];
-  response[strings::params][strings::protocol_version] =
-      (*message_)[strings::params][strings::protocol_version];
-  response[strings::params][strings::connection_key] =
-      (*message_)[strings::params][strings::connection_key];
+   response[strings::params][strings::correlation_id] =
+   (*message_)[strings::params][strings::correlation_id];
+   response[strings::params][strings::protocol_version] =
+   (*message_)[strings::params][strings::protocol_version];
+   response[strings::params][strings::connection_key] =
+   (*message_)[strings::params][strings::connection_key];
 
-  response[strings::msg_params][strings::success] = false;
-  */
+   response[strings::msg_params][strings::success] = false;
+   */
 
-  (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::GenericResponseID;
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::msg_params][strings::success] = false;
   (*message_)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::UNSUPPORTED_REQUEST;
+      mobile_apis::Result::INVALID_DATA;
 
   SendResponse(false);
 }

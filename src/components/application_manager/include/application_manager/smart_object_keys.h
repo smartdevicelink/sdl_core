@@ -63,7 +63,8 @@ const char uses_vehicle_data[] = "usesVehicleData";
 const char is_media_application[] = "isMediaApplication";
 const char language_desired[] = "languageDesired";
 const char auto_activated_id[] = "autoActivateID";
-const char app_type[] = "AppType";
+const char app_type[] = "appType";
+const char app_hmi_type[] = "appHMIType";
 const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
 const char help_promt[] = "helpPrompt";
@@ -75,6 +76,8 @@ const char main_field_1[] = "mainField1";
 const char main_field_2[] = "mainField2";
 const char main_field_3[] = "mainField3";
 const char main_field_4[] = "mainField4";
+const char eta[] = "eta";
+const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
 const char status_bar[] = "statusBar";
@@ -85,6 +88,8 @@ const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
 const char vr_commands[] = "vrCommands";
 const char position[] = "position";
+const char num_ticks[] = "numTicks";
+const char slider_footer[] = "sliderFooter";
 const char menu_id[] = "menuID";
 const char menu_name[] = "menuName";
 const char interaction_choice_set_id[] = "interactionChoiceSetID";
@@ -98,6 +103,7 @@ const char alert_text2[] = "alertText2";
 const char alert_text3[] = "alertText3";
 const char tts_chunks[] = "ttsChunks";
 const char initial_prompt[] = "initialPrompt";
+const char initial_text[] = "initialText";
 const char duration[] = "duration";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
@@ -119,6 +125,8 @@ const char value[] = "value";
 const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
+const char start_time[] = "startTime";
+const char update_mode[] = "updateMode";
 const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
 const char audio_streaming_state[] = "audioStreamingState";
@@ -150,6 +158,8 @@ const char application[] = "application";
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
 const char reason[] = "reason";
+const char available[] = "available";
+const char text[] = "text";
 
 // vehicle info
 const char gps[] = "gps";
@@ -182,6 +192,9 @@ const char timeout_prompt[] = "timeoutPrompt";
 const char scroll_message_body[] = "scrollableMessageBody";
 const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
+const char interaction_mode[] = "interactionMode";
+const char slider_position[] = "sliderPosition";
+const char system_action[] = "systemAction";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -207,6 +220,7 @@ const char show_strings[] = "showStrings";
 
 namespace hmi_response {
 const char code[] = "code";
+const char message[] = "message";
 const char method[] = "method";
 const char try_again_time[] = "tryAgainTime";
 const char custom_button_id[] = "customButtonID";
@@ -226,6 +240,11 @@ const char did_result[] = "didResult";
 const char result_code[] = "resultCode";
 const char dtc[] = "dtc";
 const char ecu_header[] = "ecuHeader";
+const char image_capabilities[] = "imageCapabilities";
+const char display_type[] = "displayType";
+const char text_fields[] = "textFields";
+const char media_clock_formats[] = "mediaClockFormats";
+const char graphic_supported[] = "graphicSupported";
 }  // namespace hmi_response
 
 namespace hmi_notification {

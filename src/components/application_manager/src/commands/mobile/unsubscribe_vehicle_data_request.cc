@@ -45,7 +45,8 @@ namespace commands {
 namespace str = strings;
 
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
@@ -55,9 +56,7 @@ void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application(app_id);
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -77,27 +76,30 @@ void UnsubscribeVehicleDataRequest::Run() {
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
-        true == (*message_)[str::msg_params][it->first].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first)
+        && true == (*message_)[str::msg_params][it->first].asBool()) {
       ++items_to_unsubscribe;
       response_params[it->first][strings::data_type] = it->second;
 
       if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
         ++unsubscribed_items;
         response_params[it->first][strings::result_code] =
-          mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+            mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
       } else {
         response_params[it->first][strings::result_code] =
-          mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
+            mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
       }
     }
   }
 
-  if (unsubscribed_items == items_to_unsubscribe) {
+  if (0 == items_to_unsubscribe) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                 "Provided VehicleData is empty", &response_params);
+  } else if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Unsubscribed on all VehicleData", &response_params);
+                 "Unsubscribed on provided VehicleData", &response_params);
   } else if (0 == unsubscribed_items) {
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    SendResponse(false, mobile_apis::Result::IGNORED,
                  "Was not subscribed on any VehicleData", &response_params);
   } else if (unsubscribed_items < items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::WARNINGS,

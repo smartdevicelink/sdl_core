@@ -43,7 +43,8 @@ namespace commands {
 namespace mobile {
 
 OnButtonPressNotification::OnButtonPressNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnButtonPressNotification::~OnButtonPressNotification() {
@@ -52,27 +53,12 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
-  if ((*message_)[strings::msg_params].keyExists(
-        hmi_response::custom_button_id)) {
-    LOG4CXX_INFO_EXT(logger_, "No subscription for custom buttons requires");
-
-    Application* app = ApplicationManagerImpl::instance()->active_application();
-
-    if (NULL == app) {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonPress came but no app is active.");
-      return;
-    }
-
-    SendButtonPress(app, true);
-    return;
-  }
-
-  const unsigned int btn_id = static_cast<unsigned int>(
-                                (*message_)[strings::msg_params]
-                                [hmi_response::button_name].asInt());
+  const unsigned int btn_id =
+      static_cast<unsigned int>(
+          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
   const std::vector<Application*>& subscribedApps =
-    ApplicationManagerImpl::instance()->applications_by_button(btn_id);
+      ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {
@@ -82,10 +68,10 @@ void OnButtonPressNotification::Run() {
       continue;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
-        (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-         && mobile_apis::ButtonName::OK != btn_id)) {
-      SendButtonPress(subscribed_app, false);
+    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
+        || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
+            && mobile_apis::ButtonName::OK != btn_id)) {
+      SendButtonPress(subscribed_app);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
@@ -93,10 +79,8 @@ void OnButtonPressNotification::Run() {
   }
 }
 
-void OnButtonPressNotification::SendButtonPress(const Application* app,
-    bool is_custom_btn_id) {
-  smart_objects::SmartObject* on_btn_press =
-    new smart_objects::SmartObject();
+void OnButtonPressNotification::SendButtonPress(const Application* app) {
+  smart_objects::SmartObject* on_btn_press = new smart_objects::SmartObject();
 
   if (!on_btn_press) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
@@ -108,20 +92,20 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
     return;
   }
 
-  (*on_btn_press)[strings::params][strings::connection_key] =
-      app->app_id();
+  (*on_btn_press)[strings::params][strings::connection_key] = app->app_id();
 
   (*on_btn_press)[strings::params][strings::function_id] =
-     mobile_apis::FunctionID::eType::OnButtonPressID;
+      mobile_apis::FunctionID::eType::OnButtonPressID;
 
   (*on_btn_press)[strings::msg_params][strings::button_name] =
-    (*message_)[strings::msg_params][hmi_response::button_name];
+      (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
-    (*message_)[strings::msg_params][hmi_response::button_mode];
+      (*message_)[strings::msg_params][hmi_response::button_mode];
 
-  if (is_custom_btn_id) {
+  if ((*message_)[strings::msg_params].keyExists(
+      hmi_response::custom_button_id)) {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] =
-      (*message_)[strings::msg_params][strings::custom_button_id];
+        (*message_)[strings::msg_params][strings::custom_button_id];
   } else {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] = 0;
   }
@@ -130,7 +114,7 @@ void OnButtonPressNotification::SendButtonPress(const Application* app,
   SendNotification();
 }
 
-} // namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

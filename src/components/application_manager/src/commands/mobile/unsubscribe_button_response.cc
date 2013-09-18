@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {

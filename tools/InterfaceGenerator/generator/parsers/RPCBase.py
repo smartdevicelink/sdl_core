@@ -579,9 +579,14 @@ class Parser(object):
                     min_value=min_value,
                     max_value=max_value)
         elif type_name == "String":
+            min_length = self._extract_optional_number_attrib(
+                attrib, "minlength")
+            # if minlength is not defined default value is 1
+            if min_length is None:
+                min_length = 1
             max_length = self._extract_optional_number_attrib(
                 attrib, "maxlength")
-            param_type = Model.String(max_length=max_length)
+            param_type = Model.String(min_length=min_length, max_length=max_length)
         else:
             if 1 == type_name.count("."):
                 custom_type_name = type_name.replace(".", "_")

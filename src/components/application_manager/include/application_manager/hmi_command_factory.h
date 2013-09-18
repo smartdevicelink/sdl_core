@@ -45,19 +45,19 @@ typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
  * @brief Factory class for command creation
  **/
 class HMICommandFactory {
-  public:
-    /**
-     * @brief Create command object and return pointer to it
-     *
-     * @param  smartObject SmartObject shared pointer.
-     * @return Pointer to created command object.
-     **/
-    static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief Create command object and return pointer to it
+   *
+   * @param  smartObject SmartObject shared pointer.
+   * @return Pointer to created command object.
+   **/
+  static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
 
-  private:
-    HMICommandFactory();
-    static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(HMICommandFactory);
+ private:
+  HMICommandFactory();
+  static log4cxx::LoggerPtr logger_;
+  DISALLOW_COPY_AND_ASSIGN(HMICommandFactory);
 };
 
 }  // namespace application_manager

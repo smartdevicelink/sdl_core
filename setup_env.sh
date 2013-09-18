@@ -8,6 +8,13 @@ BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
+UPDATE_SOURCES=false
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
+AVAHI_COMMON="libavahi-common-dev"
+DOXYGEN="doxygen"
+GRAPHVIZ="graphviz"
+MSCGEN="mscgen"
+
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -52,25 +59,47 @@ echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
+echo "Installing Avahi-common-dev library"
+apt-install ${AVAHI_COMMON}
+echo $OK
+
+echo "Installing Avahi-client-dev library"
+apt-install ${AVAHI_CLIENT_LIBRARY}
+echo $OK
+
+echo "Installing Doxygen"
+apt-install ${DOXYGEN}
+echo $OK
+
+echo "Installing Graphviz for doxygen"
+apt-install ${GRAPHVIZ}
+echo $OK
+
+echo "Installing Mscgen"
+apt-install ${MSCGEN}
+echo $OK
+
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer to /etc/apt/sources.list"
-	# TODO use $FULL_GSTREAMER_REPO_LINK in sed
-	sudo sed -i '$a\deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu precise main' /etc/apt/sources.list
+	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
 fi
 
 if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer sources to /etc/apt/sources.list"
-	# TODO use $FULL_GSTREAMER_SRC_REPO_LINK in sed
-	sudo sed -i '$a\deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu precise main' /etc/apt/sources.list
+	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
 fi
 
-echo "Apdating repository..."
-sudo apt-get update
+if $UPDATE_SOURCES; then
+	echo "Apdating repository..."
+	sudo apt-get update
+fi
 
 echo "Installing gstreamer..."
-sudo apt-get install gstreamer1.0*
+apt-install gstreamer1.0*
 
 
 

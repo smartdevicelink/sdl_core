@@ -41,8 +41,8 @@ namespace application_manager {
 namespace commands {
 
 OnAppDeactivatedNotification::OnAppDeactivatedNotification(
-  const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
@@ -51,21 +51,18 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
 
-  Application* app = ApplicationManagerImpl::instance()
-                     ->active_application();
+  Application* app = ApplicationManagerImpl::instance()->active_application();
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(
-      logger_,
-      "Memory allocation in OnAppDeactivatedNotification::Run failed!");
+        logger_,
+        "Memory allocation in OnAppDeactivatedNotification::Run failed!");
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::app_id].asInt()
       != app->app_id()) {
-    LOG4CXX_ERROR_EXT(
-      logger_,
-      "Wrong application id!");
+    LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
     return;
   }
 
@@ -79,10 +76,10 @@ void OnAppDeactivatedNotification::Run() {
       if (app->is_media_application()) {
         if (profile::Profile::instance()->is_mixing_audio_supported()) {
           app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::ATTENUATED);
+              mobile_api::AudioStreamingState::ATTENUATED);
         } else {
           app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::NOT_AUDIBLE);
+              mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);

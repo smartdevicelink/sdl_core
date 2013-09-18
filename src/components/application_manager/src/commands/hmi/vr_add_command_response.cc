@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+VRAddCommandResponse::VRAddCommandResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VRAddCommandResponse::~VRAddCommandResponse() {
@@ -53,23 +53,22 @@ void VRAddCommandResponse::Run() {
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  smart_objects::SmartObject data =
-    msg_chain->data();
+  smart_objects::SmartObject data = msg_chain->data();
 
   /* store received response code for to check it
    * in corresponding Mobile response
    */
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_vr_response_result(code);
 
@@ -79,7 +78,7 @@ void VRAddCommandResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::AddCommandID;
+      mobile_apis::FunctionID::AddCommandID;
 
   SendResponseToMobile(message_);
 }

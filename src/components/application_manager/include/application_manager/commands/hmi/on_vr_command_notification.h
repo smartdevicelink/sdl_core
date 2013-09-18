@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VR_COMMAND_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -62,6 +63,8 @@ class OnVRCommandNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
+  bool PerformInteractionHandling(Application* const app);
+
   DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
 };
 

@@ -35,6 +35,7 @@
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -44,8 +45,8 @@ namespace commands {
 
 namespace str = strings;
 
-GetVehicleDataRequest::GetVehicleDataRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {
@@ -55,8 +56,7 @@ void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
   int app_id = (*message_)[strings::params][strings::connection_key];
-  Application* app = ApplicationManagerImpl::instance()->
-                     application(app_id);
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -70,15 +70,26 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
 
-  // copy entirely msg
-  msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = app->app_id();
+  for (; vehicle_data.end() != it; ++it) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first)
+        && true == (*message_)[str::msg_params][it->first].asBool()) {
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
 
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                   msg_params, true);
+      // copy entirely msg
+      msg_params = (*message_)[strings::msg_params];
+      msg_params[strings::app_id] = app->app_id();
+
+      CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                       msg_params, true, 1);
+      return;
+    }
+  }
+
+  SendResponse(false, mobile_apis::Result::INVALID_DATA);
 }
 
 }  // namespace commands

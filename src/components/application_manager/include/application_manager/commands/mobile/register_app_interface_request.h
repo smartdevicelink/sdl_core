@@ -31,10 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "utils/synchronisation_primitives.h"
+#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -47,41 +49,46 @@ namespace commands {
  * @brief Register app interface request  command class
  **/
 class RegisterAppInterfaceRequest : public CommandRequestImpl {
-  public:
-    /**
-     * \brief RegisterAppInterfaceRequest class constructor
-     **/
-    explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-    }
+ public:
+  /**
+   * \brief RegisterAppInterfaceRequest class constructor
+   **/
+  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message);
 
-    /**
-     * \brief RegisterAppInterfaceRequest class destructor
-     **/
-    virtual ~RegisterAppInterfaceRequest() {
-    }
+  /**
+   * @brief RegisterAppInterfaceRequest class destructor
+   **/
+  virtual ~RegisterAppInterfaceRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
-    // virtual void cleanUp() = 0;
+  /**
+   * @brief Init required by command resources
+   **/
+  virtual bool Init();
 
-    /**
-      * @brief Sends RegisterAppInterface response to mobile
-      *
-      *@param application_impl application
-      *
-      **/
-    void SendRegisterAppInterfaceResponseToMobile(
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+  // virtual void cleanUp() = 0;
+
+  /**
+   * @brief Sends RegisterAppInterface response to mobile
+   *
+   *@param application_impl application
+   *
+   **/
+  void SendRegisterAppInterfaceResponseToMobile(
       const Application& application_impl);
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
+ private:
+  sync_primitives::SynchronisationPrimitives synchronisation_;
+  sync_primitives::Timer* timer_;
+
+  DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_

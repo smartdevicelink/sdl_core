@@ -5,18 +5,29 @@ project (${PROJECT})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# --- Check libavahi-common, libavahi-client availability
+find_package(Libavahi)
+
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
 option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 
+# TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 add_definitions(-DOS_LINUX)
 
+IF(CMAKE_C_FLAGS_DEBUG)
+    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
+    add_definitions(-DDEBUG)
+ELSE (CMAKE_C_FLAGS_DEBUG)
+    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRELEASE" )
+    add_definitions(-DRELEASE)
+ENDIF(CMAKE_C_FLAGS_DEBUG)
 
 # --- Interface generator
 
@@ -65,7 +76,6 @@ macro(create_test NAME SOURCES LIBS)
     target_link_libraries("${NAME}" ${LIBS})
     add_test(${NAME} ${NAME})
 endmacro(create_test)
-
 
 # Building application
 

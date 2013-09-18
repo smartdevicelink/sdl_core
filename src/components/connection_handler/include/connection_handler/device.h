@@ -34,12 +34,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 
 #include <string>
 #include <map>
-
+#include <vector>
 #include "utils/logger.h"
 
 /**
@@ -51,7 +51,8 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef int DeviceHandle;
+typedef unsigned int DeviceHandle;
+typedef std::vector<int> AppList;
 
 /**
  * \class Device
@@ -62,7 +63,8 @@ class Device {
   /**
    * \brief Class constructor
    */
-  Device(DeviceHandle device_handle, std::string user_friendly_name);
+  Device(DeviceHandle device_handle, const std::string& user_friendly_name,
+         const std::string& mac_address = "");
 
   /**
    * \brief Destructor
@@ -93,6 +95,11 @@ class Device {
   std::string user_friendly_name_;
 
   /**
+   * \brief Mac address of device if available
+   */
+  std::string mac_address_;
+
+  /**
    * \brief For logging.
    */
   static log4cxx::LoggerPtr logger_;
@@ -111,4 +118,4 @@ typedef std::map<int, Device>::iterator DeviceListIterator;
 
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_DEVICE_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_

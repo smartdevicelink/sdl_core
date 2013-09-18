@@ -47,8 +47,7 @@ void MessagesToMobileAppHandler::threadMain() {
 
   while (1) {
     while (!handler->messages_to_mobile_app_.empty()) {
-      MobileMessage message = handler->messages_to_mobile_app_
-          .pop();
+      MobileMessage message = handler->messages_to_mobile_app_.pop();
 
       protocol_handler::RawMessage* rawMessage = 0;
       if (message->protocol_version() == application_manager::kV1) {
@@ -63,7 +62,7 @@ void MessagesToMobileAppHandler::threadMain() {
         return;
       }
 
-      handler->protocol_handler_->sendMessageToMobileApp(rawMessage);
+      handler->protocol_handler_->SendMessageToMobileApp(rawMessage);
     }
     handler->messages_to_mobile_app_.wait();
   }

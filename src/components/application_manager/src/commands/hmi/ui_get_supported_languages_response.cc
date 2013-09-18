@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
@@ -48,8 +49,8 @@ void UIGetSupportedLanguagesResponse::Run() {
   LOG4CXX_INFO(logger_, "UIGetSupportedLanguagesResponse::Run");
 
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
     ApplicationManagerImpl::instance()->set_ui_supported_languages(

@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NaviIsReadyResponse::NaviIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 NaviIsReadyResponse::~NaviIsReadyResponse() {
@@ -45,7 +46,15 @@ NaviIsReadyResponse::~NaviIsReadyResponse() {
 void NaviIsReadyResponse::Run() {
   LOG4CXX_INFO(logger_, "NaviIsReadyResponse::Run");
 
-  // TODO(VS): Process response from HMI(field "available") and do something with SDL
+  DCHECK(message_);
+  smart_objects::SmartObject& object = *message_;
+
+  bool is_available = false;
+
+  if (object[strings::msg_params].keyExists(strings::available)) {
+    is_available = object[strings::msg_params][strings::available].asBool();
+  }
+  ApplicationManagerImpl::instance()->set_is_navi_cooperating(is_available);
 }
 
 }  // namespace commands
