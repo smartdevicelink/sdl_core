@@ -72,7 +72,6 @@ Rectangle{
 
     Api {
         Ford.Buttons {
-            id: buttons
             objectName: "buttons"
         }
     }

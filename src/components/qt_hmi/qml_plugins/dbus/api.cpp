@@ -47,7 +47,7 @@ void Api::componentComplete()
 {
     QQuickItem::componentComplete();
 
-    buttonsAdaptor->buttonsApi = findChild<QQuickItem*>("buttons");
+    buttonsAdaptor->setButtonsApi(findChild<QQuickItem*>("buttons"));
 }
 
 ButtonsAdaptor *Api::buttonsAdaptor = NULL;

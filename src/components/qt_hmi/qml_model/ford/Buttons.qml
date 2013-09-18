@@ -1,8 +1,13 @@
 import QtQuick 2.0
 
 Item {
+
+    signal notify(string what)
+
     function getCapabilities()
     {
+        notify("hello");
+
         return {
             buttonCapabilities:
             [
@@ -25,10 +30,8 @@ Item {
         };
     }
 
-    function hello(gg)
+    function fireNotify(what)
     {
-        console.log("hello called with gg = " + gg)
-        gg = 16;
-        return [ { name: "Vasya", id: 10 }, 12 ];
+        notify(what)
     }
 }

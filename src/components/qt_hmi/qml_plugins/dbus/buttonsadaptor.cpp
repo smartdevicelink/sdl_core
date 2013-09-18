@@ -2,10 +2,19 @@
 
 #include <QDBusContext>
 
+#include <qqml.h>
+
 ButtonsAdaptor::ButtonsAdaptor(QObject *parent) :
     QDBusAbstractAdaptor(parent)
 {
 
+}
+
+void ButtonsAdaptor::setButtonsApi(QQuickItem *api)
+{
+    buttonsApi = api;
+
+    connect(api, SIGNAL(notify(QString)), this, SIGNAL(Notify(QString)));
 }
 
 QList<ButtonCapabilities> ButtonsAdaptor::GetCapabilities(OptionalArgument<PresetBankCapabilities> &pbc)
