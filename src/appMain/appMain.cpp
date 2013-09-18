@@ -179,14 +179,14 @@ bool InitDBus() {
     return false;
   }
 
+  adapter->subscribeTo();
+
   LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
   System::Thread* th1 = new System::Thread(
     new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
       *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
       NULL));
   th1->Start(false);
-
-  adapter->subscribeTo();
 
   return true;
 }

@@ -121,9 +121,8 @@ class DBusAdapter {
   /**
    * \brief adds a match rule
    * \param rule string rule in the DBus specification
-   * \return false if error
    */
-  bool AddMatch(const std::string& rule);
+  void AddMatch(const std::string& rule);
 
   /**
    * \brief processes incoming message from DBus if queue isn't empty
