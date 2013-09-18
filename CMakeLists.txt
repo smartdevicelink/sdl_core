@@ -36,6 +36,18 @@ if(NOT PYTHONINTERP_FOUND)
     message(ERROR "sudo apt-get install python")
 endif(NOT PYTHONINTERP_FOUND)
 
+FIND_PACKAGE(Qt5Core REQUIRED)
+INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS}
+    /usr/lib/i386-linux-gnu/libQt5Core.so
+    /usr/lib/i386-linux-gnu/libQt5Quick.so
+)
+IF (NOT Qt5Core_FOUND)
+    message(STATUS "QT5 Libraries not found")
+    message(STATUS "To install it type in the command line:")
+    message(STATUS "sudo apt-get install qtdeclarative5-dev")
+ENDIF(NOT Qt5Core_FOUND)
+
+
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
 file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/*.*")

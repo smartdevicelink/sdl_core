@@ -5,7 +5,7 @@ Item{
     anchors.fill: parent
 
     Image {
-        anchors.centerIn: parent
+        anchors.fill: parent
         source: "../res/nav/map.png"
     }
 
@@ -14,7 +14,9 @@ Item{
         id: zoomIn
         source: "../res/buttons/zoom.png"
         anchors.top: parent.top
+        anchors.topMargin:  1/5 * contentLoader.height
         anchors.left: parent.left
+        anchors.leftMargin: 1/100 * contentLoader.width
 
         Text{
             id: zoomInBtn
@@ -36,7 +38,7 @@ Item{
             }
 
             onClicked: {
-                //Some map behavior
+                //Some behavior
             }
         }
     }
@@ -44,8 +46,10 @@ Item{
     // Zoom "-" button
     Image{
         id: zoomOut
+        anchors.top: parent.top
+        anchors.topMargin:  2/5 * contentLoader.height
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 1/100 * contentLoader.width
         source: "../res/buttons/zoom.png"
 
         Text{
@@ -68,7 +72,7 @@ Item{
             }
 
             onClicked: {
-                //Some map behavior
+                //Some behavior
             }
         }
     }
@@ -77,6 +81,7 @@ Item{
         id: compas
         anchors.horizontalCenter: zoomOut.horizontalCenter
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: 1/5 * contentLoader.height
         source: "../res/nav/compass.png"
     }
 
@@ -104,8 +109,7 @@ Item{
     // Destination search button
     Image{
         id: destSearch
-        anchors.top: parent.bottom
-        anchors.topMargin: 20
+        anchors.bottom: parent.bottom
         anchors.right: parent.right
         source: "../res/buttons/longest_oval_btn.png"
 
@@ -143,7 +147,7 @@ Item{
             }
 
             onClicked: {
-                contentLoader.go("NavigationMenuGridView.qml")
+                contentLoader.go("./views/NavigationMenuGridView.qml")
             }
         }
     }
