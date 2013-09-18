@@ -11,6 +11,7 @@ PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 AVAHI_CLIENT_LIBRARY="libavahi-client3"
 AVAHI_COMMON="libavahi-common3"
+QT5_LIBS="qtdeclarative5-dev"
 
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
@@ -62,6 +63,10 @@ echo $OK
 
 echo "Installing Avahi-common library"
 apt-install ${AVAHI_COMMON}
+echo $OK
+
+echo "Installing QT5 libraries"
+apt-install {QT5_LIBS}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup

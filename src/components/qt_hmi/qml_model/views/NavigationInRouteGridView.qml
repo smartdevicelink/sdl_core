@@ -5,7 +5,7 @@ Item {
     anchors.fill: parent
 
     Image {
-        anchors.centerIn: parent
+        anchors.fill: parent
         source: "../res/nav/map.png"
     }
 
@@ -14,7 +14,9 @@ Item {
         id: zoomIn
         source: "../res/buttons/zoom.png"
         anchors.top: parent.top
+        anchors.topMargin:  1/5 * contentLoader.height
         anchors.left: parent.left
+        anchors.leftMargin: 1/100 * contentLoader.height
 
         Text{
             id: zoomInBtn
@@ -36,7 +38,7 @@ Item {
             }
 
             onClicked: {
-                //Some map behavior
+                //Some behavior
             }
         }
     }
@@ -44,8 +46,10 @@ Item {
     // Zoom "-" button
     Image{
         id: zoomOut
+        anchors.top: parent.top
+        anchors.topMargin:  2/5 * contentLoader.height
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 1/100 * contentLoader.height
         source: "../res/buttons/zoom.png"
 
         Text{
@@ -68,15 +72,16 @@ Item {
             }
 
             onClicked: {
-                //Some map behavior
+                //Some behavior
             }
         }
     }
 
     Image{
         id: compas
-        anchors.horizontalCenter: zoomOut.horizontalCenter
+        anchors.horizontalCenter: zoomIn.horizontalCenter
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: 1/5 * contentLoader.height
         source: "../res/nav/compass.png"
     }
 
@@ -102,7 +107,7 @@ Item {
     }
 
     Image {
-        anchors.bottom: parent.bottom
+        anchors.verticalCenter: compas.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         source: "../res/nav/current_street.png"
 
@@ -135,16 +140,16 @@ Item {
     Image{
         id: turnArrow
         anchors.verticalCenter: cancel.verticalCenter
-        anchors.right: street.left
-        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 1/5 * contentLoader.width
         source: "../res/nav/turnArrow.png"
     }
 
     Text{
         id: street
         anchors.verticalCenter: cancel.verticalCenter
-        anchors.right: timeToDest.left
-        anchors.rightMargin: 90
+        anchors.left: turnArrow.right
+        anchors.leftMargin: 1/20 * contentLoader.width
         text: "0.2 mi on Cherry Hill Rd."
         color: "White"
         font.pixelSize: 20
@@ -154,7 +159,7 @@ Item {
         id: timeToDest
         anchors.verticalCenter: cancel.verticalCenter
         anchors.right: cancel.left
-        anchors.rightMargin: 20
+        anchors.rightMargin: 1/20 * contentLoader.width
         text: "2 hrs 27 min"
         color: "White"
         font.pixelSize: 20
@@ -162,8 +167,7 @@ Item {
 
     Image{
         id: cancel
-        anchors.top: parent.bottom
-        anchors.topMargin: 20
+        anchors.bottom: parent.bottom
         anchors.right: parent.right
 
         source: "../res/buttons/long_oval_btn.png"
@@ -194,7 +198,7 @@ Item {
             }
 
             onClicked: {
-                contentLoader.go("NavigationMenuGridView.qml")
+                contentLoader.go("./views/NavigationMenuGridView.qml")
             }
         }
     }

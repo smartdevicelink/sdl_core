@@ -39,14 +39,15 @@ Item {
     Text{
         id: closeText
         anchors.horizontalCenter: parent.horizontalCenter
-        y:250
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 1/5 * contentLoader.height
         text: "CLOSE"
         color: "#1d81d5"
-        font.pixelSize: 20
+        font.pixelSize: 25
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              contentLoader.go("NavigationNoRouteGridView.qml")
+              contentLoader.go("./views/NavigationNoRouteGridView.qml")
             }
         }
 

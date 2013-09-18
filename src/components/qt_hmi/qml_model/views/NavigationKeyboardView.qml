@@ -6,6 +6,11 @@ Item {
     anchors.fill: parent
     anchors.centerIn: parent
 
+ /*   Rectangle{
+        anchors.fill: parent
+        color: "white"
+    }*/
+
     // Text line with input text
     TextInput{
         id: inputText
@@ -162,7 +167,7 @@ Item {
             }
 
             onClicked: {
-                contentLoader.go("NavigationInRouteGridView.qml")
+                contentLoader.go("./views/NavigationInRouteGridView.qml")
             }
         }
     }
@@ -171,13 +176,14 @@ Item {
         id: closeText
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: 1/5 * contentLoader.height
         text: "CLOSE"
         color: "#1d81d5"
-        font.pixelSize: 20
+        font.pixelSize: 25
         MouseArea {
           anchors.fill: parent
           onClicked: {
-              contentLoader.go("NavigationMenuGridView.qml")
+              contentLoader.go("./views/NavigationMenuGridView.qml")
             }
         }
     }
