@@ -29,28 +29,33 @@ Rectangle{
             HeaderMenu{}
         }
 
-        Loader {
-            id: contentLoader
-            height: parent.height * 0.75
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
+        Item{
+            anchors.leftMargin: 30
+            anchors.rightMargin: 30
+            anchors.bottomMargin: 30
+            anchors.fill: parent
+            Loader {
+                id: contentLoader
+                height: parent.height * 0.75
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                source:startQml
 
-            source:startQml
+                ListModel {
+                    id: urlStack
+                }
 
-            ListModel {
-                id: urlStack
-            }
+                function go(path) {
+                    urlStack.append({ url: source.toString(), index: 10 })
+                    source = path
+                }
 
-            function go(path) {
-                urlStack.append({ url: source.toString(), index: 10 })
-                source = path
-            }
-
-            function back() {
-                var item = urlStack.get(urlStack.count - 1)
-                source = item.url
-                urlStack.remove(item)
+                function back() {
+                    var item = urlStack.get(urlStack.count - 1)
+                    source = item.url
+                    urlStack.remove(item)
+                }
             }
         }
     }
@@ -59,8 +64,8 @@ Rectangle{
         id: hwBtnScreen
         width: parent.width * 0.38
         anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        height: parent.height
+        anchors.left: mainScreen.right
+        height: parent.height < minHieght ? minHieght : parent.height
         HardwareButtonsView {}
     }
 
