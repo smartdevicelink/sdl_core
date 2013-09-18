@@ -15,8 +15,9 @@
 
 void DbusPlugin::registerTypes(const char *uri)
 {
+    qDebug() << "void DbusPlugin::registerTypes(const char *uri)";
     // @uri sdl.core.api
-    qmlRegisterType<DbusPlugin>(uri, 1, 0, "Api");
+    qmlRegisterType<Api>(uri, 1, 0, "Api");
 
     qmlRegisterType<QQuickButtonCapabilities>();
     qmlRegisterType<QQuickPresetBankCapabilities>();
@@ -31,7 +32,7 @@ void DbusPlugin::registerTypes(const char *uri)
     qDBusRegisterMetaType<OptionalArgument<PresetBankCapabilities> >();
     qDBusRegisterMetaType<OptionalArgument<QList<PresetBankCapabilities> > >();
 
-    new ButtonsAdaptor(this);
+    Api::buttonsAdaptor = new ButtonsAdaptor(this);
 
     QDBusConnection::sessionBus().registerObject("/Test", this);
     QDBusConnection::sessionBus().registerService("com.ford.api");

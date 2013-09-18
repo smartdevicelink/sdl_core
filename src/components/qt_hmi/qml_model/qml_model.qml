@@ -3,6 +3,7 @@ import com.ford.hmi_framework 1.0
 import sdl.core.api 1.0
 import "./controls"
 import "./views"
+import "./ford" as Ford
 
 Rectangle{
     width: 1600
@@ -70,6 +71,10 @@ Rectangle{
     }
 
     Api {
+        Ford.Buttons {
+            id: buttons
+            objectName: "buttons"
+        }
     }
 }
 

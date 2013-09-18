@@ -8,6 +8,12 @@
 struct PresetBankCapabilities
 {
     bool onScreenPresetsAvailable;
+
+    PresetBankCapabilities()
+        : onScreenPresetsAvailable(false)
+    {
+
+    }
 };
 
 class QQuickPresetBankCapabilities : public QQuickItem

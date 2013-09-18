@@ -3,7 +3,7 @@
 
 #include <QQuickItem>
 
-class SdlCoreApiInterface;
+#include "buttonsadaptor.h"
 
 class Api : public QQuickItem
 {
@@ -12,7 +12,6 @@ class Api : public QQuickItem
     
     QString name_;
     QString path_;
-    SdlCoreApiInterface *api_;
 
     inline void init();
 
@@ -20,18 +19,23 @@ public:
     explicit Api(QQuickItem *parent = 0);
     ~Api();
 
+    static ButtonsAdaptor* buttonsAdaptor;
+
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
 
     Q_INVOKABLE QString name() const;
     Q_INVOKABLE QString path() const;
 
-Q_SIGNALS:
+protected:
+    void componentComplete();
+
+signals:
     void receive(const QString& json);
     void nameChanged();
     void pathChanged();
 
-public Q_SLOTS:
+public slots:
     void send(const QString& json);
     void setName(const QString& name);
     void setPath(const QString& path);

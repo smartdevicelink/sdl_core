@@ -4,13 +4,11 @@
 #include <QDBusArgument>
 
 template<class T>
-struct OptionalArgument
+struct OptionalArgument : public T
 {
     bool presence;
-    T value;
-
     OptionalArgument(const T& value)
-        : value(value),
+        : T(value),
           presence(true)
     { }
     OptionalArgument()
@@ -23,7 +21,7 @@ inline
 QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o)
 {
     arg.beginStructure();
-    arg << o.presence << o.value;
+    arg << o.presence << static_cast<T>(o);
     arg.endStructure();
     return arg;
 }
@@ -32,8 +30,9 @@ template<class T>
 inline
 const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o)
 {
+    T out = static_cast<T>(o);
     arg.beginStructure();
-    arg >> o.presence >> o.value;
+    arg >> o.presence >> out;
     arg.endStructure();
     return arg;
 }

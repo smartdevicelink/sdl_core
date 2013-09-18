@@ -1,19 +1,14 @@
 #include "api.h"
-#include "api_interface.h"
 #include <QtDBus/QDBusConnection>
 
 Api::Api(QQuickItem *parent):
     QQuickItem(parent),
-    name_(SdlCoreApiInterface::staticInterfaceName()),
-    path_("/dbus"),
-    api_(new SdlCoreApiInterface(name_, path_, QDBusConnection::sessionBus(), this))
+    path_("/dbus")
 {
-    connect(api_, SIGNAL(receive(QString)), this, SIGNAL(receive(QString)));
 }
 
 Api::~Api()
 {
-    delete api_;
 }
 
 QString Api::name() const
@@ -28,18 +23,10 @@ QString Api::path() const
 
 void Api::send(const QString &json)
 {
-    qDebug() << json;
-    api_->send(json);
 }
 
 void Api::init()
 {
-    SdlCoreApiInterface *tmp = new SdlCoreApiInterface(name_, path_,
-                                                       QDBusConnection::sessionBus(), this);
-    if (tmp) {
-        delete api_;
-        api_ = tmp;
-    }
 }
 
 void Api::setName(const QString &name)
@@ -56,3 +43,11 @@ void Api::setPath(const QString &path)
     emit pathChanged();
 }
 
+void Api::componentComplete()
+{
+    QQuickItem::componentComplete();
+
+    buttonsAdaptor->buttonsApi = findChild<QQuickItem*>("buttons");
+}
+
+ButtonsAdaptor *Api::buttonsAdaptor = NULL;
