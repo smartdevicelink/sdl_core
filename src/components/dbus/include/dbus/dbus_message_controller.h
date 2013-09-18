@@ -41,8 +41,6 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace dbus {
 
-class DBusAdapter;
-
 class DBusMessageController : public DBusAdapter {
  public:
   /**
@@ -80,35 +78,6 @@ class DBusMessageController : public DBusAdapter {
    * \param obj
    */
   virtual void SendMessageToCore(smart_objects::SmartObject& obj) = 0;
-
- private:
-  /**
-   * \brief Start value of id's diapason.
-   */
-  int mControllersIdStart;
-
-  /**
-   * \brief Current id's value.
-   */
-  int mControllersIdCurrent;
-
-  /**
-  * \brief Already sent messages Methods to recognize esponses: MessageId:MethodName.
-  */
-  std::map<std::string, std::string> mWaitResponseQueue;
-
-  /**
-   * \brief searches Method by id in mWaitResponseQueue.
-   * \param id id of incoming JSON message.
-   * \return string method name or "" in case not found.
-   */
-  std::string findMethodById(std::string id);
-
-  /**
-   * \brief generates new message id from diapason mControllersIdStart - (mControllersIdStart+999).
-   * \return next id for message
-   */
-  int getNextMessageId();
 };
 
 }  // namespace dbus

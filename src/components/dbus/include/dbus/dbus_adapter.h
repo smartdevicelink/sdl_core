@@ -98,7 +98,7 @@ class DBusAdapter {
    * \param signal name of signal for send
    * \param obj params for signal
    */
-  void Signal(uint id, const std::string& interface, const std::string& signal,
+  void Signal(const std::string& interface, const std::string& signal,
               smart_objects::SmartObject& obj);
 
   /**
@@ -132,6 +132,20 @@ class DBusAdapter {
    */
   bool Process(smart_objects::SmartObject& obj);
 
+  /**
+   * \brief push Ford message id to map by serial
+   * \param serial DBus message serial
+   * \param ids pair correlation id and Ford message id
+   */
+  inline void PushMessageId(uint32_t serial, std::pair<uint, MessageId> ids);
+
+  /**
+   * \brief pop Ford message id from map by serial
+   * \param serial DBus message serial
+   * \return pair correlation id and Ford message id
+   */
+  inline std::pair<uint, MessageId> PopMessageId(uint32_t serial);
+
   std::string sdl_service_name_;
   std::string sdl_object_path_;
   std::string hmi_service_name_;
@@ -143,6 +157,11 @@ class DBusAdapter {
    * \brief schema messages and arguments for DBus
    */
   DBusSchema schema_;
+
+  /**
+   * \brief mapping serial message DBus on message id Ford protocol
+   */
+  std::map<uint32_t, std::pair<uint, MessageId> > map_messages_;
 
   /**
    * \brief processes incoming call of method and fill obj
