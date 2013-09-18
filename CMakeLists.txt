@@ -36,7 +36,7 @@ if(NOT PYTHONINTERP_FOUND)
     message(ERROR "sudo apt-get install python")
 endif(NOT PYTHONINTERP_FOUND)
 
-FIND_PACKAGE(Qt5Core REQUIRED)
+FIND_PACKAGE(Qt5Core)
 INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS}
     /usr/lib/i386-linux-gnu/libQt5Core.so
     /usr/lib/i386-linux-gnu/libQt5Quick.so

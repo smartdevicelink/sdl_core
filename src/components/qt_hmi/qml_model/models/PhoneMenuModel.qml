@@ -10,7 +10,7 @@ ListModel
     ListElement {
         name: "contacts"
         icon: "../res/phone/contacts.png"
-        qml: "./views/PhoneKeyboardGridView.qml"
+        qml: "./views/PhoneKeyboardView.qml"
     }
     ListElement {
         name: "messages"

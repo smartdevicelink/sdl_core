@@ -3,53 +3,62 @@ import "../controls"
 import "../models"
 
 Item {
+    id: navMenu
     anchors.fill: parent
 
-    MenuGridView {
-        anchors.centerIn: parent
-        id: navMenuGridView
-        model: NavigationMenuModel {}
+    Item {
+        // 3/4 top screen
+        height: parent.height * 3/4
+        width: parent.width
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        LongOvalBtn {
-            id: lob
-            visible: false
-        }
-
-        width: 3*lob.width
-        height: 2*lob.height
-
-        columns: 3
-        rows: 2
-
-        delegate: Item {
-            id: cell
-            width: button.width
-            height: button.height
+        MenuGridView {
+            id: navMenuGridView
+            anchors.centerIn: parent
+            model: NavigationMenuModel {}
 
             LongOvalBtn {
-                id: button
-                text: title
-                pixelSize: 20
-                dest: qml
-                anchors.centerIn: parent
+                id: lob
+                visible: false
+            }
+
+            width: 3*lob.width
+            height: 2*lob.height
+
+            columns: 3
+            rows: 2
+
+            delegate: Item {
+                id: cell
+                width: button.width
+                height: button.height
+
+                LongOvalBtn {
+                    id: button
+                    text: title
+                    pixelSize: 20
+                    dest: qml
+                    anchors.centerIn: parent
+                }
             }
         }
     }
 
-    Text{
-        id: closeText
-        anchors.horizontalCenter: parent.horizontalCenter
+    Item{
+        // 1/4 bottom screen
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 1/5 * contentLoader.height
-        text: "CLOSE"
-        color: "#1d81d5"
-        font.pixelSize: 25
-        MouseArea {
-          anchors.fill: parent
-          onClicked: {
-              contentLoader.go("./views/NavigationNoRouteGridView.qml")
+        anchors.left: parent.left
+        width: parent.width
+        height: 1/4 * parent.height
+
+        BackBtn {
+            onIsPressedChanged: {
+                if(isPressed == false){
+                    contentLoader.go("./views/NavigationNoRouteGridView.qml")
+                }
             }
         }
-
     }
 }
