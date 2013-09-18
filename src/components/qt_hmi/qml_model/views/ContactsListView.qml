@@ -34,7 +34,6 @@ Item{
                 }
             }
 
-
             delegate: Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
