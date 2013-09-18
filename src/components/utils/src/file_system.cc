@@ -92,7 +92,7 @@ unsigned int file_system::AvailableSpaceApp(const std::string& name) {
   ->space_available();
   std::string full_path;
   unsigned int size_of_directory = 0;
-  uint64_t available_space = 0;
+  unsigned int available_space = 0;
   if(DirectoryExists(name)) {
     full_path = FullPath(name);
     size_of_directory = SizeDirectory(full_path);
