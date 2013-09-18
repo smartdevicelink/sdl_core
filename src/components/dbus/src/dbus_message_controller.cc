@@ -31,6 +31,9 @@
 */
 
 #include "dbus/dbus_message_controller.h"
+#include "formatters/CSmartFactory.hpp"
+
+namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace dbus {
 
@@ -38,9 +41,8 @@ DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
                                              const std::string& sdlObjectPath,
                                              const std::string& hmiServiceName,
                                              const std::string& hmiObjectPath)
-    : DBusAdapter(sdlServiceName, sdlObjectPath, hmiServiceName, hmiObjectPath),
-      mControllersIdStart(-1),
-      mControllersIdCurrent(0) {}
+    : DBusAdapter(sdlServiceName, sdlObjectPath,
+                  hmiServiceName, hmiObjectPath) {}
 
 void DBusMessageController::subscribeTo(const std::string& interface,
                                         const std::string& signal) {
@@ -56,36 +58,16 @@ void DBusMessageController::subscribeTo(const std::string& interface,
 DBusMessageController::~DBusMessageController() {
 }
 
-std::string DBusMessageController::findMethodById(std::string id) {
-  std::string res = "";
-  std::map <std::string, std::string>::iterator it;
-  it = mWaitResponseQueue.find(id);
-  if (it != mWaitResponseQueue.end()) {
-    res = (*it).second;
-    mWaitResponseQueue.erase(it);
-  }
-  return res;
-}
-
 void* DBusMessageController::MethodForReceiverThread(void*) {
-  smart_objects::SmartObject obj(smart_objects::SmartType_Map);
   while (true) {
+    smart_objects::SmartObject obj(smart_objects::SmartType_Map);
+    obj[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
+    obj[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
     if (DBusAdapter::Process(obj)) {
       SendMessageToCore(obj);
     }
   }
   return NULL;
-}
-
-int DBusMessageController::getNextMessageId()
-{
-   if (mControllersIdCurrent < (mControllersIdStart+1000))
-   {
-      return mControllersIdCurrent++;
-   } else
-   {
-      return mControllersIdCurrent = mControllersIdStart;
-   }
 }
 
 }  // namespace dbus

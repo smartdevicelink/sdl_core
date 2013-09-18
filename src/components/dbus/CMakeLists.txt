@@ -2,6 +2,7 @@ include_directories (
   ./include/
   ${CMAKE_BINARY_DIR}/
   ${CMAKE_BINARY_DIR}/src/components/
+  ${CMAKE_BINARY_DIR}/src/components/formatters/include/
   ${CMAKE_BINARY_DIR}/src/components/smart_objects/include/
   ${CMAKE_BINARY_DIR}/src/components/utils/include/
   ${CMAKE_BINARY_DIR}/src/components/dbus/include/

@@ -158,8 +158,7 @@ void DBusMessageAdapter::Notification(smart_objects::SmartObject& obj) {
   std::vector<std::string> elems;
   split(destination, '.', elems);
   if (elems.size() > 2) {
-    uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
-    Signal(id, HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
+    Signal(HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
   }
 }
 
