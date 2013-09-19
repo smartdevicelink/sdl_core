@@ -66,7 +66,7 @@ apt-install ${AVAHI_COMMON}
 echo $OK
 
 echo "Installing QT5 libraries"
-apt-install {QT5_LIBS}
+apt-install ${QT5_LIBS}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
