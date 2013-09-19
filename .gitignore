@@ -1,5 +1,6 @@
 *.a
 *.cmake
+!cmake/
 bin
 build
 CMakeFiles
