@@ -54,7 +54,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
 
             // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
 
-            this.set('commandsList', []);
+            this.set('commandsList', {0: []});
             this.set('softButtons', []);
         },
 

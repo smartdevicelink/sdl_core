@@ -36,34 +36,34 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
 
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Device adapter that use bluetooth transport.
  */
-class BluetoothDeviceAdapter : public DeviceAdapterImpl {
+class BluetoothTransportAdapter : public TransportAdapterImpl {
  public:
   /**
    * @brief Constructor.
    */
-  BluetoothDeviceAdapter();
+  BluetoothTransportAdapter();
 
   /**
    * @brief Destructor.
    */
-  virtual ~BluetoothDeviceAdapter();
+  virtual ~BluetoothTransportAdapter();
  protected:
 
   /**
    * @brief Return type of device.
    */
-  virtual DeviceType getDeviceType() const;
+  virtual DeviceType GetDeviceType() const;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER

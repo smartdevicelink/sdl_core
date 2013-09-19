@@ -44,26 +44,26 @@ namespace commands {
  * @brief OnReadyNotification command class
  **/
 class OnReadyNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnReadyNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnReadyNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnReadyNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnReadyNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnReadyNotification class destructor
-     **/
-    virtual ~OnReadyNotification();
+  /**
+   * @brief OnReadyNotification class destructor
+   **/
+  virtual ~OnReadyNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnReadyNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnReadyNotification);
 };
 
 }  // namespace commands

@@ -42,12 +42,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Class responsible for communication over TCP sockets.
@@ -64,7 +64,7 @@ class TcpSocketConnection : public ThreadedSocketConnection {
    */
   TcpSocketConnection(const DeviceUID& device_uid,
                       const ApplicationHandle& app_handle,
-                      DeviceAdapterController* controller);
+                      TransportAdapterController* controller);
 
   /**
    * @brief Destructor.
@@ -75,7 +75,7 @@ class TcpSocketConnection : public ThreadedSocketConnection {
   /**
    * @brief
    */
-  virtual bool establish(ConnectError** error);
+  virtual bool Establish(ConnectError** error);
 };
 
 /**
@@ -93,7 +93,7 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
    */
   TcpServerOiginatedSocketConnection(const DeviceUID& device_uid,
                       const ApplicationHandle& app_handle,
-                      DeviceAdapterController* controller);
+                      TransportAdapterController* controller);
 
   /**
    * @brief Destructor.
@@ -104,10 +104,10 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
   /**
    * @brief
    */
-  virtual bool establish(ConnectError** error);
+  virtual bool Establish(ConnectError** error);
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_SOCKET_CONNECTION_H_

@@ -36,12 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
 
-#include "transport_manager/device_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Create connections.
@@ -54,13 +54,13 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    *
    * @param controller Pointer to the device adapter controller.
    */
-  BluetoothConnectionFactory(DeviceAdapterController* controller);
+  BluetoothConnectionFactory(TransportAdapterController* controller);
  protected:
 
   /**
    * @brief Start BT connection factory.
    */
-  virtual DeviceAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Create bluetooth socket connection.
@@ -68,13 +68,13 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @param device_uid Device unique identifier.
    * @param ap_handle Handle of application.
    */
-  virtual DeviceAdapter::Error createConnection(const DeviceUID& device_uid,
+  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
                                                 const ApplicationHandle& app_handle);
 
   /**
    * @brief
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief Check for initialization.
@@ -82,17 +82,17 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
 
   /**
    * @brief Destructor.
    */
   virtual ~BluetoothConnectionFactory();
  private:
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_

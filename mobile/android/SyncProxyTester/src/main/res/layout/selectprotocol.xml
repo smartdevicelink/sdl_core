@@ -153,13 +153,6 @@
                 android:text="@string/selectprotocol_tcpPortDefault" />
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/selectprotocol_checkAutoReconnect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/selectprotocol_autoReconnect" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

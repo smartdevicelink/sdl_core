@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnShowNotification command class
  **/
 class OnShowNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnShowNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnShowNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnShowNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnShowNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnShowNotification class destructor
-     **/
-    virtual ~OnShowNotification();
+  /**
+   * @brief OnShowNotification class destructor
+   **/
+  virtual ~OnShowNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnShowNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnShowNotification);
 };
 
 }  // namespace commands

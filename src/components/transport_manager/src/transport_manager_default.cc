@@ -37,28 +37,32 @@
 
 #include "transport_manager/bluetooth/bluetooth_adapter.h"
 #include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 
 
-using transport_manager::device_adapter::BluetoothDeviceAdapter;
-using transport_manager::device_adapter::TcpDeviceAdapter;
+using transport_manager::transport_adapter::BluetoothTransportAdapter;
+using transport_manager::transport_adapter::TcpTransportAdapter;
+using transport_manager::transport_adapter::UsbAoaAdapter;
 
 namespace transport_manager {
 
-int TransportManagerDefault::init() {
-  if (E_SUCCESS != TransportManagerImpl::init()) {
+int TransportManagerDefault::Init() {
+  if (E_SUCCESS != TransportManagerImpl::Init()) {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  addDeviceAdapter(bluetooth_da_);
-  addDeviceAdapter(tcp_da_);
+  AddTransportAdapter(bluetooth_da_);
+  AddTransportAdapter(tcp_da_);
+  AddTransportAdapter(usb_aoa_da_);
 
   return E_SUCCESS;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {
   if (is_initialized_) {
-    removeDeviceAdapter(bluetooth_da_);
-    removeDeviceAdapter(tcp_da_);
+    RemoveTransportAdapter(bluetooth_da_);
+    RemoveTransportAdapter(tcp_da_);
+    RemoveTransportAdapter(usb_aoa_da_);
   }
 }
 
@@ -67,10 +71,11 @@ TransportManagerAttr default_config_ = { 0 };
 TransportManagerDefault::TransportManagerDefault(
     const TransportManagerAttr& config)
     : TransportManagerImpl(config),
-      bluetooth_da_(new BluetoothDeviceAdapter()),
-      tcp_da_(new TcpDeviceAdapter()) {}
+      bluetooth_da_(new BluetoothTransportAdapter()),
+      tcp_da_(new TcpTransportAdapter()),
+      usb_aoa_da_(new UsbAoaAdapter()) {}
 
-TransportManagerDefault* TransportManagerDefault::instance() {
+TransportManagerDefault* TransportManagerDefault::Instance() {
   static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
   static TransportManagerDefault* tm_default_instance = nullptr;
 
@@ -78,7 +83,7 @@ TransportManagerDefault* TransportManagerDefault::instance() {
     pthread_mutex_lock(&tm_default_instance_mutex);
     if (tm_default_instance == nullptr) {
       tm_default_instance = new TransportManagerDefault(default_config_);
-      tm_default_instance->init();
+      tm_default_instance->Init();
     }
     pthread_mutex_unlock(&tm_default_instance_mutex);
   }

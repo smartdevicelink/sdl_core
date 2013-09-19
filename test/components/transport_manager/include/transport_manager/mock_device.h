@@ -37,32 +37,32 @@
 #define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICE_H_
 
 #include "transport_manager/common.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <transport_manager/device_adapter/device_adapter_impl.h>
+#include <transport_manager/transport_adapter/transport_adapter_impl.h>
 #include <transport_manager/transport_manager_impl.h>
 #include <transport_manager/mock_device_scanner.h>
 #include <transport_manager/mock_application.h>
 
 using ::transport_manager::ApplicationList;
-using ::transport_manager::device_adapter::Device;
-using ::transport_manager::device_adapter::DeviceAdapterController;
+using ::transport_manager::transport_adapter::Device;
+using ::transport_manager::transport_adapter::TransportAdapterController;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDevice : public ::transport_manager::device_adapter::Device {
+class MockDevice : public ::transport_manager::transport_adapter::Device {
 
   pthread_mutex_t device_started_mutex;
   std::vector<MockApplication> applications_;
   int applications_cnt_;
-  DeviceAdapterController *controller_;
+  TransportAdapterController *controller_;
  public:
   MockDevice(const std::string& name, const std::string& id,
-             DeviceAdapterController * controller)
+             TransportAdapterController * controller)
       : Device(name, id),
         applications_cnt_(0),
         controller_(controller) {
@@ -70,8 +70,8 @@ class MockDevice : public ::transport_manager::device_adapter::Device {
   const ApplicationHandle addApplication();
   void start();
   void stop();
-  bool isSameAs(const Device* other) const;
-  ApplicationList getApplicationList() const;
+  bool IsSameAs(const Device* other) const;
+  ApplicationList GetApplicationList() const;
   bool operator == (const MockDevice &other);
 };
 

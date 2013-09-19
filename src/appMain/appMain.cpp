@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   ::transport_manager::TransportManager* transport_manager =
-    ::transport_manager::TransportManagerDefault::instance();
+    ::transport_manager::TransportManagerDefault::Instance();
   DCHECK(transport_manager);
 
   protocol_handler::ProtocolHandlerImpl* protocol_handler =
@@ -289,9 +289,9 @@ int main(int argc, char** argv) {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler)
 
-  transport_manager->set_protocol_handler(protocol_handler);
-  transport_manager->addEventListener(protocol_handler);
-  transport_manager->addEventListener(connection_handler);
+  transport_manager->SetProtocolHandler(protocol_handler);
+  transport_manager->AddEventListener(protocol_handler);
+  transport_manager->AddEventListener(connection_handler);
 
   mmh->setProtocolHandler(protocol_handler);
   hmi_handler->setMessageObserver(app_manager);

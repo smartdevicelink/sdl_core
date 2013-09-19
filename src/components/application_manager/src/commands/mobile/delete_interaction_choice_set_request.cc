@@ -94,7 +94,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(const Application* app) {
 
     // retrieve stored choice sets for perform interaction
     const PerformChoiceSetMap& choice_set_map =
-        app->GetPerformInteractionChoiceSetMap();
+        app->performinteraction_choice_set_map();
 
     PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {

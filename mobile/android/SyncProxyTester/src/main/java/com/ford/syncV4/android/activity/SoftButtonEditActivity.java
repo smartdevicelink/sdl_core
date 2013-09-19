@@ -30,6 +30,7 @@ public class SoftButtonEditActivity extends Activity {
 	private CheckBox checkBoxHighlighted;
 	private Spinner spinnerType;
 	private Spinner spinnerImageType;
+    private CheckBox checkBoxUseSystemAction;
 	private Spinner spinnerSystemAction;
 
 	private ArrayAdapter<SoftButtonType> typeAdapter;
@@ -50,6 +51,7 @@ public class SoftButtonEditActivity extends Activity {
 		checkBoxHighlighted = (CheckBox) findViewById(R.id.softbutton_isHighlighted);
 		spinnerType = (Spinner) findViewById(R.id.softbutton_type);
 		spinnerImageType = (Spinner) findViewById(R.id.softbutton_imageType);
+        checkBoxUseSystemAction = (CheckBox) findViewById(R.id.softbutton_useSystemAction);
 		spinnerSystemAction = (Spinner) findViewById(R.id.softbutton_systemAction);
 
 		Button btnOk = ((Button) findViewById(R.id.softbutton_ok));
@@ -71,8 +73,10 @@ public class SoftButtonEditActivity extends Activity {
 					break;
 				}
 				result.setIsHighlighted(checkBoxHighlighted.isChecked());
-				result.setSystemAction((SystemAction) spinnerSystemAction
-						.getSelectedItem());
+                if (checkBoxUseSystemAction.isChecked()) {
+                    result.setSystemAction((SystemAction) spinnerSystemAction
+                            .getSelectedItem());
+                }
 				try {
 					result.setSoftButtonID(Integer.parseInt(editId.getText()
 							.toString()));
@@ -132,8 +136,14 @@ public class SoftButtonEditActivity extends Activity {
 			break;
 		}
 		checkBoxHighlighted.setChecked(softButton.getIsHighlighted());
-		spinnerSystemAction.setSelection(systemActionAdapter
-				.getPosition(softButton.getSystemAction()));
+        SystemAction systemAction = softButton.getSystemAction();
+        if (systemAction != null) {
+            spinnerSystemAction.setSelection(
+                    systemActionAdapter.getPosition(systemAction));
+        } else {
+            checkBoxUseSystemAction.setChecked(false);
+            spinnerSystemAction.setSelection(0);
+        }
 	}
 
 	private void setImageFromSoftButton() {

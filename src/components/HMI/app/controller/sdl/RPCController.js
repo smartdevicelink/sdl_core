@@ -57,10 +57,12 @@ SDL.RPCController = Em.Object
         checkImagesArray: function(array) {
 
             var error = false;
-            for ( var i = 0; i < array.length; i++) {
-                if (array[i].image && array[i].image.imageType !== "DYNAMIC") {
+            if (array instanceof Array) {
+                for ( var i = 0; i < array.length; i++) {
+                    if (array[i].image && array[i].image.imageType !== "DYNAMIC") {
 
-                    error = true;
+                        error = true;
+                    }
                 }
             }
             return error;
@@ -1097,6 +1099,42 @@ SDL.RPCController = Em.Object
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Wrong type of parameter 'cmdID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.menuParams == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'menuParams' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.menuParams != 'object') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'menuParams'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.menuParams.menuName == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'menuName' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.menuParams.menuName != 'string') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'menuName'!"
                         };
 
                         return this.resultStruct;

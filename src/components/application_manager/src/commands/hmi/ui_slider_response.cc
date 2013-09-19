@@ -50,6 +50,13 @@ void UISliderResponse::Run() {
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::SliderID;
 
+  if ((*message_)[strings::params][strings::message_type] ==
+      hmi_apis::messageType::error_response) {
+    (*message_)[strings::msg_params][strings::slider_position] =
+        (*message_)[strings::params][strings::data][strings::slider_position];
+    (*message_)[strings::params].erase(strings::data);
+  }
+
   SendResponseToMobile(message_);
 
 }

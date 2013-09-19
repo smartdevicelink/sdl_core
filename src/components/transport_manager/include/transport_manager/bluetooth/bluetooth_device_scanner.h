@@ -43,12 +43,12 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
-#include "transport_manager/device_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class DeviceAdapterController;
+class TransportAdapterController;
 
 /**
  * @brief Scan for devices using bluetooth.
@@ -59,7 +59,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief Constructor.
    */
-  BluetoothDeviceScanner(DeviceAdapterController* controller);
+  BluetoothDeviceScanner(TransportAdapterController* controller);
 
   /**
    * @brief Destructor.
@@ -77,19 +77,19 @@ class BluetoothDeviceScanner : public DeviceScanner {
    *
    * @return Error information about reason of initialization failure.
    */
-  virtual DeviceAdapter::Error init();
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief
    */
-  virtual void terminate();
+  virtual void Terminate();
 
   /**
    * @brief
    *
-   * @return Error information about reason of scan failure.
+   * @return Error information about reason of Scan failure.
    */
-  virtual DeviceAdapter::Error scan();
+  virtual TransportAdapter::Error Scan();
 
   /**
    * @brief Check device scanner for initialization.
@@ -97,17 +97,17 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @return true - initialized.
    * false - not initialized.
    */
-  virtual bool isInitialised() const;
+  virtual bool IsInitialised() const;
  private:
 
   typedef std::vector<uint8_t> RfcommChannelVector;
 
-  bool waitForDeviceScanRequest();
-  RfcommChannelVector discoverSmartDeviceLinkRfcommChannels(
+  bool WaitForDeviceScanRequest();
+  RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
       const bdaddr_t& device_address);
   SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
 
-  DeviceAdapterController* controller_;
+  TransportAdapterController* controller_;
   pthread_t thread_;
   bool thread_started_;
   bool shutdown_requested_;
@@ -122,7 +122,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   uuid_t smart_device_link_service_uuid_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* BLUETOOTH_DEVICE_SCANNER_H_ */

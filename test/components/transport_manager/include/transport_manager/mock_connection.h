@@ -38,29 +38,29 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "transport_manager/device_adapter/device_adapter_impl.h"
-#include "transport_manager/device_adapter/threaded_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::Connection;
-using ::transport_manager::device_adapter::DeviceAdapterController;
+using ::transport_manager::transport_adapter::Connection;
+using ::transport_manager::transport_adapter::TransportAdapterController;
 using ::transport_manager::ConnectError;
 using ::transport_manager::RawMessageSptr;
-using ::transport_manager::device_adapter::ThreadedSocketConnection;
-using ::transport_manager::device_adapter::DeviceAdapter;
+using ::transport_manager::transport_adapter::ThreadedSocketConnection;
+using ::transport_manager::transport_adapter::TransportAdapter;
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter;
+class MockTransportAdapter;
 
 class MockConnection : public ThreadedSocketConnection{
  public:
   MockConnection(const ::transport_manager::DeviceUID& device_handle,
                  const ApplicationHandle& app_handle,
-                 DeviceAdapterController* adapter);
-  bool establish(ConnectError **error);
+                 TransportAdapterController* adapter);
+  bool Establish(ConnectError **error);
 };
 
 }  // namespace transport_manager

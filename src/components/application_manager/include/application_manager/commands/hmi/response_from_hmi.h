@@ -49,22 +49,24 @@ namespace commands {
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class ResponseFromHMI : public CommandImpl {
-  public:
-    explicit ResponseFromHMI(const MessageSharedPtr& message);
-    virtual ~ResponseFromHMI();
-    virtual bool Init();
-    virtual bool CleanUp();
-    virtual void Run();
-    void SendResponseToMobile(const MessageSharedPtr& message);
+ public:
+  explicit ResponseFromHMI(const MessageSharedPtr& message);
+  virtual ~ResponseFromHMI();
+  virtual bool Init();
+  virtual bool CleanUp();
+  virtual void Run();
+  void SendResponseToMobile(const MessageSharedPtr& message);
 
-    /*
-     * @brief Creates HMI request
-     *
-     * @param function_id HMI request ID
-     * @param msg_params HMI request msg params
-     */
-    void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+  /*
+   * @brief Creates HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   */
+  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                           const NsSmart::SmartObject& msg_params) const;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);
 };
 
 }  // namespace commands

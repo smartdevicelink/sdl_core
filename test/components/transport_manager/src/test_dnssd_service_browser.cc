@@ -5,42 +5,42 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/dnssd_service_browser.h"
 #include "transport_manager/tcp/tcp_device.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-class MockDeviceAdapterController : public DeviceAdapterController {
+class MockTransportAdapterController : public TransportAdapterController {
  public:
-  MOCK_METHOD1(addDevice,
+  MOCK_METHOD1(AddDevice,
       DeviceSptr(DeviceSptr device));
-  MOCK_METHOD1(searchDeviceDone,
+  MOCK_METHOD1(SearchDeviceDone,
       void(const DeviceVector& devices));
-  MOCK_METHOD1(searchDeviceFailed,
+  MOCK_METHOD1(SearchDeviceFailed,
       void(const SearchDeviceError& error));
-  MOCK_CONST_METHOD1(findDevice,
+  MOCK_CONST_METHOD1(FindDevice,
       DeviceSptr(const DeviceUID& device_handle));
-  MOCK_METHOD3(connectionCreated,
+  MOCK_METHOD3(ConnectionCreated,
       void(ConnectionSptr connection, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
-  MOCK_METHOD2(connectDone,
+  MOCK_METHOD2(ConnectDone,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
-  MOCK_METHOD3(connectFailed,
+  MOCK_METHOD3(ConnectFailed,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ConnectError& error));
-  MOCK_METHOD2(connectionFinished,
+  MOCK_METHOD2(ConnectionFinished,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
-  MOCK_METHOD3(connectionAborted,
+  MOCK_METHOD3(ConnectionAborted,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const CommunicationError& error));
-  MOCK_METHOD2(disconnectDone,
+  MOCK_METHOD2(DisconnectDone,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
-  MOCK_METHOD3(dataReceiveDone,
+  MOCK_METHOD3(DataReceiveDone,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message));
-  MOCK_METHOD3(dataReceiveFailed,
+  MOCK_METHOD3(DataReceiveFailed,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
-  MOCK_METHOD3(dataSendDone,
+  MOCK_METHOD3(DataSendDone,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message));
-  MOCK_METHOD4(dataSendFailed,
+  MOCK_METHOD4(DataSendFailed,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message, const DataSendError& error));
 };
 
@@ -68,10 +68,10 @@ static in_addr_t iface_address = GetIfaceAddress();
 MATCHER_P(HasService, service_port, ""){
 for(DeviceVector::const_iterator it = arg.begin(); it != arg.end(); ++it) {
   TcpDevice* tcp_device = dynamic_cast<TcpDevice*>(it->get());
-  if(tcp_device && tcp_device->getAddress() == iface_address) {
-    ApplicationList app_list = tcp_device->getApplicationList();
+  if(tcp_device && tcp_device->GetAddress() == iface_address) {
+    ApplicationList app_list = tcp_device->GetApplicationList();
     for(ApplicationList::const_iterator it = app_list.begin(); it != app_list.end(); ++it) {
-      if(tcp_device->getApplicationPort(*it) == service_port) {
+      if(tcp_device->GetApplicationPort(*it) == service_port) {
         return true;
       }
     }
@@ -81,17 +81,17 @@ return false;
 }
 
 TEST(DnssdServiceBrowser, Basic) {
-  MockDeviceAdapterController controller;
+  MockTransportAdapterController controller;
 
-  EXPECT_CALL(controller, searchDeviceDone(HasService(4444)));
+  EXPECT_CALL(controller, SearchDeviceDone(HasService(4444)));
 
   DnssdServiceBrowser dnssd_service_browser(&controller);
   DeviceScanner& device_scanner = dnssd_service_browser;
-  device_scanner.init();
-  while (!device_scanner.isInitialised()) {
+  device_scanner.Init();
+  while (!device_scanner.IsInitialised()) {
   }
   sleep(1);
-  device_scanner.scan();
+  device_scanner.Scan();
 }
 
 }  // namespace

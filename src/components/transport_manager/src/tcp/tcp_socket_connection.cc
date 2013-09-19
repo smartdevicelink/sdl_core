@@ -1,6 +1,6 @@
 /**
  * \file tcp_adapter.cpp
- * \brief TcpDeviceAdapter class source file.
+ * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 #include "transport_manager/tcp/tcp_device.h"
 
@@ -42,32 +42,32 @@
 #include <errno.h>
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,
-                                         DeviceAdapterController* controller)
+                                         TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
 }
 
-bool TcpSocketConnection::establish(ConnectError** error) {
+bool TcpSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
 }
 
-bool TcpServerOiginatedSocketConnection::establish(ConnectError** error) {
-  DeviceSptr device = getController()->findDevice(device_handle());
+bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
+  DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
     LOG4CXX_ERROR(
         logger_,
@@ -78,7 +78,7 @@ bool TcpServerOiginatedSocketConnection::establish(ConnectError** error) {
   TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
 
   int port;
-  if (-1 == (port = tcp_device->getApplicationPort(application_handle()))) {
+  if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
     LOG4CXX_ERROR(
         logger_,
         "Application port for " << application_handle() << " not found");
@@ -96,12 +96,12 @@ bool TcpServerOiginatedSocketConnection::establish(ConnectError** error) {
   struct sockaddr_in addr;
   memset((char*) &addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = tcp_device->getAddress();
+  addr.sin_addr.s_addr = tcp_device->GetAddress();
   addr.sin_port = port;
 
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
     LOG4CXX_ERROR(logger_,
-                  "Failed to connect for application" << application_handle());
+                  "Failed to Connect for application" << application_handle());
     *error = new ConnectError();
     return false;
   }
@@ -110,6 +110,6 @@ bool TcpServerOiginatedSocketConnection::establish(ConnectError** error) {
   return true;
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 

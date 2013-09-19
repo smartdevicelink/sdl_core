@@ -98,7 +98,7 @@ class Timer {
   void *params_;
   volatile bool single_shot_;
 
-  static void *threadRoutine(void* param);
+  static void *ThreadRoutine(void* param);
 };
 
 }  // namespace transport_manager

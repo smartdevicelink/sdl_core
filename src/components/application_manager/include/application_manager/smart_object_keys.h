@@ -75,7 +75,7 @@ const char main_field_1[] = "mainField1";
 const char main_field_2[] = "mainField2";
 const char main_field_3[] = "mainField3";
 const char main_field_4[] = "mainField4";
-const char eta[]          = "eta";
+const char eta[] = "eta";
 const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
@@ -192,6 +192,7 @@ const char scroll_message_body[] = "scrollableMessageBody";
 const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
+const char slider_position[] = "sliderPosition";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -237,6 +238,11 @@ const char did_result[] = "didResult";
 const char result_code[] = "resultCode";
 const char dtc[] = "dtc";
 const char ecu_header[] = "ecuHeader";
+const char image_capabilities[] = "imageCapabilities";
+const char display_type[] = "displayType";
+const char text_fields[] = "textFields";
+const char media_clock_formats[] = "mediaClockFormats";
+const char graphic_supported[] = "graphicSupported";
 }  // namespace hmi_response
 
 namespace hmi_notification {

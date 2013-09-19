@@ -144,7 +144,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   if (watchdog_) {
-    watchdog_->removeListener(this);
+    watchdog_->RemoveListener(this);
 
     // TODO(AK): Is it correct?
     delete watchdog_;
@@ -305,7 +305,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
           connection_key,
           mobile_apis::FunctionID::RegisterAppInterfaceID,
           message[strings::params][strings::correlation_id],
-          mobile_apis::Result::DUPLICATE_NAME));
+          mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
       ManageMobileCommand(response);
       return NULL;
     }
@@ -445,6 +445,9 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
       }
       if (application->HasBeenActivated()) {
         MessageHelper::SendAppDataToHMI(application);
+      } else {
+        MessageHelper::SendChangeRegistrationRequestToHMI(
+          application);
       }
       if (!application->MakeFullscreen()) {
         return false;
@@ -747,8 +750,8 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
   perform_audio_thread_ = new threads::Thread("AudioPassThru thread",
       thread_impl);
 
-  perform_audio_thread_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
+  perform_audio_thread_->start();//WithOptions(
+    //threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {
@@ -756,14 +759,14 @@ void ApplicationManagerImpl::StopAudioPassThruThread() {
     return;
   }
 
-  if (NULL != audioManager_) {
-    audioManager_->stopMicrophoneRecording();
-  }
-
   if (NULL != perform_audio_thread_) {
     perform_audio_thread_->stop();
     delete perform_audio_thread_;
     perform_audio_thread_ = NULL;
+  }
+
+  if (NULL != audioManager_) {
+    audioManager_->stopMicrophoneRecording();
   }
 }
 
@@ -970,7 +973,7 @@ void ApplicationManagerImpl::set_watchdog(
   DCHECK(watchdog);
   watchdog_ = watchdog;
 
-  watchdog_->addListener(this);
+  watchdog_->AddListener(this);
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
@@ -1006,10 +1009,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
-    watchdog_->removeRequest(
-      msg_to_mobile[strings::params][strings::connection_key],
-      msg_to_mobile[strings::params][strings::correlation_id]);
-  }
+    // Check to prevent deadlock in watchdog
+      watchdog_->removeRequest(
+        msg_to_mobile[strings::params][strings::connection_key],
+        msg_to_mobile[strings::params][strings::correlation_id]);
+   }
 
   messages_to_mobile_.push(message_to_send);
 }
@@ -1339,7 +1343,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
   if (!watchdog_) {
     watchdog_ = request_watchdog::RequestWatchdog::instance();
     DCHECK(watchdog_);
-    watchdog_->addListener(this);
+    watchdog_->AddListener(this);
   }
   unsigned int default_timeout =
     profile::Profile::instance()->default_timeout();

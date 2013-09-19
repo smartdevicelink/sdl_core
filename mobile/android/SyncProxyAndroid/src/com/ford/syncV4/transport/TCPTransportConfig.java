@@ -15,25 +15,17 @@ public class TCPTransportConfig extends BaseTransportConfig {
 	 */
 	private final String mIpAddress;
 
-    /**
-     * Value of flag which is set to true if tcp connection must be automatically reestablished in case of disconnection
-     */
-    private final boolean mAutoReconnect;
-
-    /**
+	/**
 	 * Constructor. Objects of this class must be created for known port and IP address value.
-	 * 
+	 *
 	 * @param port Port for TCP connection.
 	 * @param ipAddress IP address for TCP connection.
-     * @param autoReconnect Flag which must be set to true if tcp connection must be automatically reestablished in
-     *                      case of disconnection
 	 */
-    public TCPTransportConfig(int port, String ipAddress, boolean autoReconnect) {
+	public TCPTransportConfig(int port, String ipAddress) {
 		mPort = port;
 		mIpAddress = ipAddress;
-        mAutoReconnect = autoReconnect;
-    }
-	
+	}
+
 	/**
 	 * Gets value of Port.
 	 * 
@@ -53,14 +45,6 @@ public class TCPTransportConfig extends BaseTransportConfig {
 	}
 
     /**
-     * Gets value of AutoReconnect
-     * @return Flag that determines automatic reconnection
-     */
-    public boolean getAutoReconnect() {
-        return mAutoReconnect;
-    }
-
-    /**
 	 * Overridden abstract method which returns specific type of this transport configuration.
 	 * 
 	 * @return Constant value TransportType.TCP. 
@@ -76,7 +60,6 @@ public class TCPTransportConfig extends BaseTransportConfig {
         return "TCPTransportConfig{" +
                 "Port=" + mPort +
                 ", IpAddress='" + mIpAddress + '\'' +
-                ", AutoReconnect=" + mAutoReconnect +
                 '}';
     }
 }

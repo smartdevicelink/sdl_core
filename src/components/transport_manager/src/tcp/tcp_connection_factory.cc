@@ -34,40 +34,40 @@
  */
 
 #include "transport_manager/tcp/tcp_connection_factory.h"
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
-TcpConnectionFactory::TcpConnectionFactory(DeviceAdapterController* controller)
+TcpConnectionFactory::TcpConnectionFactory(TransportAdapterController* controller)
     : controller_(controller) {
 }
 
-DeviceAdapter::Error TcpConnectionFactory::init() {
-  return DeviceAdapter::OK;
+TransportAdapter::Error TcpConnectionFactory::Init() {
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error TcpConnectionFactory::createConnection(
+TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(device_uid, app_handle,
                                              controller_));
-  DeviceAdapter::Error error = connection->start();
-  if (error != DeviceAdapter::OK)
+  TransportAdapter::Error error = connection->start();
+  if (error != TransportAdapter::OK)
     delete connection;
   return error;
 }
 
-void TcpConnectionFactory::terminate() {
+void TcpConnectionFactory::Terminate() {
 }
 
-bool TcpConnectionFactory::isInitialised() const {
+bool TcpConnectionFactory::IsInitialised() const {
   return true;
 }
 
 TcpConnectionFactory::~TcpConnectionFactory() {
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

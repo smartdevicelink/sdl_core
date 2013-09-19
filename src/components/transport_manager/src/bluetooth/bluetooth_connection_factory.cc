@@ -34,28 +34,28 @@
  */
 
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
-#include "transport_manager/device_adapter/device_adapter_controller.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 BluetoothConnectionFactory::BluetoothConnectionFactory(
-    DeviceAdapterController* controller)
+    TransportAdapterController* controller)
     : controller_(controller) {
 }
 
-DeviceAdapter::Error BluetoothConnectionFactory::init() {
-  return DeviceAdapter::OK;
+TransportAdapter::Error BluetoothConnectionFactory::Init() {
+  return TransportAdapter::OK;
 }
 
-DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
+TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOG4CXX_INFO(logger_, "enter");
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_uid, app_handle, controller_));
-  DeviceAdapter::Error error = connection->start();
-  if (error != DeviceAdapter::OK) {
+  TransportAdapter::Error error = connection->start();
+  if (error != TransportAdapter::OK) {
     LOG4CXX_INFO(logger_, "connection::start() failed");
     delete connection;
   }
@@ -63,15 +63,15 @@ DeviceAdapter::Error BluetoothConnectionFactory::createConnection(
   return error;
 }
 
-void BluetoothConnectionFactory::terminate() {
+void BluetoothConnectionFactory::Terminate() {
 }
 
-bool BluetoothConnectionFactory::isInitialised() const {
+bool BluetoothConnectionFactory::IsInitialised() const {
   return true;
 }
 
 BluetoothConnectionFactory::~BluetoothConnectionFactory() {
 }
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager

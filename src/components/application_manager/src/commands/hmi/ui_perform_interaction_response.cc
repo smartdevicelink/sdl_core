@@ -81,7 +81,7 @@ void UIPerformInteractionResponse::Run() {
 
   if (app->is_perform_interaction_active()) {
     const PerformChoiceSetMap& choice_set_map =
-      app->GetPerformInteractionChoiceSetMap();
+      app->performinteraction_choice_set_map();
 
     if (mobile_apis::InteractionMode::MANUAL_ONLY !=
         app->perform_interaction_mode()) {
@@ -105,14 +105,12 @@ void UIPerformInteractionResponse::Run() {
     app->set_perform_interaction_mode(-1);
     app->DeletePerformInteractionChoiceSetMap();
     app->set_perform_interaction_active(0);
-
-    if (hmi_apis::Common_Result::ABORTED ==
-        (*message_)[strings::params][hmi_response::code].asInt()) {
-    }
   }
 
-  (*message_)[strings::msg_params][strings::trigger_source] =
-    mobile_apis::TriggerSource::TS_MENU;
+  if (hmi_apis::Common_Result::SUCCESS == code) {
+    (*message_)[strings::msg_params][strings::trigger_source] =
+      mobile_apis::TriggerSource::TS_MENU;
+  }
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

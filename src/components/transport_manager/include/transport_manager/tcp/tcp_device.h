@@ -36,7 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include "transport_manager/device_adapter/device.h"
+#include "transport_manager/transport_adapter/device.h"
 
 #include <map>
 #include <memory.h>
@@ -49,7 +49,7 @@
 #include <sys/socket.h>
 
 namespace transport_manager {
-namespace device_adapter {
+namespace transport_adapter {
 
 /**
  * @brief Information about device that use TCP transport.
@@ -73,35 +73,35 @@ class TcpDevice : public Device {
    *
    * @return True if devices are equal, false otherwise.
    **/
-  virtual bool isSameAs(const Device* other) const;
+  virtual bool IsSameAs(const Device* other) const;
 
   /**
    * @brief Update list of applications available on device.
    *
    * @return Container with list of applications.
    */
-  virtual ApplicationList getApplicationList() const;
+  virtual ApplicationList GetApplicationList() const;
 
   /**
    * @brief Add an application to the container of applications.
    *
    * @param socket Value of socket.
    */
-  ApplicationHandle addIncomingApplication(const int socket);
+  ApplicationHandle AddIncomingApplication(const int socket);
 
   /**
    * @brief Add application that was discovered before.
    *
    * @param Port No.
    */
-  ApplicationHandle addDiscoveredApplication(const int port);
+  ApplicationHandle AddDiscoveredApplication(const int port);
 
   /**
    * @brief Remove application from the container of applications.
    *
    * @param app_handle Handle of application.
    */
-  void removeApplication(const ApplicationHandle app_handle);
+  void RemoveApplication(const ApplicationHandle app_handle);
 
   /**
    * @brief Return application's socket value.
@@ -110,7 +110,7 @@ class TcpDevice : public Device {
    *
    * @return Application's socket value.
    */
-  int getApplicationSocket(const ApplicationHandle app_handle) const;
+  int GetApplicationSocket(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return application's port No.
@@ -119,14 +119,14 @@ class TcpDevice : public Device {
    *
    * @return Application's port No.
    */
-  int getApplicationPort(const ApplicationHandle app_handle) const;
+  int GetApplicationPort(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return address.
    *
    * @return Address.
    */
-  in_addr_t getAddress() const {
+  in_addr_t GetAddress() const {
     return in_addr_;
   }
 
@@ -143,7 +143,7 @@ class TcpDevice : public Device {
   ApplicationHandle last_handle_;
 };
 
-}  // namespace device_adapter
+}  // namespace transport_adapter
 }  // namespace transport_manager
 
 #endif /* TCP_DEVICE_H_ */

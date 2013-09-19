@@ -62,11 +62,11 @@ void MockDevice::stop() {
   }
 }
 
-bool MockDevice::isSameAs(const Device* other) const {
+bool MockDevice::IsSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
 
-ApplicationList MockDevice::getApplicationList() const {
+ApplicationList MockDevice::GetApplicationList() const {
   ApplicationList rc(applications_.size());
   std::transform(
       applications_.begin(), applications_.end(), rc.begin(),
@@ -75,7 +75,7 @@ ApplicationList MockDevice::getApplicationList() const {
 }
 
 bool MockDevice::operator ==(const MockDevice& other) {
-  return isSameAs(&other);
+  return IsSameAs(&other);
 }
 
 }  // namespace transport_manager

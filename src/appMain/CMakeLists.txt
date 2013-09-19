@@ -1,3 +1,10 @@
+cmake_policy(PUSH)
+# make link_directories() treat paths relative to the source dir
+# info: cmake --help-policy CMP0015
+cmake_policy(SET CMP0015 NEW)
+link_directories(../thirdPartyLibs/libusbx)
+cmake_policy(POP)
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -23,6 +30,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   AudioManager
+  Libusb-1.0.16
 )
 
 # required to find 'glibconfig.h'

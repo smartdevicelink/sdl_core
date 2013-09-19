@@ -36,30 +36,30 @@
 #ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTIONFACTORY_H_
 #define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKCONNECTIONFACTORY_H_
 
-#include "transport_manager/device_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;
-using ::transport_manager::device_adapter::DeviceAdapter;
-using ::transport_manager::device_adapter::ServerConnectionFactory;
+using ::transport_manager::transport_adapter::TransportAdapter;
+using ::transport_manager::transport_adapter::ServerConnectionFactory;
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-class MockDeviceAdapter;
+class MockTransportAdapter;
 
 class MockConnectionFactory : public ServerConnectionFactory {
  public:
-  MockConnectionFactory(MockDeviceAdapter *adapter);
-  DeviceAdapter::Error init() { return DeviceAdapter::OK; }
-  DeviceAdapter::Error createConnection(const ::transport_manager::DeviceUID& device_handle,
+  MockConnectionFactory(MockTransportAdapter *adapter);
+  TransportAdapter::Error Init() { return TransportAdapter::OK; }
+  TransportAdapter::Error CreateConnection(const ::transport_manager::DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
-  void terminate() {}
-  bool isInitialised() const { return true; }
+  void Terminate() {}
+  bool IsInitialised() const { return true; }
 
  private:
-  MockDeviceAdapter *controller_;
+  MockTransportAdapter *controller_;
 };
 
 }  // namespace transport_manager

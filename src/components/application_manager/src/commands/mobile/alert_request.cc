@@ -58,6 +58,13 @@ void AlertRequest::Run() {
     (*message_)[strings::params][strings::connection_key].asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
+  if (ApplicationManagerImpl::instance()->vr_session_started())
+  {
+    LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -65,8 +72,9 @@ void AlertRequest::Run() {
   }
 
   //check if mandatory params(alertText1 and TTSChunk) specified
-  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) ||
-      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) ||
+  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
     LOG4CXX_ERROR_EXT(logger_, "Mandatoty parameters omitted");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
