@@ -101,32 +101,32 @@ DBusSchema::DBusSchema() {
   }
 }
 
-MessageName DBusSchema::getMessageName(MessageId id) {
-  Messages::iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsId(id));
+MessageName DBusSchema::getMessageName(MessageId id) const {
+  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsId(id));
   if (msgs_.end() != it) {
     return (*it)->name;
   }
   return MessageName();
 }
 
-MessageId DBusSchema::getMessageId(MessageName name) {
-  Messages::iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsName(name));
+MessageId DBusSchema::getMessageId(MessageName name) const {
+  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsName(name));
   if (msgs_.end() != it) {
     return (*it)->id;
   }
   return hmi_apis::FunctionID::eType::INVALID_ENUM;
 }
 
-ListArgs DBusSchema::getListArgs(MessageId id, MessageType type) {
-  Messages::iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsIdType(id, type));
+ListArgs DBusSchema::getListArgs(MessageId id, MessageType type) const {
+  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsIdType(id, type));
   if (msgs_.end() != it) {
     return (*it)->args;
   }
   return ListArgs();
 }
 
-ListArgs DBusSchema::getListArgs(MessageName name, MessageType type) {
-  Messages::iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsNameType(name, type));
+ListArgs DBusSchema::getListArgs(MessageName name, MessageType type) const {
+  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(), IsNameType(name, type));
   if (msgs_.end() != it) {
     return (*it)->args;
   }

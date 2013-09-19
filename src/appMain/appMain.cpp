@@ -345,16 +345,16 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "Init DBus service successful");
-
-  if (!InitMessageBroker()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
-
-  if (!InitHmi()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitHmi successful");
+// TODO(KKolodiy): add define for selective compiling
+//  if (!InitMessageBroker()) {
+//    exit(EXIT_FAILURE);
+//  }
+//  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+//
+//  if (!InitHmi()) {
+//    exit(EXIT_FAILURE);
+//  }
+//  LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
 
