@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "interfaces/HMI_API.h"
+#include "dbus/schema.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "formatters/CSmartFactory.hpp"
 
@@ -73,10 +73,7 @@ void DBusMessageAdapter::sendMessageToHMI(
     utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
-  // TODO(KKolodiy): get smart object from message
-  return;
-  smart_objects::SmartObject smart;
-
+  smart_objects::SmartObject& smart = message->smart_object();
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
     case hmi_apis::messageType::request:
       Request(smart);
@@ -132,42 +129,36 @@ void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
 
   application_manager::Message* message = new application_manager::Message;
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-  // TODO(KKolodiy): insert smart object "obj" to message
-//  message->set_json_message(message_string);
-
-//  handler()->onMessageReceived(message);
+  message->set_smart_object(obj);
+  handler()->onMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");
 }
 
 void DBusMessageAdapter::Request(smart_objects::SmartObject& obj) {
-  obj[sos::S_PARAMS][sos::S_FUNCTION_ID].getSchema()
-      .unapplySchema(obj[sos::S_PARAMS][sos::S_FUNCTION_ID]);
-  std::string destination = obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asString();
-  std::vector<std::string> elems;
-  split(destination, '.', elems);
-  if (elems.size() > 2) {
-    uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
-    MethodCall(id, HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
-  }
+  LOG4CXX_DEBUG(logger_, "Request");
+  dbus::MessageId func_id = static_cast<dbus::MessageId>(
+      obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
+  dbus::MessageName name = get_schema().getMessageName(func_id);
+  uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
+  MethodCall(id, func_id, name, obj[sos::S_MSG_PARAMS]);
 }
 
 void DBusMessageAdapter::Notification(smart_objects::SmartObject& obj) {
-  obj[sos::S_PARAMS][sos::S_FUNCTION_ID].getSchema()
-        .unapplySchema(obj[sos::S_PARAMS][sos::S_FUNCTION_ID]);
-  std::string destination = obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asString();
-  std::vector<std::string> elems;
-  split(destination, '.', elems);
-  if (elems.size() > 2) {
-    Signal(HMI_SERVICE_NAME + "." + elems[0], elems[1], obj[sos::S_MSG_PARAMS]);
-  }
+  LOG4CXX_DEBUG(logger_, "Notification");
+  dbus::MessageId func_id = static_cast<dbus::MessageId>(
+      obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
+  dbus::MessageName name = get_schema().getMessageName(func_id);
+  Signal(func_id, name, obj[sos::S_MSG_PARAMS]);
 }
 
 void DBusMessageAdapter::Response(smart_objects::SmartObject& obj) {
+  LOG4CXX_DEBUG(logger_, "Response");
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
   MethodReturn(id, obj[sos::S_MSG_PARAMS]);
 }
 
 void DBusMessageAdapter::ErrorResponse(smart_objects::SmartObject& obj) {
+  LOG4CXX_DEBUG(logger_, "Error");
   // TODO(KKolodiy): get error and description
   std::string error = "";
   std::string description = "";

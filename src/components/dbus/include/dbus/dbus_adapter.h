@@ -84,21 +84,21 @@ class DBusAdapter {
   /**
    * \brief calls method on HMI
    * \param id id message
-   * \param path name of interface on HMI
-   * \param method name of method for call
+   * \param func_id id function in Ford protocol
+   * \param name pair interface and name of method for call
    * \param obj params for call
    */
-  void MethodCall(uint id, const std::string& path, const std::string& method,
+  void MethodCall(uint id, const MessageId func_id, const MessageName name,
                   smart_objects::SmartObject& obj);
 
   /**
    * \brief sends signal
    * \param id id message
-   * \param interface name of interface
-   * \param signal name of signal for send
+   * \param func_id id function in Ford protocol
+   * \param name pair interface and name of signal for call
    * \param obj params for signal
    */
-  void Signal(const std::string& interface, const std::string& signal,
+  void Signal(const MessageId func_id, const MessageName name,
               smart_objects::SmartObject& obj);
 
   /**

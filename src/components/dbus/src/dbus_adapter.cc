@@ -69,26 +69,22 @@ DBusAdapter::~DBusAdapter() {}
 bool DBusAdapter::Init() {
   DBusError err;
   int ret;
-  std::string str;
   dbus_error_init(&err);
   conn_ = dbus_bus_get(DBUS_BUS_SESSION, &err);
   if (dbus_error_is_set(&err)) {
-    str = "DBus: Connection Error ";
-    LOG4CXX_ERROR(logger_, str.append(err.message));
+    LOG4CXX_ERROR(logger_, "DBus: Connection Error " << err.message);
     dbus_error_free(&err);
     return false;
   }
   ret = dbus_bus_request_name(conn_, sdl_service_name_.c_str(),
                               DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
   if (dbus_error_is_set(&err)) {
-    str = "DBus: Name Error ";
-    LOG4CXX_ERROR(logger_, str.append(err.message));
+    LOG4CXX_ERROR(logger_, "DBus: Name Error " << err.message);
     dbus_error_free(&err);
     return false;
   }
   if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
-    str = "DBus: Name Error ";
-    LOG4CXX_ERROR(logger_, str.append(err.message));
+    LOG4CXX_ERROR(logger_, "DBus: Name Error " << err.message);
     return false;
   }
 
@@ -182,17 +178,16 @@ void DBusAdapter::Error(uint id, const std::string& name,
 //  dbus_message_unref(msg);
 }
 
-void DBusAdapter::MethodCall(uint id, const std::string& interface,
-                             const std::string& method,
+void DBusAdapter::MethodCall(uint id, const MessageId func_id,
+                             const MessageName name,
                              smart_objects::SmartObject& obj) {
+  LOG4CXX_DEBUG(logger_, "Method call " << name.first << "." << name.second);
   if (conn_ == nullptr) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return;
   }
 
-  MessageName name(interface, method);
-  MessageId m_id = schema_.getMessageId(name);
-  if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
+  if (func_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
     return;
   }
@@ -200,14 +195,14 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
   DBusMessage* msg;
   msg = dbus_message_new_method_call(hmi_service_name_.c_str(),
        hmi_object_path_.c_str(),
-       interface.c_str(),
-       method.c_str());
+       (hmi_service_name_ + "." + name.first).c_str(),
+       name.second.c_str());
   if (NULL == msg) {
     LOG4CXX_WARN(logger_, "DBus: Failed call method (Message Null)");
     return;
   }
 
-  const ListArgs& args = schema_.getListArgs(m_id,
+  const ListArgs& args = schema_.getListArgs(func_id,
                                              hmi_apis::messageType::request);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
@@ -222,36 +217,34 @@ void DBusAdapter::MethodCall(uint id, const std::string& interface,
     return;
   }
   dbus_connection_flush(conn_);
-  PushMessageId(serial, std::make_pair(id, m_id));
+  PushMessageId(serial, std::make_pair(id, func_id));
   dbus_message_unref(msg);
   LOG4CXX_INFO(logger_, "DBus: Success call method");
 }
 
-void DBusAdapter::Signal(const std::string& interface,
-                         const std::string& signal,
+void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
                          smart_objects::SmartObject& obj) {
+  LOG4CXX_DEBUG(logger_, "Signal " << name.first << "." << name.second);
   if (conn_ == nullptr) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return;
   }
 
-  MessageName name(interface, signal);
-  MessageId m_id = schema_.getMessageId(name);
-  if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
+  if (func_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
     return;
   }
 
   DBusMessage *msg;
   msg = dbus_message_new_signal(sdl_object_path_.c_str(),
-                                interface.c_str(),
-                                signal.c_str());
+                                (hmi_service_name_ + "." + name.first).c_str(),
+                                name.second.c_str());
   if (NULL == msg) {
     LOG4CXX_WARN(logger_, "DBus: Failed emit signal (Message Null)");
     return;
   }
 
-  const ListArgs& args = schema_.getListArgs(m_id,
+  const ListArgs& args = schema_.getListArgs(func_id,
                                              hmi_apis::messageType::notification);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");

@@ -56,10 +56,10 @@ class DBusSchema {
  public:
   DBusSchema();
 
-  MessageName getMessageName(MessageId id);
-  MessageId getMessageId(MessageName name);
-  ListArgs getListArgs(MessageId id, MessageType type);
-  ListArgs getListArgs(MessageName name, MessageType type);
+  MessageName getMessageName(MessageId id) const;
+  MessageId getMessageId(MessageName name) const;
+  ListArgs getListArgs(MessageId id, MessageType type) const;
+  ListArgs getListArgs(MessageName name, MessageType type) const;
 
  private:
   Messages msgs_;

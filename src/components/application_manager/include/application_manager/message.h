@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "utils/shared_ptr.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
@@ -76,6 +77,7 @@ class Message {
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
   bool has_binary_data() const;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject& smart_object();
 
   //! --------------------------------------------------------------------------
   void set_function_id(int id);
@@ -85,6 +87,7 @@ class Message {
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
+  void set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
 
  private:
   int function_id_;  // @remark protocol V2.
@@ -94,6 +97,7 @@ class Message {
   int connection_key_;
   ProtocolVersion version_;
   std::string json_message_;
+  NsSmartDeviceLink::NsSmartObjects::SmartObject object_;
 
   // TODO(akandul): replace with shared_ptr
   BinaryData* binary_data_;
