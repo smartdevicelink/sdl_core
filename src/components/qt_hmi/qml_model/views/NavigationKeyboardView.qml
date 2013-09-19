@@ -13,6 +13,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
+
         // Text line with input text
         TextInput{
             id: inputText
@@ -21,6 +22,7 @@ Item {
             maximumLength: 30
             color: "#1d81d5"
             font.pixelSize: 30
+            text: dataContainer.route_text
         }
 
         // Keyboard
@@ -40,7 +42,7 @@ Item {
                         pixelSize: 25
 
                         onClicked: {
-                            inputText.text += upperRow.qWERTY.charAt(index)
+                            dataContainer.route_text += upperRow.qWERTY.charAt(index)
                         }
                     }
                 }
@@ -66,7 +68,7 @@ Item {
                         pixelSize: 25
 
                         onClicked: {
-                            inputText.text += middleRow.aSDFGH.charAt(index)
+                            dataContainer.route_text += middleRow.aSDFGH.charAt(index)
                         }
                     }
                 }
@@ -84,7 +86,7 @@ Item {
                     }
 
                     onClicked: {
-                        inputText.text = inputText.text.substring(0,inputText.text.length - 1)
+                        dataContainer.route_text = dataContainer.route_text.substring(0,dataContainer.route_text.length - 1)
                     }
                 }
             }
@@ -109,7 +111,7 @@ Item {
                         pixelSize: 25
 
                         onClicked: {
-                            inputText.text += lowerRow.zXCVBN.charAt(index)
+                            dataContainer.route_text += lowerRow.zXCVBN.charAt(index)
                         }
                     }
                 }
@@ -121,7 +123,7 @@ Item {
                     pixelSize: 12
 
                     onClicked: {
-                        inputText.text = ""
+                        dataContainer.route_text = ""
                     }
                 }
                 //----------------
@@ -132,7 +134,7 @@ Item {
                     pixelSize: 12
 
                     onClicked: {
-                        inputText.text += " "
+                        dataContainer.route_text += " "
                     }
                 }
             }

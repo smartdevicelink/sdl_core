@@ -9,4 +9,8 @@ MenuGridView
     rows: 2
 
     model: MainMenuListModel {}
+
+    Component.onCompleted: {
+        dataContainer.reset()
+    }
 }
