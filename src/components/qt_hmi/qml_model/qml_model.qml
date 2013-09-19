@@ -2,6 +2,7 @@ import QtQuick 2.0
 import com.ford.hmi_framework 1.0
 import "./controls"
 import "./views"
+import "./models"
 
 Rectangle{
     width: 1600
@@ -11,6 +12,10 @@ Rectangle{
     property int minWidth: 600
     property int minHieght: 400
     color: "black"
+
+    DataStorage{
+        id: dataContainer
+    }
 
     Item {
         id: mainScreen

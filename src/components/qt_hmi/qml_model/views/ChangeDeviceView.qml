@@ -11,7 +11,6 @@ Item {
         width: parent.width
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
 
         Text {
 

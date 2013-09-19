@@ -37,7 +37,8 @@ if(NOT PYTHONINTERP_FOUND)
 endif(NOT PYTHONINTERP_FOUND)
 
 FIND_PACKAGE(Qt5Core)
-INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS}
+
+INCLUDE_DIRECTORIES(${Qt5Core_INCLUDES}
     /usr/lib/i386-linux-gnu/libQt5Core.so
     /usr/lib/i386-linux-gnu/libQt5Quick.so
 )
