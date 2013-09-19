@@ -1,16 +1,18 @@
 import QtQuick 2.0
 import "../controls"
 
-Column {
-    spacing: 25
+Item {
     anchors.fill: parent
     property string radioType: ""
     property var activeBand: radioType === "AM"? ["1130", "950", "760", "1270"]: ["96.3", "107.9", "104.3", "101.9"]
     property var presets: [ "1130", "950", "760", "1270", "96.3", "107.9", "104.3", "101.9" ]
+    property int minHeight: 400
     Item{
+        id: upperControlLine
         width: parent.width
         height: parent.height * 0.25
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
         LongOvalBtn {
             text: radioType + " Radio"
             pixelSize: 20
@@ -26,11 +28,11 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
         }
     }
-    Row{
-        spacing: 40
+    Item{
         width: parent.width
-        height: parent.height * 0.5
-        x: 10
+        height: parent.height  * 0.5 < minHeight ? minHeight: parent.height * 0.5
+        anchors.top: upperControlLine.bottom
+
         Column {
             spacing: 10
             Row{
@@ -114,8 +116,10 @@ Column {
             }
         }
     }
+
     PresetRow{
         height: parent.height * 0.25
+        anchors.bottom: parent.bottom
     }
 
 }
