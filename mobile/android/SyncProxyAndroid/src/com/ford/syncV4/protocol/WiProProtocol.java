@@ -1,9 +1,12 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 
 import com.ford.syncV4.protocol.enums.*;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.exception.*;
@@ -410,6 +413,11 @@ public class WiProProtocol extends AbstractProtocol {
 			} else message.setData(data);
 			
 			_assemblerForMessageID.remove(header.getMessageID());
+
+            if (message.getFunctionID() == FunctionID.getFunctionID(Names.UnregisterAppInterface)) {
+                Log.d("WiPro", "UnregisterAppInterface");
+                handleAppUnregistered();
+                }
 			
 			try {
 				handleProtocolMessageReceived(message);

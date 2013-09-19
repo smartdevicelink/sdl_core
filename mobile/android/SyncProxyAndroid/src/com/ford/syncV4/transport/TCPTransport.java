@@ -178,6 +178,11 @@ public class TCPTransport extends SyncTransport {
         }
     }
 
+    @Override
+    public void stopReading() {
+
+    }
+
     /**
      * Performs actual work related to disconnecting from ApplinkCore.
      *

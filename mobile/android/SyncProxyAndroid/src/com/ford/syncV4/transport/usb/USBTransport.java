@@ -150,11 +150,11 @@ public class USBTransport extends SyncTransport {
     /**
      * Data input stream to read data from USB accessory.
      */
-    private InputStream mInputStream = null;
+    private FileInputStream mInputStream = null;
     /**
      * Data output stream to write data to USB accessory.
      */
-    private OutputStream mOutputStream = null;
+    private FileOutputStream mOutputStream = null;
     /**
      * Thread that connects and reads data from USB accessory.
      *
@@ -215,6 +215,12 @@ public class USBTransport extends SyncTransport {
                 synchronized (this) {
                     if (mOutputStream != null) {
                         try {
+                            FileDescriptor inFD = mInputStream.getFD();
+                            logI(" InFD " + inFD + " valid? " + inFD.valid());
+                            FileDescriptor outFD = mOutputStream.getFD();
+                            logI(" OutFD " + outFD + " valid? " + outFD.valid());
+                            logI(" has permission? " + getUsbManager().hasPermission(mAccessory));
+
                             mOutputStream.write(msgBytes, offset, length);
                             result = true;
 
@@ -291,6 +297,31 @@ public class USBTransport extends SyncTransport {
     @Override
     public void disconnect() {
         disconnect(null, null);
+    }
+
+    @Override
+    public void stopReading() {
+        final State state = getState();
+        switch (state) {
+            case CONNECTED:
+                logI("Stopping reading");
+                synchronized (this) {
+                    if (mReaderThread != null) {
+                        logI("Interrupting USB reader");
+                        mReaderThread.interrupt();
+                        // don't join() now
+                                mReaderThread = null;
+                        } else {
+                        logD("USB reader is null");
+                        }
+                    }
+                break;
+
+                    default:
+                logW("Stopping reading called from state " + state +
+                        "; doing nothing");
+                break;
+            }
     }
 
     /**
@@ -774,4 +805,6 @@ public class USBTransport extends SyncTransport {
             DebugTool.logError(s, tr);
         }
     }
+
+
 }

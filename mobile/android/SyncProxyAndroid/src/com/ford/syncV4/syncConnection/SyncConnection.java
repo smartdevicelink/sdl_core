@@ -1,5 +1,7 @@
 package com.ford.syncV4.syncConnection;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
@@ -73,6 +75,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public AbstractProtocol getWiProProtocol(){
 		return _protocol;
 	}
+
+    public void stopTransportReading() {
+        if (_transport != null) {
+            _transport.stopReading();
+            }
+    }
 	
 	public void closeConnection(byte rpcSessionID) {
 		synchronized(PROTOCOL_REFERENCE_LOCK) {
@@ -169,6 +177,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
 			String correlationID) {
 		_connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
+        Log.d("SyncConnection", "onProtocolSessionEnded");
+        _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
 	}
 
 	@Override
@@ -181,7 +191,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public void onProtocolError(String info, Exception e) {
 		_connectionListener.onProtocolError(info, e);
 	}
-	
+
+    @Override
+    public void onProtocolAppUnregistered() {
+        Log.d("SyncConnection", "onProtocolAppUnregistered");
+        _transport.stopReading();
+    }
+
 	/**
 	 * Gets type of transport currently used by this connection.
 	 * 
