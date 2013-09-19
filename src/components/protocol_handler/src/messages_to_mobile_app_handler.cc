@@ -72,14 +72,14 @@ void MessagesToMobileAppHandler::threadMain() {
           << " ISessionObserver doesn't exist.");
         return;
       }
-      unsigned int connectionHandle = 0;
+      unsigned int connection_handle = 0;
       unsigned char sessionID = 0;
       handler_->session_observer_->PairFromKey(message->connection_key(),
-          &connectionHandle, &sessionID);
+          &connection_handle, &sessionID);
 
       if (message->data_size() <= maxDataSize) {
         RESULT_CODE result = handler_->SendSingleFrameMessage(
-                               message, sessionID, message->protocol_version(),
+                               connection_handle, sessionID, message->protocol_version(),
                                SERVICE_TYPE_RPC,
                                message->data_size(), message->data(),
                                false);
@@ -94,7 +94,7 @@ void MessagesToMobileAppHandler::threadMain() {
           << maxDataSize);
 
         RESULT_CODE result = handler_->SendMultiFrameMessage(
-                               message, sessionID, message->protocol_version(),
+                               connection_handle, sessionID, message->protocol_version(),
                                SERVICE_TYPE_RPC,
                                message->data_size(), message->data(), false,
                                maxDataSize);

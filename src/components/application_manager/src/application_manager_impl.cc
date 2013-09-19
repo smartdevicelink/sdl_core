@@ -938,8 +938,6 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
 
 void ApplicationManagerImpl::onTimeoutExpired(
   request_watchdog::RequestInfo info) {
-  printf("\n\n\n!!!!!onTimeoutExpired!!!!!\n\n\n");
-
   RemoveMobileRequestFromMessageChain(info.correlationID_, info.connectionID_);
   /*watchdog_->removeRequest(info.connectionID_,
                            info.correlationID_);*/
@@ -1331,8 +1329,6 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
-
-  printf("\n\n\nfunction_id: %d\n\n\n", message->function_id());
 
   if (!ConvertMessageToSO(*message, *so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");

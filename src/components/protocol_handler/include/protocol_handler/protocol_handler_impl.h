@@ -63,6 +63,7 @@ class MessagesToMobileAppHandler;
 
 typedef std::multimap<int, RawMessagePtr> MessagesOverNaviMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
+typedef transport_manager::ConnectionUID ConnectionID;
 
 using transport_manager::TransportManagerListenerImpl;
 
@@ -132,7 +133,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendEndSessionNAck(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id ,
       unsigned int session_id,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
@@ -149,7 +150,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionAck(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id,
       unsigned char session_id,
       unsigned char protocol_version,
       unsigned int hash_code = 0,
@@ -162,7 +163,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionNAck(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
   private:
@@ -219,7 +220,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -241,7 +242,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendMultiFrameMessage(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -258,7 +259,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendFrame(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id,
       const ProtocolPacket& packet);
 
     /**
@@ -269,7 +270,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMessage(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id ,
       ProtocolPacket* packet);
 
     /**
@@ -281,7 +282,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMultiFrameMessage(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id ,
       ProtocolPacket* packet);
 
     /**
@@ -292,14 +293,14 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleControlMessage(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id ,
       const ProtocolPacket* packet);
 
     /**
      * \brief Sends Mobile Navi Ack message
      */
     RESULT_CODE SendMobileNaviAck(
-      const RawMessagePtr& original_message,
+      ConnectionID connection_id ,
       int connection_key);
 
     /**
@@ -308,9 +309,9 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * \param connection_key Id of session over which message was received
      * \param recieved_msg Parsed message
      */
-    RESULT_CODE HandleStreamingMessage(const RawMessagePtr& original_message,
+    RESULT_CODE HandleStreamingMessage(ConnectionID connection_id ,
                                        int connection_key,
-                                       const RawMessagePtr& recieved_msg);
+                                       RawMessagePtr recieved_msg);
 
     /**
      * \brief For logging.

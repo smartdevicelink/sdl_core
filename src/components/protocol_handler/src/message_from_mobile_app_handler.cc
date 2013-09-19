@@ -67,13 +67,12 @@ void MessagesFromMobileAppHandler::threadMain() {
         } else {
           LOG4CXX_INFO_EXT(logger_,
                            "Packet: dataSize " << packet->data_size());
-          handler_->HandleMessage(message, packet);
+          handler_->HandleMessage(message->connection_key(), packet);
         }
       } else {
         LOG4CXX_WARN(
           logger_, "handleMessagesFromMobileApp() - incorrect or NULL data");
       }
-
     }
     handler_->messages_from_mobile_app_.wait();
   }
