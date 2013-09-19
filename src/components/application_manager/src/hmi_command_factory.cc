@@ -160,6 +160,7 @@
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/commands/hmi/on_show_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
+#include "application_manager/commands/hmi/on_navi_keyboard_input_notification.h"
 
 
 namespace application_manager {
@@ -682,6 +683,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::Navigation_OnTBTClientState: {
       command.reset(new commands::OnNaviTBTClientStateNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_OnKeyboardInput: {
+      command.reset(new commands::OnNaviKeyboardInputNotification(message));
       break;
     }
   }
