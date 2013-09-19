@@ -3,7 +3,6 @@ import com.ford.hmi_framework 1.0
 
 Item {
     width: parent.width
-    height: 100
     Rectangle{
         width: parent.width
         height: 2
@@ -13,7 +12,7 @@ Item {
     Flickable
     {
         anchors.fill: parent
-        contentHeight: 100
+        contentHeight: presetRow.height
         contentWidth: presetRow.width
         boundsBehavior: Flickable.StopAtBounds
         clip: true
@@ -23,14 +22,13 @@ Item {
 
             columns: presets.length
             rows: 1
-            spacing: 160
+            spacing: 225
 
             Repeater {
                 model : presets.length
-
                 Image {
+                    id: presetImg
                     source: presetRow.state == index.toString() ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
-                    //anchors.verticalCenter: parent.verticalCenter
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -43,7 +41,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: index + 1
                         font.pixelSize: 30
-                        color: "#1d81d5"
+                        color: presetRow.state == index.toString() ? "black" : "#1d81d5"
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -57,8 +55,6 @@ Item {
         }
     }
     Item {
-        width: 1
-        height: 20
         anchors.horizontalCenter: parent.horizontalCenter
         Image {
             source: "../res/white_ball.png"
