@@ -52,13 +52,41 @@ typedef std::pair<std::string, std::string> MessageName; // interface, message
 typedef std::vector<const ParameterDescription*> ListArgs;
 typedef std::vector<const Description*> Messages;
 
+/**
+ * \brief Wrapper class for message description
+ */
 class DBusSchema {
  public:
   DBusSchema();
 
+  /**
+   * \brief gets message name by message id
+   * \param id id message
+   * \return name message
+   */
   MessageName getMessageName(MessageId id) const;
+
+  /**
+   * \brief gets message id by message name
+   * \param name name message
+   * \return id message
+   */
   MessageId getMessageId(MessageName name) const;
+
+  /**
+   * \brief gets list rules for arguments
+   * \param id id message
+   * \param type type message
+   * \return list rules
+   */
   ListArgs getListArgs(MessageId id, MessageType type) const;
+
+  /**
+   * \brief gets list rules for arguments
+   * @param name name message
+   * @param type type message
+   * @return list rules
+   */
   ListArgs getListArgs(MessageName name, MessageType type) const;
 
  private:
