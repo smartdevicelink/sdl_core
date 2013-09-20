@@ -121,9 +121,9 @@ SDL.SDLController = Em.Object
         /**
          * Activate navigation method to set navigation data to controlls on main screen
          */
-        navigationAppActivation: function() {
-            SDL.BaseNavigationView.activate(SDL.SDLAppController.model.appID);
-        }.observes('SDL.States.media.mediaNavigation.baseNavigation.active'),
+        navigationAppUpdate: function() {
+            SDL.BaseNavigationView.update(SDL.SDLAppController.model.appID);
+        },
 
         /**
          * Default action for SoftButtons: closes window, popUp or clears
@@ -386,7 +386,8 @@ SDL.SDLController = Em.Object
                 .pushObject(this.applicationModels[applicationType].create( {
                     appID: params.appID,
                     appName: params.appName,
-                    deviceName: params.deviceName
+                    deviceName: params.deviceName,
+                    appType: params.appType
                 }));
         },
         /**
