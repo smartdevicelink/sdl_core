@@ -38,10 +38,11 @@ public class ProtocolMessage {
 		return _data;
 	}
 
-	public void setData(byte[] data) {
-		this._data = data;
-		this._jsonSize = data.length;
-	}
+    public void setData(byte[] data) {
+        this._data = new byte[data.length];
+        System.arraycopy(data, 0, this._data, 0, _data.length);
+        this._jsonSize = data.length;
+    }
 
 	public byte[] getBulkData() {
 		return _bulkData;
