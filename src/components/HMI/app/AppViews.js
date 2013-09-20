@@ -66,7 +66,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TBTClientStateView,
         SDL.DriverDistraction,
         SDL.ExitApp,
-        SDL.NavigationView,
+        SDL.Keyboard,
         SDL.ControlButtons
     ],
 

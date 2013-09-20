@@ -46,7 +46,8 @@ SDL.sdlView = Em.ContainerView
          * View Components
          */
         childViews: [
-            'innerMenu', 'controlls'
+            'innerMenu',
+            'controlls'
         ],
 
         controlls: SDL.SDLMediaControlls,
