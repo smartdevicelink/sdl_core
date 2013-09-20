@@ -46,6 +46,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TurnByTurnView,
         SDL.TBTTurnList,
         SDL.OptionsView,
+        SDL.Keyboard,
         SDL.InteractionChoicesView,
         SDL.VRHelpListView,
         SDL.ScrollableMessage,
@@ -66,7 +67,6 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TBTClientStateView,
         SDL.DriverDistraction,
         SDL.ExitApp,
-        SDL.Keyboard,
         SDL.ControlButtons
     ],
 
