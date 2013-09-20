@@ -70,6 +70,6 @@ Item{
         width: parent.width
         height: 1/4 * parent.height
 
-        BackBtn{y: parent.height + contactsListView.spacing}
+        BackBtn{}
     }
 }

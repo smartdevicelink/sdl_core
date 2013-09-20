@@ -7,9 +7,6 @@ LongOvalBtn {
     anchors.verticalCenter: parent.verticalCenter
     //anchors.bottom: parent.bottom
 
-    onIsPressedChanged: {
-        if(isPressed == false){
-              contentLoader.back()
-        }
-    }
+    onClicked: {contentLoader.back()}
+
 }
