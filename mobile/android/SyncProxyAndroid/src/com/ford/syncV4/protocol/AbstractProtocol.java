@@ -108,4 +108,9 @@ public abstract class AbstractProtocol {
 	protected void handleProtocolError(String string, Exception ex) {
 		_protocolListener.onProtocolError(string, ex);
 	}
+
+    protected void handleAppUnregistered() {
+        _protocolListener.onProtocolAppUnregistered();
+    }
+
 } // end-class

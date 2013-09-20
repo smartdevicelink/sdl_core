@@ -3,6 +3,7 @@ package com.ford.syncV4.trace;
 import java.sql.Timestamp;
 
 import android.bluetooth.BluetoothDevice;
+import android.hardware.usb.UsbAccessory;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Process;
@@ -334,6 +335,15 @@ public class SyncTrace {
 		sb.append("</btp>");
 		return sb.toString();
 	} // end-method
+
+    public static String getUSBAccessoryInfo(UsbAccessory accessory) {
+        // TODO: split info into different tags?
+        StringBuilder sb = new StringBuilder();
+        sb.append("<usba>");
+        sb.append(SyncTrace.B64EncodeForXML(accessory.toString()));
+        sb.append("</usba>");
+        return sb.toString();
+    }
 
 	public static void logTransportEvent(String preamble, String transportSpecificInfoXml, InterfaceActivityDirection msgDirection, byte buf[], int byteLength, String token) {
 		logTransportEvent(preamble, transportSpecificInfoXml, msgDirection, buf, 0, byteLength, token);

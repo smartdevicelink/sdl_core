@@ -108,8 +108,14 @@
                 android:id="@+id/selectprotocol_radioBT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:text="@string/selectprotocol_bluetooth" />
+
+            <RadioButton
+                android:id="@+id/selectprotocol_radioUSB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/selectprotocol_usb" />
         </RadioGroup>
 
         <LinearLayout

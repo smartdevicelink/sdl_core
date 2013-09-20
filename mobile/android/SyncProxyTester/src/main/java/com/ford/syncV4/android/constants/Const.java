@@ -38,11 +38,12 @@ public class Const {
 
 		public static final String TCP = "WiFi";
 		public static final String BLUETOOTH = "Bluetooth";
+		public static final String USB = "USB";
 		public static final int KEY_TCP = 1;
 		public static final int KEY_BLUETOOTH = 2;
+		public static final int KEY_USB = 3;
 
-		//public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_TCP;
-		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_BLUETOOTH;
+		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_USB;
 		public static final int PREFS_DEFAULT_TRANSPORT_PORT = 12345;
 		public static final String PREFS_DEFAULT_TRANSPORT_IP = "10.10.0.1";
 	}

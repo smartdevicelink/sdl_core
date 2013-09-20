@@ -25,4 +25,6 @@ public interface IProtocolListener {
 	void onProtocolError(String info, Exception e);
 
     void onMobileNavAckReceived(int frameReceivedNumber);
+
+    void onProtocolAppUnregistered();
 } // end-interfCe

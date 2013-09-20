@@ -113,7 +113,12 @@ public class BTTransport extends SyncTransport {
 		disconnect(null, null);
 	}
 
-	/**
+    @Override
+    public void stopReading() {
+
+    }
+
+    /**
 	 * Destroys the transport between SYNC and the mobile app
 	 * 
 	 * @param msg

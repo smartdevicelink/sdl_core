@@ -1,11 +1,9 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
-import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import java.io.ByteArrayOutputStream;
+import java.util.Hashtable;
+
+import com.ford.syncV4.protocol.enums.*;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
@@ -376,43 +374,42 @@ public class WiProProtocol extends AbstractProtocol {
             }else if (header.getSessionType().getValue() ==  SessionType.Mobile_Nav.getValue()  && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()){
                 handleMobileNavAckReceived(header);
             }
-        } // end-method
+		} // end-method
 
         private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
             _protocolListener.onMobileNavAckReceived(header.getMessageID());
         }
-
-        private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
-            ProtocolMessage message = new ProtocolMessage();
-            if (header.getSessionType() == SessionType.RPC) {
-                message.setMessageType(MessageType.RPC);
-            } else if (header.getSessionType() == SessionType.Bulk_Data) {
-                message.setMessageType(MessageType.BULK);
-            } // end-if
-            message.setSessionType(header.getSessionType());
-            message.setSessionID(header.getSessionID());
-            //If it is WiPro 2.0 it must have binary header
-            if (_version == 2) {
-                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
-                        parseBinaryHeader(data);
-                message.setVersion(_version);
-                message.setRPCType(binFrameHeader.getRPCType());
-                message.setFunctionID(binFrameHeader.getFunctionID());
-                message.setCorrID(binFrameHeader.getCorrID());
-                if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
-                if (binFrameHeader.getBulkData() != null)
-                    message.setBulkData(binFrameHeader.getBulkData());
-            } else message.setData(data);
-
-            _assemblerForMessageID.remove(header.getMessageID());
-
-            try {
-                handleProtocolMessageReceived(message);
-            } catch (Exception ex) {
-                DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
-                handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
-            } // end-catch
-        } // end-method
-    } // end-class
+				
+		private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
+			ProtocolMessage message = new ProtocolMessage();
+			if (header.getSessionType() == SessionType.RPC) {
+				message.setMessageType(MessageType.RPC);
+			} else if (header.getSessionType() == SessionType.Bulk_Data) {
+				message.setMessageType(MessageType.BULK);
+			} // end-if
+			message.setSessionType(header.getSessionType());
+			message.setSessionID(header.getSessionID());
+			//If it is WiPro 2.0 it must have binary header
+			if (_version == 2) {
+				BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+						parseBinaryHeader(data);
+				message.setVersion(_version);
+				message.setRPCType(binFrameHeader.getRPCType());
+				message.setFunctionID(binFrameHeader.getFunctionID());
+				message.setCorrID(binFrameHeader.getCorrID());
+				if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
+				if (binFrameHeader.getBulkData() != null) message.setBulkData(binFrameHeader.getBulkData());
+			} else message.setData(data);
+			
+			_assemblerForMessageID.remove(header.getMessageID());
+			
+			try {
+				handleProtocolMessageReceived(message);
+			} catch (Exception ex) {
+				DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
+				handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
+			} // end-catch
+		} // end-method
+	} // end-class
 } // end-class
 

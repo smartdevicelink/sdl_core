@@ -78,6 +78,7 @@
     <string name="selectprotocol_hmiLang">HMI language:</string>
     <string name="selectprotocol_wifi">WiFi</string>
     <string name="selectprotocol_bluetooth">Bluetooth</string>
+    <string name="selectprotocol_usb">USB (VERY EXPERIMENTAL!)</string>
     <string name="selectprotocol_ipAddress">IP address:</string>
     <string name="selectprotocol_ipAddressDefault">10.10.0.1</string>
     <string name="selectprotocol_tcpPort">Port:</string>

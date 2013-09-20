@@ -90,7 +90,10 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.transport.BTTransportConfig;
+import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
 
 import java.io.ByteArrayOutputStream;
@@ -104,6 +107,11 @@ import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
 	static final String TAG = "SyncProxyTester";
+
+    private static final String APPID_BT = "8675309";
+    private static final String APPID_TCP = "8675308";
+    private static final String APPID_USB = "8675310";
+
 	private Integer autoIncCorrId = 1;
 	
 	private static final String ICON_SYNC_FILENAME = "icon.png";
@@ -224,6 +232,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	public void startProxy() {
+        SyncProxyALM.enableDebugTool();
+
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.startProxy()", true);
 		else Log.i(TAG, "ProxyService.startProxy()");
@@ -259,45 +269,43 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
                 syncMsgVersion.setMinorVersion(2);
-
                 Vector<AppType> appTypes = createAppTypeVector(isNaviApp);
+                String appID = null;
+                BaseTransportConfig config = null;
+                switch (transportType) {
+                    case Const.Transport.KEY_BLUETOOTH:
+                        config = new BTTransportConfig();
+                        appID = APPID_BT;
+                        break;
 
-				if (transportType == Const.Transport.KEY_BLUETOOTH) {
-					_syncProxy = new SyncProxyALM(this,
-							/*sync proxy configuration resources*/null,
-							/*enable advanced lifecycle management true,*/
-							appName,
-							/*ngn media app*/null,
-							/*vr synonyms*/null,
-							/*is media app*/isMediaApp,
-                            appTypes,
-							syncMsgVersion,
-							/*language desired*/lang,
-							/*HMI Display Language Desired*/hmiLang,
-							/*App ID*/"8675309",
-							/*autoActivateID*/null,
-							/*callbackToUIThread*/ false,
-							/*preRegister*/ false,
-							versionNumber);
-				} else {
-					_syncProxy = new SyncProxyALM(this,
-							/*sync proxy configuration resources*/null,
-							/*enable advanced lifecycle management true,*/
-							appName,
-							/*ngn media app*/null,
-							/*vr synonyms*/null,
-							/*is media app*/isMediaApp,
-                            appTypes,
-							syncMsgVersion,
-							/*language desired*/lang,
-							/*HMI Display Language Desired*/hmiLang,
-							/*App ID*/"8675308",
-							/*autoActivateID*/null,
-							/*callbackToUIThre1ad*/ false,
-							/*preRegister*/ false,
-							versionNumber,
-							new TCPTransportConfig(tcpPort, ipAddress));
-				}
+                    case Const.Transport.KEY_TCP:
+                        config = new TCPTransportConfig(tcpPort, ipAddress);
+                        appID = APPID_TCP;
+                        break;
+
+                    case Const.Transport.KEY_USB:
+                        config = new USBTransportConfig(getApplicationContext());
+                        appID = APPID_USB;
+                        break;
+                }
+
+                _syncProxy = new SyncProxyALM(this,
+                        /*sync proxy configuration resources*/null,
+                        /*enable advanced lifecycle management true,*/
+                        appName,
+                        /*ngn media app*/null,
+                        /*vr synonyms*/null,
+                        /*is media app*/isMediaApp,
+                        appTypes,
+                        syncMsgVersion,
+                        /*language desired*/lang,
+                        /*HMI Display Language Desired*/hmiLang,
+                        appID,
+                        /*autoActivateID*/null,
+                        /*callbackToUIThre1ad*/ false,
+                        /*preRegister*/ false,
+                        versionNumber,
+                        config);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null
