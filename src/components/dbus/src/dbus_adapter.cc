@@ -280,25 +280,7 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
     Introspect(msg);
     return false;
   }
-
-//  // TODO(KKolodiy): push msg
-//
-//  std::vector<std::string> elems;
-//  split(interface, '.', elems);
-//  MessageName name(elems.back(), method);
-//  MessageId m_id = schema_.getMessageId(name);
-//  if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
-//    LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
-//    return false;
-//  }
-//
-//  const ListArgs args = schema_.getListArgs(name, hmi_apis::messageType::request);
-//  if (GetArguments(msg, args, obj)) {
-//    return true;
-//  } else {
-//    Error(0, "NOKIA", "JBL + NOKIA");
-//    return false;
-//  }
+  // SDL Core does not provide other methods
   return false;
 }
 
