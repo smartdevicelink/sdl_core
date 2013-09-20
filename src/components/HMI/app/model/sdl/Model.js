@@ -94,6 +94,17 @@ SDL.SDLModel = Em.Object
         VRHelpListActivated: false,
 
         /**
+         * Flag to be set true when VRHelpList are activated
+         *
+         * @param {Boolean}
+         */
+        keyboardLayout: {
+            'QWERTY': SDL.QWERTYLayout.create(),
+            'QWERTZ': null,
+            'AZERTY': null
+        },
+
+        /**
          * Default values for global properties
          */
         globalPropertiesDefault: {
@@ -644,6 +655,20 @@ SDL.SDLModel = Em.Object
             } else {
                 FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
             }
+        },
+
+        /**
+         * SDL ShowKeyboard show method with incoming parameters of layout, language etc...
+         *
+         * @param {Object}
+         *            message Object with parameters come from SDLCore
+         */
+        uiShowKeyboard: function(params){
+            language
+            keyboardLayout
+            sendDynamicEntry
+            limitedCharacterList
+            autoCompleteText
         },
 
         /**

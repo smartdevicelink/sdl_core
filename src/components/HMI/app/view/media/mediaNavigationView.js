@@ -24,22 +24,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.NavigationView
+ * @name SDL.MediaNavigationView
  * @desc Navigation component
  * @category View
- * @filesource app/view/navigationView.js
+ * @filesource app/view/mediaNavigationView.js
  * @version 1.0
  */
-SDL.NavigationView = Em.ContainerView.create( {
+SDL.MediaNavigationView = Em.ContainerView.create( {
     /** View Id */
-    elementId: 'navigationView',
+    elementId: 'MediaNavigationView',
 
     classNameBindings: [
-        'SDL.States.navigation.active:active_state:inactive_state'
+        'SDL.States.media.mediaNavigation.active:active_state:inactive_state'
     ],
 
     childViews: [
-        //'videoView'
+        'videoView',
+        SDL.BaseNavigationView
     ],
 
     videoView: Ember.View.extend({

@@ -35,7 +35,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     elementId: 'baseNavigation',
 
     classNameBindings: [
-        'SDL.States.navigation.baseNavigation.active:active_state:inactive_state'
+        'SDL.States.media.mediaNavigation.baseNavigation.active:active_state:inactive_state'
     ],
 
     childViews: [
@@ -114,48 +114,48 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                 }
             }
         }
-    }.observes('SDL.States.navigation.baseNavigation.active'),
+    },
 
     mainField1: SDL.Label.extend({
 
         classNames: 'mainField1 mainField',
 
-        contentBinding: 'this.parentView.mainField1'
+        contentBinding: 'parentView.mainField1'
     }),
 
     mainField2: SDL.Label.extend({
 
         classNames: 'mainField2 mainField',
 
-        contentBinding: 'this.parentView.mainField2'
+        contentBinding: 'parentView.mainField2'
     }),
 
     mainField3: SDL.Label.extend({
 
         classNames: 'mainField3 mainField',
 
-        contentBinding: 'this.parentView.mainField3'
+        contentBinding: 'parentView.mainField3'
     }),
 
     mainField4: SDL.Label.extend({
 
         classNames: 'mainField4 mainField',
 
-        contentBinding: 'this.parentView.mainField4'
+        contentBinding: 'parentView.mainField4'
     }),
 
     mainField5: SDL.Label.extend({
 
         classNames: 'mainField5 mainField',
 
-        contentBinding: 'this.parentView.mainField5'
+        contentBinding: 'parentView.mainField5'
     }),
 
     mainField6: SDL.Label.extend({
 
         classNames: 'mainField6 mainField',
 
-        contentBinding: 'this.parentView.mainField6'
+        contentBinding: 'parentView.mainField6'
     })
 
 });

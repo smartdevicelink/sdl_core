@@ -52,7 +52,60 @@ SDL.SDLMediaModel = SDL.SDLAppModel
                 alignment: "text-align:left"
             }));
 
-            this.set('constantTBTParams', null);
+            this.set('constantTBTParams', {
+                "navigationTexts":[
+                    {
+                        "fieldName": "navigationText1",
+                        "fieldText": "mainField1"
+                    },
+                    {
+                        "fieldName": "navigationText2",
+                        "fieldText": "mainField2"
+                    },
+                    {
+                        "fieldName": "ETA",
+                        "fieldText": "mainField3"
+                    },
+                    {
+                        "fieldName": "totalDistance",
+                        "fieldText": "mainField4"
+                    },
+                    {
+                        "fieldName": "navigationText",
+                        "fieldText": "mainField5"
+                    },
+                    {
+                        "fieldName": "timeToDestination",
+                        "fieldText": "mainField6"
+                    }
+                ],
+                "softButtons": [
+                    {
+                        "text" : "softButton1",
+                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "isHighlighted" : true,
+                        "softButtonID" : 1
+                    },
+                    {
+                        "text" : "softButton2",
+                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "isHighlighted" : false,
+                        "softButtonID" : 2
+                    },
+                    {
+                        "text" : "softButton3",
+                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "isHighlighted" : true,
+                        "softButtonID" : 3
+                    },
+                    {
+                        "text" : "softButton4",
+                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "isHighlighted" : false,
+                        "softButtonID" : 4
+                    }
+                ]
+            });
 
             this.set('isPlaying', true);
 

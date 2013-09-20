@@ -119,6 +119,13 @@ SDL.SDLController = Em.Object
         },
 
         /**
+         * Activate navigation method to set navigation data to controlls on main screen
+         */
+        navigationAppActivation: function() {
+            SDL.BaseNavigationView.activate(SDL.SDLAppController.model.appID);
+        }.observes('SDL.States.media.mediaNavigation.baseNavigation.active'),
+
+        /**
          * Default action for SoftButtons: closes window, popUp or clears
          * applications screen
          * 
