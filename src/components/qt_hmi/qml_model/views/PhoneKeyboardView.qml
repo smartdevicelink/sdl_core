@@ -100,13 +100,7 @@ Item {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackBtn {
-            onIsPressedChanged: {
-                if(isPressed == false){
-                    contentLoader.go("./views/PhoneMenuGridView.qml")
-                }
-            }
-        }
+        BackBtn {}
     }
 }
 

@@ -8,6 +8,14 @@ Image {
     property string  dest: ""
     property bool isPressed: false
 
+    signal clicked
+    Connections {
+        target: mouseArea
+        onClicked: {
+            clicked()
+        }
+    }
+
     Text {
         anchors.centerIn: parent
         id: btnText
@@ -15,6 +23,7 @@ Image {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         onPressed: {
             source = "../res/buttons/long_oval_pressed_btn.png"
