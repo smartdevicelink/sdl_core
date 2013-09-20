@@ -3,7 +3,7 @@ import com.ford.hmi_framework 1.0
 import sdl.core.api 1.0
 import "./controls"
 import "./views"
-import "./ford" as Ford
+import "./hmi_api" as HmiApi
 import "./models"
 
 Rectangle{
@@ -76,11 +76,11 @@ Rectangle{
     }
 
     Api {
-        Ford.Buttons {
+        HmiApi.Buttons {
             id: sdlButtons
             objectName: "buttons"
         }
-        Ford.BasicCommunication {
+        HmiApi.BasicCommunication {
             id: sdlBasicCommunications
             objectName: "BasicCommunications"
         }

@@ -14,9 +14,8 @@ void MaskedContainer::componentComplete() {
     QQuickItem::componentComplete();
 
     for (QObjectList::ConstIterator it = children().begin(); it != children().end(); ++it) {
-        QObject *child = *it;
         QQuickItem *item = qobject_cast<QQuickItem*>(*it);
-        if (item->inherits("QQuickImage")) {
+        if (item && item->inherits("QQuickImage") && item->opacity() > 0 && item->isVisible()) {
             images.push_back(item);
         }
     }
@@ -66,14 +65,18 @@ void MaskedContainer::mousePressEvent(QMouseEvent *mouse) {
 
     if (width() * mouse->y() + mouse->x() > width() * height())
     {
+        mouse->ignore();
         return;
     } else {
         int idx = mask[mouse->y() * static_cast<int>(width()) +
                 mouse->x()];
         if (idx >= 0) {
-            AttributedMouseEvent *ev = new AttributedMouseEvent(images[idx]);
-            emit pressed(ev);
+            AttributedMouseEvent ev(images[idx]);
+            emit pressed(&ev);
             grabMouse();
+            mouse->accept();
+        } else {
+            mouse->ignore();
         }
     }
 }
@@ -85,8 +88,8 @@ void MaskedContainer::mouseReleaseEvent(QMouseEvent *mouse) {
         int idx = mask[mouse->y() * static_cast<int>(width()) +
                 mouse->x()];
         if (idx >= 0) {
-            AttributedMouseEvent *ev = new AttributedMouseEvent(images[idx]);
-            emit released(ev);
+            AttributedMouseEvent ev(images[idx]);
+            emit released(&ev);
         } else {
             emit released(NULL);
         }

@@ -3,7 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import com.ford.hmi_framework 1.0
 import "../controls"
-import "../ford/enums.js" as Enums
+import "../hmi_api/enums.js" as Enums
 
 Item {
     id: hardwareButtons
