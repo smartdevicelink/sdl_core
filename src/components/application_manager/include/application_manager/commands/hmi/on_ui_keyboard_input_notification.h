@@ -40,6 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 /**
  * @brief OnUIKeyBoardInputNotification command class
  **/
@@ -65,6 +67,8 @@ class OnUIKeyBoardInputNotification : public NotificationFromHMI {
  private:
   DISALLOW_COPY_AND_ASSIGN(OnUIKeyBoardInputNotification);
 };
+
+}  // namespace hmi
 
 }  // namespace commands
 

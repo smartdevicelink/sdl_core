@@ -37,8 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 OnUIKeyBoardInputNotification::OnUIKeyBoardInputNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
 OnUIKeyBoardInputNotification::~OnUIKeyBoardInputNotification() {
@@ -47,12 +49,13 @@ OnUIKeyBoardInputNotification::~OnUIKeyBoardInputNotification() {
 void OnUIKeyBoardInputNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUIKeyBoardInputNotification::Run");
 
-  // prepare SmartObject for mobile factory
-  //(*message_)[strings::params][strings::function_id] =
-  // mobile_apis::FunctionID;
-
-  //SendNotificationToMobile(message_);
+  //prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+  mobile_apis::FunctionID::OnKeyboardInputID;
+  SendNotificationToMobile(message_);
 }
+
+}  // namespace hmi
 
 }  // namespace commands
 
