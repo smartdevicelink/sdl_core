@@ -270,18 +270,17 @@ void DBusAdapter::AddMatch(const std::string& rule) {
 
 bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
                                     smart_objects::SmartObject& obj) {
-  // TODO(KKolodiy): implement
-//  std::string method = dbus_message_get_member(msg);
-//  std::string interface = dbus_message_get_interface(msg);
-//  LOG4CXX_INFO(logger_, "DBus: name of method " << interface << " " << method);
-//
-//  if (interface == "org.freedesktop.DBus.Introspectable" &&
-//      method == "Introspect") {
-//    LOG4CXX_INFO(logger_, "DBus: INTROSPECT");
-//    Introspect(msg);
-//    return false;
-//  }
-//
+  std::string method = dbus_message_get_member(msg);
+  std::string interface = dbus_message_get_interface(msg);
+  LOG4CXX_INFO(logger_, "DBus: name of method " << interface << " " << method);
+
+  if (interface == "org.freedesktop.DBus.Introspectable" &&
+      method == "Introspect") {
+    LOG4CXX_INFO(logger_, "DBus: INTROSPECT");
+    Introspect(msg);
+    return false;
+  }
+
 //  // TODO(KKolodiy): push msg
 //
 //  std::vector<std::string> elems;
@@ -396,6 +395,7 @@ bool DBusAdapter::SetValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
+  LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name);
   int type = 0;
   void* value = 0;
   int integerValue = 0;
@@ -417,7 +417,7 @@ bool DBusAdapter::SetValue(
       break;
     case ford_message_descriptions::ParameterType::Enum:
     case ford_message_descriptions::ParameterType::Integer:
-      type = DBUS_TYPE_UINT32;
+      type = DBUS_TYPE_INT32;
       integerValue = param.asInt();
       value = &integerValue;
       break;
@@ -459,8 +459,8 @@ bool DBusAdapter::SetOptionalValue(
       true
   };
   smart_objects::SmartObject flag(param.isValid());
-  SetValue(&sub_iter, &flagRules, flag);
-  if (!SetValue(&sub_iter, rules, param)) {
+  if (!SetValue(&sub_iter, &flagRules, flag)
+      || !SetValue(&sub_iter, rules, param)) {
     return false;
   }
 
@@ -506,7 +506,7 @@ bool DBusAdapter::SetStructValue(
   }
   const ParameterDescription** entry;
   entry = rules->parameters;
-  while (entry != NULL) {
+  while (*entry != NULL) {
     smart_objects::SmartObject& param = const_cast<smart_objects::SmartObject&>(
             structure.getElement((*entry)->name));
     if (!SetOneArgument(&sub_iter, *entry, param)) {
@@ -530,6 +530,7 @@ bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
     if (!GetOneArgument(&iter, rules[i], args)) {
       return false;
     }
+    dbus_message_iter_next(&iter);
   }
   return true;
 }
@@ -556,6 +557,7 @@ bool DBusAdapter::GetValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
+  LOG4CXX_DEBUG(logger_, "DBus: Get param " << rules->name);
   int type = dbus_message_iter_get_arg_type(iter);
   switch (rules->type) {
     case ford_message_descriptions::ParameterType::Array:
@@ -582,7 +584,7 @@ bool DBusAdapter::GetValue(
       break;
     case ford_message_descriptions::ParameterType::Enum:
     case ford_message_descriptions::ParameterType::Integer:
-      if (type == DBUS_TYPE_UINT32) {
+      if (type == DBUS_TYPE_INT32) {
         dbus_int32_t integerValue;
         dbus_message_iter_get_basic(iter, &integerValue);
         smart_objects::SmartObject value(integerValue);
@@ -640,7 +642,7 @@ bool DBusAdapter::GetArrayValue(
   int i = 0;
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
-  while (dbus_message_iter_get_element_type(&sub_iter) != DBUS_TYPE_INVALID) {
+  while (dbus_message_iter_get_arg_type(&sub_iter) != DBUS_TYPE_INVALID) {
     if (!GetValue(&sub_iter, rules->element, array[i])) {
       return false;
     }
@@ -660,10 +662,11 @@ bool DBusAdapter::GetStructValue(
   const ParameterDescription** entry;
   entry = rules->parameters;
   smart_objects::SmartObject structure(smart_objects::SmartType_Map);
-  while (entry != NULL) {
+  while (*entry != NULL) {
     if (!GetOneArgument(&sub_iter, *entry, structure)) {
       return false;
     }
+    dbus_message_iter_next(&sub_iter);
     entry++;
   }
   param = structure;
@@ -683,10 +686,11 @@ bool DBusAdapter::GetOptionalValue(
       true
   };
   smart_objects::SmartObject flag;
-  if (GetValue(&sub_iter, &flagRules, flag)) {
+  if (!GetValue(&sub_iter, &flagRules, flag)) {
     return false;
   }
   if (flag.asBool()) {
+    dbus_message_iter_next(&sub_iter);
     return GetValue(&sub_iter, rules, param);
   } else {
     return false;
