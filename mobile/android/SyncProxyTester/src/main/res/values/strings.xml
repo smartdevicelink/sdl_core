@@ -155,5 +155,6 @@
     <string name="mobile_navi_hint">Turn On Mobile Session</string>
     <string name="mobile_navi_check_box_on">Mobile Session Running</string>
     <string name="video_check_box_on">Video Streaming running</string>
+    <string name="mobileNavi">MobileNavi</string>
 
 </resources>

@@ -16,6 +16,13 @@
             android:checked="true"
             android:text="@string/selectprotocol_media" />
 
+        <CheckBox
+            android:id="@+id/selectprotocol_checkMobileNavi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/mobileNavi" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
