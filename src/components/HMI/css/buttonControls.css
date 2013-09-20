@@ -23,6 +23,125 @@
 	left: 20px;
 }
 
+#keyboard_view .QWERTYLayout{
+    width: 750px;
+    height: 210px;
+    top: 130px;
+    left: 25px;
+}
+#keyboard_view .QWERTYLayout .ffw-button{
+    width: 60px;
+    height: 60px;
+    border-radius: 3px;
+    border: 1px solid #808080;
+    margin: 5px;
+    font-size: 42px;
+    text-align: center;
+    line-height: 60px;
+}
+#keyboard_view .QWERTYLayout .k1{
+    left: 75px;
+}
+#keyboard_view .QWERTYLayout .k2{
+    left: 150px;
+}
+#keyboard_view .QWERTYLayout .k3{
+    left: 225px;
+}
+#keyboard_view .QWERTYLayout .k4{
+    left: 300px;
+}
+#keyboard_view .QWERTYLayout .k5{
+    left: 375px;
+}
+#keyboard_view .QWERTYLayout .k6{
+    left: 450px;
+}
+#keyboard_view .QWERTYLayout .k7{
+    left: 525px;
+}
+#keyboard_view .QWERTYLayout .k8{
+    left: 600px;
+}
+#keyboard_view .QWERTYLayout .k9{
+    left: 675px;
+}
+#keyboard_view .QWERTYLayout .k10{
+    left: 38px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k11{
+    left: 113px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k12{
+    left: 188px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k13{
+    left: 263px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k14{
+    left: 338px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k15{
+    left: 413px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k16{
+    left: 488px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k17{
+    left: 563px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k18{
+    left: 638px;
+    top: 75px;
+}
+#keyboard_view .QWERTYLayout .k19{
+    left: 0px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k20{
+    left: 75px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k21{
+    left: 150px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k22{
+    left: 225px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k23{
+    left: 300px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k24{
+    left: 375px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k25{
+    left: 450px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k26{
+    left: 525px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k27{
+    left: 600px;
+    top: 150px;
+}
+#keyboard_view .QWERTYLayout .k28{
+    left: 675px;
+    top: 150px;
+}
 #infoTable.infoTable {
 	width: 375px;
 	height: 96px;

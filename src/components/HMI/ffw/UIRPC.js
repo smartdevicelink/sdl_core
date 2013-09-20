@@ -411,7 +411,7 @@ FFW.UI = FFW.RPCObserver.create({
                     case "UI.ShowKeyboard":
                     {
 
-                        SDL.SDLModel.ShowKeyboard(request.params);
+                        SDL.SDLModel.uiShowKeyboard(request.params);
 
                         this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 

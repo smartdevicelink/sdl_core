@@ -145,6 +145,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/sync_pdata_request.cc
 ./src/commands/mobile/sync_pdata_response.cc
 ./src/commands/mobile/on_sync_pdata_notification.cc
+./src/commands/mobile/on_keyboard_input_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES

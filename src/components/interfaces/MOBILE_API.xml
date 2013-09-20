@@ -1600,6 +1600,14 @@
     </param>
   </struct>
 
+  <enum name="KeyboardEvent" platform="MobileNav">
+    <description>Enumeration listing possible keyboard events.</description>
+    <element name="KEYPRESS" />
+    <element name="ENTRY_SUBMITTED" />
+    <element name="ENTRY_CANCELLED" />
+    <element name="ENTRY_ABORTED" />    
+  </enum>
+
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
     <element name="GRAPHIC_BMP" />
@@ -1684,6 +1692,7 @@
     <element name="OnPermissionsChangeID" value="32776" hexvalue="8008" />
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
     <element name="OnLanguageChangeID" value="32778" hexvalue="800A" />
+    <element name="OnKeyboardInputID" value="32779" hexvalue="800B" /> 
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -4079,6 +4088,24 @@
     <param name="hmiDisplayLanguage" type="Language">
       <description>Current display language</description>
     </param>
+  </function>
+
+  <function name="OnKeyboardInput" functionID="OnKeyboardInputID" messagetype="notification" platform="MobileNav">
+   
+    <description>On-screen keyboard event.</description>
+    <description>Can be full string or individual keypresses depending on keyboard mode.</description>
+   
+    <param name="event" type="KeyboardEvent" mandatory="true">
+      <description>On-screen keyboard input data.</description>
+    </param>    
+
+    <param name="data" type="String" maxlength="500" mandatory="false">
+      <description>On-screen keyboard input data.</description>
+      <description>For dynamic keypress events, this will be the current compounded string of entry text.</description>
+      <description>For entry submission events, this will be the full text entry (this will always return regardless of the mode).</description>
+      <description>For entry cancelled and entry aborted events, this data param will be omitted.</description>
+    </param>
+
   </function>
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->

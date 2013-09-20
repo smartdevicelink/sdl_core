@@ -61,13 +61,17 @@ SDL.MediaController = Em.Object.create( {
         /**
          * Set SDL Data active, flag for status bar
          */
-        if (SDL.SDLAppController.model) {
+        if(SDL.SDLAppController.model){
             SDL.SDLAppController.model.set('active', true);
         }
         /**
          * Go to SDL state
          */
-        SDL.States.goToStates('media.sdlmedia');
+        if(SDL.SDLAppController.model.appType == "NAVIGATION"){
+            SDL.States.goToStates('media.mediaNavigation.baseNavigation');
+        }else{
+            SDL.States.goToStates('media.sdlmedia');
+        }
 
     }
 });

@@ -686,7 +686,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case  hmi_apis::FunctionID::UI_OnKeyboardInput: {
-      command.reset(new commands::OnUIKeyBoardInputNotification(message));
+      command.reset(new commands::hmi::OnUIKeyBoardInputNotification(message));
       break;
     }
   }

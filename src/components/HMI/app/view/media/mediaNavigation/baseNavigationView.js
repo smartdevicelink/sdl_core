@@ -54,7 +54,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     mainField5: null,
     mainField6: null,
 
-    activate: function(appID){
+    update: function(appID){
 
         var naviParams = SDL.SDLController.getApplicationModel(appID).constantTBTParams;
 
@@ -108,7 +108,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                             isHighlighted: naviParams.softButtons[i].isHighlighted ? true : false,
                             softButtonID: naviParams.softButtons[i].softButtonID,
                             systemAction: naviParams.softButtons[i].systemAction,
-                            classNames: 'softButton softButton'  + i + 1,
+                            classNames: 'softButton softButton'  + (i + 1),
                             appID: appID
                         }));
                 }
