@@ -62,9 +62,12 @@ DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
       sdl_object_path_(sdlObjectPath),
       hmi_service_name_(hmiServiceName),
       hmi_object_path_(hmiObjectPath),
-      conn_(nullptr) {}
+      conn_(nullptr),
+      schema_(new DBusSchema(ford_message_descriptions::message_descriptions)) {}
 
-DBusAdapter::~DBusAdapter() {}
+DBusAdapter::~DBusAdapter() {
+  delete schema_;
+}
 
 bool DBusAdapter::Init() {
   DBusError err;
@@ -202,7 +205,7 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
     return;
   }
 
-  const ListArgs& args = schema_.getListArgs(func_id,
+  const ListArgs& args = schema_->getListArgs(func_id,
                                              hmi_apis::messageType::request);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
@@ -244,7 +247,7 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
     return;
   }
 
-  const ListArgs& args = schema_.getListArgs(func_id,
+  const ListArgs& args = schema_->getListArgs(func_id,
                                              hmi_apis::messageType::notification);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
@@ -298,7 +301,7 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
   obj[sos::S_PARAMS][sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  const ListArgs args = schema_.getListArgs(ids.second,
+  const ListArgs args = schema_->getListArgs(ids.second,
                                             hmi_apis::messageType::response);
   bool ret = GetArguments(msg, args, obj[sos::S_PARAMS][sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
@@ -325,7 +328,7 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
   std::vector<std::string> elems;
   split(interface, '.', elems);
   MessageName name(elems.back(), method);
-  MessageId m_id = schema_.getMessageId(name);
+  MessageId m_id = schema_->getMessageId(name);
   if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name signal");
     return false;
@@ -335,7 +338,7 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::notification;
   obj[sos::S_PARAMS][sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  const ListArgs args = schema_.getListArgs(name,
+  const ListArgs args = schema_->getListArgs(name,
                                             hmi_apis::messageType::notification);
   bool ret = GetArguments(msg, args, obj[sos::S_PARAMS][sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
@@ -518,7 +521,7 @@ bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
 }
 
 const DBusSchema& DBusAdapter::get_schema() const {
-  return schema_;
+  return *schema_;
 }
 
 bool DBusAdapter::GetOneArgument(

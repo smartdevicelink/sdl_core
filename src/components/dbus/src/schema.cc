@@ -82,9 +82,8 @@ struct IsNameType : public std::unary_function<const Description*, bool> {
   MessageType type_;
 };
 
-DBusSchema::DBusSchema() {
-  const MessageDescription** msg;
-  msg = ford_message_descriptions::message_descriptions;
+DBusSchema::DBusSchema(const MessageDescription** array) {
+  const MessageDescription** msg = array;
   while (*msg != NULL) {
     Description *desc = new Description();
     desc->id = (*msg)->function_id;

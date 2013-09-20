@@ -156,7 +156,7 @@ class DBusAdapter {
   /**
    * \brief schema messages and arguments for DBus
    */
-  DBusSchema schema_;
+  const DBusSchema* schema_;
 
   /**
    * \brief mapping serial message DBus on message id Ford protocol

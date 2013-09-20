@@ -57,7 +57,7 @@ typedef std::vector<const Description*> Messages;
  */
 class DBusSchema {
  public:
-  DBusSchema();
+  explicit DBusSchema(const MessageDescription** array);
 
   /**
    * \brief gets message name by message id
