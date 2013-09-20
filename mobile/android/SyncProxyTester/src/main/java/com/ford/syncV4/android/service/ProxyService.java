@@ -84,6 +84,7 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.AppType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -234,6 +235,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				boolean isMediaApp = settings.getBoolean(
 						Const.PREFS_KEY_ISMEDIAAPP,
 						Const.PREFS_DEFAULT_ISMEDIAAPP);
+                boolean isNaviApp = settings.getBoolean(
+                        Const.PREFS_KEY_ISNAVIAPP,
+                        Const.PREFS_DEFAULT_ISNAVIAPP);
 				int versionNumber = getCurrentProtocolVersion();
 				String appName = settings.getString(Const.PREFS_KEY_APPNAME,
 						Const.PREFS_DEFAULT_APPNAME);
@@ -255,6 +259,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
                 syncMsgVersion.setMinorVersion(2);
+
+                Vector<AppType> appTypes = createAppTypeVector(isNaviApp);
+
 				if (transportType == Const.Transport.KEY_BLUETOOTH) {
 					_syncProxy = new SyncProxyALM(this,
 							/*sync proxy configuration resources*/null,
@@ -263,6 +270,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							/*ngn media app*/null,
 							/*vr synonyms*/null,
 							/*is media app*/isMediaApp,
+                            appTypes,
 							syncMsgVersion,
 							/*language desired*/lang,
 							/*HMI Display Language Desired*/hmiLang,
@@ -279,6 +287,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 							/*ngn media app*/null,
 							/*vr synonyms*/null,
 							/*is media app*/isMediaApp,
+                            appTypes,
 							syncMsgVersion,
 							/*language desired*/lang,
 							/*HMI Display Language Desired*/hmiLang,
@@ -302,7 +311,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		else Log.i(TAG, "ProxyService.startProxy() returning");
 	}
 
-	private int getCurrentProtocolVersion() {
+    private Vector<AppType> createAppTypeVector(boolean naviApp) {
+        if (naviApp){
+            Vector<AppType> vector = new Vector<AppType>();
+            vector.add(AppType.NAVIGATION);
+            return vector;
+        }
+        return null;
+    }
+
+    private int getCurrentProtocolVersion() {
 		return Const.PROTOCOL_VERSION_2;
 	}
 	
