@@ -87,7 +87,6 @@ Rectangle{
     }
 
     Component.onCompleted: {
-        sdlBasicCommunications.fireOnReady();
+        sdlBasicCommunications.onReady()
     }
 }
-
