@@ -2,8 +2,9 @@
 #define DBUS_PLUGIN_H
 
 #include <QQmlExtensionPlugin>
+#include <QDBusContext>
 
-class DbusPlugin : public QQmlExtensionPlugin
+class DbusPlugin : public QQmlExtensionPlugin, public QDBusContext
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")

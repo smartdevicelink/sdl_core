@@ -1,7 +1,9 @@
 import QtQuick 2.0
 import com.ford.hmi_framework 1.0
+import sdl.core.api 1.0
 import "./controls"
 import "./views"
+import "./hmi_api" as HmiApi
 import "./models"
 
 Rectangle{
@@ -67,6 +69,21 @@ Rectangle{
         anchors.left: mainScreen.right
         height: parent.height < minHieght ? minHieght : parent.height
         HardwareButtonsView {}
+    }
+
+    Api {
+        HmiApi.Buttons {
+            id: sdlButtons
+            objectName: "buttons"
+        }
+        HmiApi.BasicCommunication {
+            id: sdlBasicCommunications
+            objectName: "BasicCommunications"
+        }
+    }
+
+    Component.onCompleted: {
+        sdlBasicCommunications.fireOnReady();
     }
 }
 

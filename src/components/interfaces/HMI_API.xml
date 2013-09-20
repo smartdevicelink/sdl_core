@@ -1221,7 +1221,7 @@
 			<description>The array of names/IDs of connected devices</description>
         </param>
 	</function>
-	<function name="UpdateDeviceList" messagetype="response">
+    <function name="UpdateDeviceList" messagetype="response">
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>

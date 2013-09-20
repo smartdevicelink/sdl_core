@@ -1,0 +1,13 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+        "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/sdl/core/api">
+    <interface name="sdl.core.api">
+        <method name="send">
+	    <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="TestStruct1"/>
+            <arg name="name" type="as" direction="out"/>
+        </method>
+        <signal name="receive">
+            <arg name="json" type="s"/>
+        </signal>
+    </interface>
+</node>

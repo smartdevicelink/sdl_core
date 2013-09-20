@@ -6,16 +6,23 @@ CONFIG += qt plugin
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = sdl.core.interface
 
-DBUS_INTERFACES += api.xml
+DBUS_INTERFACES += notify.xml
 
 # Input
 SOURCES += \
     dbus_plugin.cpp \
-    api.cpp
+    api.cpp \
+    presetBankCapabilities.cpp \
+    buttonCapabilities.cpp \
+    buttonsadaptor.cpp
 
 HEADERS += \
     dbus_plugin.h \
-    api.h
+    api.h \
+    presetBankCapabilities.h \
+    buttonCapabilities.h \
+    buttonsadaptor.h \
+    optionalArgument.h
 
 OTHER_FILES = qmldir \
     api.xml
@@ -30,7 +37,8 @@ OTHER_FILES = qmldir \
 
 qmldir.files = qmldir
 unix {
-    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
+#    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
+    installPath = ../../qml_model/sdl/core/api
     qmldir.path = $$installPath
     target.path = $$installPath
     INSTALLS += target qmldir
