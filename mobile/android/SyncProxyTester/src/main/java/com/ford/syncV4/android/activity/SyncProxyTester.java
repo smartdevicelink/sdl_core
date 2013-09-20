@@ -482,14 +482,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.selectprotocol_ipAddr);
         final EditText tcpPortEditText = (EditText) view
                 .findViewById(R.id.selectprotocol_tcpPort);
-        final CheckBox autoReconnectCheckBox = (CheckBox) view
-                .findViewById(R.id.selectprotocol_checkAutoReconnect);
+
         final CheckBox autoSetAppIconCheckBox = (CheckBox) view
                 .findViewById(R.id.selectprotocol_checkAutoSetAppIcon);
 
         ipAddressEditText.setEnabled(false);
         tcpPortEditText.setEnabled(false);
-        autoReconnectCheckBox.setEnabled(false);
+
 
         transportGroup
                 .setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -498,8 +497,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
                         ipAddressEditText.setEnabled(transportOptionsEnabled);
                         tcpPortEditText.setEnabled(transportOptionsEnabled);
-                        autoReconnectCheckBox
-                                .setEnabled(transportOptionsEnabled);
+
                     }
                 });
 
@@ -525,9 +523,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
         int tcpPort = prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
-        boolean autoReconnect = prefs.getBoolean(
-                Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
-                Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
+
         boolean autoSetAppIcon = prefs.getBoolean(
                 Const.PREFS_KEY_AUTOSETAPPICON,
                 Const.PREFS_DEFAULT_AUTOSETAPPICON);
@@ -541,7 +537,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         : R.id.selectprotocol_radioBT);
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
-        autoReconnectCheckBox.setChecked(autoReconnect);
+
         autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
         new AlertDialog.Builder(context)
@@ -563,8 +559,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 .toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText
                                 .getText().toString());
-                        boolean autoReconnect = autoReconnectCheckBox
-                                .isChecked();
+
                         boolean autoSetAppIcon = autoSetAppIconCheckBox
                                 .isChecked();
 
@@ -582,9 +577,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         ipAddress)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
                                         tcpPort)
-                                .putBoolean(
-                                        Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
-                                        autoReconnect)
+
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
                                         autoSetAppIcon).commit();
                         if (!success) {
@@ -3650,6 +3643,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Called when a connection to a SYNC device has been closed.
      */
     public void onProxyClosed() {
+        cancelStreaming();
         resetAdapters();
         _msgAdapter.logMessage("Disconnected", true);
     }
@@ -3734,7 +3728,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onMobileNavAckReceived(int frameReceived){
-        
+        int r = frameReceived;
     }
 
     public void startMobileNaviSession() {

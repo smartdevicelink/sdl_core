@@ -1273,7 +1273,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         final int fNumber = frameReceivedNumber;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         String response = "Mobile Ack Received = "+ frameReceivedNumber;
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
         else Log.i(TAG, "" + response);
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();

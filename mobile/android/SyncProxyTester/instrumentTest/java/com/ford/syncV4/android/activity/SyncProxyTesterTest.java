@@ -63,4 +63,5 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
         });
         staticFileReader.execute(R.raw.test_video);
     }
+
 }
