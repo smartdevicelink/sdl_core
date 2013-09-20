@@ -470,6 +470,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         final CheckBox mediaCheckBox = (CheckBox) view
                 .findViewById(R.id.selectprotocol_checkMedia);
+        final CheckBox naviCheckBox = (CheckBox)view.findViewById(R.id.selectprotocol_checkMobileNavi);
         final EditText appNameEditText = (EditText) view
                 .findViewById(R.id.selectprotocol_appName);
         final Spinner langSpinner = (Spinner) view
@@ -509,6 +510,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 0);
         boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
                 Const.PREFS_DEFAULT_ISMEDIAAPP);
+        boolean isNavi = prefs.getBoolean(Const.PREFS_KEY_ISNAVIAPP,
+                Const.PREFS_DEFAULT_ISNAVIAPP);
         String appName = prefs.getString(Const.PREFS_KEY_APPNAME,
                 Const.PREFS_DEFAULT_APPNAME);
         Language lang = Language.valueOf(prefs.getString(Const.PREFS_KEY_LANG,
@@ -529,6 +532,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 Const.PREFS_DEFAULT_AUTOSETAPPICON);
 
         mediaCheckBox.setChecked(isMedia);
+        naviCheckBox.setChecked(isNavi);
         appNameEditText.setText(appName);
         langSpinner.setSelection(langAdapter.getPosition(lang));
         hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
@@ -547,6 +551,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         boolean isMedia = mediaCheckBox.isChecked();
+                        boolean isNavi = naviCheckBox.isChecked();
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem())
                                 .name();
@@ -567,6 +572,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         boolean success = prefs
                                 .edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
+                                .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)

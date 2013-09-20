@@ -50,7 +50,7 @@ public class Names {
 	public static final String displayLayout = "displayLayout";
 	public static final String ttsName = "ttsName";
 	public static final String hmiDisplayLanguageDesired = "hmiDisplayLanguageDesired";
-	public static final String appType = "appType";
+	public static final String appType = "appHMIType";
 	public static final String appID = "appID";
 	public static final String vrHelpTitle = "vrHelpTitle";
 	public static final String graphic = "graphic";
