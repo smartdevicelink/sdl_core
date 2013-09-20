@@ -6,6 +6,11 @@ QQuickPresetBankCapabilities::QQuickPresetBankCapabilities(const PresetBankCapab
 {
 }
 
+QQuickPresetBankCapabilities::QQuickPresetBankCapabilities(QQuickItem *parent)
+    : QQuickItem(parent)
+{
+}
+
 bool QQuickPresetBankCapabilities::onScreenPresetsAvailable() const
 {
     return value.onScreenPresetsAvailable;

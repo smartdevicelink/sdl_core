@@ -21,6 +21,7 @@ class QQuickPresetBankCapabilities : public QQuickItem
     Q_OBJECT
     Q_PROPERTY(bool onScreenPresetsAvailable READ onScreenPresetsAvailable)
 public:
+    QQuickPresetBankCapabilities(QQuickItem *parent = NULL);
     QQuickPresetBankCapabilities(const PresetBankCapabilities&, QQuickItem *parent = NULL);
 
     bool onScreenPresetsAvailable() const;

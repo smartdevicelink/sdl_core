@@ -1,16 +1,15 @@
 import QtQuick 2.0
 
-Item {
+Item
+{
+    property var capabilities: []
 
-    signal notify(string what)
-
-    function getCapabilities()
+    function getCapabilities(test)
     {
-        notify("hello");
-
+        console.log(capabilities)
         return {
-            buttonCapabilities:
-            [
+            buttonCapabilities: capabilities
+            /*[
                 {
                     name: 100,
                     shortPressAvailable: true,
@@ -23,15 +22,10 @@ Item {
                     longPressAvailable: true,
                     upDownAvailable: true
                 }
-            ],
+            ]*/,
             presetBankCapabilities: {
-                onScreenPresetsAvailable: false
+                onScreenPresetsAvailable: test.testItem
             }
         };
-    }
-
-    function fireNotify(what)
-    {
-        notify(what)
     }
 }

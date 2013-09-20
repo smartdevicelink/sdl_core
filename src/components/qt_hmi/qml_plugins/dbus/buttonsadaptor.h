@@ -18,8 +18,8 @@ class ButtonsAdaptor : public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection",
 "<interface name=\"sdl.core.api.Buttons\">\n"
 "  <method name=\"GetCapabilities\">\n"
-"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out0\" value=\"QList&lt;ButtonCapabilities&gt;\"/>\n"
-"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out1\" value=\"OptionalArgument&lt;PresetBankCapabilities&gt;\"/>\n"
+//"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out0\" value=\"QList&lt;ButtonCapabilities&gt;\"/>\n"
+//"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out1\" value=\"OptionalArgument&lt;PresetBankCapabilities&gt;\"/>\n"
 "    <arg direction=\"out\" type=\"a(ibbb)\" name=\"capabilities\" />\n"
 "    <arg direction=\"out\" type=\"(b(b))\" name=\"presetBankCapabilities\" />\n"
 "  </method>\n"

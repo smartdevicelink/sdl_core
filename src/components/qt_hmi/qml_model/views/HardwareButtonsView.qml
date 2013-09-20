@@ -3,6 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import com.ford.hmi_framework 1.0
 import "../controls"
+import "../ford/enums.js" as Enums
 
 Item {
     id: hardwareButtons
@@ -20,6 +21,10 @@ Item {
         buttonDown(name)
     }
 
+    function longPressButton(name) {
+        console.log("long press " + name)
+    }
+
     function releaseButton(name) {
         buttonUp(name)
     }
@@ -29,68 +34,21 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: 50
         Row {
-            MaskedContainer {
-                ButtonImage {
-                    name: "Up"
-                    source: "../res/controlButtons/UpButton.png"
-                    pressed: "../res/controlButtons/UpButton_pressed.png"
-                }
-                ButtonImage {
-                    name: "Down"
-                    source: "../res/controlButtons/DownButton.png"
-                    pressed: "../res/controlButtons/DownButton_pressed.png"
-                }
-                ButtonImage {
-                    name: "Left"
-                    source: "../res/controlButtons/LeftButton.png"
-                    pressed: "../res/controlButtons/LeftButton_pressed.png"
-                }
-                ButtonImage {
-                    name: "Right"
-                    source: "../res/controlButtons/RightButton.png"
-                    pressed: "../res/controlButtons/RightButton_pressed.png"
-                }
+            Item {
+                width: childrenRect.width
+                height: childrenRect.height
 
-                ButtonImage {
-                    name: "Ok"
-                    source: "../res/controlButtons/OkButton.png"
-                    pressed: "../res/controlButtons/OkButton_pressed.png"
-                }
-
-                property ButtonImage pressed: null;
-
-                onPressed: {
-                    attr.item.pressedOpacity = 1
-                    pressed = attr.item;
-                    hardwareButtons.pressButton(attr.item.name)
-                }
-                onReleased: {
-                    if (pressed != null) {
-                        pressed.pressedOpacity = 0
-                        hardwareButtons.releaseButton(pressed.name)
-                        pressed = null
-                    }
-                }
+                HardwareButton { buttonId: Enums.ButtonName.TUNEUP; name: "Up" }
+                HardwareButton { buttonId: Enums.ButtonName.TUNEDOWN; name: "Down" }
+                HardwareButton { buttonId: Enums.ButtonName.SEEKLEFT; name: "Left" }
+                HardwareButton { buttonId: Enums.ButtonName.SEEKRIGHT; name: "Right" }
+                HardwareButton { buttonId: Enums.ButtonName.OK; name: "Ok" }
             }
 
             Column {
                 Row {
                     spacing: 25
-                    MaskedContainer {
-                        ButtonImage {
-                            id: vrButton
-                            source: "../res/controlButtons/vr.png"
-                            pressed: "../res/controlButtons/vr_pressed.png"
-                        }
-                        onPressed: {
-                            vrButton.pressedOpacity = 1
-                            hardwareButtons.pressButton("Vr")
-                        }
-                        onReleased: {
-                            vrButton.pressedOpacity = 0
-                            hardwareButtons.releaseButton("Vr")
-                        }
-                    }
+                    HardwareButton { name: "vr" }
                     PowerSwitchBtn{}
                 }
 
@@ -104,10 +62,23 @@ Item {
                             width: 40
                             height: 40
                             radius: 5
-                            property bool pressed;
                             gradient: Gradient {
-                                GradientStop { position: pressed ? 1.0 : 0.0; color: "#2c2c2c" }
-                                GradientStop { position: pressed ? 0.0 : 1.0; color: "black" }
+                                GradientStop
+                                {
+                                    position: 0.0;
+                                    color: "#2c2c2c"
+                                    Behavior on position {
+                                        NumberAnimation { duration: 80 }
+                                    }
+                                }
+                                GradientStop
+                                {
+                                    position: 1.0;
+                                    color: "black"
+                                    Behavior on position {
+                                        NumberAnimation { duration: 80 }
+                                    }
+                                }
                             }
 
                             Text {
@@ -119,10 +90,12 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onPressed: {
-                                    parent.pressed = true
+                                    parent.gradient.stops[0].position = 1.0
+                                    parent.gradient.stops[1].position = 0.0
                                 }
                                 onReleased: {
-                                    parent.pressed = false
+                                    parent.gradient.stops[0].position = 0.0
+                                    parent.gradient.stops[1].position = 1.0
                                 }
                             }
                         }

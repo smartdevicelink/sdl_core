@@ -2,45 +2,9 @@
 #include <QtDBus/QDBusConnection>
 
 Api::Api(QQuickItem *parent):
-    QQuickItem(parent),
-    path_("/dbus")
+    QQuickItem(parent)
 {
-}
-
-Api::~Api()
-{
-}
-
-QString Api::name() const
-{
-    return name_;
-}
-
-QString Api::path() const
-{
-    return path_;
-}
-
-void Api::send(const QString &json)
-{
-}
-
-void Api::init()
-{
-}
-
-void Api::setName(const QString &name)
-{
-    name_ = name;
-    init();
-    emit nameChanged();
-}
-
-void Api::setPath(const QString &path)
-{
-    path_ = path;
-    init();
-    emit pathChanged();
+    notifications = new OrgFreedesktopNotificationsInterface("org.naquadah.awesome.awful", "/", QDBusConnection::sessionBus(), this);
 }
 
 void Api::componentComplete()
@@ -48,6 +12,11 @@ void Api::componentComplete()
     QQuickItem::componentComplete();
 
     buttonsAdaptor->setButtonsApi(findChild<QQuickItem*>("buttons"));
+}
+
+void Api::send(QString text)
+{
+    notifications->Notify("test", 1000, "", text, text, QStringList(), QMap<QString, QVariant>(), 5000);
 }
 
 ButtonsAdaptor *Api::buttonsAdaptor = NULL;

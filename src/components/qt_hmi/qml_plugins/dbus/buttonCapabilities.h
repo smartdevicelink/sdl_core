@@ -22,6 +22,7 @@ class QQuickButtonCapabilities : public QQuickItem
     Q_PROPERTY(bool longPressAvailable READ longPressAvailable)
     Q_PROPERTY(bool upDownAvailable READ upDownAvailable)
 public:
+    QQuickButtonCapabilities(QQuickItem *parent = NULL);
     QQuickButtonCapabilities(const ButtonCapabilities&, QQuickItem *parent = NULL);
 
     int name() const;

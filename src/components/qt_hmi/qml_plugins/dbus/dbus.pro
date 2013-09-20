@@ -6,7 +6,7 @@ CONFIG += qt plugin
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = sdl.core.interface
 
-DBUS_INTERFACES += api.xml
+DBUS_INTERFACES += notify.xml
 
 # Input
 SOURCES += \

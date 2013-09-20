@@ -77,8 +77,17 @@ Rectangle{
 
     Api {
         Ford.Buttons {
+            id: sdlButtons
             objectName: "buttons"
         }
+        Ford.BasicCommunication {
+            id: sdlBasicCommunications
+            objectName: "BasicCommunications"
+        }
+    }
+
+    Component.onCompleted: {
+        sdlBasicCommunications.fireOnReady();
     }
 }
 

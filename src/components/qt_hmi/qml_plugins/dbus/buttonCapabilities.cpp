@@ -6,6 +6,11 @@ QQuickButtonCapabilities::QQuickButtonCapabilities(const ButtonCapabilities &val
 {
 }
 
+QQuickButtonCapabilities::QQuickButtonCapabilities(QQuickItem *parent)
+    : QQuickItem(parent)
+{
+}
+
 int QQuickButtonCapabilities::name() const
 {
     return value.name;

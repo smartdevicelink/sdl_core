@@ -13,14 +13,13 @@
 
 #include <QDBusMetaType>
 
+#include <QQmlListReference>
+
 void DbusPlugin::registerTypes(const char *uri)
 {
     qDebug() << "void DbusPlugin::registerTypes(const char *uri)";
     // @uri sdl.core.api
     qmlRegisterType<Api>(uri, 1, 0, "Api");
-
-    qmlRegisterType<QQuickButtonCapabilities>();
-    qmlRegisterType<QQuickPresetBankCapabilities>();
 
     qDBusRegisterMetaType<ButtonCapabilities>();
     qDBusRegisterMetaType<QList<ButtonCapabilities> >();
