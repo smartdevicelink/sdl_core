@@ -123,6 +123,7 @@
 #include "application_manager/commands/mobile/sync_pdata_response.h"
 #include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
+#include "application_manager/commands/mobile/on_touch_event_notification.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -532,6 +533,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnKeyboardInputID: {
       command.reset(new commands::mobile::OnKeyBoardInputNotification(message));
+      break;
+    }
+    case mobile_apis::FunctionID::OnTouchEventID: {
+      command.reset(new commands::mobile::OnTouchEventNotification(message));
       break;
     }
     default: {

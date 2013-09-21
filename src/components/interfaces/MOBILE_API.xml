@@ -1433,6 +1433,57 @@
     </param>
   </struct>
 
+  <struct name="ImageResolution">
+    <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution width.</description>
+    </param>
+    <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution height.</description>
+    </param>
+  </struct>
+
+  <enum name="TouchEvent">
+    <element name="TOUCHSTART"/>
+		<element name="TOUCHMOVE"/>
+		<element name="TOUCHEND"/>
+		<element name="DOUBLETOUCH"/>
+  </enum>
+
+  <struct name="TouchLists">
+		<param name="touches" type="Integer" array="true" mandatory="true" minvalue="0" maxvalue="9" minsize="1" maxsize="10">
+			<description>List of fingers currently on screen</description>
+		</param>
+		<param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
+			<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
+		</param>
+  </struct>
+
+  <struct name="Coordinate">
+		<param name="xCoord" type="Integer" mandatory="true">
+		</param>
+		<param name="yCoord" type="Integer" mandatory="true">
+		</param>
+  </struct> 
+
+  <struct name="TouchArea">
+		<param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
+		</param>
+		<param name="radiusCoord" type="Coordinate" mandatory="true">
+		</param>
+  </struct>
+
+  <struct name="TouchEventInfo">
+		<param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
+			<description>Finger / stylus ID</description>
+		</param>
+		<param name="point" type="Coordinate" mandatory="true">
+			<description>XY coordinate of where on screen the event happened</description>
+		</param>
+		<param name="area" type="TouchArea" mandatory="false">
+			<description>Describe the ellipse approximating touch input shape</description>
+		</param>
+  </struct>
+
   <enum name="PermissionStatus">
     <description>Enumeration that describes possible permission states of a policy table entry.</description>
     <element name="ALLOWED" internal_name="PS_ALLOWED"/>
@@ -1692,7 +1743,8 @@
     <element name="OnPermissionsChangeID" value="32776" hexvalue="8008" />
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
     <element name="OnLanguageChangeID" value="32778" hexvalue="800A" />
-    <element name="OnKeyboardInputID" value="32779" hexvalue="800B" /> 
+    <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
+    <element name="OnTouchEventID" value="32780" hexvalue="800C" />  
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -4107,6 +4159,24 @@
     </param>
 
   </function>
+  
+  <function name="OnTouchEvent" functionID="OnTouchEventID" messagetype="notification" platform="MobileNav">
+  
+		<description>Notifies about touch events on the screen's prescribed area</description>
+		
+		<param name="eventType" type="TouchEvent" mandatory="true">
+			<description>Type of event - start, move, stop, etc.</description>
+		</param>
+		
+		<param name="touchLists" type="TouchLists" mandatory="false">
+			<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
+		</param>
+		
+		<param name="info" type="TouchEventInfo" mandatory="true">
+			<description>Coordinate of the touch, radius of touch input and input ID.</description>
+		</param>ZZ
+	</function>	
+  
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
