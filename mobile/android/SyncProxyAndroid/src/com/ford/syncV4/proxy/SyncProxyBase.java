@@ -1134,6 +1134,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	
 	// Protected isConnected method to allow legacy proxy to poll isConnected state
 	public Boolean getIsConnected() {
+        if (_syncConnection == null){
+            return false;
+        }
 		return _syncConnection.getIsConnected();
 	}
 	
