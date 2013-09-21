@@ -30,7 +30,7 @@
  * @filesource app/controller/MediaController.js
  * @version 1.0
  */
-SDL.MediaController = Em.Object.create( {
+SDL.MediaController = Em.Object.create({
 
     /**
      * Initial substate
@@ -40,7 +40,7 @@ SDL.MediaController = Em.Object.create( {
     /**
      * Turn on CD
      */
-    turnOnCD: function() {
+    turnOnCD: function () {
 
         if (!SDL.States.media.player.active) {
             SDL.States.goToStates('media.player');
@@ -55,23 +55,25 @@ SDL.MediaController = Em.Object.create( {
     /**
      * Switching on Application
      */
-    turnOnSDL: function() {
+    turnOnSDL: function () {
 
         SDL.CDModel.set('active', false);
         /**
          * Set SDL Data active, flag for status bar
          */
-        if(SDL.SDLAppController.model){
+        if (SDL.SDLAppController.model) {
             SDL.SDLAppController.model.set('active', true);
         }
         /**
          * Go to SDL state
          */
-        if(SDL.SDLAppController.model.appType == "NAVIGATION"){
-            SDL.States.goToStates('media.mediaNavigation.baseNavigation');
-        }else{
-            SDL.States.goToStates('media.sdlmedia');
+        for (var i = 0; i < SDL.SDLAppController.model.appType.length; i++) {
+            if (SDL.SDLAppController.model.appType[i] == "NAVIGATION") {
+                SDL.States.goToStates('media.mediaNavigation.baseNavigation');
+                return;
+            }
         }
 
+        SDL.States.goToStates('media.sdlmedia');
     }
 });
