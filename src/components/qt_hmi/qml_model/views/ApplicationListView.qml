@@ -58,6 +58,6 @@ Item {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackBtn{}
+        BackButton{}
     }
 }

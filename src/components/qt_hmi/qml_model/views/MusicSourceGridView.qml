@@ -52,5 +52,5 @@ Column {
 
 
     }
-    BackBtn {anchors.bottom: parent.bottom}
+    BackButton {anchors.bottom: parent.bottom}
 }

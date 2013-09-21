@@ -20,15 +20,21 @@ Item{
             width: parent.width - 100
             height: parent.height
             id: contactsListView
+            clip: true
             model: ContactsListModel {}
             spacing: 25
+            section.property: "name"
+            section.criteria: ViewSection.FirstCharacter
+            section.delegate: Text {
+                color: "blue"
+                font.pixelSize: 20
+                text: section
+            }
 
-            function setCurrent(btnText){
-                var i
-                for(i = 0; i <contactsListView.count; i ++){
-                    if(contactsListView.model.get(i).name.substring(0, 1) === btnText){
-                        contactsListView.currentIndex = i
-                        if(contactsListView.currentIndex < contactsListView.count- 6) contactsListView.currentIndex += 5
+            function setCurrent(firstLetter){
+                for(var i = 0; i < count; i ++){
+                    if(model.get(i).name[0] === firstLetter){
+                        positionViewAtIndex(i, ListView.Beginning)
                         break;
                     }
                 }
@@ -63,13 +69,13 @@ Item{
         }
     }
 
-    Item{
+    Item {
         // 1/4 bottom screen
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         width: parent.width
         height: 1/4 * parent.height
 
-        BackBtn{}
+        BackButton{}
     }
 }
