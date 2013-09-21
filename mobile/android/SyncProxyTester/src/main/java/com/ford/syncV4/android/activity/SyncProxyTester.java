@@ -544,6 +544,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
+        int groupCheck = R.id.selectprotocol_radioUSB;
+        switch (transportType) {
+            case Const.Transport.KEY_TCP:
+                groupCheck = R.id.selectprotocol_radioWiFi;
+                break;
+
+            case Const.Transport.KEY_BLUETOOTH:
+                groupCheck = R.id.selectprotocol_radioBT;
+                break;
+        }
+        transportGroup.check(groupCheck);
+
         new AlertDialog.Builder(context)
                 .setTitle("Please select protocol properties")
                 .setCancelable(false)
@@ -557,9 +569,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 .name();
                         String hmiLang = ((Language) hmiLangSpinner
                                 .getSelectedItem()).name();
-                        int transportType = transportGroup
-                                .getCheckedRadioButtonId() == R.id.selectprotocol_radioWiFi ? Const.Transport.KEY_TCP
-                                : Const.Transport.KEY_BLUETOOTH;
+                        int transportType = Const.Transport.KEY_USB;
+                        switch (transportGroup.getCheckedRadioButtonId()) {
+                            case R.id.selectprotocol_radioWiFi:
+                                transportType = Const.Transport.KEY_TCP;
+                                break;
+
+                            case R.id.selectprotocol_radioBT:
+                                transportType = Const.Transport.KEY_BLUETOOTH;
+                                break;
+                        }
                         String ipAddress = ipAddressEditText.getText()
                                 .toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText
@@ -664,10 +683,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         int protocolVersion = getCurrentProtocolVersion();
         boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
                 Const.PREFS_DEFAULT_ISMEDIAAPP);
-        String transportType = prefs.getInt(
-                Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
-                Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE) == Const.Transport.KEY_TCP ? "WiFi"
-                : "BT";
+        String transportType = null;
+        switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+                Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
+            case Const.Transport.KEY_TCP:
+                transportType = "WiFi";
+                break;
+
+            case Const.Transport.KEY_BLUETOOTH:
+                transportType = "BT";
+                break;
+
+            case Const.Transport.KEY_USB:
+                transportType = "USB";
+                break;
+        }
         setTitle(getResources().getString(R.string.tester_app_name) + " (v"
                 + protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
                 + transportType + ")");
