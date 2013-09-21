@@ -1,27 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.util.Hashtable;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
@@ -152,6 +130,28 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.DebugTool;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
 	// Used for calls to Android Log class.
 	public static final String TAG = "SyncProxy";
@@ -187,6 +187,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 	// RPC Session ID
 	private byte _rpcSessionID = 0;
+
+    // Mobile Nav Session ID
+    protected byte _mobileNavSessionID = 100;
 	
 	// Device Info for logging
 	private TraceDeviceInfo _traceDeviceInterrogator = null;
@@ -318,12 +321,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			}
 			if (sessionType.eq(SessionType.RPC)) {			
 				startRPCProtocolSession(sessionID, correlationID);
-			} else if (_wiproVersion == 2) {
-				//If version 2 then don't need to specify a Session Type
-				startRPCProtocolSession(sessionID, correlationID);
-			}  else {
-				// Handle other protocol session types here
-			}
+            } else if (_wiproVersion == 2) {
+                if (sessionType.equals(SessionType.Mobile_Nav)) {
+                    startMobileNavSession(sessionID, correlationID);
+                } else {
+                    //If version 2 then don't need to specify a Session Type
+                    startRPCProtocolSession(sessionID, correlationID);
+                }
+            }
 		}
 
 		@Override
@@ -339,8 +344,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		public void onProtocolError(String info, Exception e) {
 			passErrorToProxyListener(info, e);
 		}
-	}
-	
+
+        @Override
+        public void onMobileNavAckReceived(int frameReceivedNumber) {
+            handleMobileNavAck(frameReceivedNumber);
+        }
+    }
+
+
 	private class ProxyHeartBeat {
 		
 		private final String THREAD_NAME = "SyncHeartbeat";
@@ -898,6 +909,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
 	}
 
+    public SyncConnection getSyncConnection() {
+        return _syncConnection;
+    }
+
+    public ProxyMessageDispatcher<ProtocolMessage> getIncomingProxyMessageDispatcher() {
+        return _incomingProxyMessageDispatcher;
+    }
+
+    public SyncInterfaceBroker getInterfaceBroker() {
+        return _interfaceBroker;
+    }
+
+    public byte getMobileNavSessionID() {
+        return _mobileNavSessionID;
+    }
+
 	public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
 		try {
 			final int CONNECTION_TIMEOUT = timeout*1000; // in ms
@@ -1392,6 +1419,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 	
+    protected void handleMobileNavMessage(ProtocolMessage message) {
+        Log.i(TAG, "Mobile Nav Session message received" + message.toString());
+        // TODO handle incoming mobile nav sessions
+    }
+
 	public byte getWiProVersion() {
 		return this._wiproVersion;
 	}
@@ -1509,16 +1541,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
             Log.d(TAG, "Version: " + _wiproVersion + " | msg: " + new String(msgBytes));
 
-			ProtocolMessage pm = new ProtocolMessage();
-			pm.setData(msgBytes);
-			pm.setSessionID(_rpcSessionID);
-			pm.setMessageType(MessageType.RPC);
-			pm.setSessionType(SessionType.RPC);
-			pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-			pm.setCorrID(request.getCorrelationID());
-			if (request.getBulkData() != null) 
-				pm.setBulkData(request.getBulkData());
-			
+            ProtocolMessage pm = createProtocolMessage(request, msgBytes);
+
 			// Queue this outgoing message
 			synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
 				if (_outgoingProxyMessageDispatcher != null) {
@@ -1540,6 +1564,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		} // end-if
 	}
 	
+    private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
+        ProtocolMessage pm = new ProtocolMessage();
+        pm.setData(msgBytes);
+        pm.setSessionID(_rpcSessionID);
+        pm.setMessageType(MessageType.RPC);
+        pm.setSessionType(SessionType.RPC);
+        pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
+        pm.setCorrID(request.getCorrelationID());
+        if (request.getBulkData() != null)
+            pm.setBulkData(request.getBulkData());
+        return pm;
+    }
+
 	private void handleRPCMessage(Hashtable hash) {
 		RPCMessage rpcMsg = new RPCMessage(hash);
 		String functionName = rpcMsg.getFunctionName();
@@ -2553,13 +2590,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		
 		SyncTrace.logProxyEvent("Application called sendRPCRequest method for RPCRequest: ." + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
 			
-		// Test if SyncConnection is null
-		synchronized(CONNECTION_REFERENCE_LOCK) {
-			if (_syncConnection == null || !_syncConnection.getIsConnected()) {
-				SyncTrace.logProxyEvent("Application attempted to send and RPCRequest without a connected transport.", SYNC_LIB_TRACE_KEY);
-				throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
-			}
-		}
+        checkSyncConnection();
 		
 		// Test for illegal correlation ID
 		if (isCorrelationIDProtected(request.getCorrelationID())) {
@@ -2591,6 +2622,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		sendRPCRequestPrivate(request);
 	} // end-method
 	
+    private void checkSyncConnection() throws SyncException {
+        // Test if SyncConnection is null
+        synchronized (CONNECTION_REFERENCE_LOCK) {
+            if (_syncConnection == null || !_syncConnection.getIsConnected()) {
+                SyncTrace.logProxyEvent("Application attempted to send and RPCRequest without a connected transport.", SYNC_LIB_TRACE_KEY);
+                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
+            }
+        }
+    }
+
 	/**
 	 * Returns whether the class allows some extra testing features. For this,
 	 * the _proxyListener must be an instance of the IProxyListenerALMTesting
@@ -2649,6 +2690,44 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 	
+    protected void handleMobileNavAck(int frameNumberReceived){
+        Log.i(TAG, "Mobile Nav Ack received = " + frameNumberReceived);
+        final int fNumber = frameNumberReceived;
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onMobileNavAckReceived(fNumber);
+                }
+            });
+        } else {
+            _proxyListener.onMobileNavAckReceived(fNumber);
+        }
+
+    }
+
+    protected void startMobileNavSession(byte sessionID, String correlationID) {
+        Log.i(TAG, "Mobile Nav Session started" + correlationID);
+        _mobileNavSessionID = sessionID;
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onMobileNaviStart();
+                }
+            });
+        } else {
+            _proxyListener.onMobileNaviStart();
+        }
+    }
+
+    public void stopMobileNaviSession(){
+        Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
+        getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+    }
+
 	// Queue internal callback message
 	private void queueInternalMessage(InternalProxyMessage message) {
 		synchronized(INTERNAL_MESSAGE_QUEUE_THREAD_LOCK) {
@@ -2667,8 +2746,46 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 
-	/******************** Public Helper Methods *************************/
+    public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
+        if (rtpPacket == null) {
+            throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);
+        }
+        checkSyncConnection();
+        return sendRTPPacket(rtpPacket);
+    }
 	
+    private boolean sendRTPPacket(byte[] rtpPacket) throws SyncException {
+        ProtocolMessage pm = createMobileNavSessionProtocolMessage(rtpPacket);
+        try {
+            // Queue this outgoing message
+            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+                if (_outgoingProxyMessageDispatcher != null) {
+                    _outgoingProxyMessageDispatcher.queueMessage(pm);
+                } else {
+                    return false;
+                }
+            }
+        } catch (OutOfMemoryError e) {
+            SyncTrace.logProxyEvent("OutOfMemory exception while sending RTP packet", SYNC_LIB_TRACE_KEY);
+            throw new SyncException("OutOfMemory exception while sending RTP packet ", e, SyncExceptionCause.INVALID_ARGUMENT);
+        }
+        return true;
+    }
+
+    public ProtocolMessage createMobileNavSessionProtocolMessage(byte[] rtpPacket) {
+        return createProtocolMessage(rtpPacket);
+    }
+
+    private ProtocolMessage createProtocolMessage(byte[] rtpPacket) {
+        ProtocolMessage pm = new ProtocolMessage();
+        pm.setData(rtpPacket);
+        pm.setSessionID(_mobileNavSessionID);
+        pm.setVersion(getWiProVersion());
+        pm.setMessageType(MessageType.VIDEO);
+        pm.setSessionType(SessionType.Mobile_Nav);
+        return pm;
+    }
+
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *

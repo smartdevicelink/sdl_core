@@ -1,9 +1,11 @@
 package com.ford.syncV4.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Hashtable;
-
-import com.ford.syncV4.protocol.enums.*;
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
+import com.ford.syncV4.protocol.enums.FrameType;
+import com.ford.syncV4.protocol.enums.MessageType;
+import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
