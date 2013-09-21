@@ -161,6 +161,7 @@
 #include "application_manager/commands/hmi/on_show_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
+#include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 
 
 namespace application_manager {
@@ -687,6 +688,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::UI_OnKeyboardInput: {
       command.reset(new commands::hmi::OnUIKeyBoardInputNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_OnTouchEvent: {
+      command.reset(new commands::hmi::OnUITouchEventNotification(message));
       break;
     }
   }

@@ -2004,7 +2004,7 @@
         <description>Provides additional human readable info regarding the result.</description>
       </param>    
     </function>
-	<function name="OnKeyboardInput" messagetype="notification">
+		<function name="OnKeyboardInput" messagetype="notification">
       <description>On-screen keyboard event.</description>
       <description>Can be full string or individual keypresses depending on keyboard mode.</description>
       <param name="event" type="Common.KeyboardEvent" mandatory="true">
@@ -2019,14 +2019,14 @@
     </function>
     <function name="OnTouchEvent" messagetype="notification">
       <description>Notifies about touch events on the screen's prescribed area</description>
-	  <param name="eventType" type="Common.TouchEvent" mandatory="true">
-		<description>Type of event - start, move, stop, etc.</description>
-	  </param>
-	  <param name="touchLists" type="Common.TouchLists" mandatory="false">
-		<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
-	  </param>
-	  <param name="info" type="Common.TouchEventInfo" mandatory="true">
- 		<description>Coordinate of the touch, radius of touch input and input ID.</description>
+		  <param name="eventType" type="Common.TouchEvent" mandatory="true">
+				<description>Type of event - start, move, stop, etc.</description>
+		  </param>
+		  <param name="touchLists" type="Common.TouchLists" mandatory="false">
+				<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
+		  </param>
+		  <param name="info" type="Common.TouchEventInfo" mandatory="true">
+ 				<description>Coordinate of the touch, radius of touch input and input ID.</description>
       </param>
     </function>	
     <function name="Slider" messagetype="request">
