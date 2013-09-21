@@ -49,12 +49,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
                 mOutputStream.write(buffer);
                 Log.d("SyncProxyTester", "i = " + i);
                 i++;
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Log.e("SyncProxyTester", e.toString());
 
-                }
             }
             is.close();
         } catch (IOException e) {
