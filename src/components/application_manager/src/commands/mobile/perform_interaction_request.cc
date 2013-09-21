@@ -42,6 +42,7 @@
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
+
 namespace application_manager {
 
 namespace commands {
@@ -49,15 +50,24 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  EventObserver("PerformInteractionRequest") {
+  EventObserver("PerformInteractionRequest"),
+  timer_(this, &PerformInteractionRequest::onTimer) {
+
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
+
+void PerformInteractionRequest::onTimer() const{
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimer");
+}
+
 void PerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
+
+  //timer_.start(2);
 
   Application* app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key]);

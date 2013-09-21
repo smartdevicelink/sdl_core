@@ -36,6 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "utils/timer_thread.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -85,6 +86,12 @@ class PerformInteractionRequest : public CommandRequestImpl,
    * @param event The received event
    */
   void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief Timer callback function
+   *
+   */
+  void onTimer() const;
 
  private:
   /*
@@ -153,6 +160,9 @@ class PerformInteractionRequest : public CommandRequestImpl,
    * otherwise FALSE
    */
   bool CheckVrHelpItemPositions(Application* const app);
+
+  // members
+  timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
