@@ -44,6 +44,14 @@ public class ProtocolMessage {
         this._jsonSize = data.length;
     }
 
+    public void setData(byte[] data, int length) {
+        if (this._data != null)
+            this._data = null;
+        this._data = new byte[length];
+        System.arraycopy(data, 0, this._data, 0, length);
+        this._jsonSize = 0;
+    }
+
 	public byte[] getBulkData() {
 		return _bulkData;
 	}

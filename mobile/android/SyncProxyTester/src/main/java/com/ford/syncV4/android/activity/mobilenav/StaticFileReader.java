@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by Andrew Batutin on 9/11/13.
@@ -14,10 +15,12 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
 
     private final Activity mContext;
     private DataReaderListener mListener;
+    private  OutputStream mOutputStream;
 
-    public StaticFileReader(Activity context, DataReaderListener listener) {
+    public StaticFileReader(Activity context, OutputStream outputStream,  DataReaderListener listener) {
         mContext = context;
         mListener = listener;
+        mOutputStream = outputStream;
     }
 
     @Override
@@ -42,13 +45,20 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
         try {
             int i = 0;
             while ((length = is.read(buffer)) != -1 && !isCancelled()) {
-                mListener.onDataReceived(buffer);
+
+                mOutputStream.write(buffer);
                 Log.d("SyncProxyTester", "i = " + i);
                 i++;
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Log.e("SyncProxyTester", e.toString());
+
+                }
             }
             is.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("SyncProxyTester", e.toString());
         }
     }
 

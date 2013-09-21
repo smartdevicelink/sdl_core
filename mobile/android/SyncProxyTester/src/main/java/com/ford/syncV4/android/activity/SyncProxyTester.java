@@ -272,6 +272,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
     private StaticFileReader staticFileReader;
+    private OutputStream mOutputStream;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -318,7 +319,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 try {
                     is.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(logTag, e.toString());
                 }
             }
         }
@@ -957,7 +958,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(logTag, e.toString());
                 }
             }
         }
@@ -3576,7 +3577,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             audioPassThruMediaPlayer.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(logTag, e.toString());
         }
     }
 
@@ -3756,11 +3757,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onMobileNaviStarted() {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOn();
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            mOutputStream =  proxy.startH264();
+        }
     }
 
     public void onMobileNaviError() {
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
+        closeMobileNaviOutputStream();
+    }
+
+    private void closeMobileNaviOutputStream() {
+        if( mOutputStream != null ){
+            try {
+                mOutputStream.close();
+            } catch (IOException e) {
+                Log.w(logTag, "Can't close Mobile Navi OutputStream ", e);
+            }
+        }
     }
 
     public void onMobileNavAckReceived(int frameReceived){
@@ -3793,6 +3809,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
                 if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
                     ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
+                    closeMobileNaviOutputStream();
                 } else {
                     _msgAdapter.logMessage("Can't stop mobile nav session. sync connection is null", true);
                 }
@@ -3857,7 +3874,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void createStaticFileReader(){
         final MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        staticFileReader = new StaticFileReader(this, new DataReaderListener() {
+        staticFileReader = new StaticFileReader(this, mOutputStream ,new DataReaderListener() {
             @Override
             public void onStartReading() {
                 runOnUiThread(new Runnable() {
@@ -3870,13 +3887,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
             @Override
             public void onDataReceived(final byte[] data) {
-                sendMobileNaviData(data, true);
-              /*  runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sendMobileNaviData(data, false);
-                    }
-                });*/
 
             }
 

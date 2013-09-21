@@ -307,7 +307,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         versionNumber,
                         config);
 			} catch (SyncException e) {
-				e.printStackTrace();
+                Log.e(TAG, e.toString());
 				//error creating proxy, returned proxy = null
 				if (_syncProxy == null){
 					stopSelf();
@@ -359,7 +359,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			try {
 				_syncProxy.dispose();
 			} catch (SyncException e) {
-				e.printStackTrace();
+                Log.e(TAG, e.toString());
 			}
 			_syncProxy = null;
 		}
@@ -642,7 +642,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+                    Log.e(TAG, e.toString());
 				}
 			}
 		}
@@ -1440,10 +1440,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			writer.close();
 		} catch (FileNotFoundException e) {
 			Log.i("syncp", "FileNotFoundException: " + e);
-			e.printStackTrace();
+            Log.e(TAG, e.toString());
 		} catch (IOException e) {
 			Log.i("syncp", "IOException: " + e);
-			e.printStackTrace();
+            Log.e(TAG, e.toString());
 		}
 	}
 

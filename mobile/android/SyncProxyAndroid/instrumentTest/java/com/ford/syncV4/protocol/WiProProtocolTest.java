@@ -1,6 +1,7 @@
 package com.ford.syncV4.protocol;
 
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
@@ -185,7 +186,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             method.invoke(WiProProtocolTest.this, parameters);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Log.e("SyncProxyTester", e.toString());
         } catch (InvocationTargetException e) {
             reconstructAssertionError(e);
         }

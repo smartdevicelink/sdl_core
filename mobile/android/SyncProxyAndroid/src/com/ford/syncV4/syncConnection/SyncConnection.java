@@ -8,23 +8,30 @@ import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.streaming.AbstractPacketizer;
+import com.ford.syncV4.streaming.H264Packetizer;
+import com.ford.syncV4.streaming.IStreamListener;
 import com.ford.syncV4.transport.BTTransport;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransport;
-import com.ford.syncV4.transport.usb.USBTransport;
-import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.transport.usb.USBTransport;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
-import static com.ford.syncV4.transport.TransportType.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
-public class SyncConnection implements IProtocolListener, ITransportListener {
+public class SyncConnection implements IProtocolListener, ITransportListener , IStreamListener{
 
 	SyncTransport _transport = null;
 	AbstractProtocol _protocol = null;
 	ISyncConnectionListener _connectionListener = null;
+    AbstractPacketizer mPacketizer = null;
 
 	// Thread safety locks
 	Object TRANSPORT_REFERENCE_LOCK = new Object();
@@ -115,6 +122,19 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
                 }
             } // end-if
         }
+    }
+
+    public OutputStream startH264(byte rpcSessionID) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mPacketizer = new H264Packetizer(this, is, rpcSessionID);
+            mPacketizer.start();
+            return os;
+        } catch (Exception e) {
+            Log.e("SyncConnection", "Unable to start H.264 streaming:" + e.toString());
+        }
+        return null;
     }
 	
 	public void startTransport() throws SyncException {
@@ -237,4 +257,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public TransportType getCurrentTransportType() {
 		return _transport.getTransportType();
 	}
+
+    @Override
+    public void sendH264(ProtocolMessage pm) {
+        sendMessage(pm);
+    }
 }
