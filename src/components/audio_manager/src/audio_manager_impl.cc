@@ -211,6 +211,33 @@ void AudioManagerImpl::stopMicrophoneRecording() {
   }
 }
 
+void AudioManagerImpl::startVideoStreaming() {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  VideoStreamingThread* videoStreamingThreadDelegate =
+    new VideoStreamingThread();
+
+  if (NULL != videoStreamingThreadDelegate) {
+
+    videoStreamerThread_ = new threads::Thread("VideoStreamer"
+                                          , videoStreamingThreadDelegate);
+
+    if (NULL != videoStreamerThread_) {
+      videoStreamerThread_->start();
+    }
+  }
+}
+
+void AudioManagerImpl::stopVideoStreaming() {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  if (NULL != videoStreamerThread_) {
+    recorderThread_->stop();
+    delete videoStreamerThread_;
+    videoStreamerThread_ = NULL;
+  }
+}
+
 void AudioManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_TRACE_ENTER(logger_);

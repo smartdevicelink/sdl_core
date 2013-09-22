@@ -59,6 +59,19 @@ void AudioManagerTest::SetUp() {
 void AudioManagerTest::TearDown() {
 }
 
+TEST_F(AudioManagerTest, StreamVideo) {
+  audio_manager::AudioManager* audioManager =
+      audio_manager::AudioManagerImpl::getAudioManager();
+
+  audioManager->startVideoStreaming();
+
+  LOG4CXX_TRACE(logger, ".Playing stream");
+  while (true) {
+    usleep(10000000);
+    LOG4CXX_TRACE(logger, ".");
+  }
+}
+
 TEST_F(AudioManagerTest, RecordMicrophoneStream) {
   audio_manager::AudioManager* audioManager =
       audio_manager::AudioManagerImpl::getAudioManager();
