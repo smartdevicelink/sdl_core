@@ -40,7 +40,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
     private void readFileFromRaw(Integer id) {
         // Open the input stream
         InputStream is = mContext.getResources().openRawResource(id);
-        byte[] buffer = new byte[100];
+        byte[] buffer = new byte[1488];
         int length;
         try {
             int i = 0;

@@ -3921,6 +3921,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onKeyboardInputReceived(OnKeyboardInput event) {
+
     }
 }
 
