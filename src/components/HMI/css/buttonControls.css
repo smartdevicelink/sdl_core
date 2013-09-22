@@ -48,6 +48,18 @@
     color: #FFF;
 }
 
+#keyboard_view .clearBtn{
+    right: 0px;
+    top: 0px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    font-size: 32px;
+    text-align: center;
+    line-height: 50px;
+}
+
 #keyboard_view .microphone{
     left: 63px;
     top: 80px;

@@ -51,7 +51,14 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     deactivate: function () {
 
         this._super();
-        //FFW.UI.keyboardClose();
+    },
+
+    inputChanges: function (element) {
+        this.searchBar.input.set('value', this.searchBar.input.value + element.text);
+    },
+
+    clearBtn: function (element) {
+        this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1))
     },
 
     microphone: SDL.Button.extend({
@@ -70,16 +77,19 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
         clearBtn: SDL.Button.extend({
             classNames: 'clearBtn',
-            target    : 'SDL.SDLController',
-            action    : 'clearBtn'
+            text: 'X',
+            action: 'clearBtn',
+            target: 'parentView.parentView'
         }),
 
         serchIcon: Em.View.extend({
             classNames: 'serchIcon'
         }),
 
-        input: Ember.View.extend({
+        input: Ember.TextArea.extend({
             tagName: 'input',
+            attribute: ['type:text'],
+            valueBinding: 'SDL.SDLModel.keyboardInputValue',
             attributeBindings: ['disabled'],
             disabled: true
         })
@@ -102,51 +112,51 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
         leftBtn: SDL.Button.extend({
             classNames: 'leftBtn',
-            text      : 'Left Button',
-            target    : 'SDL.SDLController',
-            action    : 'leftBtn'
+            text: 'Left Button',
+            target: 'SDL.SDLController',
+            action: 'leftBtn'
         }),
 
         numericBtn: SDL.Button.extend({
             classNames: 'numericBtn',
-            text      : '123',
-            target    : 'SDL.SDLController',
-            action    : 'numericBtn'
+            text: '123',
+            target: 'SDL.SDLController',
+            action: 'numericBtn'
         }),
 
         symbolBtn: SDL.Button.extend({
             classNames: 'symbolBtn',
-            text      : '!@#',
-            target    : 'SDL.SDLController',
-            action    : 'symbolBtn'
+            text: '!@#',
+            target: 'SDL.SDLController',
+            action: 'symbolBtn'
         }),
 
         spaceBtn: SDL.Button.extend({
             classNames: 'spaceBtn',
-            text      : 'Space',
-            target    : 'SDL.SDLController',
-            action    : 'spaceBtn'
+            text: 'Space',
+            target: 'SDL.SDLController',
+            action: 'spaceBtn'
         }),
 
         caseSwitchBtn: SDL.Button.extend({
             classNames: 'caseSwitchBtn',
-            text      : 'ABC',
-            target    : 'SDL.SDLController',
-            action    : 'caseSwitchBtn'
+            text: 'ABC',
+            target: 'SDL.SDLController',
+            action: 'caseSwitchBtn'
         }),
 
         localisationBtn: SDL.Button.extend({
             classNames: 'localisationBtn',
-            icon      : 'icon',
-            target    : 'SDL.SDLController',
-            action    : 'localisationBtn'
+            icon: 'icon',
+            target: 'SDL.SDLController',
+            action: 'localisationBtn'
         }),
 
         searchBtn: SDL.Button.extend({
             classNames: 'searchBtn',
-            text      : 'Search',
-            target    : 'SDL.SDLController',
-            action    : 'searchBtn'
+            text: 'Search',
+            target: 'SDL.SDLController',
+            action: 'searchBtn'
         })
     }),
 
