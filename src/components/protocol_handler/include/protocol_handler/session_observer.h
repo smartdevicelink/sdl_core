@@ -61,7 +61,8 @@ class SessionObserver {
      * \return int Id (number) of new session if successful otherwise -1.
      */
     virtual unsigned int OnSessionStartedCallback(
-      transport_manager::ConnectionUID connection_handle) = 0;
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char service_type) = 0;
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -124,7 +125,7 @@ class SessionObserver {
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnDeviceID(
-        unsigned int device_handle,
+      unsigned int device_handle,
       std::string* device_name,
       std::list<unsigned int>* applications_list) = 0;
 

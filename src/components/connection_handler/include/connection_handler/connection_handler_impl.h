@@ -141,7 +141,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int Id (number) of new session if successful otherwise -1.
      */
     virtual unsigned int OnSessionStartedCallback(
-      transport_manager::ConnectionUID connection_handle);
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char service_type);
 
     /**
      * \brief Callback function used by ProtocolHandler

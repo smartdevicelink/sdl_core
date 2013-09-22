@@ -319,7 +319,8 @@ void ConnectionHandlerImpl::RemoveConnection(
 }
 
 unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
-  transport_manager::ConnectionUID connection_handle) {
+  transport_manager::ConnectionUID connection_handle,
+  unsigned char service_type) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onSessionStartedCallback()");
   int newSessionID = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -338,9 +339,16 @@ unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
           firstSessionID = KeyFromPair(connection_handle, firstSessionID);
         }
         int sessionKey = KeyFromPair(connection_handle, newSessionID);
-        connection_handler_observer_->OnSessionStartedCallback(
-          (it->second).connection_device_handle(), sessionKey,
-          firstSessionID);
+        ServiceType type = static_cast<ServiceType>(service_type);
+
+        bool success = connection_handler_observer_->OnSessionStartedCallback(
+                         (it->second).connection_device_handle(),
+                         sessionKey,
+                         firstSessionID,
+                         type);
+        if (!success) {
+          newSessionID = -1;
+        }
       }
     }
   }

@@ -751,7 +751,7 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
       thread_impl);
 
   perform_audio_thread_->start();//WithOptions(
-    //threads::ThreadOptions(threads::Thread::kMinStackSize));
+  //threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 void ApplicationManagerImpl::StopAudioPassThruThread() {
@@ -908,9 +908,16 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-void ApplicationManagerImpl::OnSessionStartedCallback(
+bool ApplicationManagerImpl::OnSessionStartedCallback(
   connection_handler::DeviceHandle device_handle, int session_key,
-  int first_session_key) {
+  int first_session_key, connection_handler::ServiceType type) {
+  LOG4CXX_INFO(logger_, "Started session with type " << type);
+  if (connection_handler::ServiceType::kNaviSession == type) {
+    LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+    // !!!!!!!!!!!!!!!!!!!!!!!
+    // TODO(DK): add check if navi streaming allowed for this app.
+  }
+  return true;
 }
 
 void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
@@ -1008,10 +1015,10 @@ void ApplicationManagerImpl::SendMessageToMobile(
   smart_objects::SmartObject& msg_to_mobile = *message;
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     // Check to prevent deadlock in watchdog
-      watchdog_->removeRequest(
-        msg_to_mobile[strings::params][strings::connection_key],
-        msg_to_mobile[strings::params][strings::correlation_id]);
-   }
+    watchdog_->removeRequest(
+      msg_to_mobile[strings::params][strings::connection_key],
+      msg_to_mobile[strings::params][strings::correlation_id]);
+  }
 
   messages_to_mobile_.push(message_to_send);
 }

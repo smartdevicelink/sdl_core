@@ -623,7 +623,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
       logger_, "Version 2 " << (packet -> version() == PROTOCOL_VERSION_2));
 
     int session_id = session_observer_->OnSessionStartedCallback(
-                       connection_id);
+                       connection_id,
+                       packet->service_type());
     if (-1 != session_id) {
       SendStartSessionAck(
         connection_id, session_id, packet->version(),
