@@ -104,9 +104,9 @@ void RegisterAppInterfaceRequest::Run() {
         (*message_)[strings::msg_params][strings::tts_name]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(strings::app_type)) {
+    if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
       application_impl->set_app_types(
-        (*message_)[strings::msg_params][strings::app_type]);
+          (*message_)[strings::msg_params][strings::app_hmi_type]);
     }
 
     SendRegisterAppInterfaceResponseToMobile(*application_impl);

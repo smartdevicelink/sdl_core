@@ -417,6 +417,15 @@ SDL.SDLController = Em.Object
                 FFW.UI.onDriverDistraction("DD_OFF");
             }
         }.observes('SDL.SDLModel.driverDistractionState'),
+
+        /**
+         * Ondisplay keyboard event handler
+         * Sends notification on SDL Core with changed value
+         */
+        onKeyboardChanges: function() {
+            FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+        }.observes('SDL.SDLModel.keyboardInputValue'),
+
         /**
          * Get application model
          * 

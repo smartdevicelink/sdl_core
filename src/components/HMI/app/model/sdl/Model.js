@@ -37,21 +37,21 @@ SDL.SDLModel = Em.Object
         /**
          * Video player object for navigation
          *
-         * @param {Object}
+         * @type {Object}
          */
         naviVideo: null,
 
         /**
          * Flag to indicate AudioPassThruPopUp activity
          *
-         * @param {Boolean}
+         * @type {Boolean}
          */
         AudioPassThruState: false,
 
         /**
          * Current device information
          * 
-         * @param {Object}
+         * @type {Object}
          */
         CurrDeviceInfo: {
             "name": null,
@@ -68,41 +68,48 @@ SDL.SDLModel = Em.Object
         /**
          * Flag to sent Send Data extended params
          * 
-         * @param {Boolean}
+         * @type {Boolean}
          */
         sendDataExtend: false,
 
         /**
          * VR active status
          * 
-         * @param {Boolean}
+         * @type {Boolean}
          */
         VRActive: false,
 
         /**
          * Flag to be set true when phone call is initialised
          * 
-         * @param {Boolean}
+         * @type {Boolean}
          */
         phoneCall: false,
 
         /**
          * Flag to be set true when VRHelpList are activated
          * 
-         * @param {Boolean}
+         * @type {Boolean}
          */
         VRHelpListActivated: false,
 
         /**
          * Flag to be set true when VRHelpList are activated
          *
-         * @param {Boolean}
+         * @type {Object}
          */
         keyboardLayout: {
             'QWERTY': SDL.QWERTYLayout.create(),
             'QWERTZ': null,
             'AZERTY': null
         },
+
+        /**
+         * Flag to be set true when VRHelpList are activated
+         *
+         * @type {String}
+         */
+        keyboardInputValue: "",
 
         /**
          * Default values for global properties

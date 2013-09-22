@@ -70,223 +70,223 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         elementId : 'q',
         classNames: 'q k0',
         text      : 'q',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     w: SDL.Button.extend({
         elementId : 'w',
         classNames: 'w k1',
         text      : 'w',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     e: SDL.Button.extend({
         elementId : 'e',
         classNames: 'e k2',
         text      : 'e',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     r: SDL.Button.extend({
         elementId : 'r',
         classNames: 'r k3',
         text      : 'r',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     t: SDL.Button.extend({
         elementId : 't',
         classNames: 't k4',
         text      : 't',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     y: SDL.Button.extend({
         elementId : 'y',
         classNames: 'y k5',
         text      : 'y',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     u: SDL.Button.extend({
         elementId : 'u',
         classNames: 'u k6',
         text      : 'u',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     i: SDL.Button.extend({
         elementId : 'i',
         classNames: 'i k7',
         text      : 'i',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     o: SDL.Button.extend({
         elementId : 'o',
         classNames: 'o k8',
         text      : 'o',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     p: SDL.Button.extend({
         elementId : 'p',
         classNames: 'p k9',
         text      : 'p',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     a: SDL.Button.extend({
         elementId : 'a',
         classNames: 'a k10',
         text      : 'a',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     s: SDL.Button.extend({
         elementId : 's',
         classNames: 's k11',
         text      : 's',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     d: SDL.Button.extend({
         elementId : 'd',
         classNames: 'd k12',
         text      : 'd',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     f: SDL.Button.extend({
         elementId : 'f',
         classNames: 'f k13',
         text      : 'f',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     g: SDL.Button.extend({
         elementId : 'g',
         classNames: 'g k14',
         text      : 'g',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     h: SDL.Button.extend({
         elementId : 'h',
         classNames: 'h k15',
         text      : 'h',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     j: SDL.Button.extend({
         elementId : 'j',
         classNames: 'j k16',
         text      : 'j',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     k: SDL.Button.extend({
         elementId : 'k',
         classNames: 'k k17',
         text      : 'k',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     l: SDL.Button.extend({
         elementId : 'l',
         classNames: 'l k18',
         text      : 'l',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     z: SDL.Button.extend({
         elementId : 'z',
         classNames: 'z k20',
         text      : 'z',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     x: SDL.Button.extend({
         elementId : 'x',
         classNames: 'x k21',
         text      : 'x',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     c: SDL.Button.extend({
         elementId : 'c',
         classNames: 'c k22',
         text      : 'c',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     v: SDL.Button.extend({
         elementId : 'v',
         classNames: 'v k23',
         text      : 'v',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     b: SDL.Button.extend({
         elementId : 'b',
         classNames: 'b k24',
         text      : 'b',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     n: SDL.Button.extend({
         elementId : 'n',
         classNames: 'n k25',
         text      : 'n',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     m: SDL.Button.extend({
         elementId : 'm',
         classNames: 'm k26',
         text      : 'm',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     dash: SDL.Button.extend({
         elementId : 'dash',
         classNames: 'dash k27',
         text      : '-',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     }),
 
     ampersand: SDL.Button.extend({
         elementId : 'ampersand',
         classNames: 'ampersand k28',
         text      : '&',
-        target    : 'SDL.SDLController',
-        action    : 'keyboardPress'
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
     })
 });
