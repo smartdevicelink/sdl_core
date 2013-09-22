@@ -89,7 +89,7 @@ public class ProtocolFrameHeader {
 	public String toString() {
 		String ret = "";
 		ret += "version " + version + ", " + (compressed ? "compressed" : "uncompressed") + "\n";
-		ret += "frameType " + frameType + ", serviceType " + sessionType;
+		ret += "frameType " + frameType.getName() + ", serviceType " + sessionType.getName();
 		ret += "\nframeData " + frameData;
 		ret += ", sessionID " + sessionID;
 		ret += ", dataSize " + dataSize;

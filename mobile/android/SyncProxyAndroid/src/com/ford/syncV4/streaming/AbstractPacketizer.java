@@ -26,7 +26,7 @@ abstract public class AbstractPacketizer {
 
 	public abstract void stop();
 
-	protected static String printBuffer(byte[] buffer, int start,int end) {
+	public static String printBuffer(byte[] buffer, int start,int end) {
 		String str = "";
 		for (int i=start;i<end;i++) str+=","+Integer.toHexString(buffer[i]&0xFF);
 		return str;
