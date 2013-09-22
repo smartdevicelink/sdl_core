@@ -54,7 +54,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             onDown: false
         }),
 
-        input: Em.TextArea.extend({
+        input: Ember.TextArea.extend({
             classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
 
             tagName: 'input',
@@ -64,7 +64,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             disabled: true
         }),
 
-        naviChoises: Em.Container.extend({
+        naviChoises: Em.ContainerView.extend({
             classNames: 'naviChoises',
             classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
             childViews: []
