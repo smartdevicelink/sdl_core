@@ -198,6 +198,8 @@ var StateManager = Em.StateManager.extend({
 
                 this._super();
 
+                SDL.SDLMediaController.restoreCurrentApp();
+
                 SDL.SDLModel.playVideo();
             },
 
