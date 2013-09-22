@@ -97,8 +97,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          *
          * @param text: String
          */
-        activate: function (message) {
-            if (message.initialText.fieldText) {
+        activate: function (message, performInteractionRequestId) {
+            if (message) {
                 this.set('caption', message.initialText.fieldText);
             }
 

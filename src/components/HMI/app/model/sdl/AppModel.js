@@ -309,13 +309,13 @@ SDL.SDLAppModel = Em.Object
 
             if (message) {
 
-                SDL.InteractionChoicesView.activate(message);
+                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
 
             } else {
                 SDL.InteractionChoicesView.preformChoices([],
                     performInteractionRequestId,
                     30000);
-                SDL.InteractionChoicesView.activate("");
+                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
             }
 
             SDL.SDLController.VRMove();
