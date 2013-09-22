@@ -407,6 +407,20 @@
 	width: 578px;
 }
 
+#perform_interaction_view input{
+    width: 720px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background: rgba(119, 119, 119, 0.42);
+    cursor: pointer;
+    font-size: 32px;
+    color: #FFF;
+    top: 80px;
+    left: 65px;
+    position: absolute;
+}
+
 #sdl_view_container .cd_logo {
 	position: absolute;
 	top: 90px;

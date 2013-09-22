@@ -309,11 +309,7 @@ SDL.SDLAppModel = Em.Object
 
             if (message) {
 
-                SDL.InteractionChoicesView.preformChoices(message.choiceSet,
-                    performInteractionRequestId,
-                    message.timeout);
-
-                SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+                SDL.InteractionChoicesView.activate(message);
 
             } else {
                 SDL.InteractionChoicesView.preformChoices([],

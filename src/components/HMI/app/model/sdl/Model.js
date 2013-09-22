@@ -50,7 +50,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Current device information
-         * 
+         *
          * @type {Object}
          */
         CurrDeviceInfo: {
@@ -60,35 +60,35 @@ SDL.SDLModel = Em.Object
 
         /**
          * Driver Distraction State
-         * 
+         *
          * @type bool
          */
         driverDistractionState: false,
 
         /**
          * Flag to sent Send Data extended params
-         * 
+         *
          * @type {Boolean}
          */
         sendDataExtend: false,
 
         /**
          * VR active status
-         * 
+         *
          * @type {Boolean}
          */
         VRActive: false,
 
         /**
          * Flag to be set true when phone call is initialised
-         * 
+         *
          * @type {Boolean}
          */
         phoneCall: false,
 
         /**
          * Flag to be set true when VRHelpList are activated
-         * 
+         *
          * @type {Boolean}
          */
         VRHelpListActivated: false,
@@ -215,7 +215,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Data for AudioPassThruPopUp that contains params for visualisation
-         * 
+         *
          * @type {Object}
          */
         AudioPassThruData: {},
@@ -223,14 +223,14 @@ SDL.SDLModel = Em.Object
         /**
          * List of registered applications, To prevent errors without registered
          * application "-1" used as test appID
-         * 
+         *
          * @type object
          */
         registeredApps: [],
 
         /**
          * List of registered components
-         * 
+         *
          * @type object
          */
         registeredComponents: [
@@ -260,7 +260,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * List of icons
-         * 
+         *
          * @type {Object}
          */
         listOfIcons: {
@@ -270,21 +270,21 @@ SDL.SDLModel = Em.Object
 
         /**
          * Array of active applications
-         * 
+         *
          * @type {Array}
          */
         applicationsList: [],
 
         /**
          * Array of connected devices
-         * 
+         *
          * @type {Array}
          */
         devicesList: [],
 
         /**
          * Global properties
-         * 
+         *
          * @type {Object}
          */
         globalProperties: {
@@ -294,21 +294,21 @@ SDL.SDLModel = Em.Object
 
         /**
          * TTS + VR language
-         * 
+         *
          * @type {String}
          */
         hmiTTSVRLanguage: 'EN-US',
 
         /**
          * UI language
-         * 
+         *
          * @type {String}
          */
         hmiUILanguage: 'EN-US',
 
         /**
          * List of supported languages
-         * 
+         *
          * @type {Array}
          */
         sdlLanguagesList: [
@@ -338,7 +338,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Method to open Phone view and dial phone number
-         * 
+         *
          * @param {Object}
          */
         dialNumber: function(params) {
@@ -373,7 +373,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Method to open Turn By Turn view
-         * 
+         *
          * @param {Object}
          */
         tbtActivate: function(params) {
@@ -384,7 +384,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Method to set data for Turn List in applications model
-         * 
+         *
          * @param {Object}
          */
         tbtTurnListUpdate: function(params) {
@@ -397,7 +397,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to VRHelpList on UI with request parameters
          * It opens VrHelpList PopUp with current list of readable VR commands
-         * 
+         *
          * @param {Object}
          */
         ShowVrHelp: function(params) {
@@ -408,7 +408,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to set language for UI component with parameters sent from
          * SDLCore to UIRPC
-         * 
+         *
          * @type {String} lang
          */
         changeRegistrationUI: function(lang) {
@@ -419,7 +419,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to set language for TTS and VR components with parameters sent
          * from SDLCore to UIRPC
-         * 
+         *
          * @type {String} lang
          */
         changeRegistrationTTSVR: function(lang) {
@@ -430,7 +430,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to add activation button to VR commands and set device
          * parameters to model
-         * 
+         *
          * @param {Object}
          */
         onAppRegistered: function(params) {
@@ -449,7 +449,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to delete activation button from VR commands and delete device
          * parameters from model
-         * 
+         *
          * @param {Object}
          */
         onAppUnregistered: function(params) {
@@ -463,7 +463,7 @@ SDL.SDLModel = Em.Object
         /**
          * SDL UI ScrolableMessage activation function dependent of Driver
          * Distraction toggle state
-         * 
+         *
          * @param {Object}
          *            params Object with parameters come from SDLCore.
          * @param {Number}
@@ -495,7 +495,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Handler for reset globalProperties
-         * 
+         *
          * @param {Object}
          */
         resetProperties: function(params) {
@@ -516,7 +516,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * setGlobalProperties
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore.
          */
@@ -530,7 +530,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to call handler from model to show list of avaliable
          * applications
-         * 
+         *
          * @param {Object}
          *            appList
          */
@@ -548,7 +548,7 @@ SDL.SDLModel = Em.Object
         /**
          * Method to call function from DeviceListView to show list of connected
          * devices
-         * 
+         *
          * @param {Object}
          *            params
          */
@@ -562,7 +562,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI SetAppIcon handler
-         * 
+         *
          * @param {Object}
          *            message
          * @param {Number}
@@ -597,7 +597,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI Alert Maneuver response handler show popup window
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore
          */
@@ -608,7 +608,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI Alert response handler show popup window
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore
          * @param {Number}
@@ -626,7 +626,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI PerformInteraction response handler show popup window
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore
          * @param {Number}
@@ -650,7 +650,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI Slider response handler show popup window
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore
          */
@@ -683,7 +683,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * SDL UI AudioPassThru response handler show popup window
-         * 
+         *
          * @param {Object}
          *            message Object with parameters come from SDLCore.
          */
@@ -715,7 +715,7 @@ SDL.SDLModel = Em.Object
 
         /**
          * Prompt activation
-         * 
+         *
          * @param {Object}
          * @param {Number}
          */
@@ -749,7 +749,7 @@ SDL.SDLModel = Em.Object
         /**
          * SDL VR AddCommand response handler add command to voice recognition
          * window
-         * 
+         *
          * @param {Object}
          */
         addCommandVR: function(message) {
@@ -765,7 +765,7 @@ SDL.SDLModel = Em.Object
         /**
          * SDL VR DeleteCommand response handler delete command from voice
          * recognition window
-         * 
+         *
          * @param {Number}
          */
         deleteCommandVR: function(commandID) {

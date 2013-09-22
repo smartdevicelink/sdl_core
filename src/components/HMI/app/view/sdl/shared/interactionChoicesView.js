@@ -32,26 +32,54 @@
  */
 
 SDL.InteractionChoicesView = SDL.SDLAbstractView
-    .create( {
+    .create({
 
         elementId: 'perform_interaction_view',
 
         childViews: [
-            'backButton', 'captionText', 'listOfChoices'
+            'backButton',
+            'captionText',
+            'listOfChoices',
+            'input',
+            'naviChoises'
         ],
 
-        backButton: SDL.Button.extend( {
-            classNames:
-                [
-                    'back-button'
-                ],
+        backButton: SDL.Button.extend({
+            classNames: [
+                'back-button'
+            ],
             target: 'SDL.SDLController',
             action: 'InteractionChoicesDeactivate',
             icon: 'images/media/ico_back.png',
             onDown: false
-        } ),
+        }),
 
-        listOfChoices: SDL.List.extend( {
+        input: Em.TextArea.extend({
+            classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
+
+            tagName: 'input',
+            attribute: ['type:text'],
+            valueBinding: 'SDL.SDLModel.keyboardInputValue',
+            attributeBindings: ['disabled'],
+            disabled: true
+        }),
+
+        naviChoises: Em.Container.extend({
+            classNames: 'naviChoises',
+            classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
+            childViews: []
+
+        }),
+
+        captionText: SDL.Label.extend({
+
+            classNameBindings: ['SDL.States.media.mediaNavigation.active:hide'],
+            classNames: ['caption-text'],
+            contentBinding: 'this.parentView.caption'
+        }),
+
+        listOfChoices: SDL.List.extend({
+            classNameBindings: ['SDL.States.media.mediaNavigation.active:hide'],
             elementId: 'perform_interaction_view_list',
             itemsOnPage: 5,
             items: []
@@ -65,37 +93,59 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         performInteractionRequestID: null,
 
         /**
+         * Activate window and set caption text
+         *
+         * @param text: String
+         */
+        activate: function (message) {
+            if (message.initialText.fieldText) {
+                this.set('caption', message.initialText.fieldText);
+            }
+
+            if (SDL.States.media.mediaNavigation.active) {
+                this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+            } else {
+                this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+            }
+
+            this.set('active', true);
+        },
+
+        /**
          * Deactivate window
          */
-        deactivate: function(ABORTED) {
+        deactivate: function (ABORTED) {
 
             clearTimeout(this.timer);
             this.set('active', false);
             SDL.SDLController.VRMove();
 
             switch (ABORTED) {
-            case "ABORTED": {
-                SDL.SDLController
-                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
-                        this.performInteractionRequestID);
-                break;
-            }
-            case "TIMED_OUT": {
-                SDL.SDLController
-                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
-                        this.performInteractionRequestID);
-                break;
-            }
-            default: {
-                // default action
-            }
+                case "ABORTED":
+                {
+                    SDL.SDLController
+                        .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
+                            this.performInteractionRequestID);
+                    break;
+                }
+                case "TIMED_OUT":
+                {
+                    SDL.SDLController
+                        .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
+                            this.performInteractionRequestID);
+                    break;
+                }
+                default:
+                {
+                    // default action
+                }
             }
         },
 
         /**
          * Clean choices caption and list before new proform
          */
-        clean: function() {
+        clean: function () {
 
             this.set('captionText.content', 'Interaction Choices');
             this.listOfChoices.items = [];
@@ -104,11 +154,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
         /**
          * Update choises list with actual set id
-         * 
+         *
          * @param data:
          *            Array
          */
-        preformChoices: function(data, performInteractionRequestID, timeout) {
+        preformChoices: function (data, performInteractionRequestID, timeout) {
 
             if (!data) {
                 Em.Logger.error('No choices to preform');
@@ -123,7 +173,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             // temp for testing
             for (i = 0; i < length; i++) {
                 this.listOfChoices.items
-                    .push( {
+                    .push({
                         type: SDL.Button,
                         params: {
                             text: data[i].menuName,
@@ -141,7 +191,48 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             this.listOfChoices.list.refresh();
 
             clearTimeout(this.timer);
-            this.timer = setTimeout(function() {
+            this.timer = setTimeout(function () {
+
+                self.deactivate("TIMED_OUT");
+            }, timeout);
+        },
+
+        /**
+         * Update choises list with actual set id
+         *
+         * @param data:
+         *            Array
+         */
+        preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
+
+            if (!data) {
+                Em.Logger.error('No choices to preform');
+                return;
+            }
+
+            this.set('performInteractionRequestID', performInteractionRequestID);
+
+            var i = 0, length = data.length, self = this;
+
+            // temp for testing
+            for (i = 0; i < length; i++) {
+                this.naviChoises.push({
+                        type: SDL.Button,
+                        params: {
+                            text: data[i].menuName,
+                            choiceID: data[i].choiceID,
+                            action: 'onChoiceInteraction',
+                            onDown: false,
+                            target: 'SDL.SDLAppController',
+                            performInteractionRequestID: performInteractionRequestID,
+                            templateName: data[i].image ? 'rightIcon' : 'text',
+                            icon: data[i].image ? data[i].image.value : null
+                        }
+                    });
+            }
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
 
                 self.deactivate("TIMED_OUT");
             }, timeout);
