@@ -59,9 +59,10 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             tagName: 'input',
             attribute: ['type:text'],
-            valueBinding: 'SDL.SDLModel.keyboardInputValue',
-            attributeBindings: ['disabled'],
-            disabled: true
+            value: 'keyboardInputValue',
+            action: function(){
+                SDL.SDLModel.uiShowKeyboard();
+            }
         }),
 
         naviChoises: Em.ContainerView.extend({
@@ -216,7 +217,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             // temp for testing
             for (i = 0; i < length; i++) {
-                this.naviChoises.push({
+                this.naviChoises._childViews.push({
                         type: SDL.Button,
                         params: {
                             text: data[i].menuName,
