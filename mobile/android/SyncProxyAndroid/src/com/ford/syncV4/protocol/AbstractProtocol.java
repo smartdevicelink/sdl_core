@@ -1,11 +1,13 @@
 package com.ford.syncV4.protocol;
 
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.os.Environment;
 import android.util.Log;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 
@@ -29,17 +31,11 @@ public abstract class AbstractProtocol {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
 
-        String filename = "ford_video.mp4";
-        file = new File(Environment.getExternalStorageDirectory(), filename);
-
-        try {
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            // handle exception
 
             _protocolListener = protocolListener;
-        }
     }// end-ctor
+
+
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
@@ -87,15 +83,36 @@ public abstract class AbstractProtocol {
                 offset, length, SYNC_LIB_TRACE_KEY);
 
         synchronized (_frameLock) {
+
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
 
             if (data != null) {
                 handleProtocolMessageBytesToSend(data, offset, length);
-                writeToSdCard(header, data);
             }
+            logMobileNaviMessages(header, data);
 
         } // end-if
+    }
+
+    private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data){
+        if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
+            Log.d("MobileNaviSession", "ProtocolFrameHeader: " + header.toString());
+            if ( data != null && data.length > 0 ){
+                Log.d("MobileNaviSession", "Hex Data frame: " +AbstractPacketizer.printBuffer(data, 0, data.length));
+            }
+        }
+    }
+
+    private void initVideoDumpStream() {
+        String filename = "ford_video.mp4";
+        file = new File(Environment.getExternalStorageDirectory(), filename);
+
+        try {
+            fos = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            // handle exception
+        }
     }
 
     private void writeToSdCard(ProtocolFrameHeader header, byte[] data) {
