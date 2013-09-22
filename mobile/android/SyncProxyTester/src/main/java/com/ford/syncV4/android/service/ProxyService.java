@@ -56,6 +56,7 @@ import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
+import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
@@ -1310,6 +1311,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mainActivity.onMobileNavAckReceived(fNumber);
             }
         });
+    }
+
+    @Override
+    public void onOnTouchEvent(OnTouchEvent notification) {
+        final  OnTouchEvent event = notification;
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "OnTouchEvent Received = "+ notification.toString();
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onTouchEventReceived(event);
+            }
+        });
+
     }
 
     @Override

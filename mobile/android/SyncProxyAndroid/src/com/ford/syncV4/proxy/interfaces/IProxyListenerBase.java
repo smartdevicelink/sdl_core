@@ -11,21 +11,22 @@ import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
-import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
-import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
-import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
@@ -297,4 +298,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onMobileNaviStart();
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
+
+    public void onOnTouchEvent(OnTouchEvent notification);
 }

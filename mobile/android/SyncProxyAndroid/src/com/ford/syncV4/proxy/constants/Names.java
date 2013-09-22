@@ -400,4 +400,27 @@ public class Names {
     public static final String stateOfCharge = "stateOfCharge";
     public static final String fuelMaintenanceMode = "fuelMaintenanceMode";
     public static final String distanceToEmpty = "distanceToEmpty";
+
+    public static final String id = "id";
+    public static final String point = "point";
+    public static final String area = "area";
+    public static final String xCoord = "xCoord";
+    public static final String yCoord = "yCoord";
+    public static final String rotationAngle = "rotationAngle";
+    public static final String radiusCoord = "radiusCoord";
+    public static final String pressAvailable = "pressAvailable";
+    public static final String multiTouchAvailable = "multiTouchAvailable";
+    public static final String doublePressAvailable = "doublePressAvailable";
+    public static final String resolution = "resolution";
+    public static final String touchEventAvailable = "touchEventAvailable";
+    public static final String templatesAvailable = "templatesAvailable";
+    public static final String screenParams = "screenParams";
+    public static final String eventType = "eventType";
+    public static final String touchLists = "touchLists";
+    public static final String touches = "touches";
+    public static final String changedTouches = "changedTouches";
+    public static final String OnTouchEvent = "OnTouchEvent";
+    public static final String secondaryImage = "secondaryImage";
+    public static final String resolutionWidth = "resolutionWidth";
+    public static final String resolutionHeight = "resolutionHeight";
 }
