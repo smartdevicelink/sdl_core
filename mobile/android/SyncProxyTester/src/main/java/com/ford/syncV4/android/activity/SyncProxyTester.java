@@ -3772,12 +3772,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void closeMobileNaviOutputStream() {
-        if( mOutputStream != null ){
-            try {
-                mOutputStream.close();
-            } catch (IOException e) {
-                Log.w(logTag, "Can't close Mobile Navi OutputStream ", e);
-            }
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            proxy.stopH264();
         }
     }
 

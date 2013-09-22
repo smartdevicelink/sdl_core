@@ -2784,6 +2784,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _syncConnection.startH264(_mobileNavSessionID);
     }
 
+    public void stopH264() {
+        _syncConnection.stopH264();
+    }
+
     public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
         if (rtpPacket == null) {
             throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);

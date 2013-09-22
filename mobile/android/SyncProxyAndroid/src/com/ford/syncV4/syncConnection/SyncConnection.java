@@ -136,6 +136,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
         }
         return null;
     }
+
+    public void stopH264() {
+        if ( mPacketizer != null){
+            mPacketizer.stop();
+        }
+    }
 	
 	public void startTransport() throws SyncException {
 		_transport.openConnection();

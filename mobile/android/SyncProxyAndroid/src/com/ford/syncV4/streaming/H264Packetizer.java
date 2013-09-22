@@ -57,7 +57,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable{
                     pm.setSessionType(SessionType.Mobile_Nav);
                     pm.setFunctionID(0);
                     pm.setCorrID(0);
-                    pm.setData(buffer, length);
+                    pm.setData(buffer, buffer.length);
                     _streamListener.sendH264(pm);
                     }
 			}
