@@ -69,10 +69,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         ],
 
         clearBtn: SDL.Button.extend({
-            classNames: 'leftBtn',
-            text      : 'Left Button',
+            classNames: 'clearBtn',
             target    : 'SDL.SDLController',
-            action    : 'leftBtn'
+            action    : 'clearBtn'
         }),
 
         serchIcon: Em.View.extend({

@@ -29,11 +29,39 @@
     top: 130px;
     left: 25px;
 }
+
+#keyboard_view .searchBar{
+    top: 78px;
+    width: 666px;
+    height: 50px;
+    left: 120px;
+}
+
+#keyboard_view input{
+    width: 664px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background: rgba(119, 119, 119, 0.42);
+    cursor: pointer;
+    font-size: 32px;
+    color: #FFF;
+}
+
+#keyboard_view .microphone{
+    left: 63px;
+    top: 80px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
 #keyboard_view .QWERTYLayout .ffw-button{
     width: 60px;
     height: 60px;
     border-radius: 3px;
-    border: 1px solid #808080;
+    border: 1px solid #333;
     margin: 5px;
     font-size: 42px;
     text-align: center;

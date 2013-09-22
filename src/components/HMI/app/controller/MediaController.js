@@ -67,13 +67,16 @@ SDL.MediaController = Em.Object.create({
         /**
          * Go to SDL state
          */
-        for (var i = 0; i < SDL.SDLAppController.model.appType.length; i++) {
-            if (SDL.SDLAppController.model.appType[i] == "NAVIGATION") {
-                SDL.States.goToStates('media.mediaNavigation.baseNavigation');
-                return;
+        if (SDL.SDLAppController.model.appType) {
+            for (var i = 0; i < SDL.SDLAppController.model.appType.length; i++) {
+                if (SDL.SDLAppController.model.appType[i] == "NAVIGATION") {
+                    SDL.States.goToStates('media.mediaNavigation.baseNavigation');
+                    return;
+                }
             }
         }
 
         SDL.States.goToStates('media.sdlmedia');
+
     }
 });
