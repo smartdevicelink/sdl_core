@@ -73,6 +73,7 @@ import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
+import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
@@ -3917,6 +3918,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onTouchEventReceived(OnTouchEvent notification){
 
+    }
+
+    public void onKeyboardInputReceived(OnKeyboardInput event) {
     }
 }
 

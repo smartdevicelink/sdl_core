@@ -21,6 +21,7 @@ import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -300,4 +301,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onMobileNavAckReceived(int frameReceivedNumber);
 
     public void onOnTouchEvent(OnTouchEvent notification);
+
+    void onKeyboardInput(OnKeyboardInput msg);
 }

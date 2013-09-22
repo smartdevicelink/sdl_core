@@ -52,6 +52,7 @@ import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
@@ -1330,6 +1331,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         });
 
+    }
+
+    @Override
+    public void onKeyboardInput(OnKeyboardInput msg) {
+        final  OnKeyboardInput event = msg;
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "OnKeyboardInput Received = "+ msg.toString();
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onKeyboardInputReceived(event);
+            }
+        });
     }
 
     @Override

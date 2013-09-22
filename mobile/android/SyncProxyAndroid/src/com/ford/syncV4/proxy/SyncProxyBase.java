@@ -60,6 +60,7 @@ import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
@@ -2544,6 +2545,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     });
                 } else {
                     _proxyListener.onOnTouchEvent((OnTouchEvent)msg);
+                }
+            } else if (functionName.equals(Names.OnKeyboardInput)) {
+                // OnKeyboardInput
+                final OnKeyboardInput msg = new OnKeyboardInput(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
                 }
 			} else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
 				// OnAppInterfaceUnregistered

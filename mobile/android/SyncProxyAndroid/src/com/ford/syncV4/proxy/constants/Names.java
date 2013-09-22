@@ -423,4 +423,6 @@ public class Names {
     public static final String secondaryImage = "secondaryImage";
     public static final String resolutionWidth = "resolutionWidth";
     public static final String resolutionHeight = "resolutionHeight";
+    public static final String keyboardEvent = "event";
+    public static final String OnKeyboardInput = "OnKeyboardInput";
 }
