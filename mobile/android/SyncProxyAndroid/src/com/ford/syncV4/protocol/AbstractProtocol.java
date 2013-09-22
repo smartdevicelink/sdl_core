@@ -91,7 +91,6 @@ public abstract class AbstractProtocol {
                 handleProtocolMessageBytesToSend(data, offset, length);
             }
             logMobileNaviMessages(header, data);
-
         } // end-if
     }
 

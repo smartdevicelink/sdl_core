@@ -12,7 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Required to make the device stay awake while doing XML tests -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
     <!-- Required to use the USB Accessory mode -->
     <uses-feature android:name="android.hardware.usb.accessory"/>
 
@@ -73,7 +74,6 @@
     <!-- Version 12 is minimum to support the USB Accessory mode -->
     <uses-sdk android:minSdkVersion="12"/>
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
-    </uses-permission>
+
 
 </manifest>

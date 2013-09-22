@@ -10,7 +10,7 @@ abstract public class AbstractPacketizer {
 	protected byte _rpcSessionID = 0;
 	
 	protected InputStream is = null;
-	protected byte[] buffer = new byte[1488];
+	protected byte[] buffer = new byte[1000];
 	protected boolean upts = false;
 	
 	//protected long ts = 0, intervalBetweenReports = 5000, delta = 0;
