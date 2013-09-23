@@ -90,7 +90,7 @@ public abstract class AbstractProtocol {
             if (data != null) {
                 handleProtocolMessageBytesToSend(data, offset, length);
             }
-            logMobileNaviMessages(header, data);
+            //logMobileNaviMessages(header, data);
         } // end-if
     }
 
