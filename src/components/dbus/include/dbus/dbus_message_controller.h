@@ -30,71 +30,56 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_MESSAGE_ADAPTER_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_MESSAGE_ADAPTER_H_
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_CONTROLLER_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_CONTROLLER_H_
 
 #include <string>
-#include "hmi_message_handler/hmi_message_adapter.h"
-#include "dbus/dbus_message_controller.h"
-#include "smart_objects/smart_object.h"
+#include <map>
+#include "dbus/dbus_adapter.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-namespace hmi_message_handler {
+namespace dbus {
 
-/**
- * \brief adapter for DBus
- */
-class DBusMessageAdapter
-    : public HMIMessageAdapter,
-      public dbus::DBusMessageController {
+class DBusMessageController : public DBusAdapter {
  public:
-  explicit DBusMessageAdapter(HMIMessageHandler* handler);
-  ~DBusMessageAdapter();
-  void sendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
+  /**
+   * \brief constructs DBus message controller
+   * \param sdlServiceName name of service SDL
+   * \param sdlObjectPath path of object SDL
+   * \param hmiServiceName name of service HMI
+   * \param hmiObjectPath path of object HMI
+   */
+  DBusMessageController(const std::string& sdlServiceName,
+                        const std::string& sdlObjectPath,
+                        const std::string& hmiServiceName,
+                        const std::string& hmiObjectPath);
 
   /**
-   * \brief subscribes to signals
+   * \brief destructs DBus message controller
    */
-  void subscribeTo();
-
- private:
-  static const std::string SDL_SERVICE_NAME;
-  static const std::string SDL_OBJECT_PATH;
-  static const std::string HMI_SERVICE_NAME;
-  static const std::string HMI_OBJECT_PATH;
+  virtual ~DBusMessageController();
 
   /**
-   * \brief sends request to HMI
-   * \param obj request
+   * \brief subscribes to the DBus signal.
+   * \param interface name of interface in HMI
+   * \param signal name of signal
    */
-  void Request(smart_objects::SmartObject& obj);
+  void subscribeTo(const std::string& interface, const std::string& signal);
 
   /**
-   * \brief sends notification to HMI
-   * \param obj notification
+   * \brief Method for receiving thread.
    */
-  void Notification(smart_objects::SmartObject& obj);
+  void* MethodForReceiverThread(void*);
 
-  /**
-   * \brief sends response to HMI
-   * \param obj response
-   */
-  void Response(smart_objects::SmartObject& obj);
-
-  /**
-   * \brief sends error response to HMI
-   * \param obj error
-   */
-  void ErrorResponse(smart_objects::SmartObject& obj);
-
+ protected:
   /**
    * \brief sends message to core
    * \param obj
    */
-  void SendMessageToCore(smart_objects::SmartObject& obj);
+  virtual void SendMessageToCore(smart_objects::SmartObject& obj) = 0;
 };
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_MESSAGE_ADAPTER_H_
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_CONTROLLER_H_

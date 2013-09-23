@@ -49,15 +49,44 @@ Item {
         }
     }
 
-    Text{
-        text: "12:50";
-        color: "#1d81d5"
-        font.pixelSize: 25;
+    Row {
+        id: clock
+        height: childrenRect.height
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.topMargin: margin
         anchors.rightMargin: margin
+        property date date: { new Date(); }
 
+        Timer {
+            running: true
+            repeat: true
+            interval: 1000
+            onTriggered: {
+                clock.date = new Date();
+            }
+        }
+
+        Text {
+            text: Qt.formatTime(clock.date, "hh");
+            color: "#1d81d5"
+            font.pixelSize: 25;
+        }
+        Item {
+            Text {
+                text: clock.date.getSeconds() % 2 ? ":" : ""
+                color: "#1d81d5"
+                font.pixelSize: 25;
+            }
+            width: 10
+            height: parent.height
+        }
+
+        Text {
+            text: Qt.formatTime(clock.date, "mm");
+            color: "#1d81d5"
+            font.pixelSize: 25;
+        }
     }
 
 }

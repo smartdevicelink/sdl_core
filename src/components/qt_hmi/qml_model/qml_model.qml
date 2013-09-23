@@ -11,8 +11,8 @@ Rectangle{
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
     property int margin: 20
-    property int minWidth: 600
-    property int minHieght: 400
+    property int minWidth: 800
+    property int minHeight: 600
     color: "black"
 
     DataStorage {
@@ -25,16 +25,16 @@ Rectangle{
 
     Item {
         id: mainScreen
-        width: parent.width * 0.62 < minWidth ? minWidth : parent.width * 0.62
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent. top
         anchors.left: parent.left
-        height: parent.height < minHieght ? minHieght : parent.height
+        width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
+        height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
 
         Item{
-            height: parent.height * 0.25
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
+            height: parent.height * 0.25
             width: parent.width
             HeaderMenu{}
         }
@@ -47,9 +47,9 @@ Rectangle{
 
             Loader {
                 id: contentLoader
-                height: parent.height * 0.75
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
+                height: parent.height * 0.75
                 width: parent.width
                 source:startQml
                 property var screenMovingStack : []
@@ -68,10 +68,10 @@ Rectangle{
 
     Item {
         id: hwBtnScreen
-        width: parent.width * 0.38
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: mainScreen.right
-        height: parent.height < minHieght ? minHieght : parent.height
+        width: parent.width * 0.38
+        height: (parent.height < minHeight) ? minHeight : parent.height
         HardwareButtonsView {}
     }
 

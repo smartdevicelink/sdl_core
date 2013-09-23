@@ -2,12 +2,14 @@ include_directories (
   ./include/
   ../application_manager/include/
   ../utils/include/
+  ../smart_objects/include/
+  ../formatters/include/
   ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
-  ${CMAKE_BINARY_DIR}/src/components/Interfaces/
-  /usr/include/dbus-1.0/
-  /usr/lib/i386-linux-gnu/dbus-1.0/include/
+  ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}/
 )
 
 set (SOURCES
@@ -17,9 +19,7 @@ set (SOURCES
 ./src/to_hmi_thread_impl.cc
 ./src/from_hmi_thread_impl.cc
 ./src/dbus_message_adapter.cc
-./src/dbus_message_controller.cc
-./src/dbus_adapter.cc
 )
 
 add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries ("HMIMessageHandler" log4cxx dbus-1)
+target_link_libraries ("HMIMessageHandler" log4cxx DBus)

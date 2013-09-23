@@ -29,37 +29,45 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
 
-#include <string>
-#include "utils/logger.h"
+#include "dbus/dbus_message_controller.h"
+#include "formatters/CSmartFactory.hpp"
 
-struct DBusConnection;
-struct DBusMessage;
+namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
-namespace hmi_message_handler {
+namespace dbus {
 
-class DBusAdapter {
- public:
-  DBusAdapter(const std::string& serviceName, const std::string& path);
-  virtual ~DBusAdapter();
-  bool Init();
+DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
+                                             const std::string& sdlObjectPath,
+                                             const std::string& hmiServiceName,
+                                             const std::string& hmiObjectPath)
+    : DBusAdapter(sdlServiceName, sdlObjectPath,
+                  hmiServiceName, hmiObjectPath) {}
 
- protected:
-  static log4cxx::LoggerPtr logger_;
+void DBusMessageController::subscribeTo(const std::string& interface,
+                                        const std::string& signal) {
+  std::string rule = "type='signal'";
+  rule.append(", sender='").append(hmi_service_name_).append("'")
+      .append(", path='").append(hmi_object_path_).append("'")
+      .append(", interface='").append(hmi_service_name_).append(".")
+      .append(interface).append("'")
+      .append(", member='").append(signal).append("'");
+  DBusAdapter::AddMatch(rule);
+}
 
-  bool Recv(std::string& message);
-  void Send(const std::string& message);
+DBusMessageController::~DBusMessageController() {
+}
 
- private:
-  std::string serviceName_;
-  std::string path_;
-  DBusConnection* conn_;
+void* DBusMessageController::MethodForReceiverThread(void*) {
+  while (true) {
+    smart_objects::SmartObject obj(smart_objects::SmartType_Map);
+    obj[sos::S_PARAMS][sos::S_PROTOCOL_VERSION] = 2;
+    obj[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
+    if (DBusAdapter::Process(obj)) {
+      SendMessageToCore(obj);
+    }
+  }
+  return NULL;
+}
 
-  void Reply(DBusMessage* msg, DBusConnection* conn, std::string& message);
-};
-
-}  // namespace hmi_message_handler
-
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_ADAPTER_H_
+}  // namespace dbus

@@ -1126,6 +1126,7 @@ void ApplicationManagerImpl::SendMessageToHMI(
                  "Cannot send message to HMI: failed to create string");
     return;
   }
+  message_to_send->set_smart_object(*message);
   messages_to_hmh_.push(message_to_send);
 }
 
@@ -1373,10 +1374,12 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
     return;
   }
 
-  if (!ConvertMessageToSO(*message, *smart_object)) {
-    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
-    return;
-  }
+// TODO(KKolodiy): add define for selective compiling
+//  if (!ConvertMessageToSO(*message, *smart_object)) {
+//    LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
+//    return;
+//  }
+  *smart_object = message->smart_object();
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
   if (!ManageHMICommand(smart_object)) {
