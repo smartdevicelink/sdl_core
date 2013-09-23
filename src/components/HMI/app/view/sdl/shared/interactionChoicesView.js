@@ -217,7 +217,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             // temp for testing
             for (i = 0; i < length; i++) {
-                this.naviChoises._childViews.push({
+                this.naviChoises.get('childViews').pushObject({
                         type: SDL.Button,
                         params: {
                             text: data[i].menuName,
