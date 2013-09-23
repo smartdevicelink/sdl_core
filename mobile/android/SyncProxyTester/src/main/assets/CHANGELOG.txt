@@ -1,3 +1,8 @@
+[CW35.1]
+*Added MobileNavi AppType registration button
+*Added Mobile Navi session support
+*Added USB Support
+
 [CW35]
 * SoftButtons can be sent without SystemAction parameter.
 * SyncProxyAndroid SDK: Fix creating more and more TCP transports after disconnects.
