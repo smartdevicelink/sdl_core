@@ -80,10 +80,34 @@ Rectangle{
             id: sdlBasicCommunications
             objectName: "BasicCommunications"
         }
+        HmiApi.VR {
+            id: sdlVR
+            objectName: "VR"
+        }
+        HmiApi.TTS {
+            id: sdlTTS
+            objectName: "TTS"
+        }
+        HmiApi.Navigation {
+            id: sdlNavigation
+            objectName: "Navigation"
+        }
+        HmiApi.VehicleInfo {
+            id: sdlVehicleInfo
+            objectName: "VehicleInfo"
+        }
+        HmiApi.UI {
+            id: sdlUI
+            objectName: "UI"
+        }
     }
 
     Component.onCompleted: {
-        sdlBasicCommunications.fireOnReady();
+        sdlVR.available = true
+        sdlTTS.available = true
+        sdlNavigation.available = true
+        sdlVehicleInfo.available = true
+        sdlUI.available = true
+        sdlBasicCommunications.onReady()
     }
 }
-
