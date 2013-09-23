@@ -147,7 +147,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
         localisationBtn: SDL.Button.extend({
             classNames: 'localisationBtn',
-            icon: 'icon',
+            icon: 'images/info/info_leftMenu_apps_ico.png',
             target: 'SDL.SDLController',
             action: 'localisationBtn'
         }),

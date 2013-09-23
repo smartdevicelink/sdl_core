@@ -30,42 +30,43 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_
+#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_
 
-#include "interfaces/MOBILE_API.h"
+#include <net/if.h>
+#include <gst/gst.h>
+#include <string>
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/synchronisation_primitives.h"
 
 namespace audio_manager {
 
-class string;
+class VideoStreamingThread : public threads::ThreadDelegate {
+ public:
+  VideoStreamingThread();
 
-class AudioManager {
-  public:
-    virtual void SetProtocolHandler(
-      protocol_handler::ProtocolHandler* protocol_hndlr) = 0;
-    virtual void addA2DPSource(const sockaddr& device) = 0;
-    virtual void removeA2DPSource(const sockaddr& device) = 0;
-    virtual void playA2DPSource(const sockaddr& device) = 0;
-    virtual void stopA2DPSource(const sockaddr& device) = 0;
+  void threadMain();
 
-    virtual void addA2DPSource(const std::string& device) = 0;
-    virtual void removeA2DPSource(const std::string& device) = 0;
-    virtual void playA2DPSource(const std::string& device) = 0;
-    virtual void stopA2DPSource(const std::string& device) = 0;
+  void exitThreadMain();
 
-    virtual void startMicrophoneRecording(const std::string& outputFileName,
-                                          mobile_apis::SamplingRate::eType type,
-                                          int duration,
-                                          mobile_apis::BitsPerSample::eType) = 0;
-    virtual void stopMicrophoneRecording() = 0;
+  static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data);
+  static void on_pad_added(GstElement *element, GstPad *pad, gpointer data);
 
-    virtual void startVideoStreaming(const std::string& fileName) = 0;
-    virtual void stopVideoStreaming() = 0;
+  void setVideoFileName(const std::string& fileName);
 
-    virtual ~AudioManager() {
-    }
+ private:
+  static log4cxx::LoggerPtr logger_;
+
+  int argc_;
+  gchar** argv_;
+  std::string fileName_;
+
+  GMainLoop *loop;
+
+  DISALLOW_COPY_AND_ASSIGN(VideoStreamingThread);
 };
 
-}  //  namespace audio_manager
+}  // namespace audio_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_

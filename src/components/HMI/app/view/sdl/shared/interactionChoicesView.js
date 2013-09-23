@@ -59,8 +59,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             tagName: 'input',
             attribute: ['type:text'],
-            value: 'keyboardInputValue',
-            action: function(){
+            value: '',
+            click: function(){
                 SDL.SDLModel.uiShowKeyboard();
             }
         }),
@@ -206,36 +206,34 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
 
-            if (!data) {
-                Em.Logger.error('No choices to preform');
-                return;
-            }
+             if (!data) {
+                 Em.Logger.error('No choices to preform');
+                 return;
+             }
 
-            this.set('performInteractionRequestID', performInteractionRequestID);
+             this.set('performInteractionRequestID', performInteractionRequestID);
 
-            var i = 0, length = data.length, self = this;
+             var i = 0, length = data.length, self = this;
 
-            // temp for testing
-            for (i = 0; i < length; i++) {
-                this.naviChoises._childViews.push({
-                        type: SDL.Button,
-                        params: {
-                            text: data[i].menuName,
-                            choiceID: data[i].choiceID,
-                            action: 'onChoiceInteraction',
-                            onDown: false,
-                            target: 'SDL.SDLAppController',
-                            performInteractionRequestID: performInteractionRequestID,
-                            templateName: data[i].image ? 'rightIcon' : 'text',
-                            icon: data[i].image ? data[i].image.value : null
-                        }
-                    });
-            }
+             // temp for testing
+             for (i = 0; i < length; i++) {
+                 this.get('naviChoises.childViews').pushObject(SDL.Button.create({
+                         text: data[i].menuName,
+                         choiceID: data[i].choiceID,
+                         action: 'onChoiceNaviInteraction',
+                         onDown: false,
+                         target: 'SDL.SDLAppController',
+                         performInteractionRequestID: performInteractionRequestID,
+                         templateName: data[i].image ? 'rightIcon' : 'text',
+                         icon: data[i].image ? data[i].image.value : null
+                     })
+                 );
+             }
 
-            clearTimeout(this.timer);
-            this.timer = setTimeout(function () {
+             clearTimeout(this.timer);
+             this.timer = setTimeout(function () {
 
-                self.deactivate("TIMED_OUT");
-            }, timeout);
+             self.deactivate("TIMED_OUT");
+             }, timeout);
         }
     });
