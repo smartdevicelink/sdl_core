@@ -16,3 +16,13 @@ var ButtonName = {
     PRESET_9:       14,
     CUSTOM_BUTTON:  15
 }
+
+var ButtonEventMode = {
+    BUTTONUP:    0,
+    BUTTONDOWN:  1
+}
+
+var ButtonPressMode = {
+    LONG:  0,
+    SHORT: 1
+}

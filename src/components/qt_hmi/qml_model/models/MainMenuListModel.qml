@@ -29,7 +29,7 @@ ListModel
     ListElement {
         name: "Phone"
         icon: "../res/phone/phone.png"
-        qml: "./views/PhoneMenuView.qml"
+        qml: "./views/PhoneMenuGridView.qml"
     }
 
     ListElement {

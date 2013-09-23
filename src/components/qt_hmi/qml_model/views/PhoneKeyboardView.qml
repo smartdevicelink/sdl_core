@@ -82,12 +82,6 @@ Item {
                     imgOn: "../res/buttons/preset_pressed_btn.png"
                     text: "123"
                     pixelSize: 20
-                    onIsPressedChanged: {
-                        if(isPressed == false){
-                            //contentLoader.go("DigitalKeyboardView.qml")
-                            //contentLoader.item.contactsListView.setCurrent(text)
-                        }
-                    }
                 }
             }
         }
@@ -100,13 +94,7 @@ Item {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackBtn {
-            onIsPressedChanged: {
-                if(isPressed == false){
-                    contentLoader.go("./views/PhoneMenuGridView.qml")
-                }
-            }
-        }
+        BackButton {}
     }
 }
 

@@ -32,5 +32,5 @@ Item {
         }
     }
 
-    BackBtn{anchors.top: parent.bottom}
+    BackButton{anchors.top: parent.bottom}
 }

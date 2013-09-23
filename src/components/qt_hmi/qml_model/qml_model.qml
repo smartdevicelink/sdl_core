@@ -40,6 +40,7 @@ Rectangle{
             anchors.rightMargin: 30
             anchors.bottomMargin: 30
             anchors.fill: parent
+
             Loader {
                 id: contentLoader
                 height: parent.height * 0.75
@@ -47,20 +48,15 @@ Rectangle{
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width
                 source:startQml
-
-                ListModel {
-                    id: urlStack
-                }
+                property var screenMovingStack : []
 
                 function go(path) {
-                    urlStack.append({ url: source.toString(), index: 10 })
+                    screenMovingStack.push(source.toString())
                     source = path
                 }
 
                 function back() {
-                    var item = urlStack.get(urlStack.count - 1)
-                    source = item.url
-                    urlStack.remove(item)
+                    source = screenMovingStack.pop()
                 }
             }
         }
