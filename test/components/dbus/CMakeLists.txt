@@ -3,6 +3,8 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/
 )
 
 set (LIBRARIES
@@ -11,15 +13,17 @@ set (LIBRARIES
     gmock
     gmock_main
     DBus
+    formatters
+    SmartObjects
 )
 
-set (SOURCES
+set (SCHEMA_SOURCES
    ./src/test_schema.cc
-#   ./src/test_dbus_message_adapter.cc
 )
 
-create_test("test_DBusSchema" "${SOURCES}" "${LIBRARIES}")
-#create_test("test_DBusMessageAdapter" "${SOURCES}" "${LIBRARIES}")
+set (DBUS_ADAPTER_SOURCES
+   ./src/test_dbus_adapter.cc
+)
 
-#target_link_libraries("test_DBusMessageAdapter" DBusMessageAdapter)
-#target_link_libraries("test_DBusMessageController" ${LIBRARIES})
+create_test("test_DBusSchema" "${SCHEMA_SOURCES}" "${LIBRARIES}")
+create_test("test_DBusAdapter" "${DBUS_ADAPTER_SOURCES}" "${LIBRARIES}")

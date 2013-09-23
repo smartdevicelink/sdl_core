@@ -7,9 +7,9 @@ include_directories (
   ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${CMAKE_BINARY_DIR}/src/components/dbus/include/
-  ${CMAKE_BINARY_DIR}/
+  ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}/
 )
 
 set (SOURCES
@@ -22,4 +22,4 @@ set (SOURCES
 )
 
 add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries ("HMIMessageHandler" DBus log4cxx dbus-1)
+target_link_libraries ("HMIMessageHandler" log4cxx DBus)

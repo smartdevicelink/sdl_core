@@ -45,7 +45,7 @@ using ford_message_descriptions::ParameterDescription;
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace dbus {
 
 class DBusSchemaTest : public ::testing::Test {
  protected:
@@ -111,7 +111,7 @@ TEST_F(DBusSchemaTest, GetListArg) {
   EXPECT_EQ(kExpListWrong, argsId);
 }
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 }  // namespace components
 }  // namespace test
 

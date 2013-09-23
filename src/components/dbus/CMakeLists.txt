@@ -1,11 +1,10 @@
 include_directories (
   ./include/
-  ${CMAKE_BINARY_DIR}/
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${CMAKE_BINARY_DIR}/src/components/formatters/include/
-  ${CMAKE_BINARY_DIR}/src/components/smart_objects/include/
-  ${CMAKE_BINARY_DIR}/src/components/utils/include/
-  ${CMAKE_BINARY_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}/
+  ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/formatters/include/
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   /usr/include/dbus-1.0/
   /usr/lib/i386-linux-gnu/dbus-1.0/include/
 )
@@ -16,6 +15,10 @@ set (SOURCES
   ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
   ./src/dbus_message_controller.cc
   ./src/dbus_adapter.cc
+)
+
+set (LIBRARIES
+    dbus-1
 )
 
 add_library("DBus" ${SOURCES})
@@ -38,4 +41,4 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
 )
 
-target_link_libraries ("DBus")
+target_link_libraries("DBus" "${LIBRARIES}")

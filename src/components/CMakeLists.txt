@@ -40,5 +40,5 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./audio_manager)
 
-# --- DBusSchema
+# --- DBus
 add_subdirectory(./dbus)
