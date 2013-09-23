@@ -4,6 +4,12 @@ Item {
     signal onReady;
     signal onStartDeviceDiscovery;
 
-    function updateDeviceList(deviceList) {
+    function updateDeviceList (deviceList) {
+    }
+
+    function allowDeviceToConnect (device) {
+        return {
+            allow: true
+        }
     }
 }

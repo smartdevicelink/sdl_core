@@ -15,7 +15,7 @@ Item
             presetBankCapabilities: {
                 onScreenPresetsAvailable: test.testItem
             }
-        };
+        }
     }
 
 }
