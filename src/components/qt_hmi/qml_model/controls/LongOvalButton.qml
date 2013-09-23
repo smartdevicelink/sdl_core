@@ -1,7 +1,7 @@
 import QtQuick 2.0
 
 Image {
-    id: longOvalBtn
+    id: longOvalButton
     source: "../res/buttons/long_oval_btn.png"
     property alias text: btnText.text
     property alias pixelSize: btnText.font.pixelSize

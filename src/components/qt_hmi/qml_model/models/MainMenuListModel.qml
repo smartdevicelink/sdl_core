@@ -17,7 +17,7 @@ ListModel
     ListElement {
         name: "Media"
         icon: "../res/notes.png"
-        qml: "./views/AMFMPlayerView.qml"
+        qml: "./views/AMPlayerView.qml"
     }
 
     ListElement {

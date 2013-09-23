@@ -14,9 +14,9 @@ QT_END_NAMESPACE
 class ButtonsAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "sdl.core.api.Buttons")
+    Q_CLASSINFO("D-Bus Interface", "com.ford.sdl.hmi.Buttons")
     Q_CLASSINFO("D-Bus Introspection",
-"<interface name=\"sdl.core.api.Buttons\">\n"
+"<interface name=\"com.ford.sdl.hmi.Buttons\">\n"
 "  <method name=\"GetCapabilities\">\n"
 //"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out0\" value=\"QList&lt;ButtonCapabilities&gt;\"/>\n"
 //"    <annotation name=\"org.qtproject.QtDBus.QtTypeName.Out1\" value=\"OptionalArgument&lt;PresetBankCapabilities&gt;\"/>\n"
