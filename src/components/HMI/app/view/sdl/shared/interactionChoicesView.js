@@ -59,8 +59,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             tagName: 'input',
             attribute: ['type:text'],
-            value: 'keyboardInputValue',
-            action: function(){
+            value: '',
+            click: function(){
                 SDL.SDLModel.uiShowKeyboard();
             }
         }),
