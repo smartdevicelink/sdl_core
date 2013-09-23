@@ -3867,7 +3867,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void startFileStreaming(){
         createStaticFileReader();
-        staticFileReader.execute(R.raw.test_video);
+        staticFileReader.execute(R.raw.faq_welcome_orientation);
     }
 
 
