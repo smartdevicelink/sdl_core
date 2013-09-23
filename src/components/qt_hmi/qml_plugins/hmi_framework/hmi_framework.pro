@@ -37,3 +37,4 @@ unix {
 }
 QMAKE_LIBDIR += /usr/lib/i386-linux-gnu/mesa
 
+QMAKE_POST_LINK = make install
