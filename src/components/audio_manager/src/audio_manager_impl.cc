@@ -211,13 +211,15 @@ void AudioManagerImpl::stopMicrophoneRecording() {
   }
 }
 
-void AudioManagerImpl::startVideoStreaming() {
+void AudioManagerImpl::startVideoStreaming(const std::string& fileName) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   VideoStreamingThread* videoStreamingThreadDelegate =
     new VideoStreamingThread();
 
   if (NULL != videoStreamingThreadDelegate) {
+
+    videoStreamingThreadDelegate->setVideoFileName(fileName);
 
     videoStreamerThread_ = new threads::Thread("VideoStreamer"
                                           , videoStreamingThreadDelegate);

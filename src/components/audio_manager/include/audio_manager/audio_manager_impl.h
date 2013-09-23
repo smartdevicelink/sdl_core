@@ -75,7 +75,7 @@ class AudioManagerImpl : public AudioManager,
                                           mobile_apis::BitsPerSample::eType);
     virtual void stopMicrophoneRecording();
 
-    virtual void startVideoStreaming() ;
+    virtual void startVideoStreaming(const std::string& fileName);
     virtual void stopVideoStreaming();
 
     virtual void OnMessageReceived(

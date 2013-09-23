@@ -47,6 +47,10 @@ VideoStreamingThread::VideoStreamingThread()
   argv_[0] = const_cast<gchar*>(std::string("AudioManager").c_str());
 }
 
+void VideoStreamingThread::setVideoFileName(const std::string& fileName) {
+  fileName_ = fileName;
+}
+
 gboolean VideoStreamingThread::bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
   GMainLoop *loop = (GMainLoop *) data;
 
@@ -103,11 +107,10 @@ void VideoStreamingThread::threadMain() {
 
   loop = g_main_loop_new (NULL, FALSE);
 
-
   /* Create gstreamer elements */
   pipeline = gst_pipeline_new ("audio-player");
   source   = gst_element_factory_make ("filesrc",        "file-source");
-  decoder  = gst_element_factory_make ("decodebin",     NULL);
+  decoder  = gst_element_factory_make ("decodebin",      NULL);
   encoder  = gst_element_factory_make ("theoraenc",      "theoraenc");
   muxer    = gst_element_factory_make ("oggmux",         "oggmux");
   sink     = gst_element_factory_make ("shout2send",     "video-output");
@@ -120,7 +123,7 @@ void VideoStreamingThread::threadMain() {
   /* Set up the pipeline */
 
   /* we set the input filename to the source element */
-  g_object_set (G_OBJECT (source), "location", "/home/meskalito/Videos/SoundCity_540p.mp4", NULL);
+  g_object_set (G_OBJECT (source), "location", fileName_.c_str(), NULL);
 
   g_object_set (G_OBJECT (sink), "password", "hackme", NULL);
   g_object_set (G_OBJECT (sink), "mount", "live", NULL);

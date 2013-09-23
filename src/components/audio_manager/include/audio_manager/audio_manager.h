@@ -59,7 +59,7 @@ class AudioManager {
                                           mobile_apis::BitsPerSample::eType) = 0;
     virtual void stopMicrophoneRecording() = 0;
 
-    virtual void startVideoStreaming() = 0;
+    virtual void startVideoStreaming(const std::string& fileName) = 0;
     virtual void stopVideoStreaming() = 0;
 
     virtual ~AudioManager() {

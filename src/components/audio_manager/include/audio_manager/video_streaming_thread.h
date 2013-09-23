@@ -53,11 +53,14 @@ class VideoStreamingThread : public threads::ThreadDelegate {
   static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data);
   static void on_pad_added(GstElement *element, GstPad *pad, gpointer data);
 
+  void setVideoFileName(const std::string& fileName);
+
  private:
   static log4cxx::LoggerPtr logger_;
 
   int argc_;
   gchar** argv_;
+  std::string fileName_;
 
   GMainLoop *loop;
 
