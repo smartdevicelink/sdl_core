@@ -14,4 +14,10 @@ Item {
             language: dataContainer.hmiTTSVRLanguage
         }
     }
+
+    function getSupportedLanguages () {
+        return {
+            languages: settingsContainer.sdlLanguagesList
+        }
+    }
 }
