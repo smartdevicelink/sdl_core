@@ -78,7 +78,7 @@ Rectangle{
     Api {
         HmiApi.Buttons {
             id: sdlButtons
-            objectName: "buttons"
+            objectName: "Buttons"
         }
         HmiApi.BasicCommunication {
             id: sdlBasicCommunications
