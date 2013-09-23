@@ -25,6 +25,7 @@
         android:id="@+id/videobutton"
         android:layout_below="@+id/mobileNavCheckBox"
         android:layout_alignParentLeft="true"
+        android:visibility="invisible"
         android:layout_alignParentRight="true" />
 
     <Button
