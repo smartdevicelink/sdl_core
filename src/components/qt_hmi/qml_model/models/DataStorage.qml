@@ -19,4 +19,12 @@ Item {
     function reset () {
         route_text = ""
     }
+
+    function changeRegistrationUI (language) {
+        hmiUILanguage = language
+    }
+
+    function changeRegistrationTTSVR (language) {
+        hmiTTSVRLanguage = language
+    }
 }
