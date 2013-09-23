@@ -8,4 +8,10 @@ Item {
             available: available
         }
     }
+
+    function getLanguage () {
+        return {
+            language: dataContainer.hmiUILanguage
+        }
+    }
 }

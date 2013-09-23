@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
 Item {
     property string route_text: ""
@@ -11,6 +12,9 @@ Item {
         "CD": { },
         "iPod": { }
     }
+
+    property int hmiUILanguage: Common.Language.EN_US
+    property int hmiTTSVRLanguage: Common.Language.EN_US
 
     function reset () {
         route_text = ""
