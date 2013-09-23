@@ -6,8 +6,9 @@ Column {
     anchors.fill: parent
     GridView
     {
+        height: 3 / 4 * parent.height
+        width: parent.width
         id: musicSourceGridView
-        anchors.fill: parent
         cellWidth: width / 3
         cellHeight: height / 3
 
@@ -40,17 +41,22 @@ Column {
                 cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 onClicked: {
-                    if(qml !== "")contentLoader.go(qml)
-                    if(contentLoader.item.radioType !== undefined) contentLoader.item.radioType = name;
-                    if(contentLoader.item.playerType !== undefined) contentLoader.item.playerType = name;
+                    if(qml !== "")
+                        contentLoader.go(qml)
                 }
             }
 
-            Image { source: icon; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter;}
-            Text {text: name; font.pixelSize: 25; color: "#1d81d5"; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter;}
+            Image { source: icon; anchors.centerIn: parent }
+            Text { text: name; font.pixelSize: 25; color: "#1d81d5"; anchors.centerIn: parent }
         }
 
 
     }
-    BackBtn {anchors.bottom: parent.bottom}
+    Item {
+        // 1/4 bottom screen
+        width: parent.width
+        height: 1/4 * parent.height
+
+        BackButton { anchors.horizontalCenter: parent.horizontalCenter }
+    }
 }

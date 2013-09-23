@@ -71,6 +71,7 @@ Item {
                                         NumberAnimation { duration: 80 }
                                     }
                                 }
+
                                 GradientStop
                                 {
                                     position: 1.0;
@@ -87,16 +88,53 @@ Item {
                                 color: "white"
                                 anchors.centerIn: parent
                             }
+
+                            Timer {
+                                id: timer
+                                interval: 400
+                                repeat: false
+                                triggeredOnStart: false
+                            }
+
                             MouseArea {
+                                id: mouseArea
                                 anchors.fill: parent
+                                property bool clickProcessed
                                 onPressed: {
                                     parent.gradient.stops[0].position = 1.0
                                     parent.gradient.stops[1].position = 0.0
+                                    clickProcessed  = false
+                                    timer.start()
+                                    sdlButtons.onButtonEvent(Enums.ButtonName.PRESET_0 + index, Enums.ButtonEventMode.BUTTONDOWN, undefined)
                                 }
                                 onReleased: {
                                     parent.gradient.stops[0].position = 0.0
                                     parent.gradient.stops[1].position = 1.0
+                                    sdlButtons.onButtonEvent(Enums.ButtonName.PRESET_0 + index, Enums.ButtonEventMode.BUTTONUP, undefined)
+                                    timer.stop()
+                                    if (!clickProcessed) {
+                                        sdlButtons.onButtonPress(Enums.ButtonName.PRESET_0 + index, Enums.ButtonPressMode.SHORT, undefined)
+                                    }
                                 }
+                                Connections {
+                                    target: timer
+                                    onTriggered: {
+                                        if(!mouseArea.clickProcessed) {
+                                            sdlButtons.onButtonPress(Enums.ButtonName.PRESET_0 + index, Enums.ButtonPressMode.LONG, undefined)
+                                            mouseArea.clickProcessed = true
+                                        }
+                                    }
+                                }
+                            }
+
+                            Component.onCompleted: {
+                                sdlButtons.capabilities.push(
+                                            {
+                                                name: Enums.ButtonName.PRESET_0 + index,
+                                                upDownAvailable: true,
+                                                shortPressAvailable: true,
+                                                longPressAvailable: true
+                                            });
                             }
                         }
                     }

@@ -17,7 +17,7 @@ ListModel
     ListElement {
         name: "Media"
         icon: "../res/notes.png"
-        qml: "./views/AMFMPlayerView.qml"
+        qml: "./views/AMPlayerView.qml"
     }
 
     ListElement {
@@ -29,7 +29,7 @@ ListModel
     ListElement {
         name: "Phone"
         icon: "../res/phone/phone.png"
-        qml: "./views/PhoneMenuView.qml"
+        qml: "./views/PhoneMenuGridView.qml"
     }
 
     ListElement {

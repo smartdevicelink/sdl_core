@@ -11,7 +11,7 @@ void Api::componentComplete()
 {
     QQuickItem::componentComplete();
 
-    buttonsAdaptor->setButtonsApi(findChild<QQuickItem*>("buttons"));
+    buttonsAdaptor->setButtonsApi(findChild<QQuickItem*>("Buttons"));
 }
 
 void Api::send(QString text)

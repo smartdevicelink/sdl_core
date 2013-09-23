@@ -4,6 +4,9 @@ Item
 {
     property var capabilities: []
 
+    signal onButtonEvent(int name, int mode, var customButtonId)
+    signal onButtonPress(int name, int mode, var customButtonId)
+
     function getCapabilities(test)
     {
         console.log(capabilities)
@@ -14,4 +17,5 @@ Item
             }
         };
     }
+
 }

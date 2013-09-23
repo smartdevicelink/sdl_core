@@ -35,9 +35,6 @@ GridView
     flickableDirection: Flickable.AutoFlickDirection
     interactive: true
 
-    //highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-    //focus: true
-
     delegate: Item {
         width: menuGridView.cellWidth
         height: menuGridView.cellHeight
@@ -45,11 +42,8 @@ GridView
             cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
-                if(qml !== ""){
+                if(qml !== "") {
                     contentLoader.go(qml)
-                    if(qml === "./views/AMFMPlayerView.qml"){
-                        contentLoader.item.radioType = "AM"
-                    }
                 }
             }
         }

@@ -29,32 +29,47 @@ MaskedContainer {
         repeat: false
         triggeredOnStart: false
     }
+    property bool clickProcessed
     onPressed: {
+        clickProcessed = false
         pressedImg.opacity = 1
         timer.start()
+        if (upDownAvailable) {
+            sdlButtons.onButtonEvent(buttonId, Enums.ButtonEventMode.BUTTONDOWN, undefined)
+        }
     }
 
     onReleased: {
+        if (upDownAvailable) {
+            sdlButtons.onButtonEvent(buttonId, Enums.ButtonEventMode.BUTTONUP, undefined)
+        }
         timer.stop()
+        if (!clickProcessed && shortPressAvailable) {
+            sdlButtons.onButtonPress(buttonId, Enums.ButtonPressMode.SHORT, undefined)
+        }
         pressedImg.opacity = 0
     }
 
     Connections {
         target: timer
         onTriggered: {
-            hold()
+            if(!clickProcessed && longPressAvailable) {
+                sdlButtons.onButtonPress(buttonId, Enums.ButtonPressMode.LONG, undefined)
+                clickProcessed = true
+                hold()
+            }
         }
     }
 
     Component.onCompleted: {
         if (buttonId !== Enums.ButtonName.CUSTOM_BUTTON) {
             sdlButtons.capabilities.push(
-                        {
-                            name: buttonId,
-                            upDownAvailable: upDownAvailable,
-                            shortPressAvailable: shortPressAvailable,
-                            longPressAvailable: longPressAvailable
-                        });
+            {
+                name: buttonId,
+                upDownAvailable: upDownAvailable,
+                shortPressAvailable: shortPressAvailable,
+                longPressAvailable: longPressAvailable
+            });
         }
     }
 }
