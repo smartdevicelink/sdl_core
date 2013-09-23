@@ -15,31 +15,21 @@ Item {
         ListView {
             id: applicationListView
             anchors.fill: parent
-            model: ApplicationListModel {}
+            model: dataContainer.applicationList
 
             anchors.horizontalCenter: parent.horizontalCenter
-            //y: searchDeviceText.height
             width:parent.width
             height:parent.height
 
-
-            //highlightFollowsCurrentItem: false
-            //flickableDirection: Flickable.AutoFlickDirection
-            //interactive: true
-
-            //highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-            //focus: true
-
-
-            delegate: Item{
+            delegate: Row {
                 width: parent.width
                 height: sdlIcon.height
-                Image { id:sdlIcon;source: icon}
+                Image { id:sdlIcon; source: icon }
                 Text  {
-                    x: sdlIcon.width
-                    text: name
+                    text: appName
                     color: "#1d81d5"
                     font.pixelSize: 40
+                    anchors.verticalCenter: parent.verticalCenter
                     MouseArea {
                       anchors.fill: parent
                       onClicked: {
@@ -51,13 +41,13 @@ Item {
         }
     }
 
-    Item{
+    Item {
         // bottom 1/4 of screen
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         width: parent.width
         height: 1/4 * parent.height
 
-        BackButton{}
+        BackButton{ anchors.horizontalCenter: parent.horizontalCenter }
     }
 }
