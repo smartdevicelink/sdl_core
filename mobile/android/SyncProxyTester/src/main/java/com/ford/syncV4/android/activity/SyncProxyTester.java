@@ -706,6 +706,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 + transportType + ")");
     }
 
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         //endSyncProxyInstance();
@@ -3446,6 +3447,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         super.onPause();
         saveMessageSelectCount();
     }
+
 
     /**
      * Called when a CreateChoiceSetResponse comes. If successful, add it to the
