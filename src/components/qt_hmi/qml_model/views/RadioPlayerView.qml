@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import "../controls"
 
-Item {
+Column {
     anchors.fill: parent
     property string radioType: ""
     property var activeBand: radioType === "AM"? ["1130", "950", "760", "1270"]: ["96.3", "107.9", "104.3", "101.9"]
@@ -10,10 +10,9 @@ Item {
     Item{
         id: upperControlLine
         width: parent.width
-        height: parent.height * 0.25
+        height: parent.height / 4
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        LongOvalBtn {
+        LongOvalButton {
             text: radioType + " Radio"
             pixelSize: 20
             dest: "./views/MusicSourceGridView.qml"
@@ -21,7 +20,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        LongOvalBtn {
+        LongOvalButton {
             text: "Tune"
             pixelSize: 20
             anchors.right: parent.right
@@ -30,8 +29,7 @@ Item {
     }
     Item{
         width: parent.width
-        height: parent.height  * 0.5 < minHeight ? minHeight: parent.height * 0.5
-        anchors.top: upperControlLine.bottom
+        height: parent.height / 2
 
         Column {
             spacing: 10
@@ -65,7 +63,7 @@ Item {
 
                 }
             }
-            LongOvalBtn {
+            LongOvalButton {
                 id: hdBtn
                 visible: radioType === "AM" ? false: true
                 Row{
@@ -118,8 +116,7 @@ Item {
     }
 
     PresetRow{
-        height: parent.height * 0.25
-        anchors.bottom: parent.bottom
+        height: parent.height / 4
     }
 
 }

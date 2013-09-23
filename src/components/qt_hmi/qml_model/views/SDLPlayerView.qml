@@ -31,7 +31,7 @@ Column {
             }
             delegate:  Item{
                     width: parent.width / 4
-                    LongOvalBtn {
+                    LongOvalButton {
                         text: name
                         pixelSize: 20
                         dest: qml

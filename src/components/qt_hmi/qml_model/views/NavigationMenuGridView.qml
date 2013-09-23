@@ -19,7 +19,7 @@ Item {
             anchors.centerIn: parent
             model: NavigationMenuModel {}
 
-            LongOvalBtn {
+            LongOvalButton {
                 id: lob
                 visible: false
             }
@@ -35,7 +35,7 @@ Item {
                 width: button.width
                 height: button.height
 
-                LongOvalBtn {
+                LongOvalButton {
                     id: button
                     text: title
                     pixelSize: 20
@@ -53,6 +53,6 @@ Item {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackButton {}
+        BackButton { anchors.horizontalCenter: parent.horizontalCenter }
     }
 }

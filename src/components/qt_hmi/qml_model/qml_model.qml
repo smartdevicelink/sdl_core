@@ -9,7 +9,7 @@ import "./models"
 Rectangle{
     width: 1600
     height: 768
-    property string startQml: "./views/AMFMPlayerView.qml"
+    property string startQml: "./views/AMPlayerView.qml"
     property int margin: 20
     property int minWidth: 600
     property int minHieght: 400

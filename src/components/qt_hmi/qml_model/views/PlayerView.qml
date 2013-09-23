@@ -1,14 +1,16 @@
 import QtQuick 2.0
+
+import QtQuick 2.0
 import "../controls"
 
 Column {
     spacing: 25
     anchors.fill: parent
     property string playerType: ""
-    Item{
+    Item {
         width: parent.width
-        height: parent.height * 0.25
-        LongOvalBtn {
+        height: parent.height / 4
+        LongOvalButton {
             text: playerType
             pixelSize: 20
             dest: "./views/MusicSourceGridView.qml"
@@ -16,17 +18,17 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        LongOvalBtn {
+        LongOvalButton {
             text: "Browse"
             pixelSize: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
         }
     }
-    Row{
+    Row {
         spacing: 50
         width: parent.width
-        height: parent.height * 0.65
+        height: parent.height / 4
         x: 35
         Column{
             Image {
@@ -61,7 +63,7 @@ Column {
             }
         }
     }
-    Row{
+    Row {
         width: parent.width
         height: parent.height / 4
         x: 35
@@ -72,7 +74,7 @@ Column {
             text: "02:36"
             font.pixelSize: 18
         }
-        Row{
+        Row {
             width: parent.width - 2 * (spacing + songTimeText.width) - x - 40
             Rectangle{
                 y: songTimeText.height / 2 - 1
@@ -93,7 +95,7 @@ Column {
             font.pixelSize: 18
         }
     }
-    Item{
+    Item {
         width: parent.width
         height: parent.height / 4
         Row{

@@ -5,7 +5,7 @@ ListModel
     ListElement {
         name: "AM"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/AMFMPlayerView.qml"
+        qml: "./views/AMPlayerView.qml"
     }
     ListElement {
         name: "Sirius"
@@ -15,21 +15,21 @@ ListModel
     ListElement {
         name: "BT Audio"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/BTCDIPODPlayerView.qml"
+        qml: "./views/BTPlayerView.qml"
     }
     ListElement {
         name: "FM"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/AMFMPlayerView.qml"
+        qml: "./views/FMPlayerView.qml"
     }
     ListElement {
         name: "CD"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/BTCDIPODPlayerView.qml"
+        qml: "./views/CDPlayerView.qml"
     }
     ListElement {
         name: "iPod"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/BTCDIPODPlayerView.qml"
+        qml: "./views/IPodPlayerView.qml"
     }
 }

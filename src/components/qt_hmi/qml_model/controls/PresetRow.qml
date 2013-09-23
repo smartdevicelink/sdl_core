@@ -1,39 +1,31 @@
 import QtQuick 2.0
-import com.ford.hmi_framework 1.0
 
 Item {
+    id: presetRow
     width: parent.width
-    Rectangle{
-        width: parent.width
-        height: 2
-        color: "#1d81d5"
-    }
+    height: childrenRect.height
 
-    Flickable
-    {
+    property variant presets: [];
+    property int selectedIndex: 0
+    signal presetSelected
+
+    Column {
         anchors.fill: parent
-        contentHeight: presetRow.height
-        contentWidth: presetRow.width
-        boundsBehavior: Flickable.StopAtBounds
-        clip: true
 
-        Grid {
-            id: presetRow
-
-            columns: presets.length
-            rows: 1
-            spacing: 225
+        PagedFlickable {
+            width: parent.width
+            height: 200
+            snapTo: spacing + 63
+            spacing: (width - (63 * 4)) / 3
 
             Repeater {
-                model : presets.length
-                Image {
-                    id: presetImg
-                    source: presetRow.state == index.toString() ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
+                model: presetRow.presets.length
+                delegate: Image {
+                    source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            siriusChannelNameText.text = presets[index]
-                            presetRow.state = index.toString()
+                            presetRow.selectedIndex = index
                         }
                     }
                     Text {
@@ -41,12 +33,12 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: index + 1
                         font.pixelSize: 30
-                        color: presetRow.state == index.toString() ? "black" : "#1d81d5"
+                        color: "#1d81d5"
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         y: parent.width
-                        text: presets[index]
+                        text: presetRow.presets[index]
                         font.pixelSize: 25
                         color: "white"
                     }
@@ -54,15 +46,4 @@ Item {
             }
         }
     }
-    Item {
-        anchors.horizontalCenter: parent.horizontalCenter
-        Image {
-            source: "../res/white_ball.png"
-        }
-        Image {
-            x: 15
-            source: "../res/blue_ball.png"
-        }
-    }
-
 }

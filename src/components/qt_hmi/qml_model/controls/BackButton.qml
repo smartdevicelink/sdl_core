@@ -1,12 +1,7 @@
 import QtQuick 2.0
 
-LongOvalBtn {
+LongOvalButton {
     text: "Back"
     pixelSize: 30
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
-    //anchors.bottom: parent.bottom
-
-    onClicked: {contentLoader.back()}
-
+    onClicked: { contentLoader.back() }
 }
