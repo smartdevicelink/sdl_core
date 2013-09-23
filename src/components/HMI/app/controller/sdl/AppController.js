@@ -120,6 +120,23 @@ SDL.SDLAppController = Em.Object.create( {
     },
 
     /**
+     * Handeler for Navigation preform interaction choice send response to device and
+     * deactivate interactions window
+     *
+     * @param {Object}
+     */
+    onChoiceNaviInteraction: function(element) {
+
+        SDL.SDLModel.uiShowKeyboard();
+
+        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
+            element.performInteractionRequestID,
+            element.choiceID);
+
+        SDL.InteractionChoicesView.deactivate("SUCCESS");
+    },
+
+    /**
      * Open commands list
      */
     openCommandsList: function() {
