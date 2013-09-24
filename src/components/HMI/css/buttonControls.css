@@ -23,22 +23,76 @@
 	left: 20px;
 }
 
+#keyboard_view .back-button{
+    top: 58px;
+}
+
+#keyboard_view .controlls{
+    top: 350px;
+    width: 800px;
+    height: 75px;
+}
+
+#keyboard_view .controll{
+    margin: 10px;
+    height: 60px;
+    border: 1px solid #333;
+    text-align: center;
+    line-height: 60px;
+    border-radius: 3px;
+}
+
+#keyboard_view .controlls .leftBtn{
+    width: 130px;
+    left: 0px;
+}
+
+#keyboard_view .controlls .numericBtn{
+    width: 60px;
+    left: 145px;
+}
+
+#keyboard_view .controlls .symbolBtn{
+    width: 60px;
+    left: 220px;
+}
+
+#keyboard_view .controlls .spaceBtn{
+    width: 215px;
+    left: 295px;
+}
+
+#keyboard_view .controlls .caseSwitchBtn{
+    width: 60px;
+    left: 525px;
+}
+
+#keyboard_view .controlls .localisationBtn{
+    width: 60px;
+    left: 600px;
+}
+
+#keyboard_view .controlls .searchBtn{
+    width: 100px;
+    left: 677px;
+}
+
 #keyboard_view .QWERTYLayout{
     width: 750px;
-    height: 210px;
-    top: 130px;
+    height: 185px;
+    top: 170px;
     left: 25px;
 }
 
 #keyboard_view .searchBar{
-    top: 80px;
+    top: 58px;
     width: 666px;
     height: 49px;
     left: 120px;
 }
 
 #keyboard_view input{
-    width: 664px;
+    width: 597px;
     height: 48px;
     border: 1px solid #333;
     border-radius: 2px;
@@ -46,6 +100,13 @@
     cursor: pointer;
     font-size: 32px;
     color: #FFF;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#keyboard_view .microphone{
+    text-align: center;
+    line-height: 49px;
 }
 
 #keyboard_view .clearBtn{
@@ -62,7 +123,7 @@
 
 #keyboard_view .microphone{
     left: 63px;
-    top: 80px;
+    top: 58px;
     width: 48px;
     height: 48px;
     border: 1px solid #333;
@@ -71,13 +132,13 @@
 
 #keyboard_view .QWERTYLayout .ffw-button{
     width: 60px;
-    height: 60px;
+    height: 50px;
     border-radius: 3px;
     border: 1px solid #333;
     margin: 5px;
     font-size: 42px;
     text-align: center;
-    line-height: 60px;
+    line-height: 50px;
 }
 #keyboard_view .QWERTYLayout .k1{
     left: 75px;
@@ -108,79 +169,79 @@
 }
 #keyboard_view .QWERTYLayout .k10{
     left: 38px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k11{
     left: 113px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k12{
     left: 188px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k13{
     left: 263px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k14{
     left: 338px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k15{
     left: 413px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k16{
     left: 488px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k17{
     left: 563px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k18{
     left: 638px;
-    top: 75px;
+    top: 62px;
 }
 #keyboard_view .QWERTYLayout .k19{
     left: 0px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k20{
     left: 75px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k21{
     left: 150px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k22{
     left: 225px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k23{
     left: 300px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k24{
     left: 375px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k25{
     left: 450px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k26{
     left: 525px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k27{
     left: 600px;
-    top: 150px;
+    top: 124px;
 }
 #keyboard_view .QWERTYLayout .k28{
     left: 675px;
-    top: 150px;
+    top: 124px;
 }
 #infoTable.infoTable {
 	width: 375px;
