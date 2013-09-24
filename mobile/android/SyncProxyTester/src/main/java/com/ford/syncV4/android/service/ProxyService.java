@@ -1337,9 +1337,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onKeyboardInput(OnKeyboardInput msg) {
         final  OnKeyboardInput event = msg;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "OnKeyboardInput Received = "+ msg.toString();
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+
+        if (_msgAdapter != null) _msgAdapter.logMessage(msg, true);
+        else Log.i(TAG, "" + msg.toString());
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
 

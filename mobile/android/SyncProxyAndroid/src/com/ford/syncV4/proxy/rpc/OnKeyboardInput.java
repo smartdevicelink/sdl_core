@@ -46,13 +46,23 @@ public class OnKeyboardInput extends RPCNotification {
 
     public void setData(String data) {
         if (data != null) {
-            store.put(Names.data, data);
+            parameters.put(Names.data, data);
         } else {
-            store.remove(Names.data);
+            parameters.remove(Names.data);
         }
     }
     public String getData() {
-        return (String) store.get(Names.data);
+        Object obj = parameters.get(Names.data);
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        return null;
+    }
+
+    @Override
+    public String toString(){
+        String result =  this.getFunctionName() +": " + " data: " + this.getData() + " event:" + this.getEvent().toString();
+        return result;
     }
 
 }
