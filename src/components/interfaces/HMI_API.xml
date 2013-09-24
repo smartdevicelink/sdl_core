@@ -363,7 +363,7 @@
     <description>Text value for MediaClock field; applies to "Show"</description>
   </element>
   <element name="mediaTrack">
-    <description>The track field of NGN type ACMs. This field is only available for media applications; applies to "Show"</description>
+    <description>The track field of NGN & GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
   </element>
   <element name="alertText1">
     <description>The first line of the alert text field; applies to "Alert"</description>
@@ -823,6 +823,29 @@
   </element>
 </enum>
 
+<struct name="KeyboardProperties">
+  <description>Configuration of on-screen keyboard (if available).</description>
+  <param name="language" type="Language" mandatory="false">
+    <description>The keyboard language.</description>
+  </param> 
+  <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
+    <description>Desired keyboard layout.</description>
+  </param>   
+  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+    <description>In this mode, all keypresses will be sent as they occur.</description>
+    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+    <description>If omitted, this value will be set to FALSE.</description>      
+  </param>
+  <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>Array of keyboard characters to enable.</description>
+    <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+    <description>If omitted, the entire keyboard will be enabled.</description>      
+  </param>
+  <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+    <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+  </param>   
+</struct>
+
 <enum name="AmbientLightStatus">
   <description>Reflects the status of the ambient light sensor.</description>
   <element name="NIGHT" />
@@ -1019,9 +1042,12 @@
 </struct>
 
 <struct name="TouchEventCapabilities">
-  <param name="pressAvailable" type="Boolean" mandatory="true"></param>
-  <param name="multiTouchAvailable" type="Boolean" mandatory="true"></param>
-  <param name="doublePressAvailable" type="Boolean" mandatory="true"></param>
+  <param name="pressAvailable" type="Boolean" mandatory="true">
+  </param>
+  <param name="multiTouchAvailable" type="Boolean" mandatory="true">
+  </param>
+  <param name="doublePressAvailable" type="Boolean" mandatory="true">
+  </param>
 </struct>
 
 <struct name="ScreenParams">
@@ -1883,6 +1909,9 @@
       </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
+      </param>
+	  <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" platform="MobileNav">
+        <description>>On-screen keybaord configuration (if available).</description>
       </param>
     </function>
     <function name="SetGlobalProperties" messagetype="response">
