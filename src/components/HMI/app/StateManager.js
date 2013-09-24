@@ -192,7 +192,16 @@ var StateManager = Em.StateManager.extend({
 
         mediaNavigation: Em.State.create({
 
-            baseNavigation: Em.State.create({}),
+            baseNavigation: Em.State.create({
+
+                enter: function () {
+
+                    this._super();
+
+                    SDL.SDLController.navigationAppUpdate();
+                }
+
+            }),
 
             enter: function () {
 

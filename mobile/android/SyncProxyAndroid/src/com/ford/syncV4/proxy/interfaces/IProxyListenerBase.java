@@ -302,5 +302,5 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onOnTouchEvent(OnTouchEvent notification);
 
-    void onKeyboardInput(OnKeyboardInput msg);
+    public void onKeyboardInput(OnKeyboardInput msg);
 }

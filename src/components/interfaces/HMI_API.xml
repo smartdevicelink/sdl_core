@@ -1716,7 +1716,7 @@
       <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
         <description>App defined SoftButtons</description>
       </param>
-	  <param name="progressIndicator" type="Boolean" mandatory="false">
+	 	 <param name="progressIndicator" type="Boolean" mandatory="false" platform="MobileNav">
         <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">

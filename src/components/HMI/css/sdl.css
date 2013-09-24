@@ -420,6 +420,23 @@
     left: 65px;
     position: absolute;
 }
+#perform_interaction_view .naviChoises{
+    top: 140px;
+    width: 750px;
+    height: 275px;
+    left: 25px;
+}
+
+#perform_interaction_view .naviChoises .ffw-button{
+    width: 110px;
+    height: 110px;
+    margin: 20px;
+    float: left;
+    position: relative;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background-repeat: repeat;
+}
 
 #sdl_view_container .cd_logo {
 	position: absolute;

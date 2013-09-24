@@ -231,7 +231,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
     timer.start();
   } else {
     connection->transport_adapter->Disconnect(connection->device,
-                                           connection->application);
+        connection->application);
   }
   return E_SUCCESS;
 }
@@ -264,7 +264,7 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
     return E_INVALID_HANDLE;
   }
   connection->transport_adapter->Disconnect(connection->device,
-                                         connection->application);
+      connection->application);
   return E_SUCCESS;
 }
 
@@ -735,7 +735,7 @@ void TransportManagerImpl::EventListenerThread(void) {
           if (connection->shutDown && --connection->messages_count == 0) {
             connection->timer.stop();
             connection->transport_adapter->Disconnect(connection->device,
-                                                   connection->application);
+                connection->application);
           }
         }
         break;
@@ -775,8 +775,14 @@ void TransportManagerImpl::EventListenerThread(void) {
             //get size only when last complete frame successfully sent to upper level
             this->AddDataToContainer(connection->id, data_container,
                                      data->data(), data->data_size());
-            if (!(size_ready = this->GetFrameSize(data->data(),
+            /*if (!(size_ready = this->GetFrameSize(data->data(),
                                                   data->data_size(), frame_size))) {
+              //save data for future use because there is not enough data in current mesage to get frame size
+              break;
+            }*/
+            if (!(size_ready = this->GetFrameSize(data_container[connection->id].second,
+                                                  data_container[connection->id].first,
+                                                  frame_size))) {
               //save data for future use because there is not enough data in current mesage to get frame size
               break;
             }
@@ -910,8 +916,8 @@ void TransportManagerImpl::MessageQueueThread(void) {
         } else {
           if (TransportAdapter::OK
               == transport_adapter->SendData(connection->device,
-                                          connection->application,
-                                          active_msg)) {
+                                             connection->application,
+                                             active_msg)) {
             LOG4CXX_INFO(logger_, "Data sent to adapter")
             active_msg->set_waiting(true);
           } else {

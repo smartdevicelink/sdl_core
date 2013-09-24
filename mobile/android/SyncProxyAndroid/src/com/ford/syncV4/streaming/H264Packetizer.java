@@ -12,8 +12,9 @@ import java.io.InputStream;
 public class H264Packetizer extends AbstractPacketizer implements Runnable{
 
 	public final static String TAG = "H264Packetizer";
+    public static final int EOS = -1;
 
-	private Thread t = null;
+    private Thread t = null;
 
 	public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
 		super(streamListener, is, rpcSessionID);
@@ -43,22 +44,22 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable{
 
                 do {
                     length = is.read();
-                    if (length != -1) {
+                    if (length != EOS) {
                         bb.write(length);
                     }
-                }  while (length != -1 && bb.size() < 1000);
 
-                    if ( length != 1 ){
+                }  while (length != EOS && bb.size() < 1000);
 
-                    bb.flush();
-                    buffer = bb.toByteArray();
-                    ProtocolMessage pm = new ProtocolMessage();
-                    pm.setSessionID(_rpcSessionID);
-                    pm.setSessionType(SessionType.Mobile_Nav);
-                    pm.setFunctionID(0);
-                    pm.setCorrID(0);
-                    pm.setData(buffer, buffer.length);
-                    _streamListener.sendH264(pm);
+                    if ( length != EOS){
+                        bb.flush();
+                        buffer = bb.toByteArray();
+                        ProtocolMessage pm = new ProtocolMessage();
+                        pm.setSessionID(_rpcSessionID);
+                        pm.setSessionType(SessionType.Mobile_Nav);
+                        pm.setFunctionID(0);
+                        pm.setCorrID(0);
+                        pm.setData(buffer, buffer.length);
+                        _streamListener.sendH264(pm);
                     }
 			}
 		} catch (IOException e) {

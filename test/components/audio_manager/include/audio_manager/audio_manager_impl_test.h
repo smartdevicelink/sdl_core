@@ -59,6 +59,19 @@ void AudioManagerTest::SetUp() {
 void AudioManagerTest::TearDown() {
 }
 
+TEST_F(AudioManagerTest, StreamVideo) {
+  audio_manager::AudioManager* audioManager =
+      audio_manager::AudioManagerImpl::getAudioManager();
+
+  audioManager->startVideoStreaming("/home/meskalito/Videos/SoundCity_540p.mp4");
+
+  LOG4CXX_TRACE(logger, ".Playing stream");
+  while (true) {
+    usleep(10000000);
+    LOG4CXX_TRACE(logger, ".");
+  }
+}
+
 TEST_F(AudioManagerTest, RecordMicrophoneStream) {
   audio_manager::AudioManager* audioManager =
       audio_manager::AudioManagerImpl::getAudioManager();
@@ -107,30 +120,30 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
     LOG4CXX_TRACE(logger, ".");
   }
 
-//  usleep(10000000);
-//
-//  audioManager->removeA2DPSource(device);
-//
-//  usleep(10000000);
-//
-//  audioManager->addA2DPSource(device);
-//  audioManager->playA2DPSource(device);
-//
-//  usleep(10000000);
-//
-//  audioManager->stopA2DPSource(device);
-//
-//  usleep(10000000);
-//
-//  audioManager->playA2DPSource(device);
-//
-//  usleep(10000000);
-//
-//  audioManager->stopA2DPSource(device);
-//
-//  usleep(10000000);
-//
-//  audioManager->removeA2DPSource(device);
+  usleep(10000000);
+
+  audioManager->removeA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->addA2DPSource(device);
+  audioManager->playA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->stopA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->playA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->stopA2DPSource(device);
+
+  usleep(10000000);
+
+  audioManager->removeA2DPSource(device);
 }
 
 }  //  namespace audio_manager_test

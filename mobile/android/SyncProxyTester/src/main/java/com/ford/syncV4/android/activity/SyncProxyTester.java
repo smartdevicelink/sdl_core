@@ -706,6 +706,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 + transportType + ")");
     }
 
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         //endSyncProxyInstance();
@@ -3447,6 +3448,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         saveMessageSelectCount();
     }
 
+
     /**
      * Called when a CreateChoiceSetResponse comes. If successful, add it to the
      * adapter. In any case, remove the key from the map.
@@ -3867,7 +3869,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void startFileStreaming(){
         createStaticFileReader();
-        staticFileReader.execute(R.raw.test_video);
+        staticFileReader.execute(R.raw.faq_welcome_orientation);
     }
 
 

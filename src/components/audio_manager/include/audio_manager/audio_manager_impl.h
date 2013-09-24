@@ -42,6 +42,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "audio_manager/audio_manager.h"
 #include "audio_manager/from_mic_to_file_recorder_thread.h"
+#include "audio_manager/video_streaming_thread.h"
 #include "audio_manager/a2dp_source_player_thread.h"
 
 namespace audio_manager {
@@ -74,6 +75,9 @@ class AudioManagerImpl : public AudioManager,
                                           mobile_apis::BitsPerSample::eType);
     virtual void stopMicrophoneRecording();
 
+    virtual void startVideoStreaming(const std::string& fileName);
+    virtual void stopVideoStreaming();
+
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
 
@@ -85,6 +89,7 @@ class AudioManagerImpl : public AudioManager,
   private:
     std::map<std::string, threads::Thread*> sources_;
     threads::Thread* recorderThread_;
+    threads::Thread* videoStreamerThread_;
 
     const int MAC_ADDRESS_LENGTH_;
     static AudioManagerImpl* sInstance_;

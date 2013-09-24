@@ -101,26 +101,35 @@ void AlertRequest::SendAlertRequest(int app_id) {
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // alert1
+  int index = 0;
   msg_params[hmi_request::alert_strings] =
     smart_objects::SmartObject(smart_objects::SmartType_Array);
-  msg_params[hmi_request::alert_strings][0]
-  [hmi_request::field_name] = TextFieldName::ALERT_TEXT1;
-  msg_params[hmi_request::alert_strings][0]
-  [hmi_request::field_text] =
-    (*message_)[strings::msg_params][strings::alert_text1];
+
+  // alert1
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+      TextFieldName::ALERT_TEXT1;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::alert_text1];
+    ++index;
+  }
 
   // alert2
-  msg_params[hmi_request::alert_strings][1][hmi_request::field_name] =
-    TextFieldName::ALERT_TEXT2;
-  msg_params[hmi_request::alert_strings][1][hmi_request::field_text] =
-    (*message_)[strings::msg_params][strings::alert_text2];
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+      TextFieldName::ALERT_TEXT2;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::alert_text2];
+    ++index;
+  }
 
   // alert3
-  msg_params[hmi_request::alert_strings][2][hmi_request::field_name] =
-    TextFieldName::ALERT_TEXT3;
-  msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
-    (*message_)[strings::msg_params][strings::alert_text3];
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+      TextFieldName::ALERT_TEXT3;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+      (*message_)[strings::msg_params][strings::alert_text3];
+  }
 
   // softButtons
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -136,6 +145,12 @@ void AlertRequest::SendAlertRequest(int app_id) {
   }
   else {
     msg_params[strings::duration] = 5000;
+  }
+
+  // NAVI platform progressIndicator
+  if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
+    msg_params[strings::progress_indicator] =
+        (*message_)[strings::msg_params][strings::progress_indicator];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true, 1);
