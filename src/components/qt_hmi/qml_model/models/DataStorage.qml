@@ -56,6 +56,8 @@ Item {
         "timeoutPrompt": ""
     }
 
+    property int uiSliderPosition: 1
+
     function reset () {
         route_text = ""
     }

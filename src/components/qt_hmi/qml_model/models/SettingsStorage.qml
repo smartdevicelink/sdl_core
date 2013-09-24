@@ -26,4 +26,51 @@ Item {
         Common.Language.DA_DK,
         Common.Language.NO_NO
     ]
+
+    property var displayCapabilities: {
+        "displayType": Common.DisplayType.GEN2_8_DMA,
+        "textFields": [
+            Common.TextFieldName.mainField1,
+            Common.TextFieldName.mainField2,
+            Common.TextFieldName.mainField1,
+            Common.TextFieldName.mainField2,
+            Common.TextFieldName.statusBar,
+            Common.TextFieldName.mediaClock,
+            Common.TextFieldName.mediaTrack,
+            Common.TextFieldName.alertText1,
+            Common.TextFieldName.alertText2,
+            Common.TextFieldName.alertText3,
+            Common.TextFieldName.scrollableMessageBody,
+            Common.TextFieldName.initialInteractionText,
+            Common.TextFieldName.navigationText1,
+            Common.TextFieldName.navigationText2,
+            Common.TextFieldName.ETA,
+            Common.TextFieldName.totalDistance,
+            Common.TextFieldName.navigationText,
+            Common.TextFieldName.audioPassThruDisplayText1,
+            Common.TextFieldName.audioPassThruDisplayText2,
+            Common.TextFieldName.sliderHeader,
+            Common.TextFieldName.sliderFooter,
+            Common.TextFieldName.notificationText
+        ],
+        "mediaClockFormats": [
+            Common.MediaClockFormat.LOCK1,
+            Common.MediaClockFormat.CLOCK2,
+            Common.MediaClockFormat.CLOCK3,
+            Common.MediaClockFormat.CLOCKTEXT1,
+            Common.MediaClockFormat.CLOCKTEXT2,
+            Common.MediaClockFormat.CLOCKTEXT3,
+            Common.MediaClockFormat.CLOCKTEXT4
+        ],
+        "imageCapabilities": [
+            Common.ImageType.DYNAMIC
+        ]
+    }
+
+    property var softButtonCapabilities: {
+        "shortPressAvailable": true,
+        "longPressAvailable": true,
+        "upDownAvailable": true,
+        "imageSupported": true
+    }
 }

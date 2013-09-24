@@ -18,13 +18,78 @@ var ButtonName = {
 }
 
 var ButtonEventMode = {
-    BUTTONUP:    0,
-    BUTTONDOWN:  1
+    BUTTONUP:   0,
+    BUTTONDOWN: 1
 }
 
 var ButtonPressMode = {
     LONG:  0,
     SHORT: 1
+}
+
+var SystemContext = {
+    MAIN:         0,
+    VRSESSION:    1,
+    MENU:         2,
+    HMI_OBSCURED: 3,
+    ALERT:        4
+}
+
+var DisplayType = {
+    CID:        0,
+    TYPE2:      1,
+    TYPE5:      2,
+    NGN:        3,
+    GEN2_8_DMA: 4,
+    GEN2_6_DMA: 5,
+    MFD3:       6,
+    MFD4:       7,
+    MFD5:       8
+}
+
+var TextFieldName = {
+    mainField1:                 0,
+    mainField2:                 1,
+    mainField3:                 2,
+    mainField4:                 3,
+    statusBar:                  4,
+    mediaClock:                 5,
+    mediaTrack:                 6,
+    alertText1:                 7,
+    alertText2:                 8,
+    alertText3:                 9,
+    scrollableMessageBody:     10,
+    initialInteractionText:    11,
+    navigationText1:           12,
+    navigationText2:           13,
+    ETA:                       14,
+    totalDistance:             15,
+    navigationText:            16,
+    audioPassThruDisplayText1: 17,
+    audioPassThruDisplayText2: 18,
+    sliderHeader:              19,
+    sliderFooter:              20,
+    notificationText:          21
+}
+
+var MediaClockFormat = {
+    CLOCK1:     0,
+    CLOCK2:     1,
+    CLOCK3:     2,
+    CLOCKTEXT1: 3,
+    CLOCKTEXT2: 4,
+    CLOCKTEXT3: 5,
+    CLOCKTEXT4: 6
+}
+
+var HmiZoneCapabilities = {
+    FRONT: 0,
+    BACK: 1
+}
+
+var ImageType = {
+    STATIC:   0,
+    DYNAMIC : 1
 }
 
 var Language = {
@@ -52,4 +117,9 @@ var Language = {
     CS_CZ: 21,
     DA_DK: 22,
     NO_NO: 23
+}
+
+var DriverDistractionState = {
+    DD_ON:  0,
+    DD_OFF: 1
 }
