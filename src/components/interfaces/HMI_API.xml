@@ -363,7 +363,7 @@
     <description>Text value for MediaClock field; applies to "Show"</description>
   </element>
   <element name="mediaTrack">
-    <description>The track field of NGN & GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
+    <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
   </element>
   <element name="alertText1">
     <description>The first line of the alert text field; applies to "Alert"</description>
@@ -1911,7 +1911,7 @@
         <description>ID of application that concerns this RPC.</description>
       </param>
       <param name="keyboardProperties" type="Common.KeyboardProperties" mandatory="false">
-        <description>>On-screen keybaord configuration (if available).</description>
+        <description>On-screen keybaord configuration (if available).</description>
       </param>
     </function>
     <function name="SetGlobalProperties" messagetype="response">
