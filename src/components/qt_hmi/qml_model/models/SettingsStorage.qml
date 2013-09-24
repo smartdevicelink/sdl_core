@@ -26,4 +26,6 @@ Item {
         Common.Language.DA_DK,
         Common.Language.NO_NO
     ]
+
+    property var buttonCapabilities: []
 }
