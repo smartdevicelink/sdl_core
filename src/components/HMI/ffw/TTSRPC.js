@@ -130,11 +130,7 @@ FFW.TTS = FFW.RPCObserver.create( {
         switch (request.method) {
         case "TTS.Speak": {
 
-            SDL.SDLModel.onPrompt(request.params.ttsChunks);
-
-            this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
-                request.id,
-                request.method);
+            SDL.SDLModel.onPrompt(request.params.ttsChunks, request.id);
 
             break;
         }

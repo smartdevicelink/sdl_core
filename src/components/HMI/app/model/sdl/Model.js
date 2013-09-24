@@ -627,14 +627,14 @@ SDL.SDLModel = Em.Object.create({
      * @param {Object}
      * @param {Number}
      */
-    onPrompt: function (ttsChunks) {
+    onPrompt: function (ttsChunks, id) {
 
         var message = '';
         if (ttsChunks) {
             for (var i = 0; i < ttsChunks.length; i++) {
                 message += ttsChunks[i].text + '\n';
             }
-            SDL.TTSPopUp.ActivateTTS(message);
+            SDL.TTSPopUp.ActivateTTS(message, id);
         }
     },
 
