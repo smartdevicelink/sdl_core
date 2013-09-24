@@ -31,7 +31,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
-  COMMAND python codegen/make_introspection.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
+  COMMAND python codegen/make_introspection.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml --interfacepath com.ford.hmi.sdl
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml codegen/make_introspection.py
 )
 
