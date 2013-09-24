@@ -1,3 +1,6 @@
+[CW35.2]
+*OnKeyboard event support added
+
 [CW35.1]
 *Added MobileNavi AppType registration button
 *Added Mobile Navi session support
