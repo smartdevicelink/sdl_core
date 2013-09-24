@@ -37,12 +37,19 @@ Item {
         "CD": { },
         "iPod": { }
     }
+    property bool hmiVRAvailable: false
+    property bool hmiTTSAvailable: false
+    property bool hmiNavigationAvailable: false
+    property bool hmiVehicleInfoAvailable: false
+    property bool hmiUIAvailable: false
 
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
 
     property alias deviceList: deviceListModel
     property alias applicationList: applicationListModel
+
+    property var vrCommands: []
 
     function reset () {
         route_text = ""

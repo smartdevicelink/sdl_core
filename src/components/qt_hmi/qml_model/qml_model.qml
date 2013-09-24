@@ -107,11 +107,12 @@ Rectangle{
     }
 
     Component.onCompleted: {
-        sdlVR.available = true
-        sdlTTS.available = true
-        sdlNavigation.available = true
-        sdlVehicleInfo.available = true
-        sdlUI.available = true
+        dataContainer.hmiVRAvailable = true
+        dataContainer.hmiTTSAvailable = true
+        dataContainer.hmiNavigationAvailable = true
+        dataContainer.hmiVehicleInfoAvailable = true
+        dataContainer.hmiUIAvailable = true
+
         sdlBasicCommunications.onReady()
     }
 }
