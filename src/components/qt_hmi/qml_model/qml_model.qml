@@ -110,11 +110,10 @@ Rectangle{
     }
 
     Component.onCompleted: {
-/*        sdlVR.available = true
-        sdlTTS.available = true
-        sdlNavigation.available = true
-        sdlVehicleInfo.available = true
-        sdlUI.available = true */
+        settings.vrAvailable = true;
+        settings.ttsAvailable = true;
+        settings.navigationAvailable = true;
+        settings.uiAvailable = true;
         console.log("hello!")
         sdlBasicCommunications.onReady()
     }
