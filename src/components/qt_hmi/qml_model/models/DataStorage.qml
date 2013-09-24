@@ -51,6 +51,11 @@ Item {
 
     property var vrCommands: []
 
+    property var globalProperties: {
+        "helpPrompt": "",
+        "timeoutPrompt": ""
+    }
+
     function reset () {
         route_text = ""
     }

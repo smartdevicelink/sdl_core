@@ -9,6 +9,12 @@ Item {
         }
     }
 
+    function speak (ttsChunks, appID) {
+    }
+
+    function stopSpeaking () {
+    }
+
     function getLanguage () {
         return {
             language: dataContainer.hmiTTSVRLanguage
@@ -23,5 +29,10 @@ Item {
 
     function changeRegistration (language) {
         dataContainer.changeRegistrationTTSVR(language)
+    }
+
+    function setGlobalProperties (helpPrompt, timeoutPrompt, appID) {
+        dataContainer.globalProperties.helpPrompt = helpPrompt
+        dataContainer.globalProperties.timeoutPrompt = timeoutPrompt
     }
 }
