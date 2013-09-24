@@ -43,9 +43,17 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable{
                 ByteArrayOutputStream bb = new ByteArrayOutputStream();
 
                 do {
-                    length = is.read();
-                    if (length != EOS) {
-                        bb.write(length);
+                    if (is != null){
+                        try {
+                            length = is.read();
+                        }
+                        catch (NullPointerException e){
+                            Log.e("SyncProxyTester", e.toString());
+                        }
+
+                        if (length != EOS) {
+                            bb.write(length);
+                        }
                     }
 
                 }  while (length != EOS && bb.size() < 1000);

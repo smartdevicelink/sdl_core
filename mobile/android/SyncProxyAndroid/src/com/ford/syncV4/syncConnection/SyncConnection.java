@@ -158,7 +158,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
 	}
 	
 	public void sendMessage(ProtocolMessage msg) {
-		_protocol.SendMessage(msg);
+        if (msg != null){
+		    _protocol.SendMessage(msg);
+        }
 	}
 
     public void startMobileNavSession() {
