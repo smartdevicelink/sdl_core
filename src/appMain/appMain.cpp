@@ -53,25 +53,33 @@
 #include "config_profile/profile.h"
 
 #include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "hmi_message_handler/messagebroker_adapter.h"
 #include "application_manager/application_manager_impl.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "hmi_message_handler/dbus_message_adapter.h"
+#ifdef QT_HMI
+#  include "hmi_message_handler/dbus_message_adapter.h"
+#endif  // QT_HMI
+#ifdef WEB_HMI
+#  include "hmi_message_handler/messagebroker_adapter.h"
+#endif  // WEB_HMI
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
-#include "networking.h"  // cpplint: Include the directory when naming .h files
+#ifdef WEB_HMI
+#  include "CMessageBroker.hpp"
+#  include "mb_tcpserver.hpp"
+#  include "networking.h"  // cpplint: Include the directory when naming .h files
+#endif  // WEB_HMI
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
 
 namespace {
+
+#ifdef WEB_HMI
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
@@ -81,7 +89,7 @@ const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
  * Initialize MessageBroker component
  * @return true if success otherwise false.
  */
-bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
+bool InitMessageSystem() {  // TODO(AK): check memory allocation here.
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                                 log4cxx::Logger::getLogger("appMain"));
 
@@ -156,37 +164,6 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
 
   mb_adapter->registerController();
   mb_adapter->subscribeTo();
-
-  return true;
-}
-
-/**
- * Initialize DBus component
- * @return true if success otherwise false.
- */
-bool InitDBus() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-
-  hmi_message_handler::DBusMessageAdapter* adapter =
-    new hmi_message_handler::DBusMessageAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
-
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
-    adapter);
-  if (!adapter->Init()) {
-    LOG4CXX_INFO(logger, "Cannot init DBus service!");
-    return false;
-  }
-
-  adapter->subscribeTo();
-
-  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
-  System::Thread* th1 = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-      *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-      NULL));
-  th1->Start(false);
 
   return true;
 }
@@ -274,7 +251,51 @@ bool InitHmi() {
     }
   }
 }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool InitMessageSystem() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
+
+  hmi_message_handler::DBusMessageAdapter* adapter =
+    new hmi_message_handler::DBusMessageAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
+    adapter);
+  if (!adapter->Init()) {
+    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    return false;
+  }
+
+  adapter->subscribeTo();
+
+  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  System::Thread* th1 = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+      *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+      NULL));
+  th1->Start(false);
+
+  return true;
 }
+
+/**
+ * Initialize HTML based HMI.
+ * @return true if success otherwise false.
+ */
+bool InitHmi() {
+  // TODO(KKolodiy): implement
+  return false;
+}
+#endif  // QT_HMI
+
+}  // namespace
 
 /**
  * \brief Entry point of the program.
@@ -338,25 +359,15 @@ int main(int argc, char** argv) {
   app_manager->set_connection_handler(connection_handler);
   app_manager->set_hmi_message_handler(hmi_handler);
 
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!InitDBus()) {
+  if (!InitMessageSystem()) {
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger, "Init DBus service successful");
-// TODO(KKolodiy): add define for selective compiling
-//  if (!InitMessageBroker()) {
-//    exit(EXIT_FAILURE);
-//  }
-//  LOG4CXX_INFO(logger, "InitMessageBroker successful");
-//
-//  if (!InitHmi()) {
-//    exit(EXIT_FAILURE);
-//  }
-//  LOG4CXX_INFO(logger, "InitHmi successful");
+  LOG4CXX_INFO(logger, "InitMessageSystem successful");
 
-  // --------------------------------------------------------------------------
+  if (!InitHmi()) {
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitHmi successful");
 
   while (true) {
     sleep(100500);

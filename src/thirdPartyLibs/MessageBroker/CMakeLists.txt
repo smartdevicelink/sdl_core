@@ -25,8 +25,10 @@ set (MESSAGE_BROKER_SERVER_SOURCES
 
 add_library("MessageBroker" ${MESSAGE_BROKER_SOURCES})
 
+IF (${WEB_HMI})
 add_library("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})
 target_link_libraries("MessageBrokerClient" "MessageBroker")
 
 add_library("MessageBrokerServer" ${MESSAGE_BROKER_SERVER_SOURCES})
 target_link_libraries("MessageBrokerServer" "MessageBroker")
+ENDIF (${WEB_HMI})
