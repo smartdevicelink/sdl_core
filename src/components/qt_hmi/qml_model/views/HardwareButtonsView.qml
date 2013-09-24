@@ -128,7 +128,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                sdlButtons.capabilities.push(
+                                settings.capabilities.push(
                                             {
                                                 name: Enums.ButtonName.PRESET_0 + index,
                                                 upDownAvailable: true,

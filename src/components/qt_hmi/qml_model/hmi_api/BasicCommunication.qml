@@ -1,10 +1,6 @@
 import QtQuick 2.0
 
 Item {
-    signal onReady;
-    signal onStartDeviceDiscovery;
-    signal onFindApplications(var deviceInfo);
-
     function updateDeviceList(deviceList) {
         dataContainer.deviceList.clear();
         for(var i = 0; i < deviceList.length; i++) {
