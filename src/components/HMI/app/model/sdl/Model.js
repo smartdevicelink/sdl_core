@@ -79,6 +79,13 @@ SDL.SDLModel = Em.Object.create({
     phoneCall: false,
 
     /**
+     * Device list search progress flag
+     *
+     * @param {Boolean}
+     */
+    deviceSearchProgress: false,
+
+    /**
      * Flag to be set true when VRHelpList are activated
      *
      * @param {Boolean}
@@ -499,6 +506,8 @@ SDL.SDLModel = Em.Object.create({
         if (SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
             SDL.DeviceListView.ShowDeviceList(params);
         }
+
+        SDL.SDLModel.set('deviceSearchProgress', false);
     },
 
     /**

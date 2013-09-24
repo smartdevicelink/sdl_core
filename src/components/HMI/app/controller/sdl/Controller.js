@@ -430,7 +430,8 @@ SDL.SDLController = Em.Object
         onGetDeviceList: function() {
 
             SDL.States.goToStates('info.devicelist');
-            // FFW.BasicCommunication.getDeviceList();
+            SDL.SDLModel.set('deviceSearchProgress', true);
+
             FFW.BasicCommunication.OnStartDeviceDiscovery();
         },
         /**
