@@ -60,6 +60,27 @@ class Impl(FordXmlParser):
         out.write("}\n")
 
 
+    def write_js_enum(self, enum, out):
+        out.write("var " + enum.get('name') + " = {\n")
+        lastval = -1
+        elements = enum.findall('element')
+        for i in range(len(elements)):
+            element = elements[i]
+            value = element.get('value')
+            if value is None:
+                value = lastval + 1
+            else:
+                value = int(value)
+            lastval = value
+            name = element.get('internal_name')
+            if name is None:
+                name = element.get('name')
+            out.write("  " + name + ': ' + str(value))
+            if len(elements) - 1 != i: out.write(',')
+            out.write("\n")
+        out.write("}\n\n")
+
+
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
 arg_parser.add_argument('--outdir', required=True)
@@ -76,4 +97,14 @@ for interface_el in in_tree_root.findall('interface'):
     if notifications or request_responses:
         outfile = open(args.outdir+'/'+interface_el.get('name')+'_auto.qml', 'w')
         impl.write_qml(interface_el, outfile)
+
+enum_files = dict()
+for (iface, name), enum in impl.enums.items():
+    if iface in enum_files:
+        outfile = enum_files[iface]
+    else:
+        outfile = open(args.outdir+'/'+iface+'.js', 'w')
+        enum_files[iface] = outfile
+    impl.write_js_enum(enum, outfile)
+
 
