@@ -357,7 +357,7 @@
     <description>The second line of second set of main fields of the persistent display; applies to "Show"</description>
   </element>
   <element name="statusBar">
-    <description>The status bar on Nav; applies to "Show"</description>
+    <description>The status bar on NGN; applies to "Show"</description>
   </element>
   <element name="mediaClock">
     <description>Text value for MediaClock field; applies to "Show"</description>
@@ -822,29 +822,6 @@
     <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
   </element>
 </enum>
-
-<struct name="KeyboardProperties">
-  <description>Configuration of on-screen keyboard (if available).</description>
-  <param name="language" type="Language" mandatory="false">
-    <description>The keyboard language.</description>
-  </param> 
-  <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
-    <description>Desired keyboard layout.</description>
-  </param>   
-  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-    <description>In this mode, all keypresses will be sent as they occur.</description>
-    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-    <description>If omitted, this value will be set to FALSE.</description>      
-  </param>
-  <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
-    <description>Array of keyboard characters to enable.</description>
-    <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
-    <description>If omitted, the entire keyboard will be enabled.</description>      
-  </param>
-  <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
-    <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-  </param>   
-</struct>
 
 <enum name="AmbientLightStatus">
   <description>Reflects the status of the ambient light sensor.</description>
@@ -1361,6 +1338,29 @@
 </param>
 </struct>
 
+<struct name="KeyboardProperties">
+  <description>Configuration of on-screen keyboard (if available).</description>
+  <param name="language" type="Common.Language" mandatory="false">
+    <description>The keyboard language.</description>
+  </param> 
+  <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="false" >
+    <description>Desired keyboard layout.</description>
+  </param>   
+  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+    <description>In this mode, all keypresses will be sent as they occur.</description>
+    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+    <description>If omitted, this value will be set to FALSE.</description>      
+  </param>
+  <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>Array of keyboard characters to enable.</description>
+    <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+    <description>If omitted, the entire keyboard will be enabled.</description>      
+  </param>
+  <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+    <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+  </param>   
+</struct>
+
 <struct name="DeviceStatus">
   <param name="voiceRecOn" type="Boolean" mandatory="false">
     <description>Must be true if the voice recording is on.</description>
@@ -1742,7 +1742,7 @@
       <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
         <description>App defined SoftButtons</description>
       </param>
-	 	 <param name="progressIndicator" type="Boolean" mandatory="false" platform="MobileNav">
+      <param name="progressIndicator" type="Boolean" mandatory="false">
         <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -1910,7 +1910,7 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
       </param>
-	  <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" platform="MobileNav">
+      <param name="keyboardProperties" type="Common.KeyboardProperties" mandatory="false">
         <description>>On-screen keybaord configuration (if available).</description>
       </param>
     </function>
@@ -2006,34 +2006,7 @@
     </function>
     <function name="SetAppIcon" messagetype="response">
     </function>
-    <function name="ShowKeyboard" messagetype="request">
-      <description>Configures and populates on-screen keyboard.</description>
-      <param name="language" type="Common.Language" mandatory="true">
-        <description>The keyboard language.</description>
-      </param> 
-      <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true" >
-        <description>Desired keyboard layout.</description>
-      </param>     
-      <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-        <description>In this mode, all keypresses will be sent as they occur.</description>
-        <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-        <description>If omitted, this value will be set to FALSE.</description>      
-      </param>
-      <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
-        <description>Array of keyboard characters to enable.</description>
-        <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
-        <description>If omitted, the entire keyboard will be enabled.</description>      
-      </param>
-      <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
-        <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-      </param>   
-    </function>
-    <function name="ShowKeyboard" messagetype="response">
-      <param name="info" type="String" maxlength="1000" mandatory="false">
-        <description>Provides additional human readable info regarding the result.</description>
-      </param>    
-    </function>
-		<function name="OnKeyboardInput" messagetype="notification">
+    <function name="OnKeyboardInput" messagetype="notification">
       <description>On-screen keyboard event.</description>
       <description>Can be full string or individual keypresses depending on keyboard mode.</description>
       <param name="event" type="Common.KeyboardEvent" mandatory="true">
@@ -2048,14 +2021,14 @@
     </function>
     <function name="OnTouchEvent" messagetype="notification">
       <description>Notifies about touch events on the screen's prescribed area</description>
-		  <param name="eventType" type="Common.TouchEvent" mandatory="true">
-				<description>Type of event - start, move, stop, etc.</description>
-		  </param>
-		  <param name="touchLists" type="Common.TouchLists" mandatory="false">
-				<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
-		  </param>
-		  <param name="info" type="Common.TouchEventInfo" mandatory="true">
- 				<description>Coordinate of the touch, radius of touch input and input ID.</description>
+      <param name="eventType" type="Common.TouchEvent" mandatory="true">
+        <description>Type of event - start, move, stop, etc.</description>
+      </param>
+      <param name="touchLists" type="Common.TouchLists" mandatory="false">
+        <description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
+      </param>
+      <param name="info" type="Common.TouchEventInfo" mandatory="true">
+        <description>Coordinate of the touch, radius of touch input and input ID.</description>
       </param>
     </function>	
     <function name="Slider" messagetype="request">
