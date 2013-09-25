@@ -59,7 +59,8 @@ AudioManagerImpl::AudioManagerImpl()
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
     kH264FileName("h264file.mp4"),
     protocol_handler_(NULL),
-    videoStreamerThread_(NULL) {
+    videoStreamerThread_(NULL),
+    is_stream_running_(false) {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
@@ -236,6 +237,7 @@ void AudioManagerImpl::stopVideoStreaming() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (NULL != videoStreamerThread_) {
+    is_stream_running_ = false;
     recorderThread_->stop();
     delete videoStreamerThread_;
     videoStreamerThread_ = NULL;
@@ -263,8 +265,9 @@ void AudioManagerImpl::OnMessageReceived(
                        std::ios_base::app);
 
     // start streaming
-    if (!videoStreamerThread_) {
+    if (false == is_stream_running_) {
       LOG4CXX_ERROR(logger_, "Start streaming");
+      is_stream_running_ = true;
       const std::string url = "http://localhost:8000/live";
       startVideoStreaming(kH264FileName);
       application_manager::MessageHelper::SendNaviStartStream(

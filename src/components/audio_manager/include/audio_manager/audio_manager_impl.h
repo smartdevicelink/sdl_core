@@ -90,6 +90,7 @@ class AudioManagerImpl : public AudioManager,
     std::map<std::string, threads::Thread*> sources_;
     threads::Thread* recorderThread_;
     threads::Thread* videoStreamerThread_;
+    bool             is_stream_running_;
 
     const int MAC_ADDRESS_LENGTH_;
     static AudioManagerImpl* sInstance_;
