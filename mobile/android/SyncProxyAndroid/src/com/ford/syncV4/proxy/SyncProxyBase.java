@@ -2781,11 +2781,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 
     public OutputStream startH264() {
-        return _syncConnection.startH264(_mobileNavSessionID);
+        OutputStream stream = null;
+        if (_syncConnection != null){
+            stream = _syncConnection.startH264(_mobileNavSessionID);
+        }
+        return stream;
     }
 
     public void stopH264() {
-        _syncConnection.stopH264();
+        if (_syncConnection != null){
+            _syncConnection.stopH264();
+        }
     }
 
     public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
