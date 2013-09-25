@@ -37,9 +37,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.activity.mobilenav.DataReaderListener;
+import com.ford.syncV4.android.activity.mobilenav.FileStreamingLogic;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
-import com.ford.syncV4.android.activity.mobilenav.StaticFileReader;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -136,6 +135,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -273,8 +273,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
-    private StaticFileReader staticFileReader;
-    private OutputStream mOutputStream;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -3684,7 +3682,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Called when a connection to a SYNC device has been closed.
      */
     public void onProxyClosed() {
-        cancelStreaming();
         resetAdapters();
         _msgAdapter.logMessage("Disconnected", true);
     }
@@ -3753,24 +3750,42 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void onMobileNaviCheckBoxAction(View v) {
-        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        fr.onMobileNaviCheckBoxAction(v);
-    }
-
-    public void onMobileNaviStarted() {
-        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        fr.setMobileNaviStateOn();
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
-            mOutputStream =  proxy.startH264();
+    public void startMobileNaviSession() {
+        _msgAdapter.logMessage("Should start mobile nav session", true);
+        if (isProxyReadyForWork()) {
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
         }
     }
 
-    public void onMobileNaviError() {
+
+    public void onMobileNaviStarted() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            OutputStream stream = proxy.startH264();
+            MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+            fr.setMobileNaviStateOn(stream);
+        }
+    }
+
+    public void onMobileNaviError(String errorMsg) {
+        onMobileNaviError(errorMsg, true);
+    }
+
+    public void onMobileNaviError(String errorMsg, boolean addToUI) {
+        _msgAdapter.logMessage(errorMsg, addToUI);
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
+    }
+
+    public  void logError(final Exception e){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                _msgAdapter.logMessage(e.getMessage(), true);
+            }
+        });
+
     }
 
     private void closeMobileNaviOutputStream() {
@@ -3780,139 +3795,42 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
-    public void onMobileNavAckReceived(int frameReceived){
-        int r = frameReceived;
-    }
-
-    public void startMobileNaviSession() {
-        _msgAdapter.logMessage("Should start mobile nav session", true);
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
-                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
-                    ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
-                } else {
-                    _msgAdapter.logMessage("Can't start mobile nav session. sync connection is null", true);
-                    onMobileNaviError();
-                }
-            } else {
-                _msgAdapter.logMessage("Can't start mobile nav session. Proxy is not connected", true);
-                onMobileNaviError();
-            }
-        } else {
-            _msgAdapter.logMessage("Can't start mobile nav session. Proxy is null", true);
-            onMobileNaviError();
-        }
-    }
-
     public void stopMobileNavSession() {
         _msgAdapter.logMessage("Should stop mobile nav session", true);
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
-                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
-                    ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
-                    closeMobileNaviOutputStream();
-                } else {
-                    _msgAdapter.logMessage("Can't stop mobile nav session. sync connection is null", true);
-                }
-            } else {
-                _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is not connected", true);
-            }
-        } else {
-            _msgAdapter.logMessage("Can't stop mobile nav session. Proxy is null", true);
+        if (isProxyReadyForWork()) {
+            ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
+            closeMobileNaviOutputStream();
         }
-
-    }
-
-    public void onVideButtonAction(View v){
-        byte[] data = new byte[100];
-        sendMobileNaviData(data, true);
     }
 
     public void sendMobileNaviData(byte[] data, boolean addToUI) {
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            if (ProxyService.getInstance().getProxyInstance().getIsConnected()) {
-                if (ProxyService.getInstance().getProxyInstance().getSyncConnection() != null) {
-                    try {
-                        ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
-                    } catch (SyncException e) {
-                        _msgAdapter.logMessage("Can't send mobile navi frame." + e.getMessage(), addToUI);
-                        cancelStreaming();
-                    }
-                } else {
-                    _msgAdapter.logMessage("Can't send mobile nav data. sync connection is null", addToUI);
-                    cancelStreaming();
-                }
-            } else {
-                _msgAdapter.logMessage("Can't send mobile nav data. Proxy is not connected", addToUI);
-                cancelStreaming();
+        if (isProxyReadyForWork()) {
+            try {
+                ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
+            } catch (SyncException e) {
+                onMobileNaviError(e.getMessage(), false);
             }
-        } else {
-            _msgAdapter.logMessage("Can't send mobile nav data. Proxy is null", addToUI);
-            cancelStreaming();
         }
     }
 
-    private void cancelStreaming() {
-        if (staticFileReader != null){
-            staticFileReader.cancel(true);
+    public boolean isProxyReadyForWork() {
+        if (ProxyService.getInstance().getProxyInstance() == null){
+            onMobileNaviError("Error. Proxy is null");
+            return false;
         }
+        if (!ProxyService.getInstance().getProxyInstance().getIsConnected()) {
+            onMobileNaviError("Error. Proxy is not connected");
+            return false;
+        }
+        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null) {
+            onMobileNaviError("Error. sync connection is null");
+            return false;
+        }
+        return true;
     }
 
-    public void onVideoStreamingCheckBoxAction(View checkBox) {
-        MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        fr.onVideoStreamingCheckBoxAction(checkBox);
-    }
+    public void onMobileNavAckReceived(int frameReceived){
 
-    public void onFileStreamingAction(View v){
-        startFileStreaming();
-    }
-
-    private void startFileStreaming(){
-        createStaticFileReader();
-        staticFileReader.execute(R.raw.faq_welcome_orientation);
-    }
-
-
-    private void createStaticFileReader(){
-        final MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        staticFileReader = new StaticFileReader(this, mOutputStream ,new DataReaderListener() {
-            @Override
-            public void onStartReading() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fr.dataStreamingStarted();
-                    }
-                });
-            }
-
-            @Override
-            public void onDataReceived(final byte[] data) {
-
-            }
-
-            @Override
-            public void onCancelReading() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fr.dataStreamingStopped();
-                    }
-                });
-            }
-
-            @Override
-            public void onEndReading() {
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fr.dataStreamingStopped();
-                    }
-                });
-
-            }
-        });
     }
 
     public void onTouchEventReceived(OnTouchEvent notification){

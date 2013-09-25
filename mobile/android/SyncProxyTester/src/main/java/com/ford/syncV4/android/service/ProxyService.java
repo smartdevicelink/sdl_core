@@ -1287,13 +1287,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         else Log.i(TAG, "" + response);
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-
-        mainActivity.runOnUiThread(new Runnable() {
+        if (mainActivity != null){
+            mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mainActivity.onMobileNaviStarted();
             }
         });
+        }
     }
 
     @Override
@@ -1305,13 +1306,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         else Log.i(TAG, "" + response);
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-
-        mainActivity.runOnUiThread(new Runnable() {
+        if (mainActivity != null){
+            mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onMobileNavAckReceived(fNumber);
-            }
+                    mainActivity.onMobileNavAckReceived(fNumber);
+                }
         });
+        }
     }
 
     @Override

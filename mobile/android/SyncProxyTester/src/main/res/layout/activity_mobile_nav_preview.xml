@@ -13,7 +13,7 @@
         android:checked="false"
         android:enabled="false"
         android:hint="@string/mobile_navi_hint"
-        android:onClick="onMobileNaviCheckBoxAction" />
+        />
 
 
     <Button
@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:text="Send Data"
         android:enabled="false"
-        android:onClick="onVideButtonAction"
         android:id="@+id/videobutton"
         android:layout_below="@+id/mobileNavCheckBox"
         android:layout_alignParentLeft="true"
@@ -35,7 +34,6 @@
         android:id="@+id/file_streaming"
         android:layout_below="@+id/videobutton"
         android:enabled="false"
-        android:onClick="onFileStreamingAction"
         android:layout_centerHorizontal="true" />
 
 

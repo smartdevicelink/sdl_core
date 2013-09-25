@@ -106,6 +106,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
 		}
 		
 		synchronized (TRANSPORT_REFERENCE_LOCK) {
+            stopH264();
+
 			if (_transport != null) {
 				_transport.disconnect();
 			}
@@ -158,7 +160,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
 	}
 	
 	public void sendMessage(ProtocolMessage msg) {
-        if (msg != null){
+        if (msg != null && _protocol != null){
 		    _protocol.SendMessage(msg);
         }
 	}
