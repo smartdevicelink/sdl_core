@@ -17,8 +17,8 @@ Column {
                     qml: "./views/MusicSourceGridView.qml"
                 }
                 ListElement{
-                    name: "Device 1"
-                    qml: "./views/ChangeDeviceView.qml"
+                    name: "SDL Menu"
+                    qml: "./views/AppsMenuGridView.qml"
                 }
                 ListElement{
                     name: "Options"

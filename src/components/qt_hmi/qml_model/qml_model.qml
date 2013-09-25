@@ -74,7 +74,7 @@ Rectangle{
         HardwareButtonsView {}
     }
 
-    Api {
+    HMIProxy {
         HmiApi.Buttons_auto {
             id: sdlButtons
             objectName: "Buttons"
@@ -105,12 +105,19 @@ Rectangle{
         }
     }
 
+    SDLProxy {
+        id: sdlProxy
+
+        onAppRegistered: {
+            console.log("new app registered")
+        }
+    }
+
     Component.onCompleted: {
         settings.vrAvailable = true;
         settings.ttsAvailable = true;
         settings.navigationAvailable = true;
         settings.uiAvailable = true;
-        console.log("hello!")
-        sdlBasicCommunications.onReady()
+        sdlBasicCommunications.onReady();
     }
 }

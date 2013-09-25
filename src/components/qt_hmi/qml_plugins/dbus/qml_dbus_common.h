@@ -1,0 +1,126 @@
+#ifndef QML_DBUS_COMMON_H
+
+#include <QDBusContext>
+#include "optional_argument.h"
+
+inline void RaiseDbusError(QObject* adaptor) {
+    QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());
+    if (context) {
+        context->sendErrorReply(QDBusError::InternalError, "Returned value is invalid");
+    }
+}
+
+template<typename T>
+inline void PutArgToMap(QVariantMap& map, const char* name, const T& v) {
+  map.insert(name, QVariant::fromValue(v));
+}
+
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, int& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) return false;
+  if (it->type() != QVariant::Int) return false;
+  v = it->toInt();
+  return true;
+}
+
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, QString& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) return false;
+  if (it->type() != QVariant::String) return false;
+  v = it->toString();
+  return true;
+}
+
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, bool& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) return false;
+  if (it->type() != QVariant::Bool) return false;
+  v = it->toBool();
+  return true;
+}
+
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, double& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) return false;
+  if (it->type() != QVariant::Double) return false;
+  v = it->toDouble();
+  return true;
+}
+
+inline bool VariantToValue(const QVariant& variant, int& v) {
+    if (variant.type() != QVariant::Int) return false;
+    v = variant.toInt();
+    return true;
+}
+
+inline bool VariantToValue(const QVariant& variant, QString& v) {
+    if (variant.type() != QVariant::String) return false;
+    v = variant.toString();
+    return true;
+}
+
+inline bool VariantToValue(const QVariant& variant, bool& v) {
+    if (variant.type() != QVariant::Bool) return false;
+    v = variant.toBool();
+    return true;
+}
+
+inline bool VariantToValue(const QVariant& variant, double& v) {
+    if (variant.type() != QVariant::Double) return false;
+    v = variant.toDouble();
+    return true;
+}
+
+template<typename T>
+inline QVariant ValueToVariant(const T& v) {
+    return QVariant::fromValue(v);
+}
+
+template<typename T>
+inline QVariant ValueToVariant(const QList<T>& v) {
+  QList<QVariant> list;
+  for(typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
+      list.append(ValueToVariant(*i));
+  return QVariant::fromValue(list);
+}
+
+template<typename T>
+inline void PutArgToMap(QVariantMap& map, const char* name, const QList<T>& v) {
+  QList<QVariant> list;
+  for(typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
+      list.append(ValueToVariant(*i));
+  map.insert(name, QVariant::fromValue(list));
+}
+
+template<typename T>
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, QList<T>& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) return false;
+  const QVariant& variant = *it;
+  if (variant.type() != QVariant::List) return false;
+  QList<QVariant> list = variant.toList();
+  for(QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {
+    T t;
+    bool ok = VariantToValue(*i, t);
+    if (!ok) return false;
+    v.append(t);
+  }
+  return true;
+}
+
+template<typename T>
+inline void PutArgToMap(QVariantMap& map, const char* name, const OptionalArgument<T>& v) {
+  if (v.presence) map.insert(name, ValueToVariant(v.val));
+}
+
+template<typename T>
+inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgument<T>& v) {
+  QVariantMap::const_iterator it = map.find(name);
+  if (map.end() == it) {v.presence = false; return true;}
+  v.presence = true;
+  return GetArgFromMap(map, name, v.val);
+}
+
+#define QML_DBUS_COMMON_H
+
+#endif // QML_DBUS_COMMON_H
