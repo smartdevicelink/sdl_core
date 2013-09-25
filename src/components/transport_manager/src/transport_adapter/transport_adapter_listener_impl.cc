@@ -259,7 +259,7 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
       *it, device, application, RawMessageSptr(),
-      nullptr);
+      NULL);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }

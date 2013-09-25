@@ -36,7 +36,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <getopt.h>
+//#include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
                                 log4cxx::Logger::getLogger("appMain"));
   //log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-  bool shouldReturn = false;
+  /*bool shouldReturn = false;
   bool shouldFlush = false;
   int next_option;
 
@@ -319,7 +319,7 @@ int main(int argc, char** argv) {
   if(shouldFlush) {
     flushCoverageInfo();
     return 0;
-  }
+  }*/
 
   LOG4CXX_INFO(logger, " Application started!");
 

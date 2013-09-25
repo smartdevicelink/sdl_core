@@ -14,11 +14,11 @@ set(LIBRARIES
   Utils
   encryption
   jsoncpp
-  bluetooth
+  #bluetooth
   pthread
   rt
-  avahi-client
-  avahi-common
+  #avahi-client
+  #avahi-common
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog

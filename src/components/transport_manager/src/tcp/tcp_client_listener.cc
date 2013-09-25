@@ -54,6 +54,10 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
+#define TCP_KEEPINTVL  5  /* Interval between keepalives */
+#define TCP_KEEPCNT  6  /* Number of keepalives before death */
+
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port)
     : port_(port),

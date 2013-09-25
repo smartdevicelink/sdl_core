@@ -110,7 +110,7 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
 
 TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
-  if (device_scanner_ == nullptr) {
+  if (device_scanner_ == NULL) {
     LOG4CXX_INFO(logger_, "not supported");
     return NOT_SUPPORTED;
   } else if (!device_scanner_->IsInitialised()) {

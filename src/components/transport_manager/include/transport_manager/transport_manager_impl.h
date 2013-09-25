@@ -493,6 +493,8 @@ class TransportManagerImpl : public TransportManager {
   bool GetFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
   bool GetFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
 
+  static Connection convert(ConnectionInternal& p);
+
   friend bool TransportAdapterListenerImpl::FindSharedPtr(const TransportAdapter*, AdapterIterator&);
 };//class ;
 

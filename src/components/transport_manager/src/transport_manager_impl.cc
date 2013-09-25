@@ -54,10 +54,20 @@
 using ::transport_manager::transport_adapter::TransportAdapter;
 using ::transport_manager::transport_adapter::TransportAdapterSptr;
 
+
+
 namespace transport_manager {
 
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("TransportManager"));
+
+TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
+  TransportManagerImpl::Connection c;
+  c.application = p.application;
+  c.device = p.device;
+  c.id = p.id;
+  return c;
+}
 
 TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
   : message_queue_mutex_(),
@@ -69,12 +79,12 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
     connection_id_counter_(0),
     config_(config),
     da_scanned_(0),
-    protocol_handler_(nullptr),
+    protocol_handler_(NULL),
     search_in_progress_(false) {
 
   LOG4CXX_INFO(logger_, "==============================================");
-  pthread_mutex_init(&message_queue_mutex_, nullptr);
-  pthread_cond_init(&message_queue_cond, nullptr);
+  pthread_mutex_init(&message_queue_mutex_, NULL);
+  pthread_cond_init(&message_queue_cond, NULL);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   LOG4CXX_INFO(logger_, "TransportManager object created");
@@ -109,14 +119,7 @@ TransportManagerImpl::~TransportManagerImpl() {
 
 std::vector<TransportManagerImpl::Connection> TransportManagerImpl::GetConnectionList() {
   std::vector<TransportManagerImpl::Connection> rc(connections_.size());
-  std::transform(connections_.begin(), connections_.end(), rc.begin(),
-  [&](ConnectionInternal & p) {
-    Connection c;
-    c.application = p.application;
-    c.device = p.device;
-    c.id = p.id;
-    return c;
-  });
+  std::transform(connections_.begin(), connections_.end(), rc.begin(), convert);
   return rc;
 }
 
@@ -213,8 +216,9 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
 
   pthread_mutex_lock(&event_queue_mutex_);
   int messages_count = 0;
-  for (auto e : event_queue_) {
-    if (e.application_id() == cid) {
+  for (std::vector<TransportAdapterEvent>::iterator e = event_queue_.begin();
+    e != event_queue_.end(); ++e) {
+    if (e->application_id() == cid) {
       ++messages_count;
     }
   }
@@ -608,7 +612,7 @@ void TransportManagerImpl::EventListenerThread(void) {
   bool frame_ready = true;
   bool size_ready = false;
   unsigned int frame_size = 0;
-  unsigned char* frame = nullptr;
+  unsigned char* frame = NULL;
   bool is_new;
   std::map<ConnectionUID, std::pair<unsigned int, unsigned char*>> data_container;
   //YK: temp solution until B1.0 release - end

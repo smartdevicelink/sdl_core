@@ -40,13 +40,13 @@
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
-#include "transport_manager/tcp/dnssd_service_browser.h"
+//#include "transport_manager/tcp/dnssd_service_browser.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 TcpTransportAdapter::TcpTransportAdapter()
-    : TransportAdapterImpl(new DnssdServiceBrowser(this), new TcpConnectionFactory(this),
+    : TransportAdapterImpl(/*new DnssdServiceBrowser(this)*/NULL, new TcpConnectionFactory(this),
                         new TcpClientListener(this, default_port)) {
 }
 

@@ -44,8 +44,8 @@ Timer::Timer() : thread_(0),
     func_(0),
     params_(0),
     single_shot_(false) {
-  pthread_cond_init(&cond_, nullptr);
-  pthread_mutex_init(&mutex_, nullptr);
+  pthread_cond_init(&cond_, NULL);
+  pthread_mutex_init(&mutex_, NULL);
 }
 
 Timer::Timer(unsigned long milliseconds, Callback func, void *params, bool single_shot)
@@ -54,8 +54,8 @@ Timer::Timer(unsigned long milliseconds, Callback func, void *params, bool singl
       func_(func),
       params_(params),
       single_shot_(single_shot) {
-  pthread_cond_init(&cond_, nullptr);
-  pthread_mutex_init(&mutex_, nullptr);
+  pthread_cond_init(&cond_, NULL);
+  pthread_mutex_init(&mutex_, NULL);
 }
 
 Timer::Timer(const Timer &other)
@@ -64,8 +64,8 @@ Timer::Timer(const Timer &other)
       func_(other.func_),
       params_(other.params_),
       single_shot_(other.single_shot_) {
-  pthread_cond_init(&cond_, nullptr);
-  pthread_mutex_init(&mutex_, nullptr);
+  pthread_cond_init(&cond_, NULL);
+  pthread_mutex_init(&mutex_, NULL);
 }
 
 Timer::~Timer() {
@@ -86,7 +86,7 @@ Timer& Timer::operator = (const Timer &other)
 }
 
 void Timer::Start() {
-  pthread_create(&thread_, nullptr, &ThreadRoutine, this);
+  pthread_create(&thread_, NULL, &ThreadRoutine, this);
 }
 
 void Timer::Stop() {
@@ -109,7 +109,7 @@ void* Timer::ThreadRoutine(void* p) {
       break;
     }
   } while (!t->single_shot_);
-  return nullptr;
+  return NULL;
 }
 
 }  // namespace transport_manager

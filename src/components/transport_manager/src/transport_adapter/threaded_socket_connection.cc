@@ -178,7 +178,7 @@ TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
 void ThreadedSocketConnection::Thread() {
   LOG4CXX_TRACE_ENTER(logger_);
   controller_->ConnectionCreated(this, device_uid_, app_handle_);
-  ConnectError* connect_error = nullptr;
+  ConnectError* connect_error = NULL;
   if (Establish(&connect_error)) {
     LOG4CXX_INFO(logger_, "Connection established (#" << pthread_self() << ")");
     controller_->ConnectDone(device_handle(), application_handle());
