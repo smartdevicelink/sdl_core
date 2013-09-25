@@ -106,6 +106,11 @@ Rectangle{
         }
     }
 
+    AlertWindow {
+        id: alertWindow
+        objectName: "AlertWindow"
+    }
+
     Component.onCompleted: {
         dataContainer.hmiVRAvailable = true
         dataContainer.hmiTTSAvailable = true
