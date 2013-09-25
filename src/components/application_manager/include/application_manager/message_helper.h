@@ -210,6 +210,15 @@ class MessageHelper {
     static void SendDeleteSubMenuRequestToHMI(Application* const app);
     static void ResetGlobalproperties(Application* const app);
 
+    /*
+     * @brief Sends notification to HMI to start video streaming
+     *
+     * @param url     URL for video streamng
+     * @param app_id  Application ID
+     *
+     */
+    static void SendNaviStartStream(const std::string& url, int app_id);
+
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);

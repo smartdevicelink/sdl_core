@@ -994,6 +994,34 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   SendGlobalPropertiesToHMI(app);
 }
 
+void MessageHelper::SendNaviStartStream(
+    const std::string& url, int app_id) {
+  smart_objects::SmartObject* start_stream =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!start_stream) {
+    return;
+  }
+
+  (*start_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_OnStartStream;
+  (*start_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::notification;
+  (*start_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*start_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::url] = url;
+
+  (*start_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message,
   const Application* app) {

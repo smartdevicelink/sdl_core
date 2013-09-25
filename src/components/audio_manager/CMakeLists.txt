@@ -13,6 +13,8 @@ include_directories (
   ../interfaces
   ../../thirdPartyLibs/logger/include/
   ../../thirdPartyLibs/MessageBroker/include/
+  ../application_manager/include/
+  ../connection_handler/include/
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/

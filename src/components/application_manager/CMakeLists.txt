@@ -283,6 +283,9 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
+./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_navi_start_stream_notification.cc
+
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})

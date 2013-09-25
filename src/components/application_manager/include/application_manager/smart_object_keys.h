@@ -50,6 +50,7 @@ const char error_msg[] = "message";
 const char msg_params[] = "msg_params";
 const char info[] = "info";
 const char app_id[] = "appID";
+const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
 const char success[] = "success";

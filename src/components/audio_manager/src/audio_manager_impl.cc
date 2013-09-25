@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include "application_manager/message_helper.h"
 #include "audio_manager/audio_manager_impl.h"
 #include "utils/file_system.h"
 
@@ -57,11 +58,13 @@ AudioManagerImpl::AudioManagerImpl()
 // Six hex-pairs + five underscores + '\n'
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
     kH264FileName("h264file.mp4"),
-    protocol_handler_(NULL) {
+    protocol_handler_(NULL),
+    videoStreamerThread_(NULL) {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
   protocol_handler_ = NULL;
+  videoStreamerThread_ = NULL;
 }
 
 void AudioManagerImpl::SetProtocolHandler(
@@ -218,7 +221,6 @@ void AudioManagerImpl::startVideoStreaming(const std::string& fileName) {
     new VideoStreamingThread();
 
   if (NULL != videoStreamingThreadDelegate) {
-
     videoStreamingThreadDelegate->setVideoFileName(fileName);
 
     videoStreamerThread_ = new threads::Thread("VideoStreamer"
@@ -243,11 +245,13 @@ void AudioManagerImpl::stopVideoStreaming() {
 void AudioManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_TRACE_ENTER(logger_);
+
   if (!message) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to message.");
     NOTREACHED();
     return;
   }
+
   if (message->is_fully_binary()) {
     // the only type of message AudioManager is interested in.
     std::vector<unsigned char> recieved_bin_data(
@@ -257,6 +261,15 @@ void AudioManagerImpl::OnMessageReceived(
     file_system::Write(kH264FileName,
                        recieved_bin_data,
                        std::ios_base::app);
+
+    // start streaming
+    if (!videoStreamerThread_) {
+      LOG4CXX_ERROR(logger_, "Start streaming");
+      const std::string url = "http://localhost:8000/live";
+      startVideoStreaming(kH264FileName);
+      application_manager::MessageHelper::SendNaviStartStream(
+          url, (*message).connection_key());
+    }
   }
 }
 
