@@ -1904,7 +1904,7 @@
 	  <param name="menuTitle" maxlength="500" type="String" mandatory="false">
         <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
       </param>
-      <param name="menuIcon" type="Common.Image">
+      <param name="menuIcon" type="Common.Image" mandatory="false">
         <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
