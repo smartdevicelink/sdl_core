@@ -54,6 +54,11 @@ Rectangle{
                 source:startQml
                 property var screenMovingStack : []
 
+                function reset(){
+                    screenMovingStack = []
+                    source = startQml
+                }
+
                 function go(path) {
                     screenMovingStack.push(source.toString())
                     source = path

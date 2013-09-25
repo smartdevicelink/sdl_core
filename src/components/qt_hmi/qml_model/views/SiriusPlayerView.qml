@@ -3,7 +3,6 @@ import "../controls"
 
 Column {
     id: siriusPlayer
-    spacing: 25
     anchors.fill: parent
     property var presets: [ "Lithium", "Spectrum", "ESPN", "Alt Nation", "Lithium", "Spectrum", "ESPN", "Alt Nation" ]
     Item{
@@ -24,10 +23,10 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
         }
     }
-    Row {
-        spacing: 50
+    Item{
         width: parent.width
-        x: 35
+        height: parent.height / 2
+
         Column{
             spacing: 10
             Row{
@@ -56,6 +55,7 @@ Column {
             }
         }
     }
+
     Item {
         width: parent.width
         height: parent.height / 4
@@ -67,7 +67,7 @@ Column {
         PresetRow {
             anchors.centerIn: parent
             presets: siriusPlayer.presets
-            width: parent.width - 100
+            width: parent.width
             onSelectedIndexChanged: {
                 siriusChannelNameText.text = presets[selectedIndex];
             }
