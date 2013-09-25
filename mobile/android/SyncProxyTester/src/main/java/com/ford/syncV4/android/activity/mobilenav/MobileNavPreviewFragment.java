@@ -13,28 +13,22 @@ import android.widget.CheckBox;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 
-public class MobileNavPreviewFragment extends Fragment  {
+import java.io.OutputStream;
 
-    private static final String logTag = "MobileNavPreviewFragment";
-
+public class MobileNavPreviewFragment extends Fragment{
     private CheckBoxState mobileNavSessionCheckBoxState;
-
     private Button dataStreamingButton;
-
+    private FileStreamingLogic fileStreamingLogic;
+    private SyncProxyTester context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.i(logTag, "MobileNavPreviewFragment created");
         View view = inflater.inflate(R.layout.activity_mobile_nav_preview,
                 container, true);
+        context = (SyncProxyTester) getActivity();
+        fileStreamingLogic = new FileStreamingLogic(this);
         return view;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        Log.i(logTag, "activity attached to  MobileNavPreviewFragment");
     }
 
     @Override
@@ -43,25 +37,13 @@ public class MobileNavPreviewFragment extends Fragment  {
         initiateVideoCheckBox(view);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i(logTag, "activity paused");
-    }
-
     private void initiateVideoCheckBox(View view) {
         dataStreamingButton = (Button) getView().findViewById(R.id.file_streaming);
-
-
-        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState((CheckBox) view.findViewById(R.id.mobileNavCheckBox), getActivity());
+        dataStreamingButton.setOnClickListener(new VideoActionListener());
+        CheckBox checkBox = (CheckBox) view.findViewById(R.id.mobileNavCheckBox);
+        checkBox.setOnClickListener(new MobileNaviSessionCheckBoxOnClickListener());
+        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
         mobileNavSessionCheckBoxState.setStateOff();
-    }
-
-    public void onVideoStreamingCheckBoxAction(View checkBox) {
-        changeVideoCheckBoxState((CheckBox) checkBox);
-    }
-
-    private void changeVideoCheckBoxState(CheckBox checkBox) {
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
@@ -92,11 +74,13 @@ public class MobileNavPreviewFragment extends Fragment  {
         dataStreamingButton.setEnabled(false);
     }
 
-    public void setMobileNaviStateOn(){
+    public void setMobileNaviStateOn(OutputStream stream){
         mobileNavSessionCheckBoxState.setStateOn();
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(true);
         dataStreamingButton.setEnabled(true);
+        fileStreamingLogic.setOutputStream(stream);
+        fileStreamingLogic.createStaticFileReader();
     }
 
     public void dataStreamingStarted() {
@@ -105,7 +89,32 @@ public class MobileNavPreviewFragment extends Fragment  {
     }
 
     public void dataStreamingStopped() {
-        dataStreamingButton.setEnabled(true);
+        if (mobileNavSessionCheckBoxState.getState() == CheckBoxStateValue.ON){
+            dataStreamingButton.setEnabled(true);
+        }else{
+            dataStreamingButton.setEnabled(false);
+        }
         dataStreamingButton.setText("Start File Streaming");
     }
+
+    private void startFileStreaming() {
+        fileStreamingLogic.startFileStreaming();
+    }
+
+    private class MobileNaviSessionCheckBoxOnClickListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            onMobileNaviCheckBoxAction(v);
+        }
+    }
+
+    private class VideoActionListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            startFileStreaming();
+        }
+    }
+
 }
