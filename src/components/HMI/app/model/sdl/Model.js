@@ -380,7 +380,7 @@ SDL.SDLModel = Em.Object
                 SDL.SDLModel.naviVideo = document.getElementById("html5Player");
                 SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
                 SDL.SDLModel.naviVideo.play();
-            }, 5000);
+            }, 1000);
             }
         },
 

@@ -60,7 +60,9 @@ AudioManagerImpl::AudioManagerImpl()
     kH264FileName("h264file.mp4"),
     protocol_handler_(NULL),
     videoStreamerThread_(NULL),
-    is_stream_running_(false) {
+    is_stream_running_(false),
+    app_connection_key(0),
+    timer_(this, &AudioManagerImpl::onTimer) {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
@@ -255,6 +257,20 @@ void AudioManagerImpl::OnMessageReceived(
   }
 
   if (message->is_fully_binary()) {
+
+    if (false == is_stream_running_) {
+
+      if (file_system::FileExists(kH264FileName)) {
+        file_system::DeleteFile(kH264FileName);
+      }
+
+      LOG4CXX_ERROR(logger_, "Start streaming timer");
+      is_stream_running_ = true;
+      app_connection_key = (*message).connection_key();
+      // FIXME
+      timer_.start(1);
+    }
+
     // the only type of message AudioManager is interested in.
     std::vector<unsigned char> recieved_bin_data(
       message->data(),
@@ -263,17 +279,16 @@ void AudioManagerImpl::OnMessageReceived(
     file_system::Write(kH264FileName,
                        recieved_bin_data,
                        std::ios_base::app);
-
-    // start streaming
-    if (false == is_stream_running_) {
-      LOG4CXX_ERROR(logger_, "Start streaming");
-      is_stream_running_ = true;
-      const std::string url = "http://localhost:8000/live";
-      startVideoStreaming(kH264FileName);
-      application_manager::MessageHelper::SendNaviStartStream(
-          url, (*message).connection_key());
-    }
   }
+}
+
+void AudioManagerImpl::onTimer() const {
+  // start streaming
+    LOG4CXX_ERROR(logger_, "Start streaming");
+    const std::string url = "http://localhost:8000/live";
+    AudioManagerImpl::getAudioManager()->startVideoStreaming(kH264FileName);
+    application_manager::MessageHelper::SendNaviStartStream(
+        url, app_connection_key);
 }
 
 }  // namespace audio_manager

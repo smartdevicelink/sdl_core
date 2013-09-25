@@ -38,6 +38,7 @@
 #include <map>
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/timer_thread.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "audio_manager/audio_manager.h"
@@ -81,6 +82,8 @@ class AudioManagerImpl : public AudioManager,
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
 
+    void onTimer() const;
+
     virtual ~AudioManagerImpl();
 
   protected:
@@ -88,9 +91,11 @@ class AudioManagerImpl : public AudioManager,
 
   private:
     std::map<std::string, threads::Thread*> sources_;
-    threads::Thread* recorderThread_;
-    threads::Thread* videoStreamerThread_;
-    bool             is_stream_running_;
+    threads::Thread*                        recorderThread_;
+    threads::Thread*                        videoStreamerThread_;
+    mutable bool                            is_stream_running_;
+    int                                     app_connection_key;
+    timer::TimerThread<AudioManagerImpl>    timer_;
 
     const int MAC_ADDRESS_LENGTH_;
     static AudioManagerImpl* sInstance_;
