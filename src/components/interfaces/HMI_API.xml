@@ -2182,6 +2182,21 @@
         <description>Current State of TBT client</description>
       </param>
     </function>
+    <function name="OnStartStream" messagetype="notification">
+      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+        <description>URL that HMI start playing.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
+      </param>
+    </function>
+    <function name="OnStoptStream" messagetype="notification">
+      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
+      </param>
+    </function>
 </interface>
 
 <interface name="VehicleInfo" version="1.0" date="2013-04-21">

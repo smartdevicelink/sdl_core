@@ -208,15 +208,13 @@ var StateManager = Em.StateManager.extend({
                 this._super();
 
                 SDL.SDLMediaController.restoreCurrentApp();
-
-                SDL.SDLModel.playVideo();
             },
 
             exit: function () {
 
                 this._super();
 
-                SDL.SDLModel.pauseVideo();
+                SDL.SDLAppController.deactivateApp();
             }
         })
     }),

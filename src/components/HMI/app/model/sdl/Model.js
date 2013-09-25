@@ -350,15 +350,35 @@ SDL.SDLModel = Em.Object
         },
 
         /**
-         * Video player trigger to start playing video
+         * Method to open Phone view and dial phone number
+         *
+         * @param {Object}
+         */
+        onStartStream: function(params) {
+
+            SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
+            this.playVideo();
+        },
+
+        /**
+         * Method to set navigation streaming url to current app model
+         *
+         * @param {Object}
+         */
+        onStopStream: function(params) {
+
+            SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
+        },
+
+        /**
+         * Method to reset navigation streaming url from current app model
          */
         playVideo: function(){
-            if (this.naviVideo === null) {
+            if (SDL.SDLAppController.model.navigationStream !== null) {
                 this.naviVideo = document.getElementById("html5Player");
-                this.naviVideo.src = "http://127.0.0.1:8000/live";
+                this.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+                SDL.SDLModel.naviVideo.play();
             }
-
-            SDL.SDLModel.naviVideo.play();
         },
 
         /**
