@@ -375,9 +375,12 @@ SDL.SDLModel = Em.Object
          */
         playVideo: function(){
             if (SDL.SDLAppController.model.navigationStream !== null) {
-                this.naviVideo = document.getElementById("html5Player");
-                this.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+
+            setTimeout(function(){
+                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
+                SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
                 SDL.SDLModel.naviVideo.play();
+            }, 5000);
             }
         },
 
