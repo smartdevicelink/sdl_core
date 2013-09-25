@@ -9,6 +9,6 @@ Item
             presetBankCapabilities: {
                 onScreenPresetsAvailable: true
             }
-        };
+        }
     }
 }

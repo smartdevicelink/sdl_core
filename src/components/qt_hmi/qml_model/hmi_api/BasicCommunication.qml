@@ -1,14 +1,18 @@
 import QtQuick 2.0
 
 Item {
-    function updateDeviceList(deviceList) {
+    signal onReady;
+    signal onStartDeviceDiscovery;
+    signal onFindApplications (var deviceInfo);
+
+    function updateDeviceList (deviceList) {
         dataContainer.deviceList.clear();
         for(var i = 0; i < deviceList.length; i++) {
             dataContainer.deviceList.append({ name: deviceList[i].name, devid: deviceList[i].id })
         }
     }
 
-    function updateAppList(applications) {
+    function updateAppList (applications) {
         for(var i = 0; i < applications.length; i++) {
             dataContainer.applicationList.append({
                  appName: applications[i].appName,
@@ -20,6 +24,12 @@ Item {
                  isMediaApplication: applications[i].isMediaApplication,
                  appType: applications[i].appType
             });
+        }
+    }
+
+    function allowDeviceToConnect (device) {
+        return {
+            allow: true
         }
     }
 }

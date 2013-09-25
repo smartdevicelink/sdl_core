@@ -15,11 +15,15 @@ Rectangle{
     property int minHeight: 600
     color: "black"
 
-    DataStorage{
+    DataStorage {
         id: dataContainer
     }
     SettingsStorage {
         id: settings
+    }
+
+    SettingsStorage {
+        id: settingsContainer
     }
 
     Item {

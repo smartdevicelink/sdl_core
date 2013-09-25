@@ -1,11 +1,11 @@
 import QtQuick 2.0
 import com.ford.hmi_framework 1.0
-import "../hmi_api/enums.js" as Enums
+import "../hmi_api/Common.js" as Common
 
 MaskedContainer {
 
     property string name
-    property int    buttonId: Enums.ButtonName.CUSTOM_BUTTON
+    property int    buttonId: Common.ButtonName.CUSTOM_BUTTON
     property bool   upDownAvailable: true
     property bool   shortPressAvailable: true
     property bool   longPressAvailable: true
@@ -35,17 +35,17 @@ MaskedContainer {
         pressedImg.opacity = 1
         timer.start()
         if (upDownAvailable) {
-            sdlButtons.onButtonEvent(buttonId, Enums.ButtonEventMode.BUTTONDOWN, undefined)
+            sdlButtons.onButtonEvent(buttonId, Common.ButtonEventMode.BUTTONDOWN, undefined)
         }
     }
 
     onReleased: {
         if (upDownAvailable) {
-            sdlButtons.onButtonEvent(buttonId, Enums.ButtonEventMode.BUTTONUP, undefined)
+            sdlButtons.onButtonEvent(buttonId, Common.ButtonEventMode.BUTTONUP, undefined)
         }
         timer.stop()
         if (!clickProcessed && shortPressAvailable) {
-            sdlButtons.onButtonPress(buttonId, Enums.ButtonPressMode.SHORT, undefined)
+            sdlButtons.onButtonPress(buttonId, Common.ButtonPressMode.SHORT, undefined)
         }
         pressedImg.opacity = 0
     }
@@ -54,7 +54,7 @@ MaskedContainer {
         target: timer
         onTriggered: {
             if(!clickProcessed && longPressAvailable) {
-                sdlButtons.onButtonPress(buttonId, Enums.ButtonPressMode.LONG, undefined)
+                sdlButtons.onButtonPress(buttonId, Common.ButtonPressMode.LONG, undefined)
                 clickProcessed = true
                 hold()
             }
@@ -62,8 +62,8 @@ MaskedContainer {
     }
 
     Component.onCompleted: {
-        if (buttonId !== Enums.ButtonName.CUSTOM_BUTTON) {
-            settings.capabilities.push(
+        if (buttonId !== Common.ButtonName.CUSTOM_BUTTON) {
+            sdlButtons.capabilities.push(
             {
                 name: buttonId,
                 upDownAvailable: upDownAvailable,

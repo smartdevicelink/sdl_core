@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
 Item {
     ListModel {
@@ -37,10 +38,21 @@ Item {
         "iPod": { }
     }
 
+    property int hmiUILanguage: Common.Language.EN_US
+    property int hmiTTSVRLanguage: Common.Language.EN_US
+
     property alias deviceList: deviceListModel
     property alias applicationList: applicationListModel
 
     function reset () {
         route_text = ""
+    }
+
+    function changeRegistrationUI (language) {
+        hmiUILanguage = language
+    }
+
+    function changeRegistrationTTSVR (language) {
+        hmiTTSVRLanguage = language
     }
 }

@@ -26,3 +26,30 @@ var ButtonPressMode = {
     LONG:  0,
     SHORT: 1
 }
+
+var Language = {
+    EN_US:  0,
+    ES_MX:  1,
+    FR_CA:  2,
+    DE_DE:  3,
+    ES_ES:  4,
+    EN_GB:  5,
+    RU_RU:  6,
+    TR_TR:  7,
+    PL_PL:  8,
+    FR_FR:  9,
+    IT_IT: 10,
+    SV_SE: 11,
+    PT_PT: 12,
+    NL_NL: 13,
+    EN_AU: 14,
+    ZH_CN: 15,
+    ZH_TW: 16,
+    JA_JP: 17,
+    AR_SA: 18,
+    KO_KR: 19,
+    PT_BR: 20,
+    CS_CZ: 21,
+    DA_DK: 22,
+    NO_NO: 23
+}

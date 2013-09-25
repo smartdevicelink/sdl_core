@@ -3,7 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import com.ford.hmi_framework 1.0
 import "../controls"
-import "../hmi_api/enums.js" as Enums
+import "../hmi_api/Common.js" as Common
 
 Item {
     id: hardwareButtons
@@ -38,11 +38,11 @@ Item {
                 width: childrenRect.width
                 height: childrenRect.height
 
-                HardwareButton { buttonId: Enums.ButtonName.TUNEUP; name: "Up" }
-                HardwareButton { buttonId: Enums.ButtonName.TUNEDOWN; name: "Down" }
-                HardwareButton { buttonId: Enums.ButtonName.SEEKLEFT; name: "Left" }
-                HardwareButton { buttonId: Enums.ButtonName.SEEKRIGHT; name: "Right" }
-                HardwareButton { buttonId: Enums.ButtonName.OK; name: "Ok" }
+                HardwareButton { buttonId: Common.ButtonName.TUNEUP; name: "Up" }
+                HardwareButton { buttonId: Common.ButtonName.TUNEDOWN; name: "Down" }
+                HardwareButton { buttonId: Common.ButtonName.SEEKLEFT; name: "Left" }
+                HardwareButton { buttonId: Common.ButtonName.SEEKRIGHT; name: "Right" }
+                HardwareButton { buttonId: Common.ButtonName.OK; name: "Ok" }
             }
 
             Column {
@@ -105,22 +105,22 @@ Item {
                                     parent.gradient.stops[1].position = 0.0
                                     clickProcessed  = false
                                     timer.start()
-                                    sdlButtons.onButtonEvent(Enums.ButtonName.PRESET_0 + index, Enums.ButtonEventMode.BUTTONDOWN, undefined)
+                                    sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + index, Common.ButtonEventMode.BUTTONDOWN, undefined)
                                 }
                                 onReleased: {
                                     parent.gradient.stops[0].position = 0.0
                                     parent.gradient.stops[1].position = 1.0
-                                    sdlButtons.onButtonEvent(Enums.ButtonName.PRESET_0 + index, Enums.ButtonEventMode.BUTTONUP, undefined)
+                                    sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + index, Common.ButtonEventMode.BUTTONUP, undefined)
                                     timer.stop()
                                     if (!clickProcessed) {
-                                        sdlButtons.onButtonPress(Enums.ButtonName.PRESET_0 + index, Enums.ButtonPressMode.SHORT, undefined)
+                                        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + index, Common.ButtonPressMode.SHORT, undefined)
                                     }
                                 }
                                 Connections {
                                     target: timer
                                     onTriggered: {
                                         if(!mouseArea.clickProcessed) {
-                                            sdlButtons.onButtonPress(Enums.ButtonName.PRESET_0 + index, Enums.ButtonPressMode.LONG, undefined)
+                                            sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + index, Common.ButtonPressMode.LONG, undefined)
                                             mouseArea.clickProcessed = true
                                         }
                                     }
@@ -130,7 +130,7 @@ Item {
                             Component.onCompleted: {
                                 settings.capabilities.push(
                                             {
-                                                name: Enums.ButtonName.PRESET_0 + index,
+                                                name: Common.ButtonName.PRESET_0 + index,
                                                 upDownAvailable: true,
                                                 shortPressAvailable: true,
                                                 longPressAvailable: true
