@@ -29,4 +29,6 @@ add_subdirectory(./audio_manager)
 add_subdirectory(./hmi_message_handler)
 
 # --- DBus
-add_subdirectory(./dbus)
+IF (${QT_HMI})
+    add_subdirectory(./dbus)
+ENDIF (${QT_HMI})

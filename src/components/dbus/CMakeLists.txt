@@ -25,19 +25,19 @@ add_library("DBus" ${SOURCES})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  COMMAND python codegen/make_message_descriptions.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
+  COMMAND python codegen/make_message_descriptions.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml codegen/make_message_descriptions.py
 )
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
-  COMMAND python codegen/make_introspection.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
+  COMMAND python codegen/make_introspection.py --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml codegen/make_introspection.py
 )
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
-  COMMAND python codegen/make_introspection_c.py --infile ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml --outfile ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
+  COMMAND python codegen/make_introspection_c.py --infile ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/introspection.xml
 )
 
