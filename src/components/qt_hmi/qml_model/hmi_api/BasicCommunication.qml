@@ -15,15 +15,15 @@ Item {
     function updateAppList (applications) {
         for(var i = 0; i < applications.length; i++) {
             dataContainer.applicationList.append({
-                                                     appName: applications[i].appName,
-                                                     ngnMediaScreenAppName: applications[i].ngnMediaScreenAppName,
-                                                     icon: applications[i].icon,
-                                                     deviceName: applications[i].deviceName,
-                                                     appId: applications[i].appID,
-                                                     hmiDisplayLanguageDesired: applications[i].hmiDisplayLanguageDesired,
-                                                     isMediaApplication: application[i].isMediaApplication,
-                                                     appType: application[i].appType
-                                                 });
+                 appName: applications[i].appName,
+                 ngnMediaScreenAppName: applications[i].ngnMediaScreenAppName,
+                 icon: applications[i].icon,
+                 deviceName: applications[i].deviceName,
+                 appId: applications[i].appID,
+                 hmiDisplayLanguageDesired: applications[i].hmiDisplayLanguageDesired,
+                 isMediaApplication: applications[i].isMediaApplication,
+                 appType: applications[i].appType
+            });
         }
     }
 
