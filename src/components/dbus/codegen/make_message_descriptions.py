@@ -1,3 +1,38 @@
+#  @file make_message_descriptions.py
+#  @brief Generates HMI API message descriptions for D-Bus
+#
+# This file is a part of HMI D-Bus layer.
+# 
+# Copyright (c) 2013, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided with the
+# distribution.
+#
+# Neither the name of the Ford Motor Company nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 'A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 from argparse import ArgumentParser
 from xml.etree import ElementTree
 from copy import copy
@@ -9,31 +44,21 @@ namespace = namespace_name + '::'
 
 
 class Impl(FordXmlParser):
-    def write_param_definition(self, param_var_name, param, out, interface):
+    def write_param_definition(self, param_var_name, param, out):
         if param.array:
             tmp_param = copy(param)
             tmp_param.array = False
             tmp_param.mandatory = True
-            dbus_sig = self.convert_to_dbus_type(tmp_param, interface)
-            self.write_param_definition(param_var_name + '_array', tmp_param, out, interface)
-
-        if param.type in ['Integer', 'String', 'Boolean', 'Float']:
-            param_type = param.type
-        else:
-            param_type = param.type.split('.')
-            if len(param_type) > 1:
-                param_type = (param_type[0], param_type[1])
-            else:
-                param_type = (interface, param_type[0])
+            dbus_sig = self.convert_to_dbus_type(tmp_param)
+            self.write_param_definition(param_var_name + '_array', tmp_param, out)
 
         if param.array: out.write('const ' + namespace + 'ArrayDescription ')
-        elif param_type in self.structs: out.write('const ' + namespace + 'StructDescription ')
-        #elif param_type in self.enums: out.write('const ' + namespace + 'Enum ')
+        elif param.struct: out.write('const ' + namespace + 'StructDescription ')
         else: out.write('const ' + namespace + 'ParameterDescription ')
 
         out.write(param_var_name + " = {\n")
 
-        if param_type in self.structs or param.array:
+        if param.struct or param.array:
             out.write("  {\n")
             shift = ' ' * 4
         else:
@@ -43,28 +68,25 @@ class Impl(FordXmlParser):
 
         if param.array:
             out.write(shift + namespace + "Array,\n")
-        elif param_type in self.structs:
+        elif param.struct:
             out.write(shift + namespace + "Struct,\n")
-        elif param_type in self.enums:
+        elif param.enum:
             out.write(shift + namespace + "Enum,\n")
         else:
-            out.write(shift + namespace + param_type + ",\n")
+            out.write(shift + namespace + param.type + ",\n")
 
         if param.mandatory:
             out.write(shift + "true\n")
         else:
             out.write(shift + "false\n")
 
-        if param_type in self.structs or param.array:
+        if param.struct or param.array:
             out.write("  },\n")
             if param.array:
                 out.write("  (const " + namespace + "ParameterDescription*)&" + param_var_name + "_array,\n")
                 out.write("  \"" + dbus_sig + "\"\n")
-            elif param_type in self.structs:
-                out.write("  Structs::" + param_type[0] + "__" + param_type[1] + "__parameters\n")
-            #elif param_type in self.enums:
-            #    out.write("  Enums::" + param_type[0] + "__" + param_type[1] + "__entries\n")
-
+            elif param.struct:
+                out.write("  Structs::" + param.fulltype[0] + "__" + param.fulltype[1] + "__parameters\n")
         out.write("};\n")
 
 
@@ -84,18 +106,18 @@ class Impl(FordXmlParser):
         out.write("};\n\n")
 
 
-    def write_parameters(self, params, out, name, interface):
+    def write_parameters(self, params, out, name):
         n = 1
         for param in params:
             param_var_name = name + str(n)
             n = n + 1
-            self.write_param_definition(param_var_name, param, out, interface)
+            self.write_param_definition(param_var_name, param, out)
 
 
     def write_struct_params_definitions(self, out):
         for (interface, name), params in self.structs.iteritems():
             param_var_name = interface + '__' + name + '__parameter'
-            self.write_parameters(params, out, param_var_name, interface)
+            self.write_parameters(params, out, param_var_name)
             params_var_name = 'Structs::' + interface + '__' + name + '__parameters'
             out.write("const " + namespace + "ParameterDescription* " + params_var_name + "[] = {\n")
             for n in range(1, len(params) + 1):
@@ -128,10 +150,10 @@ class Impl(FordXmlParser):
         messagetype = message_el.get('messagetype')
         params = list()
         for param_el in message_el.findall('param'):
-            param_desc = self.make_param_desc(param_el)
+            param_desc = self.make_param_desc(param_el, interface)
             params.append(param_desc)
         param_var_name = interface + '__' + name + '__' + messagetype + '__parameter'
-        self.write_parameters(params, out, param_var_name, interface)
+        self.write_parameters(params, out, param_var_name)
 
         params_var_name = param_var_name + 's'
         out.write("const " + namespace + "ParameterDescription* " + params_var_name + "[] = {\n")
@@ -182,7 +204,7 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outfile', required=True)
+outfile = 'message_descriptions.cc'
 args = arg_parser.parse_args()
 
 in_tree = ElementTree.parse(args.infile)
@@ -190,7 +212,45 @@ in_tree_root = in_tree.getroot()
 
 impl = Impl(in_tree_root)
 
-out = open(args.outfile, "w")
+out = open(outfile, "w")
+
+out.write("""/**
+ * @file message_descriptions.cc
+ * @brief Generated HMI API message descriptions for D-Bus
+ *
+ * This file is a part of HMI D-Bus layer.
+ */
+// Copyright (c) 2013, Ford Motor Company
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following
+// disclaimer in the documentation and/or other materials provided with the
+// distribution.
+//
+// Neither the name of the Ford Motor Company nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 'A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+
+""")
 
 out.write("#include \"dbus/message_descriptions.h\"\n\n");
 out.write("namespace {\n\n");
