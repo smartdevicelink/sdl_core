@@ -32,7 +32,7 @@ el = ElementTree.SubElement(el, 'arg', attrib={'type':'s','name':'xml_data','dir
 impl = Impl(in_tree_root, args.interfacepath)
 impl.convert_to_introspection(out_tree_root)
 
-out = popen("xmllint --format --output " + args.outfile + " -", "w")
+out = open(args.outfile, "w")
 out.write('<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">')
 out_tree.write(out)
 
