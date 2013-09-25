@@ -42,13 +42,15 @@ FFW.Navigation = FFW.RPCObserver.create( {
      */
     isReady: false,
 
-
     onStartStreamSubscribeRequestID: -1,
+    onStopStreamSubscribeRequestID: -1,
 
     onStartStreamUnsubscribeRequestID: -1,
+    onStopStreamUnsubscribeRequestID: -1,
 
     // const
     onStartStreamNotification: "Navigation.OnStartStream",
+    onStopStreamNotification: "Navigation.OnStopStream",
 
     /**
      * access to basic RPC functionality
@@ -87,7 +89,9 @@ FFW.Navigation = FFW.RPCObserver.create( {
         this._super();
 
         this.onStartStreamNotificationSubscribeRequestID = this.client
-            .subscribeToNotification(this.onAppUnregisteredNotification);
+            .subscribeToNotification(this.onStartStreamNotification);
+        this.onStopStreamNotificationSubscribeRequestID = this.client
+            .subscribeToNotification(this.onStopStreamNotification);
 
         // subscribe to notifications
     },
@@ -102,6 +106,8 @@ FFW.Navigation = FFW.RPCObserver.create( {
 
         this.onStartStreamNotificationUnsubscribeRequestID = this.client
             .unsubscribeFromNotification(this.onStartStreamNotification);
+        this.onStopStreamNotificationUnsubscribeRequestID = this.client
+            .unsubscribeFromNotification(this.onStopStreamNotification);
 
         // unsubscribe from notifications
     },
@@ -143,8 +149,11 @@ FFW.Navigation = FFW.RPCObserver.create( {
         this._super();
 
         if (notification.method == this.onStartStreamNotification) {
-            // remove app from list
             SDL.SDLModel.onStartStream(notification.params);
+        }
+
+        if (notification.method == this.onStopStreamNotification) {
+            SDL.SDLModel.onStopStream(notification.params);
         }
     },
 

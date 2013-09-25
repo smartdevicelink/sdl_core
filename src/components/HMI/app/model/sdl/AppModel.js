@@ -49,6 +49,11 @@ SDL.SDLAppModel = Em.Object
         appName: '',
 
         /**
+         * Navigation streaming url
+         */
+        navigationStream: null,
+
+        /**
          * Chosen device name
          * 
          * @type {String}
