@@ -54,7 +54,7 @@ Item {
             Common.TextFieldName.notificationText
         ],
         "mediaClockFormats": [
-            Common.MediaClockFormat.LOCK1,
+            Common.MediaClockFormat.CLOCK1,
             Common.MediaClockFormat.CLOCK2,
             Common.MediaClockFormat.CLOCK3,
             Common.MediaClockFormat.CLOCKTEXT1,
