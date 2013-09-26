@@ -20,5 +20,6 @@ install_manifest.txt
 tags
 
 # Qt
+moc_*.cpp
 *.pro.user
 *.qmlproject.user
