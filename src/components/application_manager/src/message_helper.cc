@@ -39,6 +39,7 @@
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
+#include "connection_handler/connection_handler_impl.h"
 
 namespace application_manager {
 
@@ -995,7 +996,7 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
 }
 
 void MessageHelper::SendNaviStartStream(
-    const std::string& url, int app_id) {
+    const std::string& url, int connection_key) {
   smart_objects::SmartObject* start_stream =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -1014,6 +1015,26 @@ void MessageHelper::SendNaviStartStream(
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // TODO(PV) : remove connectionhandler
+  unsigned int app_id = 0;
+  std::list<int> list;
+  unsigned int device_id;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+      &app_id,
+      &list,
+      &device_id);
+
+  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+
+  /*Application* app =
+      ApplicationManagerImpl::instance()->application(connection_key);
+
+
+  if (NULL == app) {
+    return;
+  }*/
+
   msg_params[strings::app_id] = app_id;
   msg_params[strings::url] = url;
 

@@ -213,11 +213,11 @@ class MessageHelper {
     /*
      * @brief Sends notification to HMI to start video streaming
      *
-     * @param url     URL for video streamng
-     * @param app_id  Application ID
+     * @param url             URL for video streamng
+     * @param connection_key  Application connection key
      *
      */
-    static void SendNaviStartStream(const std::string& url, int app_id);
+    static void SendNaviStartStream(const std::string& url, int connection_key);
 
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
