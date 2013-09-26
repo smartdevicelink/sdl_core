@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import com.ford.hmi_framework 1.0
-import sdl.core.api 1.0
+import com.ford.sdl.hmi.dbus_adapter 1.0
+import com.ford.sdl.hmi.hw_buttons 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
