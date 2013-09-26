@@ -66,8 +66,8 @@ class MockApplication {
   std::string socket_name_;
  public:
   MockApplication(const MockDevice* device, ApplicationHandle id);
-  void start();
-  void stop();
+  void Start();
+  void Stop();
   const std::string &socket_name() const {
     return socket_name_;
   }

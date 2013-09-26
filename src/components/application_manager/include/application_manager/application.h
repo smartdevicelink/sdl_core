@@ -327,10 +327,10 @@ class Application : public virtual InitialApplicationData,
   virtual bool MakeFullscreen() = 0;
   virtual bool IsAudible() const = 0;
   virtual void MakeNotAudible() = 0;
-  virtual bool SupportsNavigation() const = 0;
-  virtual void AllowNavigation(bool allow) = 0;
+  virtual bool allowed_support_navigation() const = 0;
+  virtual void set_allowed_support_navigation(bool allow) = 0;
   virtual bool app_allowed() const = 0;
-  virtual bool HasBeenActivated() const = 0;
+  virtual bool has_been_activated() const = 0;
 
   virtual const Version& version() const = 0;
   virtual unsigned int app_id() const = 0;

@@ -1,6 +1,6 @@
 /**
- * \file tcp_adapter.cpp
- * \brief TcpTransportAdapter class source file.
+ * \file tcp_socket_connection.cc
+ * \brief TcpSocketConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -96,7 +96,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   struct sockaddr_in addr;
   memset((char*) &addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = tcp_device->GetAddress();
+  addr.sin_addr.s_addr = tcp_device->in_addr();
   addr.sin_port = port;
 
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {

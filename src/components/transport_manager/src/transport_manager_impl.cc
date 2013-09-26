@@ -1,6 +1,6 @@
 /**
- * \file transport_manager_impl.cpp
- * \brief TransportManager class source file.
+ * \file transport_manager_impl.cc
+ * \brief TransportManagerImpl class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -47,8 +47,8 @@
 #include "transport_manager/transport_manager_listener_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/timer.h"
-#include "transport_manager/bluetooth/bluetooth_adapter.h"
-#include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
@@ -194,7 +194,7 @@ void TransportManagerImpl::DisconnectFailedRoutine(void* p) {
                  tm->converter_.UidToHandle(c->device),
                  DisconnectDeviceError());
   c->shutDown = false;
-  c->timer.stop();
+  c->timer.Stop();
   delete[] param;
 }
 
@@ -228,7 +228,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
     param[1] = &connection;
     Timer timer(config_.disconnectTimeout, &DisconnectFailedRoutine, &param, true);
     connection->timer = timer;
-    timer.start();
+    timer.Start();
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                            connection->application);
@@ -733,7 +733,7 @@ void TransportManagerImpl::EventListenerThread(void) {
           RaiseEvent(&TransportManagerListener::OnTMMessageSend);
           this->RemoveMessage(data);
           if (connection->shutDown && --connection->messages_count == 0) {
-            connection->timer.stop();
+            connection->timer.Stop();
             connection->transport_adapter->Disconnect(connection->device,
                                                    connection->application);
           }
@@ -750,7 +750,7 @@ void TransportManagerImpl::EventListenerThread(void) {
 
           // TODO(YK): start timer here to wait before notify caller
           // and remove unsent messages
-          LOG4CXX_ERROR(logger_, "Device adapter failed to send data")
+          LOG4CXX_ERROR(logger_, "Transport adapter failed to send data")
           // TODO(YK): potential error case -> thread unsafe
           // update of message content
           data->set_waiting(true);
@@ -902,7 +902,7 @@ void TransportManagerImpl::MessageQueueThread(void) {
           "Got adapter " << transport_adapter.get() << "[" << transport_adapter->GetDeviceType() << "]" << " by session id " << active_msg->connection_key())
 
         if (!transport_adapter.valid()) {
-          std::string error_text = "Device adapter is not found - message removed";
+          std::string error_text = "Transport adapter is not found - message removed";
           LOG4CXX_ERROR(logger_, error_text);
           RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
                      DataSendError(error_text), active_msg);

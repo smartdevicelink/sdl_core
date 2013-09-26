@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 SliderRequest::SliderRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 SliderRequest::~SliderRequest() {
@@ -52,8 +52,8 @@ void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
   Application* application_impl =
-    application_manager::ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+      application_manager::ApplicationManagerImpl::instance()->application(
+          (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == application_impl) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -61,8 +61,8 @@ void SliderRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
-      (*message_)[strings::msg_params][strings::position].asInt()) {
+  if ((*message_)[strings::msg_params][strings::num_ticks].asInt()
+      < (*message_)[strings::msg_params][strings::position].asInt()) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -70,17 +70,18 @@ void SliderRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
     if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
-      if ((*message_)[strings::msg_params][strings::num_ticks].asInt() !=
-            (*message_)[strings::msg_params][strings::slider_footer].length()) {
-          LOG4CXX_ERROR(logger_, "INVALID_DATA");
-          SendResponse(false, mobile_apis::Result::INVALID_DATA);
-          return;
+      if ((*message_)[strings::msg_params][strings::num_ticks].asInt()
+          != (*message_)[strings::msg_params]
+                         [strings::slider_footer].length()) {
+        LOG4CXX_ERROR(logger_, "INVALID_DATA");
+        SendResponse(false, mobile_apis::Result::INVALID_DATA);
+        return;
       }
     }
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application_impl->app_id();
 

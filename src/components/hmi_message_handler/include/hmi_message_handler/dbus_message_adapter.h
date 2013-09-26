@@ -51,12 +51,12 @@ class DBusMessageAdapter
  public:
   explicit DBusMessageAdapter(HMIMessageHandler* handler);
   ~DBusMessageAdapter();
-  void sendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
+  void SendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
 
   /**
    * \brief subscribes to signals
    */
-  void subscribeTo();
+  void SubscribeTo();
 
  private:
   static const std::string SDL_SERVICE_NAME;

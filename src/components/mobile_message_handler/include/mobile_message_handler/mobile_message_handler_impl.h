@@ -53,7 +53,7 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
  public:
   static MobileMessageHandlerImpl* instance();
 
-  void setProtocolHandler(protocol_handler::ProtocolHandler* protocolHandler);
+  void set_protocol_handler(protocol_handler::ProtocolHandler* protocolHandler);
   void OnMessageReceived(const protocol_handler::RawMessage* message);
   void SendMessageToMobileApp(const MobileMessage& message);
 
@@ -97,7 +97,6 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
   // Thread for sending messages to Mobile.
   threads::Thread* handle_messages_to_mobile_app_;
   friend class MessagesToMobileAppHandler;
-
 
   static MobileMessageHandlerImpl* self_;
   static log4cxx::LoggerPtr logger_;

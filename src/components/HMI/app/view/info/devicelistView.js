@@ -50,8 +50,22 @@ SDL.DeviceListView = Em.ContainerView.create( {
      * View Components
      */
     childViews: [
-        'backButton', 'listOfDevices', 'deviceListLabel'
+        'backButton',
+        'listOfDevices',
+        'deviceListLabel',
+        'progress'
     ],
+
+    /**
+     * Animation of search devices progress
+     */
+    progress: Em.View.extend( {
+        classNames: [
+            'progress'
+        ],
+        classNameBindings: ['SDL.SDLModel.deviceSearchProgress:progress']
+    }),
+
 
     /**
      * Button to return to previous view

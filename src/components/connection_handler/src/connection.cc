@@ -43,14 +43,14 @@
  */
 namespace connection_handler {
 
-log4cxx::LoggerPtr Connection::logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
+log4cxx::LoggerPtr Connection::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("ConnectionHandler"));
 
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle)
-  : connection_handle_(connection_handle),
-    connection_device_handle_(connection_device_handle),
-    session_id_counter_(1) {
+    : connection_handle_(connection_handle),
+      connection_device_handle_(connection_device_handle),
+      session_id_counter_(1) {
 }
 
 Connection::~Connection() {

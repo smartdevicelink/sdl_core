@@ -126,7 +126,7 @@ class TcpDevice : public Device {
    *
    * @return Address.
    */
-  in_addr_t GetAddress() const {
+  in_addr_t in_addr() const {
     return in_addr_;
   }
 

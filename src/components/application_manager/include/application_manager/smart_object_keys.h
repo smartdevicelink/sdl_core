@@ -63,7 +63,8 @@ const char uses_vehicle_data[] = "usesVehicleData";
 const char is_media_application[] = "isMediaApplication";
 const char language_desired[] = "languageDesired";
 const char auto_activated_id[] = "autoActivateID";
-const char app_type[] = "AppType";
+const char app_type[] = "appType";
+const char app_hmi_type[] = "appHMIType";
 const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
 const char help_promt[] = "helpPrompt";
@@ -193,6 +194,7 @@ const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
 const char slider_position[] = "sliderPosition";
+const char system_action[] = "systemAction";
 }  // namespace strings
 
 namespace mobile_notification {

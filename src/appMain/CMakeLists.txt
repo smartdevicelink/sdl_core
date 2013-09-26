@@ -1,3 +1,10 @@
+IF (${WEB_HMI})
+set (BROKER_LIBRARIES
+  MessageBrokerClient
+  MessageBrokerServer
+)
+ENDIF (${WEB_HMI})
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -8,9 +15,6 @@ set(LIBRARIES
   connectionHandler
   TransportManager
   HMIMessageHandler
-  MessageBroker
-  MessageBrokerClient
-  MessageBrokerServer
   Utils
   encryption
   jsoncpp
@@ -24,6 +28,8 @@ set(LIBRARIES
   RequestWatchdog
   AudioManager
 #  usb-1.0
+  MessageBroker
+  ${BROKER_LIBRARIES}
 )
 
 # required to find 'glibconfig.h'

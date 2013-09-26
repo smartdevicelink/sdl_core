@@ -1,6 +1,6 @@
 /**
- * \file usb_connection_factory.cc
- * \brief
+ * \file usb_connection.cc
+ * \brief UsbConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

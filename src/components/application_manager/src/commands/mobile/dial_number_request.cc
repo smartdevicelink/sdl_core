@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-: CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 DialNumberRequest::~DialNumberRequest() {

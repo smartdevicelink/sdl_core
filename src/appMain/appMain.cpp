@@ -36,7 +36,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -53,25 +53,37 @@
 #include "config_profile/profile.h"
 
 #include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "hmi_message_handler/messagebroker_adapter.h"
 #include "application_manager/application_manager_impl.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "hmi_message_handler/dbus_message_adapter.h"
+#ifdef QT_HMI
+#  include "hmi_message_handler/dbus_message_adapter.h"
+#endif  // QT_HMI
+#ifdef WEB_HMI
+#  include "hmi_message_handler/messagebroker_adapter.h"
+#endif  // WEB_HMI
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
-#include "networking.h"  // cpplint: Include the directory when naming .h files
+#ifdef WEB_HMI
+#  include "CMessageBroker.hpp"
+#  include "mb_tcpserver.hpp"
+#  include "networking.h"  // cpplint: Include the directory when naming .h files
+#endif  // WEB_HMI
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" void __gcov_flush();
+#endif
+
 namespace {
+
+#ifdef WEB_HMI
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
@@ -81,7 +93,7 @@ const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
  * Initialize MessageBroker component
  * @return true if success otherwise false.
  */
-bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
+bool InitMessageSystem() {  // TODO(AK): check memory allocation here.
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                                 log4cxx::Logger::getLogger("appMain"));
 
@@ -125,7 +137,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
     new hmi_message_handler::MessageBrokerAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter);
   if (!mb_adapter->Connect()) {
     LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
@@ -155,38 +167,7 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
   th3->Start(false);
 
   mb_adapter->registerController();
-  mb_adapter->subscribeTo();
-
-  return true;
-}
-
-/**
- * Initialize DBus component
- * @return true if success otherwise false.
- */
-bool InitDBus() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-
-  hmi_message_handler::DBusMessageAdapter* adapter =
-    new hmi_message_handler::DBusMessageAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
-
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->addHMIMessageAdapter(
-    adapter);
-  if (!adapter->Init()) {
-    LOG4CXX_INFO(logger, "Cannot init DBus service!");
-    return false;
-  }
-
-  adapter->subscribeTo();
-
-  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
-  System::Thread* th1 = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-      *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-      NULL));
-  th1->Start(false);
+  mb_adapter->SubscribeTo();
 
   return true;
 }
@@ -274,6 +255,59 @@ bool InitHmi() {
     }
   }
 }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool InitMessageSystem() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
+
+  hmi_message_handler::DBusMessageAdapter* adapter =
+    new hmi_message_handler::DBusMessageAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    adapter);
+  if (!adapter->Init()) {
+    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    return false;
+  }
+
+  adapter->SubscribeTo();
+
+  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  System::Thread* th1 = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+      *adapter, &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+      NULL));
+  th1->Start(false);
+
+  return true;
+}
+
+/**
+ * Initialize HTML based HMI.
+ * @return true if success otherwise false.
+ */
+bool InitHmi() {
+  // TODO(KKolodiy): implement
+  return false;
+}
+#endif  // QT_HMI
+
+}  // namespace
+
+void flushCoverageInfo() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                  log4cxx::Logger::getLogger("appMain"));
+  LOG4CXX_INFO(logger, "Flush code coverage info");
+#ifdef __cplusplus
+  __gcov_flush();
+#endif
 }
 
 /**
@@ -283,12 +317,63 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char** argv) {
+
   // --------------------------------------------------------------------------
   // Logger initialization
 
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                                 log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+
+  bool shouldReturn = false;
+  bool shouldFlush = false;
+  int next_option;
+
+  const char* const short_options = "hf";
+  const struct option long_options[] = {
+      { "help",     0, NULL, 'h' },
+      { "flush",    0, NULL, 'f' },
+      { NULL,       0, NULL, 0   }
+  };
+
+  do
+  {
+    next_option = getopt_long(argc, argv, short_options,
+                                long_options, NULL);
+
+    switch(next_option) {
+    case 'h':
+      LOG4CXX_INFO(logger, "-h or --help");
+      shouldReturn = true;
+      break;
+    case 'f':
+      LOG4CXX_INFO(logger, "-f or --flush flag");
+      // -f or --flush flag
+      shouldFlush = true;
+      break;
+    case '?':
+      LOG4CXX_INFO(logger, "Wrong input");
+      shouldReturn = true;
+      break;
+    case -1:
+      LOG4CXX_INFO(logger, "No more options");
+      break;
+    default:
+      break;
+    }
+  }
+  while (next_option != -1);
+
+  // Check shouldReturn fist
+  if(shouldReturn) {
+    return 0;
+  }
+
+  if(shouldFlush) {
+    flushCoverageInfo();
+    return 0;
+  }
+
   LOG4CXX_INFO(logger, " Application started!");
 
   // --------------------------------------------------------------------------
@@ -324,8 +409,8 @@ int main(int argc, char** argv) {
   transport_manager->AddEventListener(protocol_handler);
   transport_manager->AddEventListener(connection_handler);
 
-  mmh->setProtocolHandler(protocol_handler);
-  hmi_handler->setMessageObserver(app_manager);
+  mmh->set_protocol_handler(protocol_handler);
+  hmi_handler->set_message_observer(app_manager);
 
   protocol_handler->set_session_observer(connection_handler);
   protocol_handler->set_protocol_observer(mmh);
@@ -338,25 +423,15 @@ int main(int argc, char** argv) {
   app_manager->set_connection_handler(connection_handler);
   app_manager->set_hmi_message_handler(hmi_handler);
 
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!InitDBus()) {
+  if (!InitMessageSystem()) {
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger, "Init DBus service successful");
-// TODO(KKolodiy): add define for selective compiling
-//  if (!InitMessageBroker()) {
-//    exit(EXIT_FAILURE);
-//  }
-//  LOG4CXX_INFO(logger, "InitMessageBroker successful");
-//
-//  if (!InitHmi()) {
-//    exit(EXIT_FAILURE);
-//  }
-//  LOG4CXX_INFO(logger, "InitHmi successful");
+  LOG4CXX_INFO(logger, "InitMessageSystem successful");
 
-  // --------------------------------------------------------------------------
+  if (!InitHmi()) {
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitHmi successful");
 
   while (true) {
     sleep(100500);

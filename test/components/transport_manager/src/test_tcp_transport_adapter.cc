@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#include "transport_manager/tcp/tcp_adapter.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/mock_transport_adapter_listener.h"
 
@@ -57,7 +57,7 @@ class ClientTcpSocket {
       return true;
   }
 
-  bool send(const std::string& str) {
+  bool Send(const std::string& str) {
     ssize_t written = write(socket_, str.c_str(), str.size());
     return written == str.size();
   }
@@ -176,7 +176,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, Receive) {
         WillOnce(InvokeWithoutArgs(this, &TcpAdapterTest::wakeUp));
   }
   EXPECT_TRUE(client_.Connect(TcpTransportAdapter::default_port));
-  EXPECT_TRUE(client_.send("abcd"));
+  EXPECT_TRUE(client_.Send("abcd"));
 }
 
 struct SendHelper {

@@ -69,10 +69,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool MakeFullscreen();
   bool IsAudible() const;
   void MakeNotAudible();
-  bool SupportsNavigation() const;
-  void AllowNavigation(bool allow);
+  bool allowed_support_navigation() const;
+  void set_allowed_support_navigation(bool allow);
   inline bool app_allowed() const;
-  bool HasBeenActivated() const;
+  bool has_been_activated() const;
 
   const Version& version() const;
   inline unsigned int app_id() const;

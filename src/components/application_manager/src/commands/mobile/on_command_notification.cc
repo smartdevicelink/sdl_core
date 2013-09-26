@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnCommandNotification::OnCommandNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnCommandNotification::~OnCommandNotification() {
@@ -50,17 +50,16 @@ OnCommandNotification::~OnCommandNotification() {
 void OnCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnCommandNotification::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::msg_params][strings::app_id].asInt());
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     return;
   }
 
-  const unsigned int cmd_id =
-      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
+  const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
+      .asUInt();
 
   if (!app->FindCommand(cmd_id)) {
     LOG4CXX_ERROR_EXT(logger_,
@@ -68,8 +67,7 @@ void OnCommandNotification::Run() {
     return;
   }
 
-  (*message_)[strings::params][strings::connection_key] =
-      app->app_id();
+  (*message_)[strings::params][strings::connection_key] = app->app_id();
 
   SendNotification();
 }

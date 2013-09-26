@@ -22,8 +22,10 @@ Rectangle {
             parent.pressed = false
             parent.state = parent.state === "ON" ? "OFF" : "ON"
             btnText.text = parent.state
-            if(parent.state === "ON")
+            if(parent.state === "ON"){
+                contentLoader.reset()
                 mainScreen.visible = true
+            }
             else
                 mainScreen.visible = false
         }

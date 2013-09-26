@@ -31,8 +31,7 @@
  * @version 1.0
  */
 
-SDL.TBTTurnList = SDL.SDLAbstractView
-    .create( {
+SDL.TBTTurnList = SDL.SDLAbstractView.create({
 
         elementId: 'tbtTurnListView',
 
@@ -43,7 +42,7 @@ SDL.TBTTurnList = SDL.SDLAbstractView
         /**
          * Activate window
          */
-        activate: function() {
+        activate: function () {
 
             this.set('active', true);
         },
@@ -51,7 +50,7 @@ SDL.TBTTurnList = SDL.SDLAbstractView
         /**
          * Title Labes of window
          */
-        captionText: SDL.Label.extend( {
+        captionText: SDL.Label.extend({
             classNames: 'caption-text',
 
             content: 'Turn List'
@@ -60,57 +59,50 @@ SDL.TBTTurnList = SDL.SDLAbstractView
         /**
          * Turn List
          */
-        tbtTurnListList: SDL.List.extend( {
-            elementId: 'tbtTurnListList',
+        tbtTurnListList: SDL.List.extend({
+            elementId  : 'tbtTurnListList',
             itemsOnPage: 5,
-            items: []
+            items      : []
         }),
 
         /**
          * Function updates content of Turn List with data from application's
          * model
-         * 
+         *
          * @type {Number}
          */
-        updateList: function(appID) {
+        updateList: function (appID) {
 
             this.get('tbtTurnListList.list').removeAllChildren();
 
             this.tbtTurnListList.list.refresh();
 
             var turnListArray = SDL.SDLController.getApplicationModel(appID).turnList, length = turnListArray.length;
-            for ( var i = 0; i < length; i++) {
-                this.get('tbtTurnListList.list.childViews')
-                    .pushObject(SDL.Label.create( {
-                        icon: turnListArray[i].turnIcon
-                            ? turnListArray[i].turnIcon.value : "",
-                        content: turnListArray[i].navigationText,
-                        templateName: turnListArray[i].turnIcon ? 'icon'
-                            : 'text',
-                        classNames: 'list-item'
+            for (var i = 0; i < length; i++) {
+                this.get('tbtTurnListList.list.childViews').pushObject(SDL.Label.create({
+                        icon        : turnListArray[i].turnIcon ? turnListArray[i].turnIcon.value : "",
+                        content     : turnListArray[i].navigationText,
+                        templateName: turnListArray[i].turnIcon ? 'icon' : 'text',
+                        classNames  : 'list-item'
                     }));
             }
             turnListArray = SDL.SDLController.getApplicationModel(appID).turnListSoftButtons;
             length = turnListArray.length;
-            for ( var i = 0; i < length; i++) {
-                this.get('tbtTurnListList.list.childViews')
-                    .pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
-                        systemAction: turnListArray[i].systemAction,
-                        groupName: "TBTList",
+            for (var i = 0; i < length; i++) {
+                this.get('tbtTurnListList.list.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
+                        systemAction     : turnListArray[i].systemAction,
+                        groupName        : "TBTList",
                         classNameBindings: [
                             'isHighlighted:isHighlighted'
                         ],
-                        isHighlighted: turnListArray[i].isHighlighted ? true
-                            : false,
-                        softButtonID: turnListArray[i].softButtonID,
-                        icon: turnListArray[i].image
-                            ? turnListArray[i].image.value : "",
-                        text: turnListArray[i].text,
-                        classNames: 'list-item softButton',
-                        elementId: 'softButton' + i,
-                        templateName: turnListArray[i].image ? 'rightIcon'
-                            : 'text',
-                        appID: appID
+                        isHighlighted    : turnListArray[i].isHighlighted ? true : false,
+                        softButtonID     : turnListArray[i].softButtonID,
+                        icon             : turnListArray[i].image ? turnListArray[i].image.value : "",
+                        text             : turnListArray[i].text,
+                        classNames       : 'list-item softButton',
+                        elementId        : 'softButton' + i,
+                        templateName     : turnListArray[i].image ? 'rightIcon' : 'text',
+                        appID            : appID
                     }));
             }
         }

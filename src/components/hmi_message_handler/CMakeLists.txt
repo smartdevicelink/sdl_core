@@ -21,5 +21,14 @@ set (SOURCES
 ./src/dbus_message_adapter.cc
 )
 
+IF (${QT_HMI})
+    set (DBUS_ADAPTER DBus)
+ENDIF (${QT_HMI})
+
+set (LIBRARIES
+    log4cxx
+    ${DBUS_ADAPTER}
+)
+
 add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries ("HMIMessageHandler" log4cxx DBus)
+target_link_libraries ("HMIMessageHandler" ${LIBRARIES})

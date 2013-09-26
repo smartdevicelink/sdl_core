@@ -63,7 +63,7 @@ MaskedContainer {
 
     Component.onCompleted: {
         if (buttonId !== Common.ButtonName.CUSTOM_BUTTON) {
-            sdlButtons.capabilities.push(
+            settings.buttonCapabilities.push(
             {
                 name: buttonId,
                 upDownAvailable: upDownAvailable,

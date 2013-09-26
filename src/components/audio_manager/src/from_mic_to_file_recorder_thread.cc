@@ -173,12 +173,16 @@ void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_TRACE(logger_, "Initializing pipeline ...");
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
     LOG4CXX_TRACE(logger_, "GST_STATE(pipeline) != GST_STATE_PLAYING");
+
     stopFlagMutex_.lock();
-    if (shouldBeStoped_) {
+    bool shouldBeStoped = shouldBeStoped_;
+    stopFlagMutex_.unlock();
+
+    if (shouldBeStoped) {
       return;
     }
-    stopFlagMutex_.unlock();
   }
+
   LOG4CXX_TRACE(logger_, "Pipeline started ...\n");
 
   // Start up a timer for the pipeline

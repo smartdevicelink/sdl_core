@@ -3,13 +3,19 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
+# Type HMI [QT, WEB]
+set (TYPE_HMI "QT")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# --- Check libavahi-common, libavahi-client availability
+find_package(Libavahi)
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
 set(BUILD_TESTS ON)
@@ -79,8 +85,18 @@ macro(create_test NAME SOURCES LIBS)
     add_test(${NAME} ${NAME})
 endmacro(create_test)
 
-
 # Building application
+
+# --- Type HMI
+IF (${TYPE_HMI} STREQUAL "QT")
+    set(QT_HMI ON)
+    add_definitions(-DQT_HMI)
+ELSEIF (${TYPE_HMI} STREQUAL "WEB")
+    set(WEB_HMI ON)
+    add_definitions(-DWEB_HMI)
+ELSE (${TYPE_HMI} STREQUAL "QT")
+    MESSAGE(FATAL_ERROR "Unknown type HMI")
+ENDIF (${TYPE_HMI} STREQUAL "QT")
 
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)

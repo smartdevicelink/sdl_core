@@ -56,8 +56,8 @@ class PoliciesManager {
   PoliciesManager();
   ~PoliciesManager();
 
-  bool init();
-  bool is_valid_hmi_status(mobile_apis::FunctionID::eType function,
+  bool Init();
+  bool IsValidHmiStatus(mobile_apis::FunctionID::eType function,
                            mobile_apis::HMILevel::eType status);
 
  private:

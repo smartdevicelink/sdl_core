@@ -3,7 +3,7 @@ import com.ford.hmi_framework 1.0
 import sdl.core.api 1.0
 import "./controls"
 import "./views"
-import "./hmi_api" as HmiApi
+import "./hmi_api/auto" as HmiApi
 import "./models"
 import "./popups"
 
@@ -18,6 +18,9 @@ Rectangle{
 
     DataStorage {
         id: dataContainer
+    }
+    SettingsStorage {
+        id: settings
     }
 
     SettingsStorage {
@@ -55,6 +58,11 @@ Rectangle{
                 source:startQml
                 property var screenMovingStack : []
 
+                function reset(){
+                    screenMovingStack = []
+                    source = startQml
+                }
+
                 function go(path) {
                     screenMovingStack.push(source.toString())
                     source = path
@@ -76,34 +84,42 @@ Rectangle{
         HardwareButtonsView {}
     }
 
-    Api {
-        HmiApi.Buttons {
+    HMIProxy {
+        HmiApi.Buttons_auto {
             id: sdlButtons
             objectName: "Buttons"
         }
-        HmiApi.BasicCommunication {
+        HmiApi.BasicCommunication_auto {
             id: sdlBasicCommunications
-            objectName: "BasicCommunications"
+            objectName: "BasicCommunication"
         }
-        HmiApi.VR {
+        HmiApi.VR_auto {
             id: sdlVR
             objectName: "VR"
         }
-        HmiApi.TTS {
+        HmiApi.TTS_auto {
             id: sdlTTS
             objectName: "TTS"
         }
-        HmiApi.Navigation {
+        HmiApi.Navigation_auto {
             id: sdlNavigation
             objectName: "Navigation"
         }
-        HmiApi.VehicleInfo {
+        HmiApi.VehicleInfo_auto {
             id: sdlVehicleInfo
             objectName: "VehicleInfo"
         }
-        HmiApi.UI {
+        HmiApi.UI_auto {
             id: sdlUI
             objectName: "UI"
+        }
+    }
+
+    SDLProxy {
+        id: sdlProxy
+
+        onAppRegistered: {
+            console.log("new app registered")
         }
     }
 
