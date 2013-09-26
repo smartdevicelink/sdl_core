@@ -5,6 +5,7 @@ import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
 import "./models"
+import "./popups"
 
 Rectangle{
     width: 1600

@@ -6,7 +6,6 @@ Window {
     height: 256
 
     title: "Alert"
-//  flags: Qt.Popup
     flags: Qt.Dialog
 
     Rectangle {
