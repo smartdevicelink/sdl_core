@@ -1,6 +1,6 @@
 /**
- * \file transport_manager_listener.h
- * \brief Class TransportManagerListenerImpl header file.
+ * \file transport_manager_listener_impl.h
+ * \brief TransportManagerListenerImpl class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

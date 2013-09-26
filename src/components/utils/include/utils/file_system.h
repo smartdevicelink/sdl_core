@@ -46,6 +46,13 @@ namespace file_system {
   uint64_t AvailableSpace();
 
   /**
+   * @brief Get available app space
+   * @param name of app
+   * @return free app space.
+   */
+   unsigned int AvailableSpaceApp(const std::string& name);
+
+   /**
     * @brief Creates directory
     * @param name path to directory
     * @return path to created directory.

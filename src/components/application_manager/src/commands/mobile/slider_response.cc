@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 SliderResponse::SliderResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 SliderResponse::~SliderResponse() {
@@ -65,11 +65,21 @@ void SliderResponse::Run() {
         mobile_apis::Result::ABORTED == code) {
       SendResponse(true);
     } else {
-      // TODO(VS): Some logic
+      const unsigned int correlation_id =
+          (*message_)[strings::params][strings::correlation_id].asUInt();
+
+      MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+          ->GetMessageChain(correlation_id);
+
+      const smart_objects::SmartObject& request_params = msg_chain->data();
+
+      (*message_)[strings::msg_params][strings::slider_position] =
+          request_params.getElement(
+          strings::msg_params).getElement(strings::position);
+
       SendResponse(false);
     }
   }
-
 }
 
 }  // namespace commands

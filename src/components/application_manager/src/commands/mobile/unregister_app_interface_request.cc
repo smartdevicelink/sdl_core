@@ -42,11 +42,9 @@ namespace commands {
 void UnregisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "UnregisterAppInterfaceRequest::Run");
 
-  ApplicationManagerImpl* app_manager =
-    ApplicationManagerImpl::instance();
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
-  Application* application =
-    app_manager->application(
+  Application* application = app_manager->application(
       (*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
@@ -56,7 +54,7 @@ void UnregisterAppInterfaceRequest::Run() {
   }
 
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
+      smart_objects::SmartType_Map);
   if (!notification) {
     LOG4CXX_ERROR(logger_, "Not enough memory.");
     return;
@@ -68,7 +66,7 @@ void UnregisterAppInterfaceRequest::Run() {
   MessageHelper::SendOnAppUnregNotificationToHMI(application);
 
   if (!app_manager->UnregisterApplication(
-        (*message_)[strings::params][strings::connection_key])) {
+      (*message_)[strings::params][strings::connection_key])) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;

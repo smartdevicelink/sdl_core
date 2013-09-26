@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 EndAudioPassThruResponse::EndAudioPassThruResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 EndAudioPassThruResponse::~EndAudioPassThruResponse() {

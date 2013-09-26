@@ -80,7 +80,6 @@ void RequestWatchdog::AddListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is locked");
 
   subscribers_.push_back(subscriber);
   //startDispatcherThreadIfNeeded();
@@ -88,14 +87,12 @@ void RequestWatchdog::AddListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was added.");
 
   subscribersListMutex_.unlock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is unlocked");
 }
 
 void RequestWatchdog::RemoveListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is locked");
 
   subscribers_.remove(subscriber);
   //stopDispatcherThreadIfNeeded();
@@ -103,19 +100,16 @@ void RequestWatchdog::RemoveListener(WatchdogSubscriber* subscriber) {
   LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was removed.");
 
   subscribersListMutex_.unlock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is unlocked");
 }
 
 void RequestWatchdog::removeAllListeners() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is locked");
 
   subscribers_.clear();
 
   subscribersListMutex_.unlock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is unlocked");
 
   queueDispatcherThread.stop();
 }
@@ -124,7 +118,6 @@ void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is locked");
 
   std::list<WatchdogSubscriber*>::iterator i = subscribers_.begin();
 
@@ -134,14 +127,12 @@ void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
   }
 
   subscribersListMutex_.unlock();
-  LOG4CXX_INFO(logger_, "subscribersListMutex_  is unlocked");
 }
 
 void RequestWatchdog::addRequest(RequestInfo requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is locked");
 
   requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
                    date_time::DateTime::getCurrentTime()));
@@ -156,7 +147,6 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
   //startDispatcherThreadIfNeeded();
 
   requestsMapMutex_.unlock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is unlocked");
 }
 
 void RequestWatchdog::removeRequest(int connection_key,
@@ -164,7 +154,6 @@ void RequestWatchdog::removeRequest(int connection_key,
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is locked");
 
   for (std::map<RequestInfo, struct timeval>::iterator it =
          requests_.begin();
@@ -186,19 +175,16 @@ void RequestWatchdog::removeRequest(int connection_key,
   //stopDispatcherThreadIfNeeded();
 
   requestsMapMutex_.unlock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is unlocked");
 }
 
 void RequestWatchdog::removeAllRequests() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is locked");
 
   requests_.clear();
 
   requestsMapMutex_.unlock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is unlocked");
 
   queueDispatcherThread.stop();
 }
@@ -207,12 +193,10 @@ int RequestWatchdog::getRegesteredRequestsNumber() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is locked");
 
   int ret = requests_.size();
 
   requestsMapMutex_.unlock();
-  LOG4CXX_INFO(logger_, "requestsMapMutex_  is unlocked");
 
   return ret;
 }
@@ -260,7 +244,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     cycleStartTime = date_time::DateTime::getCurrentTime();
 
     instance->requestsMapMutex_.lock();
-    LOG4CXX_INFO(logger_, "requestsMapMutex_  is locked");
 
     it = instance->requests_.begin();
 
@@ -292,7 +275,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     }
 
     instance->requestsMapMutex_.unlock();
-    LOG4CXX_INFO(logger_, "requestsMapMutex_  is unlocked");
 
     /*for_each(expiredRequests.begin(), expiredRequests.end(),
              std::bind1st(std::mem_fun(&RequestWatchdog::removeRequest),

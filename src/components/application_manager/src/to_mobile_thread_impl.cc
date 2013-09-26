@@ -28,17 +28,17 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "./to_mobile_thread_impl.h"
 
 namespace application_manager {
 
-log4cxx::LoggerPtr ToMobileThreadImpl::logger_   =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+log4cxx::LoggerPtr ToMobileThreadImpl::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("ApplicationManager"));
 
 ToMobileThreadImpl::ToMobileThreadImpl(ApplicationManagerImpl* handler)
-  : handler_(handler) {
+    : handler_(handler) {
   DCHECK(handler);
 }
 
@@ -50,11 +50,11 @@ void ToMobileThreadImpl::threadMain() {
   while (1) {
     while (!handler_->messages_to_mobile_.empty()) {
       LOG4CXX_INFO(logger_, "Received message to mobile");
-      utils::SharedPtr<Message> message =  handler_->messages_to_mobile_.pop();
+      utils::SharedPtr<Message> message = handler_->messages_to_mobile_.pop();
 
       if (!handler_->mobile_handler_) {
-        LOG4CXX_ERROR(logger_,
-                      "Mobile Message Handler is not set for HMIMessageHandler");
+        LOG4CXX_ERROR(
+            logger_, "Mobile Message Handler is not set for HMIMessageHandler");
         continue;
       }
 

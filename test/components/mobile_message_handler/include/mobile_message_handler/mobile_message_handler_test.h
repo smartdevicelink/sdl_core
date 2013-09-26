@@ -173,7 +173,7 @@ TEST(mobile_message_handler_test, component_test) {
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
       mobile_message_handler::MobileMessageHandlerImpl::instance();
   DCHECK(mmh);
-  mmh->setProtocolHandler(&observer);
+  mmh->set_protocol_handler(&observer);
   mmh->AddMobileMessageListener(&observer);
 
   // Message processing

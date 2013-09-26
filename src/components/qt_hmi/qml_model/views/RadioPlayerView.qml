@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "../controls"
 
 Column {
+    id: radioPlayer
     anchors.fill: parent
     property string radioType: ""
     property var activeBand: radioType === "AM"? ["1130", "950", "760", "1270"]: ["96.3", "107.9", "104.3", "101.9"]
@@ -35,7 +36,7 @@ Column {
             spacing: 10
             Row{
                 Text{
-                    id: siriusChannelNameText
+                    id: radioChannelNameText
                     color: "#1d81d5"
                     text: presets[0]
                     font.pixelSize: 45
@@ -44,7 +45,7 @@ Column {
                     color: "#1d81d5"
                     text: " " + radioType
                     font.pixelSize: 25
-                    anchors.bottom: siriusChannelNameText.bottom
+                    anchors.bottom: radioChannelNameText.bottom
                 }
             }
             Row {
@@ -115,8 +116,22 @@ Column {
         }
     }
 
-    PresetRow{
+    Item {
+        width: parent.width
         height: parent.height / 4
+        Rectangle{
+            width: parent.width
+            height: 2
+            color: "#1d81d5"
+        }
+        PresetRow{
+            anchors.centerIn: parent
+            presets: radioPlayer.presets
+            width: parent.width
+            onSelectedIndexChanged: {
+                radioChannelNameText.text = presets[selectedIndex];
+            }
+        }
     }
 
 }

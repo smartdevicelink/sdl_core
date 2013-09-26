@@ -44,7 +44,8 @@ namespace commands {
 namespace str = strings;
 
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
@@ -59,7 +60,8 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+      .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -78,58 +80,59 @@ void PerformAudioPassThruRequest::Run() {
   ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
 
   // create HMI request
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[str::app_id] = app_id;
 
   msg_params[hmi_request::audio_pass_display_texts] =
-    smart_objects::SmartObject(smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::audio_pass_display_texts][0]
-    [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT1;
-    msg_params[hmi_request::audio_pass_display_texts][0]
-    [hmi_request::field_text] =
-      (*message_)[str::msg_params][str::audio_pass_display_text1];
+    msg_params[hmi_request::audio_pass_display_texts]
+               [0][hmi_request::field_name] =
+                   TextFieldName::AUDIO_DISPLAY_TEXT1;
+    msg_params[hmi_request::audio_pass_display_texts]
+               [0][hmi_request::field_text] =
+        (*message_)[str::msg_params][str::audio_pass_display_text1];
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::audio_pass_display_texts][1]
-    [hmi_request::field_name] = TextFieldName::AUDIO_DISPLAY_TEXT2;
-    msg_params[hmi_request::audio_pass_display_texts][1]
-    [hmi_request::field_text] =
-      (*message_)[str::msg_params][str::audio_pass_display_text2];
+    msg_params[hmi_request::audio_pass_display_texts]
+               [1][hmi_request::field_name] =
+                   TextFieldName::AUDIO_DISPLAY_TEXT2;
+    msg_params[hmi_request::audio_pass_display_texts]
+               [1][hmi_request::field_text] =
+        (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
   // duration
   msg_params[hmi_request::max_duration] =
-    (*message_)[str::msg_params][str::max_duration];
+      (*message_)[str::msg_params][str::max_duration];
 
-  msg_params[strings::app_id] =
-      app->app_id();
+  msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,
-                   msg_params, true, 1);
+  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru, msg_params,
+                   true, 1);
 
   ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(true);
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
-    (*message_)[str::params][str::connection_key].asInt(),
-    (*message_)[str::params][str::correlation_id].asInt(),
-    (*message_)[str::msg_params][str::max_duration].asInt(),
-    (*message_)[str::msg_params][str::sampling_rate].asInt(),
-    (*message_)[str::msg_params][str::bits_per_sample].asInt(),
-    (*message_)[str::msg_params][str::audio_type].asInt());
+      (*message_)[str::params][str::connection_key].asInt(),
+      (*message_)[str::params][str::correlation_id].asInt(),
+      (*message_)[str::msg_params][str::max_duration].asInt(),
+      (*message_)[str::msg_params][str::sampling_rate].asInt(),
+      (*message_)[str::msg_params][str::bits_per_sample].asInt(),
+      (*message_)[str::msg_params][str::audio_type].asInt());
 }
 
 void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
   // crate HMI TTS speak request
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    smart_objects::SmartObject chunk =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject chunk = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     chunk[strings::text] =
         (*message_)[str::msg_params][str::audio_pass_display_text1];
@@ -138,8 +141,8 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    smart_objects::SmartObject chunk =
-            smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject chunk = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     chunk[strings::text] =
         (*message_)[str::msg_params][str::audio_pass_display_text2];

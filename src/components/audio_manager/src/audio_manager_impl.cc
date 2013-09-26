@@ -168,9 +168,10 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
 }
 
 void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
-                 mobile_apis::SamplingRate::eType type,
+                 mobile_apis::SamplingRate::eType samplingRate,
                  int duration,
-                 mobile_apis::BitsPerSample::eType) {
+                 mobile_apis::BitsPerSample::eType bitsPerSample,
+                 unsigned int session_key, unsigned int correlation_id) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   FromMicToFileRecorderThread* recordThreadDelegate =
@@ -188,6 +189,21 @@ void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileNam
       recorderThread_->start();
     }
   }
+
+  AudioStreamSenderThread* senderThreadDelegate =
+      new AudioStreamSenderThread(outputFileName,
+                                  static_cast<unsigned int>(session_key),
+                                  static_cast<unsigned int>(correlation_id));
+
+  if(NULL != recordThreadDelegate)
+  {
+    senderThread_ = new threads::Thread("AudioStreamSender"
+        , senderThreadDelegate);
+
+    if(NULL != senderThread_) {
+      senderThread_->start();
+    }
+  }
 }
 
 void AudioManagerImpl::stopMicrophoneRecording() {
@@ -197,6 +213,12 @@ void AudioManagerImpl::stopMicrophoneRecording() {
     recorderThread_->stop();
     delete recorderThread_;
     recorderThread_ = NULL;
+  }
+
+  if(NULL != senderThread_) {
+    senderThread_->stop();
+    delete senderThread_;
+    senderThread_ = NULL;
   }
 }
 

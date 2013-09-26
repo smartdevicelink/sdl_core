@@ -1,3 +1,0 @@
-module sdl.core.api
-plugin hmi_dbus
-

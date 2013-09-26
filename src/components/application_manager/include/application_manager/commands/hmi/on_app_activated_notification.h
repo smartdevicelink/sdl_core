@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -43,30 +43,30 @@ namespace commands {
  * @brief OnAppActivatedNotification command class
  **/
 class OnAppActivatedNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnAppActivatedNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnAppActivatedNotification(const MessageSharedPtr& message);
+  public:
+    /**
+     * @brief OnAppActivatedNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnAppActivatedNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnAppActivatedNotification class destructor
-   **/
-  virtual ~OnAppActivatedNotification();
+    /**
+     * @brief OnAppActivatedNotification class destructor
+     **/
+    virtual ~OnAppActivatedNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_APP_ACTIVATED_NOTIFICATION_H_

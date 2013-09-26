@@ -165,7 +165,7 @@ public:
      *  @brief pData Pointer to the data to send
      *  @brief dataSize Size of the buffer to send 
      */
-    void send(const void *pData, size_t dataSize);
+    void Send(const void *pData, size_t dataSize);
     
     /**
      * @brief   check if socket connected
@@ -245,7 +245,7 @@ void CTranspMgrTcpClient::Disconnect()
 
 // ----------------------------------------------------------------------------
 
-void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
+void CTranspMgrTcpClient::Send(const void* pData, size_t dataSize)
 {
     if (pData != NULL)
     {
@@ -434,7 +434,7 @@ private:
             {
                 mTCPClient.Connect();
             }
-            mTCPClient.send(data, length);
+            mTCPClient.Send(data, length);
         }
         else 
         {
@@ -830,7 +830,7 @@ int main(int argc, char **argv)
             
             client.Connect();
 
-            client.send(pBuff, buffSize);    
+            client.Send(pBuff, buffSize);    
 
             std::cout << "The packet has been sent successfully" << std::endl;
         }

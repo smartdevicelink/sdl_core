@@ -44,6 +44,7 @@
 #include <string>
 #include <sstream>
 #include "utils/file_system.h"
+#include "config_profile/profile.h"
 
 uint64_t file_system::AvailableSpace() {
   char currentAppPath[FILENAME_MAX];
@@ -54,6 +55,60 @@ uint64_t file_system::AvailableSpace() {
   memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
   statvfs(currentAppPath, &fsInfo);
   return fsInfo.f_bsize * fsInfo.f_bfree;
+}
+
+unsigned int SizeDirectory(const std::string& path) {
+  unsigned int size = 0;
+  int return_code = 0;
+  DIR* directory = NULL;
+  struct dirent dir_element;
+  struct dirent* result = NULL;
+  struct stat file_info;
+  directory = opendir(path.c_str());
+  if (NULL != directory) {
+    return_code = readdir_r(directory, &dir_element, &result);
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, &dir_element, &result)) {
+      if (0 == strcmp(dir_element.d_name, "..")
+          || 0 == strcmp(dir_element.d_name, ".")) {
+        continue;
+      }
+      std::string full_element_path = path + "/" + dir_element.d_name;
+      if (file_system::IsDirectory(full_element_path)) {
+        size += SizeDirectory(full_element_path);
+      } else {
+        memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
+        stat(full_element_path.c_str(), &file_info);
+        size += file_info.st_size;
+      }
+    }
+  }
+  closedir(directory);
+  return size;
+}
+
+unsigned int file_system::AvailableSpaceApp(const std::string& name) {
+  unsigned int available_space_app = profile::Profile::instance()
+  ->space_available();
+  std::string full_path;
+  unsigned int size_of_directory = 0;
+  unsigned int available_space = 0;
+  if(DirectoryExists(name)) {
+    full_path = FullPath(name);
+    size_of_directory = SizeDirectory(full_path);
+    if(available_space_app < size_of_directory) {
+      return 0;
+    }
+    available_space_app -= size_of_directory;
+    available_space = AvailableSpace();
+    if(available_space_app > available_space) {
+      return available_space;
+    } else {
+      return available_space_app;
+    }
+  } else {
+    return available_space_app;
+  }
 }
 
 std::string file_system::CreateDirectory(const std::string& name) {

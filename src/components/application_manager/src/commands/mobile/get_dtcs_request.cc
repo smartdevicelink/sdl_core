@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-GetDTCsRequest::GetDTCsRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 GetDTCsRequest::~GetDTCsRequest() {
@@ -50,9 +50,8 @@ GetDTCsRequest::~GetDTCsRequest() {
 void GetDTCsRequest::Run() {
   LOG4CXX_INFO(logger_, "GetDTCsRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -66,17 +65,16 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[strings::ecu_name] =
-    (*message_)[strings::msg_params][strings::ecu_name];
+      (*message_)[strings::msg_params][strings::ecu_name];
   msg_params[strings::dtc_mask] =
-    (*message_)[strings::msg_params][strings::dtc_mask];
+      (*message_)[strings::msg_params][strings::dtc_mask];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs,
-                   msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs, msg_params, true);
 }
 
 }  // namespace commands

@@ -41,8 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
-AddCommandResponse::AddCommandResponse(const MessageSharedPtr& message):
-  CommandResponseImpl(message) {
+AddCommandResponse::AddCommandResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 AddCommandResponse::~AddCommandResponse() {
@@ -61,52 +61,49 @@ void AddCommandResponse::Run() {
   }
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  const int connection_key =  msg_chain->connection_key();
+  const int connection_key = msg_chain->connection_key();
   smart_objects::SmartObject data = msg_chain->data();
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
-    msg_chain->ui_response_result();
+      msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
-    msg_chain->vr_response_result();
-
+      msg_chain->vr_response_result();
 
   if (!IsPendingResponseExist()) {
-    Application* app = ApplicationManagerImpl::instance()->
-                       application(connection_key);
+    Application* app = ApplicationManagerImpl::instance()->application(
+        connection_key);
 
     if (!app) {
       SendResponse(false);
     }
 
-    smart_objects::SmartObject* command =
-       app->FindCommand(data[strings::msg_params][strings::cmd_id].asInt());
+    smart_objects::SmartObject* command = app->FindCommand(
+        data[strings::msg_params][strings::cmd_id].asInt());
 
     if (!command) {
-
-      if ((data[strings::msg_params].keyExists(strings::menu_params)) ||
-          (data[strings::msg_params].keyExists(strings::vr_commands))) {
+      if ((data[strings::msg_params].keyExists(strings::menu_params))
+          || (data[strings::msg_params].keyExists(strings::vr_commands))) {
         app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
                         data[strings::msg_params]);
       }
 
-
       if (((hmi_apis::Common_Result::SUCCESS == result_ui)
-          && (hmi_apis::Common_Result::SUCCESS == result_vr))      ||
-          ((hmi_apis::Common_Result::SUCCESS == result_ui)
-          && (hmi_apis::Common_Result::INVALID_ENUM == result_vr)) ||
-          ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
-          && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
+          && (hmi_apis::Common_Result::SUCCESS == result_vr))
+          || ((hmi_apis::Common_Result::SUCCESS == result_ui)
+              && (hmi_apis::Common_Result::INVALID_ENUM == result_vr))
+          || ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
+              && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
         SendResponse(true);
       } else {
         // TODO: Check Response result code

@@ -7,14 +7,32 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "Api"
+        name: "HmiProxy"
         defaultProperty: "data"
         prototype: "QQuickItem"
-        exports: ["Api 1.0"]
+        exports: ["HMIProxy 1.0"]
         exportMetaObjectRevisions: [0]
-        Method {
-            name: "send"
-            Parameter { name: "text"; type: "string" }
+    }
+    Component {
+        name: "SdlProxy"
+        defaultProperty: "data"
+        prototype: "QQuickItem"
+        exports: ["SDLProxy 1.0"]
+        exportMetaObjectRevisions: [0]
+        Signal {
+            name: "appRegistered"
+            Parameter { type: "QVariant" }
+        }
+        Signal {
+            name: "appUnregistered"
+            Parameter { type: "int" }
+        }
+        Signal { name: "playTone" }
+        Signal {
+            name: "showNotification"
+            Parameter { type: "QVariant" }
+            Parameter { type: "QVariant" }
+            Parameter { type: "int" }
         }
     }
 }

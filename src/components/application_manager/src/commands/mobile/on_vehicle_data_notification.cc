@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 OnVehicleDataNotification::OnVehicleDataNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnVehicleDataNotification::~OnVehicleDataNotification() {
@@ -57,7 +58,7 @@ void OnVehicleDataNotification::Run() {
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
       const std::vector<Application*>& applications =
-        ApplicationManagerImpl::instance()->applications_by_ivi(it->second);
+          ApplicationManagerImpl::instance()->applications_by_ivi(it->second);
 
       std::vector<Application*>::const_iterator it = applications.begin();
       for (; applications.end() != it; ++it) {
@@ -68,9 +69,9 @@ void OnVehicleDataNotification::Run() {
         }
 
         LOG4CXX_INFO(
-          logger_,
-          "Send OnVehicleData PRNDL notification to " << app->name()
-          << " application id " << app->app_id());
+            logger_,
+            "Send OnVehicleData PRNDL notification to " << app->name()
+                << " application id " << app->app_id());
 
         (*message_)[strings::params][strings::connection_key] = app->app_id();
 

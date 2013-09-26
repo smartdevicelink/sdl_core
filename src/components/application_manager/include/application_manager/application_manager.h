@@ -37,7 +37,6 @@
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "mobile_message_handler/mobile_message_handler.h"
 #include "connection_handler/connection_handler.h"
-#include "request_watchdog/watchdog.h"
 
 namespace application_manager {
 
@@ -57,7 +56,6 @@ class ApplicationManager {
       mobile_message_handler::MobileMessageHandler* handler) = 0;
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
-  virtual void set_watchdog(request_watchdog::Watchdog* watchdog) = 0;
 
  protected:
   virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;

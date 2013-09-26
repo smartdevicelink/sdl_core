@@ -35,6 +35,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "utils/timer_thread.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -46,7 +48,9 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public CommandRequestImpl {
+class PerformInteractionRequest : public CommandRequestImpl,
+  public event_engine::EventObserver {
+
  public:
 
   /*
@@ -75,6 +79,19 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief Timer callback function
+   *
+   */
+  void onTimer() const;
 
  private:
   /*
@@ -132,6 +149,20 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * otherwise FALSE
    */
   bool CheckChoiceSetVRSynonyms(Application* const app);
+
+  /*
+   * @brief Checks if request with non-sequential positions of vrHelpItems
+   * SDLAQ-CRS-466
+   *
+   * @param app_id Application ID
+   *
+   * @return TRUE if vrHelpItems positions are sequential,
+   * otherwise FALSE
+   */
+  bool CheckVrHelpItemPositions(Application* const app);
+
+  // members
+  timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

@@ -69,7 +69,7 @@ void MockDeviceScanner::Terminate() {
 void MockDeviceScanner::reset() {
   is_search_failed_ = false;
   for (auto d : devices_) {
-    static_cast<MockDevice*>(d.get())->stop();
+    static_cast<MockDevice*>(d.get())->Stop();
   }
   devices_.clear();
 }
@@ -83,7 +83,7 @@ void MockDeviceScanner::AddDevice(const std::string& name,
   MockDevice* dev = new MockDevice(name, unique_id, controller_);
   dev->addApplication();
   if (start) {
-    dev->start();
+    dev->Start();
   }
   devices_.push_back(dev);
 }

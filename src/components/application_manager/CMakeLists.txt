@@ -35,7 +35,6 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
-./src/audio_pass_thru_thread_impl.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/message_conversion.cc
@@ -45,10 +44,17 @@ set (SOURCES
 ./src/from_hmh_thread_impl.cc
 ./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
+./src/request_controller.cc
 )
 
 set (POLICIES_MANAGER
 ./src/policies_manager/policies_manager.cc
+)
+
+set (EVENT_ENGINE
+./src/event_engine/event.cc
+./src/event_engine/event_dispatcher.cc
+./src/event_engine/event_observer.cc
 )
 
 set (MOBILE_COMMANDS_SOURCES
@@ -156,6 +162,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/allow_app_request.cc
 ./src/commands/hmi/allow_app_response.cc
+./src/commands/hmi/activate_app_request.cc
+./src/commands/hmi/activate_app_response.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/update_app_list_request.cc
@@ -281,5 +289,5 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_find_applications.cc
 )
 
-add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER})
+add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
 target_link_libraries ("ApplicationManager" log4cxx)

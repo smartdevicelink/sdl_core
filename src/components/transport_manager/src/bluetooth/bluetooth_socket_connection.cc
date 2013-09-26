@@ -1,6 +1,6 @@
 /**
  * \file bluetooth_socket_connection.cc
- * \brief
+ * \brief BluetoothSocketConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
