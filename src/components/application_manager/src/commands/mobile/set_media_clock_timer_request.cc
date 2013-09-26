@@ -80,7 +80,6 @@ void SetMediaClockRequest::Run() {
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
-
 }
 
 bool SetMediaClockRequest::isDataValid() {

@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 SetDisplayLayoutRequest::SetDisplayLayoutRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {

@@ -29,14 +29,13 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
-
+ */
 
 #include "application_manager/commands/mobile/unregister_app_interface_response.h"
 
-namespace application_manager  {
+namespace application_manager {
 
-namespace commands  {
+namespace commands {
 
 void UnregisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "UnregisterAppInterfaceResponse::Run");

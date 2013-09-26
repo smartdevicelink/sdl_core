@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 ResetGlobalPropertiesResponse::ResetGlobalPropertiesResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 ResetGlobalPropertiesResponse::~ResetGlobalPropertiesResponse() {
@@ -61,10 +62,10 @@ void ResetGlobalPropertiesResponse::Run() {
   }
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -73,14 +74,14 @@ void ResetGlobalPropertiesResponse::Run() {
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
-    msg_chain->ui_response_result();
-  const hmi_apis::Common_Result::eType result_tts =
-    msg_chain->tts_response_result();
+      msg_chain->ui_response_result();
+  const hmi_apis::Common_Result::eType result_tts = msg_chain
+      ->tts_response_result();
 
   const int connection_key = msg_chain->connection_key();
 
-  Application* app = ApplicationManagerImpl::instance()->
-                     application(connection_key);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -88,16 +89,14 @@ void ResetGlobalPropertiesResponse::Run() {
   }
 
   if (!IsPendingResponseExist()) {
-
     app->set_reset_global_properties_active(false);
 
     if ((hmi_apis::Common_Result::SUCCESS == result_ui
-        && hmi_apis::Common_Result::SUCCESS == result_tts) ||
-        (hmi_apis::Common_Result::SUCCESS == result_ui
-        && hmi_apis::Common_Result::INVALID_ENUM == result_tts) ||
-        (hmi_apis::Common_Result::SUCCESS == result_tts
-        && hmi_apis::Common_Result::INVALID_ENUM == result_ui)) {
-
+        && hmi_apis::Common_Result::SUCCESS == result_tts)
+        || (hmi_apis::Common_Result::SUCCESS == result_ui
+            && hmi_apis::Common_Result::INVALID_ENUM == result_tts)
+        || (hmi_apis::Common_Result::SUCCESS == result_tts
+            && hmi_apis::Common_Result::INVALID_ENUM == result_ui)) {
       SendResponse(true);
     } else {
       // TODO: check ui and tts response code

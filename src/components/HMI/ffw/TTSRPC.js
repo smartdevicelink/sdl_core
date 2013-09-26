@@ -130,11 +130,7 @@ FFW.TTS = FFW.RPCObserver.create( {
         switch (request.method) {
         case "TTS.Speak": {
 
-            SDL.SDLModel.onPrompt(request.params.ttsChunks);
-
-            this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
-                request.id,
-                request.method);
+            SDL.SDLModel.onPrompt(request.params.ttsChunks, request.id);
 
             break;
         }
@@ -219,7 +215,7 @@ FFW.TTS = FFW.RPCObserver.create( {
         }
         case "TTS.ChangeRegistration": {
 
-            SDL.SDLModel.changeRegistrationTTSVR(request.params.language);
+            SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
 
             this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
                 request.id,

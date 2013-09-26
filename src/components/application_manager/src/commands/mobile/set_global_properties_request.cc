@@ -43,7 +43,8 @@ namespace application_manager {
 namespace commands {
 
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
@@ -65,23 +66,24 @@ void SetGlobalPropertiesRequest::Run() {
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
-                          verification_result);
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "MessageHelper::VerifyImageFiles return " << verification_result);
     SendResponse(false, verification_result);
     return;
   }
 
-  bool help_prompt_present =
-      (*message_)[strings::msg_params].keyExists(strings::help_prompt);
-  bool timeout_prompt_present =
-       (*message_)[strings::msg_params].keyExists(strings::timeout_prompt);
-  bool vr_help_title_present =
-      (*message_)[strings::msg_params].keyExists(strings::vr_help_title);
-  bool vr_help_present =
-       (*message_)[strings::msg_params].keyExists(strings::vr_help);
+  bool help_prompt_present = (*message_)[strings::msg_params].keyExists(
+      strings::help_prompt);
+  bool timeout_prompt_present = (*message_)[strings::msg_params].keyExists(
+      strings::timeout_prompt);
+  bool vr_help_title_present = (*message_)[strings::msg_params].keyExists(
+      strings::vr_help_title);
+  bool vr_help_present = (*message_)[strings::msg_params].keyExists(
+      strings::vr_help);
 
-  if (!help_prompt_present && !timeout_prompt_present &&
-      !vr_help_title_present && !vr_help_present) {
+  if (!help_prompt_present && !timeout_prompt_present && !vr_help_title_present
+      && !vr_help_present) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "Missing conditional parameters");
@@ -108,8 +110,8 @@ void SetGlobalPropertiesRequest::Run() {
     app->set_vr_help(
         (*message_)[strings::msg_params].getElement(strings::vr_help));
 
-    smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     msg_params[strings::vr_help_title] = (*app->vr_help_title());
     msg_params[strings::vr_help] = (*app->vr_help());
@@ -153,37 +155,42 @@ void SetGlobalPropertiesRequest::Run() {
 
   // check TTS params
   if (help_prompt_present || timeout_prompt_present) {
-    smart_objects::SmartObject msg_params =
-         smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     if (help_prompt_present) {
       app->set_help_prompt(
-              (*message_)[strings::msg_params].getElement(strings::help_promt));
+          (*message_)[strings::msg_params].getElement(strings::help_promt));
       msg_params[strings::help_prompt] = (*app->help_promt());
     }
 
     if (timeout_prompt_present) {
       app->set_timeout_prompt(
-        (*message_)[strings::msg_params].getElement(strings::timeout_promt));
+          (*message_)[strings::msg_params].getElement(strings::timeout_promt));
       msg_params[strings::timeout_prompt] = (*app->timeout_promt());
     }
 
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                     msg_params, true);
+    CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties, msg_params,
+                     true);
   }
 }
 
 bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
-  const smart_objects::SmartObject vr_help =
-      (*message_)[strings::msg_params].getElement(strings::vr_help);
+  const smart_objects::SmartObject vr_help = (*message_)[strings::msg_params]
+      .getElement(strings::vr_help);
+
+  if (1 != vr_help.getElement(0).getElement(strings::position).asInt()) {
+    LOG4CXX_ERROR(logger_, "VR help items start position is wrong");
+    return false;
+  }
 
   // Check if VR Help Items contains sequential positionss
   size_t i = 0;
   for (size_t j = 1; j < vr_help.length(); ++i, ++j) {
-    if ((vr_help.getElement(i).getElement(strings::position).asInt() + 1) !=
-        vr_help.getElement(j).getElement(strings::position).asInt()) {
+    if ((vr_help.getElement(i).getElement(strings::position).asInt() + 1)
+        != vr_help.getElement(j).getElement(strings::position).asInt()) {
       LOG4CXX_ERROR(logger_, "VR help items order is wrong");
       return false;
     }

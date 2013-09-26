@@ -137,10 +137,12 @@ void A2DPSourcePlayerThread::threadMain() {
     }
 
     stopFlagMutex_.lock();
-    if (shouldBeStoped_) {
+    bool shouldBeStoped = shouldBeStoped;
+    stopFlagMutex_.unlock();
+
+    if (shouldBeStoped) {
       break;
     }
-    stopFlagMutex_.unlock();
   }
 
   /* Make sure that every single sample was played */

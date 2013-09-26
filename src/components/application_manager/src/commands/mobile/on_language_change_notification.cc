@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnLanguageChangeNotification::OnLanguageChangeNotification(
-    const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnLanguageChangeNotification::~OnLanguageChangeNotification() {

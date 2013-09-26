@@ -1251,6 +1251,14 @@
     </function>
 	<function name="UpdateAppList" messagetype="response">
     </function>
+    <function name="ActivateApp" messagetype="request">
+      <description>Request from SDL to HMI to bring specified application to front on UI e.g make it HMI status 'FULL'.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of deactivated application.</description>
+      </param>
+    </function>
+    <function name="ActivateApp" messagetype="response">
+    </function>
     <function name="OnAppActivated" messagetype="notification">
       <description>Must be sent by HU system when the user clicks on app in the list of registered apps or on soft button with 'STEAL_FOCUS' action.</description>
       <param name="appID" type="Integer" mandatory="true">

@@ -43,7 +43,8 @@ namespace application_manager {
 namespace commands {
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 ChangeRegistrationResponse::~ChangeRegistrationResponse() {
@@ -77,10 +78,10 @@ void ChangeRegistrationResponse::Run() {
   }
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -89,19 +90,19 @@ void ChangeRegistrationResponse::Run() {
 
   // we need to retrieve stored response code before message chain decrease
   const hmi_apis::Common_Result::eType result_ui =
-    msg_chain->ui_response_result();
+      msg_chain->ui_response_result();
   const hmi_apis::Common_Result::eType result_vr =
-    msg_chain->vr_response_result();
-  const hmi_apis::Common_Result::eType result_tts =
-    msg_chain->tts_response_result();
+      msg_chain->vr_response_result();
+  const hmi_apis::Common_Result::eType result_tts = msg_chain
+      ->tts_response_result();
 
   // get stored SmartObject
   smart_objects::SmartObject data = msg_chain->data();
-  const int connection_key =  msg_chain->connection_key();
+  const int connection_key = msg_chain->connection_key();
 
   if (!IsPendingResponseExist()) {
-    Application* application = ApplicationManagerImpl::instance()->
-                               application(connection_key);
+    Application* application = ApplicationManagerImpl::instance()->application(
+        connection_key);
 
     if (NULL == application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -110,15 +111,15 @@ void ChangeRegistrationResponse::Run() {
 
     if (hmi_apis::Common_Result::SUCCESS == result_ui) {
       application->set_ui_language(
-        static_cast<mobile_api::Language::eType>(
-          data[strings::msg_params][strings::language].asInt()));
+          static_cast<mobile_api::Language::eType>(
+              data[strings::msg_params][strings::language].asInt()));
     }
 
-    if (hmi_apis::Common_Result::SUCCESS == result_vr ||
-        hmi_apis::Common_Result::SUCCESS == result_tts) {
+    if (hmi_apis::Common_Result::SUCCESS == result_vr
+        || hmi_apis::Common_Result::SUCCESS == result_tts) {
       application->set_language(
-        static_cast<mobile_api::Language::eType>(
-          data[strings::msg_params][strings::hmi_display_language].asInt()));
+          static_cast<mobile_api::Language::eType>
+      (data[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
     int greates_result_code = std::max(std::max(result_ui, result_vr),

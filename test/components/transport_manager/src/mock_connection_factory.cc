@@ -57,7 +57,7 @@ TransportAdapter::Error MockConnectionFactory::CreateConnection(
     const ApplicationHandle& app_handle) {
 
   MockConnection *conn = new MockConnection(device_handle, app_handle, controller_);
-  conn->start();
+  conn->Start();
   return TransportAdapter::OK;
 }
 

@@ -1,5 +1,6 @@
 include_directories (
   ./include
+  ../config_profile/include
 )
 
 set (SOURCES

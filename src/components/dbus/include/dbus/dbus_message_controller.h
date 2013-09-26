@@ -65,7 +65,7 @@ class DBusMessageController : public DBusAdapter {
    * \param interface name of interface in HMI
    * \param signal name of signal
    */
-  void subscribeTo(const std::string& interface, const std::string& signal);
+  void SubscribeTo(const std::string& interface, const std::string& signal);
 
   /**
    * \brief Method for receiving thread.

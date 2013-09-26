@@ -71,8 +71,7 @@ class Command {
   /**
    * \brief Command class destructor
    **/
-  virtual ~Command() {
-  }
+  virtual ~Command() {}
 };
 
 }  // namespace commands

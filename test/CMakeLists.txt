@@ -56,6 +56,8 @@ set(LIBRARIES
     ApplicationManager
     MobileMessageHandler
     ProtocolHandler
+    Utils
+    ConfigProfile
     #test_JSONHandler_v4_protocol_v2_0_revP
     #test_JSONHandlerTest
     test_SmartObjectTest
@@ -67,7 +69,6 @@ set(LIBRARIES
     #test_MobileMessageHandlerTest
     MOBILE_API
     jsoncpp
-    Utils
     rt
     ${GSTREAMER_gstreamer_LIBRARY}
 )

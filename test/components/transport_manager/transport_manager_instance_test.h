@@ -313,7 +313,7 @@ TEST(test_transport_manager_instance, test_transport_manager_instance)
 //            ;
 //
 //            AddTransportAdapter(mpTransportAdapter);
-//            LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
+//            LOG4CPLUS_INFO_EXT(mLogger, "Transport adapters initialized");
 //        }
 //
 //    protected:

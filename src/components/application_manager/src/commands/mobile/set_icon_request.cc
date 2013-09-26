@@ -42,8 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
-SetIconRequest::SetIconRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+SetIconRequest::SetIconRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SetIconRequest::~SetIconRequest() {
@@ -52,9 +52,8 @@ SetIconRequest::~SetIconRequest() {
 void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -63,7 +62,7 @@ void SetIconRequest::Run() {
   }
 
   const std::string& sync_file_name =
-    (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name];
 
   std::string relative_file_path = app->name();
   relative_file_path += "/";
@@ -77,17 +76,16 @@ void SetIconRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::sync_file_name] =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::sync_file_name] = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[strings::sync_file_name][strings::value] = full_file_path;
 
-  msg_params[strings::sync_file_name][strings::image_type] =
-      ImageType::DYNAMIC;
+  msg_params[strings::sync_file_name][strings::image_type] = ImageType::DYNAMIC;
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true, 1);
 }

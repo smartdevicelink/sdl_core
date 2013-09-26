@@ -41,7 +41,8 @@ namespace application_manager {
 namespace commands {
 
 CreateInteractionChoiceSetResponse::CreateInteractionChoiceSetResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {

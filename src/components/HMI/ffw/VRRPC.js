@@ -209,7 +209,7 @@ FFW.VR = FFW.RPCObserver.create( {
             }
             case "VR.ChangeRegistration": {
 
-                SDL.SDLModel.changeRegistrationTTSVR(request.params.language);
+                SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
 
                 this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"],
                     request.id,

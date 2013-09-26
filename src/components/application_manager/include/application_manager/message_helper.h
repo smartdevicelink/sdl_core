@@ -210,7 +210,9 @@ class MessageHelper {
   static void SendDeleteSubMenuRequestToHMI(Application* const app);
   static void ResetGlobalproperties(Application* const app);
 
-  static smart_objects::SmartObject* CreateNegativeResponse(
+    static void SendActivateAppToHMI(Application* const app);
+
+    static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 
@@ -227,6 +229,22 @@ class MessageHelper {
    */
   static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, const Application* app);
+
+  static void AddSoftButtonsDefaultSystemAction(
+      smart_objects::SmartObject& msg_params);
+
+
+
+  /*
+   * @brief Verify application and tts name in RefisterAppInterface request msg_params
+   *
+   * @param message msg_params
+   *
+   *
+   * @return verification result
+   *
+   */
+  static bool VerifyApplicationName(smart_objects::SmartObject& msg_params);
 
   static bool PrintSmartObject(smart_objects::SmartObject& object);
 

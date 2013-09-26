@@ -39,8 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
-GetVehicleDataResponse::GetVehicleDataResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+GetVehicleDataResponse::GetVehicleDataResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 GetVehicleDataResponse::~GetVehicleDataResponse() {
@@ -62,8 +62,8 @@ void GetVehicleDataResponse::Run() {
 
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
-
-    if (hmi_apis::Common_Result::SUCCESS == code) {
+    if (hmi_apis::Common_Result::SUCCESS == code ||
+        hmi_apis::Common_Result::DATA_NOT_AVAILABLE == code) {
       SendResponse(true);
     } else {
       // TODO(DK): Some logic

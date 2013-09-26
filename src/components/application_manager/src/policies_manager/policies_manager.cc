@@ -80,7 +80,7 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "GenericResponse", FunctionID::GenericResponseID },
   { "PutFile", FunctionID::PutFileID },
   { "DeleteFile", FunctionID::DeleteFileID },
-  { "ListFiles", FunctionID::ListFilesID },
+  { "ListFiles",  FunctionID::ListFilesID },
   { "SetAppIcon", FunctionID::SetAppIconID },
   { "SetDisplayLayout", FunctionID::SetDisplayLayoutID },
   { "OnHMIStatus", FunctionID::OnHMIStatusID },
@@ -112,7 +112,7 @@ namespace policies_manager {
 //! ---------------------------------------------------------------------------
 
 log4cxx::LoggerPtr PoliciesManager::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("PoliciesManager"));
+    log4cxx::Logger::getLogger("PoliciesManager"));
 
 //! ---------------------------------------------------------------------------
 
@@ -122,10 +122,10 @@ PoliciesManager::PoliciesManager() {
 PoliciesManager::~PoliciesManager() {
 }
 
-bool PoliciesManager::init() {
+bool PoliciesManager::Init() {
   std::string json_string;
   std::string policies_file_name = profile::Profile::instance()
-                                   ->policies_file_name();
+      ->policies_file_name();
   if (!file_system::FileExists(policies_file_name)) {
     return false;
   }
@@ -140,8 +140,8 @@ bool PoliciesManager::init() {
     bool parsedSuccess = reader_.parse(json_string, json_, false);
     if (!parsedSuccess) {
       LOG4CXX_ERROR(
-        logger_,
-        "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
+          logger_,
+          "Failed to parse JSON: " << reader_.getFormatedErrorMessages());
       return false;
     }
 
@@ -173,9 +173,8 @@ bool PoliciesManager::init() {
   return true;
 }
 
-bool PoliciesManager::is_valid_hmi_status(
-  FunctionID::eType function,
-  mobile_apis::HMILevel::eType status) {
+bool PoliciesManager::IsValidHmiStatus(FunctionID::eType function,
+                                          mobile_apis::HMILevel::eType status) {
   if (items_.find(function) == items_.end()) {
     return false;
   }

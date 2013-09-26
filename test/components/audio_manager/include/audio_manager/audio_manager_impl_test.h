@@ -66,7 +66,7 @@ TEST_F(AudioManagerTest, RecordMicrophoneStream) {
   audioManager->startMicrophoneRecording(std::string("record.wav"),
                      mobile_apis::SamplingRate::SamplingRate_44KHZ,
                                                                  5,
-                  mobile_apis::BitsPerSample::BitsPerSample_16_BIT);
+                  mobile_apis::BitsPerSample::BitsPerSample_16_BIT, 0, 0);
 
   usleep(40000000);
 

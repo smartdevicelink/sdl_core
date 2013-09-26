@@ -60,6 +60,28 @@ class CommandRequestImpl : public CommandImpl {
   virtual void Run();
 
   /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut() const;
+
+  /*
+   * @brief Retrieves request ID
+   */
+  inline int function_id() const;
+
+  /*
+   * @brief Retrieves correlation ID
+   */
+  inline int correlation_id() const;
+
+  /*
+   * @brief Retrieves connection key
+   */
+  inline int connection_key() const;
+
+  /*
    * @brief Creates Mobile response
    *
    * @param success true if successful; false, if failed
@@ -103,6 +125,18 @@ class CommandRequestImpl : public CommandImpl {
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
+
+int CommandRequestImpl::function_id() const {
+  return (*message_)[strings::params][strings::function_id].asInt();
+}
+
+int CommandRequestImpl::correlation_id() const {
+  return (*message_)[strings::params][strings::correlation_id].asInt();
+}
+
+int CommandRequestImpl::connection_key() const {
+  return (*message_)[strings::params][strings::connection_key].asInt();
+}
 
 }  // namespace commands
 
