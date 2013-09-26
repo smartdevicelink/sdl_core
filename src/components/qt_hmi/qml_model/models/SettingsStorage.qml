@@ -1,9 +1,7 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
-
 Item
 {
-    property var capabilities: []
     property bool vrAvailable: false
     property bool ttsAvailable: false
     property bool navigationAvailable: false
