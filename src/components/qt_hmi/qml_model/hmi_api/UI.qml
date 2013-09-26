@@ -42,7 +42,7 @@ Item {
         }
 
         alertWindow.alert(alertString, duration)
-        return {} // TODO check for other alerts and return "try again"
+        return {} // TODO check for other alerts and return "try again" nvaganov@luxoft.com
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
