@@ -11,21 +11,19 @@ DBUS_INTERFACES += notify.xml
 # Input
 SOURCES += \
     dbus_plugin.cpp \
-    api.cpp \
-    presetBankCapabilities.cpp \
-    buttonCapabilities.cpp \
-    buttonsadaptor.cpp
+    qml_dbus.cpp \
+    sdlproxy.cpp \
+    hmiproxy.cpp
 
 HEADERS += \
     dbus_plugin.h \
-    api.h \
-    presetBankCapabilities.h \
-    buttonCapabilities.h \
-    buttonsadaptor.h \
-    optionalArgument.h
+    qml_dbus.h \
+    optional_argument.h \
+    qml_dbus_common.h \
+    sdlproxy.h \
+    hmiproxy.h
 
-OTHER_FILES = qmldir \
-    api.xml
+OTHER_FILES = qmldir
 
 !equals(_PRO_FILE_PWD_, $$OUT_PWD) {
     copy_qmldir.target = $$OUT_PWD/qmldir
@@ -45,5 +43,3 @@ unix {
 }
 
 QMAKE_LIBDIR += /usr/lib/i386-linux-gnu/mesa
-
-QMAKE_POST_LINK = make install

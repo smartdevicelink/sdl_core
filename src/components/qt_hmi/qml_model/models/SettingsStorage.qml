@@ -1,7 +1,13 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+Item
+{
+    property bool vrAvailable: false
+    property bool ttsAvailable: false
+    property bool navigationAvailable: false
+    property bool vehileInfoAvailable: false
+    property bool uiAvailable: false
 
-Item {
     property var sdlLanguagesList: [
         Common.Language.EN_US,
         Common.Language.ES_MX,
@@ -26,4 +32,7 @@ Item {
         Common.Language.DA_DK,
         Common.Language.NO_NO
     ]
+
+
+    property var buttonCapabilities: []
 }

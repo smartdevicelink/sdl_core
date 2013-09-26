@@ -7,7 +7,7 @@ Item {
 
     function isReady () {
         return {
-            available: available
+            available: settings.vrAvailable
         }
     }
 

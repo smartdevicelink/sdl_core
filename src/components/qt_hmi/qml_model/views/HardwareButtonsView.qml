@@ -128,13 +128,13 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                sdlButtons.capabilities.push(
-                                            {
-                                                name: Common.ButtonName.PRESET_0 + index,
-                                                upDownAvailable: true,
-                                                shortPressAvailable: true,
-                                                longPressAvailable: true
-                                            });
+                                settings.buttonCapabilities.push(
+                                {
+                                    name: Common.ButtonName.PRESET_0 + index,
+                                    upDownAvailable: true,
+                                    shortPressAvailable: true,
+                                    longPressAvailable: true
+                                });
                             }
                         }
                     }
