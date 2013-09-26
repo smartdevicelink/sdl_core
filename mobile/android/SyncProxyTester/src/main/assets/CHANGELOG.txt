@@ -1,3 +1,6 @@
+[CW35.3]
+*Fixed crashes on end session/disconnect.
+
 [CW35.2]
 *OnKeyboard event support added
 
