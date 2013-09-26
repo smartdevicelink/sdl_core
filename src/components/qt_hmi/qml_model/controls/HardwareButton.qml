@@ -62,7 +62,7 @@ MaskedContainer {
     }
 
     Component.onCompleted: {
-        if (buttonId !== Enums.ButtonName.CUSTOM_BUTTON) {
+        if (buttonId !== Common.ButtonName.CUSTOM_BUTTON) {
             settings.buttonCapabilities.push(
             {
                 name: buttonId,
