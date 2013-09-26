@@ -62,19 +62,39 @@
     width: 250px;
     bottom: 0;
     left: 0;
+    position: absolute!important;
+    margin: 0px!important;
+    height: 49px!important;
+    font-size: 32px;
+    line-height: 50px!important;
 }
 #baseNavigation .softButton2{
     width: 250px;
     bottom: 0px;
     right: 0px;
+    position: absolute!important;
+    margin: 0px!important;
+    height: 49px!important;
+    font-size: 32px;
+    line-height: 50px!important;
 }
 #baseNavigation .softButton3{
     width: 100px;
     top: 100px;
     left: 0;
+    position: absolute!important;
+    margin: 0px!important;
+    height: 49px!important;
+    font-size: 32px;
+    line-height: 50px!important;
 }
 #baseNavigation .softButton4{
     width: 100px;
     top: 150px;
     left: 0;
+    position: absolute!important;
+    margin: 0px!important;
+    height: 49px!important;
+    font-size: 32px;
+    line-height: 50px!important;
 }

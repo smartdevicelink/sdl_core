@@ -689,7 +689,7 @@
 	display: block;
 }
 
-#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+#baseNavigation .softButton,#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
 	{
 	border: 1px solid #393939;
 	border-radius: 3px;

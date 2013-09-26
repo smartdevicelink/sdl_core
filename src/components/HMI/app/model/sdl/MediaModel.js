@@ -81,26 +81,22 @@ SDL.SDLMediaModel = SDL.SDLAppModel
                 ],
                 "softButtons": [
                     {
-                        "text" : "softButton1",
-                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "text" : "Menu",
                         "isHighlighted" : true,
                         "softButtonID" : 1
                     },
                     {
-                        "text" : "softButton2",
-                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "text" : "Options",
                         "isHighlighted" : false,
                         "softButtonID" : 2
                     },
                     {
-                        "text" : "softButton3",
-                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "text" : "+",
                         "isHighlighted" : true,
                         "softButtonID" : 3
                     },
                     {
-                        "text" : "softButton4",
-                        "image" :"images/info/info_leftMenu_apps_ico.png",
+                        "text" : "-",
                         "isHighlighted" : false,
                         "softButtonID" : 4
                     }
