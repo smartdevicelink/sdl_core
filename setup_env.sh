@@ -12,7 +12,8 @@ UPDATE_SOURCES=false
 AVAHI_CLIENT_LIBRARY="libavahi-client3"
 AVAHI_COMMON="libavahi-common3"
 LIB_UDEV="libudev-dev"
-
+ICECAST="icecast2"
+USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -90,6 +91,29 @@ fi
 
 echo "Installing gstreamer..."
 apt-install gstreamer1.0*
+echo $OK
 
+echo "Setting up USB permissions..."
+if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
+	echo "Create permission file"
+	sudo touch /etc/udev/rules.d/90-usbpermission.rules
+	sudo echo -e "\n" | sudo tee /etc/udev/rules.d/90-usbpermission.rules
+fi
 
+if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; then
+	echo "Adding permissions..."
+	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
+fi
+
+echo "Installing icecast..."
+apt-install ${ICECAST}
+echo $OK
+
+echo "Configuring icecast..."
+sudo sed -i 's/ENABLE=false/ENABLE=true/g' /etc/default/icecast2
+echo $OK
+
+echo "Starting icecast..."
+sudo /etc/init.d/icecast2 start
+echo $OK
 
