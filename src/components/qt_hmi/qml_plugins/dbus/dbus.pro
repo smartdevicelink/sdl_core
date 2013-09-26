@@ -11,13 +11,13 @@ DBUS_INTERFACES += notify.xml
 # Input
 SOURCES += \
     dbus_plugin.cpp \
-    qt_dbus.cpp \
+    qml_dbus.cpp \
     sdlproxy.cpp \
     hmiproxy.cpp
 
 HEADERS += \
     dbus_plugin.h \
-    qt_dbus.h \
+    qml_dbus.h \
     optional_argument.h \
     qml_dbus_common.h \
     sdlproxy.h \

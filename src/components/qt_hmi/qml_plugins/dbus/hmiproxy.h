@@ -3,7 +3,7 @@
 
 #include <QQuickItem>
 
-#include "qt_dbus.h"
+#include "qml_dbus.h"
 
 class HmiProxy : public QQuickItem
 {

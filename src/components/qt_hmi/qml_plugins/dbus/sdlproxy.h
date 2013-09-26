@@ -4,7 +4,7 @@
 #include <QQuickItem>
 #include <QDBusInterface>
 
-#include "qt_dbus.h"
+#include "qml_dbus.h"
 
 class SdlProxy: public QQuickItem
 {

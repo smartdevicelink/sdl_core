@@ -6,7 +6,7 @@
 
 #include "dbus_plugin.h"
 #include "optional_argument.h"
-#include "qt_dbus.h"
+#include "qml_dbus.h"
 
 #include <QtDBus/QDBusConnection>
 
