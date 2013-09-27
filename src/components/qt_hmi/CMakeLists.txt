@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright (c) 2013, Ford Motor Company
 # All rights reserved.
 #
@@ -33,3 +34,7 @@ add_subdirectory(./qml_plugins)
 
 # --- HMI
 add_subdirectory(./qml_model)
+=======
+# --- plugins
+add_subdirectory(./qml_plugins)
+>>>>>>> .pro files replaced with CMakeLists.txt files

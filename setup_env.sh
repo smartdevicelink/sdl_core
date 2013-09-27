@@ -147,6 +147,19 @@ do
 done
 echo $OK
 
+echo "Setting up Qt5 cmake environment"
+for module in Core DBus Qml Quick
+do
+  find_command_prefix="find /usr /opt / -name Qt5"
+  find_command_suffix="Config.cmake -print -quit"
+  find_command=$find_command_prefix$module$find_command_suffix
+  find_result=`$find_command`
+  file_name_prefix="cmake/Modules/FindQt5"
+  file_name_suffix=".cmake"
+  file_name=$file_name_prefix$module$file_name_suffix
+  echo "include("$find_result")" > $file_name
+done
+
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
