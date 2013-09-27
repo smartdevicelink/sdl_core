@@ -53,7 +53,6 @@ using ::transport_manager::AdapterIterator;
 using ::transport_manager::transport_adapter::TransportAdapterSptr;
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
-
 namespace transport_manager {
 
 /**
@@ -64,7 +63,6 @@ enum {
   E_TM_IS_NOT_INITIALIZED,
   E_INVALID_HANDLE,
   E_CONNECTION_IS_TO_SHUTDOWN,
-  E_SEARCH_IN_PROGRESS,
   E_CONNECTION_EXISTS,
   E_INTERNAL_ERROR,
 };
@@ -190,7 +188,8 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int AddTransportAdapter(transport_adapter::TransportAdapterSptr transport_adapter);
+  virtual int AddTransportAdapter(
+      transport_adapter::TransportAdapterSptr transport_adapter);
 
   /**
    * @brief Remove device adapter from the container of device adapters.
@@ -199,7 +198,8 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    */
-  int RemoveTransportAdapter(transport_adapter::TransportAdapterSptr transport_adapter);
+  int RemoveTransportAdapter(
+      transport_adapter::TransportAdapterSptr transport_adapter);
 
   /**
    * @brief Remove device from the container that hold devices.
@@ -217,21 +217,21 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    */
-  virtual int Visibility(const bool &on_off)const;
+  virtual int Visibility(const bool &on_off) const;
 
   /**
    * @brief Return Container that hold information about devices.
    *
    * @return Container that hold information about devices.
    */
-  const std::vector<DeviceInfo>& GetDeviceList() const;
+  std::vector<DeviceInfo> GetDeviceList();
 
   /**
    * @brief Establish protocom handler.
    *
    * @param ph Pointer to the handler of protocol.
    */
-  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler *ph);//YK: temp solution until B1.0 release
+  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler *ph);  //YK: temp solution until B1.0 release
 
   /**
    * @brief Return container that hold connections.
@@ -408,8 +408,6 @@ class TransportManagerImpl : public TransportManager {
   bool is_initialized_;
  private:
 
-  std::vector<DeviceInfo> device_list_;
-
   /**
    * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
    */
@@ -461,8 +459,9 @@ class TransportManagerImpl : public TransportManager {
     bool shutDown;
     int messages_count;
 
-    ConnectionInternal(TransportAdapterSptr transport_adapter, const ConnectionUID &id, const DeviceUID &dev_id,
-               const ApplicationHandle &app_id)
+    ConnectionInternal(TransportAdapterSptr transport_adapter,
+                       const ConnectionUID &id, const DeviceUID &dev_id,
+                       const ApplicationHandle &app_id)
         : transport_adapter(transport_adapter),
           id(id),
           device(dev_id),
@@ -477,8 +476,6 @@ class TransportManagerImpl : public TransportManager {
   std::vector<ConnectionInternal> connections_;
   std::map<DeviceUID, TransportAdapterSptr> device_to_adapter_map_;
   std::vector<TransportAdapterSptr> transport_adapters_;
-  int da_scanned_; // Count of device adapters have reported Scan result
-  bool search_in_progress_; // If search in progress, another search process doesn't start
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapterSptr, TransportAdapterListenerImpl*> transport_adapter_listeners_;
 
@@ -486,16 +483,26 @@ class TransportManagerImpl : public TransportManager {
   void RemoveConnection(int id);
   ConnectionInternal* GetConnection(const ConnectionUID &id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
-                            const ApplicationHandle& application);
+                                    const ApplicationHandle& application);
 
-  protocol_handler::ProtocolHandler *protocol_handler_;//YK: temp solution until B1.0 release
-  void AddDataToContainer(ConnectionUID id, std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, unsigned char * data, unsigned int data_size);
-  bool GetFrameSize(unsigned char *data,  unsigned int data_size, unsigned int &frame_size);
-  bool GetFrame(std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container, ConnectionUID id, unsigned int frame_size, unsigned char **frame);
+  protocol_handler::ProtocolHandler *protocol_handler_;  //YK: temp solution until B1.0 release
+  void AddDataToContainer(
+      ConnectionUID id,
+      std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container,
+      unsigned char * data, unsigned int data_size);
+  bool GetFrameSize(unsigned char *data, unsigned int data_size,
+                    unsigned int &frame_size);
+  bool GetFrame(
+      std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container,
+      ConnectionUID id, unsigned int frame_size, unsigned char **frame);
 
-  friend bool TransportAdapterListenerImpl::FindSharedPtr(const TransportAdapter*, AdapterIterator&);
-};//class ;
+  void OnDeviceListUpdated(const TransportAdapterSptr& ta);
 
-}  // namespace transport_manager
+  friend bool TransportAdapterListenerImpl::FindSharedPtr(
+      const TransportAdapter*, AdapterIterator&);
+};
+//class ;
+
+}// namespace transport_manager
 
 #endif
