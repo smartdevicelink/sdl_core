@@ -6,8 +6,9 @@ import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
-import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
 import java.util.Arrays;
@@ -24,6 +25,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public static final byte SESSION_ID = (byte) 48;
     public static final int MESSAGE_ID = 48;
     private SyncConnection sut;
+    private TCPTransportConfig config;
 
     public SyncConnectionTest() {
     }
@@ -32,19 +34,21 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void setUp() throws Exception {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        sut = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class));
+        config = mock(TCPTransportConfig.class);
+        when(config.getTransportType()).thenReturn(TransportType.TCP);
+        sut = new SyncConnection(mock(ISyncConnectionListener.class), config);
         WiProProtocol protocol = (WiProProtocol) sut.getWiProProtocol();
         protocol.setVersion(VERSION);
     }
 
     public void testSyncConnectionShouldBeCreated() throws Exception {
-        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class));
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
         assertNotNull("should not be null", connection);
     }
 
     public void testStartMobileNavSessionShouldSendAppropriateBytes() throws Exception {
         final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(SessionType.Mobile_Nav, 0x00, VERSION);
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class)) {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
             public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
@@ -62,7 +66,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
         final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class)) {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
             public void onProtocolSessionStarted(SessionType sessionType, byte sessionID, byte version, String correlationID) {
@@ -81,7 +85,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
         byte[] data = BitConverter.intToByteArray(0);
         final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), mock(BaseTransportConfig.class)) {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             private int count = 0;
 

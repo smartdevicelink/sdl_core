@@ -160,7 +160,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	public static final String TAG = "SyncProxy";
 	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
 
-	private SyncConnection _syncConnection;
+	SyncConnection _syncConnection;
 	private proxyListenerType _proxyListener = null;
 
 	// Protected Correlation IDs
@@ -170,7 +170,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						POLICIES_CORRELATION_ID = 65535;
 
 	// Synchronization Objects
-	private static final Object CONNECTION_REFERENCE_LOCK = new Object(),
+	static final Object CONNECTION_REFERENCE_LOCK = new Object(),
 								INCOMING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
 								OUTGOING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
 								INTERNAL_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
@@ -189,7 +189,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private long _heartbeatResponsePastDueTimeLimit = 2000; // 2 seconds
 
 	// RPC Session ID
-	private byte _rpcSessionID = 0;
+	byte _rpcSessionID = 0;
 
     // Mobile Nav Session ID
     protected byte _mobileNavSessionID = 100;
@@ -232,7 +232,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private BaseTransportConfig _transportConfig = null;
 	// Proxy State Variables
 	protected Boolean _appInterfaceRegisterd = false;
-	private Boolean _haveReceivedFirstNonNoneHMILevel = false;
+	Boolean _haveReceivedFirstNonNoneHMILevel = false;
 	protected Boolean _haveReceivedFirstFocusLevel = false;
 	protected Boolean _haveReceivedFirstFocusLevelFull = false;
 	protected Boolean _proxyDisposed = false;
@@ -277,7 +277,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private static final Object RECONNECT_TIMER_TASK_LOCK = new Object();
 
 	// Private Class to Interface with SyncConnection
-	private class SyncInterfaceBroker implements ISyncConnectionListener {
+	protected class SyncInterfaceBroker implements ISyncConnectionListener {
 
 		@Override
 		public void onTransportDisconnected(String info) {
@@ -1156,7 +1156,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 
 	// Function to initialize new proxy connection
-	private void initializeProxy() throws SyncException {
+	protected void initializeProxy() throws SyncException {
 		// Reset all of the flags and state variables
 		_haveReceivedFirstNonNoneHMILevel = false;
 		_haveReceivedFirstFocusLevel = false;
@@ -1372,7 +1372,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 
 	/************* Functions used by the Message Dispatching Queues ****************/
-	private void dispatchIncomingMessage(ProtocolMessage message) {
+	protected void dispatchIncomingMessage(ProtocolMessage message) {
 		try{
 			// Dispatching logic
 			if (message.getSessionType().equals(SessionType.RPC)) {
