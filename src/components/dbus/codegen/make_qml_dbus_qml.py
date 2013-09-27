@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 #  @file make_qml_dbus_qml.py
 #  @brief Generator of QML to QDbus QML part
 #
