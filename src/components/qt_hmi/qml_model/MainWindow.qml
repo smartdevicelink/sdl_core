@@ -56,20 +56,20 @@ Rectangle{
                 height: parent.height * 0.75
                 width: parent.width
                 source:startQml
-                property var screenMovingStack : []
+                property var viewTrasitionStack : []
 
                 function reset(){
-                    screenMovingStack = []
+                    viewTrasitionStack = []
                     source = startQml
                 }
 
                 function go(path) {
-                    screenMovingStack.push(source.toString())
+                    viewTrasitionStack.push(source.toString())
                     source = path
                 }
 
                 function back() {
-                    source = screenMovingStack.pop()
+                    source = viewTrasitionStack.pop()
                 }
             }
         }

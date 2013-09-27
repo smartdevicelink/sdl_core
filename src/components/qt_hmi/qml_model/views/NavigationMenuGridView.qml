@@ -53,6 +53,6 @@ Item {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackButton {}
+        BackButton { anchors.horizontalCenter: parent.horizontalCenter }
     }
 }
