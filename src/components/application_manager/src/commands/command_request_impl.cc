@@ -105,6 +105,34 @@ void CommandRequestImpl::SendResponse(
   ApplicationManagerImpl::instance()->ManageMobileCommand(result);
 }
 
+void CommandRequestImpl::SendHMIRequest(
+    const hmi_apis::FunctionID::eType& function_id,
+    const NsSmart::SmartObject& msg_params, unsigned int hmi_correlation_id) {
+
+  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
+      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  if (!result) {
+    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    return;
+  }
+
+  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::params][strings::correlation_id] = hmi_correlation_id;
+  request[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
+
+  request[strings::msg_params] = msg_params;
+
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request");
+    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  }
+}
+
 void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params, bool require_chaining,
@@ -145,6 +173,7 @@ void CommandRequestImpl::CreateHMIRequest(
     if (!msg_chaining_) {
       LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      return;
     }
 
     if (0 < chaining_counter) {

@@ -34,10 +34,9 @@
 #include "application_manager/commands/mobile/change_registration_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/file_system.h"
+#include <algorithm>
 
 namespace application_manager {
 
@@ -45,7 +44,17 @@ namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
     const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    : CommandRequestImpl(message),
+      event_engine::EventObserver("ChangeRegistrationRequest"),
+      is_ui_send_(false),
+      is_vr_send_(false),
+      is_tts_send_(false),
+      is_ui_received_(false),
+      is_vr_received_(false),
+      is_tts_received_(false),
+      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      tts_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {
 }
 
 ChangeRegistrationRequest::~ChangeRegistrationRequest() {
@@ -71,8 +80,6 @@ void ChangeRegistrationRequest::Run() {
   const int language =
       (*message_)[strings::msg_params][strings::language].asInt();
 
-  // we should specify amount of required responses in the 1st request
-  unsigned int chaining_counter = 0;
   hmi_apis::Common_Result::eType result = hmi_apis::Common_Result::INVALID_ENUM;
 
   bool ui_flag = false;
@@ -87,11 +94,10 @@ void ChangeRegistrationRequest::Run() {
     }
 
     if (app->ui_language() != hmi_language) {
-      ++chaining_counter;
       ui_flag = true;
     }
   } else {
-    result = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+   ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
   if (instance->is_vr_cooperating()) {
@@ -101,11 +107,10 @@ void ChangeRegistrationRequest::Run() {
       return;
     }
     if (app->language() != language) {
-      ++chaining_counter;
       vr_flag = true;
     }
   } else {
-    result = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+    vr_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
   if (instance->is_tts_cooperating()) {
@@ -115,11 +120,18 @@ void ChangeRegistrationRequest::Run() {
       return;
     }
     if (app->language() != language) {
-      ++chaining_counter;
       tts_flag = true;
     }
   } else {
-    result = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+    tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  }
+
+  if (vr_flag) {
+    is_vr_send_ = true;
+  }
+
+  if (tts_flag) {
+    is_tts_send_ = true;
   }
 
   if (ui_flag) {
@@ -129,8 +141,8 @@ void ChangeRegistrationRequest::Run() {
     msg_params[strings::language] = hmi_language;
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration, msg_params,
-                     true, chaining_counter);
+    is_ui_send_ = true;
+    SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration, msg_params);
   }
 
   if (vr_flag) {
@@ -140,8 +152,7 @@ void ChangeRegistrationRequest::Run() {
         (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration, msg_params,
-                     true);
+    SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration, msg_params);
   }
 
   if (tts_flag) {
@@ -151,8 +162,7 @@ void ChangeRegistrationRequest::Run() {
         (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration, msg_params,
-                     true);
+    SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration, msg_params);
   }
 
   if (!ui_flag && !vr_flag && !tts_flag) {
@@ -160,16 +170,97 @@ void ChangeRegistrationRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "Current language is the same");
     return;
-  } else {
-    if (!ui_flag) {
-      msg_chaining_->set_ui_response_result(result);
+  }
+}
+
+void ChangeRegistrationRequest::SendHMIRequest(
+    const hmi_apis::FunctionID::eType& function_id,
+    const NsSmart::SmartObject& msg_params) {
+
+  const unsigned int hmi_correlation_id =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  subscribe_on_event(function_id, hmi_correlation_id);
+  CommandRequestImpl::SendHMIRequest(function_id, msg_params,
+                                     hmi_correlation_id);
+}
+
+bool ChangeRegistrationRequest::WasAnySuccess(const hmi_apis::Common_Result::eType ui,
+                   const hmi_apis::Common_Result::eType vr,
+                   const hmi_apis::Common_Result::eType tts) {
+  if (hmi_apis::Common_Result::SUCCESS == ui) {
+    return true;
+  }
+  if (hmi_apis::Common_Result::SUCCESS == vr) {
+    return true;
+  }
+  if (hmi_apis::Common_Result::SUCCESS == tts) {
+    return true;
+  }
+  return false;
+}
+
+void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_ChangeRegistration: {
+      LOG4CXX_INFO(logger_, "Received UI_ChangeRegistration event");
+      is_ui_received_ = true;
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
     }
-    if (!vr_flag) {
-      msg_chaining_->set_vr_response_result(result);
+    case hmi_apis::FunctionID::VR_ChangeRegistration: {
+      LOG4CXX_INFO(logger_, "Received VR_ChangeRegistration event");
+      is_vr_received_ = true;
+      vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
     }
-    if (!tts_flag) {
-      msg_chaining_->set_tts_response_result(result);
+    case hmi_apis::FunctionID::TTS_ChangeRegistration: {
+      LOG4CXX_INFO(logger_, "Received TTS_ChangeRegistration event");
+      is_tts_received_ = true;
+      tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
     }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
+
+  if (!IsPendingResponseExist()) {
+    Application* application = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::params][strings::connection_key]);
+
+    if (NULL == application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
+      application->set_ui_language(static_cast<mobile_api::Language::eType>(
+              message[strings::msg_params][strings::language].asInt()));
+    }
+
+    if (hmi_apis::Common_Result::SUCCESS == vr_result_
+        || hmi_apis::Common_Result::SUCCESS == tts_result_) {
+      application->set_language(
+          static_cast<mobile_api::Language::eType>(
+              message[strings::msg_params]
+                     [strings::hmi_display_language].asInt()));
+    }
+
+    int greates_result_code = std::max(std::max(ui_result_, vr_result_),
+                                       tts_result_);
+
+    (*message_)[strings::params][strings::function_id] =
+          mobile_apis::FunctionID::eType::ChangeRegistrationID;
+
+    SendResponse(WasAnySuccess(ui_result_, vr_result_, tts_result_),
+                 static_cast<mobile_apis::Result::eType>(greates_result_code));
   }
 }
 
@@ -243,6 +334,22 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
   }
   return is_language_supported;
+}
+
+bool ChangeRegistrationRequest::IsPendingResponseExist() {
+  if (is_ui_send_ != is_ui_received_) {
+    return true;
+  }
+
+  if (is_vr_send_ != is_vr_received_) {
+    return true;
+  }
+
+  if (is_tts_send_ != is_tts_received_) {
+    return true;
+  }
+
+  return false;
 }
 
 }  // namespace commands

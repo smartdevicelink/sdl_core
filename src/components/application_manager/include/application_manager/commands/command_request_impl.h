@@ -111,6 +111,18 @@ class CommandRequestImpl : public CommandImpl {
                         unsigned int chaining_counter = 0);
 
   /*
+   * @brief Sends HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   * @param hmi_correlation_id hmi request correlation id
+   *
+   */
+  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                      const NsSmart::SmartObject& msg_params,
+                      unsigned int hmi_correlation_id);
+
+  /*
    * @brief Creates HMI request
    *
    * @param function_id HMI request ID
