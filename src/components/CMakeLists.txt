@@ -40,7 +40,9 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./audio_manager)
 
-# --- DBus
 IF (${QT_HMI})
+# --- DBus
     add_subdirectory(./dbus)
+# --- Qt HMI
+    add_subdirectory(./qt_hmi)
 ENDIF (${QT_HMI})

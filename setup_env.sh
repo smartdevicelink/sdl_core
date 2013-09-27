@@ -11,6 +11,7 @@ PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 AVAHI_CLIENT_LIBRARY="libavahi-client3"
 AVAHI_COMMON="libavahi-common3"
+OPENGL_DEV="libgl1-mesa-dev"
 QT5_LIBS="qtdeclarative5-dev"
 
 
@@ -65,9 +66,26 @@ echo "Installing Avahi-common library"
 apt-install ${AVAHI_COMMON}
 echo $OK
 
-echo "Installing QT5 libraries"
+echo "Installing OpenGL development files"
+apt-install ${OPENGL_DEV}
+echo $OK
+
+echo "Installing Qt5 libraries"
 apt-install ${QT5_LIBS}
 echo $OK
+
+echo "Setting up Qt5 cmake environment"
+for module in Core DBus Qml Quick
+do
+  find_command_prefix="find /usr /opt / -name Qt5"
+  find_command_suffix="Config.cmake -print -quit"
+  find_command=$find_command_prefix$module$find_command_suffix
+  find_result=`$find_command`
+  file_name_prefix="cmake/Modules/FindQt5"
+  file_name_suffix=".cmake"
+  file_name=$file_name_prefix$module$file_name_suffix
+  echo "include("$find_result")" > $file_name
+done
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
