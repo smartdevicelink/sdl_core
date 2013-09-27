@@ -1,27 +1,24 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 FIND_PACKAGE(Qt5Core REQUIRED)
-FIND_PACKAGE(Qt5DBus REQUIRED)
 FIND_PACKAGE(Qt5Qml REQUIRED)
 FIND_PACKAGE(Qt5Quick REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCES
-  dbus_plugin.cpp
-  api.cpp
-  presetBankCapabilities.cpp
-  buttonCapabilities.cpp
-  buttonsadaptor.cpp
+  attributedmouseevent.cpp
+  hmi_plugin.cpp
+  masked_container.cpp
 )
 
-set(target hmi_dbus)
+set(target HmiFramework)
 
 add_library(${target} SHARED ${SOURCES})
 
-qt5_use_modules(${target} Core DBus Qml Quick)
+qt5_use_modules(${target} Core Qml Quick)
 
-set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/sdl/core/api)
+set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/com/ford/hmi_framework)
 
 install(TARGETS ${target}
   DESTINATION ${destination}
