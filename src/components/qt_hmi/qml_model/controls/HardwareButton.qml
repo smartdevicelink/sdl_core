@@ -63,7 +63,7 @@ MaskedContainer {
 
     Component.onCompleted: {
         if (buttonId !== Common.ButtonName.CUSTOM_BUTTON) {
-            settings.buttonCapabilities.push(
+            settingsContainer.buttonCapabilities.push(
             {
                 name: buttonId,
                 upDownAvailable: upDownAvailable,

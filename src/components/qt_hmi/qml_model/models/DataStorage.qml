@@ -23,6 +23,10 @@ Item {
         ListElement {
             appName: "SyncProxyTester"
             icon: "../res/SPT.png"
+            deviceName: "Device 1"
+            appId: 1
+            hmiDisplayLanguageDesired: 0
+            isMediaApplication: 1
         }
     }
 

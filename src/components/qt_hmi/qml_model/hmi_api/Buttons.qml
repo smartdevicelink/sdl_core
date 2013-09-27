@@ -5,7 +5,7 @@ Item
     function getCapabilities()
     {
         return {
-            capabilities: settings.capabilities,
+            capabilities: settingsContainer.capabilities,
             presetBankCapabilities: {
                 onScreenPresetsAvailable: true
             }
