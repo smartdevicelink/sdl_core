@@ -128,7 +128,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                settings.buttonCapabilities.push(
+                                settingsContainer.buttonCapabilities.push(
                                 {
                                     name: Common.ButtonName.PRESET_0 + index,
                                     upDownAvailable: true,

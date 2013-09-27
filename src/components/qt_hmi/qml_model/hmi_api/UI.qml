@@ -9,17 +9,17 @@ Item {
     signal onDriverDistraction (int state)
 
     function alert (alertStrings, duration, softButtons, appID) {
-// with this array we grab only the lines we need
+        // with this array we grab only the lines we need
         var alertFields = [Common.TextFieldName.alertText1,
                            Common.TextFieldName.alertText2,
                            Common.TextFieldName.alertText3]
-// substrings for each allowed field
+        // substrings for each allowed field
         var fieldSubstrings = []
-// have to populate the array to appropriate size
+        // have to populate the array to appropriate size
         for (var fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
             fieldSubstrings.push("")
         }
-// this cycle concatenates allowed lines sorting them by field
+        // this cycle concatenates allowed lines sorting them by field
         for (var alertStringIndex = 0; alertStringIndex < alertStrings.length; ++alertStringIndex) {
             for (fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
                 if (alertStrings[alertStringIndex].fieldName === alertFields[fieldIndex]) {
@@ -31,7 +31,7 @@ Item {
             }
         }
         var alertString = ""
-// this cycle concatenates all the substrings according to the order of the fields
+        // this cycle concatenates all the substrings according to the order of the fields
         for (fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
             if (fieldSubstrings[fieldIndex] !== "") {
                 if (alertString !== "") {

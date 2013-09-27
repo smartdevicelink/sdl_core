@@ -33,7 +33,9 @@ Item {
                     MouseArea {
                       anchors.fill: parent
                       onClicked: {
-                          contentLoader.go("./views/SDLPlayerView.qml")
+                          var appView = Qt.createComponent("./views/SDLPlayerView.qml")
+                          appView.application = { appId: appId }
+                          contentLoader.sourceComponent = appView
                         }
                     }
                 }

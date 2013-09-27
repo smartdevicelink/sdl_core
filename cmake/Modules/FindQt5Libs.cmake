@@ -4,7 +4,7 @@ FIND_LIBRARY(
              QT5Libs
              NAMES libQt5Core.so
 		   libQt5Quick.so
-             PATHS /usr/local/lib /usr/lib /opt/local/include /usr/lib/i386-linux-gnu/
+             PATHS /usr/local/lib /usr/lib /opt/local/include /usr/lib/i386-linux-gnu/ ~/Qt5.1.0/5.1.0/gcc/lib/
             )       
                 
 if (NOT QT5Libs)

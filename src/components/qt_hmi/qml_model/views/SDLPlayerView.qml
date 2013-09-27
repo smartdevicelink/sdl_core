@@ -2,9 +2,10 @@ import QtQuick 2.0
 import "../controls"
 
 Column {
+    property var application
     spacing: 25
     anchors.fill: parent
-    Row{
+    Row {
         width: parent.width
         height: parent.height / 4
         spacing: 10
@@ -29,7 +30,7 @@ Column {
                     qml: ""
                 }
             }
-            delegate:  Item{
+            delegate: Item{
                     width: parent.width / 4
                     LongOvalButton {
                         text: name
@@ -41,20 +42,20 @@ Column {
             }
         }
     }
-    Row{
+    Row {
         spacing: 50
         width: parent.width
         height: albumArtImage.height
         x: 35
-        Column{
+        Column {
             Image {
                 id: albumArtImage
                 source: "../res/album_art.png"
             }
         }
-        Column{
+        Column {
             spacing: 10
-            Row{
+            Row {
                 Text{
                     color: "#1d81d5"
                     text: "Track 13 / 16"
@@ -79,7 +80,7 @@ Column {
             }
         }
     }
-    Row{
+    Row {
         width: parent.width
         height: parent.height / 4
         x: 35
@@ -90,15 +91,15 @@ Column {
             text: "02:36"
             font.pixelSize: 18
         }
-        Row{
+        Row {
             width: parent.width - 2 * (spacing + songTimeText.width) - x - 40
-            Rectangle{
+            Rectangle {
                 y: songTimeText.height / 2 - 1
                 width: parent.width / 5
                 height: 2
                 color: "white"
             }
-            Rectangle{
+            Rectangle {
                 y: songTimeText.height / 2 - 1
                 width: 4 * parent.width / 5
                 height: 2
@@ -163,4 +164,7 @@ Column {
         }
     }
 
+    Component.onCompleted: {
+        console.log(application)
+    }
 }

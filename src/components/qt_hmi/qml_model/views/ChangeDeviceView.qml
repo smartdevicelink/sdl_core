@@ -31,7 +31,8 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        sdlBasicCommunications.onFindApplications({ name: name, id: devid })
+                        sdlBasicCommunication.onDeviceChosen({ name: name, id: devid });
+                        sdlBasicCommunication.onFindApplications({ name: name, id: devid })
                         contentLoader.go("./views/ApplicationListView.qml")
                     }
                 }
@@ -49,5 +50,9 @@ Item {
         height: 1/4 * parent.height
 
         BackButton { anchors.horizontalCenter: parent.horizontalCenter }
+    }
+
+    Component.onCompleted: {
+        sdlBasicCommunication.onStartDeviceDiscovery()
     }
 }

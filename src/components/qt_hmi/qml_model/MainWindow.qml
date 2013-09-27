@@ -7,7 +7,7 @@ import "./hmi_api/auto" as HmiApi
 import "./models"
 import "./popups"
 
-Rectangle{
+Rectangle {
     width: 1600
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
@@ -18,9 +18,6 @@ Rectangle{
 
     DataStorage {
         id: dataContainer
-    }
-    SettingsStorage {
-        id: settings
     }
 
     SettingsStorage {
@@ -35,7 +32,7 @@ Rectangle{
         height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
 
-        Item{
+        Item {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             height: parent.height * 0.25
@@ -43,7 +40,7 @@ Rectangle{
             HeaderMenu{}
         }
 
-        Item{
+        Item {
             anchors.leftMargin: 30
             anchors.rightMargin: 30
             anchors.bottomMargin: 30
@@ -51,6 +48,7 @@ Rectangle{
 
             Loader {
                 id: contentLoader
+                asynchronous: true
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height * 0.75
@@ -90,7 +88,7 @@ Rectangle{
             objectName: "Buttons"
         }
         HmiApi.BasicCommunication_auto {
-            id: sdlBasicCommunications
+            id: sdlBasicCommunication
             objectName: "BasicCommunication"
         }
         HmiApi.VR_auto {
@@ -119,7 +117,17 @@ Rectangle{
         id: sdlProxy
 
         onAppRegistered: {
-            console.log("new app registered")
+            dataContainer.applicationList.append(
+            {
+                 appName: application.appName,
+                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                 icon: application.icon,
+                 deviceName: application.deviceName,
+                 appId: application.appID,
+                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                 isMediaApplication: application.isMediaApplication,
+                 appType: application.appType
+             })
         }
     }
 
@@ -135,6 +143,6 @@ Rectangle{
         dataContainer.hmiVehicleInfoAvailable = true
         dataContainer.hmiUIAvailable = true
 
-        sdlBasicCommunications.onReady()
+        sdlBasicCommunication.onReady()
     }
 }
