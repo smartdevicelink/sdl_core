@@ -33,7 +33,7 @@ function apt-install() {
         return 1;
     fi
     set -x #Show install command to user"
-    sudo apt-get install --yes ${APT_INSTALL_FLAGS} $*
+    sudo apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
     set +x
 }
 
