@@ -42,8 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateTurnListRequest::UpdateTurnListRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {
@@ -52,9 +52,8 @@ UpdateTurnListRequest::~UpdateTurnListRequest() {
 void UpdateTurnListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateTurnListRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,24 +61,28 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
+  MessageHelper::AddSoftButtonsDefaultSystemAction(
+      (*message_)[strings::msg_params]);
+
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
-                          verification_result);
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "MessageHelper::VerifyImageFiles return " << verification_result);
     SendResponse(false, verification_result);
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList,
-                   msg_params, true);
+  CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList, msg_params,
+                   true);
 }
 
 }  // namespace commands

@@ -82,12 +82,12 @@ class Timer {
   /**
    * @brief Start timer.
    */
-  void start();
+  void Start();
 
   /**
    * @brief Stop timer.
    */
-  void stop();
+  void Stop();
 
  private:
   pthread_t thread_;

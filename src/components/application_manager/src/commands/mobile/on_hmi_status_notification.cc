@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 OnHMIStatusNotification::OnHMIStatusNotification(
-    const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnHMIStatusNotification::~OnHMIStatusNotification() {
@@ -50,7 +51,7 @@ void OnHMIStatusNotification::Run() {
   LOG4CXX_INFO(logger_, "OnHMIStatusNotification::Run");
 
   (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+      MessageType::kNotification;
 
   SendNotification();
 }

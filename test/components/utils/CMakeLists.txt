@@ -11,6 +11,7 @@ set(LIBRARIES
     gmock
     gmock_main
     Utils
+    ConfigProfile
 )
 
 set (SOURCES

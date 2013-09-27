@@ -8,7 +8,7 @@ Item{
 
     Item {
         // 3/4 top screen
-        height: parent.height * 3/4
+        height: parent.height * 3/4 - 20
         width: parent.width
         anchors.top: parent.top
         anchors.left: parent.left
@@ -17,7 +17,7 @@ Item{
         ListView {
             anchors.fill: parent
             anchors.centerIn: parent
-            width: parent.width - 100
+            width: parent.width
             height: parent.height
             id: contactsListView
             clip: true

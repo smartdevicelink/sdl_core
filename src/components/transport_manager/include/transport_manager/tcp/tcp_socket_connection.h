@@ -1,5 +1,5 @@
 /**
- * \file tcp_adapter.h
+ * \file tcp_socket_connection.h
  * \brief TcpSocketConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company

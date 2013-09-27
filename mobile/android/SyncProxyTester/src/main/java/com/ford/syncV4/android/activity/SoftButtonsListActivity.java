@@ -203,7 +203,7 @@ public class SoftButtonsListActivity extends ListActivity {
 		if ((position == softButtons.size()) && !isMaxReached()) {
 			// create and add default soft button
 			Image img = new Image();
-			img.setValue("imageFilename.png");
+			img.setValue("action.png");
 			img.setImageType(ImageType.DYNAMIC);
 
 			SoftButton sb = new SoftButton();

@@ -41,6 +41,7 @@
 #include "audio_manager/audio_manager.h"
 #include "audio_manager/from_mic_to_file_recorder_thread.h"
 #include "audio_manager/a2dp_source_player_thread.h"
+#include "audio_manager/audio_stream_sender_thread.h"
 
 namespace audio_manager {
 
@@ -65,7 +66,9 @@ class AudioManagerImpl : AudioManager {
   virtual void startMicrophoneRecording(const std::string& outputFileName,
                  mobile_apis::SamplingRate::eType type,
                  int duration,
-                 mobile_apis::BitsPerSample::eType);
+                 mobile_apis::BitsPerSample::eType,
+                 unsigned int session_key, unsigned int correlation_id);
+
   virtual void stopMicrophoneRecording();
 
   virtual ~AudioManagerImpl();
@@ -76,6 +79,7 @@ class AudioManagerImpl : AudioManager {
  private:
   std::map<std::string, threads::Thread*> sources_;
   threads::Thread* recorderThread_;
+  threads::Thread* senderThread_;
 
   const int MAC_ADDRESS_LENGTH_;
   static AudioManagerImpl* sInstance_;

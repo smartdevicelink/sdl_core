@@ -39,8 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
-AlertManeuverResponse::AlertManeuverResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+AlertManeuverResponse::AlertManeuverResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 AlertManeuverResponse::~AlertManeuverResponse() {

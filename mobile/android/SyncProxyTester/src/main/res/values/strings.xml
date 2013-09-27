@@ -47,7 +47,7 @@
     <string name="performinteraction_vrHelp">VR Help Items (all comma-separated)</string>
     <string name="performinteraction_vrHelpItemPosDefault">1,2,3</string>
     <string name="performinteraction_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
-    <string name="performinteraction_vrHelpItemImageDefault">imageFilename.png,action.png,action.png</string>
+    <string name="performinteraction_vrHelpItemImageDefault">action.png,action.png,action.png</string>
     <string name="performinteraction_timeout">Timeout</string>
     <string name="performinteraction_timeoutDefault">10000</string>
     <string name="show_mainField1">Main Field 1</string>
@@ -66,7 +66,7 @@
     <string name="show_mediaClock">Media Clock</string>
     <string name="show_mediaClockDefault">12:34</string>
     <string name="show_graphic">Graphic</string>
-    <string name="show_graphicDefault">imageFilename.png</string>
+    <string name="show_graphicDefault">action.png</string>
     <string name="show_includeSoftButtons">Include</string>
     <string name="show_softButtons">Soft Buttons</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
@@ -130,7 +130,7 @@
     <string name="setglobalproperties_vrHelp">VR Help Items (all comma-separated)</string>
     <string name="setglobalproperties_vrHelpItemPosDefault">1,2,3</string>
     <string name="setglobalproperties_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
-    <string name="setglobalproperties_vrHelpItemImageDefault">imageFilename.png,action.png,action.png</string>
+    <string name="setglobalproperties_vrHelpItemImageDefault">action.png,action.png,action.png</string>
     <string name="performaudiopassthru_initPrompt">Initial Prompt</string>
     <string name="performaudiopassthru_initPromptDefault">Initial Prompt</string>
     <string name="performaudiopassthru_text1">AudioPassThru Display Text 1</string>

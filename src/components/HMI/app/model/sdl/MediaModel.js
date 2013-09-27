@@ -31,25 +31,23 @@
  * @version 1.0
  */
 
-SDL.SDLMediaModel = SDL.SDLAppModel
-    .extend( {
+SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
-        init: function() {
+        init: function () {
 
             this._super();
 
             // init properties here
-            this.set('appInfo', Em.Object.create( {
-                field1: '<field1>',
-                field2: '<field2>',
-                field3: '<field3>',
-                mediaClock: '<mediaClock>',
-                trackIcon: 'images/sdl/audio_icon.jpg',
+            this.set('appInfo', Em.Object.create({
+                field1       : '<field1>',
+                field2       : '<field2>',
+                field3       : '<field3>',
+                mediaClock   : '<mediaClock>',
+                trackIcon    : 'images/sdl/audio_icon.jpg',
                 customPresets: [
-                    '<no definition>', '<no definition>', '<no definition>',
-                    '<no definition>', '<no definition>', '<no definition>'
+                    '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>'
                 ],
-                alignment: "text-align:left"
+                alignment    : "text-align:left"
             }));
 
             this.set('isPlaying', true);
@@ -60,21 +58,21 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
         /**
          * Parameter for presets for Media App to show presets on media screen
-         * 
+         *
          * @type bool
          */
         mediaPreset: false,
 
         /**
          * Flag for media playing state
-         * 
+         *
          * @param {Boolean}
          */
         isPlaying: false,
 
         /**
          * Flag for model active state currently used for status bar
-         * 
+         *
          * @param {Boolean}
          */
         active: false,
@@ -94,18 +92,18 @@ SDL.SDLMediaModel = SDL.SDLAppModel
          */
         currentSDLPerformInteractionChoiseId: null,
 
-        countUp: true,
-        pause: false,
+        countUp     : true,
+        pause       : false,
         maxTimeValue: 68400, // 19 hours
-        duration: 0,
-        currTime: 0,
+        duration    : 0,
+        currTime    : 0,
 
         /**
          * Method hides sdl activation button and sdl application
-         * 
+         *
          * @param {Number}
          */
-        onDeleteApplication: function(appID) {
+        onDeleteApplication: function (appID) {
 
             SDL.SDLMediaController.onDeleteApplication(appID);
         },
@@ -113,17 +111,17 @@ SDL.SDLMediaModel = SDL.SDLAppModel
         /**
          * Activate current application model
          */
-        turnOnSDL: function() {
+        turnOnSDL: function () {
 
             SDL.SDLMediaController.activateApp(this);
         },
 
-        startTimer: function() {
+        startTimer: function () {
 
             var self = this;
 
             if (!this.pause) {
-                this.timer = setInterval(function() {
+                this.timer = setInterval(function () {
 
                     self.set('currTime', self.currTime + 1);
                 }, 1000);
@@ -132,13 +130,13 @@ SDL.SDLMediaModel = SDL.SDLAppModel
             }
         }.observes('this.pause'),
 
-        stopTimer: function() {
+        stopTimer: function () {
 
             clearInterval(this.timer);
             this.appInfo.set('mediaClock', '');
         },
 
-        setDuration: function() {
+        setDuration: function () {
 
             var number, str = '', hrs = 0, min = 0, sec = 0;
             if (this.countUp) {
@@ -154,8 +152,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel
             }
 
             hrs = parseInt(number / 3600), // hours
-            min = parseInt(number / 60) % 60, // minutes
-            sec = number % 60; // seconds
+                min = parseInt(number / 60) % 60, // minutes
+                sec = number % 60; // seconds
 
             str = (hrs < 10 ? '0' : '') + hrs + ':';
             str += (min < 10 ? '0' : '') + min + ":";
@@ -169,7 +167,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
         }.observes('this.currTime'),
 
-        changeDuration: function() {
+        changeDuration: function () {
 
             clearInterval(this.timer);
             this.currTime = -1;
@@ -178,13 +176,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
         /**
          * SDL Setter for Media Clock Timer
-         * 
+         *
          * @param {Object}
          */
-        sdlSetMediaClockTimer: function(params) {
+        sdlSetMediaClockTimer: function (params) {
 
-            if ((params.updateMode == "PAUSE" && this.pause)
-                || (params.updateMode == "RESUME" && !this.pause)) { return SDL.SDLModel.resultCode['IGNORED']; }
+            if ((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause)) {
+                return SDL.SDLModel.resultCode['IGNORED'];
+            }
 
             if (params.updateMode == "CLEAR") {
                 this.stopTimer();
@@ -197,12 +196,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel
                 this.set('pause', false);
             } else {
                 if (params.startTime) {
-                    this.set('countUp', params.updateMode == "COUNTUP" ? true
-                        : false);
+                    this.set('countUp', params.updateMode == "COUNTUP" ? true : false);
                     this.set('duration', null);
-                    this.set('duration', params.startTime.hours * 3600
-                        + params.startTime.minutes * 60
-                        + params.startTime.seconds);
+                    this.set('duration', params.startTime.hours * 3600 + params.startTime.minutes * 60 + params.startTime.seconds);
                 }
                 this.set('pause', false);
             }
@@ -213,7 +209,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel
         /**
          * Method to clear App OverLay
          */
-        clearAppOverLay: function() {
+        clearAppOverLay: function () {
 
             clearInterval(this.timer);
             this.appInfo.set('field1', '');
@@ -235,59 +231,71 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
         /**
          * Applin UI Show handler
-         * 
+         *
          * @param {Object}
          */
-        onSDLUIShow: function(params) {
+        onSDLUIShow: function (params) {
 
             clearInterval(this.timer);
 
-            for ( var i = 0; i < params.showStrings.length; i++) {
+            for (var i = 0; i < params.showStrings.length; i++) {
                 switch (params.showStrings[i].fieldName) {
-                case 'mainField1': {
-                    this.appInfo.set('field1', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField2': {
-                    this.appInfo.set('field2', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField3': {
-                    this.appInfo.set('field3', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField4': {
-                    this.appInfo.set('field4', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'statusBar': {
-                    this.set('statusText', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mediaClock': {
-                    this.appInfo.set('mediaClock',
-                        params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mediaTrack': {
-                    this.appInfo.set('mediaTrack',
-                        params.showStrings[i].fieldText);
-                    break;
-                }
+                    case 'mainField1':
+                    {
+                        this.appInfo.set('field1', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField2':
+                    {
+                        this.appInfo.set('field2', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField3':
+                    {
+                        this.appInfo.set('field3', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField4':
+                    {
+                        this.appInfo.set('field4', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'statusBar':
+                    {
+                        this.set('statusText', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mediaClock':
+                    {
+                        this.appInfo.set('mediaClock', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mediaTrack':
+                    {
+                        this.appInfo.set('mediaTrack', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    default :
+                    {
+                        break;
+                    }
                 }
             }
 
             if (params.alignment) {
                 switch (params.alignment) {
-                    case "CENTERED": {
+                    case "CENTERED":
+                    {
                         this.appInfo.set('alignment', "text-align:center");
                         break;
                     }
-                    case "LEFT_ALIGNED": {
+                    case "LEFT_ALIGNED":
+                    {
                         this.appInfo.set('alignment', "text-align:left");
                         break;
                     }
-                    case "RIGHT_ALIGNED": {
+                    case "RIGHT_ALIGNED":
+                    {
                         this.appInfo.set('alignment', "text-align:right");
                         break;
                     }
@@ -304,11 +312,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
             // Magic number is a count of Preset Buttons on HMI = 6
             if (params.customPresets) {
-                for ( var i = 0; i < 6; i++) {
-                    if (params.customPresets[i] != ''
-                        || params.customPresets[i] != null) {
-                        this.appInfo.set('customPresets.' + i,
-                            params.customPresets[i]);
+                for (var i = 0; i < 6; i++) {
+                    if (params.customPresets[i] != '' || params.customPresets[i] != null) {
+                        this.appInfo.set('customPresets.' + i, params.customPresets[i]);
                     } else {
                         this.appInfo.set('customPresets.' + i, 'Preset' + i);
                     }

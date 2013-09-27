@@ -44,7 +44,7 @@ DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
     : DBusAdapter(sdlServiceName, sdlObjectPath,
                   hmiServiceName, hmiObjectPath) {}
 
-void DBusMessageController::subscribeTo(const std::string& interface,
+void DBusMessageController::SubscribeTo(const std::string& interface,
                                         const std::string& signal) {
   std::string rule = "type='signal'";
   rule.append(", sender='").append(hmi_service_name_).append("'")

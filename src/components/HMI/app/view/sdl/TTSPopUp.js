@@ -45,6 +45,8 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         'popUp', 'message'
     ],
 
+    requestId: null,
+
     content: 'Messaage',
 
     active: false,
@@ -67,9 +69,11 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         classNames: 'message'
     }),
 
-    ActivateTTS: function(msg) {
+    ActivateTTS: function(msg, id) {
 
         var self = this;
+
+        this.requestId = id;
 
         this.set('content', msg);
         this.set('active', true);
@@ -77,11 +81,17 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {
 
-            self.set('active', false);
+            self.DeactivateTTS();
         }, 2000); // 2 second timeout for TTS popUp
     },
 
-    DeactivateTTS: function() {
+    DeactivateTTS: function(id) {
+
+        FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
+            this.requestId,
+            "TTS.Speak");
+
+        this.requestId = null;
 
         clearTimeout(this.timer);
         this.set('active', false);

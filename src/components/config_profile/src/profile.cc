@@ -51,7 +51,8 @@ Profile::Profile()
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false)
   , max_cmd_id_(2000000000)
-  , default_timeout_(10000) {
+  , default_timeout_(10000)
+  , space_available_(104857600) {
   UpdateValues();
 }
 
@@ -117,6 +118,10 @@ const uint64_t& Profile::thread_min_stach_size() const {
 
 bool Profile::is_mixing_audio_supported() const {
   return is_mixing_audio_supported_;
+}
+
+const unsigned int Profile::space_available() const {
+  return space_available_;
 }
 
 void Profile::UpdateValues() {
@@ -188,6 +193,17 @@ void Profile::UpdateValues() {
       default_timeout_ = 10000;
     }
     LOG4CXX_INFO(logger_, "Set Default timeout to " << default_timeout_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "SpaceAvailable", value))
+      && ('\0' != *value)) {
+    space_available_ = atoi(value);
+    if (space_available_ <= 0) {
+      space_available_ = 104857600;
+    }
+    LOG4CXX_INFO(logger_, "Set Space Available " << space_available_);
   }
 
   help_promt_.clear();

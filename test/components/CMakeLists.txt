@@ -32,3 +32,4 @@ add_subdirectory(./hmi_message_handler)
 IF (${QT_HMI})
     add_subdirectory(./dbus)
 ENDIF (${QT_HMI})
+ 

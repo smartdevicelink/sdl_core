@@ -242,8 +242,7 @@ SDL.SDLController = Em.Object
          */
         tbtClientStateSelected: function(state) {
 
-            FFW.Navigation.onTBTClientState(state,
-                SDL.SDLAppController.model.appID);
+            FFW.Navigation.onTBTClientState(state);
         },
         /**
          * Method to sent notification with selected reason of Exit Application
@@ -292,7 +291,7 @@ SDL.SDLController = Em.Object
                 FFW.UI.sendError(result,
                     messageRequestId,
                     'UI.ScrollableMessage',
-                    "ScrollableMessage request aborted!");
+                    "ScrollableMessage aborted!");
             }
         },
         /**
@@ -431,7 +430,8 @@ SDL.SDLController = Em.Object
         onGetDeviceList: function() {
 
             SDL.States.goToStates('info.devicelist');
-            // FFW.BasicCommunication.getDeviceList();
+            SDL.SDLModel.set('deviceSearchProgress', true);
+
             FFW.BasicCommunication.OnStartDeviceDiscovery();
         },
         /**

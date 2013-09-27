@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 SetDisplayLayoutResponse::SetDisplayLayoutResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {

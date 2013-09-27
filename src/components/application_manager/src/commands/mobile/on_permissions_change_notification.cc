@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 OnPermissionsChangeNotification::OnPermissionsChangeNotification(
-    const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {
@@ -50,7 +51,7 @@ void OnPermissionsChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnPermissionsChangeNotification::Run");
 
   (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+      MessageType::kNotification;
 
   SendNotification();
 }

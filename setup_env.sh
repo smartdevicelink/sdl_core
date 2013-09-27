@@ -9,10 +9,13 @@ LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
-AVAHI_CLIENT_LIBRARY="libavahi-client3"
-AVAHI_COMMON="libavahi-common3"
 OPENGL_DEV="libgl1-mesa-dev"
 QT5_LIBS="qtdeclarative5-dev"
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
+AVAHI_COMMON="libavahi-common-dev"
+DOXYGEN="doxygen"
+GRAPHVIZ="graphviz"
+MSCGEN="mscgen"
 
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
@@ -58,12 +61,24 @@ echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
-echo "Installing Avahi-client library"
+echo "Installing Avahi-common-dev library"
+apt-install ${AVAHI_COMMON}
+echo $OK
+
+echo "Installing Avahi-client-dev library"
 apt-install ${AVAHI_CLIENT_LIBRARY}
 echo $OK
 
-echo "Installing Avahi-common library"
-apt-install ${AVAHI_COMMON}
+echo "Installing Doxygen"
+apt-install ${DOXYGEN}
+echo $OK
+
+echo "Installing Graphviz for doxygen"
+apt-install ${GRAPHVIZ}
+echo $OK
+
+echo "Installing Mscgen"
+apt-install ${MSCGEN}
 echo $OK
 
 echo "Installing OpenGL development files"
@@ -108,6 +123,6 @@ fi
 
 echo "Installing gstreamer..."
 apt-install gstreamer1.0*
-
+ 
 
 

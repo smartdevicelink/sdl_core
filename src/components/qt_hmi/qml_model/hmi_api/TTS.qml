@@ -1,14 +1,18 @@
 import QtQuick 2.0
 
 Item {
-    property bool available: false
-
     signal onLanguageChange (int language)
 
     function isReady () {
         return {
-            available: available
+            available: dataContainer.hmiTTSAvailable
         }
+    }
+
+    function speak (ttsChunks, appID) {
+    }
+
+    function stopSpeaking () {
     }
 
     function getLanguage () {
@@ -25,5 +29,10 @@ Item {
 
     function changeRegistration (language) {
         dataContainer.changeRegistrationTTSVR(language)
+    }
+
+    function setGlobalProperties (helpPrompt, timeoutPrompt, appID) {
+        dataContainer.globalProperties.helpPrompt = helpPrompt
+        dataContainer.globalProperties.timeoutPrompt = timeoutPrompt
     }
 }

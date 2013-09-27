@@ -69,7 +69,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief Main thread initialization.
    */
-  void thread();
+  void Thread();
  protected:
 
   /**
@@ -105,7 +105,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool WaitForDeviceScanRequest();
   RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
       const bdaddr_t& device_address);
-  SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
+  SearchDeviceError* DoInquiry(DeviceVector* discovered_devices);
 
   TransportAdapterController* controller_;
   pthread_t thread_;

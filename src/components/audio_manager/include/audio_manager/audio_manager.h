@@ -55,7 +55,8 @@ class AudioManager {
   virtual void startMicrophoneRecording(const std::string& outputFileName,
                mobile_apis::SamplingRate::eType type,
                int duration,
-               mobile_apis::BitsPerSample::eType) = 0;
+               mobile_apis::BitsPerSample::eType,
+               unsigned int session_key, unsigned int correlation_id) = 0;
   virtual void stopMicrophoneRecording() = 0;
 
   virtual ~AudioManager() {

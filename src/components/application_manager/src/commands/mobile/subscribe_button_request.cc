@@ -42,8 +42,8 @@ namespace commands {
 
 namespace str = strings;
 
-SubscribeButtonRequest::SubscribeButtonRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+SubscribeButtonRequest::SubscribeButtonRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 SubscribeButtonRequest::~SubscribeButtonRequest() {
@@ -61,8 +61,8 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id = ((*message_)[str::msg_params]
-                                          [str::button_name].asUInt());
+  const unsigned int btn_id = ((*message_)[str::msg_params][str::button_name]
+      .asUInt());
 
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);

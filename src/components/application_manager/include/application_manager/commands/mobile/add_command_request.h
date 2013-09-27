@@ -96,6 +96,8 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool CheckCommandParentId(const Application* app);
 
+  bool CheckVRCommandsNames();
+
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 };
 
