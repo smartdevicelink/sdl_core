@@ -7,12 +7,17 @@ FIND_PACKAGE(Qt5Quick REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 
+set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+set(dbus_dir ${components_dir}/dbus)
+set(codegen_dir ${dbus_dir}/codegen)
+set(interfaces_dir ${components_dir}/interfaces)
+add_custom_command(OUTPUT qml_dbus.cc COMMAND python ${codegen_dir}/make_qml_dbus_cpp.py --infile ${interfaces_dir}/HMI_API.xml)
+
 set(SOURCES
-  dbus_plugin.cpp
-  api.cpp
-  presetBankCapabilities.cpp
-  buttonCapabilities.cpp
-  buttonsadaptor.cpp
+  dbus_plugin.cc
+  qml_dbus.cc
+  sdlproxy.cc
+  hmiproxy.cc
 )
 
 set(target hmi_dbus)
