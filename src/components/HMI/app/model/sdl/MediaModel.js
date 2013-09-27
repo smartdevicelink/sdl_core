@@ -105,6 +105,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel
 
             this.set('isPlaying', true);
 
+            this.set('globalProperties.helpPrompt', []);
+            this.set('globalProperties.timeoutPrompt', []);
+
             this.set('commandsList', {0: []});
             this.set('softButtons', []);
         },

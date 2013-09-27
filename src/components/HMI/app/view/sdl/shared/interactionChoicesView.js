@@ -220,7 +220,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                  this.get('naviChoises.childViews').pushObject(SDL.Button.create({
                          text: data[i].menuName,
                          choiceID: data[i].choiceID,
-                         action: 'onChoiceNaviInteraction',
+                         action: 'onChoiceInteraction',
                          onDown: false,
                          target: 'SDL.SDLAppController',
                          performInteractionRequestID: performInteractionRequestID,

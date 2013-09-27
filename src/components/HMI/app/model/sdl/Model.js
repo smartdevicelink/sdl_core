@@ -112,25 +112,6 @@ SDL.SDLModel = Em.Object
         keyboardInputValue: "",
 
         /**
-         * Default values for global properties
-         */
-        globalPropertiesDefault: {
-            helpPrompt: [
-                {
-                    "text": "Some text for help prompt",
-                    "type": "TEXT"
-                }
-            ],
-
-            timeoutPrompt: [
-                {
-                    "text": "Some text for timeout prompt",
-                    "type": "TEXT"
-                }
-            ]
-        },
-
-        /**
          * List of states for OnTBTClientState notification
          */
         tbtClientStates: [
@@ -281,16 +262,6 @@ SDL.SDLModel = Em.Object
          * @type {Array}
          */
         devicesList: [],
-
-        /**
-         * Global properties
-         *
-         * @type {Object}
-         */
-        globalProperties: {
-            helpPrompt: [],
-            timeoutPrompt: []
-        },
 
         /**
          * TTS + VR language
@@ -517,36 +488,17 @@ SDL.SDLModel = Em.Object
         },
 
         /**
-         * Handler for reset globalProperties
-         *
-         * @param {Object}
-         */
-        resetProperties: function(params) {
-
-            var i, len = params.properties.length;
-            for (i = 0; i < len; i++) {
-                if (params.properties[i] == "HELPPROMPT") {
-                    this.set('globalProperties.helpPrompt',
-                        this.globalPropertiesDefault.helpPrompt);
-                }
-
-                if (params.properties[i] == "TIMEOUTPROMPT") {
-                    this.set('globalProperties.timeoutPrompt',
-                        this.globalPropertiesDefault.timeoutPrompt);
-                }
-            }
-        },
-
-        /**
          * setGlobalProperties
          *
          * @param {Object}
          *            message Object with parameters come from SDLCore.
          */
-        setProperties: function(message) {
+        setProperties: function(params) {
 
-            this.set('globalProperties.helpPrompt', message.helpPrompt);
-            this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
+            SDL.SDLController.getApplicationModel(params.appID).set('globalProperties', params);
+
+            //this.set('globalProperties.helpPrompt', params.helpPrompt);
+            //this.set('globalProperties.timeoutPrompt', params.timeoutPrompt);
 
         },
 

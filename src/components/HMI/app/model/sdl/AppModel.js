@@ -61,6 +61,13 @@ SDL.SDLAppModel = Em.Object
         deviceName: '',
 
         /**
+         * Global properties for current application
+         *
+         * @type {Object}
+         */
+        globalProperties: {},
+
+        /**
          * Statusbar text
          * 
          * @type {String}
