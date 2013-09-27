@@ -17,6 +17,7 @@ install_manifest.txt
 *.*~
 .project
 .cproject
+*.pyc
 
 # logs
 *.log
@@ -65,3 +66,9 @@ tags
 moc_*.cpp
 *.pro.user
 *.qmlproject.user
+*_automoc.cpp
+
+# generated files
+src/components/qt_hmi/qml_plugins/dbus/qml_dbus.cc
+src/components/qt_hmi/qml_plugins/dbus/qml_dbus.h
+src/components/qt_hmi/qml_model/hmi_api/auto

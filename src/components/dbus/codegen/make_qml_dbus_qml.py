@@ -35,6 +35,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from os import path
+from os import makedirs
 from argparse import ArgumentParser
 from xml.etree import ElementTree
 from copy import copy
@@ -157,6 +159,9 @@ arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
 arg_parser.add_argument('--outdir', required=True)
 args = arg_parser.parse_args()
+
+if not path.isdir(args.outdir):
+    makedirs(args.outdir)
 
 in_tree = ElementTree.parse(args.infile)
 in_tree_root = in_tree.getroot()
