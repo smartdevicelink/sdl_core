@@ -34,10 +34,3 @@ add_subdirectory(./dbus_adapter)
 
 # --- Hmi Framework plugin
 add_subdirectory(./hw_buttons)
-=======
-# --- DBus plugin
-add_subdirectory(./dbus)
-
-# --- Hmi Framework plugin
-add_subdirectory(./hmi_framework)
->>>>>>> .pro files replaced with CMakeLists.txt files

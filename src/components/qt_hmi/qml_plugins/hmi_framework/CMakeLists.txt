@@ -7,9 +7,9 @@ FIND_PACKAGE(Qt5Quick REQUIRED)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCES
-  attributedmouseevent.cpp
-  hmi_plugin.cpp
-  masked_container.cpp
+  attributedmouseevent.cc
+  hmi_plugin.cc
+  masked_container.cc
 )
 
 set(target HmiFramework)
