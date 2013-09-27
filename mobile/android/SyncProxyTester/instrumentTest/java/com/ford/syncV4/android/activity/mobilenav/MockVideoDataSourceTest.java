@@ -77,8 +77,6 @@ public class MockVideoDataSourceTest extends InstrumentationTestCase {
 
             @Override
             public void videoFrameReady(byte[] videoFrame) {
-                callFlag[0] = false;
-                assertEquals("should not get here", true, false);
             }
 
             @Override
