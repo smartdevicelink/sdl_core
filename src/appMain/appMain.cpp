@@ -295,7 +295,7 @@ bool InitMessageSystem() {
  */
 bool InitHmi() {
   // TODO(KKolodiy): implement
-  return false;
+  return true;
 }
 #endif  // QT_HMI
 
