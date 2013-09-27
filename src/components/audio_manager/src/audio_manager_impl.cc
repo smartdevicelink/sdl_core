@@ -268,7 +268,7 @@ void AudioManagerImpl::OnMessageReceived(
       is_stream_running_ = true;
       app_connection_key = (*message).connection_key();
       // FIXME
-      timer_.start(1);
+      timer_.start(10);
     }
 
     // the only type of message AudioManager is interested in.
