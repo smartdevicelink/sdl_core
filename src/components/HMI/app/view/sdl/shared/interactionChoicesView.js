@@ -55,7 +55,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         }),
 
         input: Ember.TextArea.extend({
-            classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
+            classNameBindings: ['this.parentView.search::hide'],
 
             tagName: 'input',
             attribute: ['type:text'],
@@ -66,27 +66,33 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         }),
 
         naviChoises: Em.ContainerView.extend({
+            classNameBindings: ['this.parentView.icon::hide'],
             classNames: 'naviChoises',
-            classNameBindings: ['SDL.States.media.mediaNavigation.active::hide'],
             childViews: []
 
         }),
 
         captionText: SDL.Label.extend({
 
-            classNameBindings: ['SDL.States.media.mediaNavigation.active:hide'],
+            classNameBindings: ['this.parentView.search:hide'],
             classNames: ['caption-text'],
             contentBinding: 'this.parentView.caption'
         }),
 
         listOfChoices: SDL.List.extend({
-            classNameBindings: ['SDL.States.media.mediaNavigation.active:hide'],
+            classNameBindings: ['this.parentView.list::hide'],
             elementId: 'perform_interaction_view_list',
             itemsOnPage: 5,
             items: []
         }),
 
         timer: null,
+
+        search: false,
+
+        list: false,
+
+        icon: false,
 
         /**
          * Identifier of current request
@@ -99,17 +105,62 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          * @param text: String
          */
         activate: function (message, performInteractionRequestId) {
+
             if (message) {
                 this.set('caption', message.initialText.fieldText);
             }
 
-            if (SDL.States.media.mediaNavigation.active) {
-                this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+            if (message.interactionLayout) {
+
+                switch (message.interactionLayout) {
+                    case "ICON_ONLY" : {
+
+                        this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('icon', true);
+                        this.set('active', true);
+                    }
+                    case "ICON_WITH_SEARCH" : {
+
+                        this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('icon', true);
+                        this.set('search', true);
+                        this.set('active', true);
+                    }
+                    case "LIST_ONLY" : {
+
+                        this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('list', true);
+                        this.set('active', true);
+                    }
+                    case "LIST_WITH_SEARCH" : {
+
+                        this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('list', true);
+                        this.set('search', true);
+                        this.set('active', true);
+                    }
+                    case "KEYBOARD" : {
+                        SDL.SDLModel.uiShowKeyboard();
+                        SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["SUCCESS"],
+                        this.performInteractionRequestID);
+                    }
+                    default:
+                    {
+                        // default action
+                    }
+                }
             } else {
+
                 this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                this.set('list', true);
+                this.set('active', true);
             }
 
-            this.set('active', true);
         },
 
         /**

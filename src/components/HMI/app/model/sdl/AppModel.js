@@ -324,9 +324,9 @@ SDL.SDLAppModel = Em.Object
                 SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
 
             } else {
-                SDL.InteractionChoicesView.preformChoices([],
-                    performInteractionRequestId,
-                    30000);
+//                SDL.InteractionChoicesView.preformChoices([],
+//                    performInteractionRequestId,
+//                    30000);
                 SDL.InteractionChoicesView.activate("", performInteractionRequestId);
             }
 
