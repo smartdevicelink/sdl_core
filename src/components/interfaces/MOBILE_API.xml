@@ -3539,7 +3539,7 @@
       	If omitted the value will be assumed as FALSE.
       </description>
     </param>
-    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true">
+    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
       <description>
       	Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
       	If omitted on supported displays, the currently displayed SoftButton values will not change.
