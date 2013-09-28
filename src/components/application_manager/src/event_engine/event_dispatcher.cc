@@ -54,33 +54,30 @@ EventDispatcher* EventDispatcher::instance()
 void EventDispatcher::raise_event(const Event& event) {
   mutex_.lock();
 
+  // create local list
+  ObserverList list;
+
   // check if event is notification
   if (hmi_apis::messageType::notification == event.smart_object_type()) {
 
     //ObserversMap iterator
     ObserversMap::iterator it =  observers_[event.id()].begin();
     for (; observers_[event.id()].end() != it; ++it) {
-
-      //ObserverList iterator
-      ObserverList::iterator observers =  it->second.begin();
-      for (; it->second.end() != observers; ++observers) {
-        (*observers)->on_event(event);
-      }
+      list = it->second;
     }
   }
 
   if (hmi_apis::messageType::response == event.smart_object_type()) {
-
-    //ObserverList iterator
-    ObserverList::iterator observers =
-        observers_[event.id()][event.smart_object_correlation_id()].begin();
-    for (; observers_[event.id()][event.smart_object_correlation_id()].end() != observers;
-        ++observers) {
-      (*observers)->on_event(event);
-    }
+    list = observers_[event.id()][event.smart_object_correlation_id()];
   }
 
   mutex_.unlock();
+
+  // Call observers
+  ObserverList::iterator observers =  list.begin();
+  for (; list.end() != observers; ++observers) {
+      (*observers)->on_event(event);
+  }
 }
 
 void EventDispatcher::add_observer(const Event::EventID& event_id,
