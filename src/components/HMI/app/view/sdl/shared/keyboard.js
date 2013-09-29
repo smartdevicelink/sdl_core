@@ -45,25 +45,46 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     ],
 
     /**
+     * Activate keyboard method
+     *
+     * @param {Object}
+     */
+    activate: function( element ) {
+        if( element.tagName === 'input' ){
+
+            this.set( 'active', true );
+            this.set('target', element);
+        }
+    },
+
+    /**
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
     deactivate: function () {
 
         this._super();
+        this.set('target', null);
     },
 
     inputChanges: function (element) {
         if (element.text === "Space") {
             this.searchBar.input.set('value', this.searchBar.input.value + " ");
+            this.target.set('value', this.searchBar.input.value + " ");
         } else {
             this.searchBar.input.set('value', this.searchBar.input.value + element.text);
+            this.target.set('value', this.searchBar.input.value + " ");
         }
     },
 
     clearBtn: function (element) {
         this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1))
     },
+
+    /**
+     * Tearget element that initiated keyboard
+     */
+    target: null,
 
     microphone: SDL.Button.extend({
         classNames: 'microphone',

@@ -621,7 +621,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {Number}
      *            commandID
      */
-    interactionResponse: function (resultCode, performInteractionRequestID, commandID) {
+    interactionResponse: function (resultCode, performInteractionRequestID, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
@@ -638,6 +638,14 @@ FFW.UI = FFW.RPCObserver.create({
         if (commandID) {
             JSONMessage.result.choiceID = commandID;
         }
+
+        if (manualTextEntry) {
+            JSONMessage.result.manualTextEntry = manualTextEntry;
+            JSONMessage.result.triggerSource = 'KEYBOARD';
+
+        }
+
+
 
         this.client.send(JSONMessage);
     },

@@ -56,12 +56,12 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
         input: Ember.TextArea.extend({
             classNameBindings: ['this.parentView.search::hide'],
-
             tagName: 'input',
             attribute: ['type:text'],
-            value: '',
+            attributeBindings: ['disabled'],
+            disabled: false,
             click: function(){
-                SDL.SDLModel.uiShowKeyboard();
+                SDL.SDLModel.uiShowKeyboard(this);
             }
         }),
 
@@ -144,7 +144,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                         this.set('active', true);
                     }
                     case "KEYBOARD" : {
-                        SDL.SDLModel.uiShowKeyboard();
+                        SDL.SDLModel.uiShowKeyboard(this.input);
                         SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["SUCCESS"],
                         this.performInteractionRequestID);
                     }
@@ -166,13 +166,13 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         /**
          * Deactivate window
          */
-        deactivate: function (ABORTED) {
+        deactivate: function (result, choiceID) {
 
             clearTimeout(this.timer);
             this.set('active', false);
             SDL.SDLController.VRMove();
 
-            switch (ABORTED) {
+            switch (result) {
                 case "ABORTED":
                 {
                     SDL.SDLController
@@ -185,6 +185,14 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                     SDL.SDLController
                         .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
                             this.performInteractionRequestID);
+                    break;
+                }
+                case "SUCCESS":
+                {
+                    FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
+                        this.performInteractionRequestID,
+                        choiceID,
+                        this.input.value);
                     break;
                 }
                 default:

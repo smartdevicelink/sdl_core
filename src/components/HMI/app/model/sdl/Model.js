@@ -645,15 +645,8 @@ SDL.SDLModel = Em.Object
          * @param {Object}
          *            message Object with parameters come from SDLCore
          */
-        uiShowKeyboard: function(params){
-            SDL.Keyboard.activate();
-            /*To do
-            language
-            keyboardLayout
-            sendDynamicEntry
-            limitedCharacterList
-            autoCompleteText
-            */
+        uiShowKeyboard: function(element){
+            SDL.Keyboard.activate(element);
         },
 
         /**
