@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
-# Type HMI [QT, WEB]
-set (TYPE_HMI "QT")
+option(HMI2 "Use Qt HMI" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -88,15 +87,13 @@ endmacro(create_test)
 # Building application
 
 # --- Type HMI
-IF (${TYPE_HMI} STREQUAL "QT")
+if (${HMI2})
     set(QT_HMI ON)
     add_definitions(-DQT_HMI)
-ELSEIF (${TYPE_HMI} STREQUAL "WEB")
+else (${HMI2})
     set(WEB_HMI ON)
     add_definitions(-DWEB_HMI)
-ELSE (${TYPE_HMI} STREQUAL "QT")
-    MESSAGE(FATAL_ERROR "Unknown type HMI")
-ENDIF (${TYPE_HMI} STREQUAL "QT")
+ENDIF (${HMI2})
 
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
