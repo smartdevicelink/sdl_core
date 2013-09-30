@@ -1,5 +1,7 @@
 package com.ford.syncV4.streaming;
 
+import java.util.Arrays;
+
 /**
  * Created by Andrew Batutin on 9/30/13.
  */
@@ -29,5 +31,11 @@ public class MobileNaviDataFrame {
     public static MobileNaviDataFrame createEndOfSessionFrame() {
         MobileNaviDataFrame frame = new MobileNaviDataFrame(new byte[]{-1});
         return frame;
+    }
+
+    @Override
+    public String toString() {
+        String result = super.toString() + "; data = " + Arrays.toString(data);
+        return result;
     }
 }

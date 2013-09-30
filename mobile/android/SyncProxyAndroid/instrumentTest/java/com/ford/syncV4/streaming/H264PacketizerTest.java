@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Arrays;
 
 /**
  * Created by Andrew Batutin on 9/30/13.
@@ -95,4 +96,11 @@ public class H264PacketizerTest extends AndroidTestCase {
         assertTrue("data size should be equal to 20; frame.length = " + frame.length, frame.length == 20);
     }
 
+    public void testEndOfSessionFrameCreatedAfterEOS() throws Exception {
+        outputStream.write(new byte[1000]);
+        sut.createFramePayload();
+        outputStream.close();
+        MobileNaviDataFrame frame = sut.createFramePayload();
+        assertTrue("Should get {-1} array after EOS", Arrays.equals(new byte[]{-1}, frame.getData()));
+    }
 }
