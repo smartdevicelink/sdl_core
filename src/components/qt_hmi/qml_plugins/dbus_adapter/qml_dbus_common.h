@@ -32,7 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QML_DBUS_COMMON_H
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H
 
 #include <QDBusContext>
 #include "optional_argument.h"
@@ -154,7 +155,5 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgu
   v.presence = true;
   return GetArgFromMap(map, name, v.val);
 }
-
-#define QML_DBUS_COMMON_H
 
 #endif // QML_DBUS_COMMON_H
