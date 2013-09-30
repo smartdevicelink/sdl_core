@@ -294,8 +294,8 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it) {
-    (*it)->OnSearchDeviceDone(this);
     (*it)->OnDeviceListUpdated(this);
+    (*it)->OnSearchDeviceDone(this);
   }
 }
 
