@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file make_message_descriptions.py
 #  @brief Generates HMI API message descriptions for D-Bus
 #
@@ -37,7 +40,7 @@ from argparse import ArgumentParser
 from xml.etree import ElementTree
 from copy import copy
 from ford_xml_parser import FordXmlParser
-
+from os import path
 
 namespace_name = 'ford_message_descriptions'
 namespace = namespace_name + '::'
@@ -204,15 +207,20 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
-outfile = 'message_descriptions.cc'
+arg_parser.add_argument('--outdir', required=True)
 args = arg_parser.parse_args()
+
+if not path.isdir(args.outdir):
+    makedirs(args.outdir)
+
+outfile = 'message_descriptions.cc'
 
 in_tree = ElementTree.parse(args.infile)
 in_tree_root = in_tree.getroot()
 
 impl = Impl(in_tree_root)
 
-out = open(outfile, "w")
+out = open(args.outdir + "/" + outfile, "w")
 
 out.write("""/**
  * @file message_descriptions.cc
