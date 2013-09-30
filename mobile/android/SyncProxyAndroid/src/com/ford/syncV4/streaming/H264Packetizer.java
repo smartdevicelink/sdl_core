@@ -9,49 +9,49 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class H264Packetizer extends AbstractPacketizer implements Runnable{
+public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
-	public final static String TAG = "H264Packetizer";
+    public final static int MOBILE_NAVI_DATA_SIZE = 1000;
+    public final static String TAG = "H264Packetizer";
     public static final int EOS = -1;
-
     private Thread t = null;
 
-	public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
-		super(streamListener, is, rpcSessionID);
-	}
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
+        super(streamListener, is, rpcSessionID);
+    }
 
-	public synchronized void start() throws IOException {
-		if (t == null) {
-			t = new Thread(this);
-			t.start();
-		}
-	}
-
-	public synchronized void stop() {
-		try {
-            if (is != null){
-			    is.close();
-            }
-		} catch (IOException ignore) {}
-        if (t != null){
-		    t.interrupt();
-		    t = null;
+    public synchronized void start() throws IOException {
+        if (t == null) {
+            t = new Thread(this);
+            t.start();
         }
-	}
+    }
 
-	public void run(){
-		int length = 0;
+    public synchronized void stop() {
+        try {
+            if (is != null) {
+                is.close();
+            }
+        } catch (IOException ignore) {
+        }
+        if (t != null) {
+            t.interrupt();
+            t = null;
+        }
+    }
 
-		try {
-			while (!Thread.interrupted()) {
+    public void run() {
+        int length = 0;
+
+        try {
+            while (!Thread.interrupted()) {
                 ByteArrayOutputStream bb = new ByteArrayOutputStream();
 
                 do {
-                    if (is != null){
+                    if (is != null) {
                         try {
                             length = is.read();
-                        }
-                        catch (NullPointerException e){
+                        } catch (NullPointerException e) {
                             Log.e("SyncProxyTester", e.toString());
                         }
 
@@ -60,22 +60,37 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable{
                         }
                     }
 
-                }  while (length != EOS && bb.size() < 1000);
+                } while (length != EOS && bb.size() < 1000);
 
-                    if ( length != EOS){
-                        bb.flush();
-                        buffer = bb.toByteArray();
-                        ProtocolMessage pm = new ProtocolMessage();
-                        pm.setSessionID(_rpcSessionID);
-                        pm.setSessionType(SessionType.Mobile_Nav);
-                        pm.setFunctionID(0);
-                        pm.setCorrID(0);
-                        pm.setData(buffer, buffer.length);
-                        _streamListener.sendH264(pm);
-                    }
-			}
-		} catch (IOException e) {
+                if (length != EOS) {
+                    bb.flush();
+                    buffer = bb.toByteArray();
+                    ProtocolMessage pm = new ProtocolMessage();
+                    pm.setSessionID(_rpcSessionID);
+                    pm.setSessionType(SessionType.Mobile_Nav);
+                    pm.setFunctionID(0);
+                    pm.setCorrID(0);
+                    pm.setData(buffer, buffer.length);
+                    _streamListener.sendH264(pm);
+                }
+            }
+        } catch (IOException e) {
             Log.e("SyncProxyTester", e.toString());
-		}
-	}
+        }
+    }
+
+    public byte[] createFramePayload() throws IOException, IllegalArgumentException {
+        if (is == null){
+            throw new IllegalArgumentException("Input stream is null");
+        }
+        int length = 0;
+        ByteArrayOutputStream bb = new ByteArrayOutputStream();
+        do {
+            length = is.read();
+            bb.write(length);
+        } while (length != EOS && bb.size() < 1000);
+        bb.flush();
+        byte[] buffer = bb.toByteArray();
+        return buffer;
+    }
 }
