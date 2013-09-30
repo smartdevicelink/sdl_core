@@ -333,10 +333,9 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle) {
   bool device_disconnected = true;
   pthread_mutex_lock(&connections_mutex_);
-  connections_.erase(std::make_pair(device_id, app_handle));
   for (ConnectionMap::const_iterator it = connections_.begin();
       it != connections_.end(); ++it) {
-    if (it->first.first == device_id) {
+    if (it->first.first == device_id && it->first.second != app_handle) {
       device_disconnected = false;
       break;
     }
@@ -349,6 +348,9 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
     if (device_disconnected)
       listener->OnDisconnectDeviceDone(this, device_id);
   }
+  pthread_mutex_lock(&connections_mutex_);
+  connections_.erase(std::make_pair(device_id, app_handle));
+  pthread_mutex_unlock(&connections_mutex_);
 }
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
