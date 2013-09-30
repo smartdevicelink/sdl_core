@@ -383,7 +383,7 @@ public class WiProProtocol extends AbstractProtocol {
         private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
             _protocolListener.onMobileNavAckReceived(header.getMessageID());
         }
-				
+
 		private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
 			ProtocolMessage message = new ProtocolMessage();
 			if (header.getSessionType() == SessionType.RPC) {
@@ -404,7 +404,7 @@ public class WiProProtocol extends AbstractProtocol {
 				if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
 				if (binFrameHeader.getBulkData() != null) message.setBulkData(binFrameHeader.getBulkData());
 			} else message.setData(data);
-			
+
 			_assemblerForMessageID.remove(header.getMessageID());
 
             if (isAppUnregistered(message)) {
@@ -421,8 +421,9 @@ public class WiProProtocol extends AbstractProtocol {
 		} // end-method
 
         private boolean isAppUnregistered(ProtocolMessage message) {
-            return message.getFunctionID() ==
-                    FunctionID.getFunctionID(Names.UnregisterAppInterface);
+            return (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) &&
+                    (message.getFunctionID() == FunctionID
+                            .getFunctionID(Names.UnregisterAppInterface));
         }
 	} // end-class
 } // end-class

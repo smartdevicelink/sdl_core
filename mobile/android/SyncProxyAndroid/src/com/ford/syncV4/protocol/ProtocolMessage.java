@@ -15,7 +15,11 @@ public class ProtocolMessage {
 	
 	private byte[] _data = null;
 	private byte[] _bulkData = null;
-	
+
+    public static byte RPCTYPE_REQUEST = 0x00;
+    public static byte RPCTYPE_RESPONSE = 0x01;
+    public static byte RPCTYPE_NOTIFICATION = 0x02;
+
 	public ProtocolMessage() {}
 
 	public byte getVersion() {

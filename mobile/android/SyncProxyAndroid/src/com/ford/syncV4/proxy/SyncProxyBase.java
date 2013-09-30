@@ -1396,11 +1396,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						}
 						FunctionID functionID = new FunctionID();
 						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
-						if (message.getRPCType() == 0x00) {
+						if (message.getRPCType() == ProtocolMessage.RPCTYPE_REQUEST) {
 							hash.put(Names.request, hashTemp);
-						} else if (message.getRPCType() == 0x01) {
+						} else if (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) {
 							hash.put(Names.response, hashTemp);
-						} else if (message.getRPCType() == 0x02) {
+						} else if (message.getRPCType() == ProtocolMessage.RPCTYPE_NOTIFICATION) {
 							hash.put(Names.notification, hashTemp);
 						}
 						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
