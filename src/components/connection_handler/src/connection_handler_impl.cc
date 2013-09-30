@@ -140,7 +140,7 @@ void ConnectionHandlerImpl::OnDeviceFound(
    device_list_during_search_);
    }*/
 }
-
+/*
 void ConnectionHandlerImpl::OnNoDeviceFound() {
   for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
       ++itr) {
@@ -160,7 +160,7 @@ void ConnectionHandlerImpl::OnNoDeviceFound() {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
-
+*/
 bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
     const std::vector<transport_manager::DeviceInfo>& device_list,
     const connection_handler::DeviceHandle device_handle) {

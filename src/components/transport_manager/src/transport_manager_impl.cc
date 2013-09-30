@@ -620,6 +620,9 @@ void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
   for (transport_adapter::DeviceList::const_iterator it = device_list.begin();
       it != device_list.end(); ++it) {
     device_to_adapter_map_.insert(std::make_pair(*it, ta));
+    DeviceHandle device_handle = converter_.UidToHandle(*it);
+    DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
+    RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
   RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, GetDeviceList());
 }
@@ -658,6 +661,7 @@ void TransportManagerImpl::EventListenerThread(void) {
       switch (event_type) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE:
           LOG4CXX_INFO(logger_, "Event ON_SEARCH_DONE")
+          RaiseEvent(&TransportManagerListener::OnScanDevicesFinished);
           break;
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL:
           LOG4CXX_INFO(logger_, "Event ON_SEARCH_FAIL");
