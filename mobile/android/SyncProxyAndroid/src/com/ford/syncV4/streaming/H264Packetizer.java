@@ -8,10 +8,11 @@ import com.ford.syncV4.protocol.enums.SessionType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
-    public final static int MOBILE_NAVI_DATA_SIZE = 1000;
     public final static String TAG = "H264Packetizer";
     public static final int EOS = -1;
     private Thread t = null;
@@ -79,12 +80,25 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    public byte[] createFramePayload() throws IOException, IllegalArgumentException {
-        if (is == null){
+    byte[] createFramePayload() throws IOException, IllegalArgumentException {
+        if (is == null) {
             throw new IllegalArgumentException("Input stream is null");
         }
-        byte[] data = new byte[MOBILE_NAVI_DATA_SIZE];
+        byte[] data = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
         int length = is.read(data);
+        byte[] result = Arrays.copyOf(data, length);
+        return result;
+    }
+
+    byte[] readFrameData() throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        do {
+            byte[] data = createFramePayload();
+            buffer.put(data, 0, (data.length > buffer.remaining()) ? buffer.remaining() : data.length);
+        } while (buffer.remaining() > 0);
+        byte[] data = buffer.array();
         return data;
     }
+
+
 }
