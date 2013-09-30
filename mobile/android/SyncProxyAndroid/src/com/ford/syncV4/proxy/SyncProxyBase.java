@@ -339,8 +339,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				byte sessionID, String correlationID) {
 			// How to handle protocol session ended?
 			// How should protocol session management occur?
-            Log.d(TAG, "onProtocolSessionEnded");
-            _syncConnection.stopTransportReading();
 		}
 
 		@Override

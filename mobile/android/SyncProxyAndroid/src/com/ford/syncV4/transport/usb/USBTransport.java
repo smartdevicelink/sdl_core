@@ -150,11 +150,11 @@ public class USBTransport extends SyncTransport {
     /**
      * Data input stream to read data from USB accessory.
      */
-    private FileInputStream mInputStream = null;
+    private InputStream mInputStream = null;
     /**
      * Data output stream to write data to USB accessory.
      */
-    private FileOutputStream mOutputStream = null;
+    private OutputStream mOutputStream = null;
     /**
      * Thread that connects and reads data from USB accessory.
      *
@@ -215,12 +215,6 @@ public class USBTransport extends SyncTransport {
                 synchronized (this) {
                     if (mOutputStream != null) {
                         try {
-                            FileDescriptor inFD = mInputStream.getFD();
-                            logI(" InFD " + inFD + " valid? " + inFD.valid());
-                            FileDescriptor outFD = mOutputStream.getFD();
-                            logI(" OutFD " + outFD + " valid? " + outFD.valid());
-                            logI(" has permission? " + getUsbManager().hasPermission(mAccessory));
-
                             mOutputStream.write(msgBytes, offset, length);
                             result = true;
 
@@ -299,6 +293,10 @@ public class USBTransport extends SyncTransport {
         disconnect(null, null);
     }
 
+    /**
+     * Asks the reader thread to stop while it's possible. If it's blocked on
+     * read(), there is no way to stop it except for physical USB disconnect.
+     */
     @Override
     public void stopReading() {
         final State state = getState();
@@ -306,22 +304,29 @@ public class USBTransport extends SyncTransport {
             case CONNECTED:
                 logI("Stopping reading");
                 synchronized (this) {
-                    if (mReaderThread != null) {
-                        logI("Interrupting USB reader");
-                        mReaderThread.interrupt();
-                        // don't join() now
-                                mReaderThread = null;
-                        } else {
-                        logD("USB reader is null");
-                        }
-                    }
+                    stopReaderThread();
+                }
                 break;
 
-                    default:
+            default:
                 logW("Stopping reading called from state " + state +
                         "; doing nothing");
                 break;
-            }
+        }
+    }
+
+    /**
+     * Actually asks the reader thread to interrupt.
+     */
+    private void stopReaderThread() {
+        if (mReaderThread != null) {
+            logI("Interrupting USB reader");
+            mReaderThread.interrupt();
+            // don't join() now
+            mReaderThread = null;
+        } else {
+            logD("USB reader is null");
+        }
     }
 
     /**
@@ -344,14 +349,7 @@ public class USBTransport extends SyncTransport {
                             InterfaceActivityDirection.None, null, 0,
                             SYNC_LIB_TRACE_KEY);
 
-                    if (mReaderThread != null) {
-                        logI("Interrupting USB reader");
-                        mReaderThread.interrupt();
-                        // don't join() now
-                        mReaderThread = null;
-                    } else {
-                        logD("USB reader is null");
-                    }
+                    stopReaderThread();
 
                     if (mAccessory != null) {
                         if (mOutputStream != null) {
@@ -805,6 +803,4 @@ public class USBTransport extends SyncTransport {
             DebugTool.logError(s, tr);
         }
     }
-
-
 }

@@ -182,7 +182,7 @@ public class TCPTransport extends SyncTransport {
 
     @Override
     public void stopReading() {
-
+        logInfo("TCPTransport: stop reading requested, doing nothing");
     }
 
     /**

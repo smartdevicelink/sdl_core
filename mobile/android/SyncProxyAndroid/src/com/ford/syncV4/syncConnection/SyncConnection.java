@@ -91,7 +91,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
     public void stopTransportReading() {
         if (_transport != null) {
             _transport.stopReading();
-            }
+        }
     }
 	
 	public void closeConnection(byte rpcSessionID) {
@@ -231,8 +231,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
 	public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
 			String correlationID) {
 		_connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
-        Log.d("SyncConnection", "onProtocolSessionEnded");
-        _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
 	}
 
 	@Override

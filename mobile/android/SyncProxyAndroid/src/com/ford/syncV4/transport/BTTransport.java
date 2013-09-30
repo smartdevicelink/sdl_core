@@ -115,7 +115,7 @@ public class BTTransport extends SyncTransport {
 
     @Override
     public void stopReading() {
-
+        DebugTool.logInfo("BTTransport: stop reading requested, doing nothing");
     }
 
     /**

@@ -4,8 +4,10 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
+import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
@@ -404,7 +406,12 @@ public class WiProProtocol extends AbstractProtocol {
 			} else message.setData(data);
 			
 			_assemblerForMessageID.remove(header.getMessageID());
-			
+
+            if (isAppUnregistered(message)) {
+                DebugTool.logInfo("App is unregistered");
+                handleAppUnregistered();
+            }
+
 			try {
 				handleProtocolMessageReceived(message);
 			} catch (Exception ex) {
@@ -412,6 +419,11 @@ public class WiProProtocol extends AbstractProtocol {
 				handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
 			} // end-catch
 		} // end-method
+
+        private boolean isAppUnregistered(ProtocolMessage message) {
+            return message.getFunctionID() ==
+                    FunctionID.getFunctionID(Names.UnregisterAppInterface);
+        }
 	} // end-class
 } // end-class
 
