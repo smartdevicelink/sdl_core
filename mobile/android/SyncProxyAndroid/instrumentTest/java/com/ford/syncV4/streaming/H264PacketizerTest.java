@@ -2,6 +2,8 @@ package com.ford.syncV4.streaming;
 
 import android.test.AndroidTestCase;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
+
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
@@ -170,4 +172,29 @@ public class H264PacketizerTest extends AndroidTestCase {
         assertTrue("Arrays written to output stream and get from packetizer should be same", Arrays.equals(sampleData, frame));
     }
 
+    public void testProtocolFrameHeaderWasCreatedFormInputStream() throws Exception {
+        final byte[] data2 = generateRandomBytes(10);
+        final boolean[] isTestValid = {false};
+        outputStream.write(sampleData);
+        outputStream.write(data2);
+        final H264Packetizer packetizer = new H264Packetizer(new IStreamListener() {
+            private int count = 0;
+
+            @Override
+            public void sendH264(ProtocolMessage pm) {
+                if (count == 0 && pm != null && Arrays.equals(pm.getData(), sampleData)) {
+                    isTestValid[0] = true;
+                    count++;
+                } else if (count == 1 && pm != null && Arrays.equals(pm.getData(), data2)) {
+                    isTestValid[0] = true;
+                    count++;
+                } else {
+                    isTestValid[0] = false;
+                }
+            }
+        }, inputStream, (byte) 0);
+        outputStream.close();
+        packetizer.doDataReading();
+        assertTrue("ProtocolMessage should be created", isTestValid[0]);
+    }
 }
