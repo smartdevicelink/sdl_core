@@ -80,11 +80,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    MobileNaviDataFrame createFramePayload() throws IOException, IllegalArgumentException {
-        if (is == null) {
-            throw new IllegalArgumentException("Input stream is null");
-        }
-        byte[] data = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
+    MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
+        checkPreconditions(data);
         int length = is.read(data);
         if (length == -1) {
             return MobileNaviDataFrame.createEndOfSessionFrame();
@@ -94,14 +91,23 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    byte[] readFrameData() throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+    private void checkPreconditions(byte[] data) {
+        if (is == null) {
+            throw new IllegalArgumentException("Input stream is null");
+        }
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        }
+    }
+
+    byte[] readFrameData(ByteBuffer buffer, byte[] data) throws IOException {
         do {
-            MobileNaviDataFrame frame = createFramePayload();
+            MobileNaviDataFrame frame = createFramePayload(data);
             buffer.put(frame.getData(), 0, (frame.getData().length > buffer.remaining()) ? buffer.remaining() : frame.getData().length);
         } while (buffer.remaining() > 0);
-        byte[] data = buffer.array();
-        return data;
+        byte[] result = buffer.array();
+        buffer.clear();
+        return result;
     }
 
 

@@ -38,20 +38,20 @@ public class H264PacketizerTest extends AndroidTestCase {
 
     public void testFixDataSizeFrameWasCreated() throws Exception {
         outputStream.write(new byte[1000]);
-        byte[] data = sut.createFramePayload().getData();
+        byte[] data = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE", data.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     }
 
     public void testFixDataSizeFrameWasCreatedAfterTwoInputs() throws Exception {
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
-        byte[] frame = sut.createFramePayload().getData();
+        byte[] frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     }
 
     public void testFixDataSizeFrameWasCreatedAfterShortInput() throws Exception {
         outputStream.write(new byte[500]);
-        byte[] frame = sut.createFramePayload().getData();
+        byte[] frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to 500; frame.length = " + frame.length, frame.length == 500);
     }
 
@@ -59,48 +59,68 @@ public class H264PacketizerTest extends AndroidTestCase {
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[10]);
-        byte[] frame = sut.createFramePayload().getData();
+        byte[] frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     }
 
     public void test2FixDataSizeFramesWereCreatedAfter1000_1010DataInput() throws Exception {
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
-        byte[] frame = sut.createFramePayload().getData();
+        byte[] frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[10]);
-        frame = sut.createFramePayload().getData();
+        frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
-        frame = sut.createFramePayload().getData();
+        frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to 10; frame.length = " + frame.length, frame.length == 10);
     }
 
     public void test3FixDataSizeFramesWereCreatedAfter1000_1010_1010DataInput() throws Exception {
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
-        byte[] frame = sut.createFramePayload().getData();
+        byte[] frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[10]);
-        frame = sut.createFramePayload().getData();
+        frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[500]);
         outputStream.write(new byte[10]);
-        frame = sut.createFramePayload().getData();
+        frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to MOBILE_NAVI_DATA_SIZE; frame.length = " + frame.length, frame.length == MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
-        frame = sut.createFramePayload().getData();
+        frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]).getData();
         assertTrue("data size should be equal to 20; frame.length = " + frame.length, frame.length == 20);
     }
 
     public void testEndOfSessionFrameCreatedAfterEOS() throws Exception {
         outputStream.write(new byte[1000]);
-        sut.createFramePayload();
+        sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
         outputStream.close();
-        MobileNaviDataFrame frame = sut.createFramePayload();
+        MobileNaviDataFrame frame = sut.createFramePayload(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
         assertTrue("Should get {-1} array after EOS", Arrays.equals(new byte[]{-1}, frame.getData()));
+    }
+
+    public void testCreateFrameWithNullDataParameterThrowsExp() throws Exception {
+        try {
+            outputStream.write(new byte[1000]);
+            MobileNaviDataFrame frame = sut.createFramePayload(null);
+            assertNull("should not get here", frame);
+        } catch (IllegalArgumentException e) {
+            assertNotNull("can't create frame with null data parameter", e.getMessage());
+        }
+    }
+
+    public void testCreateFrameWithNullInputStreamThrowsExp() throws Exception {
+        try {
+            H264Packetizer packetizer = new H264Packetizer(null, null, (byte) 0);
+            MobileNaviDataFrame frame = packetizer.createFramePayload(new byte[10]);
+            assertNull("should not get here", frame);
+        } catch (IllegalArgumentException e) {
+            assertNotNull("can't create frame with null input stream", e.getMessage());
+        }
     }
 }

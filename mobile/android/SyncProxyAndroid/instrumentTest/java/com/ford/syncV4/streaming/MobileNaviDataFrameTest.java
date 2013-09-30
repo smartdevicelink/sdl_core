@@ -49,4 +49,10 @@ public class MobileNaviDataFrameTest extends AndroidTestCase {
         MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfSessionFrame();
         assertTrue("end of session array should have only single -1 value in it", Arrays.equals(endData, frame.getData()));
     }
+
+    public void testMobileNaviEndSessionWasCreatedWithEndSessionType() throws Exception {
+        MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfSessionFrame();
+        MobileNaviDataFrameType type = frame.getType();
+        assertEquals("frame should have END_OS_SESSION_TYPE", type, MobileNaviDataFrameType.END_OS_SESSION_TYPE);
+    }
 }
