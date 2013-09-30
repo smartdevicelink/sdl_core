@@ -7,18 +7,18 @@ FIND_PACKAGE(Qt5Quick REQUIRED)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCES
-  attributedmouseevent.cc
-  hmi_plugin.cc
+  attributed_mouse_event.cc
+  hmi_hwbuttons.cc
   masked_container.cc
 )
 
-set(target HmiFramework)
+set(target HWButtons)
 
 add_library(${target} SHARED ${SOURCES})
 
 qt5_use_modules(${target} Core Qml Quick)
 
-set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/com/ford/hmi_framework)
+set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/com/ford/sdl/hmi/hw_buttons)
 
 install(TARGETS ${target}
   DESTINATION ${destination}

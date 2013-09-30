@@ -1,5 +1,5 @@
 # --- DBus plugin
-add_subdirectory(./dbus)
+add_subdirectory(./dbus_adapter)
 
 # --- Hmi Framework plugin
-add_subdirectory(./hmi_framework)
+add_subdirectory(./hw_buttons)
