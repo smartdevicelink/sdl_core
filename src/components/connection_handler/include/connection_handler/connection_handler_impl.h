@@ -95,7 +95,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceFound(const transport_manager::DeviceInfo& device_info);
-  virtual void OnNoDeviceFound();
 
   virtual void OnScanDevicesFinished();
   virtual void OnScanDevicesFailed(
