@@ -14,7 +14,8 @@ add_library(${target} SHARED ${SOURCES})
 
 qt5_use_modules(${target} Core Qml Quick)
 
-set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/com/ford/sdl/hmi/hw_buttons)
+set(model_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model)
+set(destination ${model_dir}/com/ford/sdl/hmi/hw_buttons)
 
 install(TARGETS ${target}
   DESTINATION ${destination}
@@ -25,3 +26,4 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.hw_buttons 1.0 ${model_dir} > ${destination}/plugins.qmltypes)

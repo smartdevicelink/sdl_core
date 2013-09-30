@@ -2,6 +2,7 @@
 
 set -e
 
+SUBVERSION="subversion"
 CMAKE_BUILD_SYSTEM="cmake"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
@@ -10,7 +11,6 @@ CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
-QT5_LIBS="qtdeclarative5-dev"
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
@@ -85,13 +85,25 @@ echo "Installing OpenGL development files"
 apt-install ${OPENGL_DEV}
 echo $OK
 
-echo "Installing Qt5 libraries"
-apt-install ${QT5_LIBS}
+echo "Installing Subversion"
+apt-install ${SUBVERSION}
 echo $OK
 
-echo "Setting up Qt5 cmake environment"
+echo "Checking out Qt5 installation runfile, please be patient"
+svn checkout ... /tmp
+echo $OK
+
+echo "Installing Qt5 libraries"
+QT5_RUNFILE="/tmp/qt-linux-opensource-5.1.0-x86-offline.run"
+chmod +x ${QT5_RUNFILE}
+sudo ${QT5_RUNFILE}
+rm ${QT5_RUNFILE}
+echo $OK
+
+echo "Setting up Qt5 cmake environment:"
 for module in Core DBus Qml Quick
 do
+  echo "module "$module"..."
   find_command_prefix="find /usr /opt / -name Qt5"
   find_command_suffix="Config.cmake -print -quit"
   find_command=$find_command_prefix$module$find_command_suffix
@@ -101,6 +113,7 @@ do
   file_name=$file_name_prefix$module$file_name_suffix
   echo "include("$find_result")" > $file_name
 done
+echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
@@ -117,7 +130,7 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 fi
 
 if $UPDATE_SOURCES; then
-	echo "Apdating repository..."
+	echo "Updating repository..."
 	sudo apt-get update
 fi
 
