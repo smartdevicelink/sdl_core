@@ -99,12 +99,9 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
       shutdown_requested_(false),
       ready_(true),
       device_scan_requested_(false),
-      device_scan_requested_mutex_(),
-      device_scan_requested_cond_(),
+      device_scan_requested_sync_(),
       search_pause_(search_pause) {
-  pthread_cond_init(&device_scan_requested_cond_, 0);
-  pthread_mutex_init(&device_scan_requested_mutex_, 0);
-
+  device_scan_requested_sync_.init();
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
       0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8 };
   sdp_uuid128_create(&smart_device_link_service_uuid_,
@@ -112,8 +109,6 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
 }
 
 BluetoothDeviceScanner::~BluetoothDeviceScanner() {
-  pthread_mutex_destroy(&device_scan_requested_mutex_);
-  pthread_cond_destroy(&device_scan_requested_cond_);
 }
 
 void* bluetoothDeviceScannerThread(void* data) {
@@ -359,10 +354,6 @@ void BluetoothDeviceScanner::Thread() {
   LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized")
   ready_ = true;
   do {
-    WaitForDeviceScanRequest();
-    if (shutdown_requested_)
-      break;
-
     SearchDeviceError* error = DoInquiry();
     if (error == 0) {
       LOG4CXX_INFO(logger_, "Bluetooth inquiry finished");
@@ -370,6 +361,8 @@ void BluetoothDeviceScanner::Thread() {
       controller_->SearchDeviceFailed(*error);
     }
     device_scan_requested_ = false;
+
+    WaitForDeviceScanRequest();
   } while (!shutdown_requested_);
 
   LOG4CXX_INFO(logger_, "Bluetooth device scanner thread finished")
@@ -384,24 +377,18 @@ void BluetoothDeviceScanner::WaitForDeviceScanRequest() {
     return;
   }
 
-  pthread_mutex_lock(&device_scan_requested_mutex_);
+  device_scan_requested_sync_.lock();
   while (!(device_scan_requested_ || shutdown_requested_)) {
-    timeval now;
-    gettimeofday(&now, NULL);
-    timespec time_wait;
-    time_wait.tv_sec = now.tv_sec + search_pause_;
-    time_wait.tv_nsec = now.tv_usec * 1000;
-    const int wait_status = pthread_cond_timedwait(
-        &device_scan_requested_cond_, &device_scan_requested_mutex_,
-        &time_wait);
-    if (wait_status == ETIMEDOUT) {
+    const sync_primitives::SynchronisationPrimitives::WaitStatus wait_status =
+      device_scan_requested_sync_.timedwait(search_pause_, 0);
+    if (wait_status == sync_primitives::SynchronisationPrimitives::TIMED_OUT) {
       LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
       device_scan_requested_ = true;
-    } else if (0 != wait_status) {
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "pthread_cond_timedwait failed");
+    } else if (wait_status == sync_primitives::SynchronisationPrimitives::FAILED) {
+      LOG4CXX_ERROR_WITH_ERRNO(logger_, "sync_primitives::SynchronisationPrimitives::timedwait failed");
     }
   }
-  pthread_mutex_unlock(&device_scan_requested_mutex_);
+  device_scan_requested_sync_.unlock();
 
   LOG4CXX_TRACE_EXIT(logger_)
 }
@@ -432,10 +419,10 @@ void BluetoothDeviceScanner::Terminate() {
   shutdown_requested_ = true;
 
   if (true == thread_started_) {
-    pthread_mutex_lock(&device_scan_requested_mutex_);
+    device_scan_requested_sync_.lock();
     device_scan_requested_ = false;
-    pthread_cond_signal(&device_scan_requested_cond_);
-    pthread_mutex_unlock(&device_scan_requested_mutex_);
+    device_scan_requested_sync_.signal();
+    device_scan_requested_sync_.unlock();
     LOG4CXX_INFO(logger_,
                  "Waiting for bluetooth device scanner thread termination");
     pthread_join(thread_, 0);
@@ -456,18 +443,17 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
   }
   TransportAdapter::Error ret = TransportAdapter::OK;
 
-  pthread_mutex_lock(&device_scan_requested_mutex_);
-
+  device_scan_requested_sync_.lock();
   if (false == device_scan_requested_) {
     LOG4CXX_INFO(logger_, "Requesting device Scan");
     device_scan_requested_ = true;
-    pthread_cond_signal(&device_scan_requested_cond_);
+    device_scan_requested_sync_.signal();
   } else {
     ret = TransportAdapter::BAD_STATE;
     LOG4CXX_INFO(logger_, "Device Scan is currently in progress")
   }
+  device_scan_requested_sync_.unlock();
 
-  pthread_mutex_unlock(&device_scan_requested_mutex_);
   LOG4CXX_TRACE_EXIT(logger_)
   return ret;
 }
