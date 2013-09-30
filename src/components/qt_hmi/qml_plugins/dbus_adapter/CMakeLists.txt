@@ -20,13 +20,13 @@ set(SOURCES
   hmiproxy.cc
 )
 
-set(target hmi_dbus)
+set(target DBusAdapter)
 
 add_library(${target} SHARED ${SOURCES})
 
 qt5_use_modules(${target} Core DBus Qml Quick)
 
-set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/sdl/core/api)
+set(destination ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model/com/ford/sdl/hmi/dbus_adapter)
 
 install(TARGETS ${target}
   DESTINATION ${destination}
