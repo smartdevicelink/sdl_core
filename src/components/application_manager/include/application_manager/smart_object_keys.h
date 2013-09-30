@@ -233,6 +233,7 @@ const char display_capabilities[] = "displayCapabilities";
 const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
 const char soft_button_capabilities[] = "softButtonCapabilities";
 const char button_capabilities[] = "buttonCapabilities";
+const char capabilities[] = "capabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";
 const char allowed[] = "allowed";
 const char vehicle_type[] = "vehicleType";
