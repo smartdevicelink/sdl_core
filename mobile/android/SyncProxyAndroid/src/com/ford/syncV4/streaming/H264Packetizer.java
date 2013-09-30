@@ -83,14 +83,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         if (is == null){
             throw new IllegalArgumentException("Input stream is null");
         }
-        int length = 0;
-        ByteArrayOutputStream bb = new ByteArrayOutputStream();
-        do {
-            length = is.read();
-            bb.write(length);
-        } while (length != EOS && bb.size() < 1000);
-        bb.flush();
-        byte[] buffer = bb.toByteArray();
-        return buffer;
+        byte[] data = new byte[MOBILE_NAVI_DATA_SIZE];
+        int length = is.read(data);
+        return data;
     }
 }
