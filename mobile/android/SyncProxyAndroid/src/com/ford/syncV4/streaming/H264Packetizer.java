@@ -80,7 +80,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
+    private MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
         checkPreconditions(data);
         int length = is.read(data);
         if (length == -1) {
@@ -100,10 +100,15 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    byte[] readFrameData(ByteBuffer buffer, byte[] data) throws IOException {
+    byte[] readFrameData(ByteBuffer buffer, byte[] data) throws IOException, IllegalArgumentException {
         do {
             MobileNaviDataFrame frame = createFramePayload(data);
-            buffer.put(frame.getData(), 0, (frame.getData().length > buffer.remaining()) ? buffer.remaining() : frame.getData().length);
+            if (frame.getType() == MobileNaviDataFrameType.END_OS_SESSION_TYPE) {
+                byte[] result = Arrays.copyOf(buffer.array(), buffer.position());
+                buffer.clear();
+                return result;
+            }
+            buffer.put(frame.getData(), 0, (frame.getData().length > buffer.remaining()) ? buffer.position() : frame.getData().length);
         } while (buffer.remaining() > 0);
         byte[] result = buffer.array();
         buffer.clear();

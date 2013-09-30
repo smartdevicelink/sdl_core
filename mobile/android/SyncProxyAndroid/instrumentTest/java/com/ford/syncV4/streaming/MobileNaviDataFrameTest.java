@@ -55,4 +55,9 @@ public class MobileNaviDataFrameTest extends AndroidTestCase {
         MobileNaviDataFrameType type = frame.getType();
         assertEquals("frame should have END_OS_SESSION_TYPE", type, MobileNaviDataFrameType.END_OS_SESSION_TYPE);
     }
+
+    public void testMobileNaviDataFrameWasCreatedWithDATA_FRAME_TYPE() throws Exception {
+        sut = new MobileNaviDataFrame(new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
+        assertEquals("Frmae should has DATA_FRAME_TYPE", sut.getType(), MobileNaviDataFrameType.DATA_FRAME_TYPE);
+    }
 }

@@ -38,7 +38,7 @@ public class MobileNaviDataFrame {
 
     @Override
     public String toString() {
-        String result = super.toString() + "; data = " + Arrays.toString(data);
+        String result = super.toString() + "; data = " + Arrays.toString(Arrays.copyOfRange(data, 0, 10)) + "..." + Arrays.toString(Arrays.copyOfRange(data, data.length - 11, data.length - 1));
         return result;
     }
 
