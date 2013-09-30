@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.9)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -43,7 +43,10 @@ endif(NOT PYTHONINTERP_FOUND)
 
 # ---Qt5 necessary libs
 
-FIND_PACKAGE(Qt5Libs)
+FIND_PACKAGE(Qt5Core REQUIRED)
+FIND_PACKAGE(Qt5DBus REQUIRED)
+FIND_PACKAGE(Qt5Qml REQUIRED)
+FIND_PACKAGE(Qt5Quick REQUIRED)
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
