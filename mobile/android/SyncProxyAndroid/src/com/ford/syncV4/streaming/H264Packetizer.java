@@ -80,21 +80,25 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    byte[] createFramePayload() throws IOException, IllegalArgumentException {
+    MobileNaviDataFrame createFramePayload() throws IOException, IllegalArgumentException {
         if (is == null) {
             throw new IllegalArgumentException("Input stream is null");
         }
         byte[] data = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
         int length = is.read(data);
-        byte[] result = Arrays.copyOf(data, length);
-        return result;
+        if (length == -1) {
+            return MobileNaviDataFrame.createEndOfSessionFrame();
+        } else {
+            MobileNaviDataFrame frame = new MobileNaviDataFrame(Arrays.copyOf(data, length));
+            return frame;
+        }
     }
 
     byte[] readFrameData() throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
         do {
-            byte[] data = createFramePayload();
-            buffer.put(data, 0, (data.length > buffer.remaining()) ? buffer.remaining() : data.length);
+            MobileNaviDataFrame frame = createFramePayload();
+            buffer.put(frame.getData(), 0, (frame.getData().length > buffer.remaining()) ? buffer.remaining() : frame.getData().length);
         } while (buffer.remaining() > 0);
         byte[] data = buffer.array();
         return data;
