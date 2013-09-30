@@ -3,7 +3,6 @@
 set -e
 
 SUBVERSION="subversion"
-CMAKE_BUILD_SYSTEM="cmake"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
@@ -11,6 +10,11 @@ CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
+CMAKE_BUILD_SYSTEM="cmake"
+QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
+QT5_RUNFILE_SRC="https://adc.luxoft.com/svn/APPLINK/dist/qt5.1/runfile"
+QT5_RUNFILE_DST="/tmp"
+QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
@@ -90,14 +94,12 @@ apt-install ${SUBVERSION}
 echo $OK
 
 echo "Checking out Qt5 installation runfile, please be patient"
-svn checkout ... /tmp
+svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
 echo $OK
 
 echo "Installing Qt5 libraries"
-QT5_RUNFILE="/tmp/qt-linux-opensource-5.1.0-x86-offline.run"
-chmod +x ${QT5_RUNFILE}
-sudo ${QT5_RUNFILE}
-rm ${QT5_RUNFILE}
+chmod +x ${QT5_RUNFILE_BIN}
+sudo ${QT5_RUNFILE_BIN}
 echo $OK
 
 echo "Setting up Qt5 cmake environment:"
