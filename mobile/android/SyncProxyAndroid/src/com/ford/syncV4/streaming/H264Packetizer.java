@@ -5,7 +5,6 @@ import android.util.Log;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.SessionType;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -14,7 +13,6 @@ import java.util.Arrays;
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
     public final static String TAG = "H264Packetizer";
-    public static final int EOS = -1;
     private Thread t = null;
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
@@ -44,38 +42,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     }
 
     public void run() {
-        int length = 0;
-
         try {
             while (!Thread.interrupted()) {
-                ByteArrayOutputStream bb = new ByteArrayOutputStream();
-
-                do {
-                    if (is != null) {
-                        try {
-                            length = is.read();
-                        } catch (NullPointerException e) {
-                            Log.e("SyncProxyTester", e.toString());
-                        }
-
-                        if (length != EOS) {
-                            bb.write(length);
-                        }
-                    }
-
-                } while (length != EOS && bb.size() < 1000);
-
-                if (length != EOS) {
-                    bb.flush();
-                    buffer = bb.toByteArray();
-                    ProtocolMessage pm = new ProtocolMessage();
-                    pm.setSessionID(_rpcSessionID);
-                    pm.setSessionType(SessionType.Mobile_Nav);
-                    pm.setFunctionID(0);
-                    pm.setCorrID(0);
-                    pm.setData(buffer, buffer.length);
-                    _streamListener.sendH264(pm);
-                }
+                doDataReading();
             }
         } catch (IOException e) {
             Log.e("SyncProxyTester", e.toString());
@@ -121,7 +90,12 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         if (length == -1) {
             return MobileNaviDataFrame.createEndOfSessionFrame();
         } else {
-            MobileNaviDataFrame frame = new MobileNaviDataFrame(Arrays.copyOf(data, length));
+            MobileNaviDataFrame frame = null;
+            if (data.length == length) {
+                frame = new MobileNaviDataFrame(data);
+            } else {
+                frame = new MobileNaviDataFrame(Arrays.copyOf(data, length));
+            }
             return frame;
         }
     }
