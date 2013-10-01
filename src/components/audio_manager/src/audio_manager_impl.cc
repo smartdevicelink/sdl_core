@@ -62,7 +62,8 @@ AudioManagerImpl::AudioManagerImpl()
     videoStreamerThread_(NULL),
     is_stream_running_(false),
     app_connection_key(0),
-    timer_(this, &AudioManagerImpl::onTimer) {
+    timer_(this, &AudioManagerImpl::onTimer),
+    video_serever_() {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
@@ -268,17 +269,22 @@ void AudioManagerImpl::OnMessageReceived(
       is_stream_running_ = true;
       app_connection_key = (*message).connection_key();
       // FIXME
-      timer_.start(10);
+      //timer_.start(10);
+      video_serever_.start();
+      const std::string url = "http://localhost:5050";
+      application_manager::MessageHelper::SendNaviStartStream(
+          url, app_connection_key);
     }
 
-    // the only type of message AudioManager is interested in.
+    /* the only type of message AudioManager is interested in.
     std::vector<unsigned char> recieved_bin_data(
       message->data(),
       message->data() + message->data_size());
 
     file_system::Write(kH264FileName,
                        recieved_bin_data,
-                       std::ios_base::app);
+                       std::ios_base::app);*/
+    video_serever_.sendMsg(message);
   }
 }
 

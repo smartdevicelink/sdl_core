@@ -29,6 +29,7 @@ set (SOURCES
     ./src/from_mic_to_file_recorder_thread.cc
     ./src/a2dp_source_player_thread.cc
     ./src/video_streaming_thread.cc
+    ./src/video_server.cc
 )
 
 add_library("AudioManager" ${SOURCES} )
