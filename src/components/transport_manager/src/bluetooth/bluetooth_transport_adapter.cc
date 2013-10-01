@@ -53,7 +53,7 @@ BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
 BluetoothTransportAdapter::BluetoothTransportAdapter()
-    : TransportAdapterImpl(new BluetoothDeviceScanner(this, 0),
+    : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
                            new BluetoothConnectionFactory(this), 0) {
 }
 

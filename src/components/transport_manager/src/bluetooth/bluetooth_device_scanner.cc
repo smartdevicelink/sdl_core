@@ -92,7 +92,7 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
 }  //  namespace
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
-    TransportAdapterController* controller, unsigned search_pause)
+    TransportAdapterController* controller, bool auto_repeat_search, int auto_repeat_pause_sec)
     : controller_(controller),
       thread_(),
       thread_started_(false),
@@ -100,7 +100,8 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
       ready_(true),
       device_scan_requested_(false),
       device_scan_requested_sync_(),
-      search_pause_(search_pause) {
+      auto_repeat_search_(auto_repeat_search),
+      auto_repeat_pause_sec_(auto_repeat_pause_sec) {
   device_scan_requested_sync_.init();
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
       0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8 };
@@ -134,25 +135,26 @@ void BluetoothDeviceScanner::UpdateTotalDeviceList() {
   controller_->SearchDeviceDone(devices);
 }
 
-SearchDeviceError* BluetoothDeviceScanner::DoInquiry() {
+void BluetoothDeviceScanner::DoInquiry() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   const int device_id = hci_get_route(0);
   if (device_id < 0) {
     LOG4CXX_INFO(logger_, "device_id < 0, exit DoInquiry");
-    return new SearchDeviceError();
+    controller_->SearchDeviceFailed(SearchDeviceError());
   }
 
   int device_handle = hci_open_dev(device_id);
   if (device_handle < 0) {
     LOG4CXX_INFO(logger_, "device_handle < 0, exit DoInquiry");
-    return new SearchDeviceError();
+    controller_->SearchDeviceFailed(SearchDeviceError());
   }
 
   if (paired_devices_.empty()) {
     LOG4CXX_INFO(logger_, "Searching for paired devices.");
     if (-1 == FindPairedDevs(&paired_devices_)) {
       LOG4CXX_ERROR(logger_, "Failed to retrieve list of paired devices.");
+      controller_->SearchDeviceFailed(SearchDeviceError());
     }
   }
 
@@ -191,10 +193,11 @@ SearchDeviceError* BluetoothDeviceScanner::DoInquiry() {
   if (number_of_devices < 0) {
     LOG4CXX_INFO(logger_, "number_of_devices < 0")
     LOG4CXX_TRACE_EXIT(logger_);
-    return new SearchDeviceError();
+    controller_->SearchDeviceFailed(SearchDeviceError());
   }
+
+  LOG4CXX_INFO(logger_, "Bluetooth inquiry finished");
   LOG4CXX_TRACE_EXIT(logger_)
-  return 0;
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
@@ -353,26 +356,33 @@ void BluetoothDeviceScanner::Thread() {
   LOG4CXX_TRACE_ENTER(logger_)
   LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized")
   ready_ = true;
-  do {
-    SearchDeviceError* error = DoInquiry();
-    if (error == 0) {
-      LOG4CXX_INFO(logger_, "Bluetooth inquiry finished");
-    } else {
-      controller_->SearchDeviceFailed(*error);
+  if (auto_repeat_search_) {
+    while (!shutdown_requested_) {
+      DoInquiry();
+      device_scan_requested_ = false;
+      TimedWaitForDeviceScanRequest();
     }
-    device_scan_requested_ = false;
-
-    WaitForDeviceScanRequest();
-  } while (!shutdown_requested_);
+  } else { // search only on demand
+    while (true) {
+      device_scan_requested_sync_.lock();
+      while (!(device_scan_requested_ || shutdown_requested_)) {
+        device_scan_requested_sync_.wait();
+      }
+      device_scan_requested_sync_.unlock();
+      if (shutdown_requested_) break;
+      DoInquiry();
+      device_scan_requested_ = false;
+    }
+  }
 
   LOG4CXX_INFO(logger_, "Bluetooth device scanner thread finished")
   LOG4CXX_TRACE_EXIT(logger_)
 }
 
-void BluetoothDeviceScanner::WaitForDeviceScanRequest() {
+void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   LOG4CXX_TRACE_ENTER(logger_)
 
-  if (search_pause_ == 0) {
+  if (auto_repeat_pause_sec_ == 0) {
     LOG4CXX_TRACE_EXIT(logger_)
     return;
   }
@@ -380,7 +390,7 @@ void BluetoothDeviceScanner::WaitForDeviceScanRequest() {
   device_scan_requested_sync_.lock();
   while (!(device_scan_requested_ || shutdown_requested_)) {
     const sync_primitives::SynchronisationPrimitives::WaitStatus wait_status =
-      device_scan_requested_sync_.timedwait(search_pause_, 0);
+      device_scan_requested_sync_.timedwait(auto_repeat_pause_sec_, 0);
     if (wait_status == sync_primitives::SynchronisationPrimitives::TIMED_OUT) {
       LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
       device_scan_requested_ = true;
@@ -437,7 +447,7 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
     LOG4CXX_INFO(logger_, "bad state");
     return TransportAdapter::BAD_STATE;
   }
-  if (search_pause_ == 0) {
+  if (auto_repeat_pause_sec_ == 0) {
     LOG4CXX_INFO(logger_, "no search pause, scan forcing not needed");
     return TransportAdapter::OK;
   }

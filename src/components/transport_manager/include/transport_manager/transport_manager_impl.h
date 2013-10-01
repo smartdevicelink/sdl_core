@@ -41,7 +41,7 @@
 #include <algorithm>
 
 #include "utils/logger.h"
-#include "protocol_handler/protocol_handler.h"//YK: temp solution until B1.0 release
+#include "protocol_handler/protocol_handler.h"//TODO(YK): temp solution until B1.0 release
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -112,7 +112,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ConnectDevice(const DeviceHandle &device_id);
+  virtual int ConnectDevice(const DeviceHandle& device_id);
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -121,7 +121,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int DisconnectDevice(const DeviceHandle &device_id);
+  virtual int DisconnectDevice(const DeviceHandle& device_id);
 
   /**
    * @brief Routine after Disconnect failed.
@@ -137,14 +137,14 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID &connection_id);
+  virtual int Disconnect(const ConnectionUID& connection_id);
 
   /**
    * @brief Disconnect and clear all unreceived data.
    *
    * @param connection Connection unique identifier.
    */
-  virtual int DisconnectForce(const ConnectionUID &connection_id);
+  virtual int DisconnectForce(const ConnectionUID& connection_id);
   /**
    * @brief Post new message in queue for massages destined to device.
    *
@@ -161,7 +161,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEvent &event);
+  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event);
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -170,7 +170,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int AddEventListener(TransportManagerListener *listener);
+  virtual int AddEventListener(TransportManagerListener* listener);
 
   /**
    * @brief Delete listener from the container of transport manager listeners.
@@ -179,7 +179,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int RemoveEventListener(TransportManagerListener *listener);
+  virtual int RemoveEventListener(TransportManagerListener* listener);
 
   /**
    * @brief Add device adapter to the container of device adapters.
@@ -208,7 +208,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int RemoveDevice(const DeviceHandle &device);
+  virtual int RemoveDevice(const DeviceHandle& device);
 
   /**
    * @brief Turns on or off visibility of SDL to mobile devices
@@ -217,7 +217,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    */
-  virtual int Visibility(const bool &on_off) const;
+  virtual int Visibility(const bool& on_off) const;
 
   /**
    * @brief Return Container that hold information about devices.
@@ -231,7 +231,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param ph Pointer to the handler of protocol.
    */
-  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler *ph);  //YK: temp solution until B1.0 release
+  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler* ph);  //TODO(YK): temp solution until B1.0 release
 
   /**
    * @brief Return container that hold connections.
@@ -245,7 +245,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param config Information about transport manager state.
    **/
-  explicit TransportManagerImpl(const TransportManagerAttr &config);
+  explicit TransportManagerImpl(const TransportManagerAttr& config);
 
  protected:
   /**
@@ -290,14 +290,14 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param event Event of device adapter.
    */
-  void RemoveEvent(const TransportAdapterEvent &event);
+  void RemoveEvent(const TransportAdapterEvent& event);
 
   /**
    * @brief Post event to the container of events.
    *
    * @param event Event of device adapter.
    **/
-  void PostEvent(const TransportAdapterEvent &event);
+  void PostEvent(const TransportAdapterEvent& event);
 
   /**
    * @brief Type definition of container that holds smart pointer to the raw massages.
@@ -317,7 +317,7 @@ class TransportManagerImpl : public TransportManager {
   explicit TransportManagerImpl(
       std::vector<transport_adapter::TransportAdapterSptr> transport_adapter_list);
 
-  static void *MessageQueueStartThread(void *data);
+  static void* MessageQueueStartThread(void* data);
   /**
    * @brief Scan message's queue and pull messages according to priority and serial number
    *
@@ -330,7 +330,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Launch EventListenerThread(void).
    */
-  static void *EventListenerStartThread(void *);
+  static void* EventListenerStartThread(void*);
   /**
    * @brief wait until event happens
    *
@@ -376,7 +376,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   volatile bool all_thread_active_;
 
-  typedef std::list<TransportManagerListener *> TransportManagerListenerList;
+  typedef std::list<TransportManagerListener*> TransportManagerListenerList;
   /**
    * @brief listener that would be called when TM's event happened.
    **/
@@ -414,12 +414,12 @@ class TransportManagerImpl : public TransportManager {
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
 
-    DeviceHandle UidToHandle(const DeviceUID &dev_uid) {
+    DeviceHandle UidToHandle(const DeviceUID& dev_uid) {
       bool is_new = true;
       return UidToHandle(dev_uid, is_new);
     }
 
-    DeviceHandle UidToHandle(const DeviceUID &dev_uid, bool &is_new) {
+    DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
       ConversionTable::iterator it = std::find(conversion_table_.begin(),
                                                conversion_table_.end(),
                                                dev_uid);
@@ -460,8 +460,8 @@ class TransportManagerImpl : public TransportManager {
     int messages_count;
 
     ConnectionInternal(TransportAdapterSptr transport_adapter,
-                       const ConnectionUID &id, const DeviceUID &dev_id,
-                       const ApplicationHandle &app_id)
+                       const ConnectionUID& id, const DeviceUID& dev_id,
+                       const ApplicationHandle& app_id)
         : transport_adapter(transport_adapter),
           id(id),
           device(dev_id),
@@ -481,20 +481,20 @@ class TransportManagerImpl : public TransportManager {
 
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);
-  ConnectionInternal* GetConnection(const ConnectionUID &id);
+  ConnectionInternal* GetConnection(const ConnectionUID& id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);
 
-  protocol_handler::ProtocolHandler *protocol_handler_;  //YK: temp solution until B1.0 release
+  protocol_handler::ProtocolHandler* protocol_handler_;  //TODO(YK): temp solution until B1.0 release
   void AddDataToContainer(
       ConnectionUID id,
-      std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container,
-      unsigned char * data, unsigned int data_size);
-  bool GetFrameSize(unsigned char *data, unsigned int data_size,
-                    unsigned int &frame_size);
+      std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >& container,
+      unsigned char* data, unsigned int data_size);
+  bool GetFrameSize(unsigned char* data, unsigned int data_size,
+                    unsigned int& frame_size);
   bool GetFrame(
-      std::map<ConnectionUID, std::pair<unsigned int, unsigned char *>> &container,
-      ConnectionUID id, unsigned int frame_size, unsigned char **frame);
+      std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >& container,
+      ConnectionUID id, unsigned int frame_size, unsigned char** frame);
 
   void OnDeviceListUpdated(const TransportAdapterSptr& ta);
 

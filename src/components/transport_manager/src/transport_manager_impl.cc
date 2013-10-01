@@ -678,7 +678,7 @@ void TransportManagerImpl::EventListenerThread(void) {
           connections_.push_back(
               ConnectionInternal(ta, ++connection_id_counter_, device_id,
                                  app_handle));
-          device_handle = converter_.UidToHandle(device_id, is_new);
+          device_handle = converter_.UidToHandle(device_id);
           RaiseEvent(
               &TransportManagerListener::OnConnectionEstablished,
               DeviceInfo(device_handle, device_id, ta->DeviceName(device_id)),
