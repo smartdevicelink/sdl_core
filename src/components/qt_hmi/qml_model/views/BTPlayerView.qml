@@ -1,5 +1,8 @@
 import QtQuick 2.0
 
-PlayerView {
-    playerType: "BT Audio"
+GeneralView {
+    PlayerView {
+        anchors.fill: parent
+        playerType: "BT Audio"
+    }
 }

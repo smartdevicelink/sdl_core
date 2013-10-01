@@ -37,60 +37,48 @@ import "../controls"
 
 Item {
     id: radioPlayer
-    anchors.fill: parent
-    property string radioType: ""
+
     property var presets: []
+    property int minHeight: 400
 
-    Item {
-        // 3/4 top screen
-        height: parent.height * 3/4
-        width: parent.width
-        anchors.top: parent.top
-        anchors.left: parent.left
+    default property alias content: additional.children
 
-        // Buttons at top
+    Column {
+        anchors.fill: parent
+
         Item {
-            anchors.top: parent.top
-            anchors.left: parent.left
-            height: parent.height * 1/4
+            id: upperControlLine
             width: parent.width
-
+            height: parent.height / 4
+            anchors.horizontalCenter: parent.horizontalCenter
             LongOvalButton {
-                anchors.left: parent.left
-                anchors.top: parent.top
                 text: radioType + " Radio"
                 pixelSize: 20
                 dest: "./views/MusicSourceGridView.qml"
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             LongOvalButton {
-                anchors.top: parent.top
-                anchors.right: parent.right
                 text: "Tune"
                 pixelSize: 20
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
-
-
-        // Text information
         Item {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height * 2/4
             width: parent.width
+            height: parent.height / 2
 
             Column {
-                anchors.verticalCenter: parent.verticalCenter
                 spacing: 10
-                Row{
-
+                Row {
                     Text {
                         id: radioChannelNameText
                         color: "#1d81d5"
                         text: presets[0]
                         font.pixelSize: 45
                     }
-
                     Text {
                         color: "#1d81d5"
                         text: " " + radioType
@@ -98,102 +86,46 @@ Item {
                         anchors.bottom: radioChannelNameText.bottom
                     }
                 }
-
-                Text {
-                    color: "#1d81d5"
-                    text: "Song name"
-                    font.pixelSize: 25
-                    font.bold: true
+                Row {
+                    Text {
+                        color: "#1d81d5"
+                        text: "Song name"
+                        font.pixelSize: 25
+                        font.bold: true
+                    }
                 }
+                Row {
+                    Text {
+                        color: "#1d81d5"
+                        text: "Album Name"
+                        font.pixelSize: 25
 
-                Text {
-                    color: "#1d81d5"
-                    text: "Album Name"
-                    font.pixelSize: 25
+                    }
+                }
+                Item {
+                    width: childrenRect.width
+                    height: childrenRect.height
+                    id: additional
                 }
             }
         }
+
 
         Item {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            height: parent.height * 1/4
             width: parent.width
-
-            LongOvalButton {
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                id: hdBtn
-                visible: radioPlayer.radioType == "FM"
-                Row{
-                    id: row
-                    anchors.verticalCenter: parent.verticalCenter
-                    x: parent.x + 20
-                    spacing: 5
-                    property int selected: 0
-                    MouseArea {
-                        onClicked: {
-                            //todo: change color of text
-                        }
-                    }
-
-                    Image {
-                        anchors.verticalCenter: parent.verticalCenter
-                        source:"../res/hd_logo_on.png"
-                    }
-                    Text {
-                        id: one
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "1"
-                        color: "white"
-                        font.pixelSize: 25
-                    }
-                    Text {
-                        id: two
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "2"
-                        color: parent.selected == 1 ? "white" : "#1d81d5"
-                        font.pixelSize: 25
-                    }
-                    Text {
-                        id: three
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "3"
-                        color: parent.selected == 2 ? "white" : "#1d81d5"
-                        font.pixelSize: 25
-                    }
-                    Text {
-                        id: fourth
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "4"
-                        color: parent.selected == 3 ? "white" : "#1d81d5"
-                        font.pixelSize: 25
-                    }
-                }
+            height: parent.height / 4
+            Rectangle {
+                width: parent.width
+                height: 2
+                color: "#1d81d5"
             }
-        }
-
-        Rectangle{
-            anchors.bottom: parent.bottom
-            width: parent.width
-            height: 2
-            color: "#1d81d5"
-        }
-    }
-
-    Item {
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        width: parent.width
-        height: 1/4 * parent.height
-
-        PresetRow {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            presets: radioPlayer.presets
-            onSelectedIndexChanged: {
-                radioChannelNameText.text = presets[selectedIndex];
+            PresetRow {
+                anchors.centerIn: parent
+                presets: radioPlayer.presets
+                width: parent.width
+                onSelectedIndexChanged: {
+                    radioChannelNameText.text = presets[selectedIndex];
+                }
             }
         }
     }

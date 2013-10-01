@@ -1,9 +1,7 @@
 import QtQuick 2.0
 import "../controls"
 
-Item {
-    anchors.fill: parent
-
+GeneralView {
     Item {
         // 3/4 top screen
         height: parent.height * 3/4
@@ -17,30 +15,24 @@ Item {
             width:parent.width
             height:parent.height
 
-            model: ListModel{
-                ListElement{
+            model: ListModel {
+                ListElement {
                     name: "Policies Test"
                 }
-                ListElement{
+                ListElement {
                     name: "XML Test"
                 }
             }
-
 
             delegate: Text  {
                 text: name
                 color: "#1d81d5"
                 font.pixelSize: 40
-                MouseArea {
-                  anchors.fill: parent
-                  onClicked: {
-                    }
-                }
             }
         }
     }
 
-    Item{
+    Item {
         // 1/4 bottom screen
         anchors.bottom: parent.bottom
         anchors.left: parent.left

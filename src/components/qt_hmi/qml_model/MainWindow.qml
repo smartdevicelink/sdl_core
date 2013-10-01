@@ -18,6 +18,10 @@ Rectangle {
 
     DataStorage {
         id: dataContainer
+
+        onHmiContextChanged: {
+            // TODO: Send notification to SDL
+        }
     }
 
     SettingsStorage {
@@ -37,7 +41,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             height: parent.height * 0.25
             width: parent.width
-            HeaderMenu{}
+            HeaderMenu {}
         }
 
         Item {
@@ -68,6 +72,12 @@ Rectangle {
 
                 function back() {
                     source = viewTransitionStack.pop()
+                }
+
+                onStatusChanged: {
+                    if (status == Component.Ready) {
+                        dataContainer.hmiContext = item.context
+                    }
                 }
             }
         }

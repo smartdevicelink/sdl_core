@@ -35,18 +35,18 @@
 
 import QtQuick 2.0
 
-Item
+Column
 {
-    width: parent.width
-    height: parent.height
     default property alias content: containerRow.children
     property alias spacing: containerRow.spacing
     property int snapTo: 200
 
     Flickable {
-        id: container        
+        y: 18
+        id: container
+        maximumFlickVelocity: 1500
         contentWidth: containerRow.width
-        height: parent.height
+        height: containerRow.height + 18
         width: parent.width
         maximumFlickVelocity: 1500
 
