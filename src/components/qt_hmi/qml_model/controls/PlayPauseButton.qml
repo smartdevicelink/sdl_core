@@ -1,6 +1,6 @@
 /**
- * \file PlayPauseButton.qml
- * \brief Behavior of Play/Pause button.
+ * @file PlayPauseButton.qml
+ * @brief Behavior of Play/Pause button.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,8 +35,7 @@
 import QtQuick 2.0
 
 Image {
-    id: playBtn
-    anchors.verticalCenter: parent.verticalCenter
+    id: playPauseButton
     state: 'Play'
     property string sourceOnPressed: ""
     property string sourceOnReleased: ""
@@ -44,21 +43,21 @@ Image {
     MouseArea {
         anchors.fill: parent
         onPressed: {
-            playBtn.source = playBtn.sourceOnPressed
+            playPauseButton.source = playPauseButton.sourceOnPressed
         }
         onReleased: {
-            playBtn.source = playBtn.sourceOnReleased
-            playBtn.state == 'Play' ? playBtn.state = 'Pause' : playBtn.state = 'Play'
+            playPauseButton.source = playPauseButton.sourceOnReleased
+            playPauseButton.state == 'Play' ? playPauseButton.state = 'Pause' : playPauseButton.state = 'Play'
         }
         onClicked: {
-
+        // add some behavior
         }
     }
     states: [
         State {
             name: "Play"
             PropertyChanges {
-                target: playBtn
+                target: playPauseButton
                 source: "../res/buttons/player_play_btn.png"
                 sourceOnPressed: "../res/buttons/player_play_pressed_btn.png"
                 sourceOnReleased: "../res/buttons/player_pause_btn.png"
@@ -68,7 +67,7 @@ Image {
         State {
             name: "Pause"
             PropertyChanges {
-                target: playBtn
+                target: playPauseButton
                 source: "../res/buttons/player_pause_btn.png"
                 sourceOnPressed: "../res/buttons/player_pause_pressed_btn.png"
                 sourceOnReleased: "../res/buttons/player_play_btn.png"
