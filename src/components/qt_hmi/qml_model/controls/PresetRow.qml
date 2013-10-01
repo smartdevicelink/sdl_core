@@ -1,5 +1,5 @@
 /**
- * @file presetRow.qml
+ * @file PresetRow.qml
  * @brief Animated row with radio stations.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
