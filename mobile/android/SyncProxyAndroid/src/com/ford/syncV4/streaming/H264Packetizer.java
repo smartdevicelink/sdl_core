@@ -54,11 +54,13 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public void doDataReading() throws IOException, IllegalArgumentException {
         if (is != null) {
             byte[] frameData = readFrameData(byteBuffer, dataBuffer);
-            createProtocolMessage(frameData);
+            if (frameData != null && frameData.length > 0) {
+                createProtocolMessage(frameData);
+            }
         }
     }
 
-    private ProtocolMessage createProtocolMessage(byte[] frameData) {
+    ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setSessionID(_rpcSessionID);
         pm.setSessionType(SessionType.Mobile_Nav);
@@ -80,7 +82,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
                 buffer.clear();
                 return result;
             }
-            if (frame.getData().length > buffer.remaining()) {
+            if (frame.getData().length >= buffer.remaining()) {
                 tail = Arrays.copyOfRange(frame.getData(), buffer.remaining(), frame.getData().length);
                 buffer.put(frame.getData(), 0, buffer.remaining());
             } else {
