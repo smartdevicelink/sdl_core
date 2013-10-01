@@ -4,11 +4,15 @@ import android.test.AndroidTestCase;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 
+import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 /**
  * Created by Andrew Batutin on 9/30/13.
@@ -197,4 +201,77 @@ public class H264PacketizerTest extends AndroidTestCase {
         packetizer.doDataReading();
         assertTrue("ProtocolMessage should be created", isTestValid[0]);
     }
+
+    public void testStressTest() throws Exception {
+        final int maxSize = 1024 * 10;
+        int currentSize = 0;
+        final ByteBuffer sampleDataBuffer = ByteBuffer.allocate(1024 * 10 + 1000);
+        ByteBuffer realDataBuffer = ByteBuffer.allocate(1024 * 10 + 1000);
+
+        Thread t = new Thread() {
+            int currentSize = 0;
+            @Override
+            public void run() {
+                super.run();
+                Random random = new Random(47);
+                do {
+                    byte[] data = new byte[random.nextInt(1000)];
+                    random.nextBytes(data);
+                    sampleDataBuffer.put(data);
+                    try {
+                        outputStream.write(data);
+                        outputStream.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentSize += data.length;
+                    try {
+                        synchronized (this) {
+                            Thread.currentThread().wait(100);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                } while (currentSize < 1024 * 10);
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        t.start();
+        buffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        sampleData = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
+        while (currentSize < 1024 * 10) {
+            try {
+                byte[] frame = sut.readFrameData(buffer, sampleData);
+                realDataBuffer.put(frame);
+                currentSize += frame.length;
+            } catch (IOException e) {
+                e.getMessage();
+            }
+        }
+        t.interrupt();
+        byte[] sample = sampleDataBuffer.array();
+        byte[] real = realDataBuffer.array();
+        Map<Integer, Byte> map = compareArrays(sample, real);
+        if (map.size() > 0) {
+            Integer minI = Collections.min(map.keySet());
+        }
+        assertTrue("Sample and real data should be the same", Arrays.equals(sample, real));
+    }
+
+    private Map<Integer, Byte> compareArrays(byte[] one, byte[] two) {
+        Map<Integer, Byte> map = new TreeMap<Integer, Byte>();
+        for (int i = 0; i < one.length; i++) {
+            if (one[i] != two[i]) {
+                map.put(i, one[i]);
+            }
+        }
+        return map;
+    }
+
 }
