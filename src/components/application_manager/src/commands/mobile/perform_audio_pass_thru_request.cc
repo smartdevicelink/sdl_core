@@ -136,7 +136,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
     for (int i = 0;
         i < (*message_)[str::msg_params][str::initial_prompt].length();
         ++i) {
-      msg_params[hmi_request::tts_chunks][str::text][i] =
+      msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
     }
     // app_id
