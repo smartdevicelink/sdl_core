@@ -62,7 +62,7 @@ DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
       sdl_object_path_(sdlObjectPath),
       hmi_service_name_(hmiServiceName),
       hmi_object_path_(hmiObjectPath),
-      conn_(nullptr),
+      conn_(NULL),
       schema_(new DBusSchema(ford_message_descriptions::message_descriptions)) {}
 
 DBusAdapter::~DBusAdapter() {
@@ -96,7 +96,7 @@ bool DBusAdapter::Init() {
 }
 
 bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
-  if (conn_ == nullptr) {
+  if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return false;
   }
@@ -117,7 +117,7 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
 
 void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
   // TODO(KKolodiy): implement
-//  if (conn_ == nullptr) {
+//  if (conn_ == NULL) {
 //    LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
 //    return;
 //  }
@@ -185,7 +185,7 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
                              const MessageName name,
                              smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Method call " << name.first << "." << name.second);
-  if (conn_ == nullptr) {
+  if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return;
   }
@@ -228,7 +228,7 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
 void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
                          smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Signal " << name.first << "." << name.second);
-  if (conn_ == nullptr) {
+  if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return;
   }
