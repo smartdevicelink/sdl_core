@@ -42,6 +42,7 @@
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "audio_manager/audio_manager.h"
+#include "audio_manager/video_server.h"
 #include "audio_manager/from_mic_to_file_recorder_thread.h"
 #include "audio_manager/video_streaming_thread.h"
 #include "audio_manager/a2dp_source_player_thread.h"
@@ -96,6 +97,7 @@ class AudioManagerImpl : public AudioManager,
     mutable bool                            is_stream_running_;
     int                                     app_connection_key;
     timer::TimerThread<AudioManagerImpl>    timer_;
+    video_server::VideoServer               video_serever_;
 
     const int MAC_ADDRESS_LENGTH_;
     static AudioManagerImpl* sInstance_;
