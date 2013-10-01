@@ -40,9 +40,13 @@ CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
-CMAKE_BUILD_SYSTEM="cmake"
+APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
+CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
+CMAKE_DEB_DST="/tmp"
+CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
+CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
 QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-QT5_RUNFILE_SRC="https://adc.luxoft.com/svn/APPLINK/dist/qt5.1/runfile"
+QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile"
 QT5_RUNFILE_DST="/tmp"
 QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
@@ -71,8 +75,17 @@ function apt-install() {
     set +x
 }
 
-echo "Installng CMake build system"
-apt-install ${CMAKE_BUILD_SYSTEM}
+echo "Installing Subversion"
+apt-install ${SUBVERSION}
+echo $OK
+
+echo "Checking out CMake packages, please be patient"
+svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+echo $OK
+
+echo "Installing CMake build system"
+sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
 echo $OK
 
 echo "Installng GNU C++ compiler"
@@ -117,10 +130,6 @@ echo $OK
 
 echo "Installing OpenGL development files"
 apt-install ${OPENGL_DEV}
-echo $OK
-
-echo "Installing Subversion"
-apt-install ${SUBVERSION}
 echo $OK
 
 echo "Checking out Qt5 installation runfile, please be patient"
