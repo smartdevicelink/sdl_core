@@ -92,7 +92,8 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
 }  //  namespace
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
-    TransportAdapterController* controller, bool auto_repeat_search, int auto_repeat_pause_sec)
+    TransportAdapterController* controller, bool auto_repeat_search,
+    int auto_repeat_pause_sec)
     : controller_(controller),
       thread_(),
       thread_started_(false),
@@ -362,14 +363,15 @@ void BluetoothDeviceScanner::Thread() {
       device_scan_requested_ = false;
       TimedWaitForDeviceScanRequest();
     }
-  } else { // search only on demand
+  } else {  // search only on demand
     while (true) {
       device_scan_requested_sync_.lock();
       while (!(device_scan_requested_ || shutdown_requested_)) {
         device_scan_requested_sync_.wait();
       }
       device_scan_requested_sync_.unlock();
-      if (shutdown_requested_) break;
+      if (shutdown_requested_)
+        break;
       DoInquiry();
       device_scan_requested_ = false;
     }
@@ -390,12 +392,15 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   device_scan_requested_sync_.lock();
   while (!(device_scan_requested_ || shutdown_requested_)) {
     const sync_primitives::SynchronisationPrimitives::WaitStatus wait_status =
-      device_scan_requested_sync_.timedwait(auto_repeat_pause_sec_, 0);
+        device_scan_requested_sync_.timedwait(auto_repeat_pause_sec_, 0);
     if (wait_status == sync_primitives::SynchronisationPrimitives::TIMED_OUT) {
       LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
       device_scan_requested_ = true;
-    } else if (wait_status == sync_primitives::SynchronisationPrimitives::FAILED) {
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "sync_primitives::SynchronisationPrimitives::timedwait failed");
+    } else if (wait_status
+        == sync_primitives::SynchronisationPrimitives::FAILED) {
+      LOG4CXX_ERROR_WITH_ERRNO(
+          logger_,
+          "sync_primitives::SynchronisationPrimitives::timedwait failed");
     }
   }
   device_scan_requested_sync_.unlock();
