@@ -1,47 +1,76 @@
+/**
+ * @file presetRow.qml
+ * @brief Animated row with radio stations.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import QtQuick 2.0
 
 Item {
     id: presetRow
     width: parent.width
-    height: childrenRect.height
+    height: parent.height
 
     property variant presets: [];
     property int selectedIndex: 0
     signal presetSelected
 
-    Column {
-        anchors.fill: parent
+    PagedFlickable {
 
-        PagedFlickable {
-            width: parent.width
-            height: 200
-            snapTo: spacing + 63
-            spacing: (width - (63 * 4)) / 3
+        snapTo: spacing + 63
+        spacing: (width - (63 * 4)) / 3
 
-            Repeater {
-                model: presetRow.presets.length
-                delegate: Image {
-                    source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            presetRow.selectedIndex = index
-                        }
+        Repeater {
+            model: presetRow.presets.length
+            delegate: Image {
+                source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        presetRow.selectedIndex = index
                     }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: index + 1
-                        font.pixelSize: 30
-                        color: "#1d81d5"
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: parent.width
-                        text: presetRow.presets[index]
-                        font.pixelSize: 25
-                        color: "white"
-                    }
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: index + 1
+                    font.pixelSize: 30
+                    color: "#1d81d5"
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.bottom
+                    text: presetRow.presets[index]
+                    font.pixelSize: 25
+                    color: "white"
                 }
             }
         }
