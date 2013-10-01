@@ -34,12 +34,10 @@ set -e
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
-if [ ${uname_result} = "i386" ]
-then
+if [ ${uname_result} = "i386" ]; then
   echo "x86 machine detected"
   ARCH="i386"
-elif [ ${uname_result} = "x86_64" ]
-then
+elif [ ${uname_result} = "x86_64" ]; then
   echo "x64 machine detected"
   ARCH="x64"
 else
@@ -60,18 +58,14 @@ APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
 CMAKE_DEB_DST="/tmp"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
-if [ ${ARCH} = "i386" ]
-then
+if [ ${ARCH} = "i386" ]; then
   CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-elif [ ${ARCH} = "x64" ]
-then
+elif [ ${ARCH} = "x64" ]; then
   CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 fi
-if [ ${ARCH} = "i386" ]
-then
+if [ ${ARCH} = "i386" ]; then
   QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-elif [ ${ARCH} = "x64" ]
-then
+elif [ ${ARCH} = "x64" ]; then
   QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 fi
 QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile"
@@ -82,7 +76,6 @@ AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
-
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -160,21 +153,42 @@ echo "Installing OpenGL development files"
 apt-install ${OPENGL_DEV}
 echo $OK
 
-echo "Checking out Qt5 installation runfile, please be patient"
-svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
-echo $OK
+echo "Checking whether Qt5 is installed"
+qmake_binary=`find /usr /opt / -name qmake -type f -executable -print -quit 2>/dev/null`
+if [ -z "$qmake_binary" ]; then
+  echo "Definitely not"
+  NEED_QT5_INSTALL=true
+else
+  grep_result=`${qmake_binary} -version | grep Qt5`
+  if [ -z "$grep_result" ]; then
+    echo "No"
+    NEED_QT5_INSTALL=true
+  else
+    echo "Yes"
+    NEED_QT5_INSTALL=false
+  fi
+fi
+echo
 
-echo "Installing Qt5 libraries"
-chmod +x ${QT5_RUNFILE_BIN}
-sudo ${QT5_RUNFILE_BIN}
-echo $OK
+if $NEED_QT5_INSTALL; then
+
+  echo "Checking out Qt5 installation runfile, please be patient"
+  svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
+  echo $OK
+
+  echo "Installing Qt5 libraries"
+  chmod +x ${QT5_RUNFILE_BIN}
+  sudo ${QT5_RUNFILE_BIN}
+  echo $OK
+
+fi
 
 echo "Setting up Qt5 cmake environment:"
 for module in Core DBus Qml Quick
 do
   echo "module "$module"..."
   find_command_prefix="find /usr /opt / -name Qt5"
-  find_command_suffix="Config.cmake -print -quit"
+  find_command_suffix="Config.cmake -print -quit 2>/dev/null"
   find_command=$find_command_prefix$module$find_command_suffix
   find_result=`$find_command`
   file_name_prefix="cmake/Modules/FindQt5"
