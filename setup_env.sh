@@ -64,11 +64,12 @@ elif [ ${ARCH} = "x64" ]; then
   CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 fi
 if [ ${ARCH} = "i386" ]; then
+  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
   QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
 elif [ ${ARCH} = "x64" ]; then
+  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
   QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 fi
-QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile"
 QT5_RUNFILE_DST="/tmp"
 QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
