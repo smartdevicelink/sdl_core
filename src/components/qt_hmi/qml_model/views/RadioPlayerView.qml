@@ -39,9 +39,7 @@ Item {
     id: radioPlayer
     anchors.fill: parent
     property string radioType: ""
-    property var activeBand: radioType === "AM"? ["1130", "950", "760", "1270"]: ["96.3", "107.9", "104.3", "101.9"]
-    property var presets: [ "1130", "950", "760", "1270", "96.3", "107.9", "104.3", "101.9" ]
-    //property int minHeight: 400
+    property var presets: []
 
     Item {
         // 3/4 top screen

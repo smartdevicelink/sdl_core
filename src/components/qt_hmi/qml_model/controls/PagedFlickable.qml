@@ -71,6 +71,6 @@ Item
     Pager {
         anchors.horizontalCenter: parent.horizontalCenter
         pages: Math.floor(container.contentWidth / container.width)
-        activePage: Math.round(pages * container.contentX / (container.contentWidth))
+        activePage: Math.round(pages * container.contentX / container.contentWidth)
     }
 }
