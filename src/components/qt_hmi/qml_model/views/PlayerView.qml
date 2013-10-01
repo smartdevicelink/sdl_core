@@ -1,6 +1,6 @@
 /**
- * \file PlayerView.qml
- * \brief BT, IPod, CD player view screen.
+ * @file PlayerView.qml
+ * @brief BT, IPod, CD player view screen.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -121,31 +121,30 @@ Item {
                 height: parent.height
                 width: 2/3 * parent.width
 
-                           Rectangle {
-                               id: firstRect
-                               anchors.verticalCenter: parent.verticalCenter
-                               height: 2
-                               width: 1/3 * parent.width
-                               color: "white"
-                           }
+                Rectangle {
+                   id: firstRect
+                   anchors.verticalCenter: parent.verticalCenter
+                   height: 2
+                   width: 1/3 * parent.width
+                   color: "white"
+                }
 
-                           Rectangle {
-                               id: secondRect
-                               anchors.verticalCenter: parent.verticalCenter
-                               height: 2
-                               width: 2/3 * parent.width
-                               color: "#1d81d5"
-                           }
+                Rectangle {
+                   id: secondRect
+                   anchors.verticalCenter: parent.verticalCenter
+                   height: 2
+                   width: 2/3 * parent.width
+                   color: "#1d81d5"
+                }
             }
-  Text {
-
-                anchors.right: parent.right
-                anchors.rightMargin: 1/10 * parent.width
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
-                text: "04:23"
-                font.pixelSize: 18
-            }
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 1/10 * parent.width
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "#1d81d5"
+                    text: "04:23"
+                    font.pixelSize: 18
+                }
         }
     }
 
@@ -174,7 +173,7 @@ Item {
                 }
             }
 
-            PlayPauseButton {}
+            PlayPauseButton {  }
 
             Image {
                 id: nextBtnImage
