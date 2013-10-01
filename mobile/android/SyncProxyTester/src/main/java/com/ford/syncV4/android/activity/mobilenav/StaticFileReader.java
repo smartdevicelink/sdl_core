@@ -15,7 +15,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
     private final Activity mContext;
     private DataReaderListener mListener;
 
-    public StaticFileReader(Activity context,  DataReaderListener listener) {
+    public StaticFileReader(Activity context, DataReaderListener listener) {
         mContext = context;
         mListener = listener;
     }
@@ -29,7 +29,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
     @Override
     protected Void doInBackground(Integer... ids) {
         Thread.currentThread().setName(this.getClass().getSimpleName());
-        if ( ids != null && ids.length > 0) {
+        if (ids != null && ids.length > 0) {
             readFileFromRaw(ids[0]);
         }
         return null;
@@ -41,11 +41,8 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
         byte[] buffer = new byte[1000];
         int length;
         try {
-            int i = 0;
             while ((length = is.read(buffer)) != -1 && !isCancelled()) {
                 mListener.onDataReceived(buffer);
-                Log.d("SyncProxyTester", "i = " + i);
-                i++;
             }
             is.close();
         } catch (IOException e) {
