@@ -130,30 +130,17 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    smart_objects::SmartObject chunk = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
 
-    chunk[strings::text] =
-        (*message_)[str::msg_params][str::audio_pass_display_text1];
-
-    msg_params[hmi_request::tts_chunks][0] = chunk;
-  }
-
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    smart_objects::SmartObject chunk = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
-    chunk[strings::text] =
-        (*message_)[str::msg_params][str::audio_pass_display_text2];
-
-    msg_params[hmi_request::tts_chunks][1] = chunk;
-  }
-
-  // app_id
-  msg_params[strings::app_id] = app_id;
-
-  if (0 < msg_params[hmi_request::tts_chunks].length()) {
+  if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
+      (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
+    for (int i = 0;
+        i < (*message_)[str::msg_params][str::initial_prompt].length();
+        ++i) {
+      msg_params[hmi_request::tts_chunks][str::text][i] =
+          (*message_)[str::msg_params][str::initial_prompt][i][str::text];
+    }
+    // app_id
+    msg_params[strings::app_id] = app_id;
     CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
   }
 }
