@@ -30,6 +30,7 @@ Item {
         }
     }
 
+    property string hmiContext
 
     property string route_text: ""
 

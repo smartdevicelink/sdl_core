@@ -1,5 +1,8 @@
 import QtQuick 2.0
 
-PlayerView {
-    playerType: "CD"
+GeneralView {
+    PlayerView {
+        anchors.fill: parent
+        playerType: "CD"
+    }
 }

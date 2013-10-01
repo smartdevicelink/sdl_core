@@ -2,57 +2,59 @@ import QtQuick 2.0
 import "../controls"
 import "../models"
 
-Item {
-    id: navMenu
-    anchors.fill: parent
-
+GeneralView {
     Item {
-        // 3/4 top screen
-        height: parent.height * 3/4
-        width: parent.width
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        id: navMenu
+        anchors.fill: parent
 
-        MenuGridView {
-            id: navMenuGridView
-            anchors.centerIn: parent
-            model: NavigationMenuModel {}
+        Item {
+            // 3/4 top screen
+            height: parent.height * 3/4
+            width: parent.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            LongOvalButton {
-                id: lob
-                visible: false
-            }
-
-            width: 3*lob.width
-            height: 2*lob.height
-
-            columns: 3
-            rows: 2
-
-            delegate: Item {
-                id: cell
-                width: button.width
-                height: button.height
+            MenuGridView {
+                id: navMenuGridView
+                anchors.centerIn: parent
+                model: NavigationMenuModel {}
 
                 LongOvalButton {
-                    id: button
-                    text: title
-                    pixelSize: 20
-                    dest: qml
-                    anchors.centerIn: parent
+                    id: lob
+                    visible: false
+                }
+
+                width: 3*lob.width
+                height: 2*lob.height
+
+                columns: 3
+                rows: 2
+
+                delegate: Item {
+                    id: cell
+                    width: button.width
+                    height: button.height
+
+                    LongOvalButton {
+                        id: button
+                        text: title
+                        pixelSize: 20
+                        dest: qml
+                        anchors.centerIn: parent
+                    }
                 }
             }
         }
-    }
 
-    Item{
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        width: parent.width
-        height: 1/4 * parent.height
+        Item {
+            // 1/4 bottom screen
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: parent.width
+            height: 1/4 * parent.height
 
-        BackButton {}
+            BackButton {}
+        }
     }
 }

@@ -1,20 +1,16 @@
 import QtQuick 2.0
 import "../controls"
 
-Item {
-    anchors.fill: parent
-
+GeneralView {
     ListView {
         id: sdlPlayerOptionsListView
-        anchors.horizontalCenter: parent.horizontalCenter
-        width:parent.width
-        height:parent.height
+        anchors.fill: parent
 
-        model: ListModel{
-            ListElement{
+        model: ListModel {
+            ListElement {
                 name: "Policies Test"
             }
-            ListElement{
+            ListElement {
                 name: "XML Test"
             }
         }
@@ -32,5 +28,5 @@ Item {
         }
     }
 
-    BackButton{ anchors.bottom: parent.bottom }
+    BackButton { anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter }
 }

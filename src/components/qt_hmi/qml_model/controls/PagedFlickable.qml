@@ -9,10 +9,11 @@ Item
     height: containerRow.height
 
     Flickable {
+        y: 18
         id: container
         maximumFlickVelocity: 1500
         contentWidth: containerRow.width
-        height: containerRow.height
+        height: containerRow.height - 18
         width: parent.width
 
         onMovementEnded: {

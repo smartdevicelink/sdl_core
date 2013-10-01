@@ -49,7 +49,7 @@ Item {
                 Row {
                     spacing: 25
                     HardwareButton { name: "vr" }
-                    PowerSwitchBtn{}
+                    PowerSwitchBtn {}
                 }
 
                 Grid {

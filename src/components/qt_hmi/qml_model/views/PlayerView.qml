@@ -5,7 +5,6 @@ import "../controls"
 
 Column {
     spacing: 25
-    anchors.fill: parent
     property string playerType: ""
     Item {
         width: parent.width
@@ -25,28 +24,29 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
         }
     }
+
     Row {
         spacing: 50
         width: parent.width
         height: parent.height / 4
         x: 35
-        Column{
+        Column {
             Image {
                 id: albumArtImage
                 source: "../res/album_art.png"
             }
         }
-        Column{
+        Column {
             spacing: 10
-            Row{
-                Text{
+            Row {
+                Text {
                     color: "#1d81d5"
                     text: "Track 13 / 16"
                     font.pixelSize: 20
                 }
             }
             Row {
-                Text{
+                Text {
                     color: "#1d81d5"
                     text: "Song name"
                     font.pixelSize: 45
@@ -54,7 +54,7 @@ Column {
                 }
             }
             Row {
-                Text{
+                Text {
                     color: "#1d81d5"
                     text: "Album Name"
                     font.pixelSize: 25
@@ -76,13 +76,13 @@ Column {
         }
         Row {
             width: parent.width - 2 * (spacing + songTimeText.width) - x - 40
-            Rectangle{
+            Rectangle {
                 y: songTimeText.height / 2 - 1
                 width: parent.width / 5
                 height: 2
                 color: "white"
             }
-            Rectangle{
+            Rectangle {
                 y: songTimeText.height / 2 - 1
                 width: 4 * parent.width / 5
                 height: 2
@@ -98,7 +98,7 @@ Column {
     Item {
         width: parent.width
         height: parent.height / 4
-        Row{
+        Row {
             spacing: 25
             y: -70
             anchors.horizontalCenter: parent.horizontalCenter

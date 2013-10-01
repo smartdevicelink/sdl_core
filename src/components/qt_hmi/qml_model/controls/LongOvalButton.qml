@@ -35,6 +35,12 @@ Image {
             btnText.color =  "#1d81d5"
             isPressed = false
         }
+        onCanceled: {
+            source = "../res/buttons/long_oval_btn.png"
+            btnText.color =  "#1d81d5"
+            isPressed = false
+        }
+
         onClicked: {
             if(dest !== ""){
                 contentLoader.go(dest)
