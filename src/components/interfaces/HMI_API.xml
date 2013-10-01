@@ -1026,7 +1026,7 @@
   <param name="name" type="Common.ImageFieldName">
     <description>The name that identifies the field. See ImageFieldName.</description>
   </param>
-  <param name="imageTypeSupported" type="Common.FileType" maxsize="100" array="true">
+  <param name="imageType" type="Common.FileType" maxsize="100" array="true">
     <description>The image types that are supported in this field. See FileType.</description>
   </param>
   <param name="imageResolution" type="Common.ImageResolution">
@@ -1050,6 +1050,9 @@
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
   <param name="graphicSupported" type="Boolean">
+    <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  </param>
+  <param name="imageTypeSupported" type="Common.ImageType">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
   </param>
   <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true">
