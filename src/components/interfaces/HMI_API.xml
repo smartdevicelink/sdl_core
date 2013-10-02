@@ -799,16 +799,16 @@
 
 <enum name="SamplingRate">
   <description>Describes different sampling options for PerformAudioPassThru.</description>
-  <element name="8KHZ" />
-  <element name="16KHZ" />
-  <element name="22KHZ" />
-  <element name="44KHZ" />
+  <element name="8KHZ" internal_name="RATE_8KHZ"/>
+  <element name="16KHZ" internal_name="RATE_16KHZ"/>
+  <element name="22KHZ" internal_name="RATE_22KHZ"/>
+  <element name="44KHZ" internal_name="RATE_44KHZ"/>
 </enum>
 
 <enum name="BitsPerSample">
   <description>Describes different quality options for PerformAudioPassThru.</description>
-  <element name="8_BIT" />
-  <element name="16_BIT" />
+  <element name="8_BIT" internal_name="RATE_8_BIT"/>
+  <element name="16_BIT" internal_name="RATE_16_BIT"/>
 </enum>
 
 <enum name="AudioType">
@@ -1111,7 +1111,7 @@
 <struct name="AudioPassThruCapabilities">
   <description>
     Describes different audio type configurations for PerformAudioPassThru.
-    e.g. {8kHz,8-bit,PCM}
+    e.g. 8kHz,8-bit,PCM
   </description>     
   <param name="samplingRate" type="Common.SamplingRate"/>
   <param name="bitsPerSample" type="Common.BitsPerSample"/>
