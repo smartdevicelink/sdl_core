@@ -85,31 +85,31 @@ Rectangle{
     }
 
     HMIProxy {
-        HmiApi.Buttons_proxy {
+        HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
         }
-        HmiApi.BasicCommunication_proxy {
+        HmiApi.BasicCommunicationProxy {
             id: sdlBasicCommunications
             objectName: "BasicCommunication"
         }
-        HmiApi.VR_proxy {
+        HmiApi.VRProxy {
             id: sdlVR
             objectName: "VR"
         }
-        HmiApi.TTS_proxy {
+        HmiApi.TTSProxy {
             id: sdlTTS
             objectName: "TTS"
         }
-        HmiApi.Navigation_proxy {
+        HmiApi.NavigationProxy {
             id: sdlNavigation
             objectName: "Navigation"
         }
-        HmiApi.VehicleInfo_proxy {
+        HmiApi.VehicleInfoProxy {
             id: sdlVehicleInfo
             objectName: "VehicleInfo"
         }
-        HmiApi.UI_proxy {
+        HmiApi.UIProxy {
             id: sdlUI
             objectName: "UI"
         }

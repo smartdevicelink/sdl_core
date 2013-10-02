@@ -47,6 +47,7 @@ set(SOURCES
   qml_dbus.cc
   sdlproxy.cc
   hmiproxy.cc
+  stream_qvariant.cc
   moc_qml_dbus.cpp
 )
 

@@ -352,10 +352,10 @@ class Impl(FordXmlParser):
             out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n    RaiseDbusError(this);\n")
             out.write("    LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
             out.write(return_statement + ";\n  }\n")
-            out.write("  if (out_arg_v.type() != QVariant::Map) {\n    RaiseDbusError(this);\n")
-            out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
-            out.write(return_statement + ";\n  }\n")
             if out_params:
+                out.write("  if (out_arg_v.type() != QVariant::Map) {\n    RaiseDbusError(this);\n")
+                out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
+                out.write(return_statement + ";\n  }\n")
                 out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
             for i in range(1, len(out_params)):
                 param = out_params[i]

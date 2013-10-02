@@ -37,11 +37,11 @@ std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const QVarian
     case QVariant::Map: {
         os << "{ ";
         QVariantMap structure = value.toMap();
-        QVariantMap::const_iterator last = structure.constEnd() - 1;
-        for (QVariantMap::const_iterator it = structure.constBegin();
-             it != structure.constEnd(); ++it) {
-            os << it.key() << ":" << it.value();
-            if (it != last) {
+        QMapIterator<QString, QVariant> i(structure);
+        while (i.hasNext()) {
+            i.next();
+            os << i.key() << ":" << i.value();
+            if (i.hasNext()) {
                 os << ", ";
             }
         }
@@ -50,11 +50,10 @@ std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const QVarian
     case QVariant::List: {
         os << "[ ";
         QVariantList array = value.toList();
-        QVariantList::const_iterator last = array.constEnd() - 1;
-        for (QVariantList::const_iterator it = array.constBegin();
-             it != array.constEnd(); ++it) {
-            os << *it;
-            if (it != last) {
+        QListIterator<QVariant> i(array);
+        while (i.hasNext()) {
+            os << i.next();
+            if (i.hasNext()) {
                 os << ", ";
             }
         }
