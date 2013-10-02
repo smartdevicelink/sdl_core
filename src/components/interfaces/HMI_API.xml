@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.0" date="2013-04-12">
+<interface name="Common" version="1.1" date="2013-10-02">
 
 <enum name="Result">
 	<element name="SUCCESS" value="0"/>
@@ -213,12 +213,16 @@
 
 <enum name="LayoutMode">
   <description>For touchscreen interactions, the mode of how the choices are presented.</description>
-  <element name="ICON">
+  <element name="ICON_ONLY" />
     <description>This mode causes the interaction to display the previous set of choices as icons.</description>
-  </element>
-  <element name="LIST">
+  <element name="ICON_WITH_SEARCH" />
+    <description>This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.</description>
+  <element name="LIST_ONLY" />
     <description>This mode causes the interaction to display the previous set of choices as a list.</description>
-  </element>
+  <element name="LIST_WITH_SEARCH" />
+    <description>This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.</description>
+  <element name="KEYBOARD" />
+    <description>This mode causes the interaction to immediately display a keyboard entry through the HMI.</description>
 </enum>
 
 <enum name="DeactivateReason">
@@ -262,8 +266,8 @@
   <description>Communicated to whichever app is in HMI FULL, except Alert.</description>
   <element name="MAIN" internal_name="SYSCTXT_MAIN">
     <description>The app's persistent display (whether media/non-media/navigation) is fully visible onscreen.</description>
-      <description> There is currently no user interaction (user-initiated or app-initiated) with the head-unit</description>
-</element>
+    <description> There is currently no user interaction (user-initiated or app-initiated) with the head-unit</description>
+  </element>
   <element name="VRSESSION" internal_name="SYSCTXT_VRSESSION">
     <description>The system is currently in a VR session (with whatever dedicated VR screen being overlaid onscreen).</description>
   </element>
@@ -793,6 +797,25 @@
   </element>
 </enum>
 
+<enum name="SamplingRate">
+  <description>Describes different sampling options for PerformAudioPassThru.</description>
+  <element name="8KHZ" />
+  <element name="16KHZ" />
+  <element name="22KHZ" />
+  <element name="44KHZ" />
+</enum>
+
+<enum name="BitsPerSample">
+  <description>Describes different quality options for PerformAudioPassThru.</description>
+  <element name="8_BIT" />
+  <element name="16_BIT" />
+</enum>
+
+<enum name="AudioType">
+  <description>Describes different audio type options for PerformAudioPassThru.</description>
+  <element name="PCM" />
+</enum>
+
 <enum name="KeyboardLayout">
   <description>Enumeration listing possible keyboard layouts.</description>
   <element name="QWERTY" />
@@ -1083,6 +1106,16 @@
   <param name="imageSupported" type="Boolean" mandatory="true">
     <description>Must be true if the button supports referencing a static or dynamic image.</description>
   </param>
+</struct>
+
+<struct name="AudioPassThruCapabilities">
+  <description>
+    Describes different audio type configurations for PerformAudioPassThru.
+    e.g. {8kHz,8-bit,PCM}
+  </description>     
+  <param name="samplingRate" type="Common.SamplingRate"/>
+  <param name="bitsPerSample" type="Common.BitsPerSample"/>
+  <param name="audioType" type="Common.AudioType"/>    
 </struct>
 
 <struct name="TouchLists">
@@ -2294,7 +2327,7 @@
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of ECU.</description>
     </param>
-    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
+    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="1" maxsize="1000" array="true" mandatory="true">
       <description>Get raw data from vehicle data DID location(s).</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
