@@ -35,9 +35,13 @@
 import QtQuick 2.0
 
 GeneralView {
-    RadioPlayerView {
+	RadioPlayerView {
+	    id: amRadioPlayer
         anchors.fill: parent
-        radioType: "AM"
-        presets: [ "1130", "950", "760", "1270", "1400", "2100", "940", "1001" ]
-    }
+	    radioType: "AM"
+	    radioName: "AM Radio"
+	    songName: "So Far Around The Bend"
+	    albumName: "The National"
+	    presets: [ "1130", "950", "760", "1270", "1400", "2100", "940", "1001" ]
+	}
 }

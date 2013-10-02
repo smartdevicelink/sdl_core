@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file ford_xml_parser.py
 #  @brief Parser for HMI_API.xml
 #

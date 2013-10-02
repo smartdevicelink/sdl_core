@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file make_introspection.py
 #  @brief Generates introspection xml file for D-Bus
 #
@@ -38,7 +41,7 @@ from ford_xml_parser import FordXmlParser
 from ford_xml_parser import node_name
 from xml.etree import ElementTree
 from os import popen
-
+from os import path
 
 class Impl(FordXmlParser):
     def convert_to_introspection(self, out_el_tree):
@@ -50,7 +53,11 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
+arg_parser.add_argument('--outdir', required=True)
 args = arg_parser.parse_args()
+
+if not path.isdir(args.outdir):
+    makedirs(args.outdir)
 
 in_tree = ElementTree.parse(args.infile)
 in_tree_root = in_tree.getroot()
@@ -65,7 +72,7 @@ el = ElementTree.SubElement(el, 'arg', attrib={'type':'s','name':'xml_data','dir
 impl = Impl(in_tree_root, 'com.ford.hmi.sdl')
 impl.convert_to_introspection(out_tree_root)
 
-out = open('introspection.xml', "w")
+out = open(args.outdir + '/' + 'introspection.xml', "w")
 out.write('<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">')
 out.write("""
 <!--

@@ -1,6 +1,6 @@
 /**
  * @file RadioPlayerView.qml
- * @brief Parent for AM, FM players screen view.
+ * @brief Parent for AM, FM, Sirius players screen view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,43 +36,57 @@ import QtQuick 2.0
 import "../controls"
 
 Item {
-    id: radioPlayer
+    id: radioPlayerView
 
+    property string radioType: ""
+    property string radioName: ""
+    property string songName: ""
+    property string albumName: ""
+    property alias buttonHD: bot.children
     property var presets: []
-    property int minHeight: 400
-    property string radioType
 
-    default property alias content: additional.children
-
-    Column {
-        anchors.fill: parent
+    Item {
+        // top 3/4 screen
+        id: upperContent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        height: parent.height * 3/4
+        width: parent.width
 
         Item {
-            id: upperControlLine
+            // top part for buttons
+            id: top
+            anchors.top: parent.top
+            anchors.left: parent.left
             width: parent.width
-            height: parent.height / 4
-            anchors.horizontalCenter: parent.horizontalCenter
+            height: parent.height * 1/4
+
             LongOvalButton {
-                text: radioType + " Radio"
+                text: radioName
                 pixelSize: 20
                 dest: "./views/MusicSourceGridView.qml"
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
             }
 
             LongOvalButton {
+                anchors.right: parent.right
+                anchors.top: parent.top
                 text: "Tune"
                 pixelSize: 20
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
             }
         }
+
         Item {
+            // mid part for information about song
+            id: mid
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
             width: parent.width
             height: parent.height / 2
 
             Column {
-                spacing: 10
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+
                 Row {
                     Text {
                         id: radioChannelNameText
@@ -81,52 +95,61 @@ Item {
                         font.pixelSize: 45
                     }
                     Text {
+                        anchors.bottom: radioChannelNameText.bottom
                         color: "#1d81d5"
                         text: " " + radioType
                         font.pixelSize: 25
-                        anchors.bottom: radioChannelNameText.bottom
                     }
                 }
-                Row {
-                    Text {
-                        color: "#1d81d5"
-                        text: "Song name"
-                        font.pixelSize: 25
-                        font.bold: true
-                    }
-                }
-                Row {
-                    Text {
-                        color: "#1d81d5"
-                        text: "Album Name"
-                        font.pixelSize: 25
 
-                    }
+                Text {
+                    color: "#1d81d5"
+                    text: songName
+                    font.pixelSize: 25
+                    font.bold: true
                 }
-                Item {
-                    width: childrenRect.width
-                    height: childrenRect.height
-                    id: additional
+
+                Text {
+                    color: "#1d81d5"
+                    text: albumName
+                    font.pixelSize: 25
                 }
             }
         }
 
         Item {
+            // bottom part for HD button (for FM radio)
+            id: bot
+            anchors.left: parent.left
+            anchors.bottom: parent. bottom
             width: parent.width
-            height: parent.height / 4
-            Rectangle {
-                width: parent.width
-                height: 2
-                color: "#1d81d5"
-            }
-            PresetRow {
-                anchors.centerIn: parent
-                anchors.bottom: parent.bottom
-                presets: radioPlayer.presets
-                width: parent.width
-                onSelectedIndexChanged: {
-                    radioChannelNameText.text = presets[selectedIndex];
-                }
+            height: parent.height * 1/4
+        }
+    }
+
+    Item {
+        // bottom 1/4 screen
+        id: lowerContent
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: parent.width
+        height: 1/4 * parent.height
+
+        // Line that divide screen in two parts
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: parent.width
+            height: 2
+            color: "#1d81d5"
+        }
+
+        PresetRow {
+            anchors.centerIn: parent
+            presets: radioPlayerView.presets
+            width: parent.width
+            onSelectedIndexChanged: {
+                radioChannelNameText.text = presets[selectedIndex];
             }
         }
     }

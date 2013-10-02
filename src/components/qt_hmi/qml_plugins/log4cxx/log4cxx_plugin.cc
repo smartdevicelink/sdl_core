@@ -1,6 +1,6 @@
 /**
- * \file dbus_plugin.cpp
- * \brief DbusPlugin class source file.
+ * @file log4cxx_plugin.cpp
+ * @brief Log4cxxPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,42 +32,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dbus_plugin.h"
-#include "hmiproxy.h"
-#include "sdlproxy.h"
+#include "log4cxx_plugin.h"
 
 #include <qqml.h>
-#include <log4cxx/logger.h>
+#include <log4cxx/log4cxx.h>
 #include <log4cxx/propertyconfigurator.h>
 
-#include "dbus_plugin.h"
-#include "optional_argument.h"
-#include "qml_dbus.h"
-
-#include <QtDBus/QDBusConnection>
-
-#include <QQmlListReference>
-#include <QString>
-
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("DBusPlugin"));
+                              log4cxx::Logger::getLogger("Log4cxxPlugin"));
 
-void DbusPlugin::registerTypes(const char *uri)
+void smartLogger(QtMsgType type, const QMessageLogContext &context,
+                 const QString &msg)
+{
+    log4cxx::spi::LocationInfo location(context.file, context.function, context.line);
+    switch (type) {
+    case QtDebugMsg:
+        (*logger_).debug(msg.toStdString(), location);
+        break;
+    case QtWarningMsg:
+        (*logger_).warn(msg.toStdString(), location);
+        break;
+    case QtCriticalMsg:
+        (*logger_).error(msg.toStdString(), location);
+        break;
+    case QtFatalMsg:
+        (*logger_).fatal(msg.toStdString(), location);
+        break;
+    default:
+        (*logger_).info(msg.toStdString(), location);
+        break;
+    }
+}
+
+void Log4cxxPlugin::registerTypes(const char *uri)
 {
     log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-
-    // @uri sdl.core.api
-    qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
-    qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
-
-    RegisterDbusMetatypes();
-    qDBusRegisterMetaType<OptionalArgument<int> >();
-    qDBusRegisterMetaType<OptionalArgument<QString> >();
-    qDBusRegisterMetaType<OptionalArgument<bool> >();
-    qDBusRegisterMetaType<OptionalArgument<double> >();
-
-    HmiProxy::api_adaptors_.Init(this);
-
-    QDBusConnection::sessionBus().registerObject("/", this);
-    QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
+    qInstallMessageHandler(smartLogger);
+    // @uri com.ford.sdl.hmi.log4cxx
+    qmlRegisterType<Logger>(uri, 1, 0, "Logger");
+    // Use standart console API Javascript
+    // See Debugging QML Applications in Qt documentation
 }

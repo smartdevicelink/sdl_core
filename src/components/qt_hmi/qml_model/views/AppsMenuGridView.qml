@@ -2,8 +2,7 @@ import QtQuick 2.0
 import "../models"
 
 GeneralView {
-    MenuGridView
-    {
+    MenuGridView {
         id: appsMenuGridview
         anchors.fill: parent
         columns: 3

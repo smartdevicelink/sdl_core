@@ -1,6 +1,4 @@
 /**
- * \file dbus_plugin.cpp
- * \brief DbusPlugin class source file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,42 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dbus_plugin.h"
-#include "hmiproxy.h"
-#include "sdlproxy.h"
+#include "stream_qvariant.h"
 
-#include <qqml.h>
-#include <log4cxx/logger.h>
-#include <log4cxx/propertyconfigurator.h>
+std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const QVariant& value) {
+    switch(value.type()) {
+    case QVariant::Map: {
+        os << "{ ";
+        QVariantMap structure = value.toMap();
+        QMapIterator<QString, QVariant> i(structure);
+        while (i.hasNext()) {
+            i.next();
+            os << i.key() << ":" << i.value();
+            if (i.hasNext()) {
+                os << ", ";
+            }
+        }
+        os << " }";
+    } break;
+    case QVariant::List: {
+        os << "[ ";
+        QVariantList array = value.toList();
+        QListIterator<QVariant> i(array);
+        while (i.hasNext()) {
+            os << i.next();
+            if (i.hasNext()) {
+                os << ", ";
+            }
+        }
+        os << " ]";
+    } break;
+    default:
+        os << value.toString().toLatin1().data();
+    }
 
-#include "dbus_plugin.h"
-#include "optional_argument.h"
-#include "qml_dbus.h"
-
-#include <QtDBus/QDBusConnection>
-
-#include <QQmlListReference>
-#include <QString>
-
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("DBusPlugin"));
-
-void DbusPlugin::registerTypes(const char *uri)
-{
-    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-
-    // @uri sdl.core.api
-    qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
-    qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
-
-    RegisterDbusMetatypes();
-    qDBusRegisterMetaType<OptionalArgument<int> >();
-    qDBusRegisterMetaType<OptionalArgument<QString> >();
-    qDBusRegisterMetaType<OptionalArgument<bool> >();
-    qDBusRegisterMetaType<OptionalArgument<double> >();
-
-    HmiProxy::api_adaptors_.Init(this);
-
-    QDBusConnection::sessionBus().registerObject("/", this);
-    QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
+    return os;
 }

@@ -1,6 +1,6 @@
 /**
- * \file dbus_plugin.cpp
- * \brief DbusPlugin class source file.
+ * @file log4cxx_plugin.h
+ * @brief Log4cxxPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,42 +32,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dbus_plugin.h"
-#include "hmiproxy.h"
-#include "sdlproxy.h"
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
 
-#include <qqml.h>
-#include <log4cxx/logger.h>
-#include <log4cxx/propertyconfigurator.h>
+#include <QQmlExtensionPlugin>
+#include <QQuickItem>
 
-#include "dbus_plugin.h"
-#include "optional_argument.h"
-#include "qml_dbus.h"
-
-#include <QtDBus/QDBusConnection>
-
-#include <QQmlListReference>
-#include <QString>
-
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("DBusPlugin"));
-
-void DbusPlugin::registerTypes(const char *uri)
+class Logger : public QQuickItem
 {
-    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+    Q_OBJECT
+    Q_DISABLE_COPY(Logger)
 
-    // @uri sdl.core.api
-    qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
-    qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
+public:
+    explicit Logger(QQuickItem *parent = 0);
+};
 
-    RegisterDbusMetatypes();
-    qDBusRegisterMetaType<OptionalArgument<int> >();
-    qDBusRegisterMetaType<OptionalArgument<QString> >();
-    qDBusRegisterMetaType<OptionalArgument<bool> >();
-    qDBusRegisterMetaType<OptionalArgument<double> >();
+class Log4cxxPlugin : public QQmlExtensionPlugin
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+    
+public:
+    void registerTypes(const char *uri);
+};
 
-    HmiProxy::api_adaptors_.Init(this);
+QML_DECLARE_TYPE(Logger)
 
-    QDBusConnection::sessionBus().registerObject("/", this);
-    QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
-}
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
+

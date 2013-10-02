@@ -1,8 +1,12 @@
 import QtQuick 2.0
 
 GeneralView {
-    PlayerView {
+	MediaPlayerView {
+	    playerName: "CD"
         anchors.fill: parent
-        playerType: "CD"
-    }
+	    albumImage: "../res/album_art.png"
+	    trackNumber: "13/16"
+	    trackName: "The Dog Days Are Over"
+	    albumName: "Florence and the Machine"
+	}
 }

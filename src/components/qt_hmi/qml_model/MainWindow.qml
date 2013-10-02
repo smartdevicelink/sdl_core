@@ -3,7 +3,7 @@ import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import "./controls"
 import "./views"
-import "./hmi_api/auto" as HmiApi
+import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
 
@@ -93,31 +93,31 @@ Rectangle {
     }
 
     HMIProxy {
-        HmiApi.Buttons_auto {
+        HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
         }
-        HmiApi.BasicCommunication_auto {
+        HmiApi.BasicCommunicationProxy {
             id: sdlBasicCommunication
             objectName: "BasicCommunication"
         }
-        HmiApi.VR_auto {
+        HmiApi.VRProxy {
             id: sdlVR
             objectName: "VR"
         }
-        HmiApi.TTS_auto {
+        HmiApi.TTSProxy {
             id: sdlTTS
             objectName: "TTS"
         }
-        HmiApi.Navigation_auto {
+        HmiApi.NavigationProxy {
             id: sdlNavigation
             objectName: "Navigation"
         }
-        HmiApi.VehicleInfo_auto {
+        HmiApi.VehicleInfoProxy {
             id: sdlVehicleInfo
             objectName: "VehicleInfo"
         }
-        HmiApi.UI_auto {
+        HmiApi.UIProxy {
             id: sdlUI
             objectName: "UI"
         }

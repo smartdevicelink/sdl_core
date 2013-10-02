@@ -37,6 +37,7 @@
 
 #include <QDBusContext>
 #include "optional_argument.h"
+#include "stream_qvariant.h"
 
 inline void RaiseDbusError(QObject* adaptor) {
     QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());

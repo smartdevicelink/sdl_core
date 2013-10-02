@@ -52,8 +52,8 @@ GeneralView {
                 }
 
                 Column {
-                    ClimateControlBtn {name: "heated_seat"}
-                    ClimateControlBtn {name: "AC"}
+                    ClimateControlBtn { name: "heated_seat" }
+                    ClimateControlBtn { name: "AC" }
                 }
             }
         }

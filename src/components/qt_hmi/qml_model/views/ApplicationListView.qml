@@ -11,7 +11,7 @@ GeneralView {
             height: 1/4 * parent.height
 
             PagedFlickable {
-                anchors.fill: parent
+                width: parent.width
                 snapTo: 200 + spacing
                 spacing: (width - 600) / 2
                 LongOvalButton {
