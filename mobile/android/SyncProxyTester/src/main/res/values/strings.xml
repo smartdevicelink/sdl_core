@@ -106,10 +106,14 @@
     <string name="showconstanttbt_navText2Default">Navigation Text 2</string>
     <string name="showconstanttbt_eta">ETA</string>
     <string name="showconstanttbt_etaDefault">12:34</string>
+    <string name="showconstanttbt_timeToDestination">Time To Destination</string>
+    <string name="showconstanttbt_timeToDestinationDefault">08:88</string>
     <string name="showconstanttbt_totalDistance">Total Distance</string>
     <string name="showconstanttbt_totalDistanceDefault">100 Miles</string>
     <string name="showconstanttbt_turnIconCheck">Use Turn Icon</string>
     <string name="showconstanttbt_turnIconValue">turn_right.png</string>
+    <string name="showconstanttbt_nextTurnIconCheck">Use Next Turn Icon</string>
+    <string name="showconstanttbt_nextTurnIconValue">turn_left.png</string>
     <string name="showconstanttbt_distanceToManeuver">Distance To Maneuver</string>
     <string name="showconstanttbt_distanceToManeuverDefault">50</string>
     <string name="showconstanttbt_distanceToManeuverScale">Distance To Maneuver Scale</string>
