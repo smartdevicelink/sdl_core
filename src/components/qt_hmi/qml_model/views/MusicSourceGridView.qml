@@ -2,6 +2,8 @@ import QtQuick 2.0
 import "../controls"
 import "../models"
 
+//TODO: (ALeshin) Buttons doesnt changes when pressed
+
 Column {
     anchors.fill: parent
     GridView
