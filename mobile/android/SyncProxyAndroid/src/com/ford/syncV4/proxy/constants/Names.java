@@ -317,9 +317,11 @@ public class Names {
 	public static final String customButtonName = "customButtonName";
 	public static final String navigationText = "navigationText";
 	public static final String turnIcon = "turnIcon";
+	public static final String nextTurnIcon = "nextTurnIcon";
 	public static final String navigationText1 = "navigationText1";
 	public static final String navigationText2 = "navigationText2";
 	public static final String eta = "eta";
+	public static final String timeToDestination = "timeToDestination";
 	public static final String totalDistance = "totalDistance";
 	public static final String distanceToManeuver = "distanceToManeuver";
 	public static final String distanceToManeuverScale = "distanceToManeuverScale";
