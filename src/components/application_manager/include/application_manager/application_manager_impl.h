@@ -43,6 +43,7 @@
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
+#include "application_manager/request_controller.h"
 #include "audio_manager/audio_manager_impl.h"
 
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -51,7 +52,7 @@
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 
-#include "request_watchdog/watchdog_subscriber.h"
+
 #include "formatters/CSmartFactory.hpp"
 
 #include "interfaces/HMI_API.h"
@@ -105,13 +106,13 @@ typedef std::map<unsigned int, HMIRequest> MobileRequest;
 typedef std::map<unsigned int, MobileRequest> MessageChain;
 
 class ApplicationManagerImpl : public ApplicationManager,
-  public hmi_message_handler::HMIMessageObserver,
-  public mobile_message_handler::MobileMessageObserver,
-  public connection_handler::ConnectionHandlerObserver,
-  public request_watchdog::WatchdogSubscriber, public HMICapabilities {
-  public:
-    ~ApplicationManagerImpl();
-    static ApplicationManagerImpl* instance();
+    public hmi_message_handler::HMIMessageObserver,
+    public mobile_message_handler::MobileMessageObserver,
+    public connection_handler::ConnectionHandlerObserver,
+    public HMICapabilities {
+ public:
+  ~ApplicationManagerImpl();
+  static ApplicationManagerImpl* instance();
 
     /////////////////////////////////////////////////////
 
@@ -335,10 +336,14 @@ class ApplicationManagerImpl : public ApplicationManager,
                                   int max_duration, int sampling_rate,
                                   int bits_per_sample, int audio_type);
 
-    /*
-     * @brief Terminates audio pass thru thread
-     */
-    void StopAudioPassThruThread();
+  /*
+   * @brief Terminates audio pass thru thread
+   */
+  void StopAudioPassThru();
+
+  void SendAudioPassThroughNotification(unsigned int session_key,
+                                        unsigned int correlation_id,
+                                        std::vector<unsigned char> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
@@ -352,8 +357,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
     void set_mobile_message_handler(
       mobile_message_handler::MobileMessageHandler* handler);
-    void set_connection_handler(connection_handler::ConnectionHandler* handler);
-    void set_watchdog(request_watchdog::Watchdog* watchdog);
+  void set_connection_handler(connection_handler::ConnectionHandler* handler);
 
     ///////////////////////////////////////////////////////
 
@@ -377,9 +381,9 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     virtual void OnMobileMessageReceived(const MobileMessage& message);
 
-    void onMessageReceived(
+  void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
-    void onErrorSending(utils::SharedPtr<application_manager::Message> message);
+    void OnErrorSending(utils::SharedPtr<application_manager::Message> message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);
@@ -389,8 +393,6 @@ class ApplicationManagerImpl : public ApplicationManager,
                                   connection_handler::ServiceType type);
 
     void OnSessionEndedCallback(int session_key, int first_session_key);
-
-    void onTimeoutExpired(request_watchdog::RequestInfo);
 
   private:
     ApplicationManagerImpl();
@@ -433,31 +435,30 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveMobileRequestFromMessageChain(unsigned int mobile_correlation_id,
         unsigned int connection_key);
 
-    /**
-     * @brief Map of connection keys and associated applications
-     */
-    std::map<int, Application*> applications_;
-    /**
-     * @brief List of applications
-     */
-    std::set<Application*> application_list_;
-    MessageChain message_chaining_;
-    bool audio_pass_thru_flag_;
-    threads::Thread* perform_audio_thread_;
-    bool is_distracting_driver_;
-    bool is_vr_session_strated_;
-    bool hmi_cooperating_;
-    bool is_all_apps_allowed_;
-    hmi_apis::Common_Language::eType ui_language_;
-    hmi_apis::Common_Language::eType vr_language_;
-    hmi_apis::Common_Language::eType tts_language_;
-    smart_objects::SmartObject* vehicle_type_;
-    audio_manager::AudioManager* audioManager_;
+  /**
+   * @brief Map of connection keys and associated applications
+   */
+  std::map<int, Application*> applications_;
+  /**
+   * @brief List of applications
+   */
+  std::set<Application*> application_list_;
+  MessageChain message_chaining_;
+  bool audio_pass_thru_flag_;
+  bool is_distracting_driver_;
+  bool is_vr_session_strated_;
+  bool hmi_cooperating_;
+  bool is_all_apps_allowed_;
+  hmi_apis::Common_Language::eType ui_language_;
+  hmi_apis::Common_Language::eType vr_language_;
+  hmi_apis::Common_Language::eType tts_language_;
+  smart_objects::SmartObject* vehicle_type_;
+  audio_manager::AudioManager* audioManager_;
 
-    hmi_message_handler::HMIMessageHandler* hmi_handler_;
-    mobile_message_handler::MobileMessageHandler* mobile_handler_;
-    connection_handler::ConnectionHandler* connection_handler_;
-    request_watchdog::Watchdog* watchdog_;
+  hmi_message_handler::HMIMessageHandler* hmi_handler_;
+  mobile_message_handler::MobileMessageHandler* mobile_handler_;
+  connection_handler::ConnectionHandler* connection_handler_;
+
 
     policies_manager::PoliciesManager policies_manager_;
 
@@ -478,9 +479,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API* hmi_so_factory_;
     mobile_apis::MOBILE_API* mobile_so_factory_;
 
-    static log4cxx::LoggerPtr logger_;
-    static unsigned int message_chain_current_id_;
-    static const unsigned int message_chain_max_id_;
+  static log4cxx::LoggerPtr logger_;
+  static unsigned int message_chain_current_id_;
+  static const unsigned int message_chain_max_id_;
+  request_controller::RequestController         request_ctrl;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

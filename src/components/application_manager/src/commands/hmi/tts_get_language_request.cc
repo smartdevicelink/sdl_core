@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSGetLanguageRequest::TTSGetLanguageRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+TTSGetLanguageRequest::TTSGetLanguageRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 TTSGetLanguageRequest::~TTSGetLanguageRequest() {

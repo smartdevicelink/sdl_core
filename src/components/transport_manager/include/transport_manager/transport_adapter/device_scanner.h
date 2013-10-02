@@ -61,7 +61,7 @@ class DeviceScanner {
   virtual TransportAdapter::Error Scan() = 0;
 
   /**
-   * @brief
+   * @brief Stop device scanner.
    */
   virtual void Terminate() = 0;
 

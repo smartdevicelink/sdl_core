@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 OnSystemContextNotification::OnSystemContextNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnSystemContextNotification::~OnSystemContextNotification() {
@@ -57,17 +58,18 @@ void OnSystemContextNotification::Run() {
   }
 
   mobile_api::SystemContext::eType system_context =
-    static_cast<mobile_api::SystemContext::eType>((*message_)
-        [strings::msg_params][hmi_notification::system_context].asInt());
+      static_cast<mobile_api::SystemContext::eType>(
+          (*message_)[strings::msg_params][hmi_notification::system_context]
+          .asInt());
 
-  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION != system_context) &&
-      (true == ApplicationManagerImpl::instance()->vr_session_started()) &&
-      app->is_media_application()) {
+  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION != system_context)
+      && (true == ApplicationManagerImpl::instance()->vr_session_started())
+      && app->is_media_application()) {
     app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
     ApplicationManagerImpl::instance()->set_vr_session_started(false);
-  } else if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) &&
-             (!ApplicationManagerImpl::instance()->vr_session_started()) &&
-             app->is_media_application()) {
+  } else if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context)
+      && (!ApplicationManagerImpl::instance()->vr_session_started())
+      && app->is_media_application()) {
     if (true == ApplicationManagerImpl::instance()->attenuated_supported()) {
       app->set_audio_streaming_state(
           mobile_api::AudioStreamingState::ATTENUATED);
@@ -80,8 +82,7 @@ void OnSystemContextNotification::Run() {
     app->set_audio_streaming_state(
         mobile_api::AudioStreamingState::NOT_AUDIBLE);
   } else if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context) {
-    app->set_audio_streaming_state(
-        mobile_api::AudioStreamingState::AUDIBLE);
+    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
   } else {
     // TODO(DK): check system context MENU HMI_OBSCURED
   }

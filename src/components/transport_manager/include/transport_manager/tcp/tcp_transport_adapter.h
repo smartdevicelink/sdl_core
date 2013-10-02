@@ -1,6 +1,6 @@
 /**
- * \file tcp_adapter.cpp
- * \brief TcpTransportAdapter class source file.
+ * \file tcp_transport_adapter.h
+ * \brief TcpTransportAdapter class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,30 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H_
 
-#include "transport_manager/tcp/tcp_adapter.h"
-#include "transport_manager/tcp/tcp_client_listener.h"
-#include "transport_manager/tcp/tcp_connection_factory.h"
-#include "transport_manager/tcp/dnssd_service_browser.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-TcpTransportAdapter::TcpTransportAdapter()
-    : TransportAdapterImpl(new DnssdServiceBrowser(this), new TcpConnectionFactory(this),
-                        new TcpClientListener(this, default_port)) {
-}
+/**
+ * @brief Transport adapter that use TCP transport.
+ */
+class TcpTransportAdapter : public TransportAdapterImpl {
+ public:
+  /**
+   * @brief Constructor.
+   */
+  TcpTransportAdapter();
 
-TcpTransportAdapter::~TcpTransportAdapter() {
-}
+  /**
+   * @brief Destructor.
+   */
+  virtual ~TcpTransportAdapter();
 
-DeviceType TcpTransportAdapter::GetDeviceType() const {
-  return "sdl-tcp";
-}
+  /**
+   * @brief Default port.
+   */
+  static const uint16_t default_port = 12345;
+ protected:
+
+  /**
+   * @brief Return type of device.
+   *
+   * @return String with device type.
+   */
+  virtual DeviceType GetDeviceType() const;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER

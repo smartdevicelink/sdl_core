@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSIsReadyResponse::TTSIsReadyResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+TTSIsReadyResponse::TTSIsReadyResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 TTSIsReadyResponse::~TTSIsReadyResponse() {
@@ -52,8 +52,7 @@ void TTSIsReadyResponse::Run() {
   bool is_available = false;
 
   if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available =
-      object[strings::msg_params][strings::available].asBool();
+    is_available = object[strings::msg_params][strings::available].asBool();
   }
   ApplicationManagerImpl::instance()->set_is_tts_cooperating(is_available);
 }

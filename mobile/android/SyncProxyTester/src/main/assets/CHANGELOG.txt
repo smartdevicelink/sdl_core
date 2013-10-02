@@ -1,4 +1,6 @@
 [CW40]
++ ShowConstantTBT dialog: add timeToDestination and nextTurnIcon parameters.
++ SyncProxyAndroid SDK: Extend ShowConstantTBT request object.
 + PerformInteraction dialog: add interactionLayout parameter.
 + SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
 
@@ -12,6 +14,12 @@
 *Added MobileNavi AppType registration button
 *Added Mobile Navi session support
 *Added USB Support
+
+[CW37]
+* SoftButtons, PerformInteraction, Show, SetGlobalProperties dialogs: change default imageFilename.png to action.png.
+
+[CW36]
+* Automatically attempt to reconnect to SDLCore after disconnect.
 
 [CW35]
 * SoftButtons can be sent without SystemAction parameter.

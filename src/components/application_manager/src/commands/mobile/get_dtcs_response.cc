@@ -39,8 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
-GetDTCsResponse::GetDTCsResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+GetDTCsResponse::GetDTCsResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 GetDTCsResponse::~GetDTCsResponse() {
@@ -70,7 +70,7 @@ void GetDTCsResponse::Run() {
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS == code) {
-        SendResponse(true);
+      SendResponse(true);
     } else {
       SendResponse(false);
     }

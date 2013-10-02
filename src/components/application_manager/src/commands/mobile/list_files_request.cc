@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-ListFilesRequest::ListFilesRequest(
-    const MessageSharedPtr& message): CommandRequestImpl(message) {
+ListFilesRequest::ListFilesRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 ListFilesRequest::~ListFilesRequest() {

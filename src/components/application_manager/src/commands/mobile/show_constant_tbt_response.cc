@@ -40,7 +40,8 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTResponse::ShowConstantTBTResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 ShowConstantTBTResponse::~ShowConstantTBTResponse() {

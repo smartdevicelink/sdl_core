@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateAppListResponse::UpdateAppListResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UpdateAppListResponse::UpdateAppListResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UpdateAppListResponse::~UpdateAppListResponse() {

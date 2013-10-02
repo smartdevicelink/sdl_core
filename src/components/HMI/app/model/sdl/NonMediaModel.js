@@ -31,23 +31,22 @@
  * @version 1.0
  */
 
-SDL.SDLNonMediaModel = SDL.SDLAppModel
-    .extend( {
+SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
-        init: function() {
+        init: function () {
 
             this._super();
 
             // init properties here
-            this.set('appInfo', Em.Object.create( {
-                field1: '<field1>',
-                field2: '<field2>',
-                field3: '<field3>',
-                field4: '<field4>',
-                mainImage: 'images/sdl/audio_icon.jpg',
-                image: '',
+            this.set('appInfo', Em.Object.create({
+                field1       : '<field1>',
+                field2       : '<field2>',
+                field3       : '<field3>',
+                field4       : '<field4>',
+                mainImage    : 'images/sdl/audio_icon.jpg',
+                image        : '',
                 customPresets: [],
-                alignment: "text-align:left"
+                alignment    : "text-align:left"
             }));
 
             this.set('constantTBTParams', null);
@@ -60,10 +59,10 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
 
         /**
          * Method hides sdl activation button and sdl application
-         * 
+         *
          * @param {Number}
          */
-        onDeleteApplication: function(appID) {
+        onDeleteApplication: function (appID) {
 
             SDL.NonMediaController.onDeleteApplication(appID);
         },
@@ -71,7 +70,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
         /**
          * Activate current application model
          */
-        turnOnSDL: function() {
+        turnOnSDL: function () {
 
             SDL.NonMediaController.activateApp(this);
         },
@@ -79,7 +78,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
         /**
          * Method to clear App OverLay
          */
-        clearAppOverLay: function() {
+        clearAppOverLay: function () {
 
             clearInterval(this.timer);
             this.appInfo.set('field1', '');
@@ -97,58 +96,68 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
 
         /**
          * Applin UI Show handler
-         * 
+         *
          * @param {Object}
          */
-        onSDLUIShow: function(params) {
+        onSDLUIShow: function (params) {
 
-            for ( var i = 0; i < params.showStrings.length; i++) {
+            for (var i = 0; i < params.showStrings.length; i++) {
                 switch (params.showStrings[i].fieldName) {
-                case 'mainField1': {
-                    this.appInfo.set('field1', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField2': {
-                    this.appInfo.set('field2', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField3': {
-                    this.appInfo.set('field3', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mainField4': {
-                    this.appInfo.set('field4', params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'statusBar': {
-                    this.appInfo.set('statusText',
-                        params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mediaClock': {
-                    this.appInfo.set('mediaClock',
-                        params.showStrings[i].fieldText);
-                    break;
-                }
-                case 'mediaTrack': {
-                    this.appInfo.set('mediaTrack',
-                        params.showStrings[i].fieldText);
-                    break;
-                }
+                    case 'mainField1':
+                    {
+                        this.appInfo.set('field1', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField2':
+                    {
+                        this.appInfo.set('field2', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField3':
+                    {
+                        this.appInfo.set('field3', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mainField4':
+                    {
+                        this.appInfo.set('field4', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'statusBar':
+                    {
+                        this.appInfo.set('statusText', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mediaClock':
+                    {
+                        this.appInfo.set('mediaClock', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    case 'mediaTrack':
+                    {
+                        this.appInfo.set('mediaTrack', params.showStrings[i].fieldText);
+                        break;
+                    }
+                    default :{
+                        break;
+                    }
                 }
             }
 
             if (params.alignment) {
                 switch (params.alignment) {
-                    case "CENTERED": {
+                    case "CENTERED":
+                    {
                         this.appInfo.set('alignment', "text-align:center");
                         break;
                     }
-                    case "LEFT_ALIGNED": {
+                    case "LEFT_ALIGNED":
+                    {
                         this.appInfo.set('alignment', "text-align:left");
                         break;
                     }
-                    case "RIGHT_ALIGNED": {
+                    case "RIGHT_ALIGNED":
+                    {
                         this.appInfo.set('alignment', "text-align:right");
                         break;
                     }
@@ -164,9 +173,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
             // Magic number is a count of Preset Buttons on HMI = 6
             if (params.customPresets) {
                 this.appInfo.set('customPresets', []);
-                for ( var i = 0; i < 6; i++) {
-                    if (params.customPresets[i] != ''
-                        || params.customPresets[i] != null) {
+                for (var i = 0; i < 6; i++) {
+                    if (params.customPresets[i] != '' || params.customPresets[i] != null) {
                         this.appInfo.get('customPresets').pushObject(params.customPresets[i]);
                     } else {
                         this.appInfo.get('customPresets').pushObject('Preset' + i);
@@ -178,7 +186,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel
 
         },
 
-        sdlSetMediaClockTimer: function() {
+        sdlSetMediaClockTimer: function () {
 
             return;
         }

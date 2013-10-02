@@ -32,20 +32,19 @@
  * @version 1.0
  */
 
-SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
+SDL.ScrollableMessage = SDL.SDLAbstractView.create({
 
     elementId: 'ScrollableMessage',
 
     classNames: 'ScrollableMessage',
 
-    classNameBindings:
-        [
-            'active:active'
-        ],
+    classNameBindings: [
+        'active:active'
+    ],
 
     /**
      * Id of current request
-     * 
+     *
      * @type {Number}
      */
     messageRequestId: null,
@@ -56,72 +55,66 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
 
     timer: null,
 
-    childViews:
-        [
-            'backButton',
-            'captionText',
-            'softButtons',
-            'listOfCommands'
-        ],
+    childViews: [
+        'backButton', 'captionText', 'softButtons', 'listOfCommands'
+    ],
 
     /**
      * Deactivate View
-     * 
+     *
      * @param {Object} ABORTED Parameter to indicate status for
      *            UI.ScrollableMessageResponse
      */
-    deactivate: function( ABORTED ) {
-        clearTimeout( this.timer );
-        this.set( 'active', false );
+    deactivate: function (ABORTED) {
+        clearTimeout(this.timer);
+        this.set('active', false);
 
         SDL.SDLController.scrollableMessageResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.messageRequestId);
     },
 
-    activate: function(appName, params, messageRequestId) {
-        if( appName ){
+    activate: function (appName, params, messageRequestId) {
+        if (appName) {
 
             var self = this;
-            
+
             if (params.messageText.fieldName == 'scrollableMessageBody') {
-            	this.set( 'listOfCommands.items', params.messageText.fieldText);
+                this.set('listOfCommands.items', params.messageText.fieldText);
             }
 
-            this.set( 'messageRequestId', messageRequestId );
-            this.set( 'captionText.content', appName );
-            this.softButtons.addItems( params.softButtons, params.appID );
-            this.set( 'active', true );
-            clearTimeout( this.timer );
-            this.timer = setTimeout( function() {
+            this.set('messageRequestId', messageRequestId);
+            this.set('captionText.content', appName);
+            this.softButtons.addItems(params.softButtons, params.appID);
+            this.set('active', true);
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
                 self.deactivate();
-            }, params.timeout );
+            }, params.timeout);
         }
     },
 
-    softButtons: SDL.MenuList.extend( {
+    softButtons: SDL.MenuList.extend({
 
         itemsOnPage: 4,
 
         groupName: "ScrollableMessage",
 
-        content: Em.ContainerView.extend( {
+        content: Em.ContainerView.extend({
 
-            classNames:
-                [
-                    'content'
-                ],
+            classNames: [
+                'content'
+            ],
 
-            attributeBindings:
-                [
-                    'parentView.contentPositon:style'
-                ]
+            attributeBindings: [
+                'parentView.contentPositon:style'
+            ]
 
-        } )
-    } ),
+        })
+    }),
 
     /**
      * List for option on SDLOptionsView screen
      */
-    listOfCommands: SDL.ScrollableText.extend( {
+    listOfCommands: SDL.ScrollableText.extend({
 
         elementId: 'scrollable_message_list',
 
@@ -129,5 +122,5 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create( {
 
         /** Items array */
         items: 'asdasdasd'
-    } )
-} );
+    })
+});

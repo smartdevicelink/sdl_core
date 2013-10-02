@@ -696,6 +696,14 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
   return handle_map_access(str);
 }
 
+
+const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
+    const char* Key) const {
+  return getElement(Key);
+}
+
+
 const NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::getElement(
     size_t Index) const {

@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 ReadDIDRequest::~ReadDIDRequest() {
@@ -51,8 +51,8 @@ ReadDIDRequest::~ReadDIDRequest() {
 void ReadDIDRequest::Run() {
   LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
 
-  unsigned int app_id =
-    (*message_)[strings::params][strings::connection_key].asUInt();
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+      .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
@@ -67,16 +67,16 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
-    (*message_)[strings::msg_params][strings::ecu_name];
+      (*message_)[strings::msg_params][strings::ecu_name];
   msg_params[strings::did_location] =
-    (*message_)[strings::msg_params][strings::did_location];
+      (*message_)[strings::msg_params][strings::did_location];
 
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID,
-                   msg_params, true, 1);
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID, msg_params, true,
+                   1);
 }
 
 }  // namespace commands

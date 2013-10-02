@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnUpdateDeviceList::OnUpdateDeviceList(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnUpdateDeviceList::~OnUpdateDeviceList() {

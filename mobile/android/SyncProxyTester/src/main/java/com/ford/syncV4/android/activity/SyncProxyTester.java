@@ -2328,16 +2328,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
                             final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
                             final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+                            final EditText txtTimeToDestination = (EditText) layout.findViewById(R.id.showconstanttbt_txtTimeToDestination);
                             final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
                             final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
                             final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
                             final EditText txtTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_turnIconValue);
+                            final CheckBox chkUseNextTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_nextTurnIconCheck);
+                            final Spinner spnNextTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_nextTurnIconType);
+                            final EditText txtNextTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_nextTurnIconValue);
                             final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
                             final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
                             final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
 
                             spnTurnIconType.setAdapter(imageTypeAdapter);
                             spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+
+                            spnNextTurnIconType.setAdapter(imageTypeAdapter);
+                            spnNextTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2376,6 +2383,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setNavigationText1(txtNavigationText1.getText().toString());
                                         msg.setNavigationText2(txtNavigationText2.getText().toString());
                                         msg.setEta(txtEta.getText().toString());
+                                        msg.setTimeToDestination(txtTimeToDestination.getText().toString());
                                         msg.setTotalDistance(txtTotalDistance.getText().toString());
 
                                         if (chkUseTurnIcon.isChecked()) {
@@ -2384,6 +2392,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     spnTurnIconType.getSelectedItemPosition()));
                                             image.setValue(txtTurnIconValue.getText().toString());
                                             msg.setTurnIcon(image);
+                                        }
+
+                                        if (chkUseNextTurnIcon.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType(imageTypeAdapter.getItem(
+                                                    spnNextTurnIconType.getSelectedItemPosition()));
+                                            image.setValue(txtNextTurnIconValue.getText().toString());
+                                            msg.setNextTurnIcon(image);
                                         }
 
                                         msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));

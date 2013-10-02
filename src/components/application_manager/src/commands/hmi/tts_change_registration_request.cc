@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 TTSChangeRegistrationRequest::TTSChangeRegistrationRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 TTSChangeRegistrationRequest::~TTSChangeRegistrationRequest() {

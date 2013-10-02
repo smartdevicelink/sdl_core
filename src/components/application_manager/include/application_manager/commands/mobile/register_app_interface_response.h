@@ -29,36 +29,37 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager  {
-namespace commands  {
+namespace application_manager {
+namespace commands {
 /**
-  * @brief Register app interface request  command class
-**/
-class RegisterAppInterfaceResponse: public CommandResponseImpl  {
+ * @brief Register app interface request  command class
+ **/
+class RegisterAppInterfaceResponse : public CommandResponseImpl {
  public:
   /**
    * \brief RegisterAppInterfaceResponse class constructor
-  **/
+   **/
   explicit RegisterAppInterfaceResponse(const MessageSharedPtr& response)
-    : CommandResponseImpl(response)  {}
+      : CommandResponseImpl(response) {
+  }
 
   /**
-    * \brief RegisterAppInterfaceResponse class destructor
-  **/
-  virtual ~RegisterAppInterfaceResponse() {}
+   * \brief RegisterAppInterfaceResponse class destructor
+   **/
+  virtual ~RegisterAppInterfaceResponse() {
+  }
 
   /**
-    * @brief Execute command
-  **/
+   * @brief Execute command
+   **/
   virtual void Run();
 
  private:
@@ -68,4 +69,4 @@ class RegisterAppInterfaceResponse: public CommandResponseImpl  {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REGISTER_APP_INTERFACE_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_RESPONSE_H_

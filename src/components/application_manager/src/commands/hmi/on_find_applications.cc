@@ -32,13 +32,12 @@
 
 #include "application_manager/commands/hmi/on_find_applications.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-OnFindApplications::OnFindApplications(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+OnFindApplications::OnFindApplications(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnFindApplications::~OnFindApplications() {

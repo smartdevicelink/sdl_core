@@ -31,19 +31,18 @@
  * @version 1.0
  */
 
-SDL.SDLAppModel = Em.Object
-    .extend( {
+SDL.SDLAppModel = Em.Object.extend({
 
         /**
          * Application Id
-         * 
+         *
          * @type {Number}
          */
         appID: null,
 
         /**
          * Application name
-         * 
+         *
          * @type {String}
          */
         appName: '',
@@ -55,7 +54,7 @@ SDL.SDLAppModel = Em.Object
 
         /**
          * Chosen device name
-         * 
+         *
          * @type {String}
          */
         deviceName: '',
@@ -69,14 +68,14 @@ SDL.SDLAppModel = Em.Object
 
         /**
          * Statusbar text
-         * 
+         *
          * @type {String}
          */
         statusText: '',
 
         /**
          * Info data
-         * 
+         *
          * @type: {Em.Object}
          */
         appInfo: null,
@@ -90,42 +89,42 @@ SDL.SDLAppModel = Em.Object
 
         /**
          * Current language of applications UI component
-         * 
+         *
          * @type {String}
          */
         UILanguage: 'EN-US',
 
         /**
          * Current language of applications TTS and applications VR component
-         * 
+         *
          * @type {String}
          */
         TTSVRLanguage: 'EN-US',
 
         /**
          * Array of Soft Buttons
-         * 
+         *
          * @type {Array}
          */
         softButtons: [],
 
         /**
          * Array of Objects for TBTTurnList
-         * 
+         *
          * @type {Array}
          */
         turnList: [],
 
         /**
          * URL to application Icon
-         * 
+         *
          * @type {String}
          */
         appIcon: 'images/info/info_leftMenu_apps_ico.png',
 
         /**
          * Application commands list
-         * 
+         *
          * @type {Array}
          */
         commandsList: {
@@ -137,24 +136,24 @@ SDL.SDLAppModel = Em.Object
          *
          * @return {Array}
          */
-        currentCommandsList: function() {
+        currentCommandsList: function () {
 
             return this.get('commandsList.' + this.get('currentSubMenuId'));
         }.property('this.currentSubMenuId'),
 
         /**
          * Current command submenu identificator
-         * 
+         *
          * @type {Number}
          */
         currentSubMenuId: 0,
 
         /**
          * Return current submenu name
-         * 
+         *
          * @return {String}
          */
-        currentSubMenuLabel: function() {
+        currentSubMenuLabel: function () {
 
             //Magic number 0 is Top level menu index
             var submenu, commands = this.commandsList[0];
@@ -170,17 +169,17 @@ SDL.SDLAppModel = Em.Object
 
         /**
          * Interaction chooses data
-         * 
+         *
          * @type {Object}
          */
         interactionChoices: {},
 
         /**
          * Update Soft Buttons will handle on command Show
-         * 
+         *
          * @param {Array}
          */
-        updateSoftButtons: function(buttons) {
+        updateSoftButtons: function (buttons) {
 
             // delete existing buttons from array
             this.softButtons.splice(0);
@@ -191,10 +190,10 @@ SDL.SDLAppModel = Em.Object
 
         /**
          * Add command to list
-         * 
+         *
          * @param {Object}
          */
-        addCommand: function(request) {
+        addCommand: function (request) {
 
             var parentID = request.params.menuParams.parentID ? request.params.menuParams.parentID : 0;
 
@@ -208,27 +207,19 @@ SDL.SDLAppModel = Em.Object
             if (commands.length <= 999) {
                 commands[commands.length] = {
                     commandID: request.params.cmdID,
-                    name: request.params.menuParams.menuName,
-                    parent: parentID,
-                    position: request.params.menuParams.position
-                        ? request.params.menuParams.position : 0,
-                    icon: request.params.cmdIcon
-                        ? request.params.cmdIcon.value : null
+                    name     : request.params.menuParams.menuName,
+                    parent   : parentID,
+                    position : request.params.menuParams.position ? request.params.menuParams.position : 0,
+                    icon     : request.params.cmdIcon ? request.params.cmdIcon.value : null
                 };
 
                 SDL.SDLAppController.buttonsSort(parentID);
 
                 SDL.OptionsView.commands.refreshItems();
 
-                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
-                    request.id,
-                    request.method);
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
-                FFW.UI
-                    .sendError(SDL.SDLModel.resultCode["REJECTED"],
-                        request.id,
-                        request.method,
-                        'Adding more than 1000 item to the top menu or to submenu is not allowed.');
+                FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
             }
 
         },
@@ -238,12 +229,11 @@ SDL.SDLAppModel = Em.Object
          *
          * @param {Number}
          */
-        deleteCommand: function(commandID) {
+        deleteCommand: function (commandID) {
 
             for (var i in this.commandsList) {
                 if (this.commandsList[i].filterProperty('commandID', commandID)) {
-                    this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i)
-                        .filterProperty('commandID', commandID));
+                    this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
                 }
             }
         },
@@ -253,7 +243,7 @@ SDL.SDLAppModel = Em.Object
          *
          * @param {Object}
          */
-        addSubMenu: function(request) {
+        addSubMenu: function (request) {
 
             // parentID is equal to 0 cause Top level menu ID is 0
             var parentID = 0;
@@ -266,40 +256,31 @@ SDL.SDLAppModel = Em.Object
                 this.commandsList[request.params.menuID] = [];
 
                 commands[commands.length] = {
-                    menuID: request.params.menuID,
-                    name: request.params.menuParams.menuName ? request.params.menuParams.menuName
-                        : '',
-                    parent: 0,
-                    position: request.params.menuParams.position
-                        ? request.params.menuParams.position : 0
+                    menuID  : request.params.menuID,
+                    name    : request.params.menuParams.menuName ? request.params.menuParams.menuName : '',
+                    parent  : 0,
+                    position: request.params.menuParams.position ? request.params.menuParams.position : 0
                 };
 
                 SDL.SDLAppController.buttonsSort(parentID);
 
                 SDL.OptionsView.commands.refreshItems();
 
-                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
-                    request.id,
-                    request.method);
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
-                FFW.UI
-                    .sendError(SDL.SDLModel.resultCode["REJECTED"],
-                        request.id,
-                        request.method,
-                        'Adding more than 1000 item to the top menu or to submenu is not allowed.');
+                FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
             }
         },
 
         /**
          * Delete submenu and related commands from list
-         * 
+         *
          * @param {Number}
          */
-        deleteSubMenu: function(menuID) {
+        deleteSubMenu: function (menuID) {
 
             if (this.commandsList[0].filterProperty('commandID', menuID)) {
-                this.get('commandsList.0').removeObjects(this.get('commandsList.0')
-                    .filterProperty('menuID', menuID));
+                this.get('commandsList.0').removeObjects(this.get('commandsList.0').filterProperty('menuID', menuID));
                 delete(this.commandsList[menuID]);
             }
 
@@ -309,13 +290,13 @@ SDL.SDLAppModel = Em.Object
         /**
          * SDL UI PreformInteraction response handeler open Perform Interaction
          * screen and show choices
-         * 
+         *
          * @param {Object}
          *            message
          * @param {Number}
          *            performInteractionRequestId
          */
-        onPreformInteraction: function(message, performInteractionRequestId) {
+        onPreformInteraction: function (message, performInteractionRequestId) {
 
             SDL.InteractionChoicesView.clean();
 
@@ -339,7 +320,7 @@ SDL.SDLAppModel = Em.Object
          *
          * @param {Object}
          */
-        onCreateInteraction: function(message) {
+        onCreateInteraction: function (message) {
 
             this.interactionChoices[message.interactionChoiceSetID] = message.choiceSet;
 
@@ -352,7 +333,7 @@ SDL.SDLAppModel = Em.Object
          *
          * @param {Object}
          */
-        onDeleteInteraction: function(message) {
+        onDeleteInteraction: function (message) {
 
             delete this.interactionChoices[message.interactionChoiceSetID];
         },
@@ -363,12 +344,12 @@ SDL.SDLAppModel = Em.Object
          *
          * @param {Object}
          */
-        onSlider: function(message) {
+        onSlider: function (message) {
 
             SDL.SliderView.loadData(message);
 
             SDL.SliderView.activate(this.appName);
-            setTimeout(function() {
+            setTimeout(function () {
 
                 if (SDL.SliderView.active) {
                     SDL.SliderView.deactivate(true);

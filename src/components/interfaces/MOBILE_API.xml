@@ -264,6 +264,30 @@
     </description>
   </enum>
 
+  <enum name="LayoutMode">
+    <description>For touchscreen interactions, the mode of how the choices are presented.</description>
+    <element name="ICON_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons.
+    </description>
+    <element name="ICON_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.
+    </description>
+    <element name="LIST_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list.
+    </description>
+    <element name="LIST_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.
+    </description>
+    <element name="KEYBOARD" />
+    <description>
+    	This mode causes the interaction to immediately display a keyboard entry through the HMI.
+    </description>    
+  </enum>
+
   <enum name="HMILevel">
     <description>Enumeraction that describes current levels of HMI.</description>
     <element name="FULL" internal_name="HMI_FULL" />
@@ -686,6 +710,15 @@
     <param name="menuName" type="String" maxlength="500" />
     <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" />
     <param name="image" type="Image" mandatory="false"/>
+    <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
+    </param>
+    <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
+    </param>
+    <param name="secondaryImage" type="Image" mandatory="false" scope="partner">
+      <description>Optional secondary image struct for choice</description>
+    </param>
   </struct>
 
   <struct name="VrHelpItem">
@@ -2320,6 +2353,10 @@
       </description>
     </param>
 
+    <param name="interactionLayout" type="LayoutMode" mandatory="false" scope="partner">
+      <description>See LayoutMode.</description>
+    </param>
+
   </function>
 
   <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="response">
@@ -3606,7 +3643,7 @@
       	If omitted the value will be assumed as FALSE.
       </description>
     </param>
-    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true">
+    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
       <description>
       	Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
       	If omitted on supported displays, the currently displayed SoftButton values will not change.

@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIGetCapabilitiesRequest::UIGetCapabilitiesRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIGetCapabilitiesRequest::~UIGetCapabilitiesRequest() {

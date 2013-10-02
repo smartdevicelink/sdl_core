@@ -41,7 +41,8 @@ namespace application_manager {
 namespace commands {
 
 UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {

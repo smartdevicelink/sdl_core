@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSGetLanguageResponse::TTSGetLanguageResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+TTSGetLanguageResponse::TTSGetLanguageResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 TTSGetLanguageResponse::~TTSGetLanguageResponse() {

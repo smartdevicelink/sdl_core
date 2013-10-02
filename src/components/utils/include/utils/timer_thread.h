@@ -42,12 +42,11 @@
 
 namespace timer {
 
-class CommandImpl;
 class TimerDelegate;
 
 /*
  * The TimerThread class provide possibility to run timer in a separate thread.
- * The client should specify callee and callback function.
+ * The client should specify callee and const callback function.
  * Example usage:
  *
  * Create timer in mobile request
@@ -81,7 +80,7 @@ class TimerThread {
   /*
    * @brief Starts timer for specified timeout.
    * Previously started timeout will be set to new value.
-   * On timeout TimerDelegate::onTimeOut interface will be called.
+   * On timeout TimerThread::onTimeOut interface will be called.
    *
    * @param timeout Timeout in seconds to be set
    */
@@ -99,11 +98,6 @@ class TimerThread {
    */
   void onTimeOut() const;
 
-  /*
-   * @brief Free resources
-   */
-  void cleanUp();
-
  private:
 
   class TimerDelegate : public threads::ThreadDelegate {
@@ -115,8 +109,7 @@ class TimerThread {
      * @param timer_thread The Timer_thread pointer
      * @param timeout      Timeout to be set
      */
-    TimerDelegate(const TimerThread* timer_thread,
-                  unsigned int timeout);
+    TimerDelegate(const TimerThread* timer_thread);
 
     /*
      * @brief Destructor
@@ -133,6 +126,13 @@ class TimerThread {
      */
     virtual void exitThreadMain();
 
+    /*
+     * @brief Restart timer
+     *
+     * @param timeout New timeout to be set
+     */
+    virtual void setTimeOut(unsigned int timeout);
+
    protected:
 
    private:
@@ -148,7 +148,7 @@ class TimerThread {
   const T*                                           callee_;
   TimerDelegate*                                     delegate_;
   threads::Thread*                                   thread_;
-  sync_primitives::SynchronisationPrimitives         mutex_;
+  mutable bool                                       is_running_;
 
   DISALLOW_COPY_AND_ASSIGN(TimerThread);
 };
@@ -158,72 +158,62 @@ TimerThread<T>::TimerThread(const T* callee, void (T::*f)() const)
 : callback_(f),
   callee_(callee),
   delegate_(NULL),
-  thread_(NULL) {
-  mutex_.init();
+  thread_(NULL),
+  is_running_(false) {
+
+  delegate_ = new TimerDelegate(this);
+  if (delegate_) {
+    thread_ = new threads::Thread("TimerThread", delegate_);
+  }
 }
 
 template <class T>
 TimerThread<T>::~TimerThread() {
+  if (is_running_) {
+    stop();
+  }
   callback_ = NULL;
   callee_ = NULL;
-
-  stop();
-  cleanUp();
+  delete thread_;
+  // delegate_ will be deleted by thread_
+  thread_ = NULL;
+  delegate_ = NULL;
 }
 
 template <class T>
 void TimerThread<T>::start(unsigned int timeout) {
-  if (delegate_ && thread_) {
+  if (is_running_) {
     stop();
-    cleanUp();
   }
 
-  mutex_.lock();
-  delegate_ = new TimerDelegate(this, timeout);
-  if (delegate_) {
-    thread_ = new threads::Thread("TimerDelegate", delegate_);
-  }
-
+  delegate_->setTimeOut(timeout);
   if (delegate_ && thread_) {
+    is_running_ = true;
     thread_->startWithOptions(
         threads::ThreadOptions(threads::Thread::kMinStackSize));
   }
-  mutex_.unlock();
 }
 
 template <class T>
 void TimerThread<T>::stop() {
-  mutex_.lock();
   if (delegate_ && thread_) {
-      thread_->stop();
+    thread_->stop();
+    is_running_ = false;
   }
-  mutex_.unlock();
 }
 
 template <class T>
 void TimerThread<T>::onTimeOut() const {
   if (callee_ && callback_) {
     (callee_->*callback_)();
+    is_running_ = false;
   }
 }
 
 template <class T>
-void TimerThread<T>::cleanUp() {
-  mutex_.lock();
-
-  delete thread_;
-  // delegate_ will be deleted by thread_
-  thread_ = NULL;
-  delegate_ = NULL;
-
-  mutex_.unlock();
-}
-
-template <class T>
-TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread,
-                                             unsigned int timeout)
+TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread)
 : timer_thread_(timer_thread),
-  timeout_(timeout),
+  timeout_(0),
   stop_flag_(false) {
 
   sync_primitive_.init();
@@ -237,7 +227,6 @@ TimerThread<T>::TimerDelegate::~TimerDelegate() {
 template <class T>
 void TimerThread<T>::TimerDelegate::threadMain() {
   sync_primitive_.lock();
-
   if (!stop_flag_) {
     timespec time_spec;
     clock_gettime(CLOCK_REALTIME, &time_spec);
@@ -246,18 +235,23 @@ void TimerThread<T>::TimerDelegate::threadMain() {
                            &sync_primitive_.mutex(),
                            &time_spec);
 
-    sync_primitive_.unlock();
-
     if (false == stop_flag_ && timer_thread_) {
       timer_thread_->onTimeOut();
     }
   }
+  stop_flag_ = false;
+  sync_primitive_.unlock();
 }
 
 template <class T>
 void TimerThread<T>::TimerDelegate::exitThreadMain() {
   stop_flag_ = true;
   sync_primitive_.signal();
+}
+
+template <class T>
+void TimerThread<T>::TimerDelegate::setTimeOut(unsigned int timeout) {
+  timeout_ = timeout;
 }
 
 }  // namespace timer

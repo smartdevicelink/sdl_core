@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRGetLanguageResponse::VRGetLanguageResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+VRGetLanguageResponse::VRGetLanguageResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 VRGetLanguageResponse::~VRGetLanguageResponse() {

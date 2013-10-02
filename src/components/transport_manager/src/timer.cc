@@ -1,6 +1,6 @@
 /*
  * \file timer.cc
- * \brief 
+ * \brief Timer class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -85,11 +85,11 @@ Timer& Timer::operator = (const Timer &other)
     return *this;
 }
 
-void Timer::start() {
+void Timer::Start() {
   pthread_create(&thread_, nullptr, &ThreadRoutine, this);
 }
 
-void Timer::stop() {
+void Timer::Stop() {
   pthread_mutex_lock(&mutex_);
   pthread_cond_signal(&cond_);
   pthread_mutex_unlock(&mutex_);

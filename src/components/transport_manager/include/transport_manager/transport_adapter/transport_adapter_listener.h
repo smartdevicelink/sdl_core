@@ -1,6 +1,6 @@
 /**
  * \file transport_adapter_listener.h
- * \brief interface for TransportAdapterListener header file.
+ * \brief TransportAdapterListener class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

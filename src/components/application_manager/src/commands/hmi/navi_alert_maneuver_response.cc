@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 NaviAlertManeuverResponse::NaviAlertManeuverResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message) : ResponseFromHMI(message) {
 }
 
 NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
@@ -48,7 +48,7 @@ void NaviAlertManeuverResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::AlertManeuverID;
+      mobile_apis::FunctionID::AlertManeuverID;
 
   SendResponseToMobile(message_);
 }

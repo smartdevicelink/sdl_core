@@ -1,6 +1,6 @@
 /**
- * \file BluetoothAdapter.cpp
- * \brief BluetoothAdapter class source file.
+ * \file bluetooth_transport_adapter.h
+ * \brief BluetoothAdapter class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,34 +33,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
 
-#include <iomanip>
-#include <set>
-#include <bluetooth/bluetooth.h>
-
-#include "transport_manager/bluetooth/bluetooth_adapter.h"
-#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
-#include "transport_manager/bluetooth/bluetooth_connection_factory.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-BluetoothTransportAdapter::~BluetoothTransportAdapter() {
-}
+/**
+ * @brief Transport adapter that use bluetooth transport.
+ */
+class BluetoothTransportAdapter : public TransportAdapterImpl {
+ public:
+  /**
+   * @brief Constructor.
+   */
+  BluetoothTransportAdapter();
 
-BluetoothTransportAdapter::BluetoothTransportAdapter()
-    : TransportAdapterImpl(new BluetoothDeviceScanner(this),
-                        new BluetoothConnectionFactory(this), 0) {
-}
+  /**
+   * @brief Destructor.
+   */
+  virtual ~BluetoothTransportAdapter();
+ protected:
 
-DeviceType BluetoothTransportAdapter::GetDeviceType() const {
-  return "sdl-bluetooth";
-}
+  /**
+   * @brief Return type of device.
+   */
+  virtual DeviceType GetDeviceType() const;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER

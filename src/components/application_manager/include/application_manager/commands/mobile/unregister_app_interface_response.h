@@ -29,38 +29,38 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNREGISTER_APP_INTERFACE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNREGISTER_APP_INTERFACE_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
-namespace application_manager  {
-namespace commands  {
+namespace application_manager {
+namespace commands {
 /**
-  * @brief Unregister app interface request  command class
-**/
-class UnregisterAppInterfaceResponse: public CommandResponseImpl  {
+ * @brief Unregister app interface request  command class
+ **/
+class UnregisterAppInterfaceResponse : public CommandResponseImpl {
  public:
   /**
    * \brief UnregisterAppInterfaceResponse class constructor
-  **/
+   **/
   explicit UnregisterAppInterfaceResponse(const MessageSharedPtr& response)
-    : CommandResponseImpl(response)  {}
+      : CommandResponseImpl(response) {
+  }
 
   /**
-    * \brief UnregisterAppInterfaceResponse class destructor
-  **/
-  virtual ~UnregisterAppInterfaceResponse() {}
+   * \brief UnregisterAppInterfaceResponse class destructor
+   **/
+  virtual ~UnregisterAppInterfaceResponse() {
+  }
 
   /**
-    * @brief Execute command
-  **/
+   * @brief Execute command
+   **/
   virtual void Run();
-
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UnregisterAppInterfaceResponse);
@@ -69,4 +69,4 @@ class UnregisterAppInterfaceResponse: public CommandResponseImpl  {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_UNREGISTER_APP_INTERFACE_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNREGISTER_APP_INTERFACE_RESPONSE_H_

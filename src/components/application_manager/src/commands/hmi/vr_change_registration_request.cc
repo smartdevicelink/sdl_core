@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 VRChangeRegistrationRequest::VRChangeRegistrationRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VRChangeRegistrationRequest::~VRChangeRegistrationRequest() {

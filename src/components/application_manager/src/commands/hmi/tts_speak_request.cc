@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-TTSSpeakRequest::TTSSpeakRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+TTSSpeakRequest::TTSSpeakRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 TTSSpeakRequest::~TTSSpeakRequest() {
