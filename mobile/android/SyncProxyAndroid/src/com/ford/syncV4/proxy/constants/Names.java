@@ -171,6 +171,7 @@ public class Names {
 	public static final String timeout = "timeout";
 	public static final String choiceSet = "choiceSet";
 	public static final String interactionMode = "interactionMode";
+	public static final String interactionLayout = "interactionLayout";
 	public static final String result = "result";
 	public static final String alertText1 = "alertText1";
 	public static final String alertText2 = "alertText2";
@@ -425,4 +426,5 @@ public class Names {
     public static final String resolutionHeight = "resolutionHeight";
     public static final String keyboardEvent = "event";
     public static final String OnKeyboardInput = "OnKeyboardInput";
+    public static final String manualTextEntry = "manualTextEntry";
 }

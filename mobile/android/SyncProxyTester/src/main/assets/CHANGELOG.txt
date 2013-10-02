@@ -1,3 +1,6 @@
+[CW40]
++ SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
+
 [CW35.3]
 *Fixed crashes on end session/disconnect.
 
