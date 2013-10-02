@@ -108,6 +108,7 @@ import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
@@ -2710,12 +2711,28 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemPos);
                             final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemText);
                             final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemImage);
+                            final CheckBox interactionLayoutCheck =
+                                    (CheckBox) layout.findViewById(
+                                            R.id.performinteraction_interactionLayoutCheck);
+                            final Spinner interactionLayoutSpinner =
+                                    (Spinner) layout.findViewById(
+                                            R.id.performinteraction_interactionLayoutSpinner);
 
                             final ArrayAdapter<InteractionMode> interactionModeAdapter = new ArrayAdapter<InteractionMode>(
                                     mContext, android.R.layout.simple_spinner_item, InteractionMode.values());
                             interactionModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             interactionModeSpinner.setAdapter(interactionModeAdapter);
                             interactionModeSpinner.setSelection(interactionModeAdapter.getPosition(InteractionMode.BOTH));
+
+                            final ArrayAdapter<LayoutMode>
+                                    interactionLayoutAdapter =
+                                    new ArrayAdapter<LayoutMode>(mContext,
+                                            android.R.layout.simple_spinner_item,
+                                            LayoutMode.values());
+                            interactionLayoutAdapter.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item);
+                            interactionLayoutSpinner
+                                    .setAdapter(interactionLayoutAdapter);
 
                             final String[] choiceSetIDStrings = new String[_choiceSetAdapter.getCount()];
                             final boolean[] choiceSetIDSelections = new boolean[choiceSetIDStrings.length];
@@ -2760,7 +2777,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setInitialText(initialText.getText().toString());
                                         msg.setInitialPrompt(ttsChunksFromString(initialPrompt.getText().toString()));
-                                        msg.setInteractionMode(interactionModeAdapter.getItem(interactionModeSpinner.getSelectedItemPosition()));
+                                        msg.setInteractionMode(
+                                                interactionModeAdapter.getItem(
+                                                        interactionModeSpinner
+                                                                .getSelectedItemPosition()));
                                         msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                         if (helpPromptCheck.isChecked()) {
@@ -2810,6 +2830,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
 
                                             msg.setVrHelp(vrHelpItems);
+                                        }
+
+                                        if (interactionLayoutCheck
+                                                .isChecked()) {
+                                            msg.setInteractionLayout(
+                                                    interactionLayoutAdapter
+                                                            .getItem(
+                                                                    interactionLayoutSpinner
+                                                                            .getSelectedItemPosition()));
                                         }
 
                                         try {

@@ -1,4 +1,5 @@
 [CW40]
++ PerformInteraction dialog: add interactionLayout parameter.
 + SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
 
 [CW35.3]
