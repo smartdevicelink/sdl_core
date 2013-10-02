@@ -429,4 +429,11 @@ public class Names {
     public static final String keyboardEvent = "event";
     public static final String OnKeyboardInput = "OnKeyboardInput";
     public static final String manualTextEntry = "manualTextEntry";
+    public static final String keyboardLayout = "keyboardLayout";
+    public static final String sendDynamicEntry = "sendDynamicEntry";
+    public static final String limitedCharacterList = "limitedCharacterList";
+    public static final String autoCompleteText = "autoCompleteText";
+    public static final String menuTitle = "menuTitle";
+    public static final String menuIcon = "menuIcon";
+    public static final String keyboardProperties = "keyboardProperties";
 }

@@ -1,6 +1,6 @@
 [CW40]
 + ShowConstantTBT dialog: add timeToDestination and nextTurnIcon parameters.
-+ SyncProxyAndroid SDK: Extend ShowConstantTBT request object.
++ SyncProxyAndroid SDK: Extend ShowConstantTBT and SetGlobalProperties request objects.
 + PerformInteraction dialog: add interactionLayout parameter.
 + SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
 
