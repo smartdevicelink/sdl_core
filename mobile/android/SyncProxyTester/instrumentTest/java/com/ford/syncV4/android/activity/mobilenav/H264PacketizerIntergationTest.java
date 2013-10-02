@@ -1,12 +1,16 @@
-package com.ford.syncV4.streaming;
+package com.ford.syncV4.android.activity.mobilenav;
 
 import android.content.Context;
 import android.os.Environment;
-import android.test.InstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import com.ford.syncV4.R;
+import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.streaming.H264Packetizer;
+import com.ford.syncV4.streaming.IStreamListener;
+import com.ford.syncV4.streaming.MobileNaviDataFrame;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +26,7 @@ import java.util.TreeMap;
 /**
  * Created by Andrew Batutin on 10/1/13.
  */
-public class H264PacketizerIntergationTest extends InstrumentationTestCase implements IStreamListener {
+public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCase2<SyncProxyTester> implements IStreamListener {
 
     private PipedInputStream inputStream;
     private PipedOutputStream outputStream;
@@ -31,6 +35,10 @@ public class H264PacketizerIntergationTest extends InstrumentationTestCase imple
     private byte[] sampleData;
     private FileOutputStream fos;
 
+    public H264PacketizerIntergationTest() {
+        super(SyncProxyTester.class);
+    }
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -38,13 +46,6 @@ public class H264PacketizerIntergationTest extends InstrumentationTestCase imple
         outputStream = new PipedOutputStream();
         inputStream.connect(outputStream);
         sut = new H264Packetizer(this, inputStream, (byte) 0);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        inputStream.close();
-        outputStream.close();
     }
 
     public void testStressTest() throws Exception {
@@ -59,7 +60,7 @@ public class H264PacketizerIntergationTest extends InstrumentationTestCase imple
             public void run() {
                 super.run();
                 // Open the input stream
-                Context context = getInstrumentation().getContext();
+                Context context = getActivity();
                 InputStream is = context.getResources().openRawResource(R.raw.faq_welcome_orientation);
                 byte[] buffer = new byte[1000];
                 int length;

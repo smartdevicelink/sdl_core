@@ -60,7 +60,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    ProtocolMessage createProtocolMessage(byte[] frameData) {
+    public ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setSessionID(_rpcSessionID);
         pm.setSessionType(SessionType.Mobile_Nav);
@@ -71,7 +71,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         return pm;
     }
 
-    byte[] readFrameData(ByteBuffer buffer, byte[] data) throws IOException, IllegalArgumentException {
+    public byte[] readFrameData(ByteBuffer buffer, byte[] data) throws IOException, IllegalArgumentException {
         if (tail != null) {
             buffer.put(tail);
         }
