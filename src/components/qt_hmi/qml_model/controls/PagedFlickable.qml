@@ -43,11 +43,12 @@ Item
     property int snapTo: 200
 
     Flickable {
+        y: 18
         id: container
         anchors.bottom: parent.bottom
         maximumFlickVelocity: 1500
         contentWidth: containerRow.width
-        height: containerRow.height
+        height: containerRow.height - 18
         width: parent.width
 
         onMovementEnded: {

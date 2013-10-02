@@ -90,6 +90,5 @@ GeneralView {
                 }
             }
         }
-
     }
 }

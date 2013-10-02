@@ -148,7 +148,7 @@ Item {
         }
     }
 
-    Item {
+    Item{
         // 1/4 bottom screen
         anchors.bottom: parent.bottom
         anchors.left: parent.left
