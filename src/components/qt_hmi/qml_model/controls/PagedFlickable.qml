@@ -35,20 +35,20 @@
 
 import QtQuick 2.0
 
-Column
+Item
 {
+    height: container.height + pager.height
     default property alias content: containerRow.children
     property alias spacing: containerRow.spacing
     property int snapTo: 200
 
     Flickable {
-        y: 18
         id: container
+        anchors.bottom: parent.bottom
         maximumFlickVelocity: 1500
         contentWidth: containerRow.width
-        height: containerRow.height + 18
+        height: containerRow.height
         width: parent.width
-        maximumFlickVelocity: 1500
 
         onMovementEnded: {
             var rest = contentX % snapTo
@@ -62,15 +62,17 @@ Column
             flickDeceleration = 1500
         }
         Row {
-            anchors.verticalCenter: parent.verticalCenter
             id: containerRow
-            height: childrenRect.height
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
 
     Pager {
+        id: pager
         anchors.horizontalCenter: parent.horizontalCenter
-        pages: Math.floor(container.contentWidth / container.width)
+        anchors.top: parent.top
+
+        pages: Math.round((container.contentWidth - containerRow.spacing )/ container.width)
         activePage: Math.round(pages * container.contentX / container.contentWidth)
     }
 }

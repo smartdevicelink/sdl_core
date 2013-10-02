@@ -36,42 +36,44 @@ import QtQuick 2.0
 
 Item {
     id: presetRow
-    width: parent.width
-    height: parent.height
 
-    property variant presets: [];
+    property variant presets: []
     property int selectedIndex: 0
     signal presetSelected
 
-    PagedFlickable {
+    height: childrenRect.height
 
-        snapTo: spacing + 63
+    PagedFlickable {
+        width: parent.width
         spacing: (width - (63 * 4)) / 3
+        snapTo: spacing + 63
 
         Repeater {
             model: presetRow.presets.length
-            delegate: Image {
-                source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        presetRow.selectedIndex = index
+            delegate:
+                Column {
+                    Image {
+                        source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                presetRow.selectedIndex = index
+                            }
+                        }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: index + 1
+                            font.pixelSize: 30
+                            color: "#1d81d5"
+                        }
                     }
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: index + 1
-                    font.pixelSize: 30
-                    color: "#1d81d5"
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.bottom
-                    text: presetRow.presets[index]
-                    font.pixelSize: 25
-                    color: "white"
-                }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: presetRow.presets[index]
+                        font.pixelSize: 25
+                        color: "white"
+                    }
             }
         }
     }

@@ -80,7 +80,7 @@ FIND_PACKAGE(Qt5Quick REQUIRED)
 
 find_program(qmlplugindump_binary
   NAMES qmlplugindump
-  PATHS /usr /opt /
+  PATHS /opt ~ /usr /
 )
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")

@@ -40,6 +40,7 @@ Item {
 
     property var presets: []
     property int minHeight: 400
+    property string radioType
 
     default property alias content: additional.children
 
@@ -121,6 +122,7 @@ Item {
             }
             PresetRow {
                 anchors.centerIn: parent
+                anchors.bottom: parent.bottom
                 presets: radioPlayer.presets
                 width: parent.width
                 onSelectedIndexChanged: {
