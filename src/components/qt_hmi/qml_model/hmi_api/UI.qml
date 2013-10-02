@@ -8,31 +8,38 @@ Item {
     signal onLanguageChange (int language)
     signal onDriverDistraction (int state)
 
+    function filter (strings, fields) {
+// substrings for each allowed field
+        var fieldSubstrings = []
+// have to populate the array to appropriate size
+        for (var fieldIndex = 0; fieldIndex < fields.length; ++fieldIndex) {
+            fieldSubstrings.push("")
+        }
+// this cycle concatenates allowed lines sorting them by field
+        for (var stringIndex = 0; stringIndex < strings.length; ++stringIndex) {
+            for (fieldIndex = 0; fieldIndex < fields.length; ++fieldIndex) {
+                if (strings[stringIndex].fieldName === fields[fieldIndex]) {
+                    if (fieldSubstrings[fieldIndex] !== "") {
+                        fieldSubstrings[fieldIndex] += "\n";
+                    }
+                    fieldSubstrings[fieldIndex] += strings[stringIndex].fieldText
+                }
+            }
+        }
+        return fieldSubstrings
+    }
+
     function alert (alertStrings, duration, softButtons, appID) {
 // with this array we grab only the lines we need
         var alertFields = [Common.TextFieldName.alertText1,
                            Common.TextFieldName.alertText2,
                            Common.TextFieldName.alertText3]
-// substrings for each allowed field
-        var fieldSubstrings = []
-// have to populate the array to appropriate size
-        for (var fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
-            fieldSubstrings.push("")
-        }
-// this cycle concatenates allowed lines sorting them by field
-        for (var alertStringIndex = 0; alertStringIndex < alertStrings.length; ++alertStringIndex) {
-            for (fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
-                if (alertStrings[alertStringIndex].fieldName === alertFields[fieldIndex]) {
-                    if (fieldSubstrings[fieldIndex] !== "") {
-                        fieldSubstrings[fieldIndex] += "\n" // need linebreak
-                    }
-                    fieldSubstrings[fieldIndex] += alertStrings[alertStringIndex].fieldText
-                }
-            }
-        }
+
+        var fieldSubstrings = filter(alertStrings, alertFields)
+
         var alertString = ""
 // this cycle concatenates all the substrings according to the order of the fields
-        for (fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
+        for (var fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
             if (fieldSubstrings[fieldIndex] !== "") {
                 if (alertString !== "") {
                     alertString += "\n" // need linebreak
@@ -46,6 +53,24 @@ Item {
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
+// with this array we grab only the lines we need
+        var showFields = [
+            Common.TextFieldName.mainField1,
+            Common.TextFieldName.mainField2,
+            Common.TextFieldName.mainField3,
+            Common.TextFieldName.mainField4,
+            Common.TextFieldName.statusBar
+        ]
+        var fieldSubstrings = filter(showStrings, showFields)
+        var fieldSubstringsStruct = {
+            "mainField1": fieldSubstrings[0],
+            "mainField2": fieldSubstrings[1],
+            "mainField3": fieldSubstrings[2],
+            "mainField4": fieldSubstrings[3],
+            "statusBar": fieldSubstrings[4]
+        }
+        showWindow.showMessage(fieldSubstringsStruct)
+        showWindow.show()
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {

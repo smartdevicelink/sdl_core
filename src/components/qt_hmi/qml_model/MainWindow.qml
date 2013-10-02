@@ -128,6 +128,11 @@ Rectangle{
         objectName: "AlertWindow"
     }
 
+    ShowWindow {
+        id: showWindow
+        objectName: "ShowWindow"
+    }
+
     Component.onCompleted: {
         dataContainer.hmiVRAvailable = true
         dataContainer.hmiTTSAvailable = true
