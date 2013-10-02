@@ -1023,10 +1023,10 @@
 </struct>
 
 <struct name="ImageField">
-  <param name="name" type="Common.ImageFieldName">
+  <param name="name" type="Common.ImageFieldName" mandatory="true">
     <description>The name that identifies the field. See ImageFieldName.</description>
   </param>
-  <param name="imageType" type="Common.FileType" maxsize="100" array="true">
+  <param name="imageTypeSupported" type="Common.FileType" maxsize="100" array="true" mandatory="false" minsize="1">
     <description>The image types that are supported in this field. See FileType.</description>
   </param>
   <param name="imageResolution" type="Common.ImageResolution">
@@ -1049,10 +1049,9 @@
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
-  <param name="graphicSupported" type="Boolean">
-    <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
   </param>
-  <param name="imageTypeSupported" type="Common.ImageType">
+  <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
   </param>
   <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true">

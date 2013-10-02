@@ -343,7 +343,7 @@ FFW.UI = FFW.RPCObserver.create({
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],
                                 "graphicSupported": true,
-                                "imageType": "DYNAMIC",
+                                "imageCapabilities": ["DYNAMIC"],
                                 "templatesAvailable": '',
                                 "screenParams": {
                                     "resolution": {
