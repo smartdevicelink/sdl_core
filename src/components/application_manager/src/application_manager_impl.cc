@@ -45,6 +45,7 @@
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
+#include "utils/file_system.h"
 #include "utils/logger.h"
 #include "./from_hmh_thread_impl.h"
 #include "./to_hmh_thread_impl.h"
@@ -735,7 +736,15 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
 
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != audioManager_) {
-    audioManager_->startMicrophoneRecording(std::string("record.wav"),
+    Application* application =
+        ApplicationManagerImpl::instance()->application(session_key);
+
+    std::string record_file = file_system::CreateDirectory(application->name());
+
+    record_file += "/";
+    record_file +=  "record.wav";
+
+    audioManager_->startMicrophoneRecording(record_file,
          static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
          max_duration,
          static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
