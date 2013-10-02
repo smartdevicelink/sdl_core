@@ -50,6 +50,7 @@
     <string name="performinteraction_vrHelpItemImageDefault">imageFilename.png,action.png,action.png</string>
     <string name="performinteraction_timeout">Timeout</string>
     <string name="performinteraction_timeoutDefault">10000</string>
+    <string name="performinteraction_interactionLayout">Interaction Layout</string>
     <string name="show_mainField1">Main Field 1</string>
     <string name="show_mainField1Default">Show Line 1</string>
     <string name="show_mainField2">Main Field 2</string>
