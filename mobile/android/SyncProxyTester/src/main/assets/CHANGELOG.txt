@@ -15,6 +15,12 @@
 *Added Mobile Navi session support
 *Added USB Support
 
+[CW37]
+* SoftButtons, PerformInteraction, Show, SetGlobalProperties dialogs: change default imageFilename.png to action.png.
+
+[CW36]
+* Automatically attempt to reconnect to SDLCore after disconnect.
+
 [CW35]
 * SoftButtons can be sent without SystemAction parameter.
 * SyncProxyAndroid SDK: Fix creating more and more TCP transports after disconnects.

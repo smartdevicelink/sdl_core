@@ -38,7 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnVRStartedNotification::OnVRStartedNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnVRStartedNotification::~OnVRStartedNotification() {

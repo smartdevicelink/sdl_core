@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
 
 #include "transport_manager/transport_manager_listener.h"
 #include "protocol_handler/session_observer.h"
@@ -53,33 +53,33 @@ namespace connection_handler {
  * \brief SmartDeviceLink ConnectionHandler interface class
  */
 class ConnectionHandler {
-  public:
-    /**
-     * \brief Sets observer pointer for ConnectionHandler.
-     * \param observer Pointer to observer object.
-     **/
-    virtual void set_connection_handler_observer(
+ public:
+  /**
+   * \brief Sets observer pointer for ConnectionHandler.
+   * \param observer Pointer to observer object.
+   **/
+  virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer) = 0;
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
+  /**
+   * \brief Sets pointer to TransportManager.
+   * \param transportManager Pointer to TransportManager object.
+   **/
+  virtual void set_transport_manager(
       transport_manager::TransportManager* transport_manager) = 0;
 
-    virtual void StartTransportManager() = 0;
+  virtual void StartTransportManager() = 0;
 
-    virtual void ConnectToDevice(
+  virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandler() {
-    }
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~ConnectionHandler() {
+  }
 };
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_

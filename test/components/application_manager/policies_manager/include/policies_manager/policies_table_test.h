@@ -40,9 +40,9 @@
 
 TEST(policies_manager_test, class_test) {
   application_manager::policies_manager::PoliciesManager manager;
-  ASSERT_TRUE(manager.init());
-  ASSERT_TRUE(manager.is_valid_hmi_status(mobile_apis::FunctionID::RegisterAppInterfaceID, mobile_apis::HMILevel::HMI_NONE));
-  ASSERT_FALSE(manager.is_valid_hmi_status(mobile_apis::FunctionID::AddSubMenuID, mobile_apis::HMILevel::HMI_NONE));
+  ASSERT_TRUE(manager.Init());
+  ASSERT_TRUE(manager.IsValidHmiStatus(mobile_apis::FunctionID::RegisterAppInterfaceID, mobile_apis::HMILevel::HMI_NONE));
+  ASSERT_FALSE(manager.IsValidHmiStatus(mobile_apis::FunctionID::AddSubMenuID, mobile_apis::HMILevel::HMI_NONE));
 }
 
 #endif  // TEST_COMPONENTS_APPLICATION_MANAGER_POLICIES_TABLE_INCLUDE_POLICIES_TABLE_POLICIES_TABLE_TEST_H_

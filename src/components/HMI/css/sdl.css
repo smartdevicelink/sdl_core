@@ -90,6 +90,14 @@
 	padding-right: 15px;
 }
 
+#info_apps_deviceList_view .progress{
+    top: 175px;
+    left: 254px;
+    background: URL('../images/sdl/progress.gif') no-repeat;
+    width: 300px;
+    height: 200px;
+}
+
 #info_nonMedia {
 	z-index: 1001;
 }

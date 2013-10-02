@@ -46,19 +46,19 @@ const ApplicationHandle MockDevice::addApplication() {
   return app.handle;
 }
 
-void MockDevice::start() {
+void MockDevice::Start() {
   for (std::vector<MockApplication>::iterator it = applications_.begin();
       it != applications_.end();
       ++it) {
-    it->start();
+    it->Start();
   }
 }
 
-void MockDevice::stop() {
+void MockDevice::Stop() {
   for (std::vector<MockApplication>::iterator it = applications_.begin();
       it != applications_.end();
       ++it) {
-    it->stop();
+    it->Stop();
   }
 }
 

@@ -48,38 +48,35 @@ class Application;
  * data of any SyncP packets that SYNC needs to send back to the mobile device
  **/
 class OnEncodedSyncPDataNotification : public CommandResponseImpl {
-  public:
-    /**
-     * @brief OnEncodedSyncPDataNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnEncodedSyncPDataNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnEncodedSyncPDataNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnEncodedSyncPDataNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnEncodedSyncPDataNotification class destructor
-     **/
-    virtual ~OnEncodedSyncPDataNotification();
+  /**
+   * @brief OnEncodedSyncPDataNotification class destructor
+   **/
+  virtual ~OnEncodedSyncPDataNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    /*
-     * @brief Sends sync pdata notification to mobile device
-     *
-     * @param app Application to receive notification
-     */
-    void SendEncodedPData(const Application* app);
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnEncodedSyncPDataNotification);
+ private:
+  /*
+   * @brief Sends sync pdata notification to mobile device
+   *
+   * @param app Application to receive notification
+   */
+  void SendEncodedPData(const Application* app);
+  DISALLOW_COPY_AND_ASSIGN(OnEncodedSyncPDataNotification);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_ENCODED_SYNC_PDATA_NOTIFICATION_H_
-

@@ -1,6 +1,6 @@
 /**
  * \file tcp_device.cc
- * \brief
+ * \brief TcpDevice class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

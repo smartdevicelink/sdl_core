@@ -43,7 +43,8 @@ namespace commands {
 namespace mobile {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {
@@ -53,7 +54,7 @@ void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
   const std::set<Application*>& applications =
-    ApplicationManagerImpl::instance()->applications();
+      ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
   for (; applications.end() != it; ++it) {

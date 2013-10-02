@@ -66,21 +66,23 @@ bool RegisterAppInterfaceRequest::Init() {
 }
 
 void RegisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "
-               << (*message_)[strings::params][strings::connection_key].asInt());
+  LOG4CXX_INFO(
+    logger_,
+    "RegisterAppInterfaceRequest::Run "
+    << (*message_)[strings::params][strings::connection_key].asInt());
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
     timer_->StartWait(1);
   }
 
-  Application* application_impl =
-    ApplicationManagerImpl::instance()->RegisterApplication(message_);
+  Application* application_impl = ApplicationManagerImpl::instance()
+                                  ->RegisterApplication(message_);
 
   if (!application_impl) {
-    LOG4CXX_ERROR_EXT(logger_, "Application " <<
-                      ((*message_)[strings::msg_params][strings::app_name].asString()) <<
-                      "  hasn't been registered!");
+    LOG4CXX_ERROR_EXT(
+      logger_,
+      "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) << "  hasn't been registered!");
   } else {
     application_impl->set_mobile_app_id(
       (*message_)[strings::msg_params][strings::app_id]);
@@ -106,16 +108,16 @@ void RegisterAppInterfaceRequest::Run() {
 
     if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
       application_impl->set_app_types(
-          (*message_)[strings::msg_params][strings::app_hmi_type]);
+        (*message_)[strings::msg_params][strings::app_hmi_type]);
 
       // check if app is NAVI
       const int is_navi_type = 4;
       smart_objects::SmartObject app_type =
-          (*message_)[strings::msg_params].getElement(strings::app_hmi_type);
+        (*message_)[strings::msg_params].getElement(strings::app_hmi_type);
 
       for (size_t i = 0; i < app_type.length(); ++i) {
         if (is_navi_type == app_type[i].asInt()) {
-          application_impl->AllowNavigation(true);
+          application_impl->set_allowed_support_navigation(true);
         }
       }
     }
@@ -129,9 +131,9 @@ void RegisterAppInterfaceRequest::Run() {
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const Application& application_impl) {
-  mobile_apis::Result::eType result =  mobile_apis::Result::SUCCESS;
-  smart_objects::SmartObject* params =
-    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+  smart_objects::SmartObject* params = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
 
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -140,7 +142,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   smart_objects::SmartObject& response_params = *params;
 
-  ApplicationManagerImpl* app_manager =  ApplicationManagerImpl::instance();
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   response_params[strings::sync_msg_version][strings::major_version] =
     application_impl.version().max_supported_api_version;
@@ -148,21 +150,19 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     application_impl.version().min_supported_api_version;
 
   response_params[strings::language] = app_manager->active_vr_language();
-  response_params[strings::hmi_display_language] =
-    app_manager->active_ui_language();
+  response_params[strings::hmi_display_language] = app_manager
+      ->active_ui_language();
 
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
-      != app_manager->active_vr_language() ||
-      (*message_)[strings::msg_params][strings::hmi_display_language_desired]
+      != app_manager->active_vr_language()
+      || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
       .asInt() != app_manager->active_ui_language()) {
-    LOG4CXX_WARN_EXT(logger_, "Wrong language on registering application "
-                     << application_impl.name());
+    LOG4CXX_WARN_EXT(
+      logger_,
+      "Wrong language on registering application " << application_impl.name());
     LOG4CXX_ERROR_EXT(
-      logger_, "vr " << (*message_)[strings::msg_params]
-      [strings::language_desired].asInt() << " - " <<
-      app_manager->active_vr_language() << "ui " << (*message_)
-      [strings::msg_params][strings::hmi_display_language_desired].asInt()
-      << " - " << app_manager->active_ui_language());
+      logger_,
+      "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
@@ -178,9 +178,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     display_caps[hmi_response::text_fields] =
       app_manager->display_capabilities()->getElement(
         hmi_response::text_fields);
-    display_caps[hmi_response::media_clock_formats] =
-      app_manager->display_capabilities()->getElement(
-        hmi_response::media_clock_formats);
+    display_caps[hmi_response::media_clock_formats] = app_manager
+        ->display_capabilities()->getElement(hmi_response::media_clock_formats);
     if (app_manager->display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
       display_caps[hmi_response::graphic_supported] = true;
@@ -190,31 +189,31 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   if (app_manager->button_capabilities()) {
-    response_params[hmi_response::button_capabilities] =
-      *app_manager->button_capabilities();
+    response_params[hmi_response::button_capabilities] = *app_manager
+        ->button_capabilities();
   }
   if (app_manager->soft_button_capabilities()) {
-    response_params[hmi_response::soft_button_capabilities] =
-      *app_manager->soft_button_capabilities();
+    response_params[hmi_response::soft_button_capabilities] = *app_manager
+        ->soft_button_capabilities();
   }
   if (app_manager->preset_bank_capabilities()) {
-    response_params[hmi_response::preset_bank_capabilities] =
-      *app_manager->preset_bank_capabilities();
+    response_params[hmi_response::preset_bank_capabilities] = *app_manager
+        ->preset_bank_capabilities();
   }
   if (app_manager->hmi_zone_capabilities()) {
-    response_params[hmi_response::hmi_zone_capabilities] =
-      *app_manager->hmi_zone_capabilities();
+    response_params[hmi_response::hmi_zone_capabilities] = *app_manager
+        ->hmi_zone_capabilities();
   }
   if (app_manager->speech_capabilities()) {
-    response_params[strings::speech_capabilities] =
-      *app_manager->speech_capabilities();
+    response_params[strings::speech_capabilities] = *app_manager
+        ->speech_capabilities();
   }
   if (app_manager->vr_capabilities()) {
     response_params[strings::vr_capabilities] = *app_manager->vr_capabilities();
   }
   if (app_manager->audio_pass_thru_capabilities()) {
-    response_params[strings::audio_pass_thru_capabilities] =
-      *app_manager->audio_pass_thru_capabilities();
+    response_params[strings::audio_pass_thru_capabilities] = *app_manager
+        ->audio_pass_thru_capabilities();
   }
   if (app_manager->vehicle_type()) {
     response_params[hmi_response::vehicle_type] = *app_manager->vehicle_type();

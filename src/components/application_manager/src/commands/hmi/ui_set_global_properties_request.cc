@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UISetGlobalPropertiesRequest::UISetGlobalPropertiesRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {

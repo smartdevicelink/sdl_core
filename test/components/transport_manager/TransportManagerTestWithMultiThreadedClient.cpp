@@ -409,7 +409,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
             ;
 
             addTransportAdapter(mpTransportAdapter);
-            LOG4CXX_INFO_EXT(mLogger, "Device adapters initialized");
+            LOG4CXX_INFO_EXT(mLogger, "Transport adapters initialized");
         }
 
     protected:

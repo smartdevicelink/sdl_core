@@ -1,6 +1,6 @@
 /**
- * \file transport_adapter_impl.cpp
- * \brief Class TransportAdapterImpl.
+ * \file transport_adapter_impl.cc
+ * \brief TransportAdapterImpl class source file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

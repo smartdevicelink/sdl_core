@@ -44,7 +44,8 @@ namespace application_manager {
 namespace commands {
 
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
@@ -63,12 +64,12 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
+      (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+      (*message_)[strings::params][strings::connection_key];
 
-  size_t obj_length =
-    (*message_)[strings::msg_params][strings::properties].length();
+  size_t obj_length = (*message_)[strings::msg_params][strings::properties]
+      .length();
 
   bool helpt_promt = false;
   bool timeout_promt = false;
@@ -94,8 +95,11 @@ void ResetGlobalPropertiesRequest::Run() {
         break;
       }
       default: {
-        LOG4CXX_ERROR(logger_, "Unknown global property 0x%02X value" <<
-            (*message_)[strings::msg_params][strings::properties][i].asInt());
+        LOG4CXX_ERROR(
+            logger_,
+            "Unknown global property 0x%02X value"
+                << (*message_)[strings::msg_params][strings::properties][i]
+                    .asInt());
         break;
       }
     }
@@ -113,9 +117,8 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   if (vr_help_title || vr_help_items) {
-
-    smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     if (vr_help_title) {
       msg_params[strings::vr_help_title] = (*app->vr_help_title());
@@ -127,14 +130,14 @@ void ResetGlobalPropertiesRequest::Run() {
 
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
-                     msg_params, true, chaining_counter);
+    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
+                     true, chaining_counter);
   }
 
   if (timeout_promt || helpt_promt) {
     // create ui request
-    smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
     if (helpt_promt) {
       msg_params[strings::help_prompt] = (*app->help_promt());
@@ -149,10 +152,10 @@ void ResetGlobalPropertiesRequest::Run() {
     // check if only tts request should be sent
     if (1 == chaining_counter) {
       CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                           msg_params, true, chaining_counter);
+                       msg_params, true, chaining_counter);
     } else {
       CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                     msg_params, true);
+                       msg_params, true);
     }
   }
 }
@@ -164,16 +167,16 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
     return false;
   }
 
-  const std::vector<std::string>& help_promt =
-      profile::Profile::instance()->help_promt();
+  const std::vector<std::string>& help_promt = profile::Profile::instance()
+      ->help_promt();
 
-  smart_objects::SmartObject so_help_promt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
+      smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < help_promt.size(); ++i) {
-    smart_objects::SmartObject helpPrompt =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    helpPrompt[strings::text] =  help_promt[i];
+    smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    helpPrompt[strings::text] = help_promt[i];
     so_help_promt[i] = helpPrompt;
   }
 
@@ -189,15 +192,15 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
     return false;
   }
 
-  const std::vector<std::string>& time_out_promt =
-      profile::Profile::instance()->time_out_promt();
+  const std::vector<std::string>& time_out_promt = profile::Profile::instance()
+      ->time_out_promt();
 
-  smart_objects::SmartObject so_time_out_promt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
+      smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
-    smart_objects::SmartObject timeoutPrompt =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
     so_time_out_promt[i] = timeoutPrompt;
   }
@@ -241,8 +244,8 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
     }
     // use only first
     vr_help_items[index][strings::position] = index;
-    vr_help_items[index++][strings::text] = (*command_it->second)[strings::vr_commands][0];
-
+    vr_help_items[index++][strings::text] =
+        (*command_it->second)[strings::vr_commands][0];
   }
 
   app->set_vr_help(vr_help_items);

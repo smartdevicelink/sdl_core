@@ -1,6 +1,6 @@
 /**
  * \file transport_adapter_controller.h
- * \brief Device adapter controller header file.
+ * \brief TransportAdapterController class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

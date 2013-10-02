@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 SpeakResponse::SpeakResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 SpeakResponse::~SpeakResponse() {

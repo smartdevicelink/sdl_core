@@ -32,13 +32,12 @@
 
 #include "application_manager/commands/hmi/close_popup_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-ClosePopupRequest::ClosePopupRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+ClosePopupRequest::ClosePopupRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 ClosePopupRequest::~ClosePopupRequest() {

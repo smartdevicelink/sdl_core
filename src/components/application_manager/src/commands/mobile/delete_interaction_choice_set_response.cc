@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
@@ -51,7 +52,7 @@ DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
 void DeleteInteractionChoiceSetResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetResponse::Run");
 
-   // check if response false
+  // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
       LOG4CXX_ERROR(logger_, "Success = false");

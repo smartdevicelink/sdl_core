@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIShowVrHelpRequest::UIShowVrHelpRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+UIShowVrHelpRequest::UIShowVrHelpRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIShowVrHelpRequest::~UIShowVrHelpRequest() {

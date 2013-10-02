@@ -33,13 +33,12 @@
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
 OnDeviceChosenNotification::~OnDeviceChosenNotification() {
@@ -50,8 +49,8 @@ void OnDeviceChosenNotification::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
     ApplicationManagerImpl::instance()->ConnectToDevice(
-      (*message_)[strings::msg_params][strings::device_info]
-      [strings::id].asInt());
+        (*message_)[strings::msg_params][strings::device_info][strings::id]
+            .asInt());
   }
 }
 

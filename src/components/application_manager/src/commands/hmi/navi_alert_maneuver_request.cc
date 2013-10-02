@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 NaviAlertManeuverRequest::NaviAlertManeuverRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+  const MessageSharedPtr& message) : RequestToHMI(message) {
 }
 
 NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {

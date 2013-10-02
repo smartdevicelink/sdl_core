@@ -37,7 +37,8 @@ namespace application_manager {
 namespace commands {
 
 UIScrollableMessageRequest::UIScrollableMessageRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 UIScrollableMessageRequest::~UIScrollableMessageRequest() {

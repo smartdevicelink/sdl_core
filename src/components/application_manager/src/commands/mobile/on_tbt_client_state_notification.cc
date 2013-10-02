@@ -41,7 +41,8 @@ namespace application_manager {
 namespace commands {
 
 OnTBTClientStateNotification::OnTBTClientStateNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnTBTClientStateNotification::~OnTBTClientStateNotification() {
@@ -51,10 +52,10 @@ void OnTBTClientStateNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTBTClientStateNotification::Run");
 
   (*message_)[strings::params][strings::message_type] =
-    MessageType::kNotification;
+      MessageType::kNotification;
 
   const std::vector<Application*>& applications =
-    ApplicationManagerImpl::instance()->applications_with_navi();
+      ApplicationManagerImpl::instance()->applications_with_navi();
 
   std::vector<Application*>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {

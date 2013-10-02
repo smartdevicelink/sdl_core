@@ -31,9 +31,9 @@
  * @version 1.0
  */
 
-SDL.SDLAppController = Em.Object.create( {
+SDL.SDLAppController = Em.Object.create({
 
-    init: function() {
+    init: function () {
 
         this._super();
 
@@ -48,11 +48,11 @@ SDL.SDLAppController = Em.Object.create( {
 
     /**
      * Handeler for command button press
-     * 
+     *
      * @param element:
      *            SDL.Button
      */
-    onCommand: function(element) {
+    onCommand: function (element) {
 
         // if submenu
         if (element.menuID >= 0) {
@@ -72,10 +72,10 @@ SDL.SDLAppController = Em.Object.create( {
 
     /**
      * Open commands submenu
-     * 
+     *
      * @param {Number}
      */
-    onSubMenu: function(id) {
+    onSubMenu: function (id) {
 
         this.model.set('currentSubMenuId', id);
     },
@@ -85,20 +85,20 @@ SDL.SDLAppController = Em.Object.create( {
      *
      * @param {Number}
      */
-    buttonsSort: function(arrayId) {
+    buttonsSort: function (arrayId) {
 
-        this.model.commandsList[arrayId].sort(function(a,b) {
+        this.model.commandsList[arrayId].sort(function (a, b) {
             return a.position - b.position;
         })
     },
 
     /**
      * Handeler for command button press
-     * 
+     *
      * @param element:
      *            SDL.Button
      */
-    onVRCommand: function(element) {
+    onVRCommand: function (element) {
 
         FFW.VR.onCommand(element.commandID, element.appID);
     },
@@ -106,11 +106,11 @@ SDL.SDLAppController = Em.Object.create( {
     /**
      * Handeler for preform interaction choice send response to device and
      * deactivate interactions window
-     * 
+     *
      * @param element:
      *            SDL.Button
      */
-    onChoiceInteraction: function(element) {
+    onChoiceInteraction: function (element) {
 
         SDL.InteractionChoicesView.deactivate("SUCCESS", element.choiceID);
     },
@@ -135,7 +135,7 @@ SDL.SDLAppController = Em.Object.create( {
     /**
      * Open commands list
      */
-    openCommandsList: function() {
+    openCommandsList: function () {
 
         SDL.OptionsView.activate();
     },
@@ -144,11 +144,10 @@ SDL.SDLAppController = Em.Object.create( {
      * Notification of deactivation of current application model initiated in
      * StateManager
      */
-    deactivateApp: function() {
+    deactivateApp: function () {
 
         if (this.model) {
-            SDL.SDLModel
-                .onDeactivateApp(SDL.States.nextState, this.model.appID);
+            SDL.SDLModel.onDeactivateApp(SDL.States.nextState, this.model.appID);
         }
 
     },
@@ -156,12 +155,12 @@ SDL.SDLAppController = Em.Object.create( {
     /**
      * Method clears all applications data and unregister models
      */
-    onSDLDisconected: function() {
+    onSDLDisconected: function () {
 
         var i = 0, apps = SDL.SDLModel.registeredApps;
 
         for (i = 0; i < apps.length; i++) {
-            SDL.SDLModel.onAppUnregistered( {
+            SDL.SDLModel.onAppUnregistered({
                 "appID": apps[i].appID
             });
         }

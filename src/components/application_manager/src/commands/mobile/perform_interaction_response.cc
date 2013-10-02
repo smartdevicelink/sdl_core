@@ -44,7 +44,8 @@ namespace application_manager {
 namespace commands {
 
 PerformInteractionResponse::PerformInteractionResponse(
-  const MessageSharedPtr& message): CommandResponseImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 PerformInteractionResponse::~PerformInteractionResponse() {
@@ -63,7 +64,7 @@ void PerformInteractionResponse::Run() {
   }
 
   const unsigned int correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
+      (*message_)[strings::params][strings::correlation_id].asUInt();
 
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();

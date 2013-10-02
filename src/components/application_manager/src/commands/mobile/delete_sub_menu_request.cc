@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuRequest::DeleteSubMenuRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+DeleteSubMenuRequest::DeleteSubMenuRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {
@@ -50,9 +50,8 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
-  Application* app =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,7 +60,7 @@ void DeleteSubMenuRequest::Run() {
   }
 
   if (!app->FindSubMenu(
-        (*message_)[strings::msg_params][strings::menu_id].asInt()))  {
+      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
@@ -71,11 +70,11 @@ void DeleteSubMenuRequest::Run() {
   DeleteSubMenuVRCommands(app);
   DeleteSubMenuUICommands(app);
 
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
-    (*message_)[strings::msg_params][strings::menu_id];
+      (*message_)[strings::msg_params][strings::menu_id];
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, msg_params, true, 1);
@@ -88,11 +87,11 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
-      (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
-
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
+        == (*it->second)[strings::menu_params]
+                         [hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       msg_params[strings::app_id] = app->app_id();
 
@@ -108,20 +107,20 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
-        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
+        == (*it->second)[strings::menu_params]
+                         [hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = app->app_id();
+      msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
 
-        smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_params[strings::app_id] = app->app_id();
-        msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
+      app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
 
-        app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
+      it = commands.begin();  // Can not relay on
+                              // iterators after erase was called
 
-        it = commands.begin(); // Can not relay on
-                               // iterators after erase was called
-
-        CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params);
+      CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params);
     } else {
       ++it;
     }

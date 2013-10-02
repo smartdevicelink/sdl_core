@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL_H_
 
 #include "utils/threads/thread_delegate.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -39,20 +39,20 @@
 namespace hmi_message_handler {
 
 class FromHMIThreadImpl : public threads::ThreadDelegate {
-  public:
-    explicit FromHMIThreadImpl(HMIMessageHandlerImpl* handler);
-    ~FromHMIThreadImpl();
+ public:
+  explicit FromHMIThreadImpl(HMIMessageHandlerImpl* handler);
+  ~FromHMIThreadImpl();
 
-    void threadMain();
+  void threadMain();
 
-  private:
-    HMIMessageHandlerImpl* handler_;
+ private:
+  HMIMessageHandlerImpl* handler_;
 
-    static log4cxx::LoggerPtr logger_;
+  static log4cxx::LoggerPtr logger_;
 
-    DISALLOW_COPY_AND_ASSIGN(FromHMIThreadImpl);
+  DISALLOW_COPY_AND_ASSIGN(FromHMIThreadImpl);
 };
 
 }  //  namespace hmi_message_handler
 
-#endif  //  SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_SRC_FROM_HMI_THREAD_IMPL_H_

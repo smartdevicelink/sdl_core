@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnShowNotification::OnShowNotification(
-  const MessageSharedPtr& message): NotificationToHMI(message) {
+OnShowNotification::OnShowNotification(const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
 }
 
 OnShowNotification::~OnShowNotification() {
