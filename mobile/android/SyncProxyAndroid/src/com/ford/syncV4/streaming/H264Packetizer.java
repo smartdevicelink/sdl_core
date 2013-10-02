@@ -44,19 +44,26 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                doDataReading();
+                try {
+                    doDataReading();
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.toString());
+                    break;
+                    //TODO - this NPE is really last hope to save app form crash. We must get sure never have it.
+                } catch (NullPointerException e) {
+                    Log.e(TAG, e.toString());
+                    break;
+                }
             }
         } catch (IOException e) {
-            Log.e("SyncProxyTester", e.toString());
+            Log.e(TAG, e.toString());
         }
     }
 
     public void doDataReading() throws IOException, IllegalArgumentException {
-        if (is != null) {
-            byte[] frameData = readFrameData(byteBuffer, dataBuffer);
-            if (frameData != null && frameData.length > 0) {
-                createProtocolMessage(frameData);
-            }
+        byte[] frameData = readFrameData(byteBuffer, dataBuffer);
+        if (frameData != null && frameData.length > 0) {
+            createProtocolMessage(frameData);
         }
     }
 
@@ -95,8 +102,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     }
 
     private MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
-        checkPreconditions(data);
-        int length = is.read(data);
+        int length = readDataFromStream(data);
         if (length == -1) {
             return MobileNaviDataFrame.createEndOfSessionFrame();
         } else {
@@ -108,6 +114,11 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             }
             return frame;
         }
+    }
+
+    private synchronized int readDataFromStream(byte[] data) throws IOException {
+        checkPreconditions(data);
+        return is.read(data);
     }
 
     private void checkPreconditions(byte[] data) {
