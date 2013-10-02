@@ -34,38 +34,32 @@
 
 import QtQuick 2.0
 import "../controls"
-
 GeneralView {
     RadioPlayerView {
         id: fmRadioPlayer
         anchors.fill: parent
         radioType: "FM"
         radioName: "FM Radio"
+        presets: ["96.3", "107.9", "104.3", "101.9", "105.3", "100.5", "107.9", "103.4"]
         songName: "So Far Around The Bend"
         albumName: "The National"
-        presets: ["96.3", "107.9", "104.3", "101.9", "105.3", "100.5", "107.9", "103.4"]
+
+        property int hdButtonValue: 1
 
         buttonHD: [
-            //TODO: (ALeshin) Remake button and it's behavior
-            LongOvalButton {
-                id: hdBtn
+            Image {
+                id: hdButton
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
+                source: "../res/buttons/long_oval_btn.png"
+                property string textColor: "#1d81d5"
 
                 Row {
-                    id: row
-                    anchors.verticalCenter: parent.verticalCenter
-                    x: parent.x + 20
-                    spacing: 5
-                    property int selected: 0
-
-                    MouseArea {
-                        onClicked: {
-                            //todo: change color of text
-                        }
-                    }
+                    anchors.centerIn: parent
+                    spacing: (hdButton.width - hdLogo.width - one.width - two.width - three.width - four.width) / 10
 
                     Image {
+                        id: hdLogo
                         anchors.verticalCenter: parent.verticalCenter
                         source:"../res/hd_logo_on.png"
                     }
@@ -74,7 +68,7 @@ GeneralView {
                         id: one
                         anchors.verticalCenter: parent.verticalCenter
                         text: "1"
-                        color: "white"
+                        color: fmRadioPlayer.hdButtonValue === 1 ? "white" : hdButton.textColor
                         font.pixelSize: 25
                     }
 
@@ -82,7 +76,7 @@ GeneralView {
                         id: two
                         anchors.verticalCenter: parent.verticalCenter
                         text: "2"
-                        color: parent.selected == 1 ? "white" : "#1d81d5"
+                        color: fmRadioPlayer.hdButtonValue === 2 ? "white" : hdButton.textColor
                         font.pixelSize: 25
                     }
 
@@ -90,16 +84,32 @@ GeneralView {
                         id: three
                         anchors.verticalCenter: parent.verticalCenter
                         text: "3"
-                        color: parent.selected == 2 ? "white" : "#1d81d5"
+                        color: fmRadioPlayer.hdButtonValue === 3 ? "white" : hdButton.textColor
                         font.pixelSize: 25
                     }
 
                     Text {
-                        id: fourth
+                        id: four
                         anchors.verticalCenter: parent.verticalCenter
                         text: "4"
-                        color: parent.selected == 3 ? "white" : "#1d81d5"
+                        color: fmRadioPlayer.hdButtonValue === 4 ? "white" : hdButton.textColor
                         font.pixelSize: 25
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        hdLogo.source = "../res/hd_logo_off.png"
+                        hdButton.source = "../res/buttons/long_oval_pressed_btn.png"
+                        hdButton.textColor = "black"
+
+                    }
+                    onReleased: {
+                        hdLogo.source = "../res/hd_logo_on.png"
+                        hdButton.source = "../res/buttons/long_oval_btn.png"
+                        hdButton.textColor = "#1d81d5"
+                        fmRadioPlayer.hdButtonValue === 4 ? fmRadioPlayer.hdButtonValue = 1 : fmRadioPlayer.hdButtonValue++
                     }
                 }
             }
