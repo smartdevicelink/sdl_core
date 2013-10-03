@@ -219,6 +219,9 @@ const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
 const char show_strings[] = "showStrings";
 const char interaction_layout[] = "interactionLayout";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
 }  // namespace hmi_request
 
 namespace hmi_response {
