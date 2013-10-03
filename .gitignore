@@ -71,4 +71,4 @@ moc_*.cpp
 # generated files
 src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.cc
 src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.h
-src/components/qt_hmi/qml_model/hmi_api/auto
+src/components/qt_hmi/qml_model/hmi_api/*Proxy.qml
