@@ -657,8 +657,6 @@ FFW.UI = FFW.RPCObserver.create({
 
         if (manualTextEntry) {
             JSONMessage.result.manualTextEntry = manualTextEntry;
-            JSONMessage.result.triggerSource = 'KEYBOARD';
-
         }
 
 

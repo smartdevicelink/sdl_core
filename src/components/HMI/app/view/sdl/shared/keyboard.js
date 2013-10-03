@@ -68,12 +68,41 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     },
 
     inputChanges: function (element) {
-        if (element.text === "Space") {
-            this.searchBar.input.set('value', this.searchBar.input.value + " ");
-            this.target.set('value', this.searchBar.input.value + " ");
-        } else {
-            this.searchBar.input.set('value', this.searchBar.input.value + element.text);
-            this.target.set('value', this.searchBar.input.value + " ");
+
+//        TO DO
+//        var keyboardEvent = document.createEvent("KeyboardEvent");
+//        var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
+//
+//
+//        keyboardEvent[initMethod](
+//            "keydown", // event type : keydown, keyup, keypress
+//            true, // bubbles
+//            true, // cancelable
+//            window, // viewArg: should be window
+//            false, // ctrlKeyArg
+//            false, // altKeyArg
+//            false, // shiftKeyArg
+//            false, // metaKeyArg
+//            element.text.charCodeAt(0), // keyCodeArg : unsigned long the virtual key code, else 0
+//            0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
+//        );
+
+        switch (element.text) {
+            case "Space": {
+                this.searchBar.input.set('value', this.searchBar.input.value + " ");
+                this.target.set('value', this.searchBar.input.value + " ");
+                break;
+            }
+            case "Search": {
+                this.target.search();
+                this.deactivate();
+                break;
+            }
+            default:{
+                this.searchBar.input.set('value', this.searchBar.input.value + element.text);
+                this.target.set('value', this.searchBar.input.value + " ");
+            }
+
         }
     },
 
@@ -112,12 +141,15 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             classNames: 'serchIcon'
         }),
 
-        input: Ember.TextArea.extend({
-            tagName: 'input',
-            attribute: ['type:text'],
-            valueBinding: 'SDL.SDLModel.keyboardInputValue',
-            attributeBindings: ['disabled'],
-            disabled: false
+        input: Ember.TextField.extend({
+            elementId: "tf1",
+            classNames: "tf1"
+            //tagName: 'input',
+            //type: 'text',
+            //attribute: ['type:text'],
+            //valueBinding: 'SDL.SDLModel.keyboardInputValue',
+            //attributeBindings: ['disabled'],
+            //disabled: false
         })
 
     }),
@@ -172,9 +204,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
         searchBtn: SDL.Button.extend({
             classNames: 'searchBtn controll',
-            text: 'Search'
-            //target: 'SDL.SDLController',
-            //action: 'searchBtn'
+            text: 'Search',
+            target: 'parentView.parentView',
+            action: 'inputChanges'
         })
     }),
 

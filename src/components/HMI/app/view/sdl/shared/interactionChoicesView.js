@@ -62,6 +62,9 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             disabled: false,
             click: function(){
                 SDL.SDLModel.uiShowKeyboard(this);
+            },
+            search: function(){
+                this.get('parentView').deactivate("SUCCESS");
             }
         }),
 
