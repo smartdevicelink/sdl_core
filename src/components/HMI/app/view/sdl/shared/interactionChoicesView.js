@@ -179,6 +179,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
 
                 this.set('list', true);
+                this.set('icon', false);
+                this.set('search', false);
                 this.set('active', true);
             }
 
