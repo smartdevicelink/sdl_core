@@ -69,6 +69,7 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
+import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -107,6 +108,7 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
+import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -247,6 +249,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * check it when the user has explicitly set the soft buttons.
      */
     private CheckBox chkIncludeSoftButtons;
+    /**
+     * KeyboardProperties object passed between KeyboardPropertiesActivity and
+     * this activity.
+     */
+    private KeyboardProperties currentKbdProperties;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
      * filename is set after choosing.
@@ -413,8 +420,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         loadMessageSelectCount();
 
         isFirstActivityRun = false;
-
-
     }
 
     private void loadMessageSelectCount() {
@@ -2588,7 +2593,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final boolean isMedia = getIsMedia();
 
                             if (!isMedia) {
-                                int visibility = android.view.View.GONE;
+                                int visibility = View.GONE;
                                 mediaClock.setVisibility(visibility);
                                 mediaTrack.setVisibility(visibility);
                                 mediaTrackCheck.setVisibility(visibility);
@@ -3203,7 +3208,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         private void sendSetGlobalProperties() {
                             AlertDialog.Builder builder;
 
-                            Context mContext = adapter.getContext();
+                            final Context mContext = adapter.getContext();
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
                             View layout = inflater.inflate(R.layout.setglobalproperties,
@@ -3219,6 +3224,43 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
                             final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
                             final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
+                            final CheckBox choiceMenuTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuTitle);
+                            final EditText menuTitle = (EditText) layout.findViewById(R.id.setglobalproperties_menuTitle);
+                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuIcon);
+                            final EditText menuIcon = (EditText) layout.findViewById(R.id.setglobalproperties_menuIcon);
+                            final Spinner menuIconType = (Spinner) layout.findViewById(R.id.setglobalproperties_menuIconType);
+                            final CheckBox chkKbdProperties = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceKbdProperties);
+
+                            menuIconType.setAdapter(imageTypeAdapter);
+                            menuIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+
+                            currentKbdProperties = new KeyboardProperties();
+                            currentKbdProperties.setLanguage(Language.EN_US);
+                            currentKbdProperties.setKeyboardLayout(
+                                    KeyboardLayout.QWERTY);
+                            currentKbdProperties.setAutoCompleteText(getString(
+                                    R.string.keyboardproperties_autoCompleteTextDefault));
+                            currentKbdProperties.setLimitedCharacterList(new Vector<String>() {{
+                                add("a");
+                                add("b");
+                                add("c");
+                            }});
+                            currentKbdProperties.setSendDynamicEntry(false);
+
+                            Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
+                            btnKbdProperties.setOnClickListener(
+                                    new OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            IntentHelper.addObjectForKey(
+                                                    currentKbdProperties,
+                                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                                            Intent intent = new Intent(mContext,
+                                                    KeyboardPropertiesActivity.class);
+                                            startActivityForResult(intent,
+                                                    Const.REQUEST_EDIT_KBDPROPERTIES);
+                                        }
+                                    });
 
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3286,6 +3328,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         ++numberOfChoices;
                                     }
 
+                                    if (choiceMenuTitle.isChecked()) {
+                                        String title = menuTitle.getText().toString();
+                                        msg.setMenuTitle(title);
+                                        ++numberOfChoices;
+                                    }
+
+                                    if (choiceMenuIcon.isChecked()) {
+                                        Image image = new Image();
+                                        image.setValue(menuIcon.getText().toString());
+                                        image.setImageType(imageTypeAdapter.getItem(menuIconType.getSelectedItemPosition()));
+                                        msg.setMenuIcon(image);
+                                        ++numberOfChoices;
+                                    }
+
+                                    if (chkKbdProperties.isChecked() &&
+                                            (currentKbdProperties != null)) {
+                                        msg.setKeyboardProperties(currentKbdProperties);
+                                        ++numberOfChoices;
+                                    }
+
                                     if (numberOfChoices > 0) {
                                         msg.setCorrelationID(autoIncCorrId++);
                                         _msgAdapter.logMessage(msg, true);
@@ -3294,6 +3356,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
+                                        currentKbdProperties = null;
                                     } else {
                                         Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
                                     }
@@ -3301,6 +3364,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
+                                    currentKbdProperties = null;
                                     dialog.cancel();
                                 }
                             });
@@ -3761,6 +3825,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         xmlTestContinue(filePath);
                     }
                 }
+                break;
+
+            case Const.REQUEST_EDIT_KBDPROPERTIES:
+                if (resultCode == RESULT_OK) {
+                    currentKbdProperties =
+                            (KeyboardProperties) IntentHelper.getObjectForKey(
+                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                    if (currentKbdProperties == null) {
+                        Log.w(logTag, "Returned kbdProperties is null!");
+                    }
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
                 break;
 
             default:

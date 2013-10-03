@@ -69,6 +69,10 @@
                     android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                     android:resource="@xml/accessory_filter"/>
         </activity>
+
+        <activity
+                android:name=".activity.KeyboardPropertiesActivity"
+                android:label="@string/title_activity_keyboard_properties"/>
     </application>
 
     <!-- Version 12 is minimum to support the USB Accessory mode -->

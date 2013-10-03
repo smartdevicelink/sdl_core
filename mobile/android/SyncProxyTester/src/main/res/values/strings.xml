@@ -127,6 +127,7 @@
     <string name="addsubmenu_menuIDDefault">42</string>
     <string name="addsubmenu_menuPos">Submenu Position</string>
     <string name="addsubmenu_menuPosDefault">1000</string>
+
     <string name="setglobalproperties_helpPrompt">Help prompt (comma-separated)</string>
     <string name="setglobalproperties_helpPromptDefault">Help prompt 1,Second help prompt</string>
     <string name="setglobalproperties_timeoutPrompt">Timeout prompt (comma-separated)</string>
@@ -137,6 +138,13 @@
     <string name="setglobalproperties_vrHelpItemPosDefault">1,2,3</string>
     <string name="setglobalproperties_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
     <string name="setglobalproperties_vrHelpItemImageDefault">action.png,action.png,action.png</string>
+    <string name="setglobalproperties_menuTitle">Menu Title</string>
+    <string name="setglobalproperties_menuTitleDefault">Menu111</string>
+    <string name="setglobalproperties_menuIcon">Menu Icon</string>
+    <string name="setglobalproperties_menuIconDefault">action.png</string>
+    <string name="setglobalproperties_choiceKbdProperties">Include</string>
+    <string name="setglobalproperties_kbdProperties">Keyboard Properties</string>
+
     <string name="performaudiopassthru_initPrompt">Initial Prompt</string>
     <string name="performaudiopassthru_initPromptDefault">Initial Prompt</string>
     <string name="performaudiopassthru_text1">AudioPassThru Display Text 1</string>
@@ -162,5 +170,15 @@
     <string name="mobile_navi_check_box_on">Mobile Session Running</string>
     <string name="video_check_box_on">Video Streaming running</string>
     <string name="mobileNavi">MobileNavi</string>
+
+    <string name="title_activity_keyboard_properties">KeyboardProperties</string>
+    <string name="keyboardproperties_useLanguage">Language</string>
+    <string name="keyboardproperties_useKbdLayout">Keyboard Layout</string>
+    <string name="keyboardproperties_useSendDynamicEntry">Use</string>
+    <string name="keyboardproperties_sendDynamicEntry">Send Dynamic Entry</string>
+    <string name="keyboardproperties_useLimitedCharacterList">Limited Character List (comma-separated)</string>
+    <string name="keyboardproperties_limitedCharacterListDefault">a,b,c,d,e,f</string>
+    <string name="keyboardproperties_useAutoCompleteText">Autocomplete Text</string>
+    <string name="keyboardproperties_autoCompleteTextDefault">Daemon, Freedom</string>
 
 </resources>

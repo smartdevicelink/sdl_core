@@ -1,4 +1,5 @@
 [CW40]
++ SetGlobalProperties dialog: add menuTitle, menuIcon, and keyboardProperties parameters.
 + ShowConstantTBT dialog: add timeToDestination and nextTurnIcon parameters.
 + SyncProxyAndroid SDK: Extend ShowConstantTBT and SetGlobalProperties request objects.
 + PerformInteraction dialog: add interactionLayout parameter.
