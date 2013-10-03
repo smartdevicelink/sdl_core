@@ -54,5 +54,5 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.log4cxx 1.0 ${model_dir} > ${destination}/plugins.qmltypes)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.log4cxx 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
 target_link_libraries(${target} log4cxx)

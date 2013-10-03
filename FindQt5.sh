@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Copyright (c) 2013, Ford Motor Company
 # All rights reserved.
 #
@@ -28,49 +30,42 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.9)
+QT5_REQUIRED_VERSION="5.1.0"
 
-set(CMAKE_AUTOMOC ON)
-
-set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-set(dbus_dir ${components_dir}/dbus)
-set(codegen_dir ${dbus_dir}/codegen)
-set(interfaces_dir ${components_dir}/interfaces)
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.cc ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.h
-  COMMAND python ${codegen_dir}/make_qml_dbus_cpp.py --infile ${interfaces_dir}/HMI_API.xml
-    --outdir ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-set(SOURCES
-  dbus_plugin.cc
-  qml_dbus.cc
-  sdlproxy.cc
-  hmiproxy.cc
-  stream_qvariant.cc
-  moc_qml_dbus.cpp
-)
-
-qt5_generate_moc(qml_dbus.h moc_qml_dbus.cpp)
-
-set(target DbusAdapter)
-
-add_library(${target} SHARED ${SOURCES})
-
-qt5_use_modules(${target} Core DBus Qml Quick)
-
-set(model_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model)
-set(destination ${model_dir}/com/ford/sdl/hmi/dbus_adapter)
-
-target_link_libraries(${target} log4cxx)
-
-install(TARGETS ${target}
-  DESTINATION ${destination}
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
-install(FILES qmldir DESTINATION ${destination})
-
-add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
+qmake_list=`find -L $CUSTOM_QT5_DIR ~ /opt /usr -name qmake -type f -executable -print 2>/dev/null || true` # first we look for qmake binary
+for qmake_binary in $qmake_list; do # for all candidates
+  grep_result=`$qmake_binary -version | grep "Qt version "$QT5_REQUIRED_VERSION || true` # ask version (only qmake provides this option for sure)
+  if [ -n "$grep_result" ]; then # if version matches
+    if [ -z $1 ]; then # if no argument specified
+      exit 0 # we are happy already
+    fi
+    QT5_DIR=`dirname $qmake_binary`
+    case $1 in
+      binary) # binary check
+        if [ -z $2 ]; then # if no argument specified
+          exit 1 # syntax error
+        fi
+        qt5_binary=$QT5_DIR/$2 # check specified binary
+        if [ -x $qt5_binary ]; then # to be executable
+          if ! [ -d $qt5_binary ]; then # and not to be directory
+            echo -n $qt5_binary # output without newline
+            exit 0
+          fi
+        fi
+        ;;
+      file) # file lookup
+        if [ -z $2 ]; then # if no argument specified
+          exit 1 # syntax error
+        fi
+        qt5_file=`find $QT5_DIR/.. -name $2 -type f -print0 -quit 2>/dev/null` # find specified file
+        if [ -n "$qt5_file" ]; then # if found
+          echo -n $qt5_file # output without newline
+          exit 0
+        fi
+        ;;
+      *) # unrecognized command
+        exit 1 # syntax error
+    esac
+  fi
+done
+exit 1 # haven't found anything

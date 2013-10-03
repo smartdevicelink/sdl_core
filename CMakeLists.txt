@@ -78,9 +78,9 @@ FIND_PACKAGE(Qt5DBus REQUIRED)
 FIND_PACKAGE(Qt5Qml REQUIRED)
 FIND_PACKAGE(Qt5Quick REQUIRED)
 
-find_program(qmlplugindump_binary
-  NAMES qmlplugindump
-  PATHS /opt ~ /usr /
+execute_process(
+  COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlplugindump
+  OUTPUT_VARIABLE qmlplugindump_binary
 )
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")

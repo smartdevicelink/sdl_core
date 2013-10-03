@@ -32,6 +32,20 @@
 
 set -e
 
+echo "Detecting machine architecture"
+uname_result=`uname -i`
+if [ ${uname_result} = "i386" ]; then
+  echo "x86 machine detected"
+  ARCH="i386"
+elif [ ${uname_result} = "x86_64" ]; then
+  echo "x64 machine detected"
+  ARCH="x64"
+else
+  echo "unknown architecture - exit"
+  exit
+fi
+echo
+
 SUBVERSION="subversion"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
@@ -40,9 +54,22 @@ CHROMIUM_BROWSER="chromium-browser"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
-CMAKE_BUILD_SYSTEM="cmake"
-QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-QT5_RUNFILE_SRC="https://adc.luxoft.com/svn/APPLINK/dist/qt5.1/runfile"
+APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
+CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
+CMAKE_DEB_DST="/tmp"
+CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
+if [ ${ARCH} = "i386" ]; then
+  CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+elif [ ${ARCH} = "x64" ]; then
+  CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+fi
+if [ ${ARCH} = "i386" ]; then
+  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
+  QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
+elif [ ${ARCH} = "x64" ]; then
+  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
+  QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
+fi
 QT5_RUNFILE_DST="/tmp"
 QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
@@ -50,7 +77,6 @@ AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
-
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -71,8 +97,17 @@ function apt-install() {
     set +x
 }
 
-echo "Installng CMake build system"
-apt-install ${CMAKE_BUILD_SYSTEM}
+echo "Installing Subversion"
+apt-install ${SUBVERSION}
+echo $OK
+
+echo "Checking out CMake packages, please be patient"
+svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+echo $OK
+
+echo "Installing CMake build system"
+sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
 echo $OK
 
 echo "Installng GNU C++ compiler"
@@ -119,33 +154,29 @@ echo "Installing OpenGL development files"
 apt-install ${OPENGL_DEV}
 echo $OK
 
-echo "Installing Subversion"
-apt-install ${SUBVERSION}
+echo "Checking whether Qt5 with QML support is installed"
+qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+if [ -n "$qmlscene_binary" ]; then
+  echo "Found Qt5 in "`dirname $qmlscene_binary`
+  NEED_QT5_INSTALL=false
+else
+  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
+  NEED_QT5_INSTALL=true
+fi
 echo $OK
 
-echo "Checking out Qt5 installation runfile, please be patient"
-svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
-echo $OK
+if $NEED_QT5_INSTALL; then
 
-echo "Installing Qt5 libraries"
-chmod +x ${QT5_RUNFILE_BIN}
-sudo ${QT5_RUNFILE_BIN}
-echo $OK
+  echo "Checking out Qt5 installation runfile, please be patient"
+  svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
+  echo $OK
 
-echo "Setting up Qt5 cmake environment:"
-for module in Core DBus Qml Quick
-do
-  echo "module "$module"..."
-  find_command_prefix="find /usr /opt / -name Qt5"
-  find_command_suffix="Config.cmake -print -quit"
-  find_command=$find_command_prefix$module$find_command_suffix
-  find_result=`$find_command`
-  file_name_prefix="cmake/Modules/FindQt5"
-  file_name_suffix=".cmake"
-  file_name=$file_name_prefix$module$file_name_suffix
-  echo "include("$find_result")" > $file_name
-done
-echo $OK
+  echo "Installing Qt5 libraries"
+  chmod +x ${QT5_RUNFILE_BIN}
+  sudo ${QT5_RUNFILE_BIN}
+  echo $OK
+
+fi
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
