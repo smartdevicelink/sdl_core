@@ -218,6 +218,7 @@ const char message_text[] = "messageText";
 const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
 const char show_strings[] = "showStrings";
+const char interaction_layout[] = "interactionLayout";
 }  // namespace hmi_request
 
 namespace hmi_response {
