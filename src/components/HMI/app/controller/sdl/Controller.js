@@ -265,8 +265,7 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result,
-            performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
 
             FFW.UI.interactionResponse(result, performInteractionRequestID);
         },

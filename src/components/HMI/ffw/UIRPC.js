@@ -641,23 +641,39 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "id": performInteractionRequestID,
-            "result": {
-                "code": resultCode,
-                "method": "UI.PerformInteraction"
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": performInteractionRequestID,
+                "result": {
+                    "code": resultCode,
+                    "method": "UI.PerformInteraction"
+                }
+            };
+
+            if (commandID) {
+                JSONMessage.result.choiceID = commandID;
             }
-        };
 
-        if (commandID) {
-            JSONMessage.result.choiceID = commandID;
+            if (manualTextEntry) {
+                JSONMessage.result.manualTextEntry = manualTextEntry;
+            }
+        } else {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": performInteractionRequestID,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": "Perform Interaction error response.",
+                    "data": {
+                        "method": "UI.PerformInteraction"
+                    }
+                }
+            };
         }
 
-        if (manualTextEntry) {
-            JSONMessage.result.manualTextEntry = manualTextEntry;
-        }
 
 
 
