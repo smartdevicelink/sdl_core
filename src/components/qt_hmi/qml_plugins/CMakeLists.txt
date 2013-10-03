@@ -33,9 +33,6 @@ add_subdirectory(./dbus_adapter)
 
 # --- Hmi Framework plugin
 add_subdirectory(./hw_buttons)
-<<<<<<< HEAD
-=======
 
 # --- Log4cxx plugin
 add_subdirectory(./log4cxx)
->>>>>>> qtHMI/qtHMI_dev
