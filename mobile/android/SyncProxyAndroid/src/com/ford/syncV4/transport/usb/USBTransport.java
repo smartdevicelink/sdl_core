@@ -299,6 +299,11 @@ public class USBTransport extends SyncTransport {
      */
     @Override
     public void stopReading() {
+        DebugTool.logInfo("USBTransport: stop reading requested, doing nothing");
+        // TODO - put back stopUSBReading(); @see <a href="https://adc.luxoft.com/jira/browse/APPLINK-3450">APPLINK-3450</a>
+    }
+
+    private void stopUSBReading() {
         final State state = getState();
         switch (state) {
             case CONNECTED:
