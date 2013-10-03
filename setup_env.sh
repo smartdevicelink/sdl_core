@@ -7,6 +7,7 @@ GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
+CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
@@ -55,6 +56,10 @@ echo $OK
 
 echo "Installing Chromium browser"
 apt-install ${CHROMIUM_BROWSER}
+echo $OK
+
+echo "Installing Chromium ffmpeg codec"
+apt-install ${CHROMIUM_CODEC_FFMPEG}
 echo $OK
 
 echo "Installing pulseaudio development files"
