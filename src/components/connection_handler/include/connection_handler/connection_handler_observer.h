@@ -100,8 +100,10 @@ class ConnectionHandlerObserver {
      * \param sessionKey Key of session which should be ended
      * \param firstSessionKey Session key of first session in this connection
      */
-    virtual void OnSessionEndedCallback(int session_key,
-                                        int first_session_key) = 0;
+    virtual void OnSessionEndedCallback(
+      int session_key,
+      int first_session_key,
+      ServiceType type = ServiceType::kRPCSession) = 0;
 
   protected:
     /**

@@ -76,7 +76,8 @@ class SessionObserver {
     virtual unsigned int OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
       unsigned char sessionId,
-      unsigned int hashCode) = 0;
+      unsigned int hashCode,
+      unsigned char service_type) = 0;
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)

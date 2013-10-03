@@ -593,7 +593,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     int sessionhash_code = session_observer_->OnSessionEndedCallback(
                              connection_id,
                              currentsession_id,
-                             hash_code);
+                             hash_code,
+                             packet->service_type());
 
     if (-1 != sessionhash_code) {
       if (2 == packet->version()) {
