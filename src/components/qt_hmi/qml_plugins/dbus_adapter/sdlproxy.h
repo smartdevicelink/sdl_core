@@ -50,10 +50,10 @@ public:
 private:
     QDBusInterface *sdlBasicCommunicationInterface;
 signals:
-    void appRegistered(QVariant);
-    void appUnregistered(int);
+    void appRegistered(QVariant application);
+    void appUnregistered(int appId);
     void playTone();
-    void showNotification(QVariant, QVariant, int);
+    void showNotification(QVariant text, QVariant icon, int timeout);
 private slots:
     void OnAppRegistered(Common_HMIApplication);
     void OnShowNotification(Common_TextFieldStruct text, OptionalArgument<Common_Image> image, int timeout);

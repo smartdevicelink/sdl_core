@@ -44,7 +44,7 @@ class Logger : public QQuickItem
     Q_DISABLE_COPY(Logger)
 
 public:
-    explicit Logger(QQuickItem *parent = 0);
+    explicit Logger(QQuickItem *parent = 0) : QQuickItem(parent) {}
 };
 
 class Log4cxxPlugin : public QQmlExtensionPlugin
