@@ -282,7 +282,7 @@ SDL.ControlButtons = Em.ContainerView
                     propertiesData: function() {
 
                         var str = '';
-                        if (SDL.SDLAppController.model) {
+                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.helpPrompt) {
                             var i = 0;
 
                             for (i = 0; i < SDL.SDLAppController.model.globalProperties.helpPrompt.length; i++) {
@@ -305,7 +305,7 @@ SDL.ControlButtons = Em.ContainerView
                     propertiesData: function() {
 
                         var str = '';
-                        if (SDL.SDLAppController.model) {
+                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.timeoutPrompt) {
                             var i = 0;
                             for (i = 0; i < SDL.SDLAppController.model.globalProperties.timeoutPrompt.length; i++) {
                                 str += SDL.SDLAppController.model.globalProperties.timeoutPrompt[i].text
