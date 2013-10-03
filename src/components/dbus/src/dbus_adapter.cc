@@ -240,7 +240,7 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
 
   DBusMessage *msg;
   msg = dbus_message_new_signal(sdl_object_path_.c_str(),
-                                (hmi_service_name_ + "." + name.first).c_str(),
+                                (sdl_service_name_ + "." + name.first).c_str(),
                                 name.second.c_str());
   if (NULL == msg) {
     LOG4CXX_WARN(logger_, "DBus: Failed emit signal (Message Null)");
@@ -316,7 +316,7 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
     return false;
   }
 
-  const char *name;
+  const char* name;
   bool ret = false;
   if ((name = dbus_message_get_error_name(msg)) != NULL) {
     ford_message_descriptions::ParameterDescription rule = {
@@ -328,7 +328,7 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
     args.push_back(&rule);
     smart_objects::SmartObject description(smart_objects::SmartType_Map);
     description[rule.name] = smart_objects::SmartObject(smart_objects::SmartType_String);
-    bool ret = GetArguments(msg, args, description);
+    ret = GetArguments(msg, args, description);
     MessageName method = schema_->getMessageName(ids.second);
     LOG4CXX_WARN(logger_, "DBus: Call of method " << method.first << "." <<
                  method.second << " returned error " <<
