@@ -1,9 +1,6 @@
-package com.ford.syncV4.proxy;
+package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
-import com.ford.syncV4.proxy.rpc.Image;
-import com.ford.syncV4.proxy.rpc.KeyboardProperties;
-import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 
 import junit.framework.TestCase;
 

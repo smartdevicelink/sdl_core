@@ -436,4 +436,6 @@ public class Names {
     public static final String menuTitle = "menuTitle";
     public static final String menuIcon = "menuIcon";
     public static final String keyboardProperties = "keyboardProperties";
+    public static final String secondaryText = "secondaryText";
+    public static String tertiaryText = "tertiaryText";
 }

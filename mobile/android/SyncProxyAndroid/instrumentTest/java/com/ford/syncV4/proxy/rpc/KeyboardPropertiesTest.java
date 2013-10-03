@@ -1,7 +1,6 @@
-package com.ford.syncV4.proxy;
+package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
-import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
