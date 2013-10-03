@@ -309,15 +309,36 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
 }
 
 bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj) {
-  // TODO(KKolodiy): implement
-//  dbus_int32_t reply_serial = dbus_message_get_reply_serial(msg);
-//  std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
-//  if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
-//    LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
-//    return false;
-//  }
-//  dbus_message_unref(msg);
-  return false;
+  dbus_int32_t reply_serial = dbus_message_get_reply_serial(msg);
+  std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
+  if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
+    LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
+    return false;
+  }
+
+  const char *name;
+  bool ret = false;
+  if ((name = dbus_message_get_error_name(msg)) != NULL) {
+    ford_message_descriptions::ParameterDescription rule = {
+      "description",
+      ford_message_descriptions::String,
+      true
+    };
+    ListArgs args;
+    args.push_back(&rule);
+    smart_objects::SmartObject description(smart_objects::SmartType_Map);
+    description[rule.name] = smart_objects::SmartObject(smart_objects::SmartType_String);
+    bool ret = GetArguments(msg, args, description);
+    MessageName method = schema_->getMessageName(ids.second);
+    LOG4CXX_WARN(logger_, "DBus: Call of method " << method.first << "." <<
+                 method.second << " returned error " <<
+                 name << " \""<< description[rule.name].asString() << "\"");
+  } else {
+    LOG4CXX_ERROR(logger_, "DBus: Type message isn't error");
+  }
+
+  dbus_message_unref(msg);
+  return ret;
 }
 
 bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj) {
@@ -534,7 +555,7 @@ bool DBusAdapter::GetOneArgument(
     if (!GetOptionalValue(iter, rules, args[rules->name])) {
       args.erase(rules->name);
     }
-    return true; // for optional argument always true
+    return true;  // for optional argument always true
   }
 }
 
@@ -605,7 +626,8 @@ bool DBusAdapter::GetValue(
       if (type == DBUS_TYPE_STRING) {
         const char* stringValue;
         dbus_message_iter_get_basic(iter, &stringValue);
-        smart_objects::SmartObject value(std::string(stringValue));
+        std::string strValue = stringValue;
+        smart_objects::SmartObject value(strValue);
         param = value;
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
