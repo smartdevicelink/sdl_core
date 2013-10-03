@@ -64,7 +64,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     deactivate: function () {
 
         this._super();
-        this.searchBar.input.set('value', "");
+        this.searchBar.input.set('value', null);
         this.set('target', null);
     },
 
@@ -87,6 +87,10 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 //            element.text.charCodeAt(0), // keyCodeArg : unsigned long the virtual key code, else 0
 //            0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
 //        );
+
+        if (this.searchBar.input.value == null) {
+            this.searchBar.input.set('value', "");
+        }
 
         switch (element.text) {
             case "Space": {
@@ -143,14 +147,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         }),
 
         input: Ember.TextField.extend({
-            elementId: "tf1",
-            classNames: "tf1"
-            //tagName: 'input',
-            //type: 'text',
-            //attribute: ['type:text'],
-            //valueBinding: 'SDL.SDLModel.keyboardInputValue',
-            //attributeBindings: ['disabled'],
-            //disabled: false
+            elementId: "keyboardInput",
+            classNames: "keyboardInput",
+            valueBinding: 'SDL.SDLModel.keyboardInputValue'
         })
 
     }),
