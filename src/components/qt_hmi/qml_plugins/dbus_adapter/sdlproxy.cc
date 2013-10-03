@@ -37,8 +37,6 @@
 SdlProxy::SdlProxy(QQuickItem *parent)
     : QQuickItem(parent) {
 
-    qDebug() << "SdlProxy instantiated";
-
     QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
                                          "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication)));
     QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
@@ -50,7 +48,6 @@ SdlProxy::SdlProxy(QQuickItem *parent)
 }
 
 void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
-    qDebug() << "SDLProxy::onAppRegistered";
     QVariantMap appMap;
     appMap["appId"] = QVariant::fromValue(app.appID);
     appMap["appName"] = QVariant::fromValue(app.appName);
