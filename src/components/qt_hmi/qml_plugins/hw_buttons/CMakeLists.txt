@@ -56,4 +56,4 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.hw_buttons 1.0 ${model_dir} > ${destination}/plugins.qmltypes)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.hw_buttons 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
