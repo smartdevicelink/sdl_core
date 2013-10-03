@@ -167,7 +167,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   uuid_t smart_device_link_service_uuid_;
 
   const bool auto_repeat_search_;
-  const unsigned auto_repeat_pause_sec_;
+  const int auto_repeat_pause_sec_;
 };
 
 }  // namespace transport_adapter
