@@ -56,9 +56,9 @@ include_directories (
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${CMAKE_BINARY_DIR}/src/components/dbus/include/
-  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}
   /usr/lib/i386-linux-gnu/glib-2.0/include
   /usr/lib/x86_64-linux-gnu/glib-2.0/include/
   ${GSTREAMER_gst_INCLUDE_DIR}

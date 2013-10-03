@@ -1,6 +1,6 @@
 /**
- * @file PlayerView.qml
- * @brief BT, IPod, CD player view screen.
+ * @file MediaPlayerView.qml
+ * @brief Parent for BT, IPod, CD players screen view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,74 +36,102 @@ import QtQuick 2.0
 import "../controls"
 
 Item {
-    id: playerView
-    anchors.fill: parent
-    property string playerType: ""
+    id: mediaPlayerView
+
+    property string playerName: ""
+    property string albumImage: ""
+
+    property string trackNumber: ""
+    property string trackName: ""
+    property string albumName: ""
 
     Item {
-        // 3/4 top screen
+        // top 3/4 screen
+        id: upperContent
         height: parent.height * 3/4
         width: parent.width
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
 
-        LongOvalButton {
-            text: playerType
-            pixelSize: 20
-            dest: "./views/MusicSourceGridView.qml"
-            anchors.left: parent.left
+        Item {
+            // top part for buttons
+            id: top
             anchors.top: parent.top
-        }
-
-        LongOvalButton {
-            text: "Browse"
-            pixelSize: 20
-            anchors.right: parent.right
-            anchors.top: parent.top
-        }
-
-        // Middle row with picture and text near it
-        Row {
-            anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 1/20 * parent.width
-            spacing: albumArtImage.width * 1/3
+            width: parent.width
+            height: parent.height * 1/4
 
-            Image {
-                id: albumArtImage
-                source: "../res/album_art.png"
+            LongOvalButton {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                text: playerName
+                pixelSize: 20
+                dest: "./views/MusicSourceGridView.qml"
             }
 
-            Column {
+            LongOvalButton {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                text: "Browse"
+                pixelSize: 20
+            }
+        }
+
+        Item {
+            // mid part for picture, information about song, album
+            id: mid
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            width: parent.width
+            height: parent.height * 2/4
+
+            Row {
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: parent.width
+                spacing: 20
 
-                Text {
-                    color: "#1d81d5"
-                    text: "Track 13 / 16"
-                    font.pixelSize: 20
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.height
+                    height: parent.height
+                    source: albumImage
                 }
 
-                Text {
-                    color: "#1d81d5"
-                    text: "Song name"
-                    font.pixelSize: 45
-                    font.bold: true
-                }
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: parent.height / 5
 
-                Text {
-                    color: "#1d81d5"
-                    text: "Album Name"
-                    font.pixelSize: 25
+                    Text {
+                        color: "#1d81d5"
+                        text: "Track " + trackNumber
+                        font.pixelSize: 20
+                    }
+
+                    Text {
+                        color: "#1d81d5"
+                        text: trackName
+                        font.pixelSize: 45
+                        font.bold: true
+                    }
+
+                    Text {
+                        color: "#1d81d5"
+                        text: albumName
+                        font.pixelSize: 25
+                    }
                 }
             }
         }
 
         Item {
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
+            // bottom part
+            id: bot
+            anchors.left: parent.left
+            anchors.bottom: parent. bottom
             width: parent.width
-            height: parent.height * 1/10
+            height: parent.height * 1/4
 
             Text {
                 id: time
@@ -137,55 +165,56 @@ Item {
                    color: "#1d81d5"
                 }
             }
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 1/10 * parent.width
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: "#1d81d5"
-                    text: "04:23"
-                    font.pixelSize: 18
-                }
+            Text {
+                anchors.right: parent.right
+                anchors.rightMargin: 1/10 * parent.width
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#1d81d5"
+                text: "04:23"
+                font.pixelSize: 18
+            }
         }
     }
 
-    Item{
-        // 1/4 bottom screen
+    Item {
+        //bottom 1/4 screen
+        id: lowerContent
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         width: parent.width
         height: 1/4 * parent.height
 
         Row {
-
             anchors.centerIn: parent
+
             Image {
-                id: prevBtnImage
+                id: prevButton
                 anchors.verticalCenter: parent.verticalCenter
                 source: "../res/buttons/player_prev_btn.png"
                 MouseArea {
                     anchors.fill: parent
                     onPressed: {
-                        prevBtnImage.source = "../res/buttons/player_prev_pressed_btn.png"
+                        prevButton.source = "../res/buttons/player_prev_pressed_btn.png"
                     }
                     onReleased: {
-                        prevBtnImage.source = "../res/buttons/player_prev_btn.png"
+                        prevButton.source = "../res/buttons/player_prev_btn.png"
                     }
                 }
             }
 
-            PlayPauseButton {  }
+            PlayPauseButton { }
 
             Image {
-                id: nextBtnImage
+                id: nextButton
                 anchors.verticalCenter: parent.verticalCenter
                 source: "../res/buttons/player_next_btn.png"
                 MouseArea {
                     anchors.fill: parent
                     onPressed: {
-                        nextBtnImage.source = "../res/buttons/player_next_pressed_btn.png"
+                        nextButton.source = "../res/buttons/player_next_pressed_btn.png"
                     }
                     onReleased: {
-                        nextBtnImage.source = "../res/buttons/player_next_btn.png"
+                        nextButton.source = "../res/buttons/player_next_btn.png"
                     }
                 }
             }

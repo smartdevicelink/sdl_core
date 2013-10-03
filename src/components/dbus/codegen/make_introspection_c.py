@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file make_introspection_c.py
 #  @brief Converts introspection.xml to C-string
 #
@@ -33,8 +36,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-in_file = open('introspection.xml', "rb")
-out_file = open('introspection_xml.cc', "w")
+from argparse import ArgumentParser
+from os import path
+
+arg_parser = ArgumentParser()
+arg_parser.add_argument('--infile', required=True)
+arg_parser.add_argument('--outdir', required=True)
+args = arg_parser.parse_args()
+
+if not path.isdir(args.outdir):
+    makedirs(args.outdir)
+
+in_file = open(args.infile, "rb")
+out_file = open(args.outdir + '/' + 'introspection_xml.cc', "w")
 
 out_file.write("""/**
  * @file message_descriptions_c.cc

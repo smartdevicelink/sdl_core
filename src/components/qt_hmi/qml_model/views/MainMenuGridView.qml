@@ -1,16 +1,19 @@
 import QtQuick 2.0
 import "../models"
 
-MenuGridView
-{
-    id: mainMenuGridview
+GeneralView {
+    MenuGridView
+    {
+        id: mainMenuGridview
+        anchors.fill: parent
 
-    columns: 4
-    rows: 2
+        columns: 4
+        rows: 2
 
-    model: MainMenuListModel {}
+        model: MainMenuListModel {}
 
-    Component.onCompleted: {
-        dataContainer.reset()
+        Component.onCompleted: {
+            dataContainer.reset()
+        }
     }
 }

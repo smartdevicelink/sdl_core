@@ -37,6 +37,8 @@
 #include "sdlproxy.h"
 
 #include <qqml.h>
+#include <log4cxx/logger.h>
+#include <log4cxx/propertyconfigurator.h>
 
 #include "dbus_plugin.h"
 #include "optional_argument.h"
@@ -47,8 +49,13 @@
 #include <QQmlListReference>
 #include <QString>
 
+log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
+                              log4cxx::Logger::getLogger("DBusPlugin"));
+
 void DbusPlugin::registerTypes(const char *uri)
 {
+    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+
     // @uri sdl.core.api
     qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
     qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
@@ -64,4 +71,3 @@ void DbusPlugin::registerTypes(const char *uri)
     QDBusConnection::sessionBus().registerObject("/", this);
     QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
 }
-

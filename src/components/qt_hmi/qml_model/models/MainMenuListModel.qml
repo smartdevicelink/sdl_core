@@ -23,7 +23,7 @@ ListModel
     ListElement {
         name: "Apps"
         icon: "../res/apps.png"
-        qml: "./views/AppsMenuGridView.qml"
+        qml: "./views/ApplicationListView.qml"
     }
 
     ListElement {

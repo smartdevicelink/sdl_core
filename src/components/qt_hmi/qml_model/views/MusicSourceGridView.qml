@@ -2,15 +2,14 @@ import QtQuick 2.0
 import "../controls"
 import "../models"
 
-Column {
-    anchors.fill: parent
+GeneralView {
     GridView
     {
+        id: musicSourceGridView
         height: 3 / 4 * parent.height
         width: parent.width
-        id: musicSourceGridView
         cellWidth: width / 3
-        cellHeight: height / 3
+        cellHeight: height / 4
 
         model: MusicSourceModel {}
 
@@ -33,29 +32,26 @@ Column {
             }
         }
 
-        delegate: Item {
-            width: musicSourceGridView.cellWidth
-            height: musicSourceGridView.cellHeight
+        delegate:
+            Item {
+                id: item
+                width: musicSourceGridView.cellWidth
+                height: musicSourceGridView.cellHeight
 
-            MouseArea {
-                cursorShape: Qt.PointingHandCursor
-                anchors.fill: parent
-                onClicked: {
-                    if(qml !== "")
-                        contentLoader.go(qml)
+                LongOvalButton {
+                    anchors.centerIn: item
+                    text: name
+                    pixelSize: 25
+                    dest: qml
                 }
-            }
-
-            Image { source: icon; anchors.centerIn: parent }
-            Text { text: name; font.pixelSize: 25; color: "#1d81d5"; anchors.centerIn: parent }
         }
-
 
     }
     Item {
         // 1/4 bottom screen
         width: parent.width
         height: 1/4 * parent.height
+        anchors.bottom: parent.bottom
 
         BackButton { anchors.horizontalCenter: parent.horizontalCenter }
     }

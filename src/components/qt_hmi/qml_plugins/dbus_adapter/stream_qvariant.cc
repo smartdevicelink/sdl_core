@@ -1,6 +1,4 @@
 /**
- * @file PagedFlickable.qml
- * @brief Animated row.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,47 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "stream_qvariant.h"
 
-import QtQuick 2.0
-
-Item
-{
-    height: container.height + pager.height
-    default property alias content: containerRow.children
-    property alias spacing: containerRow.spacing
-    property int snapTo: 200
-
-    Flickable {
-        id: container
-        anchors.bottom: parent.bottom
-        maximumFlickVelocity: 1500
-        contentWidth: containerRow.width
-        height: containerRow.height
-        width: parent.width
-
-        onMovementEnded: {
-            var rest = contentX % snapTo
-            var t = 0.25
-            if (rest > parent.snapTo / 2) {
-                rest = rest - parent.snapTo
+std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const QVariant& value) {
+    switch(value.type()) {
+    case QVariant::Map: {
+        os << "{ ";
+        QVariantMap structure = value.toMap();
+        QMapIterator<QString, QVariant> i(structure);
+        while (i.hasNext()) {
+            i.next();
+            os << i.key() << ":" << i.value();
+            if (i.hasNext()) {
+                os << ", ";
             }
-            var vel = 2 * rest / t
-            flickDeceleration = Math.abs(vel) / t
-            flick(vel, 0)
-            flickDeceleration = 1500
         }
-        Row {
-            id: containerRow
-            anchors.verticalCenter: parent.verticalCenter
+        os << " }";
+    } break;
+    case QVariant::List: {
+        os << "[ ";
+        QVariantList array = value.toList();
+        QListIterator<QVariant> i(array);
+        while (i.hasNext()) {
+            os << i.next();
+            if (i.hasNext()) {
+                os << ", ";
+            }
         }
+        os << " ]";
+    } break;
+    default:
+        os << value.toString().toLatin1().data();
     }
 
-    Pager {
-        id: pager
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-
-        pages: Math.round((container.contentWidth - containerRow.spacing )/ container.width)
-        activePage: Math.round(pages * container.contentX / container.contentWidth)
-    }
+    return os;
 }
