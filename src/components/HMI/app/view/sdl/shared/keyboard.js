@@ -202,11 +202,13 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             //action: 'localisationBtn'
         }),
 
-        searchBtn: SDL.Button.extend({
+        searchBtn: SDL.Button.extend(SDL.PresetEvents, {
             classNames: 'searchBtn controll',
             text: 'Search',
-            target: 'parentView.parentView',
-            action: 'inputChanges'
+            click: function(){
+                this.get('parentView.parentView').inputChanges(this);
+            },
+            presetName: 'Search'
         })
     }),
 
