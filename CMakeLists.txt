@@ -79,7 +79,7 @@ FIND_PACKAGE(Qt5Qml REQUIRED)
 FIND_PACKAGE(Qt5Quick REQUIRED)
 
 execute_process(
-  COMMAND find /usr /opt / -name qmlplugindump -type f -executable -print0 -quit
+  COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlplugindump
   OUTPUT_VARIABLE qmlplugindump_binary
 )
 

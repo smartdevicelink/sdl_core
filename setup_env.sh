@@ -154,22 +154,16 @@ echo "Installing OpenGL development files"
 apt-install ${OPENGL_DEV}
 echo $OK
 
-echo "Checking whether Qt5 is installed"
-qmake_binary=`find /usr /opt / -name qmake -type f -executable -print -quit 2>/dev/null`
-if [ -z "$qmake_binary" ]; then
-  echo "Definitely not"
-  NEED_QT5_INSTALL=true
+echo "Checking whether Qt5 with QML support is installed"
+qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+if [ -n "$qmlscene_binary" ]; then
+  echo "Found Qt5 in "`dirname $qmlscene_binary`
+  NEED_QT5_INSTALL=false
 else
-  grep_result=`${qmake_binary} -version | grep Qt5`
-  if [ -z "$grep_result" ]; then
-    echo "No"
-    NEED_QT5_INSTALL=true
-  else
-    echo "Yes"
-    NEED_QT5_INSTALL=false
-  fi
+  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
+  NEED_QT5_INSTALL=true
 fi
-echo
+echo $OK
 
 if $NEED_QT5_INSTALL; then
 
@@ -183,34 +177,6 @@ if $NEED_QT5_INSTALL; then
   echo $OK
 
 fi
-
-echo "Setting up Qt5 cmake environment:"
-for module in Core DBus Qml Quick
-do
-  echo "module "$module"..."
-  find_command_prefix="find /usr /opt / -name Qt5"
-  find_command_suffix="Config.cmake -print -quit 2>/dev/null"
-  find_command=$find_command_prefix$module$find_command_suffix
-  find_result=`$find_command`
-  file_name_prefix="cmake/Modules/FindQt5"
-  file_name_suffix=".cmake"
-  file_name=$file_name_prefix$module$file_name_suffix
-  echo "include("$find_result")" > $file_name
-done
-echo $OK
-
-echo "Setting up Qt5 cmake environment"
-for module in Core DBus Qml Quick
-do
-  find_command_prefix="find /usr /opt / -name Qt5"
-  find_command_suffix="Config.cmake -print -quit"
-  find_command=$find_command_prefix$module$find_command_suffix
-  find_result=`$find_command`
-  file_name_prefix="cmake/Modules/FindQt5"
-  file_name_suffix=".cmake"
-  file_name=$file_name_prefix$module$file_name_suffix
-  echo "include("$find_result")" > $file_name
-done
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 

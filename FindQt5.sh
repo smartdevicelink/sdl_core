@@ -40,13 +40,32 @@ for qmake_binary in $qmake_list; do # for all candidates
       exit 0 # we are happy already
     fi
     QT5_DIR=`dirname $qmake_binary`
-    qt5_binary=$QT5_DIR/$1 # check specified binary
-    if [ -x $qt5_binary ]; then # to be executable
-      if ! [ -d $qt5_binary ]; then # and not to be directory
-        echo $qt5_binary # output
-        exit 0
-      fi
-    fi
+    case $1 in
+      binary) # binary check
+        if [ -z $2 ]; then # if no argument specified
+          exit 1 # syntax error
+        fi
+        qt5_binary=$QT5_DIR/$2 # check specified binary
+        if [ -x $qt5_binary ]; then # to be executable
+          if ! [ -d $qt5_binary ]; then # and not to be directory
+            echo -n $qt5_binary # output without newline
+            exit 0
+          fi
+        fi
+        ;;
+      file) # file lookup
+        if [ -z $2 ]; then # if no argument specified
+          exit 1 # syntax error
+        fi
+        qt5_file=`find $QT5_DIR/.. -name $2 -type f -print0 -quit 2>/dev/null` # find specified file
+        if [ -n "$qt5_file" ]; then # if found
+          echo -n $qt5_file # output without newline
+          exit 0
+        fi
+        ;;
+      *) # unrecognized command
+        exit 1 # syntax error
+    esac
   fi
 done
 exit 1 # haven't found anything
