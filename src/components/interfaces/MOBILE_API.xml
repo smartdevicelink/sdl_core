@@ -462,6 +462,7 @@
     <element name="PRESET_8" />
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
+    <element name="SEARCH" />
   </enum>
 
   <enum name="MediaClockFormat">
