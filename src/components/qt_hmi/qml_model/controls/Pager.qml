@@ -38,6 +38,7 @@ Row {
     id: pager
     property int pages
     property int activePage: 0
+    spacing: 7
 
     Repeater {
         model: pages

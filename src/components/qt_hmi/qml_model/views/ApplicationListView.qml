@@ -33,6 +33,7 @@ GeneralView {
                 LongOvalButton {
                     width: 200
                     text: "Change device"
+                    dest: "./views/ChangeDeviceView.qml"
                 }
             }
         }
