@@ -16,6 +16,7 @@ Window {
         property alias mainField2Text: mainField2.text
         property alias mainField3Text: mainField3.text
         property alias mainField4Text: mainField4.text
+        property alias statusBarText: statusBar.text
 
         Column {
             Text {
@@ -31,6 +32,11 @@ Window {
                 id: mainField4
             }
         }
+
+        Text {
+            id: statusBar
+            anchors.bottom: parent.bottom
+        }
     }
 
     function showMessage (fieldSubstringsStruct) {
@@ -38,5 +44,6 @@ Window {
         rectangle.mainField2Text = "<h2>" + fieldSubstringsStruct.mainField2 + "</h2>"
         rectangle.mainField3Text = "<h3>" + fieldSubstringsStruct.mainField3 + "</h3>"
         rectangle.mainField4Text = fieldSubstringsStruct.mainField4
+        rectangle.statusBarText = fieldSubstringsStruct.statusBar
     }
 }
