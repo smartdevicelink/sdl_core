@@ -1,6 +1,6 @@
 /**
- * @file PagedFlickable.qml
- * @brief Animated row.
+ * @file log4cxx_plugin.h
+ * @brief Log4cxxPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,47 +32,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
 
-import QtQuick 2.0
+#include <QQmlExtensionPlugin>
+#include <QQuickItem>
 
-Item
+class Logger : public QQuickItem
 {
-    height: container.height + pager.height
-    default property alias content: containerRow.children
-    property alias spacing: containerRow.spacing
-    property int snapTo: 200
+    Q_OBJECT
+    Q_DISABLE_COPY(Logger)
 
-    Flickable {
-        id: container
-        anchors.bottom: parent.bottom
-        maximumFlickVelocity: 1500
-        contentWidth: containerRow.width
-        height: containerRow.height
-        width: parent.width
+public:
+    explicit Logger(QQuickItem *parent = 0);
+};
 
-        onMovementEnded: {
-            var rest = contentX % snapTo
-            var t = 0.25
-            if (rest > parent.snapTo / 2) {
-                rest = rest - parent.snapTo
-            }
-            var vel = 2 * rest / t
-            flickDeceleration = Math.abs(vel) / t
-            flick(vel, 0)
-            flickDeceleration = 1500
-        }
-        Row {
-            id: containerRow
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
+class Log4cxxPlugin : public QQmlExtensionPlugin
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+    
+public:
+    void registerTypes(const char *uri);
+};
 
-    Pager {
-        id: pager
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+QML_DECLARE_TYPE(Logger)
 
-        pages: Math.round((container.contentWidth - containerRow.spacing )/ container.width)
-        activePage: Math.round(pages * container.contentX / container.contentWidth)
-    }
-}
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
+

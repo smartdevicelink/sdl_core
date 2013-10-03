@@ -3,11 +3,11 @@ import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import "./controls"
 import "./views"
-import "./hmi_api/auto" as HmiApi
+import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
 
-Rectangle{
+Rectangle {
     width: 1600
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
@@ -18,9 +18,10 @@ Rectangle{
 
     DataStorage {
         id: dataContainer
-    }
-    SettingsStorage {
-        id: settings
+
+        onHmiContextChanged: {
+            // TODO: Send notification to SDL
+        }
     }
 
     SettingsStorage {
@@ -35,15 +36,15 @@ Rectangle{
         height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
 
-        Item{
+        Item {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             height: parent.height * 0.25
             width: parent.width
-            HeaderMenu{}
+            HeaderMenu {}
         }
 
-        Item{
+        Item {
             anchors.leftMargin: 30
             anchors.rightMargin: 30
             anchors.bottomMargin: 30
@@ -51,6 +52,7 @@ Rectangle{
 
             Loader {
                 id: contentLoader
+                asynchronous: true
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height * 0.75
@@ -71,6 +73,12 @@ Rectangle{
                 function back() {
                     source = viewTransitionStack.pop()
                 }
+
+                onStatusChanged: {
+                    if (status == Component.Ready) {
+                        dataContainer.hmiContext = item.context
+                    }
+                }
             }
         }
     }
@@ -85,31 +93,31 @@ Rectangle{
     }
 
     HMIProxy {
-        HmiApi.Buttons_auto {
+        HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
         }
-        HmiApi.BasicCommunication_auto {
-            id: sdlBasicCommunications
+        HmiApi.BasicCommunicationProxy {
+            id: sdlBasicCommunication
             objectName: "BasicCommunication"
         }
-        HmiApi.VR_auto {
+        HmiApi.VRProxy {
             id: sdlVR
             objectName: "VR"
         }
-        HmiApi.TTS_auto {
+        HmiApi.TTSProxy {
             id: sdlTTS
             objectName: "TTS"
         }
-        HmiApi.Navigation_auto {
+        HmiApi.NavigationProxy {
             id: sdlNavigation
             objectName: "Navigation"
         }
-        HmiApi.VehicleInfo_auto {
+        HmiApi.VehicleInfoProxy {
             id: sdlVehicleInfo
             objectName: "VehicleInfo"
         }
-        HmiApi.UI_auto {
+        HmiApi.UIProxy {
             id: sdlUI
             objectName: "UI"
         }
@@ -119,7 +127,17 @@ Rectangle{
         id: sdlProxy
 
         onAppRegistered: {
-            console.log("new app registered")
+            dataContainer.applicationList.append(
+            {
+                 appName: application.appName,
+                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                 icon: application.icon,
+                 deviceName: application.deviceName,
+                 appId: application.appID,
+                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                 isMediaApplication: application.isMediaApplication,
+                 appType: application.appType
+             })
         }
     }
 
@@ -135,6 +153,6 @@ Rectangle{
         dataContainer.hmiVehicleInfoAvailable = true
         dataContainer.hmiUIAvailable = true
 
-        sdlBasicCommunications.onReady()
+        sdlBasicCommunication.onReady()
     }
 }

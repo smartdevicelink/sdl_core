@@ -1,6 +1,6 @@
 /**
- * @file PagedFlickable.qml
- * @brief Animated row.
+ * @file log4cxx_plugin.cpp
+ * @brief Log4cxxPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,47 +32,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "log4cxx_plugin.h"
 
-import QtQuick 2.0
+#include <qqml.h>
+#include <log4cxx/log4cxx.h>
+#include <log4cxx/propertyconfigurator.h>
 
-Item
+log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
+                              log4cxx::Logger::getLogger("Log4cxxPlugin"));
+
+void smartLogger(QtMsgType type, const QMessageLogContext &context,
+                 const QString &msg)
 {
-    height: container.height + pager.height
-    default property alias content: containerRow.children
-    property alias spacing: containerRow.spacing
-    property int snapTo: 200
-
-    Flickable {
-        id: container
-        anchors.bottom: parent.bottom
-        maximumFlickVelocity: 1500
-        contentWidth: containerRow.width
-        height: containerRow.height
-        width: parent.width
-
-        onMovementEnded: {
-            var rest = contentX % snapTo
-            var t = 0.25
-            if (rest > parent.snapTo / 2) {
-                rest = rest - parent.snapTo
-            }
-            var vel = 2 * rest / t
-            flickDeceleration = Math.abs(vel) / t
-            flick(vel, 0)
-            flickDeceleration = 1500
-        }
-        Row {
-            id: containerRow
-            anchors.verticalCenter: parent.verticalCenter
-        }
+    log4cxx::spi::LocationInfo location(context.file, context.function, context.line);
+    switch (type) {
+    case QtDebugMsg:
+        (*logger_).debug(msg.toStdString(), location);
+        break;
+    case QtWarningMsg:
+        (*logger_).warn(msg.toStdString(), location);
+        break;
+    case QtCriticalMsg:
+        (*logger_).error(msg.toStdString(), location);
+        break;
+    case QtFatalMsg:
+        (*logger_).fatal(msg.toStdString(), location);
+        break;
+    default:
+        (*logger_).info(msg.toStdString(), location);
+        break;
     }
+}
 
-    Pager {
-        id: pager
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-
-        pages: Math.round((container.contentWidth - containerRow.spacing )/ container.width)
-        activePage: Math.round(pages * container.contentX / container.contentWidth)
-    }
+void Log4cxxPlugin::registerTypes(const char *uri)
+{
+    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+    qInstallMessageHandler(smartLogger);
+    // @uri com.ford.sdl.hmi.log4cxx
+    qmlRegisterType<Logger>(uri, 1, 0, "Logger");
+    // Use standart console API Javascript
+    // See Debugging QML Applications in Qt documentation
 }

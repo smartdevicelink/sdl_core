@@ -49,7 +49,7 @@ Item {
                 Row {
                     spacing: 25
                     HardwareButton { name: "vr" }
-                    PowerSwitchBtn{}
+                    PowerSwitchBtn {}
                 }
 
                 Grid {
@@ -128,7 +128,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                settings.buttonCapabilities.push(
+                                settingsContainer.buttonCapabilities.push(
                                 {
                                     name: Common.ButtonName.PRESET_0 + index,
                                     upDownAvailable: true,

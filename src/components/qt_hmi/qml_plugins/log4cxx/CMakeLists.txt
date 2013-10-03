@@ -32,48 +32,19 @@ cmake_minimum_required(VERSION 2.8.9)
 
 set(CMAKE_AUTOMOC ON)
 
-set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-set(dbus_dir ${components_dir}/dbus)
-set(codegen_dir ${dbus_dir}/codegen)
-set(interfaces_dir ${components_dir}/interfaces)
-<<<<<<< HEAD
-add_custom_command(OUTPUT qml_dbus.cc qml_dbus.h COMMAND python ${codegen_dir}/make_qml_dbus_cpp.py --infile ${interfaces_dir}/HMI_API.xml)
-=======
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.cc ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.h
-  COMMAND python ${codegen_dir}/make_qml_dbus_cpp.py --infile ${interfaces_dir}/HMI_API.xml
-  --outdir ${CMAKE_CURRENT_SOURCE_DIR}
-)
->>>>>>> qtHMI/qtHMI_dev
-
 set(SOURCES
-  dbus_plugin.cc
-  qml_dbus.cc
-  sdlproxy.cc
-  hmiproxy.cc
-<<<<<<< HEAD
-=======
-  stream_qvariant.cc
->>>>>>> qtHMI/qtHMI_dev
-  moc_qml_dbus.cpp
+  log4cxx_plugin.cc
 )
 
-qt5_generate_moc(qml_dbus.h moc_qml_dbus.cpp)
-
-set(target DbusAdapter)
+set(target qmlLog4cxx)
 
 add_library(${target} SHARED ${SOURCES})
 
-qt5_use_modules(${target} Core DBus Qml Quick)
+qt5_use_modules(${target} Core Qml Quick)
 
 set(model_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model)
-set(destination ${model_dir}/com/ford/sdl/hmi/dbus_adapter)
+set(destination ${model_dir}/com/ford/sdl/hmi/log4cxx)
 
-<<<<<<< HEAD
-=======
-target_link_libraries(${target} log4cxx)
-
->>>>>>> qtHMI/qtHMI_dev
 install(TARGETS ${target}
   DESTINATION ${destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -83,8 +54,5 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-<<<<<<< HEAD
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes)
-=======
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes)
->>>>>>> qtHMI/qtHMI_dev
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.log4cxx 1.0 ${model_dir} > ${destination}/plugins.qmltypes)
+target_link_libraries(${target} log4cxx)

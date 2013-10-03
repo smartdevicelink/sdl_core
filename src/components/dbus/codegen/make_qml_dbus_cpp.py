@@ -1,5 +1,6 @@
-#! /usr/bin/python
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file make_qml_dbus_cpp.py
 #  @brief Generator of QML to QDbus C++ part
 #
@@ -113,14 +114,18 @@ class Impl(FordXmlParser):
         out.write("  map.insert(name, ValueToVariant(v));\n")
         out.write("}\n")
         out.write('bool VariantToValue(const QVariant& variant, ' + struct_name + "& v) {\n")
-        out.write("  if (variant.type() != QVariant::Map) return false;\n")
+        out.write("  if (variant.type() != QVariant::Map) {\n")
+        out.write("    LOG4CXX_ERROR(logger_, \"Input argument isn't map\");\n")
+        out.write("    return false;\n  }\n")
         out.write("  QVariantMap map = variant.toMap();\n")
         for param in params:
             out.write("  if (!GetArgFromMap(map, \"" + param.name + "\", v." + param.name + ")) return false;\n")
         out.write("  return true;\n")
         out.write("}\n")
         out.write('bool VariantToValue(const QVariant& variant, QList<' + struct_name + ">& v) {\n")
-        out.write("  if (variant.type() != QVariant::List) return false;\n")
+        out.write("  if (variant.type() != QVariant::List) {\n")
+        out.write("    LOG4CXX_ERROR(logger_, \"Input argument isn't list\");\n")
+        out.write("    return false;\n  }\n")
         out.write("  QList<QVariant> list = variant.toList();\n")
         out.write("  for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {\n");
         out.write("    " + struct_name + " s;\n");
@@ -131,8 +136,12 @@ class Impl(FordXmlParser):
         out.write("}\n")
         out.write('bool GetArgFromMap(const QVariantMap& map, const char* name, ' + struct_name + "& v) {\n")
         out.write("  QVariantMap::const_iterator it = map.find(name);\n")
-        out.write("  if (map.end() == it) return false;\n")
-        out.write("  if (it->type() != QVariant::Map) return false;\n")
+        out.write("  if (map.end() == it) {\n")
+        out.write("    LOG4CXX_WARN(logger_, \"Argument '\" << name << \"' not found\");\n")
+        out.write("    return false;\n  }\n")
+        out.write("  if (it->type() != QVariant::Map) {\n")
+        out.write("    LOG4CXX_ERROR(logger_, \"Argument '\" << name << \"' isn't map\");\n")
+        out.write("    return false;\n  }\n")
         out.write("  const QVariantMap& inmap = it->toMap();\n")
         for param in params:
             out.write("  if (!GetArgFromMap(inmap, \"" + param.name + "\", v." + param.name + ")) return false;\n")
@@ -316,12 +325,14 @@ class Impl(FordXmlParser):
             sig_signature = self.make_qml_signal_signature(n, iface_name, signame, True)
             slot_signature = self.make_qml_signal_signature(n, iface_name, slotname, True)
             out.write("  connect(api_, SIGNAL(" + sig_signature + "), this, SLOT(" + slot_signature + "));\n")
+        out.write("  LOG4CXX_TRACE(logger_, \"CONNECT SIGNALS: \" << __PRETTY_FUNCTION__ );\n")
         out.write("}\n\n")
         for (request,response) in request_responses:
             in_params = request.findall('param')
             out_params = response.findall('param')
             signature = self.make_method_signature(request, response, iface_name, True)
             out.write(signature + " {\n")
+            out.write("  LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
             if out_params:
                 param_desc = self.make_param_desc(out_params[0], iface_name)
                 param_type = self.qt_param_type(param_desc)
@@ -334,12 +345,18 @@ class Impl(FordXmlParser):
             for param in in_params:
                 param_name = param.get('name')
                 out.write("  PutArgToMap(in_arg, \"" + param_name + "\", " + param_name + "_in);\n")
+            out.write("  LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
             method_name = request.get('name')[:1].lower() + request.get('name')[1:]
             out.write("  if (!QMetaObject::invokeMethod(api_, \"" + method_name + "\",")
             out.write("Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), ")
-            out.write("Q_ARG(QVariant, QVariant(in_arg)))) {RaiseDbusError(this); " + return_statement + ";}\n")
-            out.write("  if (out_arg_v.type() != QVariant::Map) {RaiseDbusError(this); " + return_statement + ";}\n")
-            out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
+            out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n    RaiseDbusError(this);\n")
+            out.write("    LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
+            out.write(return_statement + ";\n  }\n")
+            if out_params:
+                out.write("  if (out_arg_v.type() != QVariant::Map) {\n    RaiseDbusError(this);\n")
+                out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
+                out.write(return_statement + ";\n  }\n")
+                out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
             for i in range(1, len(out_params)):
                 param = out_params[i]
                 param_name = param.get('name')
@@ -349,13 +366,27 @@ class Impl(FordXmlParser):
                 param_desc = self.make_param_desc(out_params[0], iface_name)
                 param_type = self.qt_param_type(param_desc)
                 out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) RaiseDbusError(this);' + "\n")
+                out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
+                out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
                 out.write("  return ret;\n")
+            else:
+                out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
             out.write("}\n\n")
         for n in notifications:
             slotname = n.get('name') + '_qml'
             slot_signature = self.make_qml_signal_signature(n, iface_name, slotname, False, True)
             out.write(slot_signature + " {\n")
             params = n.findall('param')
+            out.write("  LOG4CXX_TRACE(logger_, \"EMIT SIGNAL: \" << __PRETTY_FUNCTION__ );\n")
+            out.write("  LOG4CXX_DEBUG(logger_, \"Arguments:\\n{\"")
+            for p in params[0:-1]:
+                param = self.make_param_desc(p, iface_name)
+                out.write(" << \" " + param.name + ":\" << " + param.name + " << \",\"")
+            for p in params[-1:]: # last param without comma in end line
+                p = params[-1]
+                param = self.make_param_desc(p, iface_name)
+                out.write(" << \" " + param.name + ":\" << " + param.name)
+            out.write(" << \" }\");\n")
             for p in params:
                 param = self.make_param_desc(p, iface_name)
                 param_type = self.qt_param_type(param)
@@ -363,12 +394,16 @@ class Impl(FordXmlParser):
                 if param.mandatory:
                     if param.array or (param.type not in ['Integer', 'String', 'Float', 'Boolean'] and not param.enum):
                         out.write('  ' + param_type + ' ' + param_name + ";\n")
-                        out.write('  if (!VariantToValue(' + param.name + ', ' + param_name + ")) return;\n")
+                        out.write('  if (!VariantToValue(' + param.name + ', ' + param_name + ")) {\n")
+                        out.write("    LOG4CXX_ERROR(logger_, \"Can't convert variant to value\");\n")
+                        out.write("  return;}\n")
                 else:
                     out.write('  ' + param_type + ' ' + param_name + ";\n")
                     out.write('  ' + param_name + '.presence = !' + param.name + ".isNull();\n")
                     out.write('  if (' + param_name + ".presence) {\n")
-                    out.write('    if (!VariantToValue(' + param.name + ', ' + param_name + ".val)) return;\n")
+                    out.write('    if (!VariantToValue(' + param.name + ', ' + param_name + ".val))")
+                    out.write("LOG4CXX_ERROR(logger_, \"Can't convert variant to value\");")
+                    out.write(" return;\n")
                     out.write("  }\n")
             out.write('  emit ' + n.get('name') + '(')
             for i in range(len(params)):
@@ -448,6 +483,7 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
+arg_parser.add_argument('--outdir', required=True)
 args = arg_parser.parse_args()
 
 header_name = 'qml_dbus.h'
@@ -458,8 +494,8 @@ in_tree_root = in_tree.getroot()
 
 impl = Impl(in_tree_root, 'com.ford.sdl.hmi')
 
-header_out = open(header_name, "w")
-source_out = open(source_name, "w")
+header_out = open(args.outdir + '/' + header_name, "w")
+source_out = open(args.outdir + '/' + source_name, "w")
 
 header_out.write("""/**
  * @file qml_dbus.h
@@ -550,6 +586,9 @@ source_out.write("""/**
 
 """)
 source_out.write("#include \"" + header_name + "\"\n\n");
+source_out.write("#include <log4cxx/logger.h>\n")
+source_out.write("#include <log4cxx/propertyconfigurator.h>\n\n")
+source_out.write("extern log4cxx::LoggerPtr logger_;\n\n")
 impl.make_dbus_type_definitions(source_out)
 impl.make_dbus_adaptor_definitions(source_out)
 impl.make_dbus_register_metatypes_definition(source_out)

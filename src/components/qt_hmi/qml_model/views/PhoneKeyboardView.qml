@@ -13,16 +13,16 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        Column{
+        Column {
             anchors.centerIn: parent
 
             Row {
                 id: upperRow
                 property string contentLoader : "ABCDEFGHI"
                 anchors.horizontalCenter: parent.horizontalCenter
-                Repeater{
+                Repeater {
                     model: 9
-                    CircleBtn{
+                    CircleBtn {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: upperRow.contentLoader.charAt(index)
@@ -30,7 +30,7 @@ Item {
                         onIsPressedChanged: {
                             if(isPressed == false){
                                 contentLoader.go("./views/ContactsListView.qml")
-                                contentLoader.item.contactsListView.setCurrent(text)
+                                contentLoader.item.setCurrent(text)
                             }
                         }
                     }
@@ -41,9 +41,9 @@ Item {
                 id: middleRow
                 property string contentLoader : "JKLMNOPQR"
                 anchors.horizontalCenter: parent.horizontalCenter
-                Repeater{
+                Repeater {
                     model: 9
-                    CircleBtn{
+                    CircleBtn {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: middleRow.contentLoader.charAt(index)
@@ -51,7 +51,7 @@ Item {
                         onIsPressedChanged: {
                             if(isPressed == false){
                                 contentLoader.go("./views/ContactsListView.qml")
-                                contentLoader.item.contactsListView.setCurrent(text)
+                                contentLoader.item.setCurrent(text)
                             }
                         }
                     }
@@ -62,9 +62,9 @@ Item {
                 id: lowerRow
                 property string contentLoader : "STUVWXYZ"
                 anchors.horizontalCenter: parent.horizontalCenter
-                Repeater{
+                Repeater {
                     model: 8
-                    CircleBtn{
+                    CircleBtn {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: lowerRow.contentLoader.charAt(index)
@@ -72,12 +72,12 @@ Item {
                         onIsPressedChanged: {
                             if(isPressed == false){
                                 contentLoader.go("./views/ContactsListView.qml")
-                                contentLoader.item.contactsListView.setCurrent(text)
+                                contentLoader.item.setCurrent(text)
                             }
                         }
                     }
                 }
-                CircleBtn{
+                CircleBtn {
                     imgOff: "../res/buttons/preset_btn.png"
                     imgOn: "../res/buttons/preset_pressed_btn.png"
                     text: "123"
@@ -87,7 +87,7 @@ Item {
         }
     }
 
-    Item{
+    Item {
         // 1/4 bottom screen
         anchors.bottom: parent.bottom
         anchors.left: parent.left

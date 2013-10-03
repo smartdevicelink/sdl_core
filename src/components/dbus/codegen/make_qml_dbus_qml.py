@@ -1,5 +1,6 @@
-#! /usr/bin/python
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 #  @file make_qml_dbus_qml.py
 #  @brief Generator of QML to QDbus QML part
 #
@@ -172,7 +173,7 @@ for interface_el in in_tree_root.findall('interface'):
     notifications = impl.find_notifications(interface_el)
     request_responses = impl.find_request_response_pairs(interface_el)
     if notifications or request_responses:
-        filename = interface_el.get('name')+'_auto.qml'
+        filename = interface_el.get('name')+'Proxy.qml'
         outfile = open(args.outdir + '/' + filename, 'w')
         write_header(outfile)
         impl.write_qml(interface_el, outfile)

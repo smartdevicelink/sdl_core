@@ -1,8 +1,10 @@
 import QtQuick 2.0
 
-
 GridView
 {
+    property int columns: 4
+    property int rows: 2
+
     id: menuGridView
 
     populate: Transition {
@@ -24,9 +26,6 @@ GridView
         }
     }
 
-    property int columns: 4
-    property int rows: 2
-
     cellWidth: width / columns
     cellHeight: height / rows
 
@@ -39,7 +38,6 @@ GridView
         width: menuGridView.cellWidth
         height: menuGridView.cellHeight
         MouseArea {
-            cursorShape: Qt.PointingHandCursor
             anchors.fill: parent
             onClicked: {
                 if(qml !== "") {

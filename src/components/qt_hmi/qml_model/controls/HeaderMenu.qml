@@ -8,7 +8,7 @@ Item {
     anchors.rightMargin: 30
     anchors.topMargin: 30
 
-    Text{
+    Text {
         text: "75°";
         color: "#1d81d5"
         font.pixelSize: 25;
