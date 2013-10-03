@@ -37,17 +37,20 @@
 SdlProxy::SdlProxy(QQuickItem *parent)
     : QQuickItem(parent) {
 
-    QDBusConnection::systemBus().connect("com.ford.sdl.core", "/", "com.ford.hmi.BasicCommunication",
+    qDebug() << "SdlProxy instantiated";
+
+    QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
                                          "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication)));
-    QDBusConnection::systemBus().connect("com.ford.sdl.core", "/", "com.ford.hmi.BasicCommunication",
+    QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
                                          "OnAppUnregistered", this, SIGNAL(appUnregistered(int)));
-    QDBusConnection::systemBus().connect("com.ford.sdl.core", "/", "com.ford.hmi.BasicCommunication",
+    QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
                                          "PlayTone", this, SIGNAL(playTone()));
-    QDBusConnection::systemBus().connect("com.ford.sdl.core", "/", "com.ford.hmi.UI",
+    QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.UI",
                                          "ShowNotification", this, SLOT(OnShowNotification(Common_TextFieldStruct,OptionalArgument<Common_Image>,int)));
 }
 
 void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
+    qDebug() << "SDLProxy::onAppRegistered";
     QVariantMap appMap;
     appMap["appId"] = QVariant::fromValue(app.appID);
     appMap["appName"] = QVariant::fromValue(app.appName);
@@ -73,6 +76,7 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
         appMap["icon"] = QVariant::fromValue(app.icon.val);
     }
 
+    qDebug() << "SDLProxy::onAppRegistered (emit)";
     emit appRegistered(QVariant(appMap));
 }
 
