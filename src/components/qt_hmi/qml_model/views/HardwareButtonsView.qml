@@ -311,6 +311,15 @@ Item {
 
                     model: ListModel {}
                     delegate: TextButton {}
+
+                    Rectangle {
+                        id: scrollbar
+                        anchors.right: selectList.right
+                        y: selectList.visibleArea.yPosition * selectList.height
+                        width: 10
+                        height: selectList.visibleArea.heightRatio * selectList.height
+                        color: "white"
+                    }
                 }
             }
         }

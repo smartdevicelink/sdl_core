@@ -115,7 +115,7 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("VR", "OnLanguageChange");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnVehicleData");
-  DBusMessageController::SubscribeTo("UI", "OnTBTClientState");
+  DBusMessageController::SubscribeTo("Navigation", "OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
