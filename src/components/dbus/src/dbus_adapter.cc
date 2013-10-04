@@ -117,7 +117,7 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
         return false;
     }
   } else {
-    dbus_connection_read_write(conn_, -1);
+    dbus_connection_read_write(conn_, 50);
   }
   return false;
 }
@@ -225,7 +225,6 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
     dbus_message_unref(msg);
     return;
   }
-  dbus_connection_flush(conn_);
   PushMessageId(serial, std::make_pair(id, func_id));
   dbus_message_unref(msg);
   LOG4CXX_INFO(logger_, "DBus: Success call method");
@@ -266,7 +265,6 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
     dbus_message_unref(msg);
     return;
   }
-  dbus_connection_flush(conn_);
   dbus_message_unref(msg);
   LOG4CXX_INFO(logger_, "DBus: Success emit signal");
 }
@@ -274,7 +272,6 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
 void DBusAdapter::AddMatch(const std::string& rule) {
   LOG4CXX_INFO(logger_, "Subscription: " << rule);
   dbus_bus_add_match(conn_, rule.c_str(), NULL);
-  dbus_connection_flush(conn_);
 }
 
 bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
