@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -51,7 +52,8 @@ namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
-class CommandRequestImpl : public CommandImpl {
+class CommandRequestImpl : public CommandImpl,
+    public event_engine::EventObserver   {
  public:
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
@@ -65,6 +67,13 @@ class CommandRequestImpl : public CommandImpl {
    *
    */
   virtual void onTimeOut() const;
+
+  /**
+   * @brief Default EvenObserver's pure virtual method implementation
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
 
   /*
    * @brief Retrieves request ID
@@ -115,12 +124,12 @@ class CommandRequestImpl : public CommandImpl {
    *
    * @param function_id HMI request ID
    * @param msg_params HMI request msg params
-   * @param hmi_correlation_id hmi request correlation id
+   * @param use_events true if we need subscribe on event(HMI request)
    *
    */
   void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const NsSmart::SmartObject& msg_params,
-                      unsigned int hmi_correlation_id);
+                      const NsSmart::SmartObject* msg_params = NULL,
+                      bool use_events = false);
 
   /*
    * @brief Creates HMI request

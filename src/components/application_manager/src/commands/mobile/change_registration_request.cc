@@ -45,7 +45,6 @@ namespace commands {
 ChangeRegistrationRequest::ChangeRegistrationRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message),
-      event_engine::EventObserver("ChangeRegistrationRequest"),
       is_ui_send_(false),
       is_vr_send_(false),
       is_tts_send_(false),
@@ -142,7 +141,8 @@ void ChangeRegistrationRequest::Run() {
     msg_params[strings::app_id] = app->app_id();
 
     is_ui_send_ = true;
-    SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration, msg_params);
+    SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
+                   &msg_params, true);
   }
 
   if (vr_flag) {
@@ -152,7 +152,8 @@ void ChangeRegistrationRequest::Run() {
         (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
 
-    SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration, msg_params);
+    SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
+                   &msg_params, true);
   }
 
   if (tts_flag) {
@@ -162,7 +163,8 @@ void ChangeRegistrationRequest::Run() {
         (*message_)[strings::msg_params][strings::language];
     msg_params[strings::app_id] = app->app_id();
 
-    SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration, msg_params);
+    SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
+                   &msg_params, true);
   }
 
   if (!ui_flag && !vr_flag && !tts_flag) {
@@ -171,17 +173,6 @@ void ChangeRegistrationRequest::Run() {
                  "Current language is the same");
     return;
   }
-}
-
-void ChangeRegistrationRequest::SendHMIRequest(
-    const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params) {
-
-  const unsigned int hmi_correlation_id =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  subscribe_on_event(function_id, hmi_correlation_id);
-  CommandRequestImpl::SendHMIRequest(function_id, msg_params,
-                                     hmi_correlation_id);
 }
 
 bool ChangeRegistrationRequest::WasAnySuccess(const hmi_apis::Common_Result::eType ui,
@@ -260,7 +251,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           mobile_apis::FunctionID::eType::ChangeRegistrationID;
 
     SendResponse(WasAnySuccess(ui_result_, vr_result_, tts_result_),
-                 static_cast<mobile_apis::Result::eType>(greates_result_code));
+                 static_cast<mobile_apis::Result::eType>(greates_result_code),
+                 NULL, &(message[strings::msg_params]));
   }
 }
 

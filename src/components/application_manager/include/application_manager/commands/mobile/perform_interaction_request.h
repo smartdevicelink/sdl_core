@@ -35,7 +35,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/event_engine/event_observer.h"
 #include "utils/timer_thread.h"
 #include "utils/macro.h"
 
@@ -48,8 +47,7 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public CommandRequestImpl,
-  public event_engine::EventObserver {
+class PerformInteractionRequest : public CommandRequestImpl  {
 
  public:
 

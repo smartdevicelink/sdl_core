@@ -35,7 +35,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/event_engine/event_observer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -45,8 +44,7 @@ namespace commands {
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest : public CommandRequestImpl,
-    public event_engine::EventObserver  {
+class ChangeRegistrationRequest : public CommandRequestImpl  {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
@@ -109,17 +107,6 @@ class ChangeRegistrationRequest : public CommandRequestImpl,
   static bool WasAnySuccess(const hmi_apis::Common_Result::eType ui,
                      const hmi_apis::Common_Result::eType vr,
                      const hmi_apis::Common_Result::eType tts);
-
-  /*
-   * @brief Sends HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   * @param hmi_correlation_id hmi request correlation id
-   *
-   */
-  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const NsSmart::SmartObject& msg_params);
 
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 

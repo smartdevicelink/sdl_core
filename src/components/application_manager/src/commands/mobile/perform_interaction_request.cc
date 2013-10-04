@@ -50,7 +50,6 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  EventObserver("PerformInteractionRequest"),
   timer_(this, &PerformInteractionRequest::onTimer) {
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
