@@ -97,7 +97,7 @@ void EventDispatcher::remove_observer(const Event::EventID& event_id,
     //ObserverList iterator
     ObserverList::iterator observer_it =  it->second.begin();
     for (; it->second.end() != observer_it; ++observer_it) {
-      if (observer->name() == (*observer_it)->name()) {
+      if (observer->id() == (*observer_it)->id()) {
         observer_it = it->second.erase(observer_it);
       }
     }
@@ -117,7 +117,7 @@ void EventDispatcher::remove_observer(EventObserver* const observer) {
       //ObserverList iterator
       ObserverList::iterator observer_it =  it->second.begin();
       for (; it->second.end() != observer_it; ++observer_it) {
-        if (observer->name() == (*observer_it)->name()) {
+        if (observer->id() == (*observer_it)->id()) {
           observer_it = it->second.erase(observer_it);
         }
       }

@@ -49,15 +49,6 @@ ChangeRegistrationResponse::~ChangeRegistrationResponse() {
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

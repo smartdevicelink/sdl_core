@@ -46,12 +46,14 @@ class EventObserver
 
   friend class EventDispatcher;
 
+  // Typedef for possible Observer ID's from mobile_apis functionID enum
+  typedef unsigned int ObserverID;
+
   /*
-   * @brief Constructor with parameter
+   * @brief Constructor
    *
-   * @param Unique Observer name
    */
-  explicit EventObserver(const std::string& name);
+  EventObserver();
 
   /*
    * @brief Destructor
@@ -59,11 +61,11 @@ class EventObserver
   virtual ~EventObserver();
 
   /**
-   * @brief Retrieves observer name
+   * @brief Retrieves observer unique id
    *
-   * @return Unique Observer name
+   * @return Unique Observer id
    */
-  inline std::string& name();
+  inline const ObserverID& id() const;
 
   /**
    * @brief Interface method that is called whenever new event received
@@ -93,7 +95,7 @@ class EventObserver
 
  private:
 
-  std::string name_;
+  ObserverID id_;
 
   /*
    * @brief Unsubscribes the observer from all events
@@ -101,17 +103,11 @@ class EventObserver
    */
   void unsubscribe_from_all_events();
 
-  /*
-   * @brief Default constructor
-   *
-   */
-  EventObserver();
-
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
 };
 
-std::string& EventObserver::name() {
-  return name_;
+const EventObserver::ObserverID& EventObserver::id() const {
+  return id_;
 }
 
 }

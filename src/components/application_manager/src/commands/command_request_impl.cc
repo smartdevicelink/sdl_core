@@ -70,6 +70,9 @@ void CommandRequestImpl::onTimeOut() const {
   ApplicationManagerImpl::instance()->ManageMobileCommand(response);
 }
 
+void CommandRequestImpl::on_event(const event_engine::Event& event) {
+}
+
 void CommandRequestImpl::SendResponse(
     const bool success, const mobile_apis::Result::eType& result_code,
     const char* info, const NsSmart::SmartObject* response_params) const {
@@ -107,13 +110,19 @@ void CommandRequestImpl::SendResponse(
 
 void CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params, unsigned int hmi_correlation_id) {
+    const NsSmart::SmartObject* msg_params, bool use_events) {
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
     return;
+  }
+
+  const unsigned int hmi_correlation_id =
+       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  if (use_events) {
+    subscribe_on_event(function_id, hmi_correlation_id);
   }
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
@@ -125,7 +134,9 @@ void CommandRequestImpl::SendHMIRequest(
   request[strings::params][strings::protocol_type] =
       CommandImpl::hmi_protocol_type_;
 
-  request[strings::msg_params] = msg_params;
+  if (msg_params) {
+    request[strings::msg_params] = *msg_params;
+  }
 
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
@@ -187,6 +198,7 @@ void CommandRequestImpl::CreateHMIRequest(
   }
 }
 
+//TODO(VS): Should be removed after we will shift to Event engine usage completely
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params) const {

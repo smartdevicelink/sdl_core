@@ -64,11 +64,6 @@ void CommandResponseImpl::SendResponse(
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::msg_params][strings::success] = success;
 
-  if ((*message_)[strings::params].keyExists(hmi_response::message)) {
-    (*message_)[strings::msg_params][strings::info] =
-        (*message_)[strings::params][hmi_response::message];
-  }
-
   if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
       (*message_)[strings::msg_params][strings::result_code] = result_code;
