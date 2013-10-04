@@ -70,24 +70,6 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
     inputChanges: function (element) {
 
-//        TO DO
-//        var keyboardEvent = document.createEvent("KeyboardEvent");
-//        var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
-//
-//
-//        keyboardEvent[initMethod](
-//            "keydown", // event type : keydown, keyup, keypress
-//            true, // bubbles
-//            true, // cancelable
-//            window, // viewArg: should be window
-//            false, // ctrlKeyArg
-//            false, // altKeyArg
-//            false, // shiftKeyArg
-//            false, // metaKeyArg
-//            element.text.charCodeAt(0), // keyCodeArg : unsigned long the virtual key code, else 0
-//            0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
-//        );
-
         if (this.searchBar.input.value == null) {
             this.searchBar.input.set('value', "");
         }
@@ -95,7 +77,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         switch (element.text) {
             case "Space": {
                 this.searchBar.input.set('value', this.searchBar.input.value + " ");
-                this.target.set('value', this.searchBar.input.value + " ");
+                this.target.set('value', this.searchBar.input.value);
                 break;
             }
             case "Search": {
@@ -105,14 +87,15 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             }
             default:{
                 this.searchBar.input.set('value', this.searchBar.input.value + element.text);
-                this.target.set('value', this.searchBar.input.value + " ");
+                this.target.set('value', this.searchBar.input.value);
             }
 
         }
     },
 
     clearBtn: function (element) {
-        this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1))
+        this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1));
+        this.target.set('value', this.searchBar.input.value);
     },
 
     /**
