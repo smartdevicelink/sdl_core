@@ -1,12 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Window 2.0
 
-Window {
+Rectangle {
     width: 400
     height: 256
-
-    title: "Show"
-    flags: Qt.Dialog
 
     Rectangle {
         id: rectangle
@@ -39,11 +36,12 @@ Window {
         }
     }
 
-    function showMessage (fieldSubstringsStruct) {
+    function show (fieldSubstringsStruct) {
         rectangle.mainField1Text = "<h1>" + fieldSubstringsStruct.mainField1 + "</h1>"
         rectangle.mainField2Text = "<h2>" + fieldSubstringsStruct.mainField2 + "</h2>"
         rectangle.mainField3Text = "<h3>" + fieldSubstringsStruct.mainField3 + "</h3>"
         rectangle.mainField4Text = fieldSubstringsStruct.mainField4
         rectangle.statusBarText = fieldSubstringsStruct.statusBar
+        visible = true
     }
 }

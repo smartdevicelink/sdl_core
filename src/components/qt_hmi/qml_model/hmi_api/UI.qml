@@ -47,12 +47,12 @@ Item {
             }
         }
 
-        var ret = alertWindow.alert(alertString, duration)
-        if (ret.alertLaunched) {
+        var tryAgainTime = alertWindow.alert(alertString, duration)
+        if (tryAgainTime === undefined) {
             return {}
         }
         else {
-            return {tryAgainTime: ret.timeToWait}
+            return {tryAgainTime: tryAgainTime}
         }
     }
 
@@ -73,8 +73,8 @@ Item {
             "mainField4": fieldSubstrings[3],
             "statusBar": fieldSubstrings[4]
         }
-        showWindow.showMessage(fieldSubstringsStruct)
-        showWindow.show()
+        showWindow.show(fieldSubstringsStruct)
+        return {}
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {

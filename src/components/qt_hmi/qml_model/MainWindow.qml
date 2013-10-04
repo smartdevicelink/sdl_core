@@ -81,6 +81,13 @@ Rectangle {
                 }
             }
         }
+
+        AlertWindow {
+            id: alertWindow
+            objectName: "AlertWindow"
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -141,14 +148,10 @@ Rectangle {
         }
     }
 
-    AlertWindow {
-        id: alertWindow
-        objectName: "AlertWindow"
-    }
-
     ShowWindow {
         id: showWindow
         objectName: "ShowWindow"
+        visible: false
     }
 
     Component.onCompleted: {
