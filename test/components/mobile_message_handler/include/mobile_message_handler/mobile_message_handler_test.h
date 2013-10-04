@@ -92,6 +92,8 @@ class MobileMessageHandlerTester :
       return 0;
     }
 
+    void SendFramesNumber(int connection_key, int number_of_frames) {}
+
     MobileMessageHandlerTester()
       : mmh_(NULL) {
     }
