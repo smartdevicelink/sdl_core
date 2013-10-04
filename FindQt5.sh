@@ -32,7 +32,7 @@
 
 QT5_REQUIRED_VERSION="5.1.0"
 
-qmake_list=`find -L $CUSTOM_QT5_DIR ~ /opt /usr -name qmake -type f -executable -print 2>/dev/null || true` # first we look for qmake binary
+qmake_list=`find -L $CUSTOM_QT5_DIR ~ /opt /usr -name '.*' -prune -o -name qmake -type f -executable -print 2>/dev/null || true` # first we look for qmake binary
 for qmake_binary in $qmake_list; do # for all candidates
   grep_result=`$qmake_binary -version | grep "Qt version "$QT5_REQUIRED_VERSION || true` # ask version (only qmake provides this option for sure)
   if [ -n "$grep_result" ]; then # if version matches

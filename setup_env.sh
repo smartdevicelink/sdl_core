@@ -56,7 +56,7 @@ UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
 APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
-CMAKE_DEB_DST="/tmp"
+CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 if [ ${ARCH} = "i386" ]; then
   CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
@@ -70,7 +70,7 @@ elif [ ${ARCH} = "x64" ]; then
   QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
   QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 fi
-QT5_RUNFILE_DST="/tmp"
+QT5_RUNFILE_DST="/tmp/qt5"
 QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 AVAHI_COMMON="libavahi-common-dev"
