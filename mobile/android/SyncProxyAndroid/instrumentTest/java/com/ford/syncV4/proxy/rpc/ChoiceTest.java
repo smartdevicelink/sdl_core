@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.enums.ImageType;
 
 import junit.framework.TestCase;
 
@@ -63,18 +64,32 @@ public class ChoiceTest extends TestCase {
         String testData = "text";
         choice.setTertiaryText(testData);
         String realData = choice.getTertiaryText();
-        assertEquals("Get ext should be == set text", testData, realData);
+        assertEquals("Get text should be == set text", testData, realData);
     }
 
-    /*public void testSetSecondaryImageSetsSecondaryImage() throws Exception {
+    public void testSetSecondaryImageSetsSecondaryImage() throws Exception {
         Choice choice = new Choice();
         assertNotNull(choice);
-        Image testData = new Image();
+        Image testImage = new Image();
+        ImageType testData = ImageType.DYNAMIC;
+        testImage.setImageType(ImageType.DYNAMIC);
         byte[] bulkData = new byte[100];
-        testData.setBulkData(bulkData);
-        choice.setSecondaryImage(testData);
+        testImage.setBulkData(bulkData);
+        choice.setSecondaryImage(testImage);
         JSONObject obj = getChoiceJSONObject(choice);
-        String realData = (String) obj.get(Names.secondaryImage);
+        JSONObject realImage = (JSONObject) obj.get(Names.secondaryImage);
+        ImageType realData = (ImageType) realImage.get(Names.imageType);
         assertEquals("Deserialized message should match original one", testData, realData);
-    }*/
+    }
+
+    public void testGetSecondaryImageReturnsSecondaryImage() throws Exception {
+        Choice choice = new Choice();
+        Image testImage = new Image();
+        String testData = "Value";
+        testImage.setValue(testData);
+        choice.setSecondaryImage(testImage);
+        Image realImage = choice.getSecondaryImage();
+        String realData = realImage.getValue();
+        assertEquals("Get ext should be == set text", testData, realData);
+    }
 }

@@ -104,4 +104,18 @@ public class Choice extends RPCStruct {
             store.remove(Names.secondaryImage);
         }
     }
+
+    public Image getSecondaryImage() {
+        Object obj = store.get(Names.secondaryImage);
+        if (obj instanceof Image) {
+            return (Image) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new Image((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.secondaryImage, e);
+            }
+        }
+        return null;
+    }
 }
