@@ -1,8 +1,9 @@
 import QtQuick 2.0
 import "../controls"
+import "../hmi_api/Common.js" as Common
 
 GeneralView {
-    context: "Application"
+    applicationContext: true
     Column {
         spacing: 25
         anchors.fill: parent

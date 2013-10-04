@@ -4,33 +4,16 @@ import "../hmi_api/Common.js" as Common
 Item {
     ListModel {
         id: deviceListModel
-        ListElement {
-            name: "Device 1"
-            devid: 1
-        }
-        ListElement {
-            name: "Device 2"
-            devid: 2
-        }
-        ListElement {
-            name: "Device 3"
-            devid: 3
-        }
     }
 
     ListModel {
         id: applicationListModel
-        ListElement {
-            appName: "SyncProxyTester"
-            icon: "../res/SPT.png"
-            deviceName: "Device 1"
-            appId: 1
-            hmiDisplayLanguageDesired: 0
-            isMediaApplication: 1
-        }
     }
 
-    property string hmiContext
+    property int applicationId
+
+    property int hmiContext
+    property bool applicationContext: false
 
     property string route_text: ""
 

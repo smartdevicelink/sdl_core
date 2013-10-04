@@ -1,6 +1,8 @@
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
 GeneralView {
+    category: Common.DeactivateReason.AUDIO
     MediaPlayerView {
         playerName: "iPod"
         anchors.fill: parent
