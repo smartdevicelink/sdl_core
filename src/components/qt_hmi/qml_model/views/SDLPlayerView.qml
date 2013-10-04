@@ -1,8 +1,9 @@
 import QtQuick 2.0
 import "../controls"
+import "../hmi_api/Common.js" as Common
 
 GeneralView {
-    context: "Application"
+    applicationContext: true
     Column {
         spacing: 25
         anchors.fill: parent
@@ -143,6 +144,9 @@ GeneralView {
                         }
                         onReleased: {
                             playBtnImage.source = "../res/buttons/player_play_btn.png"
+                        }
+                        onClicked: {
+                            sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined)
                         }
                     }
                     source: "../res/buttons/player_play_btn.png"

@@ -20,7 +20,15 @@ Rectangle {
         id: dataContainer
 
         onHmiContextChanged: {
-            // TODO: Send notification to SDL
+            sdlUI.onSystemContext(hmiContext)
+        }
+
+        onApplicationContextChanged: {
+            if (applicationContext) {
+                sdlBasicCommunication.onAppActivated(applicationId)
+            } else {
+                sdlBasicCommunication.onAppDeactivated(applicationId, contentLoader.item.category)
+            }
         }
     }
 
@@ -76,7 +84,8 @@ Rectangle {
 
                 onStatusChanged: {
                     if (status == Component.Ready) {
-                        dataContainer.hmiContext = item.context
+                        dataContainer.hmiContext = item.systemContext
+                        dataContainer.applicationContext = item.applicationContext
                     }
                 }
             }
@@ -140,11 +149,20 @@ Rectangle {
                  ngnMediaScreenAppName: application.ngnMediaScreenAppName,
                  icon: application.icon,
                  deviceName: application.deviceName,
-                 appId: application.appID,
+                 appId: application.appId,
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
                  appType: application.appType
              })
+        }
+
+        onAppUnregistered: {
+            for (var i = 0; i < dataContainer.applicationList.count; i++) {
+                if (dataContainer.applicationList.get(i).appId === appId) {
+                    dataContainer.applicationList.remove(0);
+                    break;
+                }
+            }
         }
     }
 

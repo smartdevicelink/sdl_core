@@ -33,8 +33,10 @@
  */
 
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
 GeneralView {
+    category: Common.DeactivateReason.AUDIO
 	RadioPlayerView {
 	    id: amRadioPlayer
         anchors.fill: parent

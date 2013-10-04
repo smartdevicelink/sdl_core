@@ -2,11 +2,6 @@ import QtQuick 2.0
 import "Common.js" as Common
 
 Item {
-    signal showNotification (var text, var icon, int timeout)
-    signal onCommand (int cmdID, int appID)
-    signal onSystemContext (int systemContext)
-    signal onLanguageChange (int language)
-    signal onDriverDistraction (int state)
     function filter (strings, fields) {
 // substrings for each allowed field
         var fieldSubstrings = []
