@@ -1,34 +1,34 @@
 /**
-* Copyright (c) 2013, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
@@ -41,17 +41,17 @@ extern char introspection_xml[];
 
 namespace dbus {
 
-log4cxx::LoggerPtr DBusAdapter::logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+log4cxx::LoggerPtr DBusAdapter::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
 }
 
 DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
@@ -63,7 +63,8 @@ DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
       hmi_service_name_(hmiServiceName),
       hmi_object_path_(hmiObjectPath),
       conn_(NULL),
-      schema_(new DBusSchema(ford_message_descriptions::message_descriptions)) {}
+      schema_(new DBusSchema(ford_message_descriptions::message_descriptions)) {
+}
 
 DBusAdapter::~DBusAdapter() {
   delete schema_;
@@ -80,14 +81,15 @@ bool DBusAdapter::Init() {
     return false;
   }
   ret = dbus_bus_request_name(conn_, sdl_service_name_.c_str(),
-                              DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
+  DBUS_NAME_FLAG_REPLACE_EXISTING,
+                              &err);
   if (dbus_error_is_set(&err)) {
-    LOG4CXX_ERROR(logger_, "DBus: Can't request name" << err.name);
+    LOG4CXX_ERROR(logger_, "DBus: Can't request name " << err.name);
     dbus_error_free(&err);
     return false;
   }
   if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
-    LOG4CXX_ERROR(logger_, "DBus: Can't get name service " << err.name);
+    LOG4CXX_ERROR(logger_, "DBus: Can't get service name " << err.name);
     return false;
   }
 
@@ -100,17 +102,22 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
     return false;
   }
-  DBusMessage* msg;
-  if ((msg = dbus_connection_pop_message(conn_)) != NULL) {
+  DBusMessage* msg = dbus_connection_pop_message(conn_);
+  if (msg != NULL) {
     switch (dbus_message_get_type(msg)) {
-      case DBUS_MESSAGE_TYPE_METHOD_CALL: return ProcessMethodCall(msg, obj);
-      case DBUS_MESSAGE_TYPE_METHOD_RETURN: return ProcessMethodReturn(msg, obj);
-      case DBUS_MESSAGE_TYPE_ERROR: return ProcessError(msg, obj);
-      case DBUS_MESSAGE_TYPE_SIGNAL: return ProcessSignal(msg, obj);
-      default: return false;
+      case DBUS_MESSAGE_TYPE_METHOD_CALL:
+        return ProcessMethodCall(msg, obj);
+      case DBUS_MESSAGE_TYPE_METHOD_RETURN:
+        return ProcessMethodReturn(msg, obj);
+      case DBUS_MESSAGE_TYPE_ERROR:
+        return ProcessError(msg, obj);
+      case DBUS_MESSAGE_TYPE_SIGNAL:
+        return ProcessSignal(msg, obj);
+      default:
+        return false;
     }
   } else {
-    dbus_connection_read_write(conn_, -1);
+    dbus_connection_read_write(conn_, 50);
   }
   return false;
 }
@@ -196,17 +203,16 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
   }
 
   DBusMessage* msg;
-  msg = dbus_message_new_method_call(hmi_service_name_.c_str(),
-       hmi_object_path_.c_str(),
-       (hmi_service_name_ + "." + name.first).c_str(),
-       name.second.c_str());
+  msg = dbus_message_new_method_call(
+      hmi_service_name_.c_str(), hmi_object_path_.c_str(),
+      (hmi_service_name_ + "." + name.first).c_str(), name.second.c_str());
   if (NULL == msg) {
     LOG4CXX_WARN(logger_, "DBus: Failed call method (Message Null)");
     return;
   }
 
   const ListArgs& args = schema_->getListArgs(func_id,
-                                             hmi_apis::messageType::request);
+                                              hmi_apis::messageType::request);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
     dbus_message_unref(msg);
@@ -219,7 +225,6 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
     dbus_message_unref(msg);
     return;
   }
-  dbus_connection_flush(conn_);
   PushMessageId(serial, std::make_pair(id, func_id));
   dbus_message_unref(msg);
   LOG4CXX_INFO(logger_, "DBus: Success call method");
@@ -247,20 +252,19 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
     return;
   }
 
-  const ListArgs& args = schema_->getListArgs(func_id,
-                                             hmi_apis::messageType::notification);
+  const ListArgs& args = schema_->getListArgs(
+      func_id, hmi_apis::messageType::notification);
   if (!SetArguments(msg, args, obj)) {
     LOG4CXX_ERROR(logger_, "DBus: Failed call method (Signature is wrong)");
     dbus_message_unref(msg);
     return;
   }
 
-  if (!dbus_connection_send(conn_, msg, NULL)) { // serial isn't required
+  if (!dbus_connection_send(conn_, msg, NULL)) {  // serial isn't required
     LOG4CXX_WARN(logger_, "DBus: Failed emit signal (Out Of Memory)");
     dbus_message_unref(msg);
     return;
   }
-  dbus_connection_flush(conn_);
   dbus_message_unref(msg);
   LOG4CXX_INFO(logger_, "DBus: Success emit signal");
 }
@@ -268,7 +272,6 @@ void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
 void DBusAdapter::AddMatch(const std::string& rule) {
   LOG4CXX_INFO(logger_, "Subscription: " << rule);
   dbus_bus_add_match(conn_, rule.c_str(), NULL);
-  dbus_connection_flush(conn_);
 }
 
 bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
@@ -277,8 +280,8 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
   std::string interface = dbus_message_get_interface(msg);
   LOG4CXX_INFO(logger_, "DBus: name of method " << interface << " " << method);
 
-  if (interface == "org.freedesktop.DBus.Introspectable" &&
-      method == "Introspect") {
+  if (interface == "org.freedesktop.DBus.Introspectable"
+      && method == "Introspect") {
     LOG4CXX_INFO(logger_, "DBus: INTROSPECT");
     Introspect(msg);
     return false;
@@ -299,17 +302,19 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
   obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
   obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
-  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  obj[sos::S_MSG_PARAMS][sos::kCode] = hmi_apis::Common_Result::SUCCESS;
+  obj[sos::S_PARAMS][sos::kCode] = hmi_apis::Common_Result::SUCCESS;
+  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   const ListArgs args = schema_->getListArgs(ids.second,
-                                            hmi_apis::messageType::response);
+                                             hmi_apis::messageType::response);
   bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
   return ret;
 }
 
-bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj) {
+bool DBusAdapter::ProcessError(DBusMessage* msg,
+                               smart_objects::SmartObject& obj) {
   dbus_int32_t reply_serial = dbus_message_get_reply_serial(msg);
   std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
   if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
@@ -320,11 +325,8 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
   const char* name;
   bool ret = false;
   if ((name = dbus_message_get_error_name(msg)) != NULL) {
-    ford_message_descriptions::ParameterDescription rule = {
-      "description",
-      ford_message_descriptions::String,
-      true
-    };
+    ford_message_descriptions::ParameterDescription rule = { "description",
+        ford_message_descriptions::String, true };
     ListArgs args;
     args.push_back(&rule);
     smart_objects::SmartObject description(smart_objects::SmartType_Map);
@@ -336,12 +338,13 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
     obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
     obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
     obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
-    obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-    obj[sos::S_MSG_PARAMS][sos::kCode] = description[rule.name].asInt();
+    obj[sos::S_PARAMS][sos::kCode] = description[rule.name].asInt();
+    obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
 
-    LOG4CXX_WARN(logger_, "DBus: Call of method " << method.first << "." <<
-                 method.second << " returned error " <<
-                 name << ": " << description[rule.name].asString());
+    LOG4CXX_WARN(
+        logger_,
+        "DBus: Call of method " << method.first << "." << method.second << " returned error " << name << ": " << description[rule.name].asString());
   } else {
     LOG4CXX_ERROR(logger_, "DBus: Type message isn't error");
   }
@@ -350,7 +353,8 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
   return ret;
 }
 
-bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& obj) {
+bool DBusAdapter::ProcessSignal(DBusMessage* msg,
+                                smart_objects::SmartObject& obj) {
   std::string method = dbus_message_get_member(msg);
   std::string interface = dbus_message_get_interface(msg);
   LOG4CXX_INFO(logger_, "DBus: name of signal " << method);
@@ -366,24 +370,24 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
 
   obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = m_id;
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::notification;
-  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
-  const ListArgs args = schema_->getListArgs(name,
-                                            hmi_apis::messageType::notification);
+  const ListArgs args = schema_->getListArgs(
+      name, hmi_apis::messageType::notification);
   bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
   return ret;
 }
 
-bool DBusAdapter::SetArguments(DBusMessage* msg,
-                               const ListArgs& rules,
+bool DBusAdapter::SetArguments(DBusMessage* msg, const ListArgs& rules,
                                smart_objects::SmartObject& args) {
   DBusMessageIter iter;
   dbus_message_iter_init_append(msg, &iter);
   size_t size = rules.size();
   for (size_t i = 0; i < size; ++i) {
-    smart_objects::SmartObject& param = const_cast<smart_objects::SmartObject&>(
-        args.getElement(rules[i]->name));
+    smart_objects::SmartObject& param =
+        const_cast<smart_objects::SmartObject&>(args.getElement(rules[i]->name));
     if (!SetOneArgument(&iter, rules[i], param)) {
       return false;
     }
@@ -398,7 +402,8 @@ bool DBusAdapter::SetOneArgument(DBusMessageIter* iter,
     if (param.isValid()) {
       return SetValue(iter, rules, param);
     } else {
-      LOG4CXX_WARN(logger_, "DBus: Argument '" << rules->name << "' is obligatory!");
+      LOG4CXX_WARN(logger_,
+                   "DBus: Argument '" << rules->name << "' is obligatory!");
       return false;
     }
   } else {
@@ -452,7 +457,8 @@ bool DBusAdapter::SetValue(
       value = &stringValue;
       break;
     default:
-      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument");
+      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument")
+      ;
       return false;
   }
   return dbus_message_iter_append_basic(iter, type, value);
@@ -463,16 +469,16 @@ bool DBusAdapter::SetOptionalValue(
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject &param) {
   DBusMessageIter sub_iter;
-  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL, &sub_iter)) {
-    LOG4CXX_ERROR(logger_, "DBus: Can't open container type (STRUCT) for optional parameter");
+  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL,
+                                        &sub_iter)) {
+    LOG4CXX_ERROR(
+        logger_,
+        "DBus: Can't open container type (STRUCT) for optional parameter");
     return false;
   }
 
-  ford_message_descriptions::ParameterDescription flagRules = {
-      "flag",
-      ford_message_descriptions::Boolean,
-      true
-  };
+  ford_message_descriptions::ParameterDescription flagRules = { "flag",
+      ford_message_descriptions::Boolean, true };
   smart_objects::SmartObject flag(param.isValid());
   if (!SetValue(&sub_iter, &flagRules, flag)
       || !SetValue(&sub_iter, rules, param)) {
@@ -480,7 +486,9 @@ bool DBusAdapter::SetOptionalValue(
   }
 
   if (!dbus_message_iter_close_container(iter, &sub_iter)) {
-    LOG4CXX_ERROR(logger_, "DBus: Can't close container type (STRUCT) for optional parameter");
+    LOG4CXX_ERROR(
+        logger_,
+        "DBus: Can't close container type (STRUCT) for optional parameter");
     return false;
   }
   return true;
@@ -515,15 +523,17 @@ bool DBusAdapter::SetStructValue(
     const ford_message_descriptions::StructDescription* rules,
     smart_objects::SmartObject& structure) {
   DBusMessageIter sub_iter;
-  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL, &sub_iter)) {
+  if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL,
+                                        &sub_iter)) {
     LOG4CXX_ERROR(logger_, "DBus: Can't open container type (STRUCT)");
     return false;
   }
   const ParameterDescription** entry;
   entry = rules->parameters;
   while (*entry != NULL) {
-    smart_objects::SmartObject& param = const_cast<smart_objects::SmartObject&>(
-            structure.getElement((*entry)->name));
+    smart_objects::SmartObject& param =
+        const_cast<smart_objects::SmartObject&>(structure.getElement(
+            (*entry)->name));
     if (!SetOneArgument(&sub_iter, *entry, param)) {
       return false;
     }
@@ -644,7 +654,8 @@ bool DBusAdapter::GetValue(
       }
       break;
     default:
-      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument");
+      LOG4CXX_ERROR(logger_, "DBus: Unknown type of argument")
+      ;
       return false;
   }
   return true;
@@ -696,11 +707,8 @@ bool DBusAdapter::GetOptionalValue(
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
 
-  ford_message_descriptions::ParameterDescription flagRules = {
-      "flag",
-      ford_message_descriptions::Boolean,
-      true
-  };
+  ford_message_descriptions::ParameterDescription flagRules = { "flag",
+      ford_message_descriptions::Boolean, true };
   smart_objects::SmartObject flag;
   if (!GetValue(&sub_iter, &flagRules, flag)) {
     return false;
@@ -724,7 +732,8 @@ std::pair<uint, MessageId> DBusAdapter::PopMessageId(uint32_t serial) {
   return std::make_pair(0, hmi_apis::FunctionID::INVALID_ENUM);
 }
 
-void DBusAdapter::PushMessageId(uint32_t serial, std::pair<uint, MessageId> ids) {
+void DBusAdapter::PushMessageId(uint32_t serial,
+                                std::pair<uint, MessageId> ids) {
   map_messages_.insert(std::make_pair(serial, ids));
 }
 
