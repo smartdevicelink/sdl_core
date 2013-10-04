@@ -543,7 +543,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
       LOG4CXX_INFO(logger_, "Last frame of multiframe message size "
                    << packet->data_size() << "; connection key " << key);
-      if (!protocol_observers_.empty()) {
+      if (protocol_observers_.empty()) {
         LOG4CXX_ERROR(
           logger_,
           "Cannot handle multiframe message: no IProtocolObserver is set.");
