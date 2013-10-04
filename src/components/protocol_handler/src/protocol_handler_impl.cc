@@ -543,7 +543,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
       LOG4CXX_INFO(logger_, "Last frame of multiframe message size "
                    << packet->data_size() << "; connection key " << key);
-      if (!protocol_observers_.empty()) {
+      if (protocol_observers_.empty()) {
         LOG4CXX_ERROR(
           logger_,
           "Cannot handle multiframe message: no IProtocolObserver is set.");
@@ -593,7 +593,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     int sessionhash_code = session_observer_->OnSessionEndedCallback(
                              connection_id,
                              currentsession_id,
-                             hash_code);
+                             hash_code,
+                             packet->service_type());
 
     if (-1 != sessionhash_code) {
       if (2 == packet->version()) {
@@ -650,32 +651,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
   RawMessagePtr recieved_msg) {
   recieved_msg->set_fully_binary(true);
 
-  static int messsages_for_session = 0;
-  ++messsages_for_session;
-  LOG4CXX_INFO(logger_, "Handling map streaming message. This is "
-               << messsages_for_session << "th message for " << connection_key);
-
-  if (kPeriodForNaviAck == messsages_for_session) {
-    SendMobileNaviAck(connection_id, connection_key);
-    messsages_for_session = 0;
-  }
   return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandlerImpl::SendMobileNaviAck(
-  ConnectionID connection_id ,
-  int connection_key) {
-  LOG4CXX_INFO(logger_, "SendMobileNaviAck for session " << connection_key);
-
-  /*int messsages_for_session = message_over_navi_session_.count(
-                                connection_key);
-
-  if (0 >= messsages_for_session) {
-    LOG4CXX_ERROR(
-      logger_, "No map streaming frames received for session id "
-      << connection_key);
-    return RESULT_FAIL;
-  }*/
+void ProtocolHandlerImpl::SendFramesNumber(int connection_key,
+    int number_of_frames) {
+  LOG4CXX_INFO(logger_, "SendFramesNumber MobileNaviAck for session "
+               << connection_key);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2,
                         COMPRESS_OFF,
@@ -684,15 +666,14 @@ RESULT_CODE ProtocolHandlerImpl::SendMobileNaviAck(
                         FRAME_DATA_MOBILE_NAVE_ACK,
                         connection_key,
                         0,
-                        kPeriodForNaviAck);
+                        number_of_frames);
 
-  RESULT_CODE send_result = SendFrame(connection_id, packet);
+  RESULT_CODE send_result = SendFrame(connection_key, packet);
   if (RESULT_OK == send_result) {
     LOG4CXX_INFO(logger_, "MobileNaviAck sent successfully.");
   } else {
     LOG4CXX_ERROR(logger_, "MobileNaviAck failed to be sent.");
   }
-  return send_result;
 }
 
 }  // namespace protocol_handler

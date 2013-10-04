@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-AllowAllAppsRequest::AllowAllAppsRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+AllowAllAppsRequest::AllowAllAppsRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 AllowAllAppsRequest::~AllowAllAppsRequest() {

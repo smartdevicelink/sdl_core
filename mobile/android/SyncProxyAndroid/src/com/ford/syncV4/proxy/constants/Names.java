@@ -171,6 +171,7 @@ public class Names {
 	public static final String timeout = "timeout";
 	public static final String choiceSet = "choiceSet";
 	public static final String interactionMode = "interactionMode";
+	public static final String interactionLayout = "interactionLayout";
 	public static final String result = "result";
 	public static final String alertText1 = "alertText1";
 	public static final String alertText2 = "alertText2";
@@ -316,9 +317,11 @@ public class Names {
 	public static final String customButtonName = "customButtonName";
 	public static final String navigationText = "navigationText";
 	public static final String turnIcon = "turnIcon";
+	public static final String nextTurnIcon = "nextTurnIcon";
 	public static final String navigationText1 = "navigationText1";
 	public static final String navigationText2 = "navigationText2";
 	public static final String eta = "eta";
+	public static final String timeToDestination = "timeToDestination";
 	public static final String totalDistance = "totalDistance";
 	public static final String distanceToManeuver = "distanceToManeuver";
 	public static final String distanceToManeuverScale = "distanceToManeuverScale";
@@ -425,4 +428,14 @@ public class Names {
     public static final String resolutionHeight = "resolutionHeight";
     public static final String keyboardEvent = "event";
     public static final String OnKeyboardInput = "OnKeyboardInput";
+    public static final String manualTextEntry = "manualTextEntry";
+    public static final String keyboardLayout = "keyboardLayout";
+    public static final String sendDynamicEntry = "sendDynamicEntry";
+    public static final String limitedCharacterList = "limitedCharacterList";
+    public static final String autoCompleteText = "autoCompleteText";
+    public static final String menuTitle = "menuTitle";
+    public static final String menuIcon = "menuIcon";
+    public static final String keyboardProperties = "keyboardProperties";
+    public static final String secondaryText = "secondaryText";
+    public static String tertiaryText = "tertiaryText";
 }

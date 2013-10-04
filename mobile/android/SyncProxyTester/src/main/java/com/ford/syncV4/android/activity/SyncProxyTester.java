@@ -37,7 +37,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.activity.mobilenav.FileStreamingLogic;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -69,6 +68,7 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
+import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -107,7 +107,9 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
+import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
@@ -135,7 +137,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -246,6 +247,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * check it when the user has explicitly set the soft buttons.
      */
     private CheckBox chkIncludeSoftButtons;
+    /**
+     * KeyboardProperties object passed between KeyboardPropertiesActivity and
+     * this activity.
+     */
+    private KeyboardProperties currentKbdProperties;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
      * filename is set after choosing.
@@ -412,8 +418,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         loadMessageSelectCount();
 
         isFirstActivityRun = false;
-
-
     }
 
     private void loadMessageSelectCount() {
@@ -471,7 +475,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         final CheckBox mediaCheckBox = (CheckBox) view
                 .findViewById(R.id.selectprotocol_checkMedia);
-        final CheckBox naviCheckBox = (CheckBox)view.findViewById(R.id.selectprotocol_checkMobileNavi);
+        final CheckBox naviCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMobileNavi);
         final EditText appNameEditText = (EditText) view
                 .findViewById(R.id.selectprotocol_appName);
         final Spinner langSpinner = (Spinner) view
@@ -2327,16 +2331,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
                             final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
                             final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+                            final EditText txtTimeToDestination = (EditText) layout.findViewById(R.id.showconstanttbt_txtTimeToDestination);
                             final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
                             final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
                             final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
                             final EditText txtTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_turnIconValue);
+                            final CheckBox chkUseNextTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_nextTurnIconCheck);
+                            final Spinner spnNextTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_nextTurnIconType);
+                            final EditText txtNextTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_nextTurnIconValue);
                             final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
                             final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
                             final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
 
                             spnTurnIconType.setAdapter(imageTypeAdapter);
                             spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+
+                            spnNextTurnIconType.setAdapter(imageTypeAdapter);
+                            spnNextTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2375,6 +2386,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setNavigationText1(txtNavigationText1.getText().toString());
                                         msg.setNavigationText2(txtNavigationText2.getText().toString());
                                         msg.setEta(txtEta.getText().toString());
+                                        msg.setTimeToDestination(txtTimeToDestination.getText().toString());
                                         msg.setTotalDistance(txtTotalDistance.getText().toString());
 
                                         if (chkUseTurnIcon.isChecked()) {
@@ -2383,6 +2395,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     spnTurnIconType.getSelectedItemPosition()));
                                             image.setValue(txtTurnIconValue.getText().toString());
                                             msg.setTurnIcon(image);
+                                        }
+
+                                        if (chkUseNextTurnIcon.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType(imageTypeAdapter.getItem(
+                                                    spnNextTurnIconType.getSelectedItemPosition()));
+                                            image.setValue(txtNextTurnIconValue.getText().toString());
+                                            msg.setNextTurnIcon(image);
                                         }
 
                                         msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
@@ -2430,20 +2450,43 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
                             final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
                             final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
+
+                            final EditText secondary_text1 = (EditText) layout.findViewById(R.id.createcommands_secondary_text1);
+                            final EditText secondary_text2 = (EditText) layout.findViewById(R.id.createcommands_secondary_text2);
+                            final EditText secondary_text3 = (EditText) layout.findViewById(R.id.createcommands_secondary_text3);
+
+                            final EditText tertiary_text1 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text1);
+                            final EditText tertiary_text2 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text2);
+                            final EditText tertiary_text3 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text3);
+
                             final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
                             final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
                             final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
                             final CheckBox image1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image1Check);
                             final CheckBox image2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image2Check);
                             final CheckBox image3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image3Check);
+
+                            final CheckBox secondaryImage1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Check);
+                            final CheckBox secondaryImage2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Check);
+                            final CheckBox secondaryImage3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Check);
+
                             final Spinner image1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image1Type);
                             final Spinner image2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image2Type);
                             final Spinner image3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image3Type);
+
+                            final Spinner secondaryImage1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Type);
+                            final Spinner secondaryImage2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Type);
+                            final Spinner secondaryImage3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Type);
+
                             final EditText image1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image1Value);
                             final EditText image2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image2Value);
                             final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
 
-                            Spinner[] spinners = {image1Type, image2Type, image3Type};
+                            final EditText secondaryImage1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Value);
+                            final EditText secondaryImage2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Value);
+                            final EditText secondaryImage3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Value);
+
+                            Spinner[] spinners = {image1Type, image2Type, image3Type, secondaryImage1Type, secondaryImage2Type, secondaryImage3Type};
                             for (Spinner spinner : spinners) {
                                 spinner.setAdapter(imageTypeAdapter);
                                 spinner.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
@@ -2460,12 +2503,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         one.setMenuName(command1.getText().toString());
                                         one.setVrCommands(new Vector<String>(Arrays.asList(
                                                 vr1.getText().toString().split(JOIN_STRING))));
+                                        one.setSecondaryText(secondary_text1.getText().toString());
+                                        one.setTertiaryText(tertiary_text1.getText().toString());
                                         if (image1Check.isChecked()) {
                                             Image image = new Image();
                                             image.setImageType(imageTypeAdapter.getItem(image1Type.getSelectedItemPosition()));
                                             image.setValue(image1Value.getText().toString());
                                             one.setImage(image);
                                         }
+
+                                        if (secondaryImage1Check.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage1Type.getSelectedItemPosition()));
+                                            image.setValue(secondaryImage1Value.getText().toString());
+                                            one.setSecondaryImage(image);
+                                        }
+
                                         commands.add(one);
                                     }
 
@@ -2475,12 +2528,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         two.setMenuName(command2.getText().toString());
                                         two.setVrCommands(new Vector<String>(Arrays.asList(
                                                 vr2.getText().toString().split(JOIN_STRING))));
+                                        two.setSecondaryText(secondary_text2.getText().toString());
+                                        two.setTertiaryText(tertiary_text2.getText().toString());
                                         if (image2Check.isChecked()) {
                                             Image image = new Image();
                                             image.setImageType(imageTypeAdapter.getItem(image2Type.getSelectedItemPosition()));
                                             image.setValue(image2Value.getText().toString());
                                             two.setImage(image);
                                         }
+
+                                        if (secondaryImage2Check.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage2Type.getSelectedItemPosition()));
+                                            image.setValue(secondaryImage2Value.getText().toString());
+                                            two.setSecondaryImage(image);
+                                        }
+
+
                                         commands.add(two);
                                     }
 
@@ -2490,12 +2554,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         three.setMenuName(command3.getText().toString());
                                         three.setVrCommands(new Vector<String>(Arrays.asList(
                                                 vr3.getText().toString().split(JOIN_STRING))));
+                                        three.setSecondaryText(secondary_text3.getText().toString());
+                                        three.setTertiaryText(tertiary_text3.getText().toString());
                                         if (image3Check.isChecked()) {
                                             Image image = new Image();
                                             image.setImageType(imageTypeAdapter.getItem(image3Type.getSelectedItemPosition()));
                                             image.setValue(image3Value.getText().toString());
                                             three.setImage(image);
                                         }
+
+                                        if (secondaryImage3Check.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage3Type.getSelectedItemPosition()));
+                                            image.setValue(secondaryImage3Value.getText().toString());
+                                            three.setSecondaryImage(image);
+                                        }
+
                                         commands.add(three);
                                     }
 
@@ -2571,7 +2645,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final boolean isMedia = getIsMedia();
 
                             if (!isMedia) {
-                                int visibility = android.view.View.GONE;
+                                int visibility = View.GONE;
                                 mediaClock.setVisibility(visibility);
                                 mediaTrack.setVisibility(visibility);
                                 mediaTrackCheck.setVisibility(visibility);
@@ -2710,12 +2784,28 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemPos);
                             final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemText);
                             final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.performinteraction_vrHelpItemImage);
+                            final CheckBox interactionLayoutCheck =
+                                    (CheckBox) layout.findViewById(
+                                            R.id.performinteraction_interactionLayoutCheck);
+                            final Spinner interactionLayoutSpinner =
+                                    (Spinner) layout.findViewById(
+                                            R.id.performinteraction_interactionLayoutSpinner);
 
                             final ArrayAdapter<InteractionMode> interactionModeAdapter = new ArrayAdapter<InteractionMode>(
                                     mContext, android.R.layout.simple_spinner_item, InteractionMode.values());
                             interactionModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             interactionModeSpinner.setAdapter(interactionModeAdapter);
                             interactionModeSpinner.setSelection(interactionModeAdapter.getPosition(InteractionMode.BOTH));
+
+                            final ArrayAdapter<LayoutMode>
+                                    interactionLayoutAdapter =
+                                    new ArrayAdapter<LayoutMode>(mContext,
+                                            android.R.layout.simple_spinner_item,
+                                            LayoutMode.values());
+                            interactionLayoutAdapter.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item);
+                            interactionLayoutSpinner
+                                    .setAdapter(interactionLayoutAdapter);
 
                             final String[] choiceSetIDStrings = new String[_choiceSetAdapter.getCount()];
                             final boolean[] choiceSetIDSelections = new boolean[choiceSetIDStrings.length];
@@ -2760,7 +2850,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setInitialText(initialText.getText().toString());
                                         msg.setInitialPrompt(ttsChunksFromString(initialPrompt.getText().toString()));
-                                        msg.setInteractionMode(interactionModeAdapter.getItem(interactionModeSpinner.getSelectedItemPosition()));
+                                        msg.setInteractionMode(
+                                                interactionModeAdapter.getItem(
+                                                        interactionModeSpinner
+                                                                .getSelectedItemPosition()));
                                         msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                         if (helpPromptCheck.isChecked()) {
@@ -2810,6 +2903,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
 
                                             msg.setVrHelp(vrHelpItems);
+                                        }
+
+                                        if (interactionLayoutCheck
+                                                .isChecked()) {
+                                            msg.setInteractionLayout(
+                                                    interactionLayoutAdapter
+                                                            .getItem(
+                                                                    interactionLayoutSpinner
+                                                                            .getSelectedItemPosition()));
                                         }
 
                                         try {
@@ -3158,7 +3260,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         private void sendSetGlobalProperties() {
                             AlertDialog.Builder builder;
 
-                            Context mContext = adapter.getContext();
+                            final Context mContext = adapter.getContext();
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
                             View layout = inflater.inflate(R.layout.setglobalproperties,
@@ -3174,6 +3276,43 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
                             final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
                             final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
+                            final CheckBox choiceMenuTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuTitle);
+                            final EditText menuTitle = (EditText) layout.findViewById(R.id.setglobalproperties_menuTitle);
+                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuIcon);
+                            final EditText menuIcon = (EditText) layout.findViewById(R.id.setglobalproperties_menuIcon);
+                            final Spinner menuIconType = (Spinner) layout.findViewById(R.id.setglobalproperties_menuIconType);
+                            final CheckBox chkKbdProperties = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceKbdProperties);
+
+                            menuIconType.setAdapter(imageTypeAdapter);
+                            menuIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+
+                            currentKbdProperties = new KeyboardProperties();
+                            currentKbdProperties.setLanguage(Language.EN_US);
+                            currentKbdProperties.setKeyboardLayout(
+                                    KeyboardLayout.QWERTY);
+                            currentKbdProperties.setAutoCompleteText(getString(
+                                    R.string.keyboardproperties_autoCompleteTextDefault));
+                            currentKbdProperties.setLimitedCharacterList(new Vector<String>() {{
+                                add("a");
+                                add("b");
+                                add("c");
+                            }});
+                            currentKbdProperties.setSendDynamicEntry(false);
+
+                            Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
+                            btnKbdProperties.setOnClickListener(
+                                    new OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            IntentHelper.addObjectForKey(
+                                                    currentKbdProperties,
+                                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                                            Intent intent = new Intent(mContext,
+                                                    KeyboardPropertiesActivity.class);
+                                            startActivityForResult(intent,
+                                                    Const.REQUEST_EDIT_KBDPROPERTIES);
+                                        }
+                                    });
 
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3241,6 +3380,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         ++numberOfChoices;
                                     }
 
+                                    if (choiceMenuTitle.isChecked()) {
+                                        String title = menuTitle.getText().toString();
+                                        msg.setMenuTitle(title);
+                                        ++numberOfChoices;
+                                    }
+
+                                    if (choiceMenuIcon.isChecked()) {
+                                        Image image = new Image();
+                                        image.setValue(menuIcon.getText().toString());
+                                        image.setImageType(imageTypeAdapter.getItem(menuIconType.getSelectedItemPosition()));
+                                        msg.setMenuIcon(image);
+                                        ++numberOfChoices;
+                                    }
+
+                                    if (chkKbdProperties.isChecked() &&
+                                            (currentKbdProperties != null)) {
+                                        msg.setKeyboardProperties(currentKbdProperties);
+                                        ++numberOfChoices;
+                                    }
+
                                     if (numberOfChoices > 0) {
                                         msg.setCorrelationID(autoIncCorrId++);
                                         _msgAdapter.logMessage(msg, true);
@@ -3249,6 +3408,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
+                                        currentKbdProperties = null;
                                     } else {
                                         Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
                                     }
@@ -3256,6 +3416,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
+                                    currentKbdProperties = null;
                                     dialog.cancel();
                                 }
                             });
@@ -3446,7 +3607,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         saveMessageSelectCount();
     }
 
-
     /**
      * Called when a CreateChoiceSetResponse comes. If successful, add it to the
      * adapter. In any case, remove the key from the map.
@@ -3547,7 +3707,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
 
 		/*
-		 * if there is current player, save the current position, stop and
+         * if there is current player, save the current position, stop and
 		 * release it, so that we recreate it with the appended file and jump to
 		 * that position, emulating seamless stream playing
 		 */
@@ -3718,6 +3878,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
                 break;
 
+            case Const.REQUEST_EDIT_KBDPROPERTIES:
+                if (resultCode == RESULT_OK) {
+                    currentKbdProperties =
+                            (KeyboardProperties) IntentHelper.getObjectForKey(
+                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                    if (currentKbdProperties == null) {
+                        Log.w(logTag, "Returned kbdProperties is null!");
+                    }
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                break;
+
             default:
                 Log.i(logTag, "Unknown request code: " + requestCode);
                 break;
@@ -3757,7 +3929,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
-
     public void onMobileNaviStarted() {
         if (ProxyService.getInstance().getProxyInstance() != null) {
             SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
@@ -3778,7 +3949,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         closeMobileNaviOutputStream();
     }
 
-    public  void logError(final Exception e){
+    public void logError(final Exception e) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -3814,7 +3985,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public boolean isProxyReadyForWork() {
-        if (ProxyService.getInstance().getProxyInstance() == null){
+        if (ProxyService.getInstance().getProxyInstance() == null) {
             onMobileNaviError("Error. Proxy is null");
             return false;
         }
@@ -3829,11 +4000,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return true;
     }
 
-    public void onMobileNavAckReceived(int frameReceived){
+    public void onMobileNavAckReceived(int frameReceived) {
 
     }
 
-    public void onTouchEventReceived(OnTouchEvent notification){
+    public void onTouchEventReceived(OnTouchEvent notification) {
 
     }
 

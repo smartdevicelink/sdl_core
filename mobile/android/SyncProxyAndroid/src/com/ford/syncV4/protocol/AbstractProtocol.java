@@ -1,6 +1,5 @@
 package com.ford.syncV4.protocol;
 
-import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.os.Environment;
 import android.util.Log;
 
@@ -32,9 +31,8 @@ public abstract class AbstractProtocol {
         } // end-if
 
 
-            _protocolListener = protocolListener;
+        _protocolListener = protocolListener;
     }// end-ctor
-
 
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
@@ -94,11 +92,11 @@ public abstract class AbstractProtocol {
         } // end-if
     }
 
-    private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data){
+    private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
         if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
             Log.d("MobileNaviSession", "ProtocolFrameHeader: " + header.toString());
-            if ( data != null && data.length > 0 ){
-                Log.d("MobileNaviSession", "Hex Data frame: " +AbstractPacketizer.printBuffer(data, 0, data.length));
+            if (data != null && data.length > 0) {
+                Log.d("MobileNaviSession", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
             }
         }
     }

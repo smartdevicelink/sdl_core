@@ -33,13 +33,12 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnAppRegisteredNotification::OnAppRegisteredNotification(
-  const MessageSharedPtr& message): NotificationToHMI(message) {
+    const MessageSharedPtr& message) : NotificationToHMI(message) {
 }
 
 OnAppRegisteredNotification::~OnAppRegisteredNotification() {

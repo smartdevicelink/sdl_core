@@ -62,6 +62,9 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             disabled: false,
             click: function(){
                 SDL.SDLModel.uiShowKeyboard(this);
+            },
+            search: function(){
+                this.get('parentView').deactivate("SUCCESS");
             }
         }),
 
@@ -117,8 +120,12 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
                         this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
 
+
+                        this.set('search', false);
+                        this.set('list', false);
                         this.set('icon', true);
                         this.set('active', true);
+                        break;
                     }
                     case "ICON_WITH_SEARCH" : {
 
@@ -126,14 +133,19 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
                         this.set('icon', true);
                         this.set('search', true);
+                        this.set('list', false);
                         this.set('active', true);
+                        break;
                     }
                     case "LIST_ONLY" : {
 
                         this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
 
                         this.set('list', true);
+                        this.set('icon', false);
+                        this.set('search', false);
                         this.set('active', true);
+                        break;
                     }
                     case "LIST_WITH_SEARCH" : {
 
@@ -141,12 +153,21 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
                         this.set('list', true);
                         this.set('search', true);
+                        this.set('icon', false);
                         this.set('active', true);
+                        break;
                     }
                     case "KEYBOARD" : {
+                        this.preformChoices(null, performInteractionRequestId, message.timeout);
                         SDL.SDLModel.uiShowKeyboard(this.input);
-                        SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["SUCCESS"],
-                        this.performInteractionRequestID);
+
+
+                        this.set('list', false);
+                        this.set('search', false);
+                        this.set('icon', false);
+                        this.set('active', true);
+
+                        break;
                     }
                     default:
                     {
@@ -158,6 +179,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
 
                 this.set('list', true);
+                this.set('icon', false);
+                this.set('search', false);
                 this.set('active', true);
             }
 
@@ -171,6 +194,9 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             clearTimeout(this.timer);
             this.set('active', false);
             SDL.SDLController.VRMove();
+            SDL.Keyboard.deactivate();
+
+
 
             switch (result) {
                 case "ABORTED":
@@ -207,9 +233,14 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         clean: function () {
 
+            this.input.set('value', null);
             this.set('captionText.content', 'Interaction Choices');
             this.listOfChoices.items = [];
             this.listOfChoices.list.refresh();
+            var length = this.get('naviChoises.childViews').length;
+            for (var i=0; i < length; i++) {
+                SDL.InteractionChoicesView.get('naviChoises.childViews').shiftObject();
+            }
         },
 
         /**
@@ -220,35 +251,32 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         preformChoices: function (data, performInteractionRequestID, timeout) {
 
-            if (!data) {
-                Em.Logger.error('No choices to preform');
-                return;
+            this.set('performInteractionRequestID', performInteractionRequestID);
+
+            if (data) {
+
+                // temp for testing
+                for (var i = 0; i < data.length; i++) {
+                    this.listOfChoices.items
+                        .push({
+                            type: SDL.Button,
+                            params: {
+                                text: data[i].menuName,
+                                choiceID: data[i].choiceID,
+                                action: 'onChoiceInteraction',
+                                onDown: false,
+                                target: 'SDL.SDLAppController',
+                                performInteractionRequestID: performInteractionRequestID,
+                                templateName: data[i].image ? 'rightIcon' : 'text',
+                                icon: data[i].image ? data[i].image.value : null
+                            }
+                        });
+                }
+
+                this.listOfChoices.list.refresh();
             }
 
-            this
-                .set('performInteractionRequestID', performInteractionRequestID);
-
-            var i = 0, length = data.length, self = this;
-
-            // temp for testing
-            for (i = 0; i < length; i++) {
-                this.listOfChoices.items
-                    .push({
-                        type: SDL.Button,
-                        params: {
-                            text: data[i].menuName,
-                            choiceID: data[i].choiceID,
-                            action: 'onChoiceInteraction',
-                            onDown: false,
-                            target: 'SDL.SDLAppController',
-                            performInteractionRequestID: performInteractionRequestID,
-                            templateName: data[i].image ? 'rightIcon' : 'text',
-                            icon: data[i].image ? data[i].image.value : null
-                        }
-                    });
-            }
-
-            this.listOfChoices.list.refresh();
+            var self = this;
 
             clearTimeout(this.timer);
             this.timer = setTimeout(function () {
@@ -265,34 +293,32 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
 
-             if (!data) {
-                 Em.Logger.error('No choices to preform');
-                 return;
-             }
-
              this.set('performInteractionRequestID', performInteractionRequestID);
 
-             var i = 0, length = data.length, self = this;
+            if (data) {
 
-             // temp for testing
-             for (i = 0; i < length; i++) {
-                 this.get('naviChoises.childViews').pushObject(SDL.Button.create({
-                         text: data[i].menuName,
-                         choiceID: data[i].choiceID,
-                         action: 'onChoiceInteraction',
-                         onDown: false,
-                         target: 'SDL.SDLAppController',
-                         performInteractionRequestID: performInteractionRequestID,
-                         templateName: data[i].image ? 'rightIcon' : 'text',
-                         icon: data[i].image ? data[i].image.value : null
-                     })
-                 );
-             }
+                 // temp for testing
+                 for (var i = 0; i < data.length; i++) {
+                     this.get('naviChoises.childViews').pushObject(SDL.Button.create({
+                             text: data[i].menuName,
+                             choiceID: data[i].choiceID,
+                             action: 'onChoiceInteraction',
+                             onDown: false,
+                             target: 'SDL.SDLAppController',
+                             performInteractionRequestID: performInteractionRequestID,
+                             templateName: data[i].image ? 'rightIcon' : 'text',
+                             icon: data[i].image ? data[i].image.value : null
+                         })
+                     );
+                 }
 
-             clearTimeout(this.timer);
-             this.timer = setTimeout(function () {
+            }
 
-             self.deactivate("TIMED_OUT");
-             }, timeout);
+            var self = this;
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
+                self.deactivate("TIMED_OUT");
+            }, timeout);
         }
     });

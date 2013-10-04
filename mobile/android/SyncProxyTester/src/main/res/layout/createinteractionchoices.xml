@@ -40,6 +40,26 @@
                 android:text="@string/createinteractionchoiceset_choice1VRDefault"
                 android:visibility="visible"/>
 
+        <EditText
+            android:id="@+id/createcommands_secondary_text1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_secondaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_secondaryText"
+            android:visibility="visible"/>
+
+        <EditText
+            android:id="@+id/createcommands_tertiary_text1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_tertiaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_tertiaryText"
+            android:visibility="visible"/>
+
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -60,12 +80,40 @@
         </LinearLayout>
 
         <EditText
-                android:id="@+id/createinteractionchoiceset_image1Value"
-                android:layout_width="match_parent"
+            android:id="@+id/createinteractionchoiceset_image1Value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/createinteractionchoiceset_choice1ImageValue"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/createinteractionchoiceset_secondary_image1Check"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="text"
-                android:text="@string/createinteractionchoiceset_choice1ImageValue"/>
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/createinteractionchoiceset_choiceSecondaryUseImage"/>
+
+            <Spinner
+                android:id="@+id/createinteractionchoiceset_secondary_image1Type"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/createinteractionchoiceset_secondary_image1Value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/createinteractionchoiceset_choice1ImageValue"/>
+
 
         <CheckBox
                 android:id="@+id/createcommands_choice2"
@@ -92,6 +140,26 @@
                 android:inputType="textCapSentences"
                 android:text="@string/createinteractionchoiceset_choice2VRDefault"
                 android:visibility="visible"/>
+
+        <EditText
+            android:id="@+id/createcommands_secondary_text2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_secondaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_secondaryText"
+            android:visibility="visible"/>
+
+        <EditText
+            android:id="@+id/createcommands_tertiary_text2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_tertiaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_tertiaryText"
+            android:visibility="visible"/>
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -120,6 +188,33 @@
                 android:inputType="text"
                 android:text="@string/createinteractionchoiceset_choice2ImageValue"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/createinteractionchoiceset_secondary_image2Check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/createinteractionchoiceset_choiceSecondaryUseImage"/>
+
+            <Spinner
+                android:id="@+id/createinteractionchoiceset_secondary_image2Type"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/createinteractionchoiceset_secondary_image2Value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/createinteractionchoiceset_choice2ImageValue"/>
+
         <CheckBox
                 android:id="@+id/createcommands_choice3"
                 android:layout_width="wrap_content"
@@ -145,6 +240,26 @@
                 android:inputType="textCapSentences"
                 android:text="@string/createinteractionchoiceset_choice3VRDefault"
                 android:visibility="visible"/>
+
+        <EditText
+            android:id="@+id/createcommands_secondary_text3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_secondaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_secondaryText"
+            android:visibility="visible"/>
+
+        <EditText
+            android:id="@+id/createcommands_tertiary_text3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="@string/createinteractionchoiceset_tertiaryText"
+            android:inputType="textCapSentences"
+            android:text="@string/createinteractionchoiceset_tertiaryText"
+            android:visibility="visible"/>
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -172,6 +287,35 @@
                 android:ems="10"
                 android:inputType="text"
                 android:text="@string/createinteractionchoiceset_choice3ImageValue"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/createinteractionchoiceset_secondary_image3Check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/createinteractionchoiceset_choiceUseImage"/>
+
+            <Spinner
+                android:id="@+id/createinteractionchoiceset_secondary_image3Type"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/createinteractionchoiceset_secondary_image3Value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/createinteractionchoiceset_choiceSecondaryUseImage"/>
+
     </LinearLayout>
+
 
 </ScrollView>

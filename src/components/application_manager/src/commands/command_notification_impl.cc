@@ -37,8 +37,9 @@ namespace application_manager {
 
 namespace commands {
 
-CommandNotificationImpl::CommandNotificationImpl(const MessageSharedPtr& message)
-  : CommandImpl(message) {
+CommandNotificationImpl::CommandNotificationImpl(
+    const MessageSharedPtr& message)
+    : CommandImpl(message) {
 }
 
 CommandNotificationImpl::~CommandNotificationImpl() {
@@ -59,7 +60,7 @@ void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::params][strings::message_type] =
-    MessageType::kNotification;
+      MessageType::kNotification;
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

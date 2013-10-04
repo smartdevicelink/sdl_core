@@ -125,6 +125,11 @@ class Profile {
       */
     const std::string& vr_help_title() const;
 
+    /**
+      * @brief Returns space for app
+      */
+    const unsigned int space_available() const;
+
     // Members section
 
   protected:
@@ -187,6 +192,7 @@ class Profile {
     unsigned int                    max_cmd_id_;
     unsigned int                    default_timeout_;
     std::string                     vr_help_title_;
+    unsigned int                    space_available_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

@@ -50,33 +50,33 @@ namespace mobile {
  * to mobile device that some button was pressed on HMI.
  **/
 class OnButtonPressNotification : public CommandNotificationImpl {
-  public:
-    /**
-     * @brief OnButtonPressNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnButtonPressNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnButtonPressNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnButtonPressNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnButtonEventCommand class destructor
-     **/
-    virtual ~OnButtonPressNotification();
+  /**
+   * @brief OnButtonEventCommand class destructor
+   **/
+  virtual ~OnButtonPressNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    /*
-     * @brief Sends button press notification to mobile device
-     *
-     * @param app Application to receive notification
-     */
-    void SendButtonPress(const Application* app);
+ private:
+  /*
+   * @brief Sends button press notification to mobile device
+   *
+   * @param app Application to receive notification
+   */
+  void SendButtonPress(const Application* app);
 
-    DISALLOW_COPY_AND_ASSIGN(OnButtonPressNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnButtonPressNotification);
 };
 
 }  // namespace mobile

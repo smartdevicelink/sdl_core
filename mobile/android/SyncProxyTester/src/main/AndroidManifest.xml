@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
     android:versionCode="1"
-    android:versionName="1.1 (CW35)" >
+    android:versionName="1.1 (CW40)" >
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- Required to pair Bluetooth devices -->
@@ -69,6 +69,10 @@
                     android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                     android:resource="@xml/accessory_filter"/>
         </activity>
+
+        <activity
+                android:name=".activity.KeyboardPropertiesActivity"
+                android:label="@string/title_activity_keyboard_properties"/>
     </application>
 
     <!-- Version 12 is minimum to support the USB Accessory mode -->

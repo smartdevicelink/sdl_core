@@ -92,6 +92,8 @@ class MobileMessageHandlerTester :
       return 0;
     }
 
+    void SendFramesNumber(int connection_key, int number_of_frames) {}
+
     MobileMessageHandlerTester()
       : mmh_(NULL) {
     }
@@ -175,7 +177,7 @@ TEST(mobile_message_handler_test, component_test) {
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
     mobile_message_handler::MobileMessageHandlerImpl::instance();
   DCHECK(mmh);
-  mmh->setProtocolHandler(&observer);
+  mmh->set_protocol_handler(&observer);
   mmh->AddMobileMessageListener(&observer);
 
   // Message processing

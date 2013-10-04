@@ -41,7 +41,8 @@ namespace application_manager {
 namespace commands {
 
 UIScrollableMessageResponse::UIScrollableMessageResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIScrollableMessageResponse::~UIScrollableMessageResponse() {
@@ -53,8 +54,8 @@ void UIScrollableMessageResponse::Run() {
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  MessageChaining* msg_chain =
-    ApplicationManagerImpl::instance()->GetMessageChain(correlation_id);
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
 
   if (NULL == msg_chain) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -65,14 +66,14 @@ void UIScrollableMessageResponse::Run() {
    * in corresponding Mobile response
    */
   const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
   msg_chain->set_ui_response_result(code);
 
   const int connection_key = msg_chain->connection_key();
-  Application* app = ApplicationManagerImpl::instance()->
-                     application(connection_key);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      connection_key);
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -81,7 +82,7 @@ void UIScrollableMessageResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::ScrollableMessageID;
+      mobile_apis::FunctionID::ScrollableMessageID;
 
   SendResponseToMobile(message_);
 }

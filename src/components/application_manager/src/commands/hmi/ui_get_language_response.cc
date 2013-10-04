@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageResponse::UIGetLanguageResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UIGetLanguageResponse::UIGetLanguageResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIGetLanguageResponse::~UIGetLanguageResponse() {

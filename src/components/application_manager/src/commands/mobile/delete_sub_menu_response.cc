@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 DeleteSubMenuResponse::~DeleteSubMenuResponse() {

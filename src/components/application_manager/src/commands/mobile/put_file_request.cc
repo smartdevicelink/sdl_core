@@ -40,8 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-PutFileRequest::PutFileRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+PutFileRequest::PutFileRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 PutFileRequest::~PutFileRequest() {
@@ -50,9 +50,8 @@ PutFileRequest::~PutFileRequest() {
 void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* application = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -60,16 +59,16 @@ void PutFileRequest::Run() {
     return;
   }
 
-  uint64_t free_space = file_system::AvailableSpace();
+  unsigned int free_space = file_system::AvailableSpaceApp(application->name());
 
   const std::string& sync_file_name =
-    (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name];
 
   bool is_persistent_file = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file =
-      (*message_)[strings::msg_params][strings::persistent_file];
+        (*message_)[strings::msg_params][strings::persistent_file];
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
@@ -79,12 +78,12 @@ void PutFileRequest::Run() {
   }
 
   const std::vector<unsigned char> file_data =
-    (*message_)[strings::params][strings::binary_data].asBinary();
+      (*message_)[strings::params][strings::binary_data].asBinary();
   LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
   if (free_space > file_data.size()) {
-    std::string relative_file_path =
-      file_system::CreateDirectory(application->name());
+    std::string relative_file_path = file_system::CreateDirectory(
+        application->name());
     relative_file_path += "/";
     relative_file_path += sync_file_name;
 

@@ -39,7 +39,8 @@ namespace application_manager {
 namespace commands {
 
 OnAppActivatedNotification::OnAppActivatedNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnAppActivatedNotification::~OnAppActivatedNotification() {
@@ -48,13 +49,12 @@ OnAppActivatedNotification::~OnAppActivatedNotification() {
 void OnAppActivatedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppActivatedNotification::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->application(
+  Application* application = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::msg_params][strings::app_id]);
 
   if (!application) {
     (*message_)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::INVALID_DATA;
+        hmi_apis::Common_Result::INVALID_DATA;
   } else {
     ApplicationManagerImpl::instance()->ActivateApplication(application);
   }

@@ -47,9 +47,10 @@
     <string name="performinteraction_vrHelp">VR Help Items (all comma-separated)</string>
     <string name="performinteraction_vrHelpItemPosDefault">1,2,3</string>
     <string name="performinteraction_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
-    <string name="performinteraction_vrHelpItemImageDefault">imageFilename.png,action.png,action.png</string>
+    <string name="performinteraction_vrHelpItemImageDefault">action.png,action.png,action.png</string>
     <string name="performinteraction_timeout">Timeout</string>
     <string name="performinteraction_timeoutDefault">10000</string>
+    <string name="performinteraction_interactionLayout">Interaction Layout</string>
     <string name="show_mainField1">Main Field 1</string>
     <string name="show_mainField1Default">Show Line 1</string>
     <string name="show_mainField2">Main Field 2</string>
@@ -66,7 +67,7 @@
     <string name="show_mediaClock">Media Clock</string>
     <string name="show_mediaClockDefault">12:34</string>
     <string name="show_graphic">Graphic</string>
-    <string name="show_graphicDefault">imageFilename.png</string>
+    <string name="show_graphicDefault">action.png</string>
     <string name="show_includeSoftButtons">Include</string>
     <string name="show_softButtons">Soft Buttons</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
@@ -86,10 +87,14 @@
     <string name="selectprotocol_extraOptions">Extra Options</string>
     <string name="selectprotocol_autoSetAppIcon">Set app icon after registration</string>
     <string name="createinteractionchoiceset_choiceVRSynonym">VR Synonyms (comma-separated)</string>
+    <string name="createinteractionchoiceset_secondaryText">Secondary Text</string>
+    <string name="createinteractionchoiceset_tertiaryText">Tertiary Text</string>
     <string name="createinteractionchoiceset_choiceUseImage">Use image:</string>
+    <string name="createinteractionchoiceset_choiceSecondaryUseImage">Use secondary image:</string>
     <string name="createinteractionchoiceset_choice1">Choice 1</string>
     <string name="createinteractionchoiceset_choice1Default">1st item</string>
     <string name="createinteractionchoiceset_choice1VRDefault">Command one,1st command</string>
+
     <string name="createinteractionchoiceset_choice1ImageValue">turn_left.png</string>
     <string name="createinteractionchoiceset_choice2">Choice 2</string>
     <string name="createinteractionchoiceset_choice2Default">2nd item</string>
@@ -105,10 +110,14 @@
     <string name="showconstanttbt_navText2Default">Navigation Text 2</string>
     <string name="showconstanttbt_eta">ETA</string>
     <string name="showconstanttbt_etaDefault">12:34</string>
+    <string name="showconstanttbt_timeToDestination">Time To Destination</string>
+    <string name="showconstanttbt_timeToDestinationDefault">08:88</string>
     <string name="showconstanttbt_totalDistance">Total Distance</string>
     <string name="showconstanttbt_totalDistanceDefault">100 Miles</string>
     <string name="showconstanttbt_turnIconCheck">Use Turn Icon</string>
     <string name="showconstanttbt_turnIconValue">turn_right.png</string>
+    <string name="showconstanttbt_nextTurnIconCheck">Use Next Turn Icon</string>
+    <string name="showconstanttbt_nextTurnIconValue">turn_left.png</string>
     <string name="showconstanttbt_distanceToManeuver">Distance To Maneuver</string>
     <string name="showconstanttbt_distanceToManeuverDefault">50</string>
     <string name="showconstanttbt_distanceToManeuverScale">Distance To Maneuver Scale</string>
@@ -122,6 +131,7 @@
     <string name="addsubmenu_menuIDDefault">42</string>
     <string name="addsubmenu_menuPos">Submenu Position</string>
     <string name="addsubmenu_menuPosDefault">1000</string>
+
     <string name="setglobalproperties_helpPrompt">Help prompt (comma-separated)</string>
     <string name="setglobalproperties_helpPromptDefault">Help prompt 1,Second help prompt</string>
     <string name="setglobalproperties_timeoutPrompt">Timeout prompt (comma-separated)</string>
@@ -131,7 +141,14 @@
     <string name="setglobalproperties_vrHelp">VR Help Items (all comma-separated)</string>
     <string name="setglobalproperties_vrHelpItemPosDefault">1,2,3</string>
     <string name="setglobalproperties_vrHelpItemDefault">VR help item,Help Item 2,third item</string>
-    <string name="setglobalproperties_vrHelpItemImageDefault">imageFilename.png,action.png,action.png</string>
+    <string name="setglobalproperties_vrHelpItemImageDefault">action.png,action.png,action.png</string>
+    <string name="setglobalproperties_menuTitle">Menu Title</string>
+    <string name="setglobalproperties_menuTitleDefault">Menu111</string>
+    <string name="setglobalproperties_menuIcon">Menu Icon</string>
+    <string name="setglobalproperties_menuIconDefault">action.png</string>
+    <string name="setglobalproperties_choiceKbdProperties">Include</string>
+    <string name="setglobalproperties_kbdProperties">Keyboard Properties</string>
+
     <string name="performaudiopassthru_initPrompt">Initial Prompt</string>
     <string name="performaudiopassthru_initPromptDefault">Initial Prompt</string>
     <string name="performaudiopassthru_text1">AudioPassThru Display Text 1</string>
@@ -157,5 +174,15 @@
     <string name="mobile_navi_check_box_on">Mobile Session Running</string>
     <string name="video_check_box_on">Video Streaming running</string>
     <string name="mobileNavi">MobileNavi</string>
+
+    <string name="title_activity_keyboard_properties">KeyboardProperties</string>
+    <string name="keyboardproperties_useLanguage">Language</string>
+    <string name="keyboardproperties_useKbdLayout">Keyboard Layout</string>
+    <string name="keyboardproperties_useSendDynamicEntry">Use</string>
+    <string name="keyboardproperties_sendDynamicEntry">Send Dynamic Entry</string>
+    <string name="keyboardproperties_useLimitedCharacterList">Limited Character List (comma-separated)</string>
+    <string name="keyboardproperties_limitedCharacterListDefault">a,b,c,d,e,f</string>
+    <string name="keyboardproperties_useAutoCompleteText">Autocomplete Text</string>
+    <string name="keyboardproperties_autoCompleteTextDefault">Daemon, Freedom</string>
 
 </resources>

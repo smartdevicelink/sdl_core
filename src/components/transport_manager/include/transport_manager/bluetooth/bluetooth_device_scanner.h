@@ -54,72 +54,78 @@ class TransportAdapterController;
  * @brief Scan for devices using bluetooth.
  */
 class BluetoothDeviceScanner : public DeviceScanner {
- public:
+  public:
 
-  /**
-   * @brief Constructor.
-   */
-  BluetoothDeviceScanner(TransportAdapterController* controller);
+    /**
+     * @brief Constructor.
+     */
+    BluetoothDeviceScanner(TransportAdapterController* controller);
 
-  /**
-   * @brief Destructor.
-   */
-  ~BluetoothDeviceScanner();
+    /**
+     * @brief Destructor.
+     */
+    ~BluetoothDeviceScanner();
 
-  /**
-   * @brief Main thread initialization.
-   */
-  void thread();
- protected:
+    /**
+     * @brief Main thread initialization.
+     */
+    void Thread();
+  protected:
 
-  /**
-   * @brief Start device scanner.
-   *
-   * @return Error information about reason of initialization failure.
-   */
-  virtual TransportAdapter::Error Init();
+    /**
+     * @brief Start device scanner.
+     *
+     * @return Error information about reason of initialization failure.
+     */
+    virtual TransportAdapter::Error Init();
 
-  /**
-   * @brief
-   */
-  virtual void Terminate();
+    /**
+     * @brief
+     */
+    virtual void Terminate();
 
-  /**
-   * @brief
-   *
-   * @return Error information about reason of Scan failure.
-   */
-  virtual TransportAdapter::Error Scan();
+    /**
+     * @brief
+     *
+     * @return Error information about reason of Scan failure.
+     */
+    virtual TransportAdapter::Error Scan();
 
-  /**
-   * @brief Check device scanner for initialization.
-   *
-   * @return true - initialized.
-   * false - not initialized.
-   */
-  virtual bool IsInitialised() const;
- private:
+    /**
+     * @brief Check device scanner for initialization.
+     *
+     * @return true - initialized.
+     * false - not initialized.
+     */
+    virtual bool IsInitialised() const;
+  private:
 
-  typedef std::vector<uint8_t> RfcommChannelVector;
+    typedef std::vector<uint8_t> RfcommChannelVector;
 
-  bool WaitForDeviceScanRequest();
-  RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
+    bool WaitForDeviceScanRequest();
+    RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
       const bdaddr_t& device_address);
-  SearchDeviceError* doInquiry(DeviceVector* discovered_devices);
+    SearchDeviceError* DoInquiry(DeviceVector* discovered_devices);
+    bool CheckSDLServiceOnDevice(
+      const bdaddr_t& bd_address,
+      int device_handle,
+      DeviceVector* discovered_devices);
 
-  TransportAdapterController* controller_;
-  pthread_t thread_;
-  bool thread_started_;
-  bool shutdown_requested_;
-  bool device_scan_requested_;
-  bool ready_;
-  pthread_mutex_t device_scan_requested_mutex_;
-  pthread_cond_t device_scan_requested_cond_;
+    TransportAdapterController* controller_;
+    pthread_t thread_;
+    bool thread_started_;
+    bool shutdown_requested_;
+    bool device_scan_requested_;
+    bool ready_;
+    pthread_mutex_t device_scan_requested_mutex_;
+    pthread_cond_t device_scan_requested_cond_;
 
-  /**
-   * @brief UUID of SmartDeviceLink service.
-   **/
-  uuid_t smart_device_link_service_uuid_;
+    std::vector<bdaddr_t> paired_devices_;
+
+    /**
+     * @brief UUID of SmartDeviceLink service.
+     **/
+    uuid_t smart_device_link_service_uuid_;
 };
 
 }  // namespace transport_adapter

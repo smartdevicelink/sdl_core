@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRAddCommandRequest::VRAddCommandRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+VRAddCommandRequest::VRAddCommandRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VRAddCommandRequest::~VRAddCommandRequest() {

@@ -36,13 +36,12 @@
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-DeleteFileRequest::DeleteFileRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
 }
 
 DeleteFileRequest::~DeleteFileRequest() {
@@ -51,9 +50,8 @@ DeleteFileRequest::~DeleteFileRequest() {
 void DeleteFileRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
 
-  Application* application =
-    ApplicationManagerImpl::instance()->
-    application((*message_)[strings::params][strings::connection_key]);
+  Application* application = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::params][strings::connection_key]);
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -62,7 +60,7 @@ void DeleteFileRequest::Run() {
   }
 
   const std::string& sync_file_name =
-    (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name];
 
   std::string relative_file_path = application->name();
   relative_file_path += "/";

@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UIShowResponse::UIShowResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UIShowResponse::~UIShowResponse() {
@@ -47,7 +47,7 @@ void UIShowResponse::Run() {
   LOG4CXX_INFO(logger_, "UIShowResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::ShowID;
+      mobile_apis::FunctionID::ShowID;
 
   SendResponseToMobile(message_);
 }

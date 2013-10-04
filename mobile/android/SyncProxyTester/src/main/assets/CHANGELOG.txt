@@ -1,3 +1,11 @@
+[CW40]
++ SyncProxyAndroid SDK: add SEARCH value to ButtonName enum.
++ SetGlobalProperties dialog: add menuTitle, menuIcon, and keyboardProperties parameters.
++ ShowConstantTBT dialog: add timeToDestination and nextTurnIcon parameters.
++ SyncProxyAndroid SDK: Extend ShowConstantTBT and SetGlobalProperties request objects.
++ PerformInteraction dialog: add interactionLayout parameter.
++ SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
+
 [CW35.3]
 *Fixed crashes on end session/disconnect.
 
@@ -8,6 +16,12 @@
 *Added MobileNavi AppType registration button
 *Added Mobile Navi session support
 *Added USB Support
+
+[CW37]
+* SoftButtons, PerformInteraction, Show, SetGlobalProperties dialogs: change default imageFilename.png to action.png.
+
+[CW36]
+* Automatically attempt to reconnect to SDLCore after disconnect.
 
 [CW35]
 * SoftButtons can be sent without SystemAction parameter.

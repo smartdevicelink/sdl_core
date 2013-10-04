@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnPlayToneNotification::OnPlayToneNotification(
-  const MessageSharedPtr& message): NotificationToHMI(message) {
+OnPlayToneNotification::OnPlayToneNotification(const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
 }
 
 OnPlayToneNotification::~OnPlayToneNotification() {

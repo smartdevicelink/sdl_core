@@ -265,8 +265,7 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result,
-            performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
 
             FFW.UI.interactionResponse(result, performInteractionRequestID);
         },
@@ -423,7 +422,9 @@ SDL.SDLController = Em.Object
          * Sends notification on SDL Core with changed value
          */
         onKeyboardChanges: function() {
-            FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+            if (null !== SDL.SDLModel.keyboardInputValue) {
+                FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+            }
         }.observes('SDL.SDLModel.keyboardInputValue'),
 
         /**
@@ -449,7 +450,8 @@ SDL.SDLController = Em.Object
         onGetDeviceList: function() {
 
             SDL.States.goToStates('info.devicelist');
-            // FFW.BasicCommunication.getDeviceList();
+            SDL.SDLModel.set('deviceSearchProgress', true);
+
             FFW.BasicCommunication.OnStartDeviceDiscovery();
         },
         /**

@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
 
 #include <map>
 #include <list>
@@ -83,7 +83,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
-    virtual void OnDeviceListUpdated(const std::vector<transport_manager::DeviceInfo>&);
+    virtual void OnDeviceListUpdated(
+      const std::vector<transport_manager::DeviceInfo>&);
 
     /**
      * \brief Available devices list updated.
@@ -105,10 +106,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      *
      * \param connection_id ID of new connection.
      **/
-    virtual void OnConnectionEstablished(const transport_manager::DeviceInfo& device_info,
-                                         const transport_manager::ConnectionUID& connection_id);
-    virtual void OnConnectionFailed(const transport_manager::DeviceInfo& device_info,
-                                    const transport_manager::ConnectError& error);
+    virtual void OnConnectionEstablished(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID& connection_id);
+    virtual void OnConnectionFailed(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectError& error);
     virtual void OnConnectionClosed(
       transport_manager::ConnectionUID connection_id);
     virtual void OnConnectionClosedFailure(
@@ -118,11 +121,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
-    virtual void OnTMMessageReceived(const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageReceiveFailed(transport_manager::ConnectionUID connection_id,
-                                          const transport_manager::DataReceiveError& error);
-    virtual void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
-                                       const transport_manager::RawMessageSptr message);
+    virtual void OnTMMessageReceived(
+      const transport_manager::RawMessageSptr message);
+    virtual void OnTMMessageReceiveFailed(
+      transport_manager::ConnectionUID connection_id,
+      const transport_manager::DataReceiveError& error);
+    virtual void OnTMMessageSendFailed(
+      const transport_manager::DataSendError& error,
+      const transport_manager::RawMessageSptr message);
     virtual void OnTMMessageSend();
 
     /**
@@ -155,7 +161,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual unsigned int OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char session_id, unsigned int hashCode);
+      unsigned char session_id, unsigned int hashCode,
+      unsigned char service_type);
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
@@ -187,9 +194,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id,
-                                    std::list<int>* sessions_list,
-                                    unsigned int* device_id);
+    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id = 0,
+                                    std::list<int>* sessions_list = 0,
+                                    unsigned int* device_id = 0);
 
     /**
      * \brief information about given Connection Key.
@@ -279,8 +286,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      *\brief For logging.
      */
-    static log4cxx::LoggerPtr logger_; DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_IMPL_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_

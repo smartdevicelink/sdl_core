@@ -196,6 +196,7 @@ const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
 const char slider_position[] = "sliderPosition";
+const char system_action[] = "systemAction";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -217,6 +218,10 @@ const char message_text[] = "messageText";
 const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
 const char show_strings[] = "showStrings";
+const char interaction_layout[] = "interactionLayout";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -234,6 +239,7 @@ const char display_capabilities[] = "displayCapabilities";
 const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
 const char soft_button_capabilities[] = "softButtonCapabilities";
 const char button_capabilities[] = "buttonCapabilities";
+const char capabilities[] = "capabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";
 const char allowed[] = "allowed";
 const char vehicle_type[] = "vehicleType";

@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
@@ -100,8 +100,10 @@ class ConnectionHandlerObserver {
      * \param sessionKey Key of session which should be ended
      * \param firstSessionKey Session key of first session in this connection
      */
-    virtual void OnSessionEndedCallback(int session_key,
-                                        int first_session_key) = 0;
+    virtual void OnSessionEndedCallback(
+      int session_key,
+      int first_session_key,
+      ServiceType type = ServiceType::kRPCSession) = 0;
 
   protected:
     /**
@@ -112,4 +114,4 @@ class ConnectionHandlerObserver {
 };
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_HANDLER_OBSERVER_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_

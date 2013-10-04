@@ -43,7 +43,8 @@ namespace commands {
 namespace mobile {
 
 OnButtonEventNotification::OnButtonEventNotification(
-  const MessageSharedPtr& message): CommandNotificationImpl(message) {
+    const MessageSharedPtr& message)
+    : CommandNotificationImpl(message) {
 }
 
 OnButtonEventNotification::~OnButtonEventNotification() {
@@ -52,12 +53,12 @@ OnButtonEventNotification::~OnButtonEventNotification() {
 void OnButtonEventNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
 
-  const unsigned int btn_id = static_cast<unsigned int>(
-                                (*message_)[strings::msg_params]
-                                [hmi_response::button_name].asInt());
+  const unsigned int btn_id =
+      static_cast<unsigned int>(
+          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
   const std::vector<Application*>& subscribedApps =
-    ApplicationManagerImpl::instance()->applications_by_button(btn_id);
+      ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
   std::vector<Application*>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {
@@ -67,10 +68,10 @@ void OnButtonEventNotification::Run() {
       continue;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) ||
-        (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-         && mobile_apis::ButtonName::OK != btn_id)) {
-        SendButtonEvent(subscribed_app);
+    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
+        || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
+            && mobile_apis::ButtonName::OK != btn_id)) {
+      SendButtonEvent(subscribed_app);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
@@ -79,8 +80,7 @@ void OnButtonEventNotification::Run() {
 }
 
 void OnButtonEventNotification::SendButtonEvent(const Application* app) {
-  smart_objects::SmartObject* on_btn_event =
-    new smart_objects::SmartObject();
+  smart_objects::SmartObject* on_btn_event = new smart_objects::SmartObject();
 
   if (!on_btn_event) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonEvent NULL pointer");
@@ -95,17 +95,17 @@ void OnButtonEventNotification::SendButtonEvent(const Application* app) {
   (*on_btn_event)[strings::params][strings::connection_key] = app->app_id();
 
   (*on_btn_event)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnButtonEventID;
+      mobile_apis::FunctionID::eType::OnButtonEventID;
 
   (*on_btn_event)[strings::msg_params][strings::button_name] =
-    (*message_)[strings::msg_params][hmi_response::button_name];
+      (*message_)[strings::msg_params][hmi_response::button_name];
   (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
-    (*message_)[strings::msg_params][hmi_response::button_mode];
+      (*message_)[strings::msg_params][hmi_response::button_mode];
 
-  if ((*message_)[strings::msg_params].
-      keyExists(hmi_response::custom_button_id)) {
+  if ((*message_)[strings::msg_params].keyExists(
+      hmi_response::custom_button_id)) {
     (*on_btn_event)[strings::msg_params][strings::custom_button_id] =
-      (*message_)[strings::msg_params][strings::custom_button_id];
+        (*message_)[strings::msg_params][strings::custom_button_id];
   } else {
     (*on_btn_event)[strings::msg_params][strings::custom_button_id] = 0;
   }
@@ -114,7 +114,7 @@ void OnButtonEventNotification::SendButtonEvent(const Application* app) {
   SendNotification();
 }
 
-} // namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

@@ -94,9 +94,9 @@ MobileMessageHandlerImpl* MobileMessageHandlerImpl::instance() {
   return MobileMessageHandlerImpl::self_;
 }
 
-void MobileMessageHandlerImpl::setProtocolHandler(
+void MobileMessageHandlerImpl::set_protocol_handler(
   protocol_handler::ProtocolHandler* protocolHandler) {
-  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl setProtocolHandler()");
+  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl set_protocol_handler()");
   DCHECK(protocolHandler);
   protocol_handler_ = protocolHandler;
 }
@@ -216,7 +216,9 @@ MobileMessageHandlerImpl::HandleIncomingMessageProtocolV2(
     static_cast<application_manager::MessageType>(rpcType));
   outgoing_message->set_correlation_id(correlationId);
   outgoing_message->set_connection_key(message->connection_key());
-  outgoing_message->set_protocol_version(static_cast<application_manager::ProtocolVersion>(message->protocol_version()));
+  outgoing_message->set_protocol_version(
+      static_cast<application_manager::ProtocolVersion>(message
+          ->protocol_version()));
 
   if (message->data_size() > (offset + jsonSize)) {
     application_manager::BinaryData* binaryData =
@@ -319,7 +321,7 @@ MobileMessageHandlerImpl::HandleOutgoingMessageProtocolV2(
 
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
-    //return NULL;
+    // return NULL;
   }
 
   const uint MAX_HEADER_SIZE = 12;
@@ -403,7 +405,8 @@ void MobileMessageHandlerImpl::AddMobileMessageListener(
 
 void MobileMessageHandlerImpl::RemoveMobileMessageListener(
   MobileMessageObserver* listener) {
-  LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl RemoveMobileMessageListener()");
+  LOG4CXX_INFO(logger_,
+               "MobileMessageHandlerImpl RemoveMobileMessageListener()");
   if (NULL == listener) {
     NOTREACHED();
     return;

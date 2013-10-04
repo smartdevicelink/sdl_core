@@ -1,7 +1,4 @@
 /**
- * \file tcp_adapter.h
- * \brief TcpTransportAdapter class header file.
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,44 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_ADAPTER_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace application_manager {
+
+namespace commands {
 
 /**
- * @brief Device adapter that use TCP transport.
- */
-class TcpTransportAdapter : public TransportAdapterImpl {
- public:
-  /**
-   * @brief Constructor.
-   */
-  TcpTransportAdapter();
+ * @brief ActivateAppResponse command class
+ **/
+class ActivateAppResponse : public ResponseFromHMI {
+  public:
+    /**
+     * @brief ActivateAppResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit ActivateAppResponse(const MessageSharedPtr& message);
 
-  /**
-   * @brief Destructor.
-   */
-  virtual ~TcpTransportAdapter();
+    /**
+     * @brief ActivateAppResponse class destructor
+     **/
+    virtual ~ActivateAppResponse();
 
-  /**
-   * @brief Default port.
-   */
-  static const uint16_t default_port = 12345;
- protected:
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  /**
-   * @brief Return type of device.
-   *
-   * @return String with device type.
-   */
-  virtual DeviceType GetDeviceType() const;
+  private:
+    DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace commands
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_ADAPTER
+}  // namespace application_manager
+
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_

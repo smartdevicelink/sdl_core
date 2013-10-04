@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIGetDTCsRequest::VIGetDTCsRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+VIGetDTCsRequest::VIGetDTCsRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VIGetDTCsRequest::~VIGetDTCsRequest() {

@@ -62,7 +62,8 @@ AudioManagerImpl::AudioManagerImpl()
     videoStreamerThread_(NULL),
     is_stream_running_(false),
     app_connection_key(0),
-    timer_(this, &AudioManagerImpl::onTimer) {
+    timer_(this, &AudioManagerImpl::onTimer),
+    video_serever_() {
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
@@ -186,9 +187,10 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
 }
 
 void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
-    mobile_apis::SamplingRate::eType type,
+    mobile_apis::SamplingRate::eType samplingRate,
     int duration,
-    mobile_apis::BitsPerSample::eType) {
+    mobile_apis::BitsPerSample::eType bitsPerSample,
+    unsigned int session_key, unsigned int correlation_id) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   FromMicToFileRecorderThread* recordThreadDelegate =
@@ -205,6 +207,20 @@ void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileNam
       recorderThread_->start();
     }
   }
+
+  AudioStreamSenderThread* senderThreadDelegate =
+    new AudioStreamSenderThread(outputFileName,
+                                static_cast<unsigned int>(session_key),
+                                static_cast<unsigned int>(correlation_id));
+
+  if (NULL != recordThreadDelegate) {
+    senderThread_ = new threads::Thread("AudioStreamSender"
+                                        , senderThreadDelegate);
+
+    if (NULL != senderThread_) {
+      senderThread_->start();
+    }
+  }
 }
 
 void AudioManagerImpl::stopMicrophoneRecording() {
@@ -214,6 +230,12 @@ void AudioManagerImpl::stopMicrophoneRecording() {
     recorderThread_->stop();
     delete recorderThread_;
     recorderThread_ = NULL;
+  }
+
+  if (NULL != senderThread_) {
+    senderThread_->stop();
+    delete senderThread_;
+    senderThread_ = NULL;
   }
 }
 
@@ -227,7 +249,7 @@ void AudioManagerImpl::startVideoStreaming(const std::string& fileName) {
     videoStreamingThreadDelegate->setVideoFileName(fileName);
 
     videoStreamerThread_ = new threads::Thread("VideoStreamer"
-                                          , videoStreamingThreadDelegate);
+        , videoStreamingThreadDelegate);
 
     if (NULL != videoStreamerThread_) {
       videoStreamerThread_->start();
@@ -268,27 +290,36 @@ void AudioManagerImpl::OnMessageReceived(
       is_stream_running_ = true;
       app_connection_key = (*message).connection_key();
       // FIXME
-      timer_.start(10);
+      //timer_.start(10);
+      video_serever_.start();
+      const std::string url = "http://localhost:5050";
+      application_manager::MessageHelper::SendNaviStartStream(
+        url, app_connection_key);
     }
 
-    // the only type of message AudioManager is interested in.
-    std::vector<unsigned char> recieved_bin_data(
-      message->data(),
-      message->data() + message->data_size());
+    // TODO(DK): only temporary
+    static int messsages_for_session = 0;
+    ++messsages_for_session;
+    LOG4CXX_INFO(logger_, "Handling map streaming message. This is "
+                 << messsages_for_session << "th message for " << app_connection_key);
 
-    file_system::Write(kH264FileName,
-                       recieved_bin_data,
-                       std::ios_base::app);
+    if (10 == messsages_for_session) {
+      protocol_handler_->SendFramesNumber(app_connection_key,
+                                          messsages_for_session);
+      messsages_for_session = 0;
+    }
+
+    video_serever_.sendMsg(message);
   }
 }
 
 void AudioManagerImpl::onTimer() const {
   // start streaming
-    LOG4CXX_ERROR(logger_, "Start streaming");
-    const std::string url = "http://localhost:8000/live";
-    AudioManagerImpl::getAudioManager()->startVideoStreaming(kH264FileName);
-    application_manager::MessageHelper::SendNaviStartStream(
-        url, app_connection_key);
+  LOG4CXX_ERROR(logger_, "Start streaming");
+  const std::string url = "http://localhost:8000/live";
+  AudioManagerImpl::getAudioManager()->startVideoStreaming(kH264FileName);
+  application_manager::MessageHelper::SendNaviStartStream(
+    url, app_connection_key);
 }
 
 }  // namespace audio_manager

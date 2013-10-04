@@ -42,7 +42,7 @@ namespace commands {
 
 EncodedSyncPDataResponse::EncodedSyncPDataResponse(
     const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 EncodedSyncPDataResponse::~EncodedSyncPDataResponse() {

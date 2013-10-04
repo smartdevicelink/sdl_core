@@ -40,9 +40,8 @@ namespace application_manager {
 
 namespace commands {
 
-SyncPDataResponse::SyncPDataResponse(
-    const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+SyncPDataResponse::SyncPDataResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
 SyncPDataResponse::~SyncPDataResponse() {
@@ -52,15 +51,15 @@ void SyncPDataResponse::Run() {
   LOG4CXX_INFO(logger_, "SyncPDataResponse::Run");
 
   // check if response false
-    if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-      if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-        LOG4CXX_ERROR(logger_, "Success = false");
-        SendResponse(false);
-        return;
-      }
+  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
+    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
+      LOG4CXX_ERROR(logger_, "Success = false");
+      SendResponse(false);
+      return;
     }
+  }
 
-    SendResponse(true);
+  SendResponse(true);
 }
 
 }  // namespace commands

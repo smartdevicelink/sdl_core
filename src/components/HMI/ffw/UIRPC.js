@@ -254,7 +254,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ChangeRegistration":
                 {
 
-                    SDL.SDLModel.changeRegistrationUI(request.params.language);
+                    SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
                     break;
@@ -337,10 +337,26 @@ FFW.UI = FFW.RPCObserver.create({
                                 "textFields": [
                                     "mainField1", "mainField2", "mainField1", "mainField2", "statusBar", "mediaClock", "mediaTrack", "alertText1", "alertText2", "alertText3", "scrollableMessageBody", "initialInteractionText", "navigationText1", "navigationText2", "ETA", "totalDistance", "navigationText", "audioPassThruDisplayText1", "audioPassThruDisplayText2", "sliderHeader", "sliderFooter", "notificationText"
                                 ],
+                                "imageFields": [
+                                ],
                                 "mediaClockFormats": [
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],
-                                "graphicSupported": true
+                                "graphicSupported": true,
+                                "imageCapabilities": ["DYNAMIC"],
+                                "templatesAvailable": '',
+                                "screenParams": {
+                                    "resolution": {
+                                        "resolutionWidth": 800,
+                                        "resolutionHeight": 480
+                                    },
+                                    "touchEventAvailable":{
+                                        "pressAvailable": true,
+                                        "multiTouchAvailable": true,
+                                        "doublePressAvailable": true
+                                    }
+                                },
+                                "numCustomPresetsAvailable": 6
                             },
                             "hmiZoneCapabilities": [
                                 "FRONT"
@@ -625,25 +641,39 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "id": performInteractionRequestID,
-            "result": {
-                "code": resultCode,
-                "method": "UI.PerformInteraction"
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": performInteractionRequestID,
+                "result": {
+                    "code": resultCode,
+                    "method": "UI.PerformInteraction"
+                }
+            };
+
+            if (commandID) {
+                JSONMessage.result.choiceID = commandID;
             }
-        };
 
-        if (commandID) {
-            JSONMessage.result.choiceID = commandID;
+            if (manualTextEntry) {
+                JSONMessage.result.manualTextEntry = manualTextEntry;
+            }
+        } else {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": performInteractionRequestID,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": "Perform Interaction error response.",
+                    "data": {
+                        "method": "UI.PerformInteraction"
+                    }
+                }
+            };
         }
 
-        if (manualTextEntry) {
-            JSONMessage.result.manualTextEntry = manualTextEntry;
-            JSONMessage.result.triggerSource = 'KEYBOARD';
-
-        }
 
 
 

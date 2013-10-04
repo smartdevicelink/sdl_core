@@ -124,6 +124,14 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      */
     unsigned int GetPacketSize(unsigned int size, unsigned char* data);
 
+    /**
+     * \brief Sends number of processed frames in case of binary nav streaming
+     * \param connection_key Id of connection over which message is to be sent
+     * \param number_of_frames Number of frames processed by
+     * streaming server and displayed to user.
+     */
+    void SendFramesNumber(int connection_key, int number_of_frames);
+
   protected:
     /**
      * \brief Sends fail of ending session to mobile application.

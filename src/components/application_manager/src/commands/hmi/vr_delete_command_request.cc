@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRDeleteCommandRequest::VRDeleteCommandRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+VRDeleteCommandRequest::VRDeleteCommandRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
 VRDeleteCommandRequest::~VRDeleteCommandRequest() {

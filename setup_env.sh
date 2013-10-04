@@ -7,14 +7,18 @@ GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
+CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
-AVAHI_CLIENT_LIBRARY="libavahi-client3"
-AVAHI_COMMON="libavahi-common3"
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
+AVAHI_COMMON="libavahi-common-dev"
+DOXYGEN="doxygen"
+GRAPHVIZ="graphviz"
+MSCGEN="mscgen"
+BLUEZ_TOOLS="bluez-tools"
 LIB_UDEV="libudev-dev"
 ICECAST="icecast2"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
-
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -54,20 +58,38 @@ echo "Installing Chromium browser"
 apt-install ${CHROMIUM_BROWSER}
 echo $OK
 
+echo "Installing Chromium ffmpeg codec"
+apt-install ${CHROMIUM_CODEC_FFMPEG}
+echo $OK
+
 echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
-echo "Installing Avahi-client library"
+echo "Installing Avahi-common-dev library"
+apt-install ${AVAHI_COMMON}
+echo $OK
+
+echo "Installing Avahi-client-dev library"
 apt-install ${AVAHI_CLIENT_LIBRARY}
 echo $OK
 
-echo "Installing Avahi-common library"
-apt-install ${AVAHI_COMMON}
+echo "Installing Doxygen"
+apt-install ${DOXYGEN}
+echo $OK
+
+echo "Installing Graphviz for doxygen"
+apt-install ${GRAPHVIZ}
+echo $OK
+
+echo "Installing Mscgen"
+apt-install ${MSCGEN}
 echo $OK
 
 echo "Installing Libudev-dev library"
 apt-install ${LIB_UDEV}
+echo "Installing bluez tools"
+apt-install ${BLUEZ_TOOLS}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup

@@ -64,21 +64,38 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     deactivate: function () {
 
         this._super();
+        this.searchBar.input.set('value', null);
         this.set('target', null);
     },
 
     inputChanges: function (element) {
-        if (element.text === "Space") {
-            this.searchBar.input.set('value', this.searchBar.input.value + " ");
-            this.target.set('value', this.searchBar.input.value + " ");
-        } else {
-            this.searchBar.input.set('value', this.searchBar.input.value + element.text);
-            this.target.set('value', this.searchBar.input.value + " ");
+
+        if (this.searchBar.input.value == null) {
+            this.searchBar.input.set('value', "");
+        }
+
+        switch (element.text) {
+            case "Space": {
+                this.searchBar.input.set('value', this.searchBar.input.value + " ");
+                this.target.set('value', this.searchBar.input.value);
+                break;
+            }
+            case "Search": {
+                this.target.search();
+                this.deactivate();
+                break;
+            }
+            default:{
+                this.searchBar.input.set('value', this.searchBar.input.value + element.text);
+                this.target.set('value', this.searchBar.input.value);
+            }
+
         }
     },
 
     clearBtn: function (element) {
-        this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1))
+        this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1));
+        this.target.set('value', this.searchBar.input.value);
     },
 
     /**
@@ -112,12 +129,10 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             classNames: 'serchIcon'
         }),
 
-        input: Ember.TextArea.extend({
-            tagName: 'input',
-            attribute: ['type:text'],
-            valueBinding: 'SDL.SDLModel.keyboardInputValue',
-            attributeBindings: ['disabled'],
-            disabled: false
+        input: Ember.TextField.extend({
+            elementId: "keyboardInput",
+            classNames: "keyboardInput",
+            valueBinding: 'SDL.SDLModel.keyboardInputValue'
         })
 
     }),
@@ -170,11 +185,13 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             //action: 'localisationBtn'
         }),
 
-        searchBtn: SDL.Button.extend({
+        searchBtn: SDL.Button.extend(SDL.PresetEvents, {
             classNames: 'searchBtn controll',
-            text: 'Search'
-            //target: 'SDL.SDLController',
-            //action: 'searchBtn'
+            text: 'Search',
+            click: function(){
+                this.get('parentView.parentView').inputChanges(this);
+            },
+            presetName: 'SEARCH'
         })
     }),
 

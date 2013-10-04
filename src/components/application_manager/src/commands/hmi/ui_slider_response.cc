@@ -32,13 +32,14 @@
 #include "application_manager/commands/hmi/ui_slider_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UISliderResponse::UISliderResponse(
-    const MessageSharedPtr& message): ResponseFromHMI(message) {
+UISliderResponse::UISliderResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
 UISliderResponse::~UISliderResponse() {
@@ -48,17 +49,16 @@ void UISliderResponse::Run() {
   LOG4CXX_INFO(logger_, "UISliderResponse::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::SliderID;
+      mobile_apis::FunctionID::SliderID;
 
-  if ((*message_)[strings::params][strings::message_type] ==
-      hmi_apis::messageType::error_response) {
+  if ((*message_)[strings::params][hmi_response::code] ==
+      hmi_apis::Common_Result::ABORTED) {
     (*message_)[strings::msg_params][strings::slider_position] =
         (*message_)[strings::params][strings::data][strings::slider_position];
     (*message_)[strings::params].erase(strings::data);
   }
 
   SendResponseToMobile(message_);
-
 }
 
 }  // namespace commands

@@ -44,8 +44,8 @@ namespace commands {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-AlertRequest::AlertRequest(
-  const MessageSharedPtr& message): CommandRequestImpl(message) {
+AlertRequest::AlertRequest(const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 AlertRequest::~AlertRequest() {
@@ -54,12 +54,11 @@ AlertRequest::~AlertRequest() {
 void AlertRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertRequest::Run");
 
-  unsigned int app_id =
-    (*message_)[strings::params][strings::connection_key].asInt();
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+                        .asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (ApplicationManagerImpl::instance()->vr_session_started())
-  {
+  if (ApplicationManagerImpl::instance()->vr_session_started()) {
     LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
@@ -71,23 +70,28 @@ void AlertRequest::Run() {
     return;
   }
 
-  //check if mandatory params(alertText1 and TTSChunk) specified
-  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
-      (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
-      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
-      (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
-    LOG4CXX_ERROR_EXT(logger_, "Mandatoty parameters omitted");
+  MessageHelper::AddSoftButtonsDefaultSystemAction(
+    (*message_)[strings::msg_params]);
+
+  // check if mandatory params(alertText1 and TTSChunk) specified
+  if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1))
+      && (!(*message_)[strings::msg_params].keyExists(strings::alert_text2))
+      && (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks)
+          && (1 > (*message_)[strings::msg_params]
+              [strings::tts_chunks].length()))) {
+    LOG4CXX_ERROR_EXT(logger_, "Mandatory parameters are missing");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "Mandatoty parameters omitted");
+                 "Mandatory parameters are missing");
     return;
   }
 
   mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+    MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(logger_, "MessageHelper::VerifyImageFiles return " <<
-                          verification_result);
+    LOG4CXX_ERROR_EXT(
+      logger_,
+      "MessageHelper::VerifyImageFiles return " << verification_result);
     SendResponse(false, verification_result);
     return;
   }
@@ -98,38 +102,27 @@ void AlertRequest::Run() {
 }
 
 void AlertRequest::SendAlertRequest(int app_id) {
-  smart_objects::SmartObject msg_params =
-    smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
-  int index = 0;
-  msg_params[hmi_request::alert_strings] =
-    smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  // alert1
-  if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT1;
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text1];
-    ++index;
-  }
+  msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+  msg_params[hmi_request::alert_strings][0][hmi_request::field_name] =
+    TextFieldName::ALERT_TEXT1;
+  msg_params[hmi_request::alert_strings][0][hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text1];
 
   // alert2
-  if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT2;
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text2];
-    ++index;
-  }
+  msg_params[hmi_request::alert_strings][1][hmi_request::field_name] =
+    TextFieldName::ALERT_TEXT2;
+  msg_params[hmi_request::alert_strings][1][hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text2];
 
   // alert3
-  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT3;
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text3];
-  }
+  msg_params[hmi_request::alert_strings][2][hmi_request::field_name] =
+    TextFieldName::ALERT_TEXT3;
+  msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
+    (*message_)[strings::msg_params][strings::alert_text3];
 
   // softButtons
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -141,16 +134,15 @@ void AlertRequest::SendAlertRequest(int app_id) {
 
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
     msg_params[strings::duration] =
-        (*message_)[strings::msg_params][strings::duration];
-  }
-  else {
+      (*message_)[strings::msg_params][strings::duration];
+  } else {
     msg_params[strings::duration] = 5000;
   }
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
     msg_params[strings::progress_indicator] =
-        (*message_)[strings::msg_params][strings::progress_indicator];
+      (*message_)[strings::msg_params][strings::progress_indicator];
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true, 1);
@@ -161,11 +153,11 @@ void AlertRequest::SendSpeakRequest(int app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
 
-      msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
+      msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
+                                              smart_objects::SmartType_Array);
       msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
       msg_params[strings::app_id] = app_id;
@@ -181,8 +173,8 @@ void AlertRequest::SendPlayToneNotification(int app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
 
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
                             msg_params);

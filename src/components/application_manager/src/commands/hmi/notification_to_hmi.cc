@@ -33,13 +33,12 @@
 #include "application_manager/commands/hmi/notification_to_hmi.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 NotificationToHMI::NotificationToHMI(const MessageSharedPtr& message)
-  : CommandImpl(message) {
+    : CommandImpl(message) {
 }
 
 NotificationToHMI::~NotificationToHMI() {

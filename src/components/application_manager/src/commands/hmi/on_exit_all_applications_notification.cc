@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
 OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {
@@ -49,8 +49,8 @@ void OnExitAllApplicationsNotification::Run() {
   LOG4CXX_INFO(logger_, "OnExitAllApplicationsNotification::Run");
 
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
-    static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
-      (*message_)[strings::msg_params][hmi_request::reason].asInt());
+      static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
+          (*message_)[strings::msg_params][hmi_request::reason].asInt());
 
   ApplicationManagerImpl::instance()->UnregisterAllApplications(reason);
 }

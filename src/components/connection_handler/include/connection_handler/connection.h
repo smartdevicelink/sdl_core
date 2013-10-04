@@ -34,8 +34,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
-#define SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_H_
 
 #include <map>
 #include <vector>
@@ -74,7 +74,7 @@ class Connection {
    * \brief Class constructor
    */
   Connection(ConnectionHandle connection_handle,
-              DeviceHandle connection_device_handle);
+             DeviceHandle connection_device_handle);
 
   /**
    * \brief Destructor
@@ -159,4 +159,4 @@ typedef std::map<int, Connection>::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 
-#endif  // SRC_COMPONENTS_CONNECTIONHANDLER_INCLUDE_CONNECTIONHANDLER_CONNECTION_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_H_

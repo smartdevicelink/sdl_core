@@ -12,8 +12,8 @@ set (SOURCES
 	./src/transport_adapter/transport_adapter_listener_impl.cc
 	./src/transport_adapter/transport_adapter_impl.cc
 	./src/timer.cc
-	./src/bluetooth/bluetooth_adapter.cc
-	./src/tcp/tcp_adapter.cc
+	./src/bluetooth/bluetooth_transport_adapter.cc
+	./src/tcp/tcp_transport_adapter.cc
 	./src/transport_adapter/threaded_socket_connection.cc
 	./src/tcp/tcp_client_listener.cc
 	./src/tcp/tcp_device.cc

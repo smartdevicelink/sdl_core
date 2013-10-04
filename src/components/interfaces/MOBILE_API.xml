@@ -264,6 +264,30 @@
     </description>
   </enum>
 
+  <enum name="LayoutMode">
+    <description>For touchscreen interactions, the mode of how the choices are presented.</description>
+    <element name="ICON_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons.
+    </description>
+    <element name="ICON_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.
+    </description>
+    <element name="LIST_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list.
+    </description>
+    <element name="LIST_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.
+    </description>
+    <element name="KEYBOARD" />
+    <description>
+    	This mode causes the interaction to immediately display a keyboard entry through the HMI.
+    </description>    
+  </enum>
+
   <enum name="HMILevel">
     <description>Enumeraction that describes current levels of HMI.</description>
     <element name="FULL" internal_name="HMI_FULL" />
@@ -438,6 +462,7 @@
     <element name="PRESET_8" />
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
+    <element name="SEARCH" />
   </enum>
 
   <enum name="MediaClockFormat">
@@ -686,6 +711,15 @@
     <param name="menuName" type="String" maxlength="500" />
     <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" />
     <param name="image" type="Image" mandatory="false"/>
+    <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
+    </param>
+    <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
+    </param>
+    <param name="secondaryImage" type="Image" mandatory="false" scope="partner">
+      <description>Optional secondary image struct for choice</description>
+    </param>
   </struct>
 
   <struct name="VrHelpItem">
@@ -1650,6 +1684,13 @@
       <description>Trim of the vehicle, e.g. SE</description>
     </param>
   </struct>
+  
+  <enum name="KeyboardLayout" scope="partner">
+    <description>Enumeration listing possible keyboard layouts.</description>
+    <element name="QWERTY" />
+    <element name="QWERTZ" />
+    <element name="AZERTY" />    
+  </enum>
 
   <enum name="KeyboardEvent" platform="MobileNav">
     <description>Enumeration listing possible keyboard events.</description>
@@ -1658,6 +1699,34 @@
     <element name="ENTRY_CANCELLED" />
     <element name="ENTRY_ABORTED" />    
   </enum>
+
+  <struct name="KeyboardProperties">
+    <description>Configuration of on-screen keyboard (if available).</description>
+
+    <param name="language" type="Language" mandatory="false">
+      <description>The keyboard language.</description>
+    </param> 
+
+    <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
+      <description>Desired keyboard layout.</description>
+    </param> 
+    
+    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+      <description>In this mode, all keypresses will be sent as they occur.</description>
+      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+      <description>If omitted, this value will be set to FALSE.</description>      
+    </param>
+
+    <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Array of keyboard characters to enable.</description>
+      <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+      <description>If omitted, the entire keyboard will be enabled.</description>      
+    </param>
+    
+    <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+      <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+    </param>   
+  </struct>
 
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
@@ -2004,7 +2073,17 @@
       	If omitted and a vrHelpTitle is provided, the request will be rejected.
       </description>
     </param>
-
+    <param name="menuTitle" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    
+    <param name="menuIcon" type="Image" mandatory="false" scope="partner">
+      <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    
+    <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" scope="partner">
+      <description>On-screen keybaord configuration (if available).</description>
+    </param>   
   </function>
 
   <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response">
@@ -2318,6 +2397,10 @@
       	Ability to send suggested VR Help Items to display on-screen during Perform Interaction.
       	If omitted on supported displays, the default SYNC generated list of suggested choices shall be displayed.
       </description>
+    </param>
+
+    <param name="interactionLayout" type="LayoutMode" mandatory="false" scope="partner">
+      <description>See LayoutMode.</description>
     </param>
 
   </function>
@@ -3606,7 +3689,7 @@
       	If omitted the value will be assumed as FALSE.
       </description>
     </param>
-    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true">
+    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
       <description>
       	Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
       	If omitted on supported displays, the currently displayed SoftButton values will not change.

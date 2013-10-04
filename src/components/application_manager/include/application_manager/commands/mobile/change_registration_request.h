@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -44,7 +45,8 @@ namespace commands {
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest : public CommandRequestImpl {
+class ChangeRegistrationRequest : public CommandRequestImpl,
+    public event_engine::EventObserver  {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
@@ -62,6 +64,13 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
 
  private:
   /*
@@ -85,7 +94,46 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    */
   bool IsLanguageSupportedByTTS(const int& hmi_display_lang);
 
+  /*
+   * @brief Check if there some not delivered hmi responses exist
+   *
+   * @return true if all responses received
+   */
+  bool IsPendingResponseExist();
+
+  /*
+   * @brief Checks result codes
+   *
+   * @return true if one of result codes is success
+   */
+  static bool WasAnySuccess(const hmi_apis::Common_Result::eType ui,
+                     const hmi_apis::Common_Result::eType vr,
+                     const hmi_apis::Common_Result::eType tts);
+
+  /*
+   * @brief Sends HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   * @param hmi_correlation_id hmi request correlation id
+   *
+   */
+  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                      const NsSmart::SmartObject& msg_params);
+
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
+
+  bool is_ui_send_;
+  bool is_vr_send_;
+  bool is_tts_send_;
+
+  bool is_ui_received_;
+  bool is_vr_received_;
+  bool is_tts_received_;
+
+  hmi_apis::Common_Result::eType ui_result_;
+  hmi_apis::Common_Result::eType vr_result_;
+  hmi_apis::Common_Result::eType tts_result_;
 };
 
 }  // namespace commands

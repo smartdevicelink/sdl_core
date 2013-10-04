@@ -42,7 +42,7 @@ namespace commands {
 namespace hmi {
 
 OnButtonPressNotification::OnButtonPressNotification(
-  const MessageSharedPtr& message): NotificationFromHMI(message) {
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
 OnButtonPressNotification::~OnButtonPressNotification() {
@@ -52,12 +52,12 @@ void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::eType::OnButtonPressID;
+      mobile_apis::FunctionID::eType::OnButtonPressID;
 
   SendNotificationToMobile(message_);
 }
 
-} // hmi
+}  // namespace hmi
 
 }  // namespace commands
 

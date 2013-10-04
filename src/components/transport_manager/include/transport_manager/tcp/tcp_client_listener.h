@@ -60,7 +60,7 @@ class TcpClientListener : public ClientConnectionListener {
   /**
    * @brief Start TCP client listener thread.
    */
-  void thread();
+  void Thread();
  protected:
 
   /**

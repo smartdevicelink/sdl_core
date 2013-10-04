@@ -1,7 +1,4 @@
 /**
- * \file bluetooth_adapter.h
- * \brief BluetoothAdapter class header file.
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,37 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace application_manager {
+
+namespace commands {
 
 /**
- * @brief Device adapter that use bluetooth transport.
- */
-class BluetoothTransportAdapter : public TransportAdapterImpl {
- public:
-  /**
-   * @brief Constructor.
-   */
-  BluetoothTransportAdapter();
+ * @brief ActivateAppRequest command class
+ **/
+class ActivateAppRequest : public RequestToHMI {
+  public:
+    /**
+     * @brief ActivateAppRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit ActivateAppRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief Destructor.
-   */
-  virtual ~BluetoothTransportAdapter();
- protected:
+    /**
+     * @brief ActivateAppRequest class destructor
+     **/
+    virtual ~ActivateAppRequest();
 
-  /**
-   * @brief Return type of device.
-   */
-  virtual DeviceType GetDeviceType() const;
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(ActivateAppRequest);
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace commands
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+}  // namespace application_manager
+
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_REQUEST_H_
