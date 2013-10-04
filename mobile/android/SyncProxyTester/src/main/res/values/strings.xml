@@ -87,10 +87,14 @@
     <string name="selectprotocol_extraOptions">Extra Options</string>
     <string name="selectprotocol_autoSetAppIcon">Set app icon after registration</string>
     <string name="createinteractionchoiceset_choiceVRSynonym">VR Synonyms (comma-separated)</string>
+    <string name="createinteractionchoiceset_secondaryText">Secondary Text</string>
+    <string name="createinteractionchoiceset_tertiaryText">Tertiary Text</string>
     <string name="createinteractionchoiceset_choiceUseImage">Use image:</string>
+    <string name="createinteractionchoiceset_choiceSecondaryUseImage">Use secondary image:</string>
     <string name="createinteractionchoiceset_choice1">Choice 1</string>
     <string name="createinteractionchoiceset_choice1Default">1st item</string>
     <string name="createinteractionchoiceset_choice1VRDefault">Command one,1st command</string>
+
     <string name="createinteractionchoiceset_choice1ImageValue">turn_left.png</string>
     <string name="createinteractionchoiceset_choice2">Choice 2</string>
     <string name="createinteractionchoiceset_choice2Default">2nd item</string>
