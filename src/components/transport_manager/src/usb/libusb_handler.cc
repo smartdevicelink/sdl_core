@@ -51,11 +51,14 @@ void LibusbHandler::StartControlTransferSequence(
   transfer_sequence->Start();
 }
 
+void LibusbHandler::CloseDeviceHandle(libusb_device_handle* device_handle) {
+  device_handles_to_close_.push_back(device_handle);
+}
+
 void* LibusbHandlerThread(void* data) {
   static_cast<LibusbHandler*>(data)->Thread();
   return 0;
 }
-
 
 int ArrivedCallback(libusb_context* context, libusb_device* device,
                     libusb_hotplug_event event, void* data) {
@@ -79,7 +82,7 @@ TransportAdapter::Error LibusbHandler::Init() {
     return TransportAdapter::FAIL;
   }
 
-  libusb_set_debug(libusb_context_, 3);
+//  libusb_set_debug(libusb_context_, 3);
 
   if (!libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
     LOG4CXX_ERROR(logger_, "LIBUSB_CAP_HAS_HOTPLUG not supported");
@@ -118,7 +121,8 @@ TransportAdapter::Error LibusbHandler::Init() {
   } else {
     LOG4CXX_ERROR(
         logger_,
-        "USB device scanner thread start failed, error code " << thread_start_error);
+        "USB device scanner thread start failed, error code "
+            << thread_start_error);
     return TransportAdapter::FAIL;
   }
 
@@ -142,6 +146,12 @@ void LibusbHandler::Thread() {
       } else {
         ++it;
       }
+    }
+
+    for (std::list<libusb_device_handle*>::iterator it =
+        device_handles_to_close_.begin(); it != device_handles_to_close_.end();
+        it = device_handles_to_close_.erase(it)) {
+      libusb_close(*it);
     }
   }
 }
