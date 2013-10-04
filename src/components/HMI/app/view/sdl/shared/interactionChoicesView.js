@@ -179,6 +179,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
 
                 this.set('list', true);
+                this.set('icon', false);
+                this.set('search', false);
                 this.set('active', true);
             }
 
@@ -193,7 +195,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             this.set('active', false);
             SDL.SDLController.VRMove();
             SDL.Keyboard.deactivate();
-            this.input.set('value', '');
+
 
 
             switch (result) {
@@ -231,9 +233,14 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         clean: function () {
 
+            this.input.set('value', null);
             this.set('captionText.content', 'Interaction Choices');
             this.listOfChoices.items = [];
             this.listOfChoices.list.refresh();
+            var length = this.get('naviChoises.childViews').length;
+            for (var i=0; i < length; i++) {
+                SDL.InteractionChoicesView.get('naviChoises.childViews').shiftObject();
+            }
         },
 
         /**
@@ -286,34 +293,32 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
 
-             if (!data) {
-                 Em.Logger.error('No choices to preform');
-                 return;
-             }
-
              this.set('performInteractionRequestID', performInteractionRequestID);
 
-             var i = 0, length = data.length, self = this;
+            if (data) {
 
-             // temp for testing
-             for (i = 0; i < length; i++) {
-                 this.get('naviChoises.childViews').pushObject(SDL.Button.create({
-                         text: data[i].menuName,
-                         choiceID: data[i].choiceID,
-                         action: 'onChoiceInteraction',
-                         onDown: false,
-                         target: 'SDL.SDLAppController',
-                         performInteractionRequestID: performInteractionRequestID,
-                         templateName: data[i].image ? 'rightIcon' : 'text',
-                         icon: data[i].image ? data[i].image.value : null
-                     })
-                 );
-             }
+                 // temp for testing
+                 for (var i = 0; i < data.length; i++) {
+                     this.get('naviChoises.childViews').pushObject(SDL.Button.create({
+                             text: data[i].menuName,
+                             choiceID: data[i].choiceID,
+                             action: 'onChoiceInteraction',
+                             onDown: false,
+                             target: 'SDL.SDLAppController',
+                             performInteractionRequestID: performInteractionRequestID,
+                             templateName: data[i].image ? 'rightIcon' : 'text',
+                             icon: data[i].image ? data[i].image.value : null
+                         })
+                     );
+                 }
 
-             clearTimeout(this.timer);
-             this.timer = setTimeout(function () {
+            }
 
-             self.deactivate("TIMED_OUT");
-             }, timeout);
+            var self = this;
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
+                self.deactivate("TIMED_OUT");
+            }, timeout);
         }
     });

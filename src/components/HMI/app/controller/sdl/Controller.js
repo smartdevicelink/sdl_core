@@ -422,7 +422,9 @@ SDL.SDLController = Em.Object
          * Sends notification on SDL Core with changed value
          */
         onKeyboardChanges: function() {
-            FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+            if (null !== SDL.SDLModel.keyboardInputValue) {
+                FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+            }
         }.observes('SDL.SDLModel.keyboardInputValue'),
 
         /**
