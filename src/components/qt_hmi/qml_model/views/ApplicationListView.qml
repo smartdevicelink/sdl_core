@@ -63,6 +63,7 @@ GeneralView {
                         MouseArea {
                           anchors.fill: parent
                           onClicked: {
+                              dataContainer.applicationId = appId
                               contentLoader.go("./views/SDLPlayerView.qml")
                             }
                         }

@@ -2,12 +2,6 @@ import QtQuick 2.0
 import "Common.js" as Common
 
 Item {
-    signal showNotification (var text, var icon, int timeout)
-    signal onCommand (int cmdID, int appID)
-    signal onSystemContext (int systemContext)
-    signal onLanguageChange (int language)
-    signal onDriverDistraction (int state)
-
     function alert (alertStrings, duration, softButtons, appID) {
         // with this array we grab only the lines we need
         var alertFields = [Common.TextFieldName.alertText1,
