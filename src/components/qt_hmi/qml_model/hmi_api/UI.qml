@@ -47,8 +47,13 @@ Item {
             }
         }
 
-        alertWindow.alert(alertString, duration)
-        return {} // TODO(nvaganov@luxoft.com): check for other alerts and return "try again"
+        var ret = alertWindow.alert(alertString, duration)
+        if (ret.alertLaunched) {
+            return {}
+        }
+        else {
+            return {tryAgainTime: ret.timeToWait}
+        }
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {

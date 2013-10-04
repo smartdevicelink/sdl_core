@@ -24,10 +24,29 @@ Window {
         onTriggered: hide()
     }
 
+    property date lastAlertTime
+
     function alert (alertString, duration) {
-        rectangle.alertString = alertString
-        timer.interval = duration
-        timer.start()
-        show()
+        if (timer.running) { // we have alert already
+            var currentTime = new Date()
+            var timeFromLastAlert = currentTime - lastAlertTime
+            var timeLeft = timer.interval - timeFromLastAlert
+            var discreteInMilliseconds = 1000 // wish to round left time to integer seconds
+            var timeLeftRounded = discreteInMilliseconds * Math.ceil(timeLeft / discreteInMilliseconds)
+            return {
+                alertLaunched: false,
+                timeToWait: timeLeftRounded
+            }
+        }
+        else {
+            lastAlertTime = new Date()
+            rectangle.alertString = alertString
+            timer.interval = duration
+            timer.start()
+            show()
+            return {
+                alertLaunched: true
+            }
+        }
     }
 }
