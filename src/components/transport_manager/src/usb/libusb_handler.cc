@@ -82,8 +82,6 @@ TransportAdapter::Error LibusbHandler::Init() {
     return TransportAdapter::FAIL;
   }
 
-//  libusb_set_debug(libusb_context_, 3);
-
   if (!libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
     LOG4CXX_ERROR(logger_, "LIBUSB_CAP_HAS_HOTPLUG not supported");
     return TransportAdapter::FAIL;
