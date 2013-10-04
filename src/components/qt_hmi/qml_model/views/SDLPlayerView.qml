@@ -145,6 +145,9 @@ GeneralView {
                         onReleased: {
                             playBtnImage.source = "../res/buttons/player_play_btn.png"
                         }
+                        onClicked: {
+                            sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined)
+                        }
                     }
                     source: "../res/buttons/player_play_btn.png"
                     anchors.verticalCenter: parent.verticalCenter

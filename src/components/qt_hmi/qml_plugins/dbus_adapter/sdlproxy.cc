@@ -73,7 +73,6 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
         appMap["icon"] = QVariant::fromValue(app.icon.val);
     }
 
-    qDebug() << "SDLProxy::onAppRegistered (emit)";
     emit appRegistered(QVariant(appMap));
 }
 
