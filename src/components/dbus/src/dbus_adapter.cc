@@ -82,12 +82,12 @@ bool DBusAdapter::Init() {
   ret = dbus_bus_request_name(conn_, sdl_service_name_.c_str(),
                               DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
   if (dbus_error_is_set(&err)) {
-    LOG4CXX_ERROR(logger_, "DBus: Name Error " << err.message);
+    LOG4CXX_ERROR(logger_, "DBus: Can't request name" << err.name);
     dbus_error_free(&err);
     return false;
   }
   if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
-    LOG4CXX_ERROR(logger_, "DBus: Name Error " << err.message);
+    LOG4CXX_ERROR(logger_, "DBus: Can't get name service " << err.name);
     return false;
   }
 
@@ -101,16 +101,16 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
     return false;
   }
   DBusMessage* msg;
-  dbus_connection_read_write(conn_, 0);
-  msg = dbus_connection_pop_message(conn_);
-  if (NULL != msg) {
+  if ((msg = dbus_connection_pop_message(conn_)) != NULL) {
     switch (dbus_message_get_type(msg)) {
-      case DBUS_MESSAGE_TYPE_METHOD_CALL: return ProcessMethodCall(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_METHOD_RETURN: return ProcessMethodReturn(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_ERROR: return ProcessError(msg, obj); break;
-      case DBUS_MESSAGE_TYPE_SIGNAL: return ProcessSignal(msg, obj); break;
+      case DBUS_MESSAGE_TYPE_METHOD_CALL: return ProcessMethodCall(msg, obj);
+      case DBUS_MESSAGE_TYPE_METHOD_RETURN: return ProcessMethodReturn(msg, obj);
+      case DBUS_MESSAGE_TYPE_ERROR: return ProcessError(msg, obj);
+      case DBUS_MESSAGE_TYPE_SIGNAL: return ProcessSignal(msg, obj);
       default: return false;
     }
+  } else {
+    dbus_connection_read_write(conn_, -1);
   }
   return false;
 }
@@ -299,11 +299,12 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
   obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
   obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
-  obj[sos::S_PARAMS][sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  obj[sos::S_MSG_PARAMS][sos::kCode] = hmi_apis::Common_Result::SUCCESS;
 
   const ListArgs args = schema_->getListArgs(ids.second,
                                             hmi_apis::messageType::response);
-  bool ret = GetArguments(msg, args, obj[sos::S_PARAMS][sos::S_MSG_PARAMS]);
+  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
   return ret;
 }
@@ -327,12 +328,20 @@ bool DBusAdapter::ProcessError(DBusMessage* msg, smart_objects::SmartObject& obj
     ListArgs args;
     args.push_back(&rule);
     smart_objects::SmartObject description(smart_objects::SmartType_Map);
-    description[rule.name] = smart_objects::SmartObject(smart_objects::SmartType_String);
+    description[rule.name] = smart_objects::SmartObject(
+        smart_objects::SmartType_String);
     ret = GetArguments(msg, args, description);
     MessageName method = schema_->getMessageName(ids.second);
+
+    obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
+    obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
+    obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
+    obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+    obj[sos::S_MSG_PARAMS][sos::kCode] = description[rule.name].asInt();
+
     LOG4CXX_WARN(logger_, "DBus: Call of method " << method.first << "." <<
                  method.second << " returned error " <<
-                 name << " \""<< description[rule.name].asString() << "\"");
+                 name << ": " << description[rule.name].asString());
   } else {
     LOG4CXX_ERROR(logger_, "DBus: Type message isn't error");
   }
@@ -357,11 +366,11 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg, smart_objects::SmartObject& ob
 
   obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = m_id;
   obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::notification;
-  obj[sos::S_PARAMS][sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   const ListArgs args = schema_->getListArgs(name,
                                             hmi_apis::messageType::notification);
-  bool ret = GetArguments(msg, args, obj[sos::S_PARAMS][sos::S_MSG_PARAMS]);
+  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
   return ret;
 }
