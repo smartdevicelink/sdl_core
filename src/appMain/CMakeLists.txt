@@ -15,8 +15,9 @@ set(LIBRARIES
   encryption
   jsoncpp
   #bluetooth
-  pthread
-  rt
+  #pthread
+  #rt
+  socket
   #avahi-client
   #avahi-common
   ConfigProfile
