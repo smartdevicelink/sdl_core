@@ -19,6 +19,7 @@ install_manifest.txt
 .project
 .cproject
 *.pyc
+*.swp
 
 # logs
 *.log
