@@ -43,5 +43,4 @@ ListModel
         icon: "../res/gear.png"
         qml: ""
     }
-
 }

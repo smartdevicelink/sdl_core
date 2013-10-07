@@ -38,7 +38,11 @@ Row {
     id: pager
     property int pages
     property int activePage: 0
-    spacing: 7
+    property int space
+
+    spacing: space
+    visible: (pages === 1) ? false : true
+
 
     Repeater {
         model: pages

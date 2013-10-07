@@ -3,7 +3,7 @@ import "../hmi_api/Common.js" as Common
 
 GeneralView {
     category: Common.DeactivateReason.AUDIO
-    MediaPlayerView {
+    MediaPlayer {
         playerName: "iPod"
         anchors.fill: parent
         albumImage: "../res/album_art.png"

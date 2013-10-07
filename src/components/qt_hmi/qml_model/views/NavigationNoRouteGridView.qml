@@ -161,7 +161,7 @@ GeneralView {
                     }
 
                     onClicked: {
-                        contentLoader.go("./views/NavigationMenuGridView.qml")
+                        contentLoader.go("./views/NavigationMenuView.qml")
                     }
                 }
             }

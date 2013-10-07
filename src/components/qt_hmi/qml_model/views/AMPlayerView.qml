@@ -37,7 +37,7 @@ import "../hmi_api/Common.js" as Common
 
 GeneralView {
     category: Common.DeactivateReason.AUDIO
-	RadioPlayerView {
+    RadioPlayer {
 	    id: amRadioPlayer
         anchors.fill: parent
 	    radioType: "AM"

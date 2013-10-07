@@ -3,32 +3,32 @@ import QtQuick 2.0
 ListModel
 {
     ListElement {
-        name: "AM"
+        title: "AM"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/AMPlayerView.qml"
     }
     ListElement {
-        name: "Sirius"
+        title: "Sirius"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/SiriusPlayerView.qml"
     }
     ListElement {
-        name: "BT Audio"
+        title: "BT Audio"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/BTPlayerView.qml"
     }
     ListElement {
-        name: "FM"
+        title: "FM"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/FMPlayerView.qml"
     }
     ListElement {
-        name: "CD"
+        title: "CD"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/CDPlayerView.qml"
     }
     ListElement {
-        name: "iPod"
+        title: "iPod"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/IPodPlayerView.qml"
     }

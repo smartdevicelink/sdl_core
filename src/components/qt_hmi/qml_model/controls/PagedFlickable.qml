@@ -69,6 +69,7 @@ Item
 
     Pager {
         id: pager
+        space: 7
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 

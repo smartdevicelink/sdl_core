@@ -2,7 +2,7 @@ import QtQuick 2.0
 import "../controls"
 
 GeneralView {
-    RadioPlayerView {
+    RadioPlayer {
         id: siriusRadioPlayer
         anchors.fill: parent
         radioType: ""

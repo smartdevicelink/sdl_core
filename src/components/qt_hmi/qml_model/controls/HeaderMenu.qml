@@ -44,7 +44,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                contentLoader.go("./views/MainMenuGridView.qml")
+                contentLoader.go("./views/MainMenuView.qml")
             }
         }
     }

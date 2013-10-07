@@ -66,7 +66,7 @@ Item {
                 anchors.top: parent.top
                 text: playerName
                 pixelSize: 20
-                dest: "./views/MusicSourceGridView.qml"
+                dest: "./views/MusicSourceView.qml"
             }
 
             LongOvalButton {
