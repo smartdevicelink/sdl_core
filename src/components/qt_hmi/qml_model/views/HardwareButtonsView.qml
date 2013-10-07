@@ -229,179 +229,99 @@ Item {
 
         Row
         {
-            Rectangle {
-                width: 160
-                height: 40
-
-                property bool pressed;
-
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#2c2c2c" }
-                    GradientStop { position: 1.0; color: "black" }
+            Column {
+                ToggleButton {
+                    label: "Vehicle info"
                 }
 
-                Text {
-                    text: "Vehicle info"
-                    font.pixelSize: 18
-                    color: "white"
-                    anchors.centerIn: parent
+                Item {
+                    height: 1
+                    width: 20
                 }
-                MouseArea {
-                    anchors.fill: parent
+
+                ToggleButton {
+                    label: "Send data"
+                }
+
+                Component {
+                    id: tbtStateDelegate
+                    TextButton {
+                        label: name
+                        width: parent.width
+                        onClicked: {
+                            sdlNavigation.onTBTClientState(value);
+                            console.log("Emit signal Navigation.onTBTClientState");
+                        }
+                    }
+                }
+                ToggleButton {
+                    id: tbtClientState
+                    label: "TBT Client state"
                     onPressed: {
-                        parent.gradient.stops[0].position = 1.0
-                        parent.gradient.stops[1].position = 0.0
+                        for (var name in Common.TBTState) {
+                            selectList.model.append({name: name, value: Common.TBTState[name]});
+                        }
+                        selectList.delegate = tbtStateDelegate
                     }
-                    onReleased: {
-                        parent.gradient.stops[0].position = 0.0
-                        parent.gradient.stops[1].position = 1.0
-                    }
-                }
-            }
-
-            Item {
-                height: 1
-                width: 20
-            }
-
-            Rectangle {
-                width: 160
-                height: 40
-
-                property bool pressed;
-
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#2c2c2c" }
-                    GradientStop { position: 1.0; color: "black" }
-                }
-
-                Text {
-                    text: "Send data"
-                    font.pixelSize: 18
-                    color: "white"
-                    anchors.centerIn: parent
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: {
-                        parent.gradient.stops[0].position = 1.0
-                        parent.gradient.stops[1].position = 0.0
-                    }
-                    onReleased: {
-                        parent.gradient.stops[0].position = 0.0
-                        parent.gradient.stops[1].position = 1.0
+                    onUnpressed: {
+                        selectList.model.clear();
+                        selectList.delegate = null;
                     }
                 }
-            }
 
-        }
-
-        Row
-        {
-            Rectangle {
-                width: 160
-                height: 40
-
-                property bool pressed;
-
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#2c2c2c" }
-                    GradientStop { position: 1.0; color: "black" }
+                Item {
+                    height: 1
+                    width: 20
                 }
 
-                Text {
-                    text: "TBT Client state"
-                    font.pixelSize: 18
-                    color: "white"
-                    anchors.centerIn: parent
+                ToggleButton {
+                    label: "Exit application"
                 }
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: {
-                        parent.gradient.stops[0].position = 1.0
-                        parent.gradient.stops[1].position = 0.0
+                Row {
+                    CheckBox {
+                        style: CheckBoxStyle {
+                            label: Text {
+                                color: "white"
+                                text: "Use URL"
+                            }
+                        }
                     }
-                    onReleased: {
-                        parent.gradient.stops[0].position = 0.0
-                        parent.gradient.stops[1].position = 1.0
+
+                    Item {
+                        height: 1
+                        width: 20
+                    }
+
+                    CheckBox {
+                        style: CheckBoxStyle {
+                            label: Text {
+                                color: "white"
+                                text: "DD"
+                            }
+                        }
                     }
                 }
             }
 
-            Item {
-                height: 1
-                width: 20
-            }
+            Column {
+                ListView {
+                    id: selectList
+                    width: 300
+                    height: 200
 
-            Rectangle {
-                width: 160
-                height: 40
+                    model: ListModel {}
+                    delegate: TextButton {}
 
-                property bool pressed;
-
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#2c2c2c" }
-                    GradientStop { position: 1.0; color: "black" }
-                }
-
-                Text {
-                    text: "Exit application"
-                    font.pixelSize: 18
-                    color: "white"
-                    anchors.centerIn: parent
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: {
-                        parent.gradient.stops[0].position = 1.0
-                        parent.gradient.stops[1].position = 0.0
-                    }
-                    onReleased: {
-                        parent.gradient.stops[0].position = 0.0
-                        parent.gradient.stops[1].position = 1.0
-                    }
-                }
-            }
-        }
-
-        Item {
-            height: 20
-            width: 1
-        }
-
-        Row
-        {
-            CheckBox {
-                style: CheckBoxStyle {
-                    label: Text {
+                    Rectangle {
+                        id: scrollbar
+                        anchors.right: selectList.right
+                        y: selectList.visibleArea.yPosition * selectList.height
+                        width: 10
+                        height: selectList.visibleArea.heightRatio * selectList.height
                         color: "white"
-                        text: "Use URL"
-                    }
-                }
-            }
-
-            Item {
-                height: 1
-                width: 20
-            }
-
-            CheckBox {
-                style: CheckBoxStyle {
-                    label: Text {
-                        color: "white"
-                        text: "DD"
                     }
                 }
             }
         }
-
-        /*Button {
-            width: 100
-            height: 40
-            text: "Vehicle info"
-            //font.pixelSize: 18
-            //color: "white"
-            anchors.centerIn: parent
-        }*/
     }
 }
