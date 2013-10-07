@@ -249,21 +249,21 @@ Item {
                         label: name
                         width: parent.width
                         onClicked: {
-                            console.log("Emit signal");
                             sdlNavigation.onTBTClientState(value);
+                            console.log("Emit signal Navigation.onTBTClientState");
                         }
                     }
                 }
                 ToggleButton {
                     id: tbtClientState
                     label: "TBT Client state"
-                    onSelected: {
+                    onPressed: {
                         for (var name in Common.TBTState) {
                             selectList.model.append({name: name, value: Common.TBTState[name]});
                         }
                         selectList.delegate = tbtStateDelegate
                     }
-                    onPushed: {
+                    onUnpressed: {
                         selectList.model.clear();
                         selectList.delegate = null;
                     }

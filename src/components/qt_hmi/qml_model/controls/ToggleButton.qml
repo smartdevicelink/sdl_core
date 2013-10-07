@@ -7,19 +7,19 @@ Rectangle {
     radius: 2
     border.width: 2
     border.color: "#000000"
-    gradient: unPressed
+    gradient: grUnpressed
 
     property alias label : label.text
 
-    signal selected()
-    signal pushed()
+    signal pressed()
+    signal unpressed()
 
-    state: "unPressed"
+    state: "unpressed"
     onStateChanged: {
-        if (state == "pressed")  {
-            selected()
+        if (state == "pressed") {
+            pressed();
         } else {
-            pushed()
+            unpressed();
         }
     }
 
@@ -39,10 +39,10 @@ Rectangle {
 
         anchors.fill: parent
         onPressed: {
-            if (parent.state == "unPressed") {
+            if (parent.state == "unpressed") {
                 parent.state = "pressed"
             } else {
-                parent.state = "unPressed"
+                parent.state = "unpressed"
             }
         }
     }
@@ -52,27 +52,27 @@ Rectangle {
             name: "pressed"
             PropertyChanges  {
                 target: toggleButton
-                gradient: pressed
+                gradient: grPressed
             }
         },
         State  {
-            name: "unPressed"
+            name: "unpressed"
             PropertyChanges  {
                 target: toggleButton
-                gradient: unPressed
+                gradient: grUnpressed
             }
         }
     ]
 
     Gradient {
-        id: unPressed
+        id: grUnpressed
 
         GradientStop { position: 0.0; color: "#2c2c2c" }
         GradientStop { position: 1.0; color: "#0c0c0c" }
     }
 
     Gradient {
-        id: pressed
+        id: grPressed
 
         GradientStop { position: 0.0; color: "black" }
         GradientStop { position: 1.0; color: "black" }
@@ -80,7 +80,7 @@ Rectangle {
 
     transitions: [
         Transition  {
-            from: "unPressed"
+            from: "unpressed"
             to: "pressed"
             reversible: true
         }
