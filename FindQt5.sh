@@ -69,7 +69,6 @@ findfiles()
         if versionmatch $VERSION; then
             case $2 in
             binary)
-                echo "3"
                 qt5_binary=$QT5_DIR/$3 # check specified binary
                 if [ -x $qt5_binary -a ! -d $qt5_binary ]; then # to be executable and not to be directory
                     echo -n $qt5_binary # output without newline
