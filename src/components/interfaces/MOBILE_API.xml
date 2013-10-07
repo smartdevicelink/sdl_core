@@ -3511,13 +3511,13 @@
   </function>
 
   <function name="ShowConstantTBT" functionID="ShowConstantTBTID" messagetype="request">
-    <param name="navigationText1" type="String" maxlength="500" mandatory="false">
+    <param name="navigationText1" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="navigationText2" type="String" maxlength="500" mandatory="false">
+    <param name="navigationText2" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="eta" type="String" maxlength="500" mandatory="false">
+    <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="totalDistance" type="String" maxlength="500" mandatory="false">
+    <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="turnIcon" type="Image" mandatory="false">
     </param>
