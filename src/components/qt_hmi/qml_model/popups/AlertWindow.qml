@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Window 2.0
+import "../hmi_api/Common.js" as Common
 
 Rectangle {
     color: "transparent"
@@ -11,13 +12,43 @@ Rectangle {
     Rectangle {
         id: rectangle
 
+        anchors.centerIn: parent
         width: 400
         height: 256
+        color: "black"
+        border.color: "white"
 
-        property alias alertString: text.text
+        property alias alertString: alert.text
+        property alias appNameString: appName.text
 
-        Text {
-            id: text
+        MouseArea {
+            anchors.fill: parent
+            onClicked: hide()
+        }
+
+        Column {
+
+            anchors.topMargin: 20
+
+            Text {
+                id: appName
+                color: "white"
+                font.pointSize: 16
+            }
+
+            Row {
+
+                Image {
+                    source: "../res/warning.png"
+                }
+
+                Text {
+                    id: alert
+                    color: "white"
+                    font.pointSize: 16
+                }
+
+            }
         }
     }
 
@@ -28,7 +59,7 @@ Rectangle {
 
     property date lastAlertTime
 
-    function alert (alertString, duration) {
+    function alert (alertString, duration, appID) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
@@ -39,14 +70,30 @@ Rectangle {
         }
         else {
             lastAlertTime = new Date()
+            rectangle.appNameString = ""
+            for (var appIndex = 0; appIndex < dataContainer.applicationList.count; ++appIndex) {
+                if (dataContainer.applicationList.get(appIndex).appId === appID) {
+                    rectangle.appNameString = dataContainer.applicationList.get(appIndex).appName
+                    break
+                }
+            }
             rectangle.alertString = alertString
             timer.interval = duration
             timer.start()
-            visible = true
+            show()
         }
     }
 
+    function show () {
+        dataContainer.hmiSavedContext = dataContainer.hmiContext
+        dataContainer.hmiContext = Common.SystemContext.SYSCTXT_ALERT
+        dataContainer.applicationSavedContext = dataContainer.applicationContext
+        visible = true
+    }
+
     function hide () {
+        dataContainer.hmiContext = dataContainer.hmiSavedContext
+        dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
     }
 }

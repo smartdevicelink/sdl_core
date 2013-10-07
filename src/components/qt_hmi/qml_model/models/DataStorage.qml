@@ -15,6 +15,9 @@ Item {
     property int hmiContext
     property bool applicationContext: false
 
+    property int hmiSavedContext
+    property bool applicationSavedContext
+
     property string route_text: ""
 
     property var playerPreferences: {

@@ -6,6 +6,7 @@ import "./views"
 import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
+import "hmi_api/Common.js" as Common
 
 Rectangle {
     width: 1600
@@ -84,8 +85,14 @@ Rectangle {
 
                 onStatusChanged: {
                     if (status == Component.Ready) {
-                        dataContainer.hmiContext = item.systemContext
-                        dataContainer.applicationContext = item.applicationContext
+                        if (dataContainer.hmiContext !== Common.SystemContext.SYSCTXT_ALERT) {
+                            dataContainer.hmiContext = item.systemContext
+                            dataContainer.applicationContext = item.applicationContext
+                        }
+                        else {
+                            dataContainer.hmiSavedContext = item.systemContext
+                            dataContainer.applicationSavedContext = item.applicationContext
+                        }
                     }
                 }
             }

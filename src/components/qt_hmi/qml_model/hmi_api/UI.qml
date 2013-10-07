@@ -42,7 +42,7 @@ Item {
             }
         }
 
-        var tryAgainTime = alertWindow.alert(alertString, duration)
+        var tryAgainTime = alertWindow.alert(alertString, duration, appID)
         if (tryAgainTime === undefined) {
             return {}
         }
