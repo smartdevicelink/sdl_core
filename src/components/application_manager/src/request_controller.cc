@@ -109,23 +109,25 @@ void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
 
   list_mutex_.lock();
 
+  const commands::CommandRequestImpl* request_impl = NULL;
   std::list<Request>::iterator it = request_list_.begin();
   for (; request_list_.end() != it; ++it) {
-    const commands::CommandRequestImpl* request_impl =
-        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
-
+    request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
     if (request_impl->correlation_id() == info.correlationID_ &&
         request_impl->connection_key() == info.connectionID_) {
-
-      request_impl->onTimeOut();
-      watchdog_->removeRequest(info.connectionID_, info.correlationID_);
-      request_list_.erase(it);
+      LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_ <<
+                   " of application " << info.connectionID_ << " expired");
       break;
     }
   }
 
   list_mutex_.unlock();
+
+  if (request_impl) {
+    request_impl->onTimeOut();
+  }
 }
+
 
 }  //  namespace request_controller
 
