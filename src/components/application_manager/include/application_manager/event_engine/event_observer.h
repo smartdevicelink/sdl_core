@@ -47,7 +47,7 @@ class EventObserver
   friend class EventDispatcher;
 
   // Typedef for possible Observer ID's from mobile_apis functionID enum
-  typedef unsigned int ObserverID;
+  typedef unsigned long ObserverID;
 
   /*
    * @brief Constructor
