@@ -3,7 +3,6 @@ import com.ford.sdl.hmi.hw_buttons 1.0
 import "../hmi_api/Common.js" as Common
 
 MaskedContainer {
-
     property string name
     property int    buttonId: Common.ButtonName.CUSTOM_BUTTON
     property bool   upDownAvailable: true
