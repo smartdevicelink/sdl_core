@@ -32,40 +32,93 @@
 
 QT5_REQUIRED_VERSION="5.1.0"
 
-qmake_list=`find -L $CUSTOM_QT5_DIR ~ /opt /usr -name '.*' -prune -o -name qmake -type f -executable -print 2>/dev/null || true` # first we look for qmake binary
-for qmake_binary in $qmake_list; do # for all candidates
-  grep_result=`$qmake_binary -version | grep "Qt version "$QT5_REQUIRED_VERSION || true` # ask version (only qmake provides this option for sure)
-  if [ -n "$grep_result" ]; then # if version matches
-    if [ -z $1 ]; then # if no argument specified
-      exit 0 # we are happy already
+version2int()
+{
+    IFS="."
+    local ver=0
+    for i in $1; do
+        ver=$(( $ver * 32 + $i ))
+    done
+    echo $ver
+}
+
+versionmatch()
+{
+    if [[ $(version2int $1) -ge $(version2int $QT5_REQUIRED_VERSION) ]]; then
+        return 0;
+    else
+        return 1;
     fi
-    QT5_DIR=`dirname $qmake_binary`
-    case $1 in
-      binary) # binary check
-        if [ -z $2 ]; then # if no argument specified
-          exit 1 # syntax error
+}
+
+# called with "qmake 1" return qmake version
+# called with "qmake 2" return Qt installation dir
+qmakedata()
+{
+    $1 --version | grep "Using Qt version" | sed "s/.*Qt version \\([0-9\\.]*\\) in \\(.*\\)$/\\$2/"
+}
+
+
+findfiles()
+{
+    local qmake_binary=$1
+    if [ -x $qmake_binary -a ! -d $qmake_binary ]; then
+        local VERSION=$(qmakedata $qmake_binary 1);
+        local QT5_DIR=$(dirname $qmake_binary)
+        local QT5_INSTALLDIR=$(qmakedata $qmake_binary 2);
+        if versionmatch $VERSION; then
+            case $2 in
+            binary)
+                echo "3"
+                qt5_binary=$QT5_DIR/$3 # check specified binary
+                if [ -x $qt5_binary -a ! -d $qt5_binary ]; then # to be executable and not to be directory
+                    echo -n $qt5_binary # output without newline
+                    exit 0
+                fi
+                ;;
+            file)
+                qt5_file=$(find $QT5_INSTALLDIR -name "$3" -type f -print0 -quit) # check specified binary
+                if [ -n "$qt5_file" -a ! -d "$qt5_file" ]; then # if found
+                    echo -n $qt5_file #output without newline
+                    exit 0
+                fi
+                ;;
+            esac
         fi
-        qt5_binary=$QT5_DIR/$2 # check specified binary
-        if [ -x $qt5_binary ]; then # to be executable
-          if ! [ -d $qt5_binary ]; then # and not to be directory
-            echo -n $qt5_binary # output without newline
+    fi
+    exit 1
+}
+
+if [ -z $1 ]; then # if no argument specified
+    exit 0 # we are happy already
+fi
+
+if [ ! $1 == "binary" -a ! $1 == "file" -o -z $2 ]; then
+    echo "Syntax error: using FindQt5.sh (binary|file) filename"
+    exit 1
+fi
+
+if [[ $(command -v locate) ]]; then
+    ## First attempt - using locate
+
+    qmake_list=$(locate bin/qmake)
+    for qmake in $qmake_list; do
+        if findfiles $qmake $1 $2; then
             exit 0
-          fi
         fi
-        ;;
-      file) # file lookup
-        if [ -z $2 ]; then # if no argument specified
-          exit 1 # syntax error
-        fi
-        qt5_file=`find $QT5_DIR/.. -name $2 -type f -print0 -quit 2>/dev/null` # find specified file
-        if [ -n "$qt5_file" ]; then # if found
-          echo -n $qt5_file # output without newline
-          exit 0
-        fi
-        ;;
-      *) # unrecognized command
-        exit 1 # syntax error
-    esac
-  fi
-done
-exit 1 # haven't found anything
+    done
+fi
+
+## Second attempt - using find
+
+export -f findfiles
+export -f qmakedata
+export -f versionmatch
+export -f version2int
+if find -L $CUSTOM_QT5_DIR ~ /opt /usr -name '.*' -prune \
+        -o -name qmake -type f \
+        -executable \
+        -exec /bin/bash -c "findfiles \$0 $1 $2" {} \; -quit; then
+   exit 0;
+fi
+exit 1
