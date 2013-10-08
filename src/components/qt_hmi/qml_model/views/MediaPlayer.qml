@@ -46,6 +46,11 @@ Item {
 
     property alias topOvalButtons: top.children
 
+    signal rewind
+    signal forward
+    signal play
+    signal pause
+
     Item {
         // top 3/4 screen
         id: upperContent
@@ -187,7 +192,6 @@ Item {
 
         Row {
             anchors.centerIn: parent
-
             Image {
                 id: prevButton
                 anchors.verticalCenter: parent.verticalCenter
@@ -203,7 +207,9 @@ Item {
                 }
             }
 
-            PlayPauseButton { }
+            PlayPauseButton {
+                onClicked: { (state == 'Play') ? pause() : play() }
+            }
 
             Image {
                 id: nextButton

@@ -36,7 +36,10 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 
 GeneralView {
+    applicationContext: true
     MediaPlayer {
+        onPlay: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
+        onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         anchors.fill: parent
         albumImage: "../res/album_art.png"
