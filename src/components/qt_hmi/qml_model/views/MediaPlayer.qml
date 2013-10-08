@@ -40,10 +40,11 @@ Item {
 
     property string playerName: ""
     property string albumImage: ""
-
     property string trackNumber: ""
     property string trackName: ""
     property string albumName: ""
+
+    property alias topOvalButtons: top.children
 
     Item {
         // top 3/4 screen

@@ -1,172 +1,69 @@
+/**
+ * @file SDLPlayerView.qml
+ * @brief SDL player screen view.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 
 GeneralView {
-    applicationContext: true
-    Column {
-        spacing: 25
+    MediaPlayer {
+        playerName: "SDL music"
         anchors.fill: parent
-        Row {
-            width: parent.width
-            height: parent.height / 4
-            spacing: 10
-            GridView {
-                width: parent.width
-                cellWidth: width / 4
-                model: ListModel {
-                    ListElement {
-                        name: "SDL Music"
-                        qml: "./views/MusicSourceGridView.qml"
-                    }
-                    ListElement {
-                        name: "SDL Menu"
-                        qml: "./views/AppsMenuGridView.qml"
-                    }
-                    ListElement {
-                        name: "Options"
-                        qml: "./views/SDLPlayerOptionsListView.qml"
-                    }
-                    ListElement {
-                        name: "Browse"
-                        qml: ""
-                    }
-                }
-                delegate: Item {
-                        width: parent.width / 4
-                        LongOvalButton {
-                            text: name
-                            pixelSize: 20
-                            dest: qml
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                }
-            }
-        }
-        Row {
-            spacing: 50
-            width: parent.width
-            height: albumArtImage.height
-            x: 35
-            Column {
-                Image {
-                    id: albumArtImage
-                    source: "../res/album_art.png"
-                }
-            }
-            Column {
-                spacing: 10
-                Row {
-                    Text {
-                        color: "#1d81d5"
-                        text: "Track 13 / 16"
-                        font.pixelSize: 20
-                    }
-                }
-                Row {
-                    Text {
-                        color: "#1d81d5"
-                        text: "Song name"
-                        font.pixelSize: 45
-                        font.bold: true
-                    }
-                }
-                Row {
-                    Text {
-                        color: "#1d81d5"
-                        text: "Album Name"
-                        font.pixelSize: 25
+        albumImage: "../res/album_art.png"
+        trackNumber: "13/16"
+        trackName: "The Dog Days Are Over"
+        albumName: "Florence and the Machine"
 
-                    }
-                }
-            }
-        }
-        Row {
-            width: parent.width
-            height: parent.height / 4
-            x: 35
-            spacing: 10
-            Text {
-                id: songTimeText
-                color: "white"
-                text: "02:36"
-                font.pixelSize: 18
-            }
+        topOvalButtons: [
             Row {
-                width: parent.width - 2 * (spacing + songTimeText.width) - x - 40
-                Rectangle {
-                    y: songTimeText.height / 2 - 1
-                    width: parent.width / 5
-                    height: 2
-                    color: "white"
-                }
-                Rectangle {
-                    y: songTimeText.height / 2 - 1
-                    width: 4 * parent.width / 5
-                    height: 2
-                    color: "#1d81d5"
-                }
-            }
-            Text {
-                color: "#1d81d5"
-                text: "04:23"
-                font.pixelSize: 18
-            }
-        }
-        Item {
-            width: parent.width
-            height: parent.height / 4
-            Row {
-                spacing: 25
-                y: -70
+                anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
-                Image {
-                    id: prevBtnImage
-                    MouseArea {
-                        anchors.fill: parent
-                        onPressed: {
-                            prevBtnImage.source = "../res/buttons/player_prev_pressed_btn.png"
-                        }
-                        onReleased: {
-                            prevBtnImage.source = "../res/buttons/player_prev_btn.png"
-                        }
-                    }
-                    source: "../res/buttons/player_prev_btn.png"
-                    anchors.verticalCenter: parent.verticalCenter
+                spacing: (parent.width - 4 * longOvalButton.width) / 3
+                width: 2 * longOvalButton.width + spacing
+
+                LongOvalButton {
+                    id: longOvalButton
+                    text: "SDL Menu"
+                    pixelSize: 20
+                    dest: "./views/AppsMenuGridView.qml"
                 }
-                Image {
-                    id: playBtnImage
-                    MouseArea {
-                        anchors.fill: parent
-                        onPressed: {
-                            playBtnImage.source = "../res/buttons/player_play_pressed_btn.png"
-                        }
-                        onReleased: {
-                            playBtnImage.source = "../res/buttons/player_play_btn.png"
-                        }
-                        onClicked: {
-                            sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined)
-                        }
-                    }
-                    source: "../res/buttons/player_play_btn.png"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-                Image {
-                    id: nextBtnImage
-                    MouseArea {
-                        anchors.fill: parent
-                        onPressed: {
-                            nextBtnImage.source = "../res/buttons/player_next_pressed_btn.png"
-                        }
-                        onReleased: {
-                            nextBtnImage.source = "../res/buttons/player_next_btn.png"
-                        }
-                    }
-                    source: "../res/buttons/player_next_btn.png"
-                    anchors.verticalCenter: parent.verticalCenter
+                LongOvalButton {
+                    text: "Options"
+                    pixelSize: 20
+                    dest: "./views/SDLPlayerOptionsListView.qml"
                 }
             }
-        }
+
+        ]
     }
 }
