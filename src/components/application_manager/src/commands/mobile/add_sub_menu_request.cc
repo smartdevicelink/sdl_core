@@ -78,8 +78,10 @@ void AddSubMenuRequest::Run() {
 
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
-  msg_params[strings::menu_params][strings::position] =
-      (*message_)[strings::msg_params][strings::position];
+  if ((*message_)[strings::msg_params].keyExists(strings::position)) {
+     msg_params[strings::menu_params][strings::position] =
+         (*message_)[strings::msg_params][strings::position];
+  }
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
