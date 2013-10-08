@@ -58,9 +58,20 @@ PerformInteractionRequest::PerformInteractionRequest(
 PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
-
 void PerformInteractionRequest::onTimer() const{
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimer");
+}
+
+bool PerformInteractionRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  }
+
+  return true;
 }
 
 void PerformInteractionRequest::Run() {
