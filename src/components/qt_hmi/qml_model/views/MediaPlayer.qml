@@ -208,7 +208,7 @@ Item {
             }
 
             PlayPauseButton {
-                onClicked: { (state == 'Play') ? pause() : play() }
+                onClicked: { (state == 'Play') ? play() : pause() }
             }
 
             Image {
