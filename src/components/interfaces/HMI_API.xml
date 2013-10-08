@@ -424,6 +424,7 @@
     <description> Tertiary text for Choice</description>
   </element>
   <element name="timeToDestination"/>
+  <element name="turnText"/>
 </enum>
 
 <enum name="TouchEvent">
