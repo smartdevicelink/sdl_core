@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iomanip>
+
 #include <libusb/libusb.h>
 
 #include "transport_manager/usb/usb_connection.h"
@@ -109,6 +111,17 @@ bool UsbConnection::PostInTransfer() {
 
 void UsbConnection::OnInTransfer(libusb_transfer *transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
+    if (logger_->isTraceEnabled()) {
+      std::ostringstream hexdata;
+      for (int i = 0; i < transfer->actual_length; ++i) {
+        hexdata << " " << std::hex << std::setw(2) << std::setfill('0')
+            << (int) transfer->buffer[i];
+      }
+      LOG4CXX_TRACE(
+          logger_,
+          "USB incoming transfer, size:" << transfer->actual_length << ", data:"
+              << hexdata.str());
+    }
     RawMessageSptr data(
         new protocol_handler::RawMessage(0, 0, in_buffer_,
                                          transfer->actual_length));
