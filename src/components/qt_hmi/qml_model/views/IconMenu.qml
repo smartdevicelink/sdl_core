@@ -161,8 +161,4 @@ GeneralView{
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
         activePage: Math.round(pages * (flicker.contentX / flicker.contentWidth + 0.005))
     }
-    Text {
-        text: flicker.contentX + " " + flicker.width
-        color: "white"
-    }
 }
