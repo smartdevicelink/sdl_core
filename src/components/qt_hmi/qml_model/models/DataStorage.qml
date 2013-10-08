@@ -69,4 +69,9 @@ Item {
     function changeRegistrationTTSVR (language) {
         hmiTTSVRLanguage = language
     }
+
+    NavigationModel {
+        id: navigationModel
+    }
+    property alias navigationModel: navigationModel
 }

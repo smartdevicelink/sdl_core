@@ -78,7 +78,7 @@ Rectangle {
         color: "#00000000"
         anchors.rightMargin: 31
         anchors.leftMargin: 31
-        anchors.bottomMargin: 11
+        anchors.bottomMargin: 10
         anchors.topMargin: 10
         anchors.fill: parent
     }
