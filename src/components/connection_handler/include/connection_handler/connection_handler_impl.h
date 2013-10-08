@@ -62,7 +62,7 @@ namespace connection_handler {
  * \brief SmartDeviceLink connection_handler main class
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
-  public transport_manager::TransportManagerListener,
+  public transport_manager::TransportManagerListenerImpl,
   public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
   public:
     /**

@@ -52,33 +52,39 @@ class TransportManagerListenerImpl : public TransportManagerListener {
   /**
    * @Destructor.
    */
-  virtual ~TransportManagerListenerImpl(){};
+  virtual ~TransportManagerListenerImpl() {
+  }
+  ;
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
    *
    * @param Container that holds information about devices.
    */
-  virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {}
+  virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {
+  }
 
   /**
    * @brief Reaction to the event, when the device is found.
    *
    * @param device_info Variable that hold information about device.
    */
-  virtual void OnDeviceFound(const DeviceInfo& device_info) { }
+  virtual void OnDeviceFound(const DeviceInfo& device_info) {
+  }
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.
    */
-  virtual void OnScanDevicesFinished() { }
+  virtual void OnScanDevicesFinished() {
+  }
 
   /**
    * @brief Reaction to the event, when scanning of devices is failed.
    *
    * @param error Error information about possible reason of scanning of devices failure.
    */
-  virtual void OnScanDevicesFailed(const SearchDeviceError& error) { }
+  virtual void OnScanDevicesFailed(const SearchDeviceError& error) {
+  }
 
   /**
    * @brief Reaction to the event, when connection is established.
@@ -87,7 +93,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param connection_id connection unique identifier.
    */
   virtual void OnConnectionEstablished(const DeviceInfo &device_info,
-                                       const ConnectionUID &connection_id) {}
+                                       const ConnectionUID &connection_id) {
+  }
 
   /**
    * @brief Reaction to the event, when connection to the device is failed.
@@ -96,7 +103,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param error Error information about possible reason of connect failure.
    */
   virtual void OnConnectionFailed(const DeviceInfo &device_info,
-                                  const ConnectError& error) {}
+                                  const ConnectError& error) {
+  }
 
   /**
    * @brief Reaction to the event, when connection is closed.
@@ -104,6 +112,10 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param connection_id Connection unique identifier.
    */
   virtual void OnConnectionClosed(ConnectionUID connection_id) {
+  }
+
+  virtual void OnUnexpectedDisconnect(ConnectionUID connection_id,
+                                      const CommunicationError& error) {
   }
 
   /**
@@ -123,7 +135,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param error Error information about possible reason of lost connection.
    */
   virtual void OnDeviceConnectionLost(const DeviceHandle& device,
-                                      const DisconnectDeviceError& error){  }
+                                      const DisconnectDeviceError& error) {
+  }
 
   /**
    * @brief Reaction to the event, when Disconnect is failed.
@@ -132,7 +145,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param error Error information about possible reason of Disconnect failure.
    */
   virtual void OnDisconnectFailed(const DeviceHandle& device,
-                                  const DisconnectDeviceError& error) {}
+                                  const DisconnectDeviceError& error) {
+  }
 
   /**
    * @brief Reaction to the event, when transport manager received a massage.
@@ -140,7 +154,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    * @param connection_id Connection unique identifier.
    */
-  virtual void OnTMMessageReceived(const RawMessageSptr message) {}
+  virtual void OnTMMessageReceived(const RawMessageSptr message) {
+  }
 
   /**
    * @brief Reaction to the event, when receiving of massage for transport manager is failed.
@@ -149,7 +164,8 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    * @param error Error information about possible reason of failure.
    */
   virtual void OnTMMessageReceiveFailed(ConnectionUID connection_id,
-                                        const DataReceiveError& error){}
+                                        const DataReceiveError& error) {
+  }
 
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
