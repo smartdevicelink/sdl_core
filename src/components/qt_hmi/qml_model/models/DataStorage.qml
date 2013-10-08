@@ -10,6 +10,7 @@ Item {
         id: applicationListModel
     }
 
+    property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property int applicationId
 
     property var currentApplication: applicationContext ?

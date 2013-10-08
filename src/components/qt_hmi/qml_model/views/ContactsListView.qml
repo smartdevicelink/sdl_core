@@ -3,6 +3,7 @@ import "../controls"
 import "../models"
 
 GeneralView {
+
     function setCurrent(firstLetter){
         for(var i = 0; i < contactsListView.count; i ++){
             if(contactsListView.model.get(i).name[0] === firstLetter){
@@ -11,6 +12,8 @@ GeneralView {
             }
         }
     }
+    Component.onCompleted: setCurrent(dataContainer.contactsFirstLetter)
+
     Item {
         anchors.fill: parent
 
@@ -34,7 +37,7 @@ GeneralView {
                 section.property: "name"
                 section.criteria: ViewSection.FirstCharacter
                 section.delegate: Text {
-                    color: "blue"
+                    color: "#1d81d5"
                     font.pixelSize: 20
                     text: section
                 }
