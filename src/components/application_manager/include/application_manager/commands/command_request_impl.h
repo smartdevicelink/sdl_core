@@ -75,6 +75,14 @@ class CommandRequestImpl : public CommandImpl,
    */
   virtual void on_event(const event_engine::Event& event);
 
+  /**
+   * @brief Retrieves request default timeout.
+   * If request has a custom timeout, request_timeout_ should be reassign to it
+   *
+   * @return Request default timeout
+   */
+  inline unsigned int default_timeout() const;
+
   /*
    * @brief Retrieves request ID
    */
@@ -142,10 +150,15 @@ class CommandRequestImpl : public CommandImpl,
 
  protected:
   MessageChaining* msg_chaining_;
+  unsigned int  default_timeout_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
+
+unsigned int CommandRequestImpl::default_timeout() const {
+  return default_timeout_;
+}
 
 int CommandRequestImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
