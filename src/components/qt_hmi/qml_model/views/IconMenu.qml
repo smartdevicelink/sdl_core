@@ -131,7 +131,7 @@ GeneralView{
                                 from: 0; to: 1;
                             }
                         }
-                        Component.onCompleted: { //opacityAnimation.running = true
+                        Component.onCompleted: {
                             lowRowAnimation.start()
                         }
                     }
@@ -141,6 +141,7 @@ GeneralView{
 
         property int snapTo: width / 3
         onMovementEnded: {
+           // pager.activePage = Math.round(pager.pages * flicker.contentX / flicker.contentWidth)
             var rest = flicker.contentX % snapTo
             var time = 0.25
             if (rest > flicker.snapTo / 2) { rest = rest - flicker.snapTo }
@@ -157,7 +158,11 @@ GeneralView{
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 
-        pages: Math.ceil(menuView.countOfUpperRowItems / 3) // 3 items in a row on 1 screen
-        activePage: Math.round(pages * flicker.contentX / flicker.contentWidth)
+        pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
+        activePage: Math.round(pages * (flicker.contentX / flicker.contentWidth + 0.005))
+    }
+    Text {
+        text: flicker.contentX + " " + flicker.width
+        color: "white"
     }
 }

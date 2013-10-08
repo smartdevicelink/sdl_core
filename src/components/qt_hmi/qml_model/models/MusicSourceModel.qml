@@ -46,14 +46,14 @@ ListModel
         qml: "./views/SiriusPlayerView.qml"
     }
     ListElement {
-        title: "BT Audio"
-        icon: "../res/buttons/long_oval_btn.png"
-        qml: "./views/BTPlayerView.qml"
-    }
-    ListElement {
         title: "FM"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/FMPlayerView.qml"
+    }
+    ListElement {
+        title: "BT Audio"
+        icon: "../res/buttons/long_oval_btn.png"
+        qml: "./views/BTPlayerView.qml"
     }
     ListElement {
         title: "CD"
@@ -64,5 +64,15 @@ ListModel
         title: "iPod"
         icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/IPodPlayerView.qml"
+    }
+    ListElement {
+        title: "USB"
+        icon: "../res/buttons/long_oval_btn.png"
+        qml: ""
+    }
+    ListElement {
+        title: "LineIn"
+        icon: "../res/buttons/long_oval_btn.png"
+        qml: ""
     }
 }
