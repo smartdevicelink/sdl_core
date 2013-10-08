@@ -37,7 +37,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from argparse import ArgumentParser
+from ford_xml_parser import FordXmlParser
+from ford_xml_parser import node_name
+from xml.etree import ElementTree
 from os import path
+
+class Impl(FordXmlParser):
+    def convert_to_introspection(self, out_el_tree):
+        for interface_el in self.el_tree.findall('interface'):
+            el = self.create_introspection_iface_el(interface_el)
+            if el is not None:
+                out_el_tree.append(el)
+
 
 arg_parser = ArgumentParser()
 arg_parser.add_argument('--infile', required=True)
@@ -47,11 +58,21 @@ args = arg_parser.parse_args()
 if not path.isdir(args.outdir):
     makedirs(args.outdir)
 
-in_file = open(args.infile, "rb")
 out_file = open(args.outdir + '/' + 'introspection_xml.cc', "w")
 
+in_tree = ElementTree.parse(args.infile)
+in_tree_root = in_tree.getroot()
+out_tree_root = ElementTree.Element('node', attrib={'name':node_name})
+
+impl = Impl(in_tree_root, 'com.ford.hmi.sdl')
+impl.convert_to_introspection(out_tree_root)
+
+introspection_string = '<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">'
+introspection_string += "\n"
+introspection_string += ElementTree.tostring(out_tree_root)
+
 out_file.write("""/**
- * @file message_descriptions_c.cc
+ * @file instrospections_xml.cc
  * @brief D-Bus introspection XML as C-string
  *
  * This file is a part of HMI D-Bus layer.
@@ -91,7 +112,7 @@ out_file.write("""/**
 out_file.write("char introspection_xml[] = {")
 
 cnt = 0
-for char in in_file.read():
+for char in introspection_string:
     if cnt % 12 == 0:
         out_file.write("\n  ")
     else:
