@@ -29,4 +29,26 @@ Item {
             allow: true
         }
     }
+
+    function mixingAudioSupported() {
+        return {
+            attenuatedSupport: true
+        }
+    }
+
+    function allowAllApps() {
+        return {
+            allowed: true
+        }
+    }
+
+    function allowApp(app, appPermissions) {
+        return {
+            allowed: true
+        }
+    }
+
+    function activateApp() {
+
+    }
 }
