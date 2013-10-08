@@ -28,15 +28,24 @@ Rectangle {
 
         Column {
 
+            anchors.fill: parent
             anchors.topMargin: 20
+            anchors.leftMargin: 20
+            spacing: 20
 
             Text {
                 id: appName
+                anchors.horizontalCenter: parent.horizontalCenter
                 color: "white"
                 font.pointSize: 16
+                horizontalAlignment: Text.AlignHCenter
             }
 
             Row {
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 20
 
                 Image {
                     source: "../res/warning.png"
@@ -44,6 +53,8 @@ Rectangle {
 
                 Text {
                     id: alert
+                    width: 200
+                    clip: true
                     color: "white"
                     font.pointSize: 16
                 }
