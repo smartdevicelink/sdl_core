@@ -40,10 +40,16 @@ Item {
 
     property string playerName: ""
     property string albumImage: ""
-
     property string trackNumber: ""
     property string trackName: ""
     property string albumName: ""
+
+    property alias topOvalButtons: top.children
+
+    signal rewind
+    signal forward
+    signal play
+    signal pause
 
     Item {
         // top 3/4 screen
@@ -66,7 +72,7 @@ Item {
                 anchors.top: parent.top
                 text: playerName
                 pixelSize: 20
-                dest: "./views/MusicSourceGridView.qml"
+                dest: "./views/MusicSourceView.qml"
             }
 
             LongOvalButton {
@@ -186,7 +192,6 @@ Item {
 
         Row {
             anchors.centerIn: parent
-
             Image {
                 id: prevButton
                 anchors.verticalCenter: parent.verticalCenter
@@ -202,7 +207,9 @@ Item {
                 }
             }
 
-            PlayPauseButton { }
+            PlayPauseButton {
+                onClicked: { (state == 'Play') ? play() : pause() }
+            }
 
             Image {
                 id: nextButton

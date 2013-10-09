@@ -38,7 +38,11 @@ Row {
     id: pager
     property int pages
     property int activePage: 0
-    spacing: 7
+    property int space
+    property int itemsInRowOnScreen: 3
+
+    spacing: space
+    visible: pages !== 1
 
     Repeater {
         model: pages

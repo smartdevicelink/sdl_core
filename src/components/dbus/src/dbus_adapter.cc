@@ -418,9 +418,9 @@ bool DBusAdapter::SetValue(
   LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name);
   int type = 0;
   void* value = 0;
-  int integerValue = 0;
+  dbus_int32_t integerValue = 0;
   double floatValue = 0;
-  bool booleanValue = false;
+  dbus_bool_t booleanValue = false;
   const char* stringValue;
   switch (rules->type) {
     case ford_message_descriptions::ParameterType::Array:
@@ -632,9 +632,9 @@ bool DBusAdapter::GetValue(
       break;
     case ford_message_descriptions::ParameterType::Boolean:
       if (type == DBUS_TYPE_BOOLEAN) {
-        bool booleanValue;
+        dbus_bool_t booleanValue;
         dbus_message_iter_get_basic(iter, &booleanValue);
-        smart_objects::SmartObject value(booleanValue);
+        smart_objects::SmartObject value(static_cast<bool>(booleanValue));
         param = value;
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");

@@ -1,6 +1,6 @@
 /**
- * @file BTPlayerView.qml
- * @brief FM player screen view.
+ * @file MainMenuView.qml
+ * @brief Main menu screen view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,16 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
-import "../hmi_api/Common.js" as Common
+import "../models"
 
-GeneralView {
-    category: Common.DeactivateReason.AUDIO
-    MediaPlayer {
-	    playerName: "BT Audio"
-        anchors.fill: parent
-	    albumImage: "../res/album_art.png"
-	    trackNumber: "13/16"
-	    trackName: "The Dog Days Are Over"
-	    albumName: "Florence and the Machine"
-	}
+IconMenu {
+    listModel: MainMenuListModel { }
 }

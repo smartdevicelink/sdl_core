@@ -65,7 +65,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: index + 1
                             font.pixelSize: 30
-                            color: "#1d81d5"
+                            color: presetRow.selectedIndex === index ? "black" : "#1d81d5"
                         }
                     }
                     Text {
