@@ -215,6 +215,7 @@ const char reason[] = "reason";
 const char message_text[] = "messageText";
 const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
+const char navi_text[] = "navigationText";
 const char show_strings[] = "showStrings";
 }  // namespace hmi_request
 
