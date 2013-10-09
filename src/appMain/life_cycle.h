@@ -35,11 +35,29 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 
+#include "mobile_message_handler/mobile_message_handler_impl.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "hmi_message_handler/messagebroker_adapter.h"
+#include "application_manager/application_manager_impl.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_handler_impl.h"
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_default.h"
+
+#include "CMessageBroker.hpp"
+#include "mb_tcpserver.hpp"
+#include "system.h"      // cpplint: Include the directory when naming .h files
+
 namespace main_namespace {
 class LifeCycle {
   public:
-    LifeCycle* instance();
+    static LifeCycle* instance();
     bool StartComponents();
+
+    /**
+    * Initialize MessageBroker component
+    * @return true if success otherwise false.
+    */
     bool InitMessageBroker();
     static void StopComponents(int params);
 
@@ -51,7 +69,13 @@ class LifeCycle {
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+    hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
+
     NsMessageBroker::CMessageBroker* message_broker_;
+    System::Thread* mb_thread_;
+    System::Thread* mb_server_thread_;
+    System::Thread* mb_adapter_thread_;
+
     static log4cxx::LoggerPtr logger_;
 };
 }  //  namespace main_namespace

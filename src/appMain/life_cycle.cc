@@ -34,19 +34,25 @@
 
 #include <cstdio>
 #include "./life_cycle.h"
+#include "utils/signals.h"
+#include "config_profile/profile.h"
 
 namespace main_namespace {
-log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("appMain"));
 
-LifeCycle()
+LifeCycle::LifeCycle()
   : transport_manager_(NULL)
   , protocol_handler_(NULL)
   , mmh_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
   , hmi_handler_(NULL)
-  , message_broker_(NULL) {
+  , mb_adapter_(NULL)
+  , message_broker_(NULL)
+  , mb_thread_(NULL)
+  , mb_server_thread_(NULL)
+  , mb_adapter_thread_(NULL) {
 }
 
 LifeCycle* LifeCycle::instance() {
@@ -54,14 +60,148 @@ LifeCycle* LifeCycle::instance() {
   return &instance;
 }
 
+bool LifeCycle::StartComponents() {
+  LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
+  transport_manager_ =
+    transport_manager::TransportManagerDefault::Instance();
+  DCHECK(transport_manager_);
+
+  protocol_handler_ =
+    new protocol_handler::ProtocolHandlerImpl(transport_manager_);
+  DCHECK(protocol_handler_);
+
+  mmh_ =
+    mobile_message_handler::MobileMessageHandlerImpl::instance();
+  DCHECK(mmh_);
+
+  connection_handler_ =
+    connection_handler::ConnectionHandlerImpl::instance();
+  DCHECK(connection_handler_);
+
+  app_manager_ =
+    application_manager::ApplicationManagerImpl::instance();
+  DCHECK(app_manager_);
+
+  hmi_handler_ =
+    hmi_message_handler::HMIMessageHandlerImpl::instance();
+  DCHECK(hmi_handler_)
+
+  transport_manager_->SetProtocolHandler(protocol_handler_);
+  transport_manager_->AddEventListener(protocol_handler_);
+  transport_manager_->AddEventListener(connection_handler_);
+
+  mmh_->set_protocol_handler(protocol_handler_);
+  hmi_handler_->set_message_observer(app_manager_);
+
+  protocol_handler_->set_session_observer(connection_handler_);
+  protocol_handler_->set_protocol_observer(mmh_);
+
+  connection_handler_->set_transport_manager(transport_manager_);
+  connection_handler_->set_connection_handler_observer(app_manager_);
+
+  app_manager_->set_mobile_message_handler(mmh_);
+  mmh_->AddMobileMessageListener(app_manager_);
+  app_manager_->set_connection_handler(connection_handler_);
+  app_manager_->set_hmi_message_handler(hmi_handler_);
+
+  return true;
+}
+
+bool LifeCycle::InitMessageBroker() {
+  message_broker_ =
+    NsMessageBroker::CMessageBroker::getInstance();
+  if (!message_broker_) {
+    LOG4CXX_INFO(logger_, " Wrong pMessageBroker pointer!");
+    return false;
+  }
+
+  NsMessageBroker::TcpServer* message_broker_server =
+    new NsMessageBroker::TcpServer(
+    profile::Profile::instance()->server_address(),
+    profile::Profile::instance()->server_port(),
+    message_broker_);
+  if (!message_broker_server) {
+    LOG4CXX_INFO(logger_, " Wrong pJSONRPC20Server pointer!");
+    return false;
+  }
+  message_broker_->startMessageBroker(message_broker_server);
+  if (!networking::init()) {
+    LOG4CXX_INFO(logger_, " Networking initialization failed!");
+    return false;
+  }
+
+  if (!message_broker_server->Bind()) {
+    LOG4CXX_FATAL(logger_, "Bind failed!");
+    return false;
+  } else {
+    LOG4CXX_INFO(logger_, "Bind successful!");
+  }
+
+  if (!message_broker_server->Listen()) {
+    LOG4CXX_FATAL(logger_, "Listen failed!");
+    return false;
+  } else {
+    LOG4CXX_INFO(logger_, " Listen successful!");
+  }
+
+  mb_adapter_ =
+    new hmi_message_handler::MessageBrokerAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    mb_adapter_);
+  if (!mb_adapter_->Connect()) {
+    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
+  mb_thread_ = new System::Thread(
+    new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
+      *message_broker_, &NsMessageBroker::CMessageBroker::MethodForThread,
+      NULL));
+  mb_thread_->Start(false);
+
+  LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
+  mb_server_thread_  = new System::Thread(
+    new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
+      *message_broker_server, &NsMessageBroker::TcpServer::MethodForThread,
+      NULL));
+  mb_server_thread_->Start(false);
+
+  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
+  mb_adapter_thread_  = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+      *mb_adapter_,
+      &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
+      NULL));
+  mb_adapter_thread_->Start(false);
+
+  mb_adapter_->registerController();
+  mb_adapter_->SubscribeTo();
+
+  return true;
+}
+
 void LifeCycle::StopComponents(int params) {
   printf("\n\n\n\n\t\t\t\t%s\n\n\n\n\n", "BARBARA STRAIZANT");
-  delete app_manager_;
-  delete connection_handler_;
-  delete mmh_;
-  delete protocol_handler_;
-  delete transport_manager_;
-  delete hmi_handler_;
-  delete message_broker_;
+  /*delete instance()->app_manager_;
+  delete instance()->connection_handler_;
+  delete instance()->mmh_;
+  delete instance()->protocol_handler_;*/
+  //delete instance()->transport_manager_;
+  delete instance()->hmi_handler_;
+
+  instance()->mb_adapter_thread_->Stop();
+  instance()->mb_adapter_thread_->Join();
+  //delete instance()->mb_adapter_;
+  LOG4CXX_INFO(logger_, "Stopping message broker.");
+  instance()->mb_thread_->Stop();
+  instance()->mb_thread_->Join();
+  instance()->mb_server_thread_->Stop();
+  instance()->mb_server_thread_->Join();
+  /*delete instance()->message_broker_;*/
+
+  //utils::ForwardSignal();
 }
 }  //  namespace main_namespace

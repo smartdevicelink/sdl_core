@@ -42,28 +42,28 @@
 namespace audio_manager {
 
 class A2DPSourcePlayerThread : public threads::ThreadDelegate {
- public:
-  explicit A2DPSourcePlayerThread(const std::string& device);
+  public:
+    explicit A2DPSourcePlayerThread(const std::string& device);
 
-  void threadMain();
+    void threadMain();
 
-  void exitThreadMain();
+    bool exitThreadMain();
 
- private:
-  static log4cxx::LoggerPtr logger_;
+  private:
+    static log4cxx::LoggerPtr logger_;
 
-  // The Sample format to use
-  static const pa_sample_spec sSampleFormat_;
+    // The Sample format to use
+    static const pa_sample_spec sSampleFormat_;
 
-  const int BUFSIZE_;
-  pa_simple *s_in, *s_out;
-  std::string device_;
-  bool shouldBeStoped_;
-  sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+    const int BUFSIZE_;
+    pa_simple* s_in, *s_out;
+    std::string device_;
+    bool shouldBeStoped_;
+    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
-  void freeStreams();
+    void freeStreams();
 
-  DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
+    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
 

@@ -35,7 +35,7 @@
 namespace audio_manager {
 
 log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
+      log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
@@ -50,7 +50,7 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread()
 }
 
 void FromMicToFileRecorderThread::setOutputFileName(
-    const std::string& outputFileName) {
+  const std::string& outputFileName) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   outputFileName_ = outputFileName;
@@ -91,44 +91,50 @@ void FromMicToFileRecorderThread::threadMain() {
 
   initArgs();
 
-  GstElement *pipeline;
-  GstElement *alsasrc, *panorama, *wavenc, *filesink;
-  GstBus *bus;
+  GstElement* pipeline;
+  GstElement* alsasrc, *panorama, *wavenc, *filesink;
+  GstBus* bus;
 
-  gchar *device = "hw:0,0";
-  gchar *outfile = NULL;
+  gchar* device = "hw:0,0";
+  gchar* outfile = NULL;
   gint duration = -1;
-  GOptionContext *context = NULL;
-  GError *err = NULL;
+  GOptionContext* context = NULL;
+  GError* err = NULL;
   GOptionEntry entries[] = {
-      {   "device", 'd', 0, G_OPTION_ARG_FILENAME, &device,
-          "device file (Default: hw:0,0)", "SRC"
-      },
-      {   "output", 'o', 0, G_OPTION_ARG_FILENAME, &outfile,
-          "save output of the stream to DEST", "DEST"
-      },
-      {   "duration", 't', 0, G_OPTION_ARG_INT, &duration,
-          "length of time in seconds to capture", "INT"
-      },
-      {NULL}
+    {
+      "device", 'd', 0, G_OPTION_ARG_FILENAME, &device,
+      "device file (Default: hw:0,0)", "SRC"
+    },
+    {
+      "output", 'o', 0, G_OPTION_ARG_FILENAME, &outfile,
+      "save output of the stream to DEST", "DEST"
+    },
+    {
+      "duration", 't', 0, G_OPTION_ARG_INT, &duration,
+      "length of time in seconds to capture", "INT"
+    },
+    {NULL}
   };
 
   pthread_t wait;
   int retcode;
 
-  if (!g_thread_supported())
-      g_thread_init(NULL);
+  if (!g_thread_supported()) {
+    g_thread_init(NULL);
+  }
 
   // Parse the arguments
   context = g_option_context_new("-- M-AUDIO RAW");
   g_option_context_add_main_entries(context, entries, NULL);
   g_option_context_add_group(context, gst_init_get_option_group());
-  if (!g_option_context_parse(context, &argc_, &argv_, &err))
-      g_error("%s\n", err->message);
+  if (!g_option_context_parse(context, &argc_, &argv_, &err)) {
+    g_error("%s\n", err->message);
+  }
 
   // Check for proper arguments
-  if (outfile == NULL)
-      g_error("Must supply destination (-d FILE)\n");
+  if (outfile == NULL) {
+    g_error("Must supply destination (-d FILE)\n");
+  }
 
   LOG4CXX_TRACE(logger_, "Reading from device: " << device);
   LOG4CXX_TRACE(logger_, "Saving pipeline output to: " << outfile);
@@ -142,8 +148,8 @@ void FromMicToFileRecorderThread::threadMain() {
   // Set up error handling
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
   gst_bus_add_watch(bus,
-            reinterpret_cast<int (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
-            NULL);
+                    reinterpret_cast<int (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
+                    NULL);
   gst_object_unref(bus);
 
   // Create all of the elements to be added to the pipeline
@@ -153,8 +159,9 @@ void FromMicToFileRecorderThread::threadMain() {
   filesink = gst_element_factory_make("filesink", "filesink0");
 
   // Assert that all the elements were created
-  if (!alsasrc || !panorama || !wavenc || !filesink)
-      g_error("Failed creating one or more of the pipeline elements.\n");
+  if (!alsasrc || !panorama || !wavenc || !filesink) {
+    g_error("Failed creating one or more of the pipeline elements.\n");
+  }
 
   // Set input and output destinations
   g_object_set(G_OBJECT(alsasrc), "device", device, NULL);
@@ -192,9 +199,9 @@ void FromMicToFileRecorderThread::threadMain() {
     timeout.duration = duration;
 
     sleepThread_ = new threads::Thread("SleepThread"
-              , new SleepThreadDelegate(timeout));
+                                       , new SleepThreadDelegate(timeout));
 
-    if(NULL != sleepThread_) {
+    if (NULL != sleepThread_) {
       sleepThread_->start();
     }
   }
@@ -203,10 +210,10 @@ void FromMicToFileRecorderThread::threadMain() {
 
   g_main_loop_run(loop);
 
-  gst_element_set_state (pipeline, GST_STATE_NULL);
+  gst_element_set_state(pipeline, GST_STATE_NULL);
 
   LOG4CXX_TRACE(logger_, "Deleting pipeline\n");
-  gst_object_unref(GST_OBJECT (pipeline));
+  gst_object_unref(GST_OBJECT(pipeline));
   g_main_loop_unref(loop);
 
   loop = NULL;
@@ -222,24 +229,24 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
 
   sleep(timeout_.duration);
 
-  if(NULL != loop) {
-    if(g_main_loop_is_running(loop)) {
+  if (NULL != loop) {
+    if (g_main_loop_is_running(loop)) {
       gst_element_send_event(timeout_.pipeline, gst_event_new_eos());
     }
   }
 }
 
-void FromMicToFileRecorderThread::exitThreadMain() {
+bool FromMicToFileRecorderThread::exitThreadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if(NULL != loop) {
-    if(g_main_loop_is_running(loop)) {
+  if (NULL != loop) {
+    if (g_main_loop_is_running(loop)) {
       LOG4CXX_TRACE(logger_, "Quit loop\n");
       g_main_loop_quit(loop);
     }
   }
 
-  if(NULL != sleepThread_) {
+  if (NULL != sleepThread_) {
     LOG4CXX_TRACE(logger_, "Stop sleep thread\n");
     sleepThread_->stop();
     delete sleepThread_;
@@ -250,6 +257,8 @@ void FromMicToFileRecorderThread::exitThreadMain() {
   stopFlagMutex_.lock();
   shouldBeStoped_ = true;
   stopFlagMutex_.unlock();
+
+  return true;
 }
 
 }  // namespace audio_manager

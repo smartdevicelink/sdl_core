@@ -51,14 +51,14 @@ namespace audio_manager {
 
 const int AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("AudioPassThruThread"));
+      log4cxx::Logger::getLogger("AudioPassThruThread"));
 
 AudioStreamSenderThread::AudioStreamSenderThread(
-    const std::string fileName, unsigned int session_key,
-    unsigned int correlation_id)
-    : session_key_(session_key),
-      correlation_id_(correlation_id),
-      fileName_(fileName) {
+  const std::string fileName, unsigned int session_key,
+  unsigned int correlation_id)
+  : session_key_(session_key),
+    correlation_id_(correlation_id),
+    fileName_(fileName) {
   LOG4CXX_TRACE_ENTER(logger_);
   stopFlagMutex_.init();
 }
@@ -82,7 +82,7 @@ void AudioStreamSenderThread::threadMain() {
     stopFlagMutex_.unlock();
 
     if (shouldBeStoped) {
-       break;
+      break;
     }
 
     sendAudioChunkToMobile();
@@ -92,7 +92,7 @@ void AudioStreamSenderThread::threadMain() {
     stopFlagMutex_.unlock();
 
     if (shouldBeStoped) {
-       break;
+      break;
     }
 
   }
@@ -129,18 +129,19 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     offset_ = offset_ + to - from;
 
     application_manager::ApplicationManagerImpl::instance()->
-        SendAudioPassThroughNotification(session_key_, correlation_id_,
-                                         std::vector<unsigned char>(from, to));
-     binaryData.clear();
-   }
+    SendAudioPassThroughNotification(session_key_, correlation_id_,
+                                     std::vector<unsigned char>(from, to));
+    binaryData.clear();
+  }
 }
 
-void AudioStreamSenderThread::exitThreadMain() {
+bool AudioStreamSenderThread::exitThreadMain() {
   LOG4CXX_INFO(logger_, "AudioStreamSenderThread::exitThreadMain");
 
   stopFlagMutex_.lock();
   shouldBeStoped_ = true;
   stopFlagMutex_.unlock();
+  return true;
 }
 
 unsigned int AudioStreamSenderThread::session_key() const {

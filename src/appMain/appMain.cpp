@@ -54,19 +54,8 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#include "mobile_message_handler/mobile_message_handler_impl.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "hmi_message_handler/messagebroker_adapter.h"
-#include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_default.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
-
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
 #include "networking.h"  // cpplint: Include the directory when naming .h files
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
@@ -81,89 +70,6 @@ namespace {
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
-
-/**
- * Initialize MessageBroker component
- * @return true if success otherwise false.
- */
-bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
-log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("appMain"));
-
-NsMessageBroker::CMessageBroker* message_broker =
-  NsMessageBroker::CMessageBroker::getInstance();
-if (!message_broker) {
-  LOG4CXX_INFO(logger, " Wrong pMessageBroker pointer!");
-  return false;
-}
-
-NsMessageBroker::TcpServer* message_broker_server =
-  new NsMessageBroker::TcpServer(
-  profile::Profile::instance()->server_address(),
-  profile::Profile::instance()->server_port(),
-  message_broker);
-if (!message_broker_server) {
-  LOG4CXX_INFO(logger, " Wrong pJSONRPC20Server pointer!");
-  return false;
-}
-message_broker->startMessageBroker(message_broker_server);
-if (!networking::init()) {
-  LOG4CXX_INFO(logger, " Networking initialization failed!");
-  return false;
-}
-
-if (!message_broker_server->Bind()) {
-  LOG4CXX_FATAL(logger, "Bind failed!");
-  return false;
-} else {
-  LOG4CXX_INFO(logger, "Bind successful!");
-}
-
-if (!message_broker_server->Listen()) {
-  LOG4CXX_FATAL(logger, "Listen failed!");
-  return false;
-} else {
-  LOG4CXX_INFO(logger, " Listen successful!");
-}
-
-hmi_message_handler::MessageBrokerAdapter* mb_adapter =
-  new hmi_message_handler::MessageBrokerAdapter(
-  hmi_message_handler::HMIMessageHandlerImpl::instance());
-
-hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-  mb_adapter);
-if (!mb_adapter->Connect()) {
-  LOG4CXX_INFO(logger, "Cannot connect to remote peer!");
-  return false;
-}
-
-LOG4CXX_INFO(logger, "Start CMessageBroker thread!");
-System::Thread* th1 = new System::Thread(
-  new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
-    *message_broker, &NsMessageBroker::CMessageBroker::MethodForThread,
-    NULL));
-th1->Start(false);
-
-LOG4CXX_INFO(logger, "Start MessageBroker TCP server thread!");
-System::Thread* th2 = new System::Thread(
-  new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
-    *message_broker_server, &NsMessageBroker::TcpServer::MethodForThread,
-    NULL));
-th2->Start(false);
-
-LOG4CXX_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-System::Thread* th3 = new System::Thread(
-  new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-    *mb_adapter,
-    &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
-    NULL));
-th3->Start(false);
-
-mb_adapter->registerController();
-mb_adapter->SubscribeTo();
-
-return true;
-}
 
 /**
  * Initialize HTML based HMI.
@@ -328,52 +234,12 @@ int main(int argc, char** argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  ::transport_manager::TransportManager* transport_manager =
-    ::transport_manager::TransportManagerDefault::Instance();
-  DCHECK(transport_manager);
-
-  protocol_handler::ProtocolHandlerImpl* protocol_handler =
-    new protocol_handler::ProtocolHandlerImpl(transport_manager);
-  DCHECK(protocol_handler);
-
-  mobile_message_handler::MobileMessageHandlerImpl* mmh =
-    mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh);
-
-  connection_handler::ConnectionHandlerImpl* connection_handler =
-    connection_handler::ConnectionHandlerImpl::instance();
-  DCHECK(connection_handler);
-
-  application_manager::ApplicationManagerImpl* app_manager =
-    application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager);
-
-  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler =
-    hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler)
-
-  transport_manager->SetProtocolHandler(protocol_handler);
-  transport_manager->AddEventListener(protocol_handler);
-  transport_manager->AddEventListener(connection_handler);
-
-  mmh->set_protocol_handler(protocol_handler);
-  hmi_handler->set_message_observer(app_manager);
-
-  protocol_handler->set_session_observer(connection_handler);
-  protocol_handler->set_protocol_observer(mmh);
-
-  connection_handler->set_transport_manager(transport_manager);
-  connection_handler->set_connection_handler_observer(app_manager);
-
-  app_manager->set_mobile_message_handler(mmh);
-  mmh->AddMobileMessageListener(app_manager);
-  app_manager->set_connection_handler(connection_handler);
-  app_manager->set_hmi_message_handler(hmi_handler);
+  main_namespace::LifeCycle::instance()->StartComponents();
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!InitMessageBroker()) {
+  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");

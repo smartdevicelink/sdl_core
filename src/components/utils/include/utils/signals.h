@@ -36,8 +36,8 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
 
 namespace utils {
-bool SubscribeToTerminateSignal();
 bool SubscribeToTerminateSignal(void (*func)(int p));
+void ForwardSignal();
 }  //  namespace utils
 
 #endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

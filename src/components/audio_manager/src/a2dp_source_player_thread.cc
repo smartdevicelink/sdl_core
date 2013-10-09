@@ -37,19 +37,20 @@
 namespace audio_manager {
 
 log4cxx::LoggerPtr A2DPSourcePlayerThread::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("A2DPSourcePlayerThread"));
+      log4cxx::Logger::getLogger("A2DPSourcePlayerThread"));
 
 const pa_sample_spec A2DPSourcePlayerThread::
-      sSampleFormat_ = {
-      /*format*/    PA_SAMPLE_S16LE,
-      /*rate*/      44100,
-      /*channels*/  2 };
+sSampleFormat_ = {
+  /*format*/    PA_SAMPLE_S16LE,
+  /*rate*/      44100,
+  /*channels*/  2
+};
 
 A2DPSourcePlayerThread::A2DPSourcePlayerThread(
-    const std::string& device)
-    : threads::ThreadDelegate(),
-      device_(device),
-      BUFSIZE_(32) {
+  const std::string& device)
+  : threads::ThreadDelegate(),
+    device_(device),
+    BUFSIZE_(32) {
   stopFlagMutex_.init();
 }
 
@@ -64,10 +65,11 @@ void A2DPSourcePlayerThread::freeStreams() {
   }
 }
 
-void A2DPSourcePlayerThread::exitThreadMain() {
+bool A2DPSourcePlayerThread::exitThreadMain() {
   stopFlagMutex_.lock();
   shouldBeStoped_ = true;
   stopFlagMutex_.unlock();
+  return true;
 }
 
 void A2DPSourcePlayerThread::threadMain() {
@@ -79,7 +81,7 @@ void A2DPSourcePlayerThread::threadMain() {
 
   int error;
 
-  const char * a2dpSource = device_.c_str();
+  const char* a2dpSource = device_.c_str();
 
   LOG4CXX_DEBUG(logger_, device_);
 
@@ -87,7 +89,7 @@ void A2DPSourcePlayerThread::threadMain() {
 
   /* Create a new playback stream */
   if (!(s_out = pa_simple_new(NULL, "AudioManager", PA_STREAM_PLAYBACK, NULL,
-                          "playback", &sSampleFormat_, NULL, NULL, &error))) {
+                              "playback", &sSampleFormat_, NULL, NULL, &error))) {
     LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;
@@ -108,15 +110,15 @@ void A2DPSourcePlayerThread::threadMain() {
 
     pa_usec_t latency;
 
-    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t) -1) {
+    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t) - 1) {
       LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
-                   << pa_strerror(error));
+                    << pa_strerror(error));
       break;
     }
 
     // LOG4CXX_INFO(logger_, "In: " << static_cast<float>(latency));
 
-    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t) -1) {
+    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t) - 1) {
       LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
                     << pa_strerror(error));
       break;

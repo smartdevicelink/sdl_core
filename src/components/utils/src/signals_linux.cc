@@ -36,22 +36,6 @@
 
 namespace utils {
 
-namespace {
-void terminate_handler(int param) {
-  printf("\n\n\n\n\t\t\t\t%s\n\n\n\n\n", "BARBARA STRAIZANT");
-}
-}  //  namespace
-
-bool SubscribeToTerminateSignal() {
-  printf("%s\n", "SubscribeToTerminateSignal");
-  void (*prev_func)(int p);
-
-  prev_func = signal(SIGABRT, terminate_handler);
-  prev_func = signal(SIGINT, terminate_handler);
-
-  return true;
-}
-
 bool SubscribeToTerminateSignal(void (*func)(int p)) {
   printf("%s\n", "SubscribeToTerminateSignal");
   void (*prev_func)(int p);
@@ -60,4 +44,12 @@ bool SubscribeToTerminateSignal(void (*func)(int p)) {
   prev_func = signal(SIGINT, func);
   return true;
 }
+
+void ForwardSignal() {
+  printf("%s\n", "ForwardSignal");
+  int signal_id = SIGINT;
+  signal(signal_id, SIG_DFL);
+  raise(signal_id);
+}
+
 }  //  namespace utils
