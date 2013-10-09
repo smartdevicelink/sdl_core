@@ -124,68 +124,11 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
 
 void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
   // TODO(KKolodiy): implement
-//  if (conn_ == NULL) {
-//    LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
-//    return;
-//  }
-//
-//  DBusMessage *msg;
-//  // TODO(KKolodiy): pop msg from something
-//
-//  std::string interface = dbus_message_get_interface(msg);
-//  std::string method; // TODO(KKolodiy): where get name of method?
-//
-//  MessageName name(interface, method);
-//  MessageId m_id = schema_.getMessageId(name);
-//  if (m_id == hmi_apis::FunctionID::INVALID_ENUM) {
-//    LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
-//    return;
-//  }
-//
-//  DBusMessage* reply;
-//
-//  dbus_uint32_t serial = id;
-//  char* param;
-//
-//  reply = dbus_message_new_method_return(msg);
-//
-//  const ListArgs& args = schema_.getListArgs(m_id,
-//                                             hmi_apis::messageType::response);
-//  if (!SetArguments(reply, args, obj)) {
-//    LOG4CXX_ERROR(logger_, "DBus: Failed return method (Signature is wrong)");
-//    dbus_message_unref(msg);
-//    return;
-//  }
-//
-//  if (!dbus_connection_send(conn_, reply, &serial)) {
-//    LOG4CXX_ERROR(logger_, "DBus: Failed return method (Can't send message)");
-//    dbus_message_unref(msg);
-//    return;
-//  }
-//  dbus_connection_flush(conn_);
-//
-//  dbus_message_unref(reply);
-//  dbus_message_unref(msg);
 }
 
 void DBusAdapter::Error(uint id, const std::string& name,
                         const std::string& description) {
   // TODO(KKolodiy): implement
-//  DBusMessage *msg;
-//  // TODO(KKolodiy): pop msg from something
-//
-//  DBusMessage *error;
-//  dbus_uint32_t serial = id;
-//  error = dbus_message_new_error(msg, name.c_str(), description.c_str());
-//
-//  if (!dbus_connection_send(conn_, error, &serial)) {
-//    LOG4CXX_ERROR(logger_, "DBus: Failed send error (Can't send message)");
-//    return;
-//  }
-//  dbus_connection_flush(conn_);
-//
-//  dbus_message_unref(error);
-//  dbus_message_unref(msg);
 }
 
 void DBusAdapter::MethodCall(uint id, const MessageId func_id,
@@ -292,7 +235,7 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
 
 bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
                                       smart_objects::SmartObject& obj) {
-  dbus_int32_t reply_serial = dbus_message_get_reply_serial(msg);
+  dbus_uint32_t reply_serial = dbus_message_get_reply_serial(msg);
   std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
   if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
@@ -315,7 +258,7 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
 
 bool DBusAdapter::ProcessError(DBusMessage* msg,
                                smart_objects::SmartObject& obj) {
-  dbus_int32_t reply_serial = dbus_message_get_reply_serial(msg);
+  dbus_uint32_t reply_serial = dbus_message_get_reply_serial(msg);
   std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
   if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
     LOG4CXX_ERROR(logger_, "DBus: Invalid name method");
