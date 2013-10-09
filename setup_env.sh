@@ -77,6 +77,7 @@ AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
+BLUEZ_TOOLS="bluez-tools"
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -177,6 +178,10 @@ if $NEED_QT5_INSTALL; then
   echo $OK
 
 fi
+
+echo "Installing bluez tools"
+apt-install ${BLUEZ_TOOLS}
+echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 

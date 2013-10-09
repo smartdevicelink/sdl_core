@@ -59,13 +59,14 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
     const transport_adapter::TransportAdapter *transport_adapter) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
-      *it, "", 0, RawMessageSptr(), new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE, *it, "", 0,
+      RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -75,15 +76,31 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     const SearchDeviceError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   SearchDeviceError *err = new SearchDeviceError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
-      *it, "", 0, RawMessageSptr(),
-      err);
+      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL, *it, "", 0,
+      RawMessageSptr(), err);
+
+  transport_manager_impl_->ReceiveEventFromDevice(event);
+}
+
+void TransportAdapterListenerImpl::OnDeviceListUpdated(
+    const TransportAdapter *transport_adapter) {
+  AdapterIterator it;
+  if (!FindSharedPtr(transport_adapter, it)) {
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
+    return;
+  }
+
+  TransportAdapterEvent event(
+      TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED, *it,
+      "", 0, RawMessageSptr(), NULL);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -93,14 +110,14 @@ void TransportAdapterListenerImpl::OnConnectDone(
     const ApplicationHandle& application_id) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
-      *it, device, application_id,
-      RawMessageSptr(), new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE, *it, device,
+      application_id, RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -110,15 +127,15 @@ void TransportAdapterListenerImpl::OnConnectFailed(
     const ApplicationHandle& app_id, const ConnectError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   ConnectError *err = new ConnectError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-      *it, device, app_id, RawMessageSptr(),
-      err);
+      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL, *it, device,
+      app_id, RawMessageSptr(), err);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -128,14 +145,14 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
     const ApplicationHandle& app_id) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-      *it, device, app_id, RawMessageSptr(),
-      new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE, *it,
+      device, app_id, RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -145,15 +162,15 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
     const ApplicationHandle& app_id, const DisconnectError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   DisconnectError *err = new DisconnectError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-      *it, device, app_id, RawMessageSptr(),
-      err);
+      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL, *it,
+      device, app_id, RawMessageSptr(), err);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -174,14 +191,14 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
     const ApplicationHandle& app_id, const RawMessageSptr data_container) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-      *it, device, app_id, data_container,
-      new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE, *it,
+      device, app_id, data_container, new BaseError());
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -193,15 +210,15 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
     const DataReceiveError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   DataReceiveError *err = new DataReceiveError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
-      *it, device, app_id, RawMessageSptr(),
-      err);
+      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL, *it,
+      device, app_id, RawMessageSptr(), err);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -211,14 +228,14 @@ void TransportAdapterListenerImpl::OnDataSendDone(
     const ApplicationHandle& app_id, const RawMessageSptr data_container) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
-      *it, device, app_id, data_container,
-      new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE, *it, device,
+      app_id, data_container, new BaseError());
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
 
@@ -228,15 +245,15 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
     const DataSendError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   DataSendError *err = new DataSendError(error);
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
-      *it, device, app_id, data_container,
-      err);
+      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL, *it, device,
+      app_id, data_container, err);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -252,14 +269,14 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     const CommunicationError& error) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
-      *it, device, application, RawMessageSptr(),
-      nullptr);
+      *it, device, application, RawMessageSptr(), nullptr);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -269,14 +286,14 @@ void TransportAdapterListenerImpl::OnCommunicationError(
     const ApplicationHandle& app_id) {
   AdapterIterator it;
   if (!FindSharedPtr(transport_adapter, it)) {
-    LOG4CXX_ERROR(logger_, "Can't find device adapter " << transport_adapter);
+    LOG4CXX_ERROR(logger_,
+                  "Can't find transport adapter " << transport_adapter);
     return;
   }
 
   TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-      *it, device, app_id, RawMessageSptr(),
-      new BaseError());
+      TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR, *it,
+      device, app_id, RawMessageSptr(), new BaseError());
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }

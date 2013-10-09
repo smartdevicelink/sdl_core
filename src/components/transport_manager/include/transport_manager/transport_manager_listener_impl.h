@@ -69,11 +69,6 @@ class TransportManagerListenerImpl : public TransportManagerListener {
   virtual void OnDeviceFound(const DeviceInfo& device_info) { }
 
   /**
-   * @brief Reaction to the event, when no device is found.
-   */
-  virtual void OnNoDeviceFound() { }
-
-  /**
    * @brief Reaction to the event, when scanning of devices is finished.
    */
   virtual void OnScanDevicesFinished() { }

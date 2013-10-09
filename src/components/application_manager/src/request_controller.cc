@@ -31,7 +31,7 @@
 */
 
 #include "utils/logger.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/request_controller.h"
 
@@ -63,20 +63,17 @@ void RequestController::addRequest(const Request& request) {
   list_mutex_.lock();
   request_list_.push_back(request);
 
-  unsigned int default_timeout =
-      profile::Profile::instance()->default_timeout();
-
-  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-               << default_timeout);
-
   const commands::CommandRequestImpl* request_impl =
       (static_cast<commands::CommandRequestImpl*>(&(*request)));
+
+  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+               << request_impl->default_timeout());
 
   watchdog_->addRequest(request_watchdog::RequestInfo(
       request_impl->function_id(),
       request_impl->connection_key(),
       request_impl->correlation_id(),
-      default_timeout));
+      request_impl->default_timeout()));
 
   LOG4CXX_INFO(logger_, "Added request to watchdog.");
 
@@ -109,23 +106,25 @@ void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
 
   list_mutex_.lock();
 
+  const commands::CommandRequestImpl* request_impl = NULL;
   std::list<Request>::iterator it = request_list_.begin();
   for (; request_list_.end() != it; ++it) {
-    const commands::CommandRequestImpl* request_impl =
-        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
-
+    request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
     if (request_impl->correlation_id() == info.correlationID_ &&
         request_impl->connection_key() == info.connectionID_) {
-
-      request_impl->onTimeOut();
-      watchdog_->removeRequest(info.connectionID_, info.correlationID_);
-      request_list_.erase(it);
+      LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_ <<
+                   " of application " << info.connectionID_ << " expired");
       break;
     }
   }
 
   list_mutex_.unlock();
+
+  if (request_impl) {
+    request_impl->onTimeOut();
+  }
 }
+
 
 }  //  namespace request_controller
 

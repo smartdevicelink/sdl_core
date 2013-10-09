@@ -44,7 +44,6 @@ include_directories (
   ../components/mobile_message_handler/include
   ../components/application_manager/include
   ../components/formatters/include
-  ../components/AppMgr/include
   ../components/transport_manager/include
   ../components/config_profile/include
   ../components/utils/include/

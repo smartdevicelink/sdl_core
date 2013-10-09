@@ -43,6 +43,7 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
+#include "utils/synchronisation_primitives.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 
 namespace transport_manager {
@@ -58,8 +59,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   /**
    * @brief Constructor.
+   * @param controller Transport adapter controller
+   * @param auto_repeat_search true - autorepeated or continous device search, false - search on demand
+   * @param repeat_search_pause_sec - pause between device searches, 0 means continous search
    */
-  BluetoothDeviceScanner(TransportAdapterController* controller);
+  BluetoothDeviceScanner(TransportAdapterController* controller,
+                         bool auto_repeat_search, int repeat_search_pause_sec);
 
   /**
    * @brief Destructor.
@@ -80,12 +85,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
   virtual TransportAdapter::Error Init();
 
   /**
-   * @brief
+   * @brief Terminates device scanner thread
    */
   virtual void Terminate();
 
   /**
-   * @brief
+   * @brief Request device search
    *
    * @return Error information about reason of Scan failure.
    */
@@ -102,10 +107,46 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   typedef std::vector<uint8_t> RfcommChannelVector;
 
-  bool WaitForDeviceScanRequest();
-  RfcommChannelVector DiscoverSmartDeviceLinkRFCOMMChannels(
-      const bdaddr_t& device_address);
-  SearchDeviceError* DoInquiry(DeviceVector* discovered_devices);
+  /**
+   * @brief Waits for external scan request or time out for repeated search or terminate request
+   */
+  void TimedWaitForDeviceScanRequest();
+
+  /**
+   * @brief Finds RFCOMM-channels of SDL enabled applications for set of devices
+   * @param device_addresses Bluetooth addresses to search on
+   * @return List of RFCOMM-channels lists
+   */
+  std::vector<RfcommChannelVector> DiscoverSmartDeviceLinkRFCOMMChannels(
+      const std::vector<bdaddr_t>& device_addresses);
+
+  /**
+   * @brief Finds RFCOMM-channels of SDL enabled applications for given device
+   * @param[out] discovered List of RFCOMM-channels to fill
+   * @return true - if search was OK, false if it failed
+   */
+  bool DiscoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t& device_address,
+                                             RfcommChannelVector* discovered);
+
+  /**
+   * @brief Summarizes the total list of devices (paired and scanned) and notifies controller
+   */
+  void UpdateTotalDeviceList();
+
+  /**
+   * @brief Performs search of SDL-enabled devices
+   */
+  void DoInquiry();
+
+  /**
+   * @brief Checks if given devices have SDL service and creates appropriate BluetoothDevice objects
+   * @param bd_address List of bluetooth addresses to check
+   * @param device_handle HCI handle
+   * @param[out] discovered_devices List of created BluetoothDevice objects to fill
+   */
+  void CheckSDLServiceOnDevices(const std::vector<bdaddr_t>& bd_address,
+                                int device_handle,
+                                DeviceVector* discovered_devices);
 
   TransportAdapterController* controller_;
   pthread_t thread_;
@@ -113,13 +154,20 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool shutdown_requested_;
   bool device_scan_requested_;
   bool ready_;
-  pthread_mutex_t device_scan_requested_mutex_;
-  pthread_cond_t device_scan_requested_cond_;
+  sync_primitives::SynchronisationPrimitives device_scan_requested_sync_;
+
+  std::vector<bdaddr_t> paired_devices_;
+
+  DeviceVector paired_devices_with_sdl_;
+  DeviceVector found_devices_with_sdl_;
 
   /**
    * @brief UUID of SmartDeviceLink service.
    **/
   uuid_t smart_device_link_service_uuid_;
+
+  const bool auto_repeat_search_;
+  const int auto_repeat_pause_sec_;
 };
 
 }  // namespace transport_adapter
