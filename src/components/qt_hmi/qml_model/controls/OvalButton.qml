@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: main
-    width: 200
+    width: label.width * 1.5
     height: 65
     color: "#00000000"
 
@@ -66,10 +66,11 @@ Rectangle {
         id: label
         color: "#1d81d5"
         text: qsTr("Oval Button")
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
         z: 50
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        anchors.fill: parent
         font.pixelSize: 16
     }
 
@@ -115,11 +116,6 @@ Rectangle {
             PropertyChanges {
                 target: right
                 source: "../res/buttons/oval_btn_pressed_right.png"
-            }
-
-            PropertyChanges {
-                target: label
-                color: "#000000"
             }
 
             PropertyChanges {
