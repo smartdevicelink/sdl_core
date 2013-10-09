@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
@@ -43,9 +44,9 @@ GeneralView {
         playerName: "SDL music"
         anchors.fill: parent
         albumImage: "../res/album_art.png"
-        trackNumber: "13/16"
-        trackName: "The Dog Days Are Over"
-        albumName: "Florence and the Machine"
+        trackName: dataContainer.hmiUIText.mainField1
+        albumName: dataContainer.hmiUIText.mainField2
+        trackNumber: dataContainer.hmiUIText.mainField3
 
         topOvalButtons: [
             Row {

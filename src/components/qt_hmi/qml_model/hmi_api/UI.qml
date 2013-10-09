@@ -61,14 +61,38 @@ Item {
             Common.TextFieldName.statusBar
         ]
         var fieldSubstrings = filter(showStrings, showFields)
-        var fieldSubstringsStruct = {
-            "mainField1": fieldSubstrings[0],
-            "mainField2": fieldSubstrings[1],
-            "mainField3": fieldSubstrings[2],
-            "mainField4": fieldSubstrings[3],
-            "statusBar": fieldSubstrings[4]
+        if (fieldSubstrings[0] !== "") {
+            dataContainer.hmiUIText.mainField1 = fieldSubstrings[0]
         }
-        showWindow.show(fieldSubstringsStruct)
+        if (fieldSubstrings[1] !== "") {
+            dataContainer.hmiUIText.mainField2 = fieldSubstrings[1]
+        }
+        if (fieldSubstrings[2] !== "") {
+            dataContainer.hmiUIText.mainField3 = fieldSubstrings[2]
+        }
+        if (fieldSubstrings[3] !== "") {
+            dataContainer.hmiUIText.mainField4 = fieldSubstrings[3]
+        }
+        if (alignment !== undefined) {
+            switch (alignment) {
+                case Common.TextAlignment.LEFT_ALIGNED:
+                    dataContainer.hmiUITextAlignment = Text.AlignLeft
+                    break;
+                case Common.TextAlignment.RIGHT_ALIGNED:
+                    dataContainer.hmiUITextAlignment = Text.AlignRight
+                    break;
+                case Common.TextAlignment.CENTERED:
+                    dataContainer.hmiUITextAlignment = Text.AlignHCenter
+                    break;
+                default:
+                    dataContainer.hmiUITextAlignment = Text.AlignHCenter
+                    break;
+            }
+        }
+        else {
+            dataContainer.hmiUITextAlignment = Text.AlignHCenter
+        }
+
         return {}
     }
 

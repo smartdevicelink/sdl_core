@@ -88,45 +88,55 @@ Item {
             id: mid
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
+            anchors.right: parent.right
             width: parent.width
             height: parent.height * 2/4
 
-            Row {
+            Image {
+                id: image
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                height: parent.height
-                width: parent.width
-                spacing: 20
+                source: albumImage
+            }
 
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.height
-                    height: parent.height
-                    source: albumImage
+            Item {
+                id: space
+                anchors.left: image.right
+                width: 20
+            }
+
+            Column {
+                anchors.left: space.right
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+//              spacing: parent.height / 5
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    color: "#1d81d5"
+                    text: trackName
+                    font.pixelSize: 45
+                    font.bold: true
                 }
 
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: parent.height / 5
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    color: "#1d81d5"
+                    text: albumName
+                    font.pixelSize: 25
+                }
 
-                    Text {
-                        color: "#1d81d5"
-                        text: "Track " + trackNumber
-                        font.pixelSize: 20
-                    }
-
-                    Text {
-                        color: "#1d81d5"
-                        text: trackName
-                        font.pixelSize: 45
-                        font.bold: true
-                    }
-
-                    Text {
-                        color: "#1d81d5"
-                        text: albumName
-                        font.pixelSize: 25
-                    }
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+//                  horizontalAlignment: Text.AlignLeft
+                    color: "#1d81d5"
+                    text: trackNumber
+                    font.pixelSize: 20
                 }
             }
         }
