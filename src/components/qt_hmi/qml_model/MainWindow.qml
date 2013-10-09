@@ -39,10 +39,14 @@ Rectangle {
 
     Item {
         id: mainScreen
+        x: 0
+        y: 0
         anchors.top: parent. top
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
         height: (parent.height < minHeight) ? minHeight : parent.height
+        anchors.leftMargin: 0
+        anchors.topMargin: 0
         visible: false
 
         Item {

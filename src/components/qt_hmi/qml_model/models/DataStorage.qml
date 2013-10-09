@@ -12,6 +12,18 @@ Item {
 
     property int applicationId
 
+    property var currentApplication: applicationContext ?
+                                         getApplication(applicationId) :
+                                         undefined;
+
+    function getApplication(appId) {
+        for(var i = 0; i < applicationList.count; i++) {
+            if(applicationList.get(i).appId === appId) {
+                return applicationList.get(i);
+            }
+        }
+    }
+
     property int hmiContext
     property bool applicationContext: false
 

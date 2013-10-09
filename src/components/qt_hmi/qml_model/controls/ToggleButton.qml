@@ -35,7 +35,6 @@ Rectangle {
     }
     MouseArea {
         id: mouseArea
-        cursorShape: Qt.PointingHandCursor
 
         anchors.fill: parent
         onPressed: {

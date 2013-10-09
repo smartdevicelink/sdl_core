@@ -181,6 +181,6 @@ GeneralView {
             width: parent.width
             height: 1/4 * parent.height
             BackButton { anchors.horizontalCenter: parent.horizontalCenter }
-	}
+        }
     }
 }

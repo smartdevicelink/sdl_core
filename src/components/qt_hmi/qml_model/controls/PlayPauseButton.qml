@@ -36,9 +36,11 @@ import QtQuick 2.0
 
 Image {
     id: playPauseButton
-    state: 'Play'
+    state: 'Pause'
     property string sourceOnPressed: ""
     property string sourceOnReleased: ""
+
+    signal clicked
 
     MouseArea {
         anchors.fill: parent
@@ -50,7 +52,7 @@ Image {
             playPauseButton.state = ( playPauseButton.state == 'Play' ? 'Pause' : 'Play' )
         }
         onClicked: {
-        // add some behavior
+            playPauseButton.clicked()
         }
     }
     states: [

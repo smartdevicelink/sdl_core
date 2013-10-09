@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: powerSwitchBtn
-    state: "OFF"
+    state: "ON"
     width: 80
     height: 80
     radius: 5
@@ -22,12 +22,12 @@ Rectangle {
             parent.pressed = false
             parent.state = parent.state === "ON" ? "OFF" : "ON"
             btnText.text = parent.state
-            if(parent.state === "ON"){
+            if (parent.state === "OFF") {
                 contentLoader.reset()
                 mainScreen.visible = true
             }
             else
-                mainScreen.visible = false
+                Qt.quit();
         }
     }
 

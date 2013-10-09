@@ -32,4 +32,14 @@ ListModel
         icon: "../res/buttons/long_oval_btn.png"
         qml: ""
     }
+    ListElement {
+        title: "Scout"
+        icon: "../res/buttons/long_oval_btn.png"
+        qml: ""
+    }
+    ListElement {
+        title: "Waze"
+        icon: "../res/buttons/long_oval_btn.png"
+        qml: ""
+    }
 }
