@@ -81,15 +81,17 @@ bool DBusAdapter::Init() {
     return false;
   }
   ret = dbus_bus_request_name(conn_, sdl_service_name_.c_str(),
-  DBUS_NAME_FLAG_REPLACE_EXISTING,
+  DBUS_NAME_FLAG_DO_NOT_QUEUE,
                               &err);
-  if (dbus_error_is_set(&err)) {
+  if (ret == -1 || dbus_error_is_set(&err)) {
     LOG4CXX_ERROR(logger_, "DBus: Can't request name " << err.name);
     dbus_error_free(&err);
     return false;
   }
   if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
-    LOG4CXX_ERROR(logger_, "DBus: Can't get service name " << err.name);
+    LOG4CXX_ERROR(
+        logger_,
+        "DBus: Service '" << sdl_service_name_ << "' is already running");
     return false;
   }
 
