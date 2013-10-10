@@ -210,11 +210,18 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @param {Number}
          */
-        deleteCommand: function (commandID) {
+        deleteCommand: function (commandID, requestID) {
 
             for (var i in this.commandsList) {
                 if (this.commandsList[i].filterProperty('commandID', commandID)) {
-                    this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
+                    if (i != this.currentSubMenuId) {
+                        this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
+                        SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["SUCCESS"], requestID);
+                        return;
+                    } else {
+                        SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["IN_USE"], requestID);
+                        return;
+                    }
                 }
             }
         },

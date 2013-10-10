@@ -690,6 +690,23 @@ SDL.SDLModel = Em.Object.create({
         SDL.VRPopUp.DeleteCommand(commandID);
     },
 
+
+
+    /**
+     * SDL UI DeleteCommand response handler
+     *
+     *
+     * @param {String}
+     */
+    deleteCommandResponse: function (result, responseID) {
+
+        if(result === SDL.SDLModel.resultCode["SUCCESS"]){
+            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], responseID, "DeleteCommand");
+        } else {
+            FFW.UI.sendError(SDL.SDLModel.resultCode["IN_USE"], responseID, "DeleteCommand", "In use");
+        }
+    },
+
     onDeactivateApp: function (target, appID) {
 
         if (SDL.SDLController.getApplicationModel(appID)) {
