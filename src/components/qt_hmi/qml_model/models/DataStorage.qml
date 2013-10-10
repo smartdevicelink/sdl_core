@@ -58,7 +58,7 @@ Item {
         }
     }
 
-    property int hmiContext
+    property int systemContext
     property bool applicationContext: false
 
     property int hmiSavedContext
@@ -90,7 +90,8 @@ Item {
         "mainField2": "Florence and the Machine",
         "mainField3": "Track 13/16",
         "mainField4": "",
-        "statusBar": ""
+        "statusBar": "",
+        "mediaClock": "02:36"
     }
     property int hmiUITextAlignment: Text.AlignLeft
 

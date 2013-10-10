@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import "../controls"
+import "../hmi_api/Common.js" as Common
 
 Item {
     id: mediaPlayerView
@@ -43,6 +44,8 @@ Item {
     property string trackNumber: ""
     property string trackName: ""
     property string albumName: ""
+
+    property string textColor: "#1d81d5"
 
     property alias topOvalButtons: top.children
 
@@ -109,13 +112,13 @@ Item {
                 anchors.left: space.right
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-//              spacing: parent.height / 5
+                spacing: parent.height / 5
 
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
-                    color: "#1d81d5"
+                    color: textColor
                     text: trackName
                     font.pixelSize: 45
                     font.bold: true
@@ -125,7 +128,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
-                    color: "#1d81d5"
+                    color: textColor
                     text: albumName
                     font.pixelSize: 25
                 }
@@ -133,8 +136,7 @@ Item {
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
-//                  horizontalAlignment: Text.AlignLeft
-                    color: "#1d81d5"
+                    color: textColor
                     text: trackNumber
                     font.pixelSize: 20
                 }
@@ -155,7 +157,7 @@ Item {
                 anchors.leftMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
                 color: "white"
-                text: "02:36"
+                text: dataContainer.hmiUIText.mediaClock
                 font.pixelSize: 18
             }
 
@@ -178,14 +180,14 @@ Item {
                    anchors.verticalCenter: parent.verticalCenter
                    height: 2
                    width: 2/3 * parent.width
-                   color: "#1d81d5"
+                   color: textColor
                 }
             }
             Text {
                 anchors.right: parent.right
                 anchors.rightMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#1d81d5"
+                color: textColor
                 text: "04:23"
                 font.pixelSize: 18
             }
@@ -201,6 +203,8 @@ Item {
         height: 1/4 * parent.height
 
         Row {
+            id: mediaControl
+
             anchors.centerIn: parent
             Image {
                 id: prevButton
@@ -235,6 +239,15 @@ Item {
                     }
                 }
             }
+        }
+
+        Text {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: mediaControl.bottom
+            anchors.bottom: parent.bottom
+            text: dataContainer.hmiUIText.statusBar
+            color: textColor
         }
     }
 }

@@ -100,7 +100,7 @@ Rectangle {
 
     property date lastAlertTime
 
-    function alert (alertString, duration, appID) {
+    function alert (alertStrings, duration, appID) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
@@ -112,6 +112,11 @@ Rectangle {
         else {
             lastAlertTime = new Date()
             rectangle.appNameString = dataContainer.getApplication(appID).appName
+            var alertString = ""
+            for (var index in alertStrings) {
+                alertString += alertStrings[index]
+                alertString += "\n"
+            }
             rectangle.alertString = alertString
             timer.interval = duration
             timer.start()

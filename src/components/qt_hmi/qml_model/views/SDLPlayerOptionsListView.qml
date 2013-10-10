@@ -1,7 +1,10 @@
 import QtQuick 2.0
 import "../controls"
+import "../hmi_api/Common.js" as Common
 
 GeneralView {
+    applicationContext: true
+    systemContext: Common.SystemContext.SYSCTXT_MENU
     Item {
         // 3/4 top screen
         height: parent.height * 3/4
@@ -9,20 +12,24 @@ GeneralView {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+
+        ListModel {
+            id: optionsTree
+            ListElement {
+                name: "Policies Test"
+            }
+            ListElement {
+                name: "XML Test"
+            }
+        }
+
         ListView {
             id: sdlPlayerOptionsListView
             anchors.horizontalCenter: parent.horizontalCenter
             width:parent.width
             height:parent.height
 
-            model: ListModel {
-                ListElement {
-                    name: "Policies Test"
-                }
-                ListElement {
-                    name: "XML Test"
-                }
-            }
+            model: optionsTree
 
             delegate: Text  {
                 text: name

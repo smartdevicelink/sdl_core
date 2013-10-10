@@ -70,10 +70,4 @@ GeneralView {
 
         ]
     }
-    Connections {
-        target: sdlProxy
-        onAppUnregistered: {
-            contentLoader.go("views/ApplicationListView.qml")
-        }
-    }
 }

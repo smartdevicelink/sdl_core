@@ -4,19 +4,19 @@ import "Common.js" as Common
 Item {
     function filter (strings, fields) {
 // substrings for each allowed field
-        var fieldSubstrings = []
-// have to populate the array to appropriate size
-        for (var fieldIndex = 0; fieldIndex < fields.length; ++fieldIndex) {
-            fieldSubstrings.push("")
-        }
+        var fieldSubstrings = {}
 // this cycle concatenates allowed lines sorting them by field
         for (var stringIndex = 0; stringIndex < strings.length; ++stringIndex) {
-            for (fieldIndex = 0; fieldIndex < fields.length; ++fieldIndex) {
-                if (strings[stringIndex].fieldName === fields[fieldIndex]) {
-                    if (fieldSubstrings[fieldIndex] !== "") {
-                        fieldSubstrings[fieldIndex] += "\n";
+            for (var fieldIndex = 0; fieldIndex < fields.length; ++fieldIndex) {
+                var fieldName = strings[stringIndex].fieldName
+                if (fieldName === fields[fieldIndex]) {
+                    if (fieldSubstrings[fieldName] !== undefined) {
+                        fieldSubstrings[fieldName] += "\n";
+                        fieldSubstrings[fieldName] += strings[stringIndex].fieldText
                     }
-                    fieldSubstrings[fieldIndex] += strings[stringIndex].fieldText
+                    else {
+                        fieldSubstrings[fieldName] = strings[stringIndex].fieldText
+                    }
                 }
             }
         }
@@ -30,7 +30,7 @@ Item {
                            Common.TextFieldName.alertText3]
 
         var fieldSubstrings = filter(alertStrings, alertFields)
-
+/*
         var alertString = ""
 // this cycle concatenates all the substrings according to the order of the fields
         for (var fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
@@ -41,8 +41,8 @@ Item {
                 alertString += fieldSubstrings[fieldIndex]
             }
         }
-
-        var tryAgainTime = alertWindow.alert(alertString, duration, appID)
+*/
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID)
         if (tryAgainTime === undefined) {
             return {}
         }
@@ -58,20 +58,27 @@ Item {
             Common.TextFieldName.mainField2,
             Common.TextFieldName.mainField3,
             Common.TextFieldName.mainField4,
-            Common.TextFieldName.statusBar
+            Common.TextFieldName.statusBar,
+            Common.TextFieldName.mediaClock
         ]
         var fieldSubstrings = filter(showStrings, showFields)
-        if (fieldSubstrings[0] !== "") {
-            dataContainer.hmiUIText.mainField1 = fieldSubstrings[0]
+        if (fieldSubstrings[Common.TextFieldName.mainField1] !== undefined) {
+            dataContainer.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]
         }
-        if (fieldSubstrings[1] !== "") {
-            dataContainer.hmiUIText.mainField2 = fieldSubstrings[1]
+        if (fieldSubstrings[Common.TextFieldName.mainField2] !== undefined) {
+            dataContainer.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]
         }
-        if (fieldSubstrings[2] !== "") {
-            dataContainer.hmiUIText.mainField3 = fieldSubstrings[2]
+        if (fieldSubstrings[Common.TextFieldName.mainField3] !== undefined) {
+            dataContainer.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]
         }
-        if (fieldSubstrings[3] !== "") {
-            dataContainer.hmiUIText.mainField4 = fieldSubstrings[3]
+        if (fieldSubstrings[Common.TextFieldName.mainField4] !== undefined) {
+            dataContainer.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]
+        }
+        if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) {
+            dataContainer.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]
+        }
+        if (fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined) {
+            dataContainer.hmiUIText.mediaClock = fieldSubstrings[Common.TextFieldName.mediaClock]
         }
         if (alignment !== undefined) {
             switch (alignment) {

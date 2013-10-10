@@ -54,8 +54,8 @@ Rectangle {
     DataStorage {
         id: dataContainer
 
-        onHmiContextChanged: {
-            sdlUI.onSystemContext(hmiContext)
+        onSystemContextChanged: {
+            sdlUI.onSystemContext(systemContext)
         }
 
         onApplicationContextChanged: {
@@ -107,13 +107,16 @@ Rectangle {
                 source:startQml
                 property var viewTransitionStack : []
 
-                function reset(){
+                function reset() {
                     viewTransitionStack = []
                     source = startQml
                 }
 
-                function go(path) {
+                function go(path, appId) {
                     viewTransitionStack.push(source.toString())
+                    if (appId > 0) {
+                        dataContainer.applicationId = appId
+                    }
                     source = path
                 }
 
@@ -123,9 +126,12 @@ Rectangle {
 
                 onStatusChanged: {
                     if (status == Component.Ready) {
-                        if (dataContainer.hmiContext !== Common.SystemContext.SYSCTXT_ALERT) {
-                            dataContainer.hmiContext = item.systemContext
+                        if (dataContainer.systemContext !== Common.SystemContext.SYSCTXT_ALERT) {
+                            dataContainer.systemContext = item.systemContext
                             dataContainer.applicationContext = item.applicationContext
+                            if (!dataContainer.applicationContext) {
+                                dataContainer.applicationId = -1
+                            }
                         }
                         else {
                             dataContainer.hmiSavedContext = item.systemContext
