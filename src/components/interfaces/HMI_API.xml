@@ -2003,6 +2003,7 @@
       <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true">
        <description>Information about the capabilities of the display: its type, text field supported, etc. See DisplayCapabilities. </description>
       </param>
+      <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
       <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
       <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
         <description>Must be returned if the platform supports on-screen SoftButtons.</description>

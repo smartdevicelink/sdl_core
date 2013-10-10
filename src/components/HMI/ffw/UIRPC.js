@@ -358,6 +358,11 @@ FFW.UI = FFW.RPCObserver.create({
                                 },
                                 "numCustomPresetsAvailable": 6
                             },
+                            "audioPassThruCapabilities": {
+                                "samplingRate": "44KHZ",
+                                "bitsPerSample": "8_BIT",
+                                "audioType": "PCM"
+                            },
                             "hmiZoneCapabilities": "FRONT",
                             "softButtonCapabilities": {
                                 "shortPressAvailable": true,
