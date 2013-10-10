@@ -181,7 +181,11 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
   const smart_objects::SmartObject vr_help = (*message_)[strings::msg_params]
       .getElement(strings::vr_help);
 
-  if (1 != vr_help.getElement(0).getElement(strings::position).asInt()) {
+  //vr help item start position must be 1
+  const unsigned int vr_help_item_start_position = 1;
+
+  if (vr_help_item_start_position !=
+      vr_help.getElement(0).getElement(strings::position).asUInt()) {
     LOG4CXX_ERROR(logger_, "VR help items start position is wrong");
     return false;
   }

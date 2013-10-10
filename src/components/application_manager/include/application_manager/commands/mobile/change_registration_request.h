@@ -44,7 +44,7 @@ namespace commands {
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest : public CommandRequestImpl {
+class ChangeRegistrationRequest : public CommandRequestImpl  {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
@@ -62,6 +62,13 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
 
  private:
   /*
@@ -85,7 +92,35 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    */
   bool IsLanguageSupportedByTTS(const int& hmi_display_lang);
 
+  /*
+   * @brief Check if there some not delivered hmi responses exist
+   *
+   * @return true if all responses received
+   */
+  bool IsPendingResponseExist();
+
+  /*
+   * @brief Checks result codes
+   *
+   * @return true if one of result codes is success
+   */
+  static bool WasAnySuccess(const hmi_apis::Common_Result::eType ui,
+                     const hmi_apis::Common_Result::eType vr,
+                     const hmi_apis::Common_Result::eType tts);
+
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
+
+  bool is_ui_send_;
+  bool is_vr_send_;
+  bool is_tts_send_;
+
+  bool is_ui_received_;
+  bool is_vr_received_;
+  bool is_tts_received_;
+
+  hmi_apis::Common_Result::eType ui_result_;
+  hmi_apis::Common_Result::eType vr_result_;
+  hmi_apis::Common_Result::eType tts_result_;
 };
 
 }  // namespace commands

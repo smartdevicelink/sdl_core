@@ -620,60 +620,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.turnIcon == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'turnIcon' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.turnIcon.value != 'string') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'turnIcon'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.distanceToManeuver == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'distanceToManeuver' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.distanceToManeuver != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'distanceToManeuver'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.distanceToManeuverScale == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'distanceToManeuverScale' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.distanceToManeuverScale != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'distanceToManeuverScale'!"
-                        };
-
-                        return this.resultStruct;
-                    }
                     if (params.appID == null) {
 
                         this.resultStruct = {
