@@ -88,7 +88,7 @@ GeneralView{
                             text: upperRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
-                                if (isPressed == false){
+                                if (!isPressed){
                                     if (phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")
@@ -113,7 +113,7 @@ GeneralView{
                             text: middleRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
-                                if (isPressed == false){
+                                if (!isPressed){
                                     if (phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")
@@ -138,7 +138,7 @@ GeneralView{
                             text: lowerRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
-                                if (isPressed == false){
+                                if (!isPressed){
                                     if (phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")

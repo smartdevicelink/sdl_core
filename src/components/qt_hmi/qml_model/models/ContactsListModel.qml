@@ -82,10 +82,10 @@ ListModel
     ListElement { name: "Neil"; phone:"(313)444-112";type:"Mobile"}
     ListElement { name: "Oswald"; phone:"(313)456-921";type:"Mobile"}
     ListElement { name: "Oscar"; phone:"(313)332-778";type:"Home"}
+    ListElement { name: "~1123"; phone:"(313)1332";type:"Home"}
     ListElement { name: "Patrice"; phone:"(313)789-111";type:"Mobile"}
     ListElement { name: "Queen Elizabeth"; phone:"(313)897-666";type:"Mobile"}
     ListElement { name: "Rose"; phone:"(313)111-211";type:"Mobile"}
-    ListElement { name: "Susell"; phone:"(313)345-122";type:"Home"}
     ListElement { name: "Susell"; phone:"(313)345-122";type:"Home"}
     ListElement { name: "Thomas"; phone:"(917)608-342";type:"Mobile"}
     ListElement { name: "Titus Andronicus" ; phone:"(917)608-321";type:"Office"}
