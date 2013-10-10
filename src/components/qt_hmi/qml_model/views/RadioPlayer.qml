@@ -34,16 +34,16 @@
 
 import QtQuick 2.0
 import "../controls"
+import "../models"
 
 Item {
     id: radioPlayerView
 
     property string radioType: ""
     property string radioName: ""
-    property string songName: ""
-    property string albumName: ""
     property alias buttonHD: bot.children
-    property var presets: []
+
+    property PlayerState playerState
 
     Item {
         // top 3/4 screen
@@ -91,7 +91,7 @@ Item {
                     Text {
                         id: radioChannelNameText
                         color: "#1d81d5"
-                        text: presets[0]
+                        text: playerState.presets[0]
                         font.pixelSize: 45
                     }
                     Text {
@@ -104,14 +104,14 @@ Item {
 
                 Text {
                     color: "#1d81d5"
-                    text: songName
+                    text: playerState.songName
                     font.pixelSize: 25
                     font.bold: true
                 }
 
                 Text {
                     color: "#1d81d5"
-                    text: albumName
+                    text: playerState.albumName
                     font.pixelSize: 25
                 }
             }
@@ -146,7 +146,7 @@ Item {
 
         PresetRow {
             anchors.centerIn: parent
-            presets: radioPlayerView.presets
+            presets: playerState.presets
             width: parent.width
             onSelectedIndexChanged: {
                 radioChannelNameText.text = presets[selectedIndex];

@@ -43,9 +43,8 @@ GeneralView {
         anchors.fill: parent
         radioType: "FM"
         radioName: "FM Radio"
-        presets: ["96.3", "107.9", "104.3", "101.9", "105.3", "100.5", "107.9", "103.4"]
-        songName: "So Far Around The Bend"
-        albumName: "The National"
+
+        playerState: dataContainer.fmPlayerState
 
         property int hdButtonValue: 1
 

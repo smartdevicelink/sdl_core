@@ -1,6 +1,6 @@
 /**
- * @file IPodPlayerView.qml
- * @brief IPod player screen view.
+ * @file PlayerState.qml
+ * @brief List of parameters for each player.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,14 +32,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
-import "../hmi_api/Common.js" as Common
 
-GeneralView {
-    category: Common.DeactivateReason.AUDIO
-    MediaPlayer {
-        playerName: "iPod"
-        anchors.fill: parent
+Item {
+    // Media players
+    property string playPauseState
+    property string albumImage
+    property string trackNumber
+    property int songPosition
+    property string trackName
 
-        playerState: dataContainer.ipodPlayerState
-    }
+    // Radio Players
+    property var presets: []
+
+    // Both players
+    property string songName
+    property string albumName
 }

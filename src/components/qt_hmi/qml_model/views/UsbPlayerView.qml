@@ -1,6 +1,6 @@
 /**
- * @file IPodPlayerView.qml
- * @brief IPod player screen view.
+ * @file UsbPlayerView.qml
+ * @brief USB player screen view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -37,9 +37,8 @@ import "../hmi_api/Common.js" as Common
 GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
-        playerName: "iPod"
+        playerName: "USB"
         anchors.fill: parent
 
-        playerState: dataContainer.ipodPlayerState
-    }
+        playerState: dataContainer.usbPlayerState    }
 }
