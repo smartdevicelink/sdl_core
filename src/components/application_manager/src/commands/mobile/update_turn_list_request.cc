@@ -61,8 +61,14 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SendResponse(false, processing_result);
+    return;
+  }
 
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
