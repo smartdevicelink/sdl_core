@@ -146,7 +146,7 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @type {Number}
          */
-        currentSubMenuId: 0,
+        currentSubMenuId: 'top',
 
         /**
          * Return current submenu name
@@ -155,8 +155,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         currentSubMenuLabel: function () {
 
-            //Magic number 0 is Top level menu index
-            var submenu, commands = this.commandsList[0];
+            //Param "top" is Top level menu index
+            var submenu, commands = this.commandsList["top"];
 
             for (var i = 0; i < commands.length; i++) {
                 if (commands[i].menuID == this.currentSubMenuId) {
@@ -164,7 +164,7 @@ SDL.SDLAppModel = Em.Object.extend({
                 }
             }
 
-            return this.get('currentSubMenuId') != 0 ? submenu : 'Options';
+            return this.get('currentSubMenuId') != 'top' ? submenu : 'Options';
         }.property('this.currentSubMenuId'),
 
         /**
@@ -195,7 +195,7 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addCommand: function (request) {
 
-            var parentID = request.params.menuParams.parentID ? request.params.menuParams.parentID : 0;
+            var parentID = request.params.menuParams.parentID >= 0 ? request.params.menuParams.parentID : 'top';
 
             if (!this.get('commandsList.' + parentID)) {
                 this.commandsList[parentID] = [];
@@ -245,8 +245,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addSubMenu: function (request) {
 
-            // parentID is equal to 0 cause Top level menu ID is 0
-            var parentID = 0;
+            // parentID is equal to 'top' cause Top level menu ID
+            var parentID = 'top';
 
             var commands = this.get('commandsList.' + parentID);
 

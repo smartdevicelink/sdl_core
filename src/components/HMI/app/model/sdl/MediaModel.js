@@ -106,7 +106,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
 
-            this.set('commandsList', {0: []});
+            this.set('commandsList', {"top": []});
             this.set('softButtons', []);
         },
 
