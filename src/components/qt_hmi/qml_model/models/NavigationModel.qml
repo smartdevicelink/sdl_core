@@ -1,6 +1,6 @@
 /**
  * @file NavigationModel.qml
- * @brief Model for Navigation
+ * @brief Model for Navigation.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

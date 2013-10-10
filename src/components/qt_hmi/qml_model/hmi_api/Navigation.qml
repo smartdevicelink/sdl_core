@@ -45,7 +45,6 @@ Item {
     function showConstantTBT(navigationTexts, turnIcon, distanceToManeuver,
                              distanceToManeuverScale, maneuverComplete,
                              softButtons, appID) {
-        console.log("Method call");
         navigationTexts.forEach(fillTexts);
         if (turnIcon !== undefined) {
             dataContainer.navigationModel.icon = turnIcon;
@@ -61,7 +60,6 @@ Item {
         }
         dataContainer.navigationModel.appId = appID;
         contentLoader.go("./views/TurnByTurnView.qml");
-        console.log("Method return");
     }
 
     function alertManeuver(softButtons) {
