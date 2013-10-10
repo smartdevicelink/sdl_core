@@ -37,8 +37,7 @@ import "../hmi_api/Common.js" as Common
 GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
-	    playerName: "CD"
-        playerType: "CD"
+        playerName: "CD"
         anchors.fill: parent
 
         playerState: dataContainer.cdPlayerState

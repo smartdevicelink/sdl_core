@@ -37,7 +37,7 @@ import "../hmi_api/Common.js" as Common
 GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
-	    playerName: "BT Audio"
+        playerName: "BT Audio"
         anchors.fill: parent
 
         playerState: dataContainer.btPlayerState

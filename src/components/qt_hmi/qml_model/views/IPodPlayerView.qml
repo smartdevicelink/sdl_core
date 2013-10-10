@@ -38,7 +38,6 @@ GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
         playerName: "iPod"
-        playerType: "iPod"
         anchors.fill: parent
 
         playerState: dataContainer.ipodPlayerState

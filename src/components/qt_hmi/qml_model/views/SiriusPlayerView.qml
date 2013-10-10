@@ -40,5 +40,7 @@ GeneralView {
         anchors.fill: parent
         radioType: ""
         radioName: "Sirius"
+
+        playerState: dataContainer.siriusPlayerState
     }
 }
