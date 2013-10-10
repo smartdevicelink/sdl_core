@@ -401,9 +401,9 @@ class Impl(FordXmlParser):
                     out.write('  ' + param_type + ' ' + param_name + ";\n")
                     out.write('  ' + param_name + '.presence = !' + param.name + ".isNull();\n")
                     out.write('  if (' + param_name + ".presence) {\n")
-                    out.write('    if (!VariantToValue(' + param.name + ', ' + param_name + ".val))")
-                    out.write("LOG4CXX_ERROR(logger_, \"Can't convert variant to value\");")
-                    out.write(" return;\n")
+                    out.write('    if (!VariantToValue(' + param.name + ', ' + param_name + ".val)) {\n")
+                    out.write("      LOG4CXX_ERROR(logger_, \"Can't convert variant to value\");\n")
+                    out.write("      return;\n    }\n")
                     out.write("  }\n")
             out.write('  emit ' + n.get('name') + '(')
             for i in range(len(params)):

@@ -34,15 +34,13 @@
 
 import QtQuick 2.0
 import "../controls"
+import "../models"
 
 Item {
     id: mediaPlayerView
 
     property string playerName: ""
-    property string albumImage: ""
-    property string trackNumber: ""
-    property string trackName: ""
-    property string albumName: ""
+    property string playerType: ""
 
     property alias topOvalButtons: top.children
 
@@ -50,6 +48,9 @@ Item {
     signal forward
     signal play
     signal pause
+
+    // Holds players info (song name, play/pause state, track number etc)
+    property PlayerState playerState;
 
     Item {
         // top 3/4 screen
@@ -102,7 +103,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.height
                     height: parent.height
-                    source: albumImage
+                    source: playerState.albumImage
                 }
 
                 Column {
@@ -111,20 +112,20 @@ Item {
 
                     Text {
                         color: "#1d81d5"
-                        text: "Track " + trackNumber
+                        text: "Track " + playerState.trackNumber
                         font.pixelSize: 20
                     }
 
                     Text {
                         color: "#1d81d5"
-                        text: trackName
+                        text: playerState.trackName
                         font.pixelSize: 45
                         font.bold: true
                     }
 
                     Text {
                         color: "#1d81d5"
-                        text: albumName
+                        text: playerState.albumName
                         font.pixelSize: 25
                     }
                 }
@@ -208,7 +209,11 @@ Item {
             }
 
             PlayPauseButton {
-                onClicked: { (state == 'Play') ? play() : pause() }
+                state: playerState.playPauseState
+                onClicked: {
+                    (state == 'Play') ? play() : pause()
+                    mediaPlayerView.playerState.playPauseState = state
+                }
             }
 
             Image {

@@ -1,6 +1,7 @@
 /**
+ * @file LineInPlayerView.qml
+ * @brief LineIn player screen view.
  * Copyright (c) 2013, Ford Motor Company
-
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +31,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
+GeneralView {
+    category: Common.DeactivateReason.AUDIO
+    MediaPlayer {
+        playerName: "LineIn"
+        anchors.fill: parent
 
-#include "application_manager/message.h"
-#include "smart_objects/smart_object.h"
-
-namespace application_manager {
-
-Message SmartObjectToMessage(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject* smart_object);
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject MessageToSmartObject(
-    const Message& message);
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_CONVERSION_H_
+        playerState: dataContainer.linePlayerState
+    }
+}

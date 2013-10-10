@@ -37,7 +37,6 @@ set (SOURCES
 ./src/mobile_command_factory.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
-./src/message_conversion.cc
 ./src/hmi_capabilities.cc
 ./src/from_mobile_thread_impl.cc
 ./src/to_mobile_thread_impl.cc

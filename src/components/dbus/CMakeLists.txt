@@ -29,20 +29,12 @@ add_custom_command(
 )
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/introspection.xml
-  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection.py
+  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/introspection_xml.cc
+  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
   --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
   --outdir ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/HMI_API.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection.py
-)
-
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/introspection_xml.cc
-  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
-  --infile ${CMAKE_CURRENT_SOURCE_DIR}/introspection.xml
-  --outdir ${CMAKE_CURRENT_SOURCE_DIR}
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/introspection.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
 )
 
 add_library("DBus" ${SOURCES})

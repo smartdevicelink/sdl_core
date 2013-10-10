@@ -243,7 +243,7 @@ utils::SharedPtr<ObjectType>::operator=(
   mReferenceCounter = Other.mReferenceCounter;
 
   if (0 != mReferenceCounter) {
-    ++*mReferenceCounter;
+    __sync_add_and_fetch(mReferenceCounter, 1);
   }
 
   return *this;
@@ -287,7 +287,7 @@ utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
 template<typename ObjectType>
 inline void SharedPtr<ObjectType>::dropReference(void) {
   if (0 != mReferenceCounter) {
-    if (0 == --*mReferenceCounter) {
+    if (0 == __sync_sub_and_fetch(mReferenceCounter, 1)) {
       delete mObject;
       mObject = 0;
 
