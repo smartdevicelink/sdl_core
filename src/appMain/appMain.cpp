@@ -70,10 +70,6 @@
 
 // ----------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" void __gcov_flush();
-#endif
-
 namespace {
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
@@ -248,15 +244,6 @@ bool InitHmi() {
 }
 }
 
-void flushCoverageInfo() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                  log4cxx::Logger::getLogger("appMain"));
-  LOG4CXX_INFO(logger, "Flush code coverage info");
-#ifdef __cplusplus
-  __gcov_flush();
-#endif
-}
-
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -272,56 +259,10 @@ int main(int argc, char** argv) {
                                 log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-  bool shouldReturn = false;
-  bool shouldFlush = false;
-  int next_option;
-
-  const char* const short_options = "hf";
-  const struct option long_options[] = {
-      { "help",     0, NULL, 'h' },
-      { "flush",    0, NULL, 'f' },
-      { NULL,       0, NULL, 0   }
-  };
-
-  do
-  {
-    next_option = getopt_long(argc, argv, short_options,
-                                long_options, NULL);
-
-    switch(next_option) {
-    case 'h':
-      LOG4CXX_INFO(logger, "-h or --help");
-      shouldReturn = true;
-      break;
-    case 'f':
-      LOG4CXX_INFO(logger, "-f or --flush flag");
-      // -f or --flush flag
-      shouldFlush = true;
-      break;
-    case '?':
-      LOG4CXX_INFO(logger, "Wrong input");
-      shouldReturn = true;
-      break;
-    case -1:
-      LOG4CXX_INFO(logger, "No more options");
-      break;
-    default:
-      break;
-    }
-  }
-  while (next_option != -1);
-
-  // Check shouldReturn fist
-  if(shouldReturn) {
-    return 0;
-  }
-
-  if(shouldFlush) {
-    flushCoverageInfo();
-    return 0;
-  }
-
   LOG4CXX_INFO(logger, " Application started!");
+
+  // Initialize gstreamer. Needed to activate debug from the command line.
+  gst_init(&argc, &argv);
 
   // --------------------------------------------------------------------------
   // Components initialization
