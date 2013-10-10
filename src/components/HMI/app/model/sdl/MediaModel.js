@@ -92,7 +92,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         currentSDLPerformInteractionChoiseId: null,
 
         countUp     : true,
-        pause       : false,
+        pause       : null,
         maxTimeValue: 68400, // 19 hours
         duration    : 0,
         currTime    : 0,
@@ -119,7 +119,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
             var self = this;
 
-            if (!this.pause) {
+            if (this.pause === false) {
                 this.timer = setInterval(function () {
 
                     self.set('currTime', self.currTime + 1);
@@ -132,6 +132,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         stopTimer: function () {
 
             clearInterval(this.timer);
+            this.pause = null;
             this.appInfo.set('mediaClock', '');
         },
 
@@ -180,7 +181,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
          */
         sdlSetMediaClockTimer: function (params) {
 
-            if ((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause)) {
+            if ((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause) || ((params.updateMode == "RESUME" || params.updateMode == "PAUSE") && this.pause === null )) {
                 return SDL.SDLModel.resultCode['IGNORED'];
             }
 

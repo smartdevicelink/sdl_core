@@ -248,7 +248,7 @@ FFW.UI = FFW.RPCObserver
                             .sendError(resultCode,
                                 request.id,
                                 request.method,
-                                'Request is ignored, because the intended result is already in effect.');
+                                'Request is ignored, illegal parameters.');
                     }
 
                     break;
