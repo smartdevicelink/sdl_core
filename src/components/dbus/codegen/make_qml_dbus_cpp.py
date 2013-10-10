@@ -364,6 +364,7 @@ class Impl(FordXmlParser):
                 out.write("    RaiseDbusError(this, InvalidData);\n")
                 out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
             out.write("    " + return_statement + ";\n  }\n")
+
             out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
 
             out.write("  int err;\n")
