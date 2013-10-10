@@ -3256,14 +3256,31 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			String appID, String autoActivateID, Integer correlationID)
 			throws SyncException {
 
-		RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
+		final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
 				syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
 				languageDesired, hmiDisplayLanguageDesired, appType, appID, correlationID);
 
 		sendRPCRequestPrivate(msg);
-	}
 
-	/**
+        logOnRegisterAppRequest(msg);
+
+    }
+
+    private void logOnRegisterAppRequest(final RegisterAppInterface msg) {
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onRegisterAppRequest(msg);
+                }
+            });
+        } else {
+            _proxyListener.onRegisterAppRequest(msg);
+        }
+    }
+
+    /**
 	 * Sends a SetGlobalProperties RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *
 	 * @param helpPrompt

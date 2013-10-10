@@ -30,6 +30,7 @@ import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
@@ -303,4 +304,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onOnTouchEvent(OnTouchEvent notification);
 
     public void onKeyboardInput(OnKeyboardInput msg);
+
+    void onRegisterAppRequest(RegisterAppInterface msg);
 }

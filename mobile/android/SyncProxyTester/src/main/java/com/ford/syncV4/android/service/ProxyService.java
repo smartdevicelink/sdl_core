@@ -64,6 +64,7 @@ import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
@@ -1351,6 +1352,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mainActivity.onKeyboardInputReceived(event);
             }
         });
+    }
+
+    @Override
+    public void onRegisterAppRequest(RegisterAppInterface msg) {
+        final  RegisterAppInterface event = msg;
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(msg, true);
+        else Log.i(TAG, "" + msg.toString());
     }
 
     @Override

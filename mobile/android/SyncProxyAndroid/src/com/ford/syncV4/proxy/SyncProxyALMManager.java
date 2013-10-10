@@ -46,6 +46,7 @@ import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
@@ -2605,6 +2606,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onKeyboardInput(OnKeyboardInput msg) {
+
+        }
+
+        @Override
+        public void onRegisterAppRequest(RegisterAppInterface msg) {
 
         }
     }
