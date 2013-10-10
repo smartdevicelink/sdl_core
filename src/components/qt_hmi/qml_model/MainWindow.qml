@@ -109,7 +109,6 @@ Rectangle {
 
                 function reset() {
                     viewTransitionStack = []
-                    source = startQml
                 }
 
                 function go(path, appId) {
@@ -129,9 +128,6 @@ Rectangle {
                         if (dataContainer.systemContext !== Common.SystemContext.SYSCTXT_ALERT) {
                             dataContainer.systemContext = item.systemContext
                             dataContainer.applicationContext = item.applicationContext
-                            if (!dataContainer.applicationContext) {
-                                dataContainer.applicationId = -1
-                            }
                         }
                         else {
                             dataContainer.hmiSavedContext = item.systemContext
@@ -210,7 +206,7 @@ Rectangle {
         onAppUnregistered: {
             for (var i = 0; i < dataContainer.applicationList.count; i++) {
                 if (dataContainer.applicationList.get(i).appId === appId) {
-                    dataContainer.applicationList.remove(0);
+                    dataContainer.applicationList.remove(i);
                     break;
                 }
             }
