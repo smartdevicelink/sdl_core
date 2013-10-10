@@ -261,11 +261,13 @@ Item {
                         for (var name in Common.TBTState) {
                             selectList.model.append({name: name, value: Common.TBTState[name]});
                         }
-                        selectList.delegate = tbtStateDelegate
+                        selectList.delegate = tbtStateDelegate;
+                        scrollbar.visible = true;
                     }
                     onUnpressed: {
                         selectList.model.clear();
                         selectList.delegate = null;
+                        scrollbar.visible = false;
                     }
                 }
 
@@ -314,6 +316,7 @@ Item {
 
                     Rectangle {
                         id: scrollbar
+                        visible: false
                         anchors.right: selectList.right
                         y: selectList.visibleArea.yPosition * selectList.height
                         width: 10
