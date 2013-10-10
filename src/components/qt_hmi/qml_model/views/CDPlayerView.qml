@@ -38,10 +38,9 @@ GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
 	    playerName: "CD"
+        playerType: "CD"
         anchors.fill: parent
-	    albumImage: "../res/album_art.png"
-	    trackNumber: "13/16"
-	    trackName: "The Dog Days Are Over"
-	    albumName: "Florence and the Machine"
+
+        playerState: dataContainer.cdPlayerState
 	}
 }

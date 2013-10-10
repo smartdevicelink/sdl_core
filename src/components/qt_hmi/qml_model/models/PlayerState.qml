@@ -1,6 +1,6 @@
 /**
- * @file PlayPauseButton.qml
- * @brief Behavior of Play/Pause button.
+ * @file PlayerState.qml
+ * @brief List of parameters for each player.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,48 +31,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 import QtQuick 2.0
 
-Image {
-    id: playPauseButton
-    property string sourceOnPressed: ""
-    property string sourceOnReleased: ""
+Item {
+    // Media players
+    property string playPauseState
+    property string albumImage
+    property string trackNumber
+    property int songPosition
+    property string trackName
 
-    signal clicked
+    // Radio Players
+    property var presets: []
 
-    MouseArea {
-        anchors.fill: parent
-        onPressed: {
-            playPauseButton.source = playPauseButton.sourceOnPressed
-        }
-        onReleased: {
-            playPauseButton.source = playPauseButton.sourceOnReleased
-            playPauseButton.state = ( playPauseButton.state == 'Play' ? 'Pause' : 'Play' )
-        }
-        onClicked: {
-            playPauseButton.clicked()
-        }
-    }
-    states: [
-        State {
-            name: "Play"
-            PropertyChanges {
-                target: playPauseButton
-                source: "../res/buttons/player_play_btn.png"
-                sourceOnPressed: "../res/buttons/player_play_pressed_btn.png"
-                sourceOnReleased: "../res/buttons/player_pause_btn.png"
-            }
-        },
-
-        State {
-            name: "Pause"
-            PropertyChanges {
-                target: playPauseButton
-                source: "../res/buttons/player_pause_btn.png"
-                sourceOnPressed: "../res/buttons/player_pause_pressed_btn.png"
-                sourceOnReleased: "../res/buttons/player_play_btn.png"
-            }
-        }
-    ]
+    // Both players
+    property string songName
+    property string albumName
 }
