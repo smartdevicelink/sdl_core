@@ -382,17 +382,13 @@ FFW.UI = FFW.RPCObserver
                                     "DYNAMIC"
                                 ]
                             },
-                            "hmiZoneCapabilities": [
-                                "FRONT"
-                            ],
-                            "softButtonCapabilities": [
-                                {
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true,
-                                    "imageSupported": true
-                                }
-                            ],
+                            "hmiZoneCapabilities": "FRONT",
+                            "softButtonCapabilities": {
+                                "shortPressAvailable": true,
+                                "longPressAvailable": true,
+                                "upDownAvailable": true,
+                                "imageSupported": true
+                            },
                             "code": SDL.SDLModel.resultCode["SUCCESS"],
                             "method": "UI.GetCapabilities"
                         }
