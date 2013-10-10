@@ -125,14 +125,14 @@ SDL.SDLController = Em.Object
         defaultActionSoftButton: function(element) {
 
             switch (element.groupName) {
-            case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate();
-                break;
-            }
-            case "ScrollableMessage": {
-                SDL.ScrollableMessage.deactivate();
-                break;
-            }
+                case "AlertPopUp": {
+                    SDL.AlertPopUp.deactivate();
+                    break;
+                }
+                case "ScrollableMessage": {
+                    SDL.ScrollableMessage.deactivate(true);
+                    break;
+                }
             }
         },
         /**
