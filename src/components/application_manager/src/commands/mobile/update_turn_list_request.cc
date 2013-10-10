@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -78,8 +79,22 @@ void UpdateTurnListRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
+  for(int i = 0; i < msg_params[strings::turn_list].length(); ++i) {
+    if(msg_params[strings::turn_list][i].keyExists(hmi_request::navi_text)) {
+      std::string navigation_text =
+          msg_params[strings::turn_list][i][hmi_request::navi_text].asString();
+      msg_params[strings::turn_list][i].erase(hmi_request::navi_text);
+      msg_params[strings::turn_list]
+                 [i][hmi_request::navi_text][hmi_request::field_name] =
+          hmi_apis::Common_TextFieldName::turnText;
+      msg_params[strings::turn_list]
+                 [i][hmi_request::navi_text][hmi_request::field_text] =
+          navigation_text;
+    }
+  }
 
   msg_params[strings::app_id] = app->app_id();
+
 
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList, msg_params,
                    true);

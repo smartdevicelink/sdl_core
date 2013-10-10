@@ -36,7 +36,6 @@ import QtQuick 2.0
 
 Image {
     id: playPauseButton
-    state: 'Pause'
     property string sourceOnPressed: ""
     property string sourceOnReleased: ""
 

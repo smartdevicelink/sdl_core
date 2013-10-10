@@ -42,8 +42,7 @@ GeneralView {
         anchors.fill: parent
 	    radioType: "AM"
 	    radioName: "AM Radio"
-	    songName: "So Far Around The Bend"
-	    albumName: "The National"
-	    presets: [ "1130", "950", "760", "1270", "1400", "2100", "940", "1001" ]
+
+        playerState: dataContainer.amPlayerState
 	}
 }

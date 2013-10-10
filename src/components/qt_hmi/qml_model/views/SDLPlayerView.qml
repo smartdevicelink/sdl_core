@@ -42,10 +42,8 @@ GeneralView {
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         anchors.fill: parent
-        albumImage: "../res/album_art.png"
-        trackNumber: "13/16"
-        trackName: "The Dog Days Are Over"
-        albumName: "Florence and the Machine"
+
+        playerState: dataContainer.sdlPlayerState
 
         topOvalButtons: [
             Row {
@@ -66,7 +64,6 @@ GeneralView {
                     dest: "./views/SDLPlayerOptionsListView.qml"
                 }
             }
-
         ]
     }
 }

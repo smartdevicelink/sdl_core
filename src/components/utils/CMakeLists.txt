@@ -12,4 +12,4 @@ set (SOURCES
 )
 
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx)
+target_link_libraries ("Utils" log4cxx rt)

@@ -68,11 +68,11 @@ ListModel
     ListElement {
         title: "USB"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: ""
+        qml: "./views/UsbPlayerView.qml"
     }
     ListElement {
         title: "LineIn"
         icon: "../res/buttons/long_oval_btn.png"
-        qml: ""
+        qml: "./views/LineInPlayerView.qml"
     }
 }

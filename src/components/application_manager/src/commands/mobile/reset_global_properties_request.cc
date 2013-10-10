@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -44,8 +45,8 @@ namespace application_manager {
 namespace commands {
 
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
@@ -64,12 +65,12 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
+    (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+    (*message_)[strings::params][strings::connection_key];
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
-      .length();
+                      .length();
 
   bool helpt_promt = false;
   bool timeout_promt = false;
@@ -96,10 +97,10 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       default: {
         LOG4CXX_ERROR(
-            logger_,
-            "Unknown global property 0x%02X value"
-                << (*message_)[strings::msg_params][strings::properties][i]
-                    .asInt());
+          logger_,
+          "Unknown global property 0x%02X value"
+          << (*message_)[strings::msg_params][strings::properties][i]
+          .asInt());
         break;
       }
     }
@@ -120,16 +121,13 @@ void ResetGlobalPropertiesRequest::Run() {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
-    if (vr_help_title) {
-      msg_params[strings::vr_help_title] = (*app->vr_help_title());
+    smart_objects::SmartObject* vr_help = MessageHelper::CreateAppVrHelp(app);
+    if (!vr_help) {
+      return;
     }
-
-    if (vr_help_items) {
-      msg_params[strings::vr_help] = (*app->vr_help());
-    }
+    msg_params = *vr_help;
 
     msg_params[strings::app_id] = app->app_id();
-
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
                      true, chaining_counter);
   }
@@ -171,7 +169,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
       ->help_promt();
 
   smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+        smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < help_promt.size(); ++i) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
@@ -196,11 +194,11 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
       ->time_out_promt();
 
   smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+        smart_objects::SmartType_Array);
 
   for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+          smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
     so_time_out_promt[i] = timeoutPrompt;
   }
@@ -216,9 +214,7 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
-
-  smart_objects::SmartObject help_title(app->name());
-  app->set_vr_help_title(help_title);
+  app->reset_vr_help_title();
 
   return true;
 }
@@ -229,26 +225,7 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
-
-  const CommandsMap& cmdMap = app->commands_map();
-  smart_objects::SmartObject vr_help_items;
-
-  int index = 0;
-  CommandsMap::const_iterator command_it = cmdMap.begin();
-
-  for (; cmdMap.end() != command_it; ++command_it) {
-    if (false == (*command_it->second).keyExists(strings::vr_commands)) {
-      LOG4CXX_ERROR(logger_, "VR synonyms are empty");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return false;
-    }
-    // use only first
-    vr_help_items[index][strings::position] = index;
-    vr_help_items[index++][strings::text] =
-        (*command_it->second)[strings::vr_commands][0];
-  }
-
-  app->set_vr_help(vr_help_items);
+  app->reset_vr_help();
 
   return true;
 }

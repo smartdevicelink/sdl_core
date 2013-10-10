@@ -1,4 +1,6 @@
 /**
+ * @file PlayerState.qml
+ * @brief List of parameters for each player.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -28,50 +30,21 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
+import QtQuick 2.0
 
-#ifndef MULTITHREADED_MAP_CLASS
-#define MULTITHREADED_MAP_CLASS
+Item {
+    // Media players
+    property string playPauseState
+    property string albumImage
+    property string trackNumber
+    property int songPosition
+    property string trackName
 
-// TODO(AK): Are we use it?
+    // Radio Players
+    property var presets: []
 
-#include <map>
-
-template <typename T, typename K> class MultithreadingMap
-{
-public:
-    MultithreadingMap();
-    ~MultithreadingMap();
-
-    int size() const;
-
-    bool empty() const;
-
-    void insert( const std::pair<const T,K> & element );
-
-    K & find( const T & key );
-
-private:
-    std::multimap<T,K> mMap;
-
-    /**
-      *\brief Mutex for queue locking.
-    */
-    mutable pthread_mutex_t mMutex;
-
-};
-
-template <typename T, typename K> MultithreadingMap<T,K>::MultithreadingMap() :
-mMutex( PTHREAD_MUTEX_INITIALIZER )
-{
-    pthread_mutex_init( &mMutex, NULL );
+    // Both players
+    property string songName
+    property string albumName
 }
-
-template <typename T, typename K> MultithreadingMap<T,K>::~MultithreadingMap()
-{
-    pthread_mutex_destroy( &mMutex );
-}
-
-
-
-#endif // MULTITHREADED_MAP_CLASS

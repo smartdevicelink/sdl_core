@@ -399,6 +399,7 @@
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
+  <element name="turnText"/>
 </enum>
 
 <enum name="TextAlignment">
@@ -1380,7 +1381,7 @@
     <param name="cmdID" type="Integer" mandatory="true">
       <description>ID of of the command (list of strings)</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true">
+    <param name="appID" type="Integer" mandatory="false">
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
@@ -1863,11 +1864,11 @@
       <param name="turnIcon" type="Common.Image" mandatory="false">
        <description>Icon (as a prompting for the turn) to be displayed.</description>
       </param>
-      <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
+      <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
         <description>Fraction of distance till next maneuver (from previous maneuver).</description>
         <description>May be used to calculate progress bar.</description>
       </param>
-      <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
+      <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
         <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
         <description>May be used to calculate progress bar.</description>
       </param>
