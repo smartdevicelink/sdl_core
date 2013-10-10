@@ -39,10 +39,38 @@
 #include "optional_argument.h"
 #include "stream_qvariant.h"
 
-inline void RaiseDbusError(QObject* adaptor) {
+enum ErrorCode
+{
+	Success = 0,
+	UnsupportedRequest,
+	UnsupportedResource,
+	Disallowed,
+	Rejected,
+	Aborted,
+	Ignored,
+	Retry,
+	InUse,
+	DataNotAvailable,
+	TimedOut,
+	InvalidData,
+	CharLimitExceeded,
+	InvalidId,
+	DuplicateName,
+	ApplicationNotRegistered,
+	WrongLanguage,
+	OutOfMemory,
+	TooManyPendingRequests,
+	NoAppsRegistered,
+	NoDevicesConnected,
+	Warnings,
+	GenericError,
+	UserDisallowed
+};
+
+inline void RaiseDbusError(QObject* adaptor, int code) {
     QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());
     if (context) {
-        context->sendErrorReply(QDBusError::InternalError, "Returned value is invalid");
+        context->sendErrorReply(QDBusError::InternalError, QString::number(static_cast<int>(code)));
     }
 }
 
