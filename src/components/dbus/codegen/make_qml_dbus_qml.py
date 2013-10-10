@@ -50,13 +50,17 @@ class Impl(FordXmlParser):
         name = request.get('name')
         name = name[:1].lower() + name[1:]
         out.write("  function " + name + "(params) {\n")
-        out.write("     return sdl" + ifacename + "." + name + "(")
+	out.write("      try {\n")
+        out.write("          return sdl" + ifacename + "." + name + "(")
         params = request.findall('param')
         for i in range(len(params)):
             out.write('params.' + params[i].get('name'))
             if i <> len(params) - 1:
                 out.write(', ')
         out.write(")\n")
+        out.write("      } catch(err) {\n")
+        out.write("""          return { "__errno": err }\n""")
+        out.write("      }\n")
         out.write("  }\n\n")
 
 
