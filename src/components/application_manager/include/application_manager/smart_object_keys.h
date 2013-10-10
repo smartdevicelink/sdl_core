@@ -142,6 +142,7 @@ const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
 const char image_type[] = "imageType";
 const char image[] = "image";
+const char type[] = "type";
 
 const char filenames[] = "filenames";
 
@@ -233,6 +234,7 @@ const char language[] = "language";
 const char display_capabilities[] = "displayCapabilities";
 const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
 const char soft_button_capabilities[] = "softButtonCapabilities";
+const char image_supported[] = "imageSupported";
 const char button_capabilities[] = "buttonCapabilities";
 const char capabilities[] = "capabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";

@@ -218,6 +218,19 @@ class MessageHelper {
       int result_code);
 
     /*
+     * @brief Verify image and add image file full path
+     *
+     * @param SmartObject with image
+     *
+     * @param app current application
+     *
+     * @return verification result
+     *
+     */
+    static mobile_apis::Result::eType VerifyImage(smart_objects::SmartObject& image,
+                            const Application* app);
+
+    /*
      * @brief Finds "Image" structure in request and verify image file presence
      *                      in Core.
      *
@@ -231,10 +244,9 @@ class MessageHelper {
     static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, const Application* app);
 
-    static void AddSoftButtonsDefaultSystemAction(
-      smart_objects::SmartObject& msg_params);
-
-
+    static mobile_apis::Result::eType ProcessSoftButtons(
+                                  smart_objects::SmartObject& message_params,
+                                  const Application* app);
 
     /*
      * @brief Verify application and tts name in RefisterAppInterface request msg_params
