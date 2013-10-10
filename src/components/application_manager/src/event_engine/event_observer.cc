@@ -36,8 +36,10 @@
 namespace application_manager {
 namespace event_engine {
 
-EventObserver::EventObserver(const std::string& name)
-: name_(name) {
+EventObserver::EventObserver()
+ : id_(0) {
+  //Get unique id based on this
+  id_ = reinterpret_cast<unsigned long>(this);
 }
 
 EventObserver::~EventObserver() {

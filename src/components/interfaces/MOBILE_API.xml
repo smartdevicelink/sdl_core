@@ -3511,13 +3511,13 @@
   </function>
 
   <function name="ShowConstantTBT" functionID="ShowConstantTBTID" messagetype="request">
-    <param name="navigationText1" type="String" maxlength="500" mandatory="false">
+    <param name="navigationText1" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="navigationText2" type="String" maxlength="500" mandatory="false">
+    <param name="navigationText2" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="eta" type="String" maxlength="500" mandatory="false">
+    <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="totalDistance" type="String" maxlength="500" mandatory="false">
+    <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="turnIcon" type="Image" mandatory="false">
     </param>
@@ -3539,7 +3539,7 @@
       	If omitted the value will be assumed as FALSE.
       </description>
     </param>
-    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true">
+    <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
       <description>
       	Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
       	If omitted on supported displays, the currently displayed SoftButton values will not change.

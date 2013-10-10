@@ -47,15 +47,6 @@ const int RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
 
-/*RequestWatchdog* RequestWatchdog::sInstance_ = 0;
-
-std::list<WatchdogSubscriber*> RequestWatchdog::subscribers_;
-std::map<RequestInfo, struct timeval> RequestWatchdog::requests_;
-sync_primitives::SynchronisationPrimitives RequestWatchdog::instanceMutex_;
-sync_primitives::SynchronisationPrimitives
-RequestWatchdog::subscribersListMutex_;
-sync_primitives::SynchronisationPrimitives RequestWatchdog::requestsMapMutex_;*/
-
 Watchdog* RequestWatchdog::instance() {
   static RequestWatchdog instance;
   return &instance;
@@ -82,7 +73,6 @@ void RequestWatchdog::AddListener(WatchdogSubscriber* subscriber) {
   subscribersListMutex_.lock();
 
   subscribers_.push_back(subscriber);
-  //startDispatcherThreadIfNeeded();
 
   LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was added.");
 
@@ -95,7 +85,6 @@ void RequestWatchdog::RemoveListener(WatchdogSubscriber* subscriber) {
   subscribersListMutex_.lock();
 
   subscribers_.remove(subscriber);
-  //stopDispatcherThreadIfNeeded();
 
   LOG4CXX_INFO(logger_, "Subscriber " << subscriber << " was removed.");
 
@@ -144,8 +133,6 @@ void RequestWatchdog::addRequest(RequestInfo requestInfo) {
                << "\n CustomTimeOut : " << requestInfo.customTimeout_
                << "\n");
 
-  //startDispatcherThreadIfNeeded();
-
   requestsMapMutex_.unlock();
 }
 
@@ -171,8 +158,6 @@ void RequestWatchdog::removeRequest(int connection_key,
       break;
     }
   }
-
-  //stopDispatcherThreadIfNeeded();
 
   requestsMapMutex_.unlock();
 }
@@ -223,7 +208,6 @@ RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
 
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
-  //std::vector<RequestInfo> expiredRequests = std::vector<RequestInfo>();
   std::map<RequestInfo, struct timeval>::iterator it;
   std::map<RequestInfo, struct timeval>::iterator it_temp;
 
@@ -275,12 +259,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     }
 
     instance->requestsMapMutex_.unlock();
-
-    /*for_each(expiredRequests.begin(), expiredRequests.end(),
-             std::bind1st(std::mem_fun(&RequestWatchdog::removeRequest),
-                          RequestWatchdog::instance()));
-
-    expiredRequests.clear();*/
 
     cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
     cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *

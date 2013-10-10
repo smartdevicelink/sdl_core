@@ -50,7 +50,6 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  EventObserver("PerformInteractionRequest"),
   timer_(this, &PerformInteractionRequest::onTimer) {
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
@@ -59,9 +58,20 @@ PerformInteractionRequest::PerformInteractionRequest(
 PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
-
 void PerformInteractionRequest::onTimer() const{
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimer");
+}
+
+bool PerformInteractionRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  }
+
+  return true;
 }
 
 void PerformInteractionRequest::Run() {

@@ -63,6 +63,12 @@ class AlertRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
  private:
   /*
    * @brief Sends UI Alert request
@@ -86,6 +92,9 @@ class AlertRequest : public CommandRequestImpl {
   void SendPlayToneNotification(int app_id);
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
+
+  bool is_tts_speak_send_;
+  bool is_tts_speak_received_;
 };
 
 }  // namespace commands

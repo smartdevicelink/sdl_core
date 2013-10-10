@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -51,7 +52,8 @@ namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
-class CommandRequestImpl : public CommandImpl {
+class CommandRequestImpl : public CommandImpl,
+    public event_engine::EventObserver   {
  public:
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
@@ -65,6 +67,21 @@ class CommandRequestImpl : public CommandImpl {
    *
    */
   virtual void onTimeOut() const;
+
+  /**
+   * @brief Default EvenObserver's pure virtual method implementation
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief Retrieves request default timeout.
+   * If request has a custom timeout, request_timeout_ should be reassign to it
+   *
+   * @return Request default timeout
+   */
+  inline unsigned int default_timeout() const;
 
   /*
    * @brief Retrieves request ID
@@ -111,6 +128,18 @@ class CommandRequestImpl : public CommandImpl {
                         unsigned int chaining_counter = 0);
 
   /*
+   * @brief Sends HMI request
+   *
+   * @param function_id HMI request ID
+   * @param msg_params HMI request msg params
+   * @param use_events true if we need subscribe on event(HMI request)
+   *
+   */
+  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+                      const NsSmart::SmartObject* msg_params = NULL,
+                      bool use_events = false);
+
+  /*
    * @brief Creates HMI request
    *
    * @param function_id HMI request ID
@@ -121,10 +150,15 @@ class CommandRequestImpl : public CommandImpl {
 
  protected:
   MessageChaining* msg_chaining_;
+  unsigned int  default_timeout_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
+
+unsigned int CommandRequestImpl::default_timeout() const {
+  return default_timeout_;
+}
 
 int CommandRequestImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
