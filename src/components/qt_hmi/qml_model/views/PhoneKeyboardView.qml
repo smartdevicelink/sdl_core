@@ -42,7 +42,7 @@ GeneralView{
     Item {
         function changeColorOfActiveButtons() {
             for (var i = 0; i < contactsListModel.count; i++) {
-                myArray[contactsListModel.get(i).name[0].toUpperCase()] = true
+                activeButtons[contactsListModel.get(i).name[0].toUpperCase()] = true
             }
         }
 
@@ -51,7 +51,7 @@ GeneralView{
 
         property string defaultColor: "#1d81d5"
         property string emptyLetterColor: "grey"
-        property var myArray: {
+        property var activeButtons: {
             "A": false, "B": false, "C": false, "D": false, "E": false,
             "F": false, "G": false, "H": false, "I": false, "J": false,
             "K": false, "L": false, "M": false, "N": false, "O": false,
@@ -83,13 +83,13 @@ GeneralView{
                         CircleBtn {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
-                            textColorDefault: phoneKeyboard.myArray[upperRow.contentLoader.charAt(index)]
+                            textColorDefault: phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]
                                               ? phoneKeyboard.defaultColor : phoneKeyboard.emptyLetterColor
                             text: upperRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
                                 if (isPressed == false){
-                                    if (phoneKeyboard.myArray[upperRow.contentLoader.charAt(index)]) {
+                                    if (phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")
                                     }
@@ -108,13 +108,13 @@ GeneralView{
                         CircleBtn {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
-                            textColorDefault: phoneKeyboard.myArray[middleRow.contentLoader.charAt(index)]
+                            textColorDefault: phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]
                                               ? phoneKeyboard.defaultColor : phoneKeyboard.emptyLetterColor
                             text: middleRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
                                 if (isPressed == false){
-                                    if (phoneKeyboard.myArray[middleRow.contentLoader.charAt(index)]) {
+                                    if (phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")
                                     }
@@ -133,13 +133,13 @@ GeneralView{
                         CircleBtn {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
-                            textColorDefault: phoneKeyboard.myArray[lowerRow.contentLoader.charAt(index)]
+                            textColorDefault: phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]
                                               ? phoneKeyboard.defaultColor : phoneKeyboard.emptyLetterColor
                             text: lowerRow.contentLoader.charAt(index)
                             pixelSize: 25
                             onIsPressedChanged: {
                                 if (isPressed == false){
-                                    if (phoneKeyboard.myArray[lowerRow.contentLoader.charAt(index)]) {
+                                    if (phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]) {
                                         dataContainer.contactsFirstLetter = text
                                         contentLoader.go("./views/ContactsListView.qml")
                                     }
