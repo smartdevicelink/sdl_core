@@ -59,6 +59,11 @@ class AlertRequest : public CommandRequestImpl {
   virtual ~AlertRequest();
 
   /**
+   * @brief Initialize request params
+   **/
+  virtual bool Init();
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();

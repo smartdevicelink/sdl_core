@@ -48,6 +48,18 @@ SliderRequest::SliderRequest(const MessageSharedPtr& message)
 SliderRequest::~SliderRequest() {
 }
 
+bool SliderRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  }
+
+  return true;
+}
+
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
