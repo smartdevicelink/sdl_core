@@ -10,7 +10,7 @@
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
-#include "mobile_message_handler/mobile_message_handler_test.h"
+//#include "mobile_message_handler/mobile_message_handler_test.h"
 //#include "SmartObjectConvertionTimeTest.h"
 //#include "jsoncpp/json_reader_test.h"
 //#include "json_handler/smart_schema_draft_test.h"
@@ -20,7 +20,7 @@
 //#include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
 
-using namespace test::components::mobile_message_handler_test;
+//using namespace test::components::mobile_message_handler_test;
 using namespace test::components::request_watchdog_test;
 using namespace test::components::utils;
 using namespace test::components::protocol_handler_test;
@@ -31,7 +31,18 @@ using namespace utils;
 //using namespace test::components::json_handler::smart_schema_draft_test;
 //using namespace test::components::json_handler::formatters;
 
+#ifdef __cplusplus
+extern "C" void __gcov_flush();
+#endif
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
+
+  int result = RUN_ALL_TESTS();
+
+#ifdef __cplusplus
+  __gcov_flush();
+#endif
+
+  return result;
 }

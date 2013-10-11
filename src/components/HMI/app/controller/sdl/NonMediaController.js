@@ -102,6 +102,7 @@ SDL.NonMediaController = Em.Object.create( {
             if (SDL.States.info.nonMedia.active) {
                 SDL.States.goToStates('info.apps');
             }
+            SDL.InfoController.set('activeState', 'info.apps');
             this.set('currentAppId', 0);
         }
     }

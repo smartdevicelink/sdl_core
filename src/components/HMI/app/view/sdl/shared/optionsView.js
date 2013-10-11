@@ -113,8 +113,8 @@ SDL.OptionsView = SDL.SDLAbstractView.create({
 
         if (SDL.SDLAppController.model) {
 
-            if (SDL.SDLAppController.model.get('currentSubMenuId') > 0) {
-                SDL.SDLAppController.onSubMenu(0);
+            if (SDL.SDLAppController.model.get('currentSubMenuId') >= 0) {
+                SDL.SDLAppController.onSubMenu('top');
             }else{
                 this._super();
                 SDL.SDLController.onSystemContextChange();

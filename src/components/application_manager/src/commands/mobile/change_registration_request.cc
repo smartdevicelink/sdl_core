@@ -233,15 +233,15 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
     if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
       application->set_ui_language(static_cast<mobile_api::Language::eType>(
-              message[strings::msg_params][strings::language].asInt()));
+          (*message_)[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
     if (hmi_apis::Common_Result::SUCCESS == vr_result_
         || hmi_apis::Common_Result::SUCCESS == tts_result_) {
       application->set_language(
           static_cast<mobile_api::Language::eType>(
-              message[strings::msg_params]
-                     [strings::hmi_display_language].asInt()));
+              (*message_)[strings::msg_params]
+                          [strings::language].asInt()));
     }
 
     int greates_result_code = std::max(std::max(ui_result_, vr_result_),

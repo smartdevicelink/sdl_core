@@ -51,8 +51,12 @@ void UIGetCapabilitiesResponse::Run() {
       (*message_)[strings::msg_params][hmi_response::display_capabilities]);
   ApplicationManagerImpl::instance()->set_hmi_zone_capabilities(
       (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
-  ApplicationManagerImpl::instance()->set_soft_button_capabilities(
+
+  if ((*message_)[strings::msg_params].keyExists(
+                                      hmi_response::soft_button_capabilities)) {
+    ApplicationManagerImpl::instance()->set_soft_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
+  }
 }
 
 }  // namespace commands

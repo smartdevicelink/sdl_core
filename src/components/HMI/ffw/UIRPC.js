@@ -204,10 +204,7 @@ FFW.UI = FFW.RPCObserver
                 case "UI.DeleteCommand": {
 
                     SDL.SDLController.getApplicationModel(request.params.appID)
-                        .deleteCommand(request.params.cmdID);
-                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
+                        .deleteCommand(request.params.cmdID, request.id);
 
                     break;
                 }
@@ -248,7 +245,7 @@ FFW.UI = FFW.RPCObserver
                             .sendError(resultCode,
                                 request.id,
                                 request.method,
-                                'Request is ignored, because the intended result is already in effect.');
+                                'Request is ignored, illegal parameters.');
                     }
 
                     break;
@@ -382,17 +379,13 @@ FFW.UI = FFW.RPCObserver
                                     "DYNAMIC"
                                 ]
                             },
-                            "hmiZoneCapabilities": [
-                                "FRONT"
-                            ],
-                            "softButtonCapabilities": [
-                                {
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true,
-                                    "imageSupported": true
-                                }
-                            ],
+                            "hmiZoneCapabilities": "FRONT",
+                            "softButtonCapabilities": {
+                                "shortPressAvailable": true,
+                                "longPressAvailable": true,
+                                "upDownAvailable": true,
+                                "imageSupported": true
+                            },
                             "code": SDL.SDLModel.resultCode["SUCCESS"],
                             "method": "UI.GetCapabilities"
                         }

@@ -71,9 +71,6 @@ void UISetMediaClockTimerResponse::Run() {
 
   msg_chain->set_ui_response_result(code);
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
-
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SetMediaClockTimerID;

@@ -399,6 +399,7 @@
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
+  <element name="turnText"/>
 </enum>
 
 <enum name="TextAlignment">

@@ -31,7 +31,7 @@
 */
 
 #include "utils/logger.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/request_controller.h"
 
@@ -63,20 +63,17 @@ void RequestController::addRequest(const Request& request) {
   list_mutex_.lock();
   request_list_.push_back(request);
 
-  unsigned int default_timeout =
-      profile::Profile::instance()->default_timeout();
-
-  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-               << default_timeout);
-
   const commands::CommandRequestImpl* request_impl =
       (static_cast<commands::CommandRequestImpl*>(&(*request)));
+
+  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+               << request_impl->default_timeout());
 
   watchdog_->addRequest(request_watchdog::RequestInfo(
       request_impl->function_id(),
       request_impl->connection_key(),
       request_impl->correlation_id(),
-      default_timeout));
+      request_impl->default_timeout()));
 
   LOG4CXX_INFO(logger_, "Added request to watchdog.");
 

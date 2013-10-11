@@ -36,14 +36,17 @@
 #include "application_manager/message_chaining.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
 namespace commands {
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
-    : CommandImpl(message),
-      msg_chaining_(NULL) {
+ : CommandImpl(message),
+   msg_chaining_(NULL),
+   default_timeout_(profile::Profile::instance()->default_timeout()) {
+
 }
 
 CommandRequestImpl::~CommandRequestImpl() {
