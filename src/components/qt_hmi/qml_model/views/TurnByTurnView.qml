@@ -53,11 +53,40 @@ GeneralView {
             width: parent.width
             height: parent.height * 3/4
 
+
             Row {
                 // top part for buttons
                 id: top
                 anchors.top: parent.top
                 anchors.left: parent.left
+
+               OvalButton {
+                   id: turnList
+                   height: 65
+                   fontSize: 18
+                   text: "Turn List"
+                   anchors.top: row.bottom
+                   anchors.topMargin: 0
+                   anchors.right: turnIcon.left
+                   anchors.rightMargin: 0
+                   anchors.left: parent.left
+                   anchors.leftMargin: 0
+                   onClicked: {
+                       contentLoader.go("./views/TbtTurnListView.qml");
+                  }
+               }
+
+        ListView {
+            id: softButton
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
+            anchors.right: turnIcon.left
+            anchors.rightMargin: 0
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            anchors.top: turnList.bottom
+            anchors.topMargin: 5
+            delegate: OvalButton {
                 width: parent.width
                 height: 1/4 * parent.height
                 spacing: (width - 4 * turnListButton.width) / 3

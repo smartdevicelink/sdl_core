@@ -67,7 +67,12 @@ Item {
     }
 
     function updateTurnList(turnList, softButtons, appID) {
-
+        turnList.forEach(fillTurnList);
+        if (softButtons !== undefined) {
+            dataContainer.navigationModel.softButtons.clear();
+            softButtons.forEach(fillSoftButtons);
+        }
+        dataContainer.navigationModel.appId = appID;
     }
 
     function fillTexts(element, index, array) {
@@ -97,5 +102,9 @@ Item {
                         buttonId: element.softButtonID,
                         action: element.systemAction
                     });
+    }
+
+    function fillTurnList(element, index, array) {
+
     }
 }
