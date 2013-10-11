@@ -50,6 +50,21 @@ ScrollabelMessageRequest::ScrollabelMessageRequest(
 ScrollabelMessageRequest::~ScrollabelMessageRequest() {
 }
 
+bool ScrollabelMessageRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  } else {
+    const int def_value = 30000;
+    default_timeout_ = def_value;
+  }
+
+  return true;
+}
+
 void ScrollabelMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
