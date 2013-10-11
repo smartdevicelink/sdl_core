@@ -43,10 +43,7 @@ GeneralView {
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         anchors.fill: parent
-        albumImage: "../res/album_art.png"
-        trackName: dataContainer.hmiUIText.mainField1
-        albumName: dataContainer.hmiUIText.mainField2
-        trackNumber: dataContainer.hmiUIText.mainField3
+        playerState: dataContainer.sdlPlayerState
 
         topOvalButtons: [
             Row {

@@ -125,14 +125,14 @@ Rectangle {
     }
 
     function show () {
-        dataContainer.hmiSavedContext = dataContainer.hmiContext
-        dataContainer.hmiContext = Common.SystemContext.SYSCTXT_ALERT
+        dataContainer.systemSavedContext = dataContainer.systemContext
+        dataContainer.systemContext = Common.SystemContext.SYSCTXT_ALERT
         dataContainer.applicationSavedContext = dataContainer.applicationContext
         visible = true
     }
 
     function hide () {
-        dataContainer.hmiContext = dataContainer.hmiSavedContext
+        dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
     }

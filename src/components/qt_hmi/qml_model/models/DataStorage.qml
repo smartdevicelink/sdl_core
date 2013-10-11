@@ -61,7 +61,7 @@ Item {
     property int systemContext
     property bool applicationContext: false
 
-    property int hmiSavedContext
+    property int systemSavedContext
     property bool applicationSavedContext
 
     property string route_text: ""

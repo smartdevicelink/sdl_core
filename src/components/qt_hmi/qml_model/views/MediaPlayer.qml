@@ -100,7 +100,7 @@ Item {
                 id: image
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                source: albumImage
+                source: playerState.albumImage
             }
 
             Item {
@@ -120,7 +120,7 @@ Item {
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: textColor
-                    text: trackName
+                    text: playerState.trackName
                     font.pixelSize: 45
                     font.bold: true
                 }
@@ -130,7 +130,7 @@ Item {
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: textColor
-                    text: albumName
+                    text: playerState.albumName
                     font.pixelSize: 25
                 }
 
@@ -138,7 +138,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     color: textColor
-                    text: trackNumber
+                    text: playerState.trackNumber
                     font.pixelSize: 20
                 }
             }

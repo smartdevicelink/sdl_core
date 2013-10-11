@@ -130,7 +130,7 @@ Rectangle {
                             dataContainer.applicationContext = item.applicationContext
                         }
                         else {
-                            dataContainer.hmiSavedContext = item.systemContext
+                            dataContainer.systemSavedContext = item.systemContext
                             dataContainer.applicationSavedContext = item.applicationContext
                         }
                     }
