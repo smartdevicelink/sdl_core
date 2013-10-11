@@ -38,10 +38,22 @@ import "../hmi_api/Common.js" as Common
 Item {
     ListModel {
         id: deviceListModel
+        ListElement {
+            name: "Device 1"
+            devid: 1
+        }
     }
 
     ListModel {
         id: applicationListModel
+        ListElement {
+            appName: "SyncProxyTester"
+            icon: "../res/SPT.png"
+            deviceName: "Device 1"
+            appId: 1
+            hmiDisplayLanguageDesired: 0
+            isMediaApplication: 1
+        }
     }
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
