@@ -150,9 +150,9 @@ Rectangle {
             width: 40
             height: 40
             anchors.verticalCenter: parent.verticalCenter
+
             visible: iconSource ? 1 : 0
         }
-
         Text {
             id: label
             color: parent.parent.highlighted ? "yellow" : Constants.primaryColor

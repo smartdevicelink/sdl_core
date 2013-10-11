@@ -92,7 +92,7 @@ Item {
                     {
                         type: element.type,
                         name: element.text,
-                        image: element.image,
+                        image: element.image ? element.image : {},
                         isHighlighted: element.isHighlighted,
                         buttonId: element.softButtonID,
                         action: element.systemAction

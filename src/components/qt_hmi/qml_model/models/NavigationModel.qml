@@ -40,8 +40,6 @@ Item {
     property string totalDistance: ""
     property string eta: ""
     property var icon: null
-    property url pathIcon: "../res/album_art.png"
-    property string imageIcon: ""
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
     property bool maneuverComplete: null
