@@ -33,7 +33,7 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 
 Image {
@@ -55,7 +55,7 @@ Image {
     Text {
         anchors.centerIn: parent
         id: btnText
-        color: Constant.primaryColor
+        color: Constants.primaryColor
     }
 
     MouseArea {
@@ -63,17 +63,17 @@ Image {
         anchors.fill: parent
         onPressed: {
             source = "../res/buttons/long_oval_pressed_btn.png"
-            btnText.color = Constant.secondaryColor
+            btnText.color = Constants.secondaryColor
             isPressed = true
         }
         onReleased: {
             source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constant.primaryColor
+            btnText.color =  Constants.primaryColor
             isPressed = false
         }
         onCanceled: {
             source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constant.primaryColor
+            btnText.color =  Constants.primaryColor
             isPressed = false
         }
 

@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView{
     Component.onCompleted: phoneKeyboard.changeColorOfActiveButtons()
@@ -50,8 +50,6 @@ GeneralView{
         id: phoneKeyboard
         anchors.fill: parent
 
-//        property string defaultColor: "#1d81d5"
-//        property string emptyLetterColor: "grey"
         property var activeButtons: {
             "A": false, "B": false, "C": false, "D": false, "E": false,
             "F": false, "G": false, "H": false, "I": false, "J": false,
@@ -85,9 +83,9 @@ GeneralView{
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]
-                                              ? Constant.primaryColor : Constant.inactiveButtonTextColor
+                                              ? Constants.primaryColor : Constants.inactiveButtonTextColor
                             text: upperRow.contentLoader.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
                             onIsPressedChanged: {
                                 if (!isPressed){
                                     if (phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]) {
@@ -110,9 +108,9 @@ GeneralView{
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]
-                                              ? Constant.primaryColor : Constant.inactiveButtonTextColor
+                                              ? Constants.primaryColor : Constants.inactiveButtonTextColor
                             text: middleRow.contentLoader.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
                             onIsPressedChanged: {
                                 if (!isPressed){
                                     if (phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]) {
@@ -135,9 +133,9 @@ GeneralView{
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]
-                                              ? Constant.primaryColor : Constant.inactiveButtonTextColor
+                                              ? Constants.primaryColor : Constants.inactiveButtonTextColor
                             text: lowerRow.contentLoader.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
                             onIsPressedChanged: {
                                 if (!isPressed){
                                     if (phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]) {

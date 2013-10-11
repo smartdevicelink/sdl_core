@@ -34,7 +34,7 @@
 
 import QtQuick 2.0
 import "../controls"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Item {
@@ -61,7 +61,7 @@ GeneralView {
 
             delegate: Text  {
                 text: name
-                color: Constant.primaryColor
+                color: Constants.primaryColor
                 font.pixelSize: 40
             }
         }

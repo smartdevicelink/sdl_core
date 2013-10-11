@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 Item {
     id: radioPlayerView
@@ -64,7 +64,7 @@ Item {
 
             LongOvalButton {
                 text: radioName
-                pixelSize: Constant.fontSize
+                pixelSize: Constants.fontSize
                 dest: "./views/MusicSourceView.qml"
             }
 
@@ -72,7 +72,7 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 text: "Tune"
-                pixelSize: Constant.fontSize
+                pixelSize: Constants.fontSize
             }
         }
 
@@ -91,27 +91,27 @@ Item {
                 Row {
                     Text {
                         id: radioChannelNameText
-                        color: Constant.primaryColor
+                        color: Constants.primaryColor
                         text: playerState.presets[0]
                         font.pixelSize: 45
                     }
                     Text {
                         anchors.bottom: radioChannelNameText.bottom
-                        color: Constant.primaryColor
+                        color: Constants.primaryColor
                         text: " " + radioType
                         font.pixelSize: 25
                     }
                 }
 
                 Text {
-                    color: Constant.primaryColor
+                    color: Constants.primaryColor
                     text: playerState.songName
                     font.pixelSize: 25
                     font.bold: true
                 }
 
                 Text {
-                    color: Constant.primaryColor
+                    color: Constants.primaryColor
                     text: playerState.albumName
                     font.pixelSize: 25
                 }
@@ -142,7 +142,7 @@ Item {
             anchors.left: parent.left
             width: parent.width
             height: 2
-            color: Constant.primaryColor
+            color: Constants.primaryColor
         }
 
         PresetRow {

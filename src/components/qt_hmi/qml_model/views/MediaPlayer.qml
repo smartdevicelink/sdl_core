@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 Item {
     id: mediaPlayerView
@@ -73,7 +73,7 @@ Item {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 text: playerName
-                pixelSize: Constant.fontSize
+                pixelSize: Constants.fontSize
                 dest: "./views/MusicSourceView.qml"
             }
 
@@ -81,7 +81,7 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 text: "Browse"
-                pixelSize: Constant.fontSize
+                pixelSize: Constants.fontSize
             }
         }
 
@@ -112,20 +112,20 @@ Item {
                     spacing: parent.height / 5
 
                     Text {
-                        color: Constant.primaryColor
+                        color: Constants.primaryColor
                         text: "Track " + playerState.trackNumber
                         font.pixelSize: 20
                     }
 
                     Text {
-                        color: Constant.primaryColor
+                        color: Constants.primaryColor
                         text: playerState.trackName
                         font.pixelSize: 45
                         font.bold: true
                     }
 
                     Text {
-                        color: Constant.primaryColor
+                        color: Constants.primaryColor
                         text: playerState.albumName
                         font.pixelSize: 25
                     }
@@ -170,14 +170,14 @@ Item {
                    anchors.verticalCenter: parent.verticalCenter
                    height: 2
                    width: 2/3 * parent.width
-                   color: Constant.primaryColor
+                   color: Constants.primaryColor
                 }
             }
             Text {
                 anchors.right: parent.right
                 anchors.rightMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
-                color: Constant.primaryColor
+                color: Constants.primaryColor
                 text: "04:23"
                 font.pixelSize: 18
             }

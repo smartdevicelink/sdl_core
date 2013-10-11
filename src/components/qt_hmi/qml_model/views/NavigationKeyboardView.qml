@@ -34,7 +34,7 @@
 
 import QtQuick 2.0
 import "../controls"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Item {
@@ -54,8 +54,8 @@ GeneralView {
                 anchors.top:parent.top
                 anchors.left:parent.left
                 maximumLength: 30
-                color: Constant.primaryColor
-                font.pixelSize: Constant.fontSize
+                color: Constants.primaryColor
+                font.pixelSize: Constants.fontSize
                 text: dataContainer.route_text
             }
 
@@ -73,7 +73,7 @@ GeneralView {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: upperRow.qWERTY.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
 
                             onClicked: {
                                 dataContainer.route_text += upperRow.qWERTY.charAt(index)
@@ -99,7 +99,7 @@ GeneralView {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: middleRow.aSDFGH.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
 
                             onClicked: {
                                 dataContainer.route_text += middleRow.aSDFGH.charAt(index)
@@ -142,7 +142,7 @@ GeneralView {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: lowerRow.zXCVBN.charAt(index)
-                            pixelSize: Constant.fontSize
+                            pixelSize: Constants.fontSize
 
                             onClicked: {
                                 dataContainer.route_text += lowerRow.zXCVBN.charAt(index)
@@ -185,8 +185,8 @@ GeneralView {
                     id: goText
                     anchors.centerIn: parent
                     text: "Go"
-                    color: Constant.primaryColor
-                    font.pixelSize: Constant.fontSize
+                    color: Constants.primaryColor
+                    font.pixelSize: Constants.fontSize
                 }
 
                 MouseArea {
@@ -194,12 +194,12 @@ GeneralView {
 
                     onPressed: {
                         goBtn.source = "../res/buttons/short_oval_btn_pressed.png"
-                        goText.color = Constant.pressedButtonTextColor
+                        goText.color = Constants.pressedButtonTextColor
                     }
 
                     onReleased: {
                         goBtn.source = "../res/buttons/short_oval_btn.png"
-                        goText.color = Constant.primaryColor
+                        goText.color = Constants.primaryColor
                     }
 
                     onClicked: {

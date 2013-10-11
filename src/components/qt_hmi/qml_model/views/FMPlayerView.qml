@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     category: Common.DeactivateReason.AUDIO
@@ -55,7 +55,7 @@ GeneralView {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 source: "../res/buttons/long_oval_btn.png"
-                property string textColor: Constant.primaryColor
+                property string textColor: Constants.primaryColor
 
                 Row {
                     anchors.centerIn: parent
@@ -72,7 +72,7 @@ GeneralView {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "1"
                         color: fmRadioPlayer.hdButtonValue === 1 ? "white" : hdButton.textColor
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
 
                     Text {
@@ -80,7 +80,7 @@ GeneralView {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "2"
                         color: fmRadioPlayer.hdButtonValue === 2 ? "white" : hdButton.textColor
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
 
                     Text {
@@ -88,7 +88,7 @@ GeneralView {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "3"
                         color: fmRadioPlayer.hdButtonValue === 3 ? "white" : hdButton.textColor
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
 
                     Text {
@@ -96,7 +96,7 @@ GeneralView {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "4"
                         color: fmRadioPlayer.hdButtonValue === 4 ? "white" : hdButton.textColor
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
                 }
 
@@ -105,13 +105,13 @@ GeneralView {
                     onPressed: {
                         hdLogo.source = "../res/hd_logo_off.png"
                         hdButton.source = "../res/buttons/long_oval_pressed_btn.png"
-                        hdButton.textColor = Constant.secondaryColor
+                        hdButton.textColor = Constants.secondaryColor
 
                     }
                     onReleased: {
                         hdLogo.source = "../res/hd_logo_on.png"
                         hdButton.source = "../res/buttons/long_oval_btn.png"
-                        hdButton.textColor = Constant.primaryColor
+                        hdButton.textColor = Constants.primaryColor
                         fmRadioPlayer.hdButtonValue === 4 ? fmRadioPlayer.hdButtonValue = 1 : fmRadioPlayer.hdButtonValue++
                     }
                 }

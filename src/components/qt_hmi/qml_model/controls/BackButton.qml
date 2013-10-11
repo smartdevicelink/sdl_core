@@ -33,10 +33,10 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 LongOvalButton {
     text: "Back"
-    pixelSize: Constant.fontSize
+    pixelSize: Constants.fontSize
     onClicked: { contentLoader.back() }
 }

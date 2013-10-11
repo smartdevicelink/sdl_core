@@ -33,7 +33,7 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 Image {
     id: circleBtn
@@ -44,8 +44,8 @@ Image {
     property bool isPressed: false
     property string imgOff: "../res/buttons/round_btn.png"
     property string imgOn: "../res/buttons/round_pressed_btn.png"
-    property string textColorOnPressed: Constant.secondaryColor
-    property string textColorDefault: Constant.primaryColor
+    property string textColorOnPressed: Constants.secondaryColor
+    property string textColorDefault: Constants.primaryColor
 
     signal clicked()
     function wasClicked()

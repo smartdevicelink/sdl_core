@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     function setCurrent(firstLetter){
@@ -68,8 +68,8 @@ GeneralView {
             section.property: "name"
             section.criteria: ViewSection.FirstCharacter
             section.delegate: Text {
-                color: Constant.primaryColor
-                font.pixelSize: Constant.fontSize
+                color: Constants.primaryColor
+                font.pixelSize: Constants.fontSize
                 text: section.toUpperCase()
             }
 
@@ -80,22 +80,22 @@ GeneralView {
 
                 Text  {
                     text: name
-                    color: Constant.contactTextColor
-                    font.pixelSize: Constant.fontSize
+                    color: Constants.contactTextColor
+                    font.pixelSize: Constants.fontSize
                     anchors.left: parent.left
                 }
                 Text  {
                     id: phoneText
                     text: phone
-                    color: Constant.contactTextColor
-                    font.pixelSize: Constant.fontSize
+                    color: Constants.contactTextColor
+                    font.pixelSize: Constants.fontSize
                     anchors.left: parent.horizontalCenter
                 }
                 Text  {
                     id: typeText
                     text: type
-                    color: Constant.contactTextColor
-                    font.pixelSize: Constant.fontSize
+                    color: Constants.contactTextColor
+                    font.pixelSize: Constants.fontSize
                     anchors.right: parent.right
                 }
             }

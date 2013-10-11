@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     width: 647
@@ -43,8 +43,9 @@ GeneralView {
     applicationContext: true
 
     Rectangle {
-        property string textColor: Constant.primaryColor
+        property string textColor: Constants.primaryColor
         property string backgroundColor: "#000000"
+        //TODO {ALeshin}: Remove this color while refactoring
 
         id: main
         color: backgroundColor

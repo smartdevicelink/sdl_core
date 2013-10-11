@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Item {
@@ -51,7 +51,7 @@ GeneralView {
             Text {
                 width: parent.width
                 id: searchDeviceText
-                color: Constant.primaryColor
+                color: Constants.primaryColor
                 font.pixelSize: 40
             }
 
@@ -73,7 +73,7 @@ GeneralView {
                         }
                     }
                     text: name
-                    color: Constant.primaryColor
+                    color: Constants.primaryColor
                     font.pixelSize: 50
                 }
             }

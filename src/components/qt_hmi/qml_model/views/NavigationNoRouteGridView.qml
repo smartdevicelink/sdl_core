@@ -33,7 +33,7 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Item {
@@ -74,18 +74,18 @@ GeneralView {
                         anchors.centerIn: parent
                         text: "+"
                         color: "white"
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
 
                     MouseArea {
                         anchors.fill: parent
                         onPressed: {
                             parent.source = "../res/buttons/zoom_pressed.png"
-                            zoomInBtn.color = Constant.pressedButtonTextColor
+                            zoomInBtn.color = Constants.pressedButtonTextColor
                         }
                         onReleased:  {
                             parent.source = "../res/buttons/zoom.png"
-                            zoomInBtn.color = Constant.releasedButtonTextColor
+                            zoomInBtn.color = Constants.releasedButtonTextColor
                         }
 
                         onClicked: {
@@ -104,18 +104,18 @@ GeneralView {
                         anchors.centerIn: parent
                         text: "-"
                         color: "white"
-                        font.pixelSize: Constant.fontSize
+                        font.pixelSize: Constants.fontSize
                     }
 
                     MouseArea {
                         anchors.fill: parent
                         onPressed: {
                             parent.source = "../res/buttons/zoom_pressed.png"
-                            zoomOutBtn.color = Constant.pressedButtonTextColor
+                            zoomOutBtn.color = Constants.pressedButtonTextColor
                         }
                         onReleased:  {
                             parent.source = "../res/buttons/zoom.png"
-                            zoomOutBtn.color = Constant.releasedButtonTextColor
+                            zoomOutBtn.color = Constants.releasedButtonTextColor
                         }
 
                         onClicked: {
@@ -176,7 +176,7 @@ GeneralView {
                     anchors.left: destIcon.right
                     anchors.leftMargin: 5
                     text: "Destination"
-                    color: Constant.primaryColor
+                    color: Constants.primaryColor
                     font.pixelSize: 20
                 }
 
@@ -186,13 +186,13 @@ GeneralView {
                     onPressed: {
                         destSearch.source = "../res/buttons/longest_oval_btn_pressed.png"
                         destIcon.source = "../res/nav/dest_icon_black.png"
-                        destText.color = Constant.pressedButtonTextColor
+                        destText.color = Constants.pressedButtonTextColor
                     }
 
                     onReleased: {
                         destSearch.source = "../res/buttons/longest_oval_btn.png"
                         destIcon.source = "../res/nav/dest_icon.png"
-                        destText.color = Constant.primaryColor
+                        destText.color = Constants.primaryColor
                     }
 
                     onClicked: {

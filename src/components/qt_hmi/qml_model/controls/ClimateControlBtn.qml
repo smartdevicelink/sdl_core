@@ -33,7 +33,7 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constant
+import "../models/Constants.js" as Constants
 
 Item
 {
@@ -61,8 +61,8 @@ Item
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             text: climateControlBtn.txt
-            font.pixelSize: Constant.fontSize
-            color: climateControlBtn.state === "off" ? Constant.primaryColor : Constant.secondaryColor
+            font.pixelSize: Constants.fontSize
+            color: climateControlBtn.state === "off" ? Constants.primaryColor : Constants.secondaryColor
         }
 
         MouseArea {
@@ -72,7 +72,7 @@ Item
                     climateControlBtn.state = "off"
                     climateBtnImg.source = "../res/climate/climate_round_off_btn.png"
                     if(climateControlBtn.txt != "") {
-                        hoverText.color = Constant.primaryColor
+                        hoverText.color = Constants.primaryColor
                     }
                     if(climateControlBtn.name != "") {
                         hoverImg.source = "../res/climate/" + climateControlBtn.name + "_off.png"
@@ -81,7 +81,7 @@ Item
                     climateControlBtn.state = "on"
                     climateBtnImg.source = "../res/climate/climate_round_on_btn.png"
                     if(climateControlBtn.txt != "") {
-                        hoverText.color = Constant.secondaryColor
+                        hoverText.color = Constants.secondaryColor
                     }
                     if(climateControlBtn.name != "") {
                         hoverImg.source = "../res/climate/" + climateControlBtn.name + "_on.png"
