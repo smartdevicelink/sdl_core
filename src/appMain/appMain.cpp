@@ -57,7 +57,6 @@
 // ----------------------------------------------------------------------------
 // Third-Party includes
 #include "networking.h"  // cpplint: Include the directory when naming .h files
-#include "system.h"      // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
 
@@ -248,14 +247,10 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitHmi successful");
+  // --------------------------------------------------------------------------
 
-
-
-  printf("%s\n", "Before SubscribeToTerminateSignal.");
   utils::SubscribeToTerminateSignal(
     &main_namespace::LifeCycle::StopComponents);
-
-  // --------------------------------------------------------------------------
 
   while (true) {
     sleep(100500);

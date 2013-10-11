@@ -37,7 +37,7 @@
 namespace audio_manager {
 
 log4cxx::LoggerPtr AudioManagerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("AudioManagerImpl"));
+      log4cxx::Logger::getLogger("AudioManagerImpl"));
 
 AudioManagerImpl* AudioManagerImpl::sInstance_ = 0;
 
@@ -57,18 +57,25 @@ AudioManagerImpl::AudioManagerImpl()
 }
 
 AudioManagerImpl::~AudioManagerImpl() {
+  LOG4CXX_DEBUG(logger_, "AudioManager destructor called.");
+  stopMicrophoneRecording();
+  for (std::map<std::string, threads::Thread*>::iterator it =
+         sources_.begin(); sources_.end() != it;
+       ++it) {
+    removeA2DPSource(it->first);
+  }
 }
 
 void AudioManagerImpl::addA2DPSource(const std::string& device) {
   if (sources_.find(device) == sources_.end()) {
     sources_.insert(std::pair<std::string, threads::Thread*>(
-        device, NULL));
+                      device, NULL));
   }
 }
 
 void AudioManagerImpl::removeA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists
@@ -83,7 +90,7 @@ void AudioManagerImpl::removeA2DPSource(const std::string& device) {
       }
       // Delete allocated thread
       LOG4CXX_DEBUG(logger_, "Delete allocated thread");
-      delete (*it).second;
+      delete(*it).second;
     }
 
     sources_.erase(it);
@@ -92,12 +99,12 @@ void AudioManagerImpl::removeA2DPSource(const std::string& device) {
 
 void AudioManagerImpl::playA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists - allocate thread for the source
     (*it).second = new threads::Thread((*it).first.c_str(),
-        new A2DPSourcePlayerThread((*it).first));
+                                       new A2DPSourcePlayerThread((*it).first));
 
     if (NULL != (*it).second) {
       // Thread was successfully allocated - start thread
@@ -108,7 +115,7 @@ void AudioManagerImpl::playA2DPSource(const std::string& device) {
 
 void AudioManagerImpl::stopA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
-      sources_.find(device);
+    sources_.find(device);
 
   if (it != sources_.end()) {
     // Source exists
@@ -168,39 +175,37 @@ void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
 }
 
 void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
-                 mobile_apis::SamplingRate::eType samplingRate,
-                 int duration,
-                 mobile_apis::BitsPerSample::eType bitsPerSample,
-                 unsigned int session_key, unsigned int correlation_id) {
+    mobile_apis::SamplingRate::eType samplingRate,
+    int duration,
+    mobile_apis::BitsPerSample::eType bitsPerSample,
+    unsigned int session_key, unsigned int correlation_id) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   FromMicToFileRecorderThread* recordThreadDelegate =
-      new FromMicToFileRecorderThread();
+    new FromMicToFileRecorderThread();
 
-  if(NULL != recordThreadDelegate)
-  {
+  if (NULL != recordThreadDelegate) {
     recordThreadDelegate->setOutputFileName(outputFileName);
     recordThreadDelegate->setRecordDuration(duration);
 
     recorderThread_ = new threads::Thread("MicrophoneRecorder"
-        , recordThreadDelegate);
+                                          , recordThreadDelegate);
 
-    if(NULL != recorderThread_) {
+    if (NULL != recorderThread_) {
       recorderThread_->start();
     }
   }
 
   AudioStreamSenderThread* senderThreadDelegate =
-      new AudioStreamSenderThread(outputFileName,
-                                  static_cast<unsigned int>(session_key),
-                                  static_cast<unsigned int>(correlation_id));
+    new AudioStreamSenderThread(outputFileName,
+                                static_cast<unsigned int>(session_key),
+                                static_cast<unsigned int>(correlation_id));
 
-  if(NULL != recordThreadDelegate)
-  {
+  if (NULL != recordThreadDelegate) {
     senderThread_ = new threads::Thread("AudioStreamSender"
-        , senderThreadDelegate);
+                                        , senderThreadDelegate);
 
-    if(NULL != senderThread_) {
+    if (NULL != senderThread_) {
       senderThread_->start();
     }
   }
@@ -209,13 +214,13 @@ void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileNam
 void AudioManagerImpl::stopMicrophoneRecording() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if(NULL != recorderThread_) {
+  if (NULL != recorderThread_) {
     recorderThread_->stop();
     delete recorderThread_;
     recorderThread_ = NULL;
   }
 
-  if(NULL != senderThread_) {
+  if (NULL != senderThread_) {
     senderThread_->stop();
     delete senderThread_;
     senderThread_ = NULL;

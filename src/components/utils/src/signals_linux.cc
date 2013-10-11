@@ -32,12 +32,10 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 #include <csignal>
-#include <cstdio>
 
 namespace utils {
 
 bool SubscribeToTerminateSignal(void (*func)(int p)) {
-  printf("%s\n", "SubscribeToTerminateSignal");
   void (*prev_func)(int p);
 
   prev_func = signal(SIGABRT, func);
@@ -46,7 +44,6 @@ bool SubscribeToTerminateSignal(void (*func)(int p)) {
 }
 
 void ForwardSignal() {
-  printf("%s\n", "ForwardSignal");
   int signal_id = SIGINT;
   signal(signal_id, SIG_DFL);
   raise(signal_id);

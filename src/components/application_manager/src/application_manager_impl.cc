@@ -164,6 +164,10 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   message_chaining_.clear();
+
+  if (audioManager_) {
+    delete audioManager_;
+  }
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {

@@ -32,7 +32,6 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdio>
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
@@ -50,6 +49,7 @@ LifeCycle::LifeCycle()
   , hmi_handler_(NULL)
   , mb_adapter_(NULL)
   , message_broker_(NULL)
+  , message_broker_server_(NULL)
   , mb_thread_(NULL)
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL) {
@@ -115,29 +115,29 @@ bool LifeCycle::InitMessageBroker() {
     return false;
   }
 
-  NsMessageBroker::TcpServer* message_broker_server =
+  message_broker_server_ =
     new NsMessageBroker::TcpServer(
     profile::Profile::instance()->server_address(),
     profile::Profile::instance()->server_port(),
     message_broker_);
-  if (!message_broker_server) {
+  if (!message_broker_server_) {
     LOG4CXX_INFO(logger_, " Wrong pJSONRPC20Server pointer!");
     return false;
   }
-  message_broker_->startMessageBroker(message_broker_server);
+  message_broker_->startMessageBroker(message_broker_server_);
   if (!networking::init()) {
     LOG4CXX_INFO(logger_, " Networking initialization failed!");
     return false;
   }
 
-  if (!message_broker_server->Bind()) {
+  if (!message_broker_server_->Bind()) {
     LOG4CXX_FATAL(logger_, "Bind failed!");
     return false;
   } else {
     LOG4CXX_INFO(logger_, "Bind successful!");
   }
 
-  if (!message_broker_server->Listen()) {
+  if (!message_broker_server_->Listen()) {
     LOG4CXX_FATAL(logger_, "Listen failed!");
     return false;
   } else {
@@ -165,7 +165,7 @@ bool LifeCycle::InitMessageBroker() {
   LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
   mb_server_thread_  = new System::Thread(
     new System::ThreadArgImpl<NsMessageBroker::TcpServer>(
-      *message_broker_server, &NsMessageBroker::TcpServer::MethodForThread,
+      *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
       NULL));
   mb_server_thread_->Start(false);
 
@@ -184,24 +184,52 @@ bool LifeCycle::InitMessageBroker() {
 }
 
 void LifeCycle::StopComponents(int params) {
-  printf("\n\n\n\n\t\t\t\t%s\n\n\n\n\n", "BARBARA STRAIZANT");
-  /*delete instance()->app_manager_;
-  delete instance()->connection_handler_;
-  delete instance()->mmh_;
-  delete instance()->protocol_handler_;*/
-  //delete instance()->transport_manager_;
-  delete instance()->hmi_handler_;
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  instance()->hmi_handler_->set_message_observer(NULL);
+  instance()->connection_handler_->set_connection_handler_observer(NULL);
+  instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
+  instance()->app_manager_->~ApplicationManagerImpl();
 
+  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  instance()->transport_manager_->RemoveEventListener(
+    instance()->connection_handler_);
+  instance()->protocol_handler_->set_session_observer(NULL);
+  instance()->connection_handler_->~ConnectionHandlerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying Mobile Message Handler.");
+  instance()->protocol_handler_->set_protocol_observer(NULL);
+  delete instance()->mmh_;
+
+  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  instance()->transport_manager_->SetProtocolHandler(NULL);
+  instance()->transport_manager_->RemoveEventListener(
+    instance()->protocol_handler_);
+  delete instance()->protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
+  delete instance()->transport_manager_;
+
+  LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+  instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->mb_adapter_);
+  instance()->mb_adapter_->unregisterController();
   instance()->mb_adapter_thread_->Stop();
   instance()->mb_adapter_thread_->Join();
-  //delete instance()->mb_adapter_;
-  LOG4CXX_INFO(logger_, "Stopping message broker.");
-  instance()->mb_thread_->Stop();
-  instance()->mb_thread_->Join();
+  instance()->mb_adapter_->Close();
+  delete instance()->mb_adapter_;
+  instance()->hmi_handler_->~HMIMessageHandlerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying Message Broker");
   instance()->mb_server_thread_->Stop();
   instance()->mb_server_thread_->Join();
-  /*delete instance()->message_broker_;*/
+  instance()->mb_thread_->Stop();
+  instance()->mb_thread_->Join();
+  instance()->message_broker_server_->Close();
+  instance()->message_broker_->stopMessageBroker();
+  delete instance()->mb_server_thread_;
+  instance()->message_broker_->~CMessageBroker();
 
-  //utils::ForwardSignal();
+  networking::cleanup();
+
+  utils::ForwardSignal();
 }
 }  //  namespace main_namespace

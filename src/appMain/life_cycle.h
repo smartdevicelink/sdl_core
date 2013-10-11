@@ -72,6 +72,7 @@ class LifeCycle {
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
 
     NsMessageBroker::CMessageBroker* message_broker_;
+    NsMessageBroker::TcpServer* message_broker_server_;
     System::Thread* mb_thread_;
     System::Thread* mb_server_thread_;
     System::Thread* mb_adapter_thread_;
