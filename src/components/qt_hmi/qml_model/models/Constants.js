@@ -33,6 +33,8 @@
  */
 .pragma library
 
+// Colors
+
 // Main color of HMI model(now it ~lightblue). Buttons, text, icons of this color.
 var primaryColor = "#1d81d5"
 
@@ -52,6 +54,8 @@ var pressedButtonTextColor = "black"
 var releasedButtonTextColor = "white"
 
 //--------------------------------------------------------------------------------------
+
+// Other
 
 // Font size for most of text in HMI model.
 var fontSize = 25
