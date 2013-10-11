@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constant
 
 GeneralView {
     width: 647
@@ -42,7 +43,7 @@ GeneralView {
     applicationContext: true
 
     Rectangle {
-        property string textColor: "#1d81d5"
+        property string textColor: Constant.primaryColor
         property string backgroundColor: "#000000"
 
         id: main

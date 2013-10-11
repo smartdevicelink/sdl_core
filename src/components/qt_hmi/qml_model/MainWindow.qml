@@ -6,15 +6,16 @@ import "./views"
 import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
+import "./models/Constants.js" as Constant
 
 Rectangle {
     width: 1600
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
-    property int margin: 20
-    property int minWidth: 800
-    property int minHeight: 600
-    color: "black"
+    //property int margin: 20
+    property int minWidth: Constant.mainScreenMinWidth
+    property int minHeight: Constant.mainScreenMiHeight
+    color: Constant.secondaryColor
 
     DataStorage {
         id: dataContainer
@@ -44,8 +45,6 @@ Rectangle {
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
         height: (parent.height < minHeight) ? minHeight : parent.height
-        anchors.leftMargin: 0
-        anchors.topMargin: 0
         visible: false
 
         Item {
@@ -57,9 +56,9 @@ Rectangle {
         }
 
         Item {
-            anchors.leftMargin: 30
-            anchors.rightMargin: 30
-            anchors.bottomMargin: 30
+            anchors.leftMargin: Constant.margin
+            anchors.rightMargin: Constant.margin
+            anchors.bottomMargin: Constant.margin
             anchors.fill: parent
 
             Loader {

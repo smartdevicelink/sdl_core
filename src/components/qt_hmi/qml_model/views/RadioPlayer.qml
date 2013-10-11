@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
+import "../models/Constants.js" as Constant
 
 Item {
     id: radioPlayerView
@@ -63,7 +64,7 @@ Item {
 
             LongOvalButton {
                 text: radioName
-                pixelSize: 20
+                pixelSize: Constant.fontSize
                 dest: "./views/MusicSourceView.qml"
             }
 
@@ -71,7 +72,7 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 text: "Tune"
-                pixelSize: 20
+                pixelSize: Constant.fontSize
             }
         }
 
@@ -90,27 +91,27 @@ Item {
                 Row {
                     Text {
                         id: radioChannelNameText
-                        color: "#1d81d5"
+                        color: Constant.primaryColor
                         text: playerState.presets[0]
                         font.pixelSize: 45
                     }
                     Text {
                         anchors.bottom: radioChannelNameText.bottom
-                        color: "#1d81d5"
+                        color: Constant.primaryColor
                         text: " " + radioType
                         font.pixelSize: 25
                     }
                 }
 
                 Text {
-                    color: "#1d81d5"
+                    color: Constant.primaryColor
                     text: playerState.songName
                     font.pixelSize: 25
                     font.bold: true
                 }
 
                 Text {
-                    color: "#1d81d5"
+                    color: Constant.primaryColor
                     text: playerState.albumName
                     font.pixelSize: 25
                 }
@@ -141,7 +142,7 @@ Item {
             anchors.left: parent.left
             width: parent.width
             height: 2
-            color: "#1d81d5"
+            color: Constant.primaryColor
         }
 
         PresetRow {

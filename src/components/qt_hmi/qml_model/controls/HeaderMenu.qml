@@ -1,22 +1,22 @@
 import QtQuick 2.0
 import com.ford.sdl.hmi.hw_buttons 1.0
+import "../models/Constants.js" as Constant
 
 Item {
     id: headerMenu
     anchors.fill: parent
-    anchors.leftMargin: 30
-    anchors.rightMargin: 30
-    anchors.topMargin: 30
+    anchors.leftMargin: Constant.margin
+    anchors.rightMargin: Constant.margin
+    anchors.topMargin: Constant.margin
 
-    Text {
-        text: "75°";
-        color: "#1d81d5"
-        font.pixelSize: 25;
+    Text {        
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
-        anchors.leftMargin: margin
-
+        anchors.topMargin: Constant.margin
+        anchors.leftMargin: Constant.margin
+        color: Constant.primaryColor
+        font.pixelSize: Constant.fontSize
+        text: "75°"
     }
 
     Item {
@@ -24,21 +24,21 @@ Item {
         height: parent.height
         anchors.horizontalCenter: headerMenu.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
+        anchors.topMargin: Constant.margin
         Text {
-            text: "≡"
-            color: "#1d81d5"
-            font.pixelSize: 25
             anchors.horizontalCenter: menuText.horizontalCenter
             anchors.bottom: parent.verticalCenter
+            text: "≡"
+            color: Constant.primaryColor
+            font.pixelSize: Constant.fontSize
         }
 
         Text {
             id: menuText
-            text: "MENU";
             anchors.top: parent.verticalCenter
-            color: "#1d81d5"
-            font.pixelSize: 25
+            text: "MENU";            
+            color: Constant.primaryColor
+            font.pixelSize: Constant.fontSize
         }
 
         MouseArea {
@@ -54,8 +54,8 @@ Item {
         height: childrenRect.height
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
-        anchors.rightMargin: margin
+        anchors.topMargin: Constant.margin
+        anchors.rightMargin: Constant.margin
         property date date: { new Date(); }
 
         Timer {
@@ -69,23 +69,24 @@ Item {
 
         Text {
             text: Qt.formatTime(clock.date, "hh");
-            color: "#1d81d5"
-            font.pixelSize: 25;
+            color: Constant.primaryColor
+            font.pixelSize: Constant.fontSize;
         }
+
         Item {
-            Text {
-                text: clock.date.getSeconds() % 2 ? ":" : ""
-                color: "#1d81d5"
-                font.pixelSize: 25;
-            }
             width: 10
             height: parent.height
+            Text {
+                text: clock.date.getSeconds() % 2 ? ":" : ""
+                color: Constant.primaryColor
+                font.pixelSize: Constant.fontSize;
+            }
         }
 
         Text {
             text: Qt.formatTime(clock.date, "mm");
-            color: "#1d81d5"
-            font.pixelSize: 25;
+            color: Constant.primaryColor
+            font.pixelSize: Constant.fontSize;
         }
     }
 

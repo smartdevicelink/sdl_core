@@ -38,6 +38,7 @@ GeneralView{
     id: menuView
     property ListModel listModel
     property int countOfUpperRowItems: Math.ceil(listModel.count / 2)
+    property int animationDuration: 300
 
     Flickable {
         id: flicker
@@ -83,7 +84,7 @@ GeneralView{
                             PauseAnimation {duration: index * 100 }
                             NumberAnimation {
                                 target: item
-                                duration:  500
+                                duration:  animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }
@@ -126,7 +127,7 @@ GeneralView{
                             PauseAnimation {duration: 300 + index * 100 }
                             NumberAnimation {
                                 target: item2
-                                duration:  500
+                                duration:  animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }

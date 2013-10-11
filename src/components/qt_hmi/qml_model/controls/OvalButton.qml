@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import "../models/Constants.js" as Constant
 
 Rectangle {
     id: main
@@ -154,7 +155,7 @@ Rectangle {
 
         Text {
             id: label
-            color: parent.parent.highlighted ? "yellow" : "#1d81d5"
+            color: parent.parent.highlighted ? "yellow" : Constant.primaryColor
             anchors.verticalCenter: parent.verticalCenter
             z: 50
             verticalAlignment: Text.AlignVCenter
@@ -180,12 +181,12 @@ Rectangle {
 
             PropertyChanges {
                 target: background
-                color: "#1d81d5"
+                color: Constant.primaryColor
             }
 
             PropertyChanges {
                 target: label
-                color: main.highlighted ? "yellow" : "black"
+                color: main.highlighted ? "yellow" : Constant.secondaryColor
             }
         }
     ]

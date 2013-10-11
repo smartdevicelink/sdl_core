@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import "../models/Constants.js" as Constant
 
 Item {
     id: presetRow
@@ -64,14 +65,14 @@ Item {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             text: index + 1
-                            font.pixelSize: 30
-                            color: presetRow.selectedIndex === index ? "black" : "#1d81d5"
+                            font.pixelSize: Constant.fontSize
+                            color: presetRow.selectedIndex === index ? Constant.secondaryColor : Constant.primaryColor
                         }
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: presetRow.presets[index]
-                        font.pixelSize: 25
+                        font.pixelSize: Constant.fontSize
                         color: "white"
                     }
             }
