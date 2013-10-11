@@ -47,7 +47,7 @@
 #include "transport_manager/mock_transport_adapter.h"
 #include "transport_manager/mock_device.h"
 #include "transport_manager/mock_transport_manager_listener.h"
-#include "transport_manager/transport_manager_listener_impl.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -137,10 +137,10 @@ class TransportManagerTest : public ::testing::Test {
 
 TransportManagerImpl * TransportManagerTest::tm;
 
-class MyTransportListener : public ::transport_manager::TransportManagerListenerImpl {
+class MyTransportListener : public ::transport_manager::TransportManagerListenerEmpty {
  public:
   explicit MyTransportListener(TransportManagerTest * test)
-      : TransportManagerListenerImpl(),
+      : TransportManagerListenerEmpty(),
         test(test),
         connection(0),
         device_handle(0) {

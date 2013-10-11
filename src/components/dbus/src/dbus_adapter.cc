@@ -424,7 +424,8 @@ bool DBusAdapter::SetOptionalValue(
 
   ford_message_descriptions::ParameterDescription flagRules = { "flag",
       ford_message_descriptions::Boolean, true };
-  smart_objects::SmartObject flag(param.isValid());
+  smart_objects::SmartObject flag(
+      param.getType() != smart_objects::SmartType_Invalid);
   if (!SetValue(&sub_iter, &flagRules, flag)
       || !SetValue(&sub_iter, rules, param)) {
     return false;

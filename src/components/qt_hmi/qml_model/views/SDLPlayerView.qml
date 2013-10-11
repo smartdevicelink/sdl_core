@@ -67,7 +67,6 @@ GeneralView {
                     dest: "./views/SDLPlayerOptionsListView.qml"
                 }
             }
-
         ]
     }
 }

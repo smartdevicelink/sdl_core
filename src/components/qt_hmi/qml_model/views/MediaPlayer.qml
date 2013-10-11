@@ -34,16 +34,14 @@
 
 import QtQuick 2.0
 import "../controls"
+import "../models"
 import "../hmi_api/Common.js" as Common
 
 Item {
     id: mediaPlayerView
 
     property string playerName: ""
-    property string albumImage: ""
-    property string trackNumber: ""
-    property string trackName: ""
-    property string albumName: ""
+    property string playerType: ""
 
     property string textColor: "#1d81d5"
 
@@ -53,6 +51,9 @@ Item {
     signal forward
     signal play
     signal pause
+
+    // Holds players info (song name, play/pause state, track number etc)
+    property PlayerState playerState;
 
     Item {
         // top 3/4 screen
@@ -222,7 +223,11 @@ Item {
             }
 
             PlayPauseButton {
-                onClicked: { (state == 'Play') ? play() : pause() }
+                state: playerState.playPauseState
+                onClicked: {
+                    (state == 'Play') ? play() : pause()
+                    mediaPlayerView.playerState.playPauseState = state
+                }
             }
 
             Image {

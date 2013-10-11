@@ -1,6 +1,6 @@
 /**
- * @file IPodPlayerView.qml
- * @brief IPod player screen view.
+ * @file Navigation.qml
+ * @brief Icon.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,15 +31,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
-GeneralView {
-    category: Common.DeactivateReason.AUDIO
-    MediaPlayer {
-        playerName: "iPod"
+Item {
+    property var source: undefined
+
+    Image {
         anchors.fill: parent
 
-        playerState: dataContainer.ipodPlayerState
+        source: url(parent.source)
+
+        function image(turnIcon) {
+            return (turnIcon === undefined ||
+                    turnIcon.imageType !== Common.ImageType.STATIC) ? "" :
+                        turnIcon.value;
+        }
+
+        function url(turnIcon) {
+            return (turnIcon === undefined ||
+                    turnIcon.imageType !== Common.ImageType.DYNAMIC) ? "" :
+                        turnIcon.value;
+        }
     }
 }
