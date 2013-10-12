@@ -190,6 +190,7 @@ for (iface, name), enum in impl.enums.items():
         filename = iface+'.js'
         outfile = open(args.outdir + '/' + filename, 'w')
         write_header(outfile)
+        outfile.write(".pragma library\n")
         enum_files[iface] = outfile
     impl.write_js_enum(enum, outfile)
 

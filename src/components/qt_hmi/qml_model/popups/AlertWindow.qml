@@ -8,6 +8,8 @@ Window {
     title: "Alert"
     flags: Qt.Dialog
 
+    property var async
+
     Rectangle {
         id: rectangle
         anchors.fill: parent
@@ -21,7 +23,7 @@ Window {
 
     Timer {
         id: timer
-        onTriggered: hide()
+        onTriggered: { hide(); DBus.sendReply(async, {} ) } // TODO(nvaganov@luxoft.com): check for other alerts and return "try again"
     }
 
     function alert (alertString, duration) {

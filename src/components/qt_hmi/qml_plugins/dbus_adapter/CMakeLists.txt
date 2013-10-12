@@ -49,6 +49,7 @@ set(SOURCES
   hmiproxy.cc
   stream_qvariant.cc
   moc_qml_dbus.cpp
+  dbus_controller.cpp
 )
 
 qt5_generate_moc(qml_dbus.h moc_qml_dbus.cpp)

@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import "Common.js" as Common
-
+import "Async.js" as Async
 Item {
     function alert (alertStrings, duration, softButtons, appID) {
         // with this array we grab only the lines we need
@@ -36,7 +36,8 @@ Item {
         }
 
         alertWindow.alert(alertString, duration)
-        return {} // TODO(nvaganov@luxoft.com): check for other alerts and return "try again"
+        alertWindow.async = new Async.AsyncCall();
+        return alertWindow.async;
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
