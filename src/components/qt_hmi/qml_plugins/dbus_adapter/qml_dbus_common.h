@@ -174,15 +174,22 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, QList<T>& v)
 
 template<typename T>
 inline void PutArgToMap(QVariantMap& map, const char* name, const OptionalArgument<T>& v) {
-  if (v.presence) map.insert(name, ValueToVariant(v.val));
+    if (v.presence)
+      map.insert(name, ValueToVariant(v.val));
 }
+
 
 template<typename T>
 inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgument<T>& v) {
   QVariantMap::const_iterator it = map.find(name);
-  if (map.end() == it) {v.presence = false; return true;}
+  if (map.end() == it) {
+    v.presence = false;
+    return true;
+  }
   v.presence = true;
   return GetArgFromMap(map, name, v.val);
 }
+
+Q_DECLARE_METATYPE(OptionalArgument<QList<QString> >)
 
 #endif // QML_DBUS_COMMON_H
