@@ -269,8 +269,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         deleteSubMenu: function (menuID) {
 
-            if (this.commandsList[0].filterProperty('commandID', menuID)) {
-                this.get('commandsList.0').removeObjects(this.get('commandsList.0').filterProperty('menuID', menuID));
+            if (this.commandsList['top'].filterProperty('commandID', menuID)) {
+                this.get('commandsList.top').removeObjects(this.get('commandsList.top').filterProperty('menuID', menuID));
                 delete(this.commandsList[menuID]);
             }
 
