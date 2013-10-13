@@ -36,19 +36,9 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 Item {
-    ListModel {
-        id: deviceListModel
-    }
-
-    ListModel {
-        id: applicationListModel
-    }
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
-    property int applicationId
-    property var currentApplication: applicationContext ?
-                                         getApplication(applicationId) :
-                                         undefined;
+    property var currentApplication
 
     function getApplication(appId) {
         for(var i = 0; i < applicationList.count; i++) {
@@ -130,8 +120,8 @@ Item {
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
 
-    property alias deviceList: deviceListModel
-    property alias applicationList: applicationListModel
+    property ListModel deviceList: ListModel {}
+    property ListModel applicationList: ListModel {}
 
     property var vrCommands: []
 

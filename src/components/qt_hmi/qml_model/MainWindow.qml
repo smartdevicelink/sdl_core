@@ -59,9 +59,9 @@ Rectangle {
 
         onApplicationContextChanged: {
             if (applicationContext) {
-                sdlBasicCommunication.onAppActivated(applicationId)
+                sdlBasicCommunication.onAppActivated(currentApplication.appId)
             } else {
-                sdlBasicCommunication.onAppDeactivated(applicationId, contentLoader.item.category)
+                sdlBasicCommunication.onAppDeactivated(currentApplication.appId, contentLoader.item.category)
             }
         }
     }
@@ -105,9 +105,8 @@ Rectangle {
                 source:startQml
                 property var viewTransitionStack : []
 
-                function reset(){
+                function reset() {
                     viewTransitionStack = []
-                    source = startQml
                 }
 
                 function go(path) {
@@ -189,7 +188,7 @@ Rectangle {
         onAppUnregistered: {
             for (var i = 0; i < dataContainer.applicationList.count; i++) {
                 if (dataContainer.applicationList.get(i).appId === appId) {
-                    dataContainer.applicationList.remove(0);
+                    dataContainer.applicationList.remove(i);
                     break;
                 }
             }
