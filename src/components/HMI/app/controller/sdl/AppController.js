@@ -85,9 +85,9 @@ SDL.SDLAppController = Em.Object.create({
      *
      * @param {Number}
      */
-    buttonsSort: function (arrayId) {
+    buttonsSort: function (arrayId, appID) {
 
-        this.model.commandsList[arrayId].sort(function (a, b) {
+        SDL.SDLController.getApplicationModel(appID).commandsList[arrayId].sort(function (a, b) {
             return a.position - b.position;
         })
     },

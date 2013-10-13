@@ -194,9 +194,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     icon     : request.params.cmdIcon ? request.params.cmdIcon.value : null
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
@@ -250,9 +251,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     position: request.params.menuParams.position ? request.params.menuParams.position : 0
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
