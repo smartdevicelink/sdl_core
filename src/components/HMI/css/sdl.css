@@ -782,6 +782,10 @@
 	top: 15px;
 }
 
+#TurnByTurnView .label {
+    overflow: hidden;
+}
+
 #TurnByTurnView .totalDistanceLabel {
 	height: 20px;
 	background: #393939;
