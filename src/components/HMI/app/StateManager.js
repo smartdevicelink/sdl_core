@@ -64,6 +64,7 @@ var StateManager = Em.StateManager.extend( {
      */
     goToStates: function(stateName) {
 
+        SDL.SDLController.userStateAction();
         this.set('nextState', stateName);
         this.transitionTo(stateName);
     },

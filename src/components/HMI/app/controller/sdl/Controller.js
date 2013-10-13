@@ -295,6 +295,14 @@ SDL.SDLController = Em.Object
             }
         },
         /**
+         * Method to do necessary actions when user navigate throught the menu
+         */
+        userStateAction: function() {
+            if (SDL.ScrollableMessage.active) {
+                SDL.ScrollableMessage.deactivate(true);
+            }
+        },
+        /**
          * Method to sent notification for Slider
          * 
          * @param {String}
