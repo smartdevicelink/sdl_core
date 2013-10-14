@@ -49,6 +49,7 @@ Item {
     }
 
     property int systemContext
+
     function setCurrentApplication(appId) {
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
