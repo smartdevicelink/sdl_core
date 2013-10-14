@@ -289,6 +289,20 @@
   <element name="BACK" />
 </enum>
 
+<enum name="SpeechCapabilities">
+  <description>Contains information about the TTS capabilities.</description> 
+  <element name="TEXT" internal_name="SC_TEXT" /> 
+  <element name="SAPI_PHONEMES" /> 
+  <element name="LHPLUS_PHONEMES" /> 
+  <element name="PRE_RECORDED" /> 
+  <element name="SILENCE" /> 
+</enum>
+
+<enum name="VrCapabilities">
+  <description>Contains information about the VR capabilities.</description> 
+  <element name="TEXT" internal_name="VR_TEXT" /> 
+</enum>
+
 <enum name="TBTState">
   <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
   <element name="ROUTE_UPDATE_REQUEST" />
@@ -1604,6 +1618,13 @@
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
+  <function name="GetCapabilities" messagetype="request">
+	<description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="capabilities" type="Common.VrCapabilities" mandatory="true">
+    </param>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
@@ -1687,6 +1708,13 @@
 
 <interface name="TTS" version="1.0" date="2013-04-18">
   <description>RPCs for communication between TTS and SDL.</description>
+  <function name="GetCapabilities" messagetype="request">
+	<description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
+    </param>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
