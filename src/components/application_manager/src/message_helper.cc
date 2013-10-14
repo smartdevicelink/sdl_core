@@ -655,12 +655,8 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
       if (((*i->second)[strings::cmd_icon].keyExists(strings::value))
           && (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
         msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
-
-        std::string file_path = file_system::FullPath(app->name());
-        file_path += "/";
-        file_path += (*i->second)[strings::cmd_icon][strings::value].asString();
-
-        msg_params[strings::cmd_icon][strings::value] = file_path;
+        msg_params[strings::cmd_icon][strings::value] =
+            (*i->second)[strings::cmd_icon][strings::value].asString();
       }
       (*ui_command)[strings::msg_params] = msg_params;
 
