@@ -36,14 +36,13 @@ import QtQuick 2.0
 import "../controls"
 import "../models"
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
 Item {
     id: mediaPlayerView
 
     property string playerName: ""
     property string playerType: ""
-
-    property string textColor: "#1d81d5"
 
     property alias topOvalButtons: top.children
 
@@ -75,7 +74,7 @@ Item {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 text: playerName
-                pixelSize: 20
+                pixelSize: Constants.fontSize
                 dest: "./views/MusicSourceView.qml"
             }
 
@@ -83,7 +82,7 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 text: "Browse"
-                pixelSize: 20
+                pixelSize: Constants.fontSize
             }
         }
 
@@ -119,7 +118,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
-                    color: textColor
+                    color: Constants.primaryColor
                     text: playerState.trackName
                     font.pixelSize: 45
                     font.bold: true
@@ -129,7 +128,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
-                    color: textColor
+                    color: Constants.primaryColor
                     text: playerState.albumName
                     font.pixelSize: 25
                 }
@@ -137,7 +136,7 @@ Item {
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    color: textColor
+                    color: Constants.primaryColor
                     text: playerState.trackNumber
                     font.pixelSize: 20
                 }
@@ -181,14 +180,14 @@ Item {
                    anchors.verticalCenter: parent.verticalCenter
                    height: 2
                    width: 2/3 * parent.width
-                   color: textColor
+                   color: Constants.primaryColor
                 }
             }
             Text {
                 anchors.right: parent.right
                 anchors.rightMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
-                color: textColor
+                color: Constants.primaryColor
                 text: "04:23"
                 font.pixelSize: 18
             }

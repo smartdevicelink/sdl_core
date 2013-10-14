@@ -1,6 +1,6 @@
 /**
  * @file MainWindow.qml
- * @brief Main QML model
+ * @brief Implementation of main window.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -41,15 +41,15 @@ import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
 import "hmi_api/Common.js" as Common
+import "./models/Constants.js" as Constants
 
 Rectangle {
     width: 1600
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
-    property int margin: 20
-    property int minWidth: 800
-    property int minHeight: 600
-    color: "black"
+    property int minWidth: Constants.mainScreenMinWidth
+    property int minHeight: Constants.mainScreenMiHeight
+    color: Constants.secondaryColor
 
     DataStorage {
         id: dataContainer
@@ -60,9 +60,9 @@ Rectangle {
 
         onApplicationContextChanged: {
             if (applicationContext) {
-                sdlBasicCommunication.onAppActivated(applicationId)
+                sdlBasicCommunication.onAppActivated(currentApplication.appId)
             } else {
-                sdlBasicCommunication.onAppDeactivated(applicationId, contentLoader.item.category)
+                sdlBasicCommunication.onAppDeactivated(currentApplication.appId, contentLoader.item.category)
             }
         }
     }
@@ -78,9 +78,8 @@ Rectangle {
         anchors.top: parent. top
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
+        //TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
         height: (parent.height < minHeight) ? minHeight : parent.height
-        anchors.leftMargin: 0
-        anchors.topMargin: 0
         visible: false
 
         Item {
@@ -92,9 +91,9 @@ Rectangle {
         }
 
         Item {
-            anchors.leftMargin: 30
-            anchors.rightMargin: 30
-            anchors.bottomMargin: 30
+            anchors.leftMargin: Constants.margin
+            anchors.rightMargin: Constants.margin
+            anchors.bottomMargin: Constants.margin
             anchors.fill: parent
 
             Loader {

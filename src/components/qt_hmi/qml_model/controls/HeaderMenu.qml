@@ -1,22 +1,56 @@
+/**
+ * @file HeaderMenu.qml
+ * @brief Header menu view.
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import QtQuick 2.0
 import com.ford.sdl.hmi.hw_buttons 1.0
+import "../models/Constants.js" as Constants
 
 Item {
     id: headerMenu
     anchors.fill: parent
-    anchors.leftMargin: 30
-    anchors.rightMargin: 30
-    anchors.topMargin: 30
+    anchors.leftMargin: Constants.margin
+    anchors.rightMargin: Constants.margin
+    anchors.topMargin: Constants.margin
 
-    Text {
-        text: "75°";
-        color: "#1d81d5"
-        font.pixelSize: 25;
+    Text {        
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
-        anchors.leftMargin: margin
-
+        anchors.topMargin: Constants.margin
+        anchors.leftMargin: Constants.margin
+        color: Constants.primaryColor
+        font.pixelSize: Constants.fontSize
+        text: "75°"
     }
 
     Item {
@@ -24,21 +58,21 @@ Item {
         height: parent.height
         anchors.horizontalCenter: headerMenu.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
+        anchors.topMargin: Constants.margin
         Text {
-            text: "≡"
-            color: "#1d81d5"
-            font.pixelSize: 25
             anchors.horizontalCenter: menuText.horizontalCenter
             anchors.bottom: parent.verticalCenter
+            text: "≡"
+            color: Constants.primaryColor
+            font.pixelSize: Constants.fontSize
         }
 
         Text {
             id: menuText
-            text: "MENU";
             anchors.top: parent.verticalCenter
-            color: "#1d81d5"
-            font.pixelSize: 25
+            text: "MENU";            
+            color: Constants.primaryColor
+            font.pixelSize: Constants.fontSize
         }
 
         MouseArea {
@@ -54,8 +88,8 @@ Item {
         height: childrenRect.height
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: margin
-        anchors.rightMargin: margin
+        anchors.topMargin: Constants.margin
+        anchors.rightMargin: Constants.margin
         property date date: { new Date(); }
 
         Timer {
@@ -69,23 +103,24 @@ Item {
 
         Text {
             text: Qt.formatTime(clock.date, "hh");
-            color: "#1d81d5"
-            font.pixelSize: 25;
+            color: Constants.primaryColor
+            font.pixelSize: Constants.fontSize;
         }
+
         Item {
-            Text {
-                text: clock.date.getSeconds() % 2 ? ":" : ""
-                color: "#1d81d5"
-                font.pixelSize: 25;
-            }
             width: 10
             height: parent.height
+            Text {
+                text: clock.date.getSeconds() % 2 ? ":" : ""
+                color: Constants.primaryColor
+                font.pixelSize: Constants.fontSize;
+            }
         }
 
         Text {
             text: Qt.formatTime(clock.date, "mm");
-            color: "#1d81d5"
-            font.pixelSize: 25;
+            color: Constants.primaryColor
+            font.pixelSize: Constants.fontSize;
         }
     }
 

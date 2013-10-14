@@ -39,6 +39,8 @@ import "../hmi_api/Common.js" as Common
 Rectangle {
     color: "transparent"
 
+    property var async
+
     Rectangle {
         id: rectangle
 
@@ -95,7 +97,10 @@ Rectangle {
 
     Timer {
         id: timer
-        onTriggered: hide()
+        onTriggered: {
+            hide()
+            DBus.sendReply(async, {})
+        }
     }
 
     property date lastAlertTime

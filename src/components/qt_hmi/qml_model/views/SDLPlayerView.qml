@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
 GeneralView {
     applicationContext: true
@@ -55,12 +56,12 @@ GeneralView {
                 LongOvalButton {
                     id: longOvalButton
                     text: "SDL Menu"
-                    pixelSize: 20
-                    dest: "./views/AppsMenuGridView.qml"
+                    pixelSize: Constants.fontSize
+                    dest: "./views/ApplicationListView.qml"
                 }
                 LongOvalButton {
                     text: "Options"
-                    pixelSize: 20
+                    pixelSize: Constants.fontSize
                     dest: "./views/SDLPlayerOptionsListView.qml"
                 }
             }

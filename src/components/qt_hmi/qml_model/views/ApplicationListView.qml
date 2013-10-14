@@ -63,7 +63,19 @@ GeneralView {
                         MouseArea {
                           anchors.fill: parent
                           onClicked: {
-                              contentLoader.go("./views/SDLPlayerView.qml", appId)
+                              var application = dataContainer.getApplication(appId);
+                              dataContainer.currentApplication = {
+                                  appName: application.appName,
+                                  ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                                  icon: application.icon,
+                                  deviceName: application.deviceName,
+                                  appId: application.appId,
+                                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                                  isMediaApplication: application.isMediaApplication,
+                                  appType: application.appType
+                              }
+
+                              contentLoader.go("./views/SDLPlayerView.qml")
                             }
                         }
                     }

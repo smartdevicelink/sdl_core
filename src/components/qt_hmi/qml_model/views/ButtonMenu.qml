@@ -33,11 +33,13 @@
  */
 import QtQuick 2.0
 import "../controls"
+import "../models/Constants.js" as Constants
 
 GeneralView {
     id: menuView
     property ListModel listModel
     property int countOfUpperRowItems: Math.ceil(listModel.count / 2)
+    property int animationDuration: 300
 
     // top 3/4 of screen with flick menu
     Flickable {
@@ -69,7 +71,7 @@ GeneralView {
                         LongOvalButton {
                             id: button
                             text: menuView.listModel.get(index).title
-                            pixelSize: 20
+                            pixelSize: Constants.fontSize
                             dest: menuView.listModel.get(index).qml
                             anchors.centerIn: parent
                         }
@@ -79,7 +81,7 @@ GeneralView {
                             PauseAnimation {duration: index * 100 }
                             NumberAnimation {
                                 target: item
-                                duration:  500
+                                duration: Constants.animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }
@@ -106,7 +108,7 @@ GeneralView {
                         LongOvalButton {
                             id: buttonLowerRow
                             text: menuView.listModel.get(index + menuView.countOfUpperRowItems).title
-                            pixelSize: 20
+                            pixelSize: Constants.fontSize
                             dest: menuView.listModel.get(index + menuView.countOfUpperRowItems).qml
                             anchors.centerIn: parent
                         }
@@ -115,7 +117,7 @@ GeneralView {
                             PauseAnimation {duration: 300 + index * 100 }
                             NumberAnimation {
                                 target: item2
-                                duration:  500
+                                duration:  Constants.animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }
@@ -167,7 +169,7 @@ GeneralView {
                 PauseAnimation {duration: 700}
                 NumberAnimation {
                     target: backButton
-                    duration:  500
+                    duration:  Constants.animationDuration
                     property: "opacity"
                     from: 0; to: 1;
                 }

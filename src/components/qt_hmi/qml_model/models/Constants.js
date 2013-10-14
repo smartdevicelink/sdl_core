@@ -1,6 +1,6 @@
 /**
- * @file SDLPlayerOptionsListView.qml
- * @brief SDL player options screen view.
+ * @file Constants.js
+ * @brief Namespace of constants.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,56 +31,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+.pragma library
 
-import QtQuick 2.0
-import "../controls"
-import "../hmi_api/Common.js" as Common
-import "../models/Constants.js" as Constants
+// Colors
 
-GeneralView {
-    applicationContext: true
-    systemContext: Common.SystemContext.SYSCTXT_MENU
-    Item {
-        // 3/4 top screen
-        height: parent.height * 3/4
-        width: parent.width
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+// Main color of HMI model(now it ~lightblue). Buttons, text, icons of this color.
+var primaryColor = "#1d81d5"
 
-        ListModel {
-            id: optionsTree
-            ListElement {
-                name: "Policies Test"
-            }
-            ListElement {
-                name: "XML Test"
-            }
-        }
+// Secondary color of HMI model, backgroud of this color.
+var secondaryColor = "black"
 
-        ListView {
-            id: sdlPlayerOptionsListView
-            anchors.horizontalCenter: parent.horizontalCenter
-            width:parent.width
-            height:parent.height
+// Color of text at buttonts that are inactive (at phone keyboard, when no any contact started with current letter).
+var inactiveButtonTextColor = "grey"
 
-            model: optionsTree
+// Color of text at contact list screen view (Name, number and number type).
+var contactTextColor = "lightblue"
 
-            delegate: Text  {
-                text: name
-                color: Constants.primaryColor
-                font.pixelSize: 40
-            }
-        }
-    }
+// Color of text at buttons, when they are pressed.
+var pressedButtonTextColor = "black"
 
-    Item {
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        width: parent.width
-        height: 1/4 * parent.height
+// Color of text at "white" buttons, for all other buttons (which most) use primaryColor.
+var releasedButtonTextColor = "white"
 
-        BackButton { anchors.centerIn: parent }
-    }
-}
+//--------------------------------------------------------------------------------------
+
+// Other
+
+// Font size for most of text in HMI model.
+var fontSize = 25
+
+// Offset from the edges of the screen.
+var margin = 30
+
+// Spacing between contacts at contact screen view.
+var contactListSpacing = 30
+
+// Minimal width and height of screen (screen wont resize, if height and width are lower).
+var mainScreenMinWidth = 800
+var mainScreenMiHeight = 600
+
+// Duration of appearance of icon/button at icon/button menus.
+var animationDuration = 500
+
+// -------------------------
+

@@ -32,6 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QQmlContext>
+
 #include "dbus_plugin.h"
 #include "hmiproxy.h"
 #include "sdlproxy.h"
@@ -47,7 +49,10 @@
 #include <QtDBus/QDBusConnection>
 
 #include <QQmlListReference>
+#include <QQmlEngine>
 #include <QString>
+
+#include "dbus_controller.h"
 
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
                               log4cxx::Logger::getLogger("DBusPlugin"));
@@ -70,4 +75,14 @@ void DbusPlugin::registerTypes(const char *uri)
 
     QDBusConnection::sessionBus().registerObject("/", this);
     QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
+
+    dbusController = new DBusController();
+    HmiProxy::api_adaptors_.SetDBusController(dbusController);
 }
+
+void DbusPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
+{
+    engine->rootContext()->setContextProperty("DBus", dbusController);
+}
+
+// vim: set ts=4 sw=4 et:

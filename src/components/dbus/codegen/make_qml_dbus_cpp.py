@@ -81,7 +81,6 @@ class Impl(FordXmlParser):
         for struct in self.structs.items():
             self.write_struct_definition(struct, out)
 
-
     def write_struct_definition(self, ((iface, name), params), out):
         struct_name = iface + '_' + name
         out.write('QDBusArgument& operator << (QDBusArgument& arg, const ' + struct_name + "& v) {\n")
@@ -300,6 +299,7 @@ class Impl(FordXmlParser):
         out.write(" public:\n")
         out.write("  explicit " + ifacename + "Adaptor(QObject *parent = 0);\n")
         out.write("  void SetApi(QQuickItem*);\n")
+        out.write("  DBusController *dbusController;\n")
         out.write(" public slots:\n")
         for (request, response) in request_responses:
             signature = self.make_method_signature(request, response, ifacename, False)
@@ -335,6 +335,21 @@ class Impl(FordXmlParser):
         for (request,response) in request_responses:
             in_params = request.findall('param')
             out_params = response.findall('param')
+
+            if out_params:
+                out.write("bool fill%s%sReply(QDBusMessage& message, const QVariantMap& map)\n" % (classname, request.get('name')))
+                out.write("{\n")
+                for out_p in out_params:
+                    param_name = out_p.get('name')
+                    param_desc = self.make_param_desc(out_p, iface_name)
+                    param_type = self.qt_param_type(param_desc)
+                    out.write("  %s %s_out;\n" % (param_type, param_name))
+                    out.write('  if (!GetArgFromMap(map, \"' + param_name + '\", ' + param_name + "_out)) { return false; }\n")
+                    out.write("  QVariant %s_arg;\n" % param_name)
+                    out.write("  %s_arg.setValue(%s_out);" % (param_name, param_name))
+                    out.write("  message << %s_arg;\n" % param_name)
+                out.write("  return true;\n")
+                out.write("}\n\n")
             signature = self.make_method_signature(request, response, iface_name, True)
             out.write(signature + " {\n")
             out.write("  LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
@@ -364,20 +379,29 @@ class Impl(FordXmlParser):
                 out.write("    RaiseDbusError(this, InvalidData);\n")
                 out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
             out.write("    " + return_statement + ";\n  }\n")
+
             out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
 
             out.write("  int err;\n")
             out.write("""  if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
 
-            for i in range(1, len(out_params)):
-                param = out_params[i]
+            if out_params:
+                out.write("  int async_uid;\n")
+                out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
+                out.write("      message.setDelayedReply(true);\n")
+                out.write("      QDBusMessage reply = message.createReply();\n")
+                out.write("      dbusController->addMessage(reply, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
+                out.write("      " + return_statement + ";\n");
+                out.write("  }\n")
+
+            for param in out_params[1:]:
                 param_name = param.get('name')
                 param_desc = self.make_param_desc(param, iface_name)
                 out.write('  if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); " + return_statement + "; }\n")
             if out_params:
                 param_desc = self.make_param_desc(out_params[0], iface_name)
                 param_type = self.qt_param_type(param_desc)
-                out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) RaiseDbusError(this, InvalidData);' + "\n")
+                out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) { RaiseDbusError(this, InvalidData); ' + return_statement + "; }\n")
                 out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
                 out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
                 out.write("  return ret;\n")
@@ -489,6 +513,12 @@ class Impl(FordXmlParser):
             chname = interface_el.get('name')
             out.write("    " + name + "_->SetApi(p->findChild<QQuickItem*>(\"" + chname + "\"));\n")
         out.write("  }\n")
+        out.write("  void SetDBusController(DBusController* dc) {\n")
+        for interface_el in interfaces:
+            name = interface_el.get('name') + 'Adaptor'
+            chname = interface_el.get('name')
+            out.write("    " + name + "_->dbusController = dc;\n")
+        out.write("  }\n")
         out.write("};\n\n")
 
 
@@ -549,10 +579,13 @@ header_out.write("""/**
 header_out.write("#ifndef SRC_COMPONENTS_DBUS_QML_DBUS_H_\n");
 header_out.write("#define SRC_COMPONENTS_DBUS_QML_DBUS_H_\n\n");
 header_out.write("#include <QDBusArgument>\n");
+header_out.write("#include <QDBusMessage>\n");
+header_out.write("#include <QDBusConnection>\n");
 header_out.write("#include <QDBusAbstractAdaptor>\n");
 header_out.write("#include <QDBusMetaType>\n");
 header_out.write("#include <QQuickItem>\n");
 header_out.write("#include \"qml_dbus_common.h\"\n\n");
+header_out.write("#include \"dbus_controller.h\"\n\n");
 impl.make_dbus_type_declarations(header_out)
 impl.make_dbus_adaptor_declarations(header_out)
 impl.make_dbus_register_metatypes_declaraion(header_out)
@@ -604,3 +637,5 @@ source_out.write("extern log4cxx::LoggerPtr logger_;\n\n")
 impl.make_dbus_type_definitions(source_out)
 impl.make_dbus_adaptor_definitions(source_out)
 impl.make_dbus_register_metatypes_definition(source_out)
+
+# vim: set ts=4 sw=4 et:

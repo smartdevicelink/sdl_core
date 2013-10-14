@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "Common.js" as Common
+import "Async.js" as Async
 
 Item {
     function filter (strings, fields) {
@@ -30,21 +31,10 @@ Item {
                            Common.TextFieldName.alertText3]
 
         var fieldSubstrings = filter(alertStrings, alertFields)
-/*
-        var alertString = ""
-// this cycle concatenates all the substrings according to the order of the fields
-        for (var fieldIndex = 0; fieldIndex < alertFields.length; ++fieldIndex) {
-            if (fieldSubstrings[fieldIndex] !== "") {
-                if (alertString !== "") {
-                    alertString += "\n" // need linebreak
-                }
-                alertString += fieldSubstrings[fieldIndex]
-            }
-        }
-*/
         var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID)
         if (tryAgainTime === undefined) {
-            return {}
+            alertWindow.async = new Async.AsyncCall();
+            return alertWindow.async;
         }
         else {
             return {tryAgainTime: tryAgainTime}

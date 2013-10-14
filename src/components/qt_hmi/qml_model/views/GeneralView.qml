@@ -46,10 +46,10 @@ Item {
     Connections {
         target: sdlProxy
         onAppUnregistered: {
-            if (dataContainer.currentApplication &&
+            if (dataContainer.applicationContext &&
                     (dataContainer.currentApplication.appId === appId)) {
                 contentLoader.reset();
-                contentLoader.go("views/ApplicationListView.qml")
+                contentLoader.go("views/ApplicationListView.qml");
             }
         }
     }

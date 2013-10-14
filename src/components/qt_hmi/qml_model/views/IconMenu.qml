@@ -33,6 +33,7 @@
  */
 import QtQuick 2.0
 import "../controls"
+import "../models/Constants.js" as Constants
 
 GeneralView{
     id: menuView
@@ -83,7 +84,7 @@ GeneralView{
                             PauseAnimation {duration: index * 100 }
                             NumberAnimation {
                                 target: item
-                                duration:  500
+                                duration:  Constants.animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }
@@ -126,7 +127,7 @@ GeneralView{
                             PauseAnimation {duration: 300 + index * 100 }
                             NumberAnimation {
                                 target: item2
-                                duration:  500
+                                duration:  Constants.animationDuration
                                 property: "opacity"
                                 from: 0; to: 1;
                             }

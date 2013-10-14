@@ -38,14 +38,22 @@
 #include <QQmlExtensionPlugin>
 #include <QDBusContext>
 
+class DBusController;
+
 class DbusPlugin : public QQmlExtensionPlugin, public QDBusContext
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+
+    DBusController *dbusController;
     
 public:
     void registerTypes(const char *uri);
+    void initializeEngine(QQmlEngine *engine, const char *uri);
+
 };
 
 #endif // DBUS_PLUGIN_H
+
+// vim: set ts=4 sw=4 et:
 
