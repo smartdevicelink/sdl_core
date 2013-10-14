@@ -1,6 +1,6 @@
 /**
- * \file transport_manager_listener_impl.h
- * \brief TransportManagerListenerImpl class header file.
+ * \file transport_manager_listener_empty.h
+ * \brief TransportManagerListenerEmpty class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
 
 #include "transport_manager/info.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -43,16 +43,16 @@
 namespace transport_manager {
 
 /**
- * @brief Implementation class for transport manager listener.
+ * @brief Empty implementation class for transport manager listener.
  */
-class TransportManagerListenerImpl : public TransportManagerListener {
+class TransportManagerListenerEmpty : public TransportManagerListener {
   const TransportManagerImpl *transport_manager_;
  public:
 
   /**
    * @Destructor.
    */
-  virtual ~TransportManagerListenerImpl(){};
+  virtual ~TransportManagerListenerEmpty(){};
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
@@ -168,4 +168,4 @@ class TransportManagerListenerImpl : public TransportManagerListener {
   }
 };
 }  // namespace transport_manager
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_IMPL
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_

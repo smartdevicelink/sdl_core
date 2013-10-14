@@ -57,7 +57,7 @@ GeneralView {
                     id: longOvalButton
                     text: "SDL Menu"
                     pixelSize: Constants.fontSize
-                    dest: "./views/AppsMenuGridView.qml"
+                    dest: "./views/ApplicationListView.qml"
                 }
                 LongOvalButton {
                     text: "Options"

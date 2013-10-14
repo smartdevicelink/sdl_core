@@ -225,6 +225,11 @@ class Impl(FordXmlParser):
                 param_type = self.qt_param_type(param_desc)
                 retstr = retstr + param_type + '& ' + param_desc.name + '_out'
                 if i <> out_params_num - 1: retstr = retstr + ", "
+
+        if in_params_num > 0 or out_params_num > 1:
+		retstr += ", "
+        retstr += "const QDBusMessage& message"
+
         retstr = retstr + ')'
         return retstr
 
@@ -349,23 +354,30 @@ class Impl(FordXmlParser):
             method_name = request.get('name')[:1].lower() + request.get('name')[1:]
             out.write("  if (!QMetaObject::invokeMethod(api_, \"" + method_name + "\",")
             out.write("Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), ")
-            out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n    RaiseDbusError(this);\n")
+            out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n    RaiseDbusError(this, InvalidData);\n")
             out.write("    LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
             out.write(return_statement + ";\n  }\n")
+
+
+            out.write("  if (out_arg_v.type() != QVariant::Map) {\n")
             if out_params:
-                out.write("  if (out_arg_v.type() != QVariant::Map) {\n    RaiseDbusError(this);\n")
+                out.write("    RaiseDbusError(this, InvalidData);\n")
                 out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
-                out.write(return_statement + ";\n  }\n")
-                out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
+            out.write("    " + return_statement + ";\n  }\n")
+            out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
+
+            out.write("  int err;\n")
+            out.write("""  if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
+
             for i in range(1, len(out_params)):
                 param = out_params[i]
                 param_name = param.get('name')
                 param_desc = self.make_param_desc(param, iface_name)
-                out.write('  if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) {RaiseDbusError(this); " + return_statement + ";}\n")
+                out.write('  if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); " + return_statement + "; }\n")
             if out_params:
                 param_desc = self.make_param_desc(out_params[0], iface_name)
                 param_type = self.qt_param_type(param_desc)
-                out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) RaiseDbusError(this);' + "\n")
+                out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) RaiseDbusError(this, InvalidData);' + "\n")
                 out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
                 out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
                 out.write("  return ret;\n")
