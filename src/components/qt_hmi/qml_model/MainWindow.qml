@@ -199,7 +199,7 @@ Rectangle {
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
                  appType: application.appType
-             });
+             })
         }
 
         onAppUnregistered: {

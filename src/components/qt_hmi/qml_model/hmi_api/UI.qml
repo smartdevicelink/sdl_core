@@ -94,6 +94,8 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        dataContainer.currentApplication.options.append({"menuName": menuParams.menuName})
+        return {}
     }
 
     function deleteCommand (cmdID, appID) {

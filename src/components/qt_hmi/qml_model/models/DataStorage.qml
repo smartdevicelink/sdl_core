@@ -54,6 +54,7 @@ Item {
                 currentApplication.appId = appId
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
+                currentApplication.options = applicationList.get(i).options
                 // ... etc
             }
         }
@@ -71,14 +72,15 @@ Item {
             isMediaApplication: app.isMediaApplication,
             appType: app.appType,
             helpPrompt: "",
-            timeoutPrompt: ""
+            timeoutPrompt: "",
+            options: []
         })
     }
 
     function removeApplication(appId) {
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
-                applicationList.remove(is);
+                applicationList.remove(i);
                 break;
             }
         }

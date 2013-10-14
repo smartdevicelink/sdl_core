@@ -48,26 +48,16 @@ GeneralView {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        ListModel {
-            id: optionsTree
-            ListElement {
-                name: "Policies Test"
-            }
-            ListElement {
-                name: "XML Test"
-            }
-        }
-
         ListView {
             id: sdlPlayerOptionsListView
             anchors.horizontalCenter: parent.horizontalCenter
             width:parent.width
             height:parent.height
 
-            model: optionsTree
+            model: dataContainer.currentApplication.options
 
             delegate: Text  {
-                text: name
+                text: menuName
                 color: Constants.primaryColor
                 font.pixelSize: 40
             }
