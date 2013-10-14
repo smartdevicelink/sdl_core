@@ -5,7 +5,7 @@ DBusController::DBusController(QObject *parent)
     : QObject(parent) {
 }
 
-void DBusController::addMessage(QDBusMessage message, fillRoutine fill, int async_uid) {
+void DBusController::addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid) {
     delayedReply reply;
     reply.message = message;
     reply.fill = fill;

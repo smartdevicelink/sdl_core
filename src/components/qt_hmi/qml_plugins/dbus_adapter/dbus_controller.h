@@ -14,8 +14,8 @@ class DBusController: public QObject {
     };
     Q_OBJECT
 public:
-    DBusController(QObject *parent=0);
-    void addMessage(QDBusMessage message, fillRoutine fill, int async_uid);
+    explicit DBusController(QObject *parent=0);
+    void addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid);
     Q_INVOKABLE void sendReply(QVariant asyncObject, QVariant data);
 private:
     std::map<int, delayedReply> replies;

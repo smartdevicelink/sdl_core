@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "Common.js" as Common
 import "Async.js" as Async
+
 Item {
     function alert (alertStrings, duration, softButtons, appID) {
         // with this array we grab only the lines we need
