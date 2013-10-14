@@ -54,9 +54,6 @@ Item {
     }
 
     function setCurrentApplication(appId) {
-        var oldApplicationContext = applicationContext;
-        applicationContext = false;
-
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
@@ -105,6 +102,7 @@ Item {
     }
     property int systemContext
 
+    property int hmiContext
     property bool applicationContext: false
 
     property int systemSavedContext
