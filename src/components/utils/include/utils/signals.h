@@ -1,4 +1,6 @@
 /**
+* \file signals.h
+* \brief Signal (i.e. SIGINT) handling.
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -30,43 +32,12 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
 
-#include <pulse/simple.h>
-#include <string>
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
+namespace utils {
+bool SubscribeToTerminateSignal(void (*func)(int p));
+void ForwardSignal();
+}  //  namespace utils
 
-namespace audio_manager {
-
-class A2DPSourcePlayerThread : public threads::ThreadDelegate {
-  public:
-    explicit A2DPSourcePlayerThread(const std::string& device);
-
-    void threadMain();
-
-    bool exitThreadMain();
-
-  private:
-    static log4cxx::LoggerPtr logger_;
-
-    // The Sample format to use
-    static const pa_sample_spec sSampleFormat_;
-
-    const int BUFSIZE_;
-    pa_simple* s_in, *s_out;
-    std::string device_;
-    bool shouldBeStoped_;
-    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
-
-    void freeStreams();
-
-    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
-};
-
-
-}  // namespace audio_manager
-
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_
+#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

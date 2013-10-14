@@ -63,6 +63,7 @@ RequestWatchdog::RequestWatchdog()
 }
 
 RequestWatchdog::~RequestWatchdog() {
+  LOG4CXX_INFO(logger_, "RequestWatchdog destructor.");
   stopDispatcherThreadIfNeeded();
   queueDispatcherThread.join();
 }
@@ -195,11 +196,8 @@ void RequestWatchdog::startDispatcherThreadIfNeeded() {
 }
 
 void RequestWatchdog::stopDispatcherThreadIfNeeded() {
-  LOG4CXX_TRACE_ENTER(logger_);
-
-  if (requests_.empty() || subscribers_.empty()) {
-    queueDispatcherThread.stop();
-  }
+  LOG4CXX_INFO(logger_, "Stop Watchdog thread.");
+  queueDispatcherThread.stop();
 }
 
 RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()

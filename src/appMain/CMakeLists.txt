@@ -58,6 +58,7 @@ include_directories (
 
 set (SOURCES
   appMain.cpp
+  life_cycle.cc
 )
 
 if( NOT CMAKE_BUILD_TYPE )

@@ -43,54 +43,54 @@
 namespace audio_manager {
 
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
- public:
-  FromMicToFileRecorderThread();
-
-  void threadMain();
-
-  void exitThreadMain();
-
-  void setOutputFileName(const std::string& outputFileName);
-  void setRecordDuration(int duration);
-
- private:
-  static log4cxx::LoggerPtr logger_;
-
-  int argc_;
-  gchar** argv_;
-
-  const std::string oKey_;
-  const std::string tKey_;
-
-  static GMainLoop *loop;
-  threads::Thread* sleepThread_;
-  bool shouldBeStoped_;
-  sync_primitives::SynchronisationPrimitives stopFlagMutex_;
-
-  std::string outputFileName_, durationString_;
-
-  typedef struct {
-    GstElement *pipeline;
-    gint duration;
-  } GstTimeout;
-
-  void initArgs();
-
-  void psleep(void *timeout);
-
-  class SleepThreadDelegate : public threads::ThreadDelegate {
-   public:
-    SleepThreadDelegate(GstTimeout timeout);
+  public:
+    FromMicToFileRecorderThread();
 
     void threadMain();
 
-   private:
-    GstTimeout timeout_;
+    bool exitThreadMain();
 
-    DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
-  };
+    void setOutputFileName(const std::string& outputFileName);
+    void setRecordDuration(int duration);
 
-  DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
+  private:
+    static log4cxx::LoggerPtr logger_;
+
+    int argc_;
+    gchar** argv_;
+
+    const std::string oKey_;
+    const std::string tKey_;
+
+    static GMainLoop* loop;
+    threads::Thread* sleepThread_;
+    bool shouldBeStoped_;
+    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+
+    std::string outputFileName_, durationString_;
+
+    typedef struct {
+      GstElement* pipeline;
+      gint duration;
+    } GstTimeout;
+
+    void initArgs();
+
+    void psleep(void* timeout);
+
+    class SleepThreadDelegate : public threads::ThreadDelegate {
+      public:
+        SleepThreadDelegate(GstTimeout timeout);
+
+        void threadMain();
+
+      private:
+        GstTimeout timeout_;
+
+        DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
+    };
+
+    DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
 };
 
 }  // namespace audio_manager

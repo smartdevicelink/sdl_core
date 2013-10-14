@@ -60,6 +60,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
+  LOG4CXX_INFO(logger_, "Desctructing ConnectionHandler.");
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
