@@ -75,5 +75,8 @@ var mainScreenMiHeight = 600
 // Duration of appearance of icon/button at icon/button menus.
 var animationDuration = 500
 
+// Width for long oval button
+var longOvalButtonWidth = 163
+
 // -------------------------
 

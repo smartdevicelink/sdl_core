@@ -60,7 +60,10 @@ Item {
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
                 currentApplication.options = applicationList.get(i).options
-                // ... etc
+                currentApplication.turnList = applicationList.get(i).turnList
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                // This place is for adding new properties
             }
         }
     }
@@ -89,6 +92,9 @@ Item {
             helpPrompt: "",
             timeoutPrompt: "",
             options: []
+            turnList: [],
+            turnListSoftButtons: []
+            // This place is for adding new properties
         })
     }
 

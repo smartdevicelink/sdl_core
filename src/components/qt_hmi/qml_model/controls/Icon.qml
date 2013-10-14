@@ -36,11 +36,11 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 Item {
-    property var iconSource
+    property var source
 
     Image {
         anchors.fill: parent
-        source: url(parent.iconSource)
+        source: url(parent.source)
 
         function image(turnIcon) {
             if (turnIcon && turnIcon.imageType === Common.ImageType.STATIC) {

@@ -53,49 +53,24 @@ GeneralView {
             width: parent.width
             height: parent.height * 3/4
 
-
             Row {
                 // top part for buttons
                 id: top
                 anchors.top: parent.top
                 anchors.left: parent.left
-
-               OvalButton {
-                   id: turnList
-                   height: 65
-                   fontSize: 18
-                   text: "Turn List"
-                   anchors.top: row.bottom
-                   anchors.topMargin: 0
-                   anchors.right: turnIcon.left
-                   anchors.rightMargin: 0
-                   anchors.left: parent.left
-                   anchors.leftMargin: 0
-                   onClicked: {
-                       contentLoader.go("./views/TbtTurnListView.qml");
-                  }
-               }
-
-        ListView {
-            id: softButton
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
-            anchors.right: turnIcon.left
-            anchors.rightMargin: 0
-            anchors.left: parent.left
-            anchors.leftMargin: 0
-            anchors.top: turnList.bottom
-            anchors.topMargin: 5
-            delegate: OvalButton {
                 width: parent.width
                 height: 1/4 * parent.height
                 spacing: (width - 4 * turnListButton.width) / 3
 
-                LongOvalButton {
+                OvalButton {
                     id: turnListButton
+                    width: Constants.longOvalButtonWidth
                     anchors.verticalCenter: parent.verticalCenter
                     text: "TurnList"
-                    pixelSize: Constants.fontSize
+                    fontSize: Constants.fontSize
+                    onClicked: {
+                        contentLoader.go("./views/TbtTurnListView.qml");
+                    }
                 }
 
                 ListView {
@@ -114,7 +89,7 @@ GeneralView {
                         width: turnListButton.width
                         height: turnListButton.height
                         text: name
-                        iconSource: model.image ? model.image : ""
+                        icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
                         fontSize: Constants.fontSize
                         highlighted: isHighlighted
                         onPressed: {
@@ -153,23 +128,20 @@ GeneralView {
                 anchors.left: parent.left
                 width: parent.width
                 height: 2/4 * parent.height
-                spacing: 1/2 * picture.width
+                spacing: 1/2 * turnIcon.width
 
-                Item {
-                    id: picture
+                Icon {
+                    id: turnIcon
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.height
                     height: parent.height
-                    Image {
-                        anchors.fill: parent
-                        source: dataContainer.navigationModel.pathIcon
-                    }
+                    source: dataContainer.navigationModel.icon
                 }
 
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
-                    width: parent.width - picture.width - spacing
+                    width: parent.width - turnIcon.width - spacing
                     spacing: (height - text1.height - text2.height - text3.height) / 2
 
                     Text {
@@ -180,6 +152,7 @@ GeneralView {
                     }
 
                     Text {
+                        // TODO(KKolodiy): make 2 columns for this text, and change font
                         id: text2
                         text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver + "Total datance: " + dataContainer.navigationModel.totalDistance
                         color: Constants.primaryColor

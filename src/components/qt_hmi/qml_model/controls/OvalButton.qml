@@ -47,7 +47,7 @@ Rectangle {
     signal pressAndHold;
     property alias text: label.text
     property alias fontSize: label.font.pixelSize
-    property alias iconSource: icon.iconSource
+    property alias icon: image.source
     property bool highlighted: false
 
     Image {
@@ -138,7 +138,7 @@ Rectangle {
 
     Row {
         id: field
-        spacing: 5
+        spacing: 10
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 13
         anchors.top: parent.top
@@ -146,12 +146,11 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
 
         Icon {
-            id: icon
-            width: 40
-            height: 40
+            id: image
+            width: 30
+            height: 30
             anchors.verticalCenter: parent.verticalCenter
-
-            visible: iconSource ? 1 : 0
+            visible: source ? true : false
         }
         Text {
             id: label
