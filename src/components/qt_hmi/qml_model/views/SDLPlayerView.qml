@@ -67,5 +67,3 @@ GeneralView {
         ]
     }
 }
-//TODO: {ALeshin} When u enter SDL music menu u can move back buy using "back" button, but
-//if u enter any player (AM,USB,...) and back - u cannot move back but using "back" button.
