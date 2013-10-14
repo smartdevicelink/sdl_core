@@ -178,6 +178,7 @@
     <string name="title_activity_keyboard_properties">KeyboardProperties</string>
     <string name="keyboardproperties_useLanguage">Language</string>
     <string name="keyboardproperties_useKbdLayout">Keyboard Layout</string>
+    <string name="keyboardproperties_useKeypressMode">Keypress Mode</string>
     <string name="keyboardproperties_useSendDynamicEntry">Use</string>
     <string name="keyboardproperties_sendDynamicEntry">Send Dynamic Entry</string>
     <string name="keyboardproperties_useLimitedCharacterList">Limited Character List (comma-separated)</string>

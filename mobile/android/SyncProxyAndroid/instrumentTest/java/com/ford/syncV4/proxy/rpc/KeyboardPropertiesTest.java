@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
+import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 import junit.framework.TestCase;
@@ -17,9 +18,11 @@ import java.util.Vector;
 public class KeyboardPropertiesTest extends TestCase {
     private static final String LANGUAGE = "language";
     private static final String KEYBOARD_LAYOUT = "keyboardLayout";
+    private static final String KEYPRESS_MODE = "keypressMode";
     private static final String SEND_DYNAMIC_ENTRY = "sendDynamicEntry";
     private static final String LIMITED_CHARACTER_LIST = "limitedCharacterList";
     private static final String AUTO_COMPLETE_TEXT = "autoCompleteText";
+    private static final String KEYPRESS_MODE_DEFAULT = "RESEND_CURRENT_ENTRY";
 
     public void testSerialization() throws JSONException {
         KeyboardProperties msg = new KeyboardProperties();
@@ -27,6 +30,7 @@ public class KeyboardPropertiesTest extends TestCase {
 
         final Language lang = Language.AR_SA;
         final KeyboardLayout kbdLayout = KeyboardLayout.QWERTZ;
+        final KeypressMode keypressMode = KeypressMode.SINGLE_KEYPRESS;
         final boolean sendDynamicEntry = true;
         final Vector<String> charList = new Vector<String>() {{
             add("A");
@@ -36,15 +40,18 @@ public class KeyboardPropertiesTest extends TestCase {
 
         msg.setLanguage(lang);
         msg.setKeyboardLayout(kbdLayout);
+        msg.setKeypressMode(keypressMode);
         msg.setSendDynamicEntry(sendDynamicEntry);
         msg.setLimitedCharacterList(charList);
         msg.setAutoCompleteText(autoCompleteText);
 
         JSONObject jsonObject = msg.serializeJSON();
-        assertEquals(5, jsonObject.length());
+        assertEquals(6, jsonObject.length());
         assertEquals(lang.toString(), jsonObject.getString(LANGUAGE));
         assertEquals(kbdLayout.toString(),
                 jsonObject.getString(KEYBOARD_LAYOUT));
+        assertEquals(keypressMode.toString(),
+                jsonObject.getString(KEYPRESS_MODE));
         assertEquals(sendDynamicEntry,
                 jsonObject.getBoolean(SEND_DYNAMIC_ENTRY));
         assertTrue(jsonObject.has(LIMITED_CHARACTER_LIST));
@@ -59,6 +66,8 @@ public class KeyboardPropertiesTest extends TestCase {
         assertNotNull(msg);
         assertNull(msg.getLanguage());
         assertNull(msg.getKeyboardLayout());
+        assertEquals("Incorrect default message", KEYPRESS_MODE_DEFAULT,
+                msg.getKeypressMode().toString());
         assertNull(msg.getSendDynamicEntry());
         assertNull(msg.getLimitedCharacterList());
         assertNull(msg.getAutoCompleteText());
@@ -158,6 +167,56 @@ public class KeyboardPropertiesTest extends TestCase {
                 JsonRPCMarshaller.deserializeJSONObject(jsonObject));
         assertNotNull(msg);
         assertNull(msg.getKeyboardLayout());
+    }
+
+    public void testKeypressModeAPI() {
+        KeyboardProperties msg = new KeyboardProperties();
+
+        final KeypressMode keypressMode = KeypressMode.QUEUE_KEYPRESSES;
+        msg.setKeypressMode(keypressMode);
+
+        assertEquals(keypressMode, msg.getKeypressMode());
+    }
+
+    public void testRemoveKeypressMode() {
+        KeyboardProperties msg = new KeyboardProperties();
+        msg.setKeypressMode(KeypressMode.SINGLE_KEYPRESS);
+        msg.setKeypressMode(null);
+        assertEquals("Incorrect default message", KEYPRESS_MODE_DEFAULT,
+                msg.getKeypressMode().toString());
+    }
+
+    public void testGetKeypressMode() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        final KeypressMode keypressMode = KeypressMode.SINGLE_KEYPRESS;
+        jsonObject.put(KEYPRESS_MODE, keypressMode);
+
+        KeyboardProperties msg = new KeyboardProperties(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertNotNull(msg);
+        assertEquals(keypressMode, msg.getKeypressMode());
+    }
+
+    public void testGetKeypressModeFromString() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        final KeypressMode keypressMode = KeypressMode.QUEUE_KEYPRESSES;
+        jsonObject.put(KEYPRESS_MODE, keypressMode.toString());
+
+        KeyboardProperties msg = new KeyboardProperties(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertNotNull(msg);
+        assertEquals(keypressMode, msg.getKeypressMode());
+    }
+
+    public void testGetKeypressModeIncorrect() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(KEYPRESS_MODE, 42);
+
+        KeyboardProperties msg = new KeyboardProperties(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertNotNull(msg);
+        assertEquals("Incorrect default message", KEYPRESS_MODE_DEFAULT,
+                msg.getKeypressMode().toString());
     }
 
     public void testSendDynamicEntryAPI() {

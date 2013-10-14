@@ -1,5 +1,6 @@
 [CW42]
-* SyncProxyAndroid SDK: add PrerecordedSpeech enum; add GEN3_8-INCH to DisplayType enum; add AUDIO_AAC to FileType enum;
++ KeyboardProperties dialog: add keypressMode parameter.
+* SyncProxyAndroid SDK: add PrerecordedSpeech, and KeypressMode enums; add GEN3_8-INCH to DisplayType enum; add AUDIO_AAC to FileType enum; add keypressMode parameter to KeyboardProperties request.
 
 [CW40]
 + SyncProxyAndroid SDK: add SEARCH value to ButtonName enum.

@@ -108,6 +108,7 @@ import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
+import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -3290,6 +3291,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             currentKbdProperties.setLanguage(Language.EN_US);
                             currentKbdProperties.setKeyboardLayout(
                                     KeyboardLayout.QWERTY);
+                            currentKbdProperties.setKeypressMode(
+                                    KeypressMode.SINGLE_KEYPRESS);
                             currentKbdProperties.setAutoCompleteText(getString(
                                     R.string.keyboardproperties_autoCompleteTextDefault));
                             currentKbdProperties.setLimitedCharacterList(new Vector<String>() {{

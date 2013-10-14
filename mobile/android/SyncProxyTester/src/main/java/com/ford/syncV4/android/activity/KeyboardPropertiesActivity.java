@@ -13,6 +13,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
+import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 import java.util.Arrays;
@@ -28,6 +29,8 @@ public class KeyboardPropertiesActivity extends Activity {
     private Spinner languageSpinner;
     private CheckBox kbdLayoutCheck;
     private Spinner kbdLayoutSpinner;
+    private CheckBox keypressModeCheck;
+    private Spinner keypressModeSpinner;
     private CheckBox sendDEntryCheck;
     private CheckBox sendDEntry;
     private CheckBox charListCheck;
@@ -37,6 +40,7 @@ public class KeyboardPropertiesActivity extends Activity {
     //
     private ArrayAdapter<Language> languageAdapter;
     private ArrayAdapter<KeyboardLayout> kbdLayoutAdapter;
+    private ArrayAdapter<KeypressMode> keypressModeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,12 @@ public class KeyboardPropertiesActivity extends Activity {
         kbdLayoutAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         kbdLayoutSpinner.setAdapter(kbdLayoutAdapter);
+
+        keypressModeAdapter = new ArrayAdapter<KeypressMode>(this,
+                android.R.layout.simple_spinner_item, KeypressMode.values());
+        keypressModeAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        keypressModeSpinner.setAdapter(keypressModeAdapter);
 
         kbdProp = (KeyboardProperties) IntentHelper
                 .getObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
@@ -80,6 +90,13 @@ public class KeyboardPropertiesActivity extends Activity {
         if (kbdLayout != null) {
             kbdLayoutSpinner
                     .setSelection(kbdLayoutAdapter.getPosition(kbdLayout));
+        }
+
+        KeypressMode keypressMode = kbdProperties.getKeypressMode();
+        keypressModeCheck.setChecked(keypressMode != null);
+        if (keypressMode != null) {
+            keypressModeSpinner.setSelection(
+                    keypressModeAdapter.getPosition(keypressMode));
         }
 
         Boolean sendDEntryValue = kbdProperties.getSendDynamicEntry();
@@ -123,6 +140,10 @@ public class KeyboardPropertiesActivity extends Activity {
                 (CheckBox) findViewById(R.id.keyboardproperties_useKbdLayout);
         kbdLayoutSpinner =
                 (Spinner) findViewById(R.id.keyboardproperties_kbdLayout);
+        keypressModeCheck = (CheckBox) findViewById(
+                R.id.keyboardproperties_useKeypressMode);
+        keypressModeSpinner =
+                (Spinner) findViewById(R.id.keyboardproperties_keypressMode);
         sendDEntryCheck = (CheckBox) findViewById(
                 R.id.keyboardproperties_useSendDynamicEntry);
         sendDEntry = (CheckBox) findViewById(
@@ -174,6 +195,12 @@ public class KeyboardPropertiesActivity extends Activity {
             KeyboardLayout kbdLayout = kbdLayoutAdapter
                     .getItem(kbdLayoutSpinner.getSelectedItemPosition());
             kbdProperties.setKeyboardLayout(kbdLayout);
+        }
+
+        if (keypressModeCheck.isChecked()) {
+            KeypressMode keypressMode = keypressModeAdapter
+                    .getItem(keypressModeSpinner.getSelectedItemPosition());
+            kbdProperties.setKeypressMode(keypressMode);
         }
 
         if (sendDEntryCheck.isChecked()) {

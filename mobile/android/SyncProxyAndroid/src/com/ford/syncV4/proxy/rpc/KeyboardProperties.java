@@ -3,6 +3,7 @@ package com.ford.syncV4.proxy.rpc;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
+import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.util.DebugTool;
 
@@ -10,12 +11,18 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 public class KeyboardProperties extends RPCStruct {
+    private static final KeypressMode KEYPRESS_MODE_DEFAULT =
+            KeypressMode.RESEND_CURRENT_ENTRY;
 
     public KeyboardProperties() {
+        store.put(Names.keypressMode, KEYPRESS_MODE_DEFAULT);
     }
 
     public KeyboardProperties(Hashtable hash) {
         super(hash);
+        if (!store.containsKey(Names.keypressMode)) {
+            store.put(Names.keypressMode, KEYPRESS_MODE_DEFAULT);
+        }
     }
 
     public Language getLanguage() {
@@ -67,6 +74,32 @@ public class KeyboardProperties extends RPCStruct {
             store.put(Names.keyboardLayout, keyboardLayout);
         } else {
             store.remove(Names.keyboardLayout);
+        }
+    }
+
+    public KeypressMode getKeypressMode() {
+        Object obj = store.get(Names.keypressMode);
+        if (obj instanceof KeypressMode) {
+            return (KeypressMode) obj;
+        } else if (obj instanceof String) {
+            KeypressMode theCode = null;
+            try {
+                theCode = KeypressMode.valueForString((String) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.keypressMode, e);
+            }
+            return theCode;
+        }
+        return KEYPRESS_MODE_DEFAULT;
+    }
+
+    public void setKeypressMode(KeypressMode keypressMode) {
+        if (keypressMode != null) {
+            store.put(Names.keypressMode, keypressMode);
+        } else {
+            store.put(Names.keypressMode, KEYPRESS_MODE_DEFAULT);
         }
     }
 

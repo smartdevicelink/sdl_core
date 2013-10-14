@@ -52,6 +52,25 @@
             android:layout_height="wrap_content">
 
         <CheckBox
+                android:id="@+id/keyboardproperties_useKeypressMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/keyboardproperties_useKeypressMode"/>
+
+        <Spinner
+                android:id="@+id/keyboardproperties_keypressMode"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <CheckBox
                 android:id="@+id/keyboardproperties_useSendDynamicEntry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
