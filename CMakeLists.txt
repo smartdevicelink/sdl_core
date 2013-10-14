@@ -71,12 +71,16 @@ if(NOT PYTHONINTERP_FOUND)
     message(ERROR "sudo apt-get install python")
 endif(NOT PYTHONINTERP_FOUND)
 
+if (${HMI2})
+
 # ---Qt5 necessary libs
 
-FIND_PACKAGE(Qt5Core REQUIRED)
-FIND_PACKAGE(Qt5DBus REQUIRED)
-FIND_PACKAGE(Qt5Qml REQUIRED)
-FIND_PACKAGE(Qt5Quick REQUIRED)
+    FIND_PACKAGE(Qt5Core REQUIRED)
+    FIND_PACKAGE(Qt5DBus REQUIRED)
+    FIND_PACKAGE(Qt5Qml REQUIRED)
+    FIND_PACKAGE(Qt5Quick REQUIRED)
+
+ENDIF (${HMI2})
 
 execute_process(
   COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlplugindump
