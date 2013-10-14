@@ -195,7 +195,7 @@ Rectangle {
         id: sdlProxy
 
         onAppRegistered: {
-            dataContainer.applicationList.append(
+            dataContainer.addApplication(
             {
                  appName: application.appName,
                  ngnMediaScreenAppName: application.ngnMediaScreenAppName,
@@ -205,16 +205,11 @@ Rectangle {
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
                  appType: application.appType
-             })
+             });
         }
 
         onAppUnregistered: {
-            for (var i = 0; i < dataContainer.applicationList.count; i++) {
-                if (dataContainer.applicationList.get(i).appId === appId) {
-                    dataContainer.applicationList.remove(i);
-                    break;
-                }
-            }
+            dataContainer.removeApplication(appId);
         }
     }
 
