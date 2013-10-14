@@ -37,61 +37,48 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include "gmock/gmock.h"
-#include "audio_manager/audio_manager_impl.h"
+#include "media_manager/media_manager_impl.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace test {
 namespace components {
-namespace audio_manager_test {
+namespace media_manager_test {
 
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("audio_manager_impl"));
+log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("media_manager_impl"));
 
-class AudioManagerTest : public ::testing::Test {
+class MediaManagerTest : public ::testing::Test {
  protected:
   virtual void SetUp();
   virtual void TearDown();
 };
 
-void AudioManagerTest::SetUp() {
+void MediaManagerTest::SetUp() {
 }
 
-void AudioManagerTest::TearDown() {
+void MediaManagerTest::TearDown() {
 }
 
-TEST_F(AudioManagerTest, StreamVideo) {
-  audio_manager::AudioManager* audioManager =
-      audio_manager::AudioManagerImpl::getAudioManager();
+TEST_F(MediaManagerTest, RecordMicrophoneStream) {
+  media_manager::MediaManager* mediaManager =
+      media_manager::MediaManagerImpl::getMediaManager();
 
-  audioManager->startVideoStreaming("/home/meskalito/Videos/SoundCity_540p.mp4");
-
-  LOG4CXX_TRACE(logger, ".Playing stream");
-  while (true) {
-    usleep(10000000);
-    LOG4CXX_TRACE(logger, ".");
-  }
-}
-
-TEST_F(AudioManagerTest, RecordMicrophoneStream) {
-  audio_manager::AudioManager* audioManager =
-      audio_manager::AudioManagerImpl::getAudioManager();
-
-  audioManager->startMicrophoneRecording(std::string("record.wav"),
-                     mobile_apis::SamplingRate::SamplingRate_44KHZ,
-                                                                 5,
-                  mobile_apis::BitsPerSample::BitsPerSample_16_BIT);
+  //mediaManager->startMicrophoneRecording(std::string("record.wav"),
+  //                   mobile_apis::SamplingRate::SamplingRate_44KHZ,
+  //                                                               5,
+  //                mobile_apis::BitsPerSample::BitsPerSample_16_BIT);
 
   usleep(40000000);
 
   // Sleep for 15 sec
   usleep(15000000);
 
-  audioManager->stopMicrophoneRecording();
+  mediaManager->stopMicrophoneRecording();
 }
 
-TEST_F(AudioManagerTest, AddAndPlayStream) {
-  audio_manager::AudioManager* audioManager =
-      audio_manager::AudioManagerImpl::getAudioManager();
+TEST_F(MediaManagerTest, AddAndPlayStream) {
+  media_manager::MediaManager* mediaManager =
+      media_manager::MediaManagerImpl::getMediaManager();
 
   sockaddr device, device_one, device_two;
 
@@ -111,8 +98,8 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
 
   device = device_two;
 
-  audioManager->addA2DPSource(device);
-  audioManager->playA2DPSource(device);
+  mediaManager->addA2DPSource(device);
+  mediaManager->playA2DPSource(device);
 
   LOG4CXX_TRACE(logger, ".Playing stream");
   while (true) {
@@ -122,31 +109,31 @@ TEST_F(AudioManagerTest, AddAndPlayStream) {
 
   usleep(10000000);
 
-  audioManager->removeA2DPSource(device);
+  mediaManager->removeA2DPSource(device);
 
   usleep(10000000);
 
-  audioManager->addA2DPSource(device);
-  audioManager->playA2DPSource(device);
+  mediaManager->addA2DPSource(device);
+  mediaManager->playA2DPSource(device);
 
   usleep(10000000);
 
-  audioManager->stopA2DPSource(device);
+  mediaManager->stopA2DPSource(device);
 
   usleep(10000000);
 
-  audioManager->playA2DPSource(device);
+  mediaManager->playA2DPSource(device);
 
   usleep(10000000);
 
-  audioManager->stopA2DPSource(device);
+  mediaManager->stopA2DPSource(device);
 
   usleep(10000000);
 
-  audioManager->removeA2DPSource(device);
+  mediaManager->removeA2DPSource(device);
 }
 
-}  //  namespace audio_manager_test
+}  //  namespace media_manager_test
 }  //  namespace components
 }  //  namespace test
 

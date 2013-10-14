@@ -121,6 +121,11 @@ class Profile {
     bool is_mixing_audio_supported() const;
 
     /**
+      * @brief Returns true if video re-decoding enabled
+      */
+    bool is_redecoding_enabled() const;
+
+    /**
       * @brief Returns title for Vr Help
       */
     const std::string& vr_help_title() const;
@@ -189,6 +194,7 @@ class Profile {
     uint16_t                        server_port_;
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
+    bool                            is_redecoding_enabled_;
     unsigned int                    max_cmd_id_;
     unsigned int                    default_timeout_;
     std::string                     vr_help_title_;

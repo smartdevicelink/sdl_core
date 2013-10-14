@@ -30,34 +30,33 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
 #include <net/if.h>
 #include <string>
 #include <map>
 #include "utils/logger.h"
 #include "utils/macro.h"
-#include "utils/timer_thread.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
-#include "audio_manager/audio_manager.h"
-#include "audio_manager/video_server.h"
-#include "audio_manager/from_mic_to_file_recorder_thread.h"
-#include "audio_manager/video_streaming_thread.h"
-#include "audio_manager/a2dp_source_player_thread.h"
-#include "audio_manager/audio_stream_sender_thread.h"
+#include "media_manager/media_manager.h"
+#include "media_manager/video_server.h"
+#include "media_manager/from_mic_to_file_recorder_thread.h"
+#include "media_manager/a2dp_source_player_thread.h"
+#include "media_manager/audio_stream_sender_thread.h"
+#include "media_manager/redecoder_client.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 // TODO(PK): Introduce base class for SourcePlayerThread with different
 // specific implementations if there are several different audio source
 // types present.
 
-class AudioManagerImpl : public AudioManager,
+class MediaManagerImpl : public MediaManager,
   public protocol_handler::ProtocolObserver {
   public:
-    static AudioManager* getAudioManager();
+    static MediaManager* getMediaManager();
 
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_hndlr);
@@ -79,30 +78,29 @@ class AudioManagerImpl : public AudioManager,
                                           unsigned int session_key, unsigned int correlation_id);
     virtual void stopMicrophoneRecording();
 
-    virtual void startVideoStreaming(const std::string& fileName);
-    virtual void stopVideoStreaming();
-
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
 
+    virtual void onRedecoded(const protocol_handler::RawMessagePtr& message);
+    virtual void setVideoRedecoder(redecoding::VideoRedecoder* redecoder);
+
     void onTimer() const;
 
-    virtual ~AudioManagerImpl();
+    virtual ~MediaManagerImpl();
 
   protected:
-    AudioManagerImpl();
+    MediaManagerImpl();
 
   private:
     std::map<std::string, threads::Thread*> sources_;
     threads::Thread*                        recorderThread_;
-    threads::Thread*                        videoStreamerThread_;
     mutable bool                            is_stream_running_;
     int                                     app_connection_key;
-    timer::TimerThread<AudioManagerImpl>    timer_;
-    video_server::VideoServer               video_serever_;
+    video_server::VideoServer               video_server_;
+    redecoding::VideoRedecoder*             redecoder_;
 
     const int MAC_ADDRESS_LENGTH_;
-    static AudioManagerImpl* sInstance_;
+    static MediaManagerImpl* sInstance_;
     static log4cxx::LoggerPtr logger_;
     static const std::string sA2DPSourcePrefix_;
     threads::Thread* senderThread_;
@@ -112,9 +110,9 @@ class AudioManagerImpl : public AudioManager,
     const std::string kH264FileName;
     protocol_handler::ProtocolHandler* protocol_handler_;
 
-    DISALLOW_COPY_AND_ASSIGN(AudioManagerImpl);
+    DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };
 
-}  //  namespace audio_manager
+}  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_

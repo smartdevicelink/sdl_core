@@ -39,9 +39,9 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
-#include "audio_manager/video_server.h"
+#include "media_manager/video_server.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 namespace video_server {
 
@@ -266,4 +266,4 @@ bool VideoServer::VideoStreamer::send(
 }
 
 }  // namespace video_server
-}  // namespace audio_manager
+}  // namespace media_manager

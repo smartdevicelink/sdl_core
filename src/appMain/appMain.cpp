@@ -60,7 +60,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "audio_manager/audio_manager_impl.h"
+#include "media_manager/media_manager_impl.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
 
@@ -362,8 +362,14 @@ int main(int argc, char** argv) {
 
   protocol_handler->set_session_observer(connection_handler);
   protocol_handler->AddProtocolObserver(mmh);
-  audio_manager::AudioManagerImpl::getAudioManager()->SetProtocolHandler(
-    protocol_handler);
+
+  if (profile::Profile::instance()->is_redecoding_enabled()) {
+    LOG4CXX_ERROR(logger, "Video re-decoding isn't supported currently" <<
+        "EnableRedecoding should be set to false insmartDeviceLink.ini");
+  }
+  media_manager::MediaManagerImpl::getMediaManager()->setVideoRedecoder(NULL);
+  media_manager::MediaManagerImpl::getMediaManager()->SetProtocolHandler(
+      protocol_handler);
 
   connection_handler->set_transport_manager(transport_manager);
   connection_handler->set_connection_handler_observer(app_manager);

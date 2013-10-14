@@ -30,69 +30,43 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_
 
-#include <net/if.h>
-#include <gst/gst.h>
+#include <pulse/simple.h>
 #include <string>
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/synchronisation_primitives.h"
 
-namespace audio_manager {
+namespace media_manager {
 
-class FromMicToFileRecorderThread : public threads::ThreadDelegate {
+class A2DPSourcePlayerThread : public threads::ThreadDelegate {
  public:
-  FromMicToFileRecorderThread();
+  explicit A2DPSourcePlayerThread(const std::string& device);
 
   void threadMain();
 
   void exitThreadMain();
 
-  void setOutputFileName(const std::string& outputFileName);
-  void setRecordDuration(int duration);
-
  private:
   static log4cxx::LoggerPtr logger_;
 
-  int argc_;
-  gchar** argv_;
+  // The Sample format to use
+  static const pa_sample_spec sSampleFormat_;
 
-  const std::string oKey_;
-  const std::string tKey_;
-
-  static GMainLoop *loop;
-  threads::Thread* sleepThread_;
+  const int BUFSIZE_;
+  pa_simple *s_in, *s_out;
+  std::string device_;
   bool shouldBeStoped_;
   sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
-  std::string outputFileName_, durationString_;
+  void freeStreams();
 
-  typedef struct {
-    GstElement *pipeline;
-    gint duration;
-  } GstTimeout;
-
-  void initArgs();
-
-  void psleep(void *timeout);
-
-  class SleepThreadDelegate : public threads::ThreadDelegate {
-   public:
-    SleepThreadDelegate(GstTimeout timeout);
-
-    void threadMain();
-
-   private:
-    GstTimeout timeout_;
-
-    DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
-  };
-
-  DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
+  DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
-}  // namespace audio_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+}  // namespace media_manager
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_A2DP_SOURCE_PLAYER_THREAD_H_

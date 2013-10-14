@@ -30,8 +30,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_
 
 #include "utils/logger.h"
 #include "utils/macro.h"
@@ -45,7 +45,7 @@ class SmartObject;
 }
 }
 
-namespace audio_manager {
+namespace media_manager {
 
 typedef enum {
   SR_INVALID = -1,
@@ -135,6 +135,6 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
 
   DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };
-}  // namespace audio_manager
+}  // namespace media_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_STREAM_SENDER_THREAD_H_

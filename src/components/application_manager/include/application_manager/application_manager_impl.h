@@ -44,7 +44,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-#include "audio_manager/audio_manager_impl.h"
+#include "media_manager/media_manager_impl.h"
 
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
@@ -455,7 +455,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::Common_Language::eType vr_language_;
     hmi_apis::Common_Language::eType tts_language_;
     smart_objects::SmartObject* vehicle_type_;
-    audio_manager::AudioManager* audioManager_;
+    media_manager::MediaManager* mediaManager_;
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;

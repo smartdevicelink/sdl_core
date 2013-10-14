@@ -36,16 +36,15 @@ set(LIBRARIES
 )
 
 set (SOURCES
-    ./src/audio_manager_impl.cc
+    ./src/media_manager_impl.cc
     ./src/from_mic_to_file_recorder_thread.cc
     ./src/a2dp_source_player_thread.cc
-    ./src/video_streaming_thread.cc
     ./src/video_server.cc
     ./src/audio_stream_sender_thread.cc
 )
 
-add_library("AudioManager" ${SOURCES} )
-target_link_libraries ("AudioManager" Utils)
-target_link_libraries ("AudioManager" log4cxx)
-target_link_libraries ("AudioManager" pulse-simple)
-target_link_libraries ("AudioManager" ${LIBRARIES})
+add_library("MediaManager" ${SOURCES} )
+target_link_libraries ("MediaManager" Utils)
+target_link_libraries ("MediaManager" log4cxx)
+target_link_libraries ("MediaManager" pulse-simple)
+target_link_libraries ("MediaManager" ${LIBRARIES})

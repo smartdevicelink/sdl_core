@@ -1,5 +1,4 @@
 /**
-*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -31,4 +30,26 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "audio_manager/audio_manager_impl_test.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_REDECODER_CLIENT_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_REDECODER_CLIENT_H_
+
+namespace media_manager {
+namespace redecoding {
+
+class VideoRedecoder;
+
+class RedecoderClient {
+  public:
+
+    virtual void setVideoRedecoder(VideoRedecoder* redecoder) = 0;
+    virtual void onRedecoded(const protocol_handler::RawMessagePtr& message) = 0;
+
+    virtual ~RedecoderClient() {
+    }
+};
+
+}  //  namespace redecoding
+
+}  //  namespace media_manager
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_REDECODER_H_

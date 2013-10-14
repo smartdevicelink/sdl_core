@@ -35,7 +35,7 @@
 #endif
 
 #include <string>
-#include "audio_manager/audio_stream_sender_thread.h"
+#include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
@@ -47,7 +47,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 const int AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
@@ -151,4 +151,4 @@ unsigned int AudioStreamSenderThread::correlation_id() const {
   return correlation_id_;
 }
 
-}  // namespace application_manager
+}  // namespace media_manager

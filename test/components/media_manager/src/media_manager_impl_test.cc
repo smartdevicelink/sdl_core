@@ -1,4 +1,5 @@
 /**
+*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -30,43 +31,4 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_
-
-#include <net/if.h>
-#include <gst/gst.h>
-#include <string>
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
-
-namespace audio_manager {
-
-class VideoStreamingThread : public threads::ThreadDelegate {
- public:
-  VideoStreamingThread();
-
-  void threadMain();
-
-  void exitThreadMain();
-
-  static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data);
-  static void on_pad_added(GstElement *element, GstPad *pad, gpointer data);
-
-  void setVideoFileName(const std::string& fileName);
-
- private:
-  static log4cxx::LoggerPtr logger_;
-
-  int argc_;
-  gchar** argv_;
-  std::string fileName_;
-
-  GMainLoop *loop;
-
-  DISALLOW_COPY_AND_ASSIGN(VideoStreamingThread);
-};
-
-}  // namespace audio_manager
-
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_STREAMING_THREAD_H_
+#include "media_manager/media_manager_impl_test.h"

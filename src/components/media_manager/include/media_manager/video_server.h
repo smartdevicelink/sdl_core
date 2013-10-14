@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
 
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
@@ -40,7 +40,7 @@
 #include "utils/threads/thread_delegate.h"
 #include "protocol_handler/protocol_handler.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 namespace video_server {
 
@@ -149,6 +149,6 @@ class VideoServer {
 
 }  //  namespace video_server
 
-}  //  namespace audio_manager
+}  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_

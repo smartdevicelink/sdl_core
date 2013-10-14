@@ -34,58 +34,57 @@
 #include <iterator>
 #include <vector>
 #include "application_manager/message_helper.h"
-#include "audio_manager/audio_manager_impl.h"
+#include "media_manager/media_manager_impl.h"
 #include "utils/file_system.h"
 
-namespace audio_manager {
+namespace media_manager {
 
-log4cxx::LoggerPtr AudioManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("AudioManagerImpl"));
+log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("MediaManagerImpl"));
 
-AudioManagerImpl* AudioManagerImpl::sInstance_ = 0;
+MediaManagerImpl* MediaManagerImpl::sInstance_ = 0;
 
-const std::string AudioManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
+const std::string MediaManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
 
-AudioManager* AudioManagerImpl::getAudioManager() {
+MediaManager* MediaManagerImpl::getMediaManager() {
   if (0 == sInstance_) {
-    sInstance_ = new AudioManagerImpl;
+    sInstance_ = new MediaManagerImpl;
   }
 
   return sInstance_;
 }
 
-AudioManagerImpl::AudioManagerImpl()
+MediaManagerImpl::MediaManagerImpl()
 // Six hex-pairs + five underscores + '\n'
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
     kH264FileName("h264file.mp4"),
     protocol_handler_(NULL),
-    videoStreamerThread_(NULL),
+    redecoder_(NULL),
     is_stream_running_(false),
     app_connection_key(0),
-    timer_(this, &AudioManagerImpl::onTimer),
-    video_serever_() {
+    video_server_() {
 }
 
-AudioManagerImpl::~AudioManagerImpl() {
+MediaManagerImpl::~MediaManagerImpl() {
   protocol_handler_ = NULL;
-  videoStreamerThread_ = NULL;
+  redecoder_ = NULL;
 }
 
-void AudioManagerImpl::SetProtocolHandler(
+void MediaManagerImpl::SetProtocolHandler(
   protocol_handler::ProtocolHandler* protocol_hndlr) {
   DCHECK(protocol_hndlr);
   protocol_handler_ = protocol_hndlr;
   protocol_handler_->AddProtocolObserver(this);
 }
 
-void AudioManagerImpl::addA2DPSource(const std::string& device) {
+void MediaManagerImpl::addA2DPSource(const std::string& device) {
   if (sources_.find(device) == sources_.end()) {
     sources_.insert(std::pair<std::string, threads::Thread*>(
                       device, NULL));
   }
 }
 
-void AudioManagerImpl::removeA2DPSource(const std::string& device) {
+void MediaManagerImpl::removeA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
     sources_.find(device);
 
@@ -109,7 +108,7 @@ void AudioManagerImpl::removeA2DPSource(const std::string& device) {
   }
 }
 
-void AudioManagerImpl::playA2DPSource(const std::string& device) {
+void MediaManagerImpl::playA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
     sources_.find(device);
 
@@ -125,7 +124,7 @@ void AudioManagerImpl::playA2DPSource(const std::string& device) {
   }
 }
 
-void AudioManagerImpl::stopA2DPSource(const std::string& device) {
+void MediaManagerImpl::stopA2DPSource(const std::string& device) {
   std::map<std::string, threads::Thread*>::iterator it =
     sources_.find(device);
 
@@ -141,7 +140,7 @@ void AudioManagerImpl::stopA2DPSource(const std::string& device) {
   }
 }
 
-std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
+std::string MediaManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   char mac[MAC_ADDRESS_LENGTH_];
@@ -162,31 +161,31 @@ std::string AudioManagerImpl::sockAddr2SourceAddr(const sockaddr& device) {
   return ret;
 }
 
-void AudioManagerImpl::addA2DPSource(const sockaddr& device) {
+void MediaManagerImpl::addA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   addA2DPSource(sockAddr2SourceAddr(device));
 }
 
-void AudioManagerImpl::removeA2DPSource(const sockaddr& device) {
+void MediaManagerImpl::removeA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   removeA2DPSource(sockAddr2SourceAddr(device));
 }
 
-void AudioManagerImpl::playA2DPSource(const sockaddr& device) {
+void MediaManagerImpl::playA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   playA2DPSource(sockAddr2SourceAddr(device));
 }
 
-void AudioManagerImpl::stopA2DPSource(const sockaddr& device) {
+void MediaManagerImpl::stopA2DPSource(const sockaddr& device) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   stopA2DPSource(sockAddr2SourceAddr(device));
 }
 
-void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
+void MediaManagerImpl::startMicrophoneRecording(const std::string& outputFileName,
     mobile_apis::SamplingRate::eType samplingRate,
     int duration,
     mobile_apis::BitsPerSample::eType bitsPerSample,
@@ -223,7 +222,7 @@ void AudioManagerImpl::startMicrophoneRecording(const std::string& outputFileNam
   }
 }
 
-void AudioManagerImpl::stopMicrophoneRecording() {
+void MediaManagerImpl::stopMicrophoneRecording() {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (NULL != recorderThread_) {
@@ -239,36 +238,7 @@ void AudioManagerImpl::stopMicrophoneRecording() {
   }
 }
 
-void AudioManagerImpl::startVideoStreaming(const std::string& fileName) {
-  LOG4CXX_TRACE_ENTER(logger_);
-
-  VideoStreamingThread* videoStreamingThreadDelegate =
-    new VideoStreamingThread();
-
-  if (NULL != videoStreamingThreadDelegate) {
-    videoStreamingThreadDelegate->setVideoFileName(fileName);
-
-    videoStreamerThread_ = new threads::Thread("VideoStreamer"
-        , videoStreamingThreadDelegate);
-
-    if (NULL != videoStreamerThread_) {
-      videoStreamerThread_->start();
-    }
-  }
-}
-
-void AudioManagerImpl::stopVideoStreaming() {
-  LOG4CXX_TRACE_ENTER(logger_);
-
-  if (NULL != videoStreamerThread_) {
-    is_stream_running_ = false;
-    recorderThread_->stop();
-    delete videoStreamerThread_;
-    videoStreamerThread_ = NULL;
-  }
-}
-
-void AudioManagerImpl::OnMessageReceived(
+void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -282,16 +252,10 @@ void AudioManagerImpl::OnMessageReceived(
 
     if (false == is_stream_running_) {
 
-      if (file_system::FileExists(kH264FileName)) {
-        file_system::DeleteFile(kH264FileName);
-      }
-
       LOG4CXX_ERROR(logger_, "Start streaming timer");
       is_stream_running_ = true;
       app_connection_key = (*message).connection_key();
-      // FIXME
-      //timer_.start(10);
-      video_serever_.start();
+      video_server_.start();
       const std::string url = "http://localhost:5050";
       application_manager::MessageHelper::SendNaviStartStream(
         url, app_connection_key);
@@ -309,17 +273,16 @@ void AudioManagerImpl::OnMessageReceived(
       messsages_for_session = 0;
     }
 
-    video_serever_.sendMsg(message);
+    video_server_.sendMsg(message);
   }
 }
 
-void AudioManagerImpl::onTimer() const {
-  // start streaming
-  LOG4CXX_ERROR(logger_, "Start streaming");
-  const std::string url = "http://localhost:8000/live";
-  AudioManagerImpl::getAudioManager()->startVideoStreaming(kH264FileName);
-  application_manager::MessageHelper::SendNaviStartStream(
-    url, app_connection_key);
+void MediaManagerImpl::onRedecoded(const protocol_handler::RawMessagePtr&
+                                        message) {
 }
 
-}  // namespace audio_manager
+void MediaManagerImpl::setVideoRedecoder(redecoding::VideoRedecoder* redecoder) {
+   redecoder_ = redecoder;
+}
+
+}  // namespace media_manager

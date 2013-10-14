@@ -37,7 +37,7 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_chaining.h"
-#include "audio_manager/audio_stream_sender_thread.h"
+#include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
@@ -731,11 +731,11 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int sampling_rate,
     int bits_per_sample,
     int audio_type) {
-  audioManager_ = audio_manager::AudioManagerImpl::getAudioManager();
+  mediaManager_ = media_manager::MediaManagerImpl::getMediaManager();
 
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
-  if (NULL != audioManager_) {
-    audioManager_->startMicrophoneRecording(std::string("record.wav"),
+  if (NULL != mediaManager_) {
+    mediaManager_->startMicrophoneRecording(std::string("record.wav"),
                                             static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
                                             max_duration,
                                             static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
@@ -793,8 +793,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 void ApplicationManagerImpl::StopAudioPassThru() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if (NULL != audioManager_) {
-    audioManager_->stopMicrophoneRecording();
+  if (NULL != mediaManager_) {
+    mediaManager_->stopMicrophoneRecording();
   }
 }
 
@@ -977,9 +977,6 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     case connection_handler::ServiceType::kNaviSession: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       // TODO(PK): add some intelligent logic
-      if (audioManager_) {
-        audioManager_->stopVideoStreaming();
-      }
       break;
     }
     default:

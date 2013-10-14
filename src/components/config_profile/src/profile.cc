@@ -50,6 +50,7 @@ Profile::Profile()
   , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false)
+  , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
   , space_available_(104857600) {
@@ -124,6 +125,10 @@ const unsigned int Profile::space_available() const {
   return space_available_;
 }
 
+bool Profile::is_redecoding_enabled() const {
+  return is_redecoding_enabled_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
@@ -161,6 +166,16 @@ void Profile::UpdateValues() {
       min_tread_stack_size_ = threads::Thread::kMinStackSize;
     }
     LOG4CXX_INFO(logger_, "Set threadStackMinSize to " << min_tread_stack_size_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "EnableRedecoding", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      is_redecoding_enabled_ = true;
+    }
+    LOG4CXX_INFO(logger_, "Set RedecodingEnabled to " << value);
   }
 
   *value = '\0';

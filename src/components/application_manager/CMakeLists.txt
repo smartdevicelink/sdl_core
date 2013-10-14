@@ -14,11 +14,10 @@ include_directories (
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
-  ../audio_manager/include
+  ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../audio_manager/include/
   ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/

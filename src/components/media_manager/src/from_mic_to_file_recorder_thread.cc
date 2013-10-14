@@ -30,9 +30,9 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "audio_manager/from_mic_to_file_recorder_thread.h"
+#include "media_manager/from_mic_to_file_recorder_thread.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
@@ -252,4 +252,4 @@ void FromMicToFileRecorderThread::exitThreadMain() {
   stopFlagMutex_.unlock();
 }
 
-}  // namespace audio_manager
+}  // namespace media_manager

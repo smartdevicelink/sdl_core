@@ -49,7 +49,7 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
-    AudioManager
+    MediaManager
     formatters
     HMI_API
     SmartObjects

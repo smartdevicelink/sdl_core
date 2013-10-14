@@ -29,7 +29,7 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-  AudioManager
+  MediaManager
   Libusb-1.0.16
 )
 
@@ -53,7 +53,7 @@ include_directories (
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
-  ../components/audio_manager/include/
+  ../components/media_manager/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include

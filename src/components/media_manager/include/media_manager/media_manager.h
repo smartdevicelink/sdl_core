@@ -30,16 +30,16 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
-#define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
 #include "interfaces/MOBILE_API.h"
+#include "media_manager/redecoder_client.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 class string;
-
-class AudioManager {
+class MediaManager : public redecoding::RedecoderClient {
   public:
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_hndlr) = 0;
@@ -59,13 +59,11 @@ class AudioManager {
                                           mobile_apis::BitsPerSample::eType,
                                           unsigned int session_key, unsigned int correlation_id) = 0;
     virtual void stopMicrophoneRecording() = 0;
-    virtual void startVideoStreaming(const std::string& fileName) = 0;
-    virtual void stopVideoStreaming() = 0;
 
-    virtual ~AudioManager() {
+    virtual ~MediaManager() {
     }
 };
 
-}  //  namespace audio_manager
+}  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_

@@ -32,9 +32,9 @@
 
 #include <string.h>
 #include <pulse/error.h>
-#include "audio_manager/a2dp_source_player_thread.h"
+#include "media_manager/a2dp_source_player_thread.h"
 
-namespace audio_manager {
+namespace media_manager {
 
 log4cxx::LoggerPtr A2DPSourcePlayerThread::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("A2DPSourcePlayerThread"));
@@ -155,4 +155,4 @@ void A2DPSourcePlayerThread::threadMain() {
   freeStreams();
 }
 
-}  // namespace audio_manager
+}  // namespace media_manager
