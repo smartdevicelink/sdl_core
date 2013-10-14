@@ -83,9 +83,11 @@ Item {
             }
         }
     }
-
-    property int hmiContext
+    property int systemContext
     property bool applicationContext: false
+
+    property int systemSavedContext
+    property bool applicationSavedContext
 
     property string route_text: ""
 
@@ -156,6 +158,15 @@ Item {
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
 
+    property var hmiUIText: {
+        "mainField1": "The Dog Days Are Over",
+        "mainField2": "Florence and the Machine",
+        "mainField3": "Track 13/16",
+        "mainField4": "",
+        "statusBar": "",
+        "mediaClock": "02:36"
+    }
+    property int hmiUITextAlignment: Text.AlignLeft
     property ListModel deviceList: ListModel {}
     property ListModel applicationList: ListModel {}
 
