@@ -1128,6 +1128,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              request_soft_buttons[i].erase(strings::image);
+            }
             return verification_result;
           }
         } else {
@@ -1160,6 +1164,11 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
           if (mobile_apis::Result::SUCCESS != verification_result) {
             if (!text_exist) {
               return mobile_apis::Result::INVALID_DATA;
+            }
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              request_soft_buttons[i].erase(strings::image);
+              return verification_result;
             }
           }
         }
