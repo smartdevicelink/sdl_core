@@ -55,7 +55,7 @@ Rectangle {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: hide()
+            onClicked: complete()
         }
 
         Column {
@@ -98,8 +98,7 @@ Rectangle {
     Timer {
         id: timer
         onTriggered: {
-            hide()
-            DBus.sendReply(async, {})
+            complete()
         }
     }
 
@@ -136,9 +135,11 @@ Rectangle {
         visible = true
     }
 
-    function hide () {
+    function complete () {
+        timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
+        DBus.sendReply(async, {})
     }
 }

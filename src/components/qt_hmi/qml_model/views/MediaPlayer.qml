@@ -251,7 +251,7 @@ Item {
             anchors.top: mediaControl.bottom
             anchors.bottom: parent.bottom
             text: dataContainer.hmiUIText.statusBar
-            color: textColor
+            color: Constants.primaryColor
         }
     }
 }
