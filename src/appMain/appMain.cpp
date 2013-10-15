@@ -80,6 +80,7 @@ namespace {
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
+const char kLocalHostAddress[] = "127.0.0.1";
 
 /**
  * Initialize MessageBroker component
@@ -390,7 +391,8 @@ int main(int argc, char** argv) {
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
 
-  if(profile::Profile::instance()->server_address() == "127.0.0.1") {
+  if(profile::Profile::instance()->server_address() ==
+      std::string(kLocalHostAddress)) {
     LOG4CXX_INFO(logger, "Start HMI on localhost");
 
     if (!InitHmi()) {
