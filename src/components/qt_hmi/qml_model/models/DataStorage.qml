@@ -157,4 +157,5 @@ Item {
     }
 
     property NavigationModel navigationModel: NavigationModel { }
+    property bool activeVR: false
 }

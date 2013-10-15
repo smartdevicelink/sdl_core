@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
+import "../views"
 
 Item {
     id: hardwareButtons
@@ -48,7 +49,16 @@ Item {
             Column {
                 Row {
                     spacing: 25
-                    HardwareButton { name: "vr" }
+                    MaskedButton {
+                        name: "vr"
+                        onReleased: {
+                            if (!dataContainer.activeVR) {
+                                vrPopUp.activate();
+                            } else {
+                                vrPopUp.deactivate();
+                            }
+                        }
+                    }
                     PowerSwitchBtn {}
                 }
 
