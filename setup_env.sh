@@ -12,7 +12,6 @@ PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 INSTALL_ALL=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
-AVAHI_COMMON="libavahi-common-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
@@ -88,10 +87,6 @@ echo $OK
 
 echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
-echo $OK
-
-echo "Installing Avahi-common-dev library"
-apt-install ${AVAHI_COMMON}
 echo $OK
 
 echo "Installing Avahi-client-dev library"
