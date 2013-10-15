@@ -354,11 +354,9 @@ SDL.SDLModel = Em.Object.create({
         playVideo: function(){
             if (SDL.SDLAppController.model.navigationStream !== null) {
 
-            setTimeout(function(){
                 SDL.SDLModel.naviVideo = document.getElementById("html5Player");
                 SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
                 SDL.SDLModel.naviVideo.play();
-            }, 1000);
             }
         },
 

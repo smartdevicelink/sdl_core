@@ -60,11 +60,16 @@ VideoServer::VideoServer()
   if (delegate_) {
     thread_ = new threads::Thread("VideoServer", delegate_);
   }
+
+  start();
 }
 
 VideoServer::~VideoServer() {
   delete thread_;
   thread_ = NULL;
+  if(socket_ != -1) {
+    ::close(socket_);
+  }
 }
 
 bool VideoServer::start() {
@@ -136,10 +141,7 @@ void VideoServer::VideoStreamer::threadMain() {
 
   while (1) {
 
-    struct sockaddr_in cli_addr;
-    int cli_len = sizeof(cli_addr);
-    socket_fd_ = accept(server_->socket_,
-        reinterpret_cast<struct sockaddr*>(&cli_addr), (socklen_t*)&cli_len);
+    socket_fd_ = accept(server_->socket_,NULL, NULL);
 
     if (0 > socket_fd_)
     {
@@ -149,24 +151,8 @@ void VideoServer::VideoStreamer::threadMain() {
     }
 
     is_client_connected_ = true;
-    int size_recv = 0;
-    char buff[1024] = {'\0'};
-
-    // while end of HTTP header not found
-    while (strstr(buff, "\r\n\r\n") != NULL) {
-      memset(buff, 0, sizeof(buff));
-      if ((size_recv = recv(socket_fd_, buff, sizeof(buff), 0)) < 0) {
-        LOG4CXX_ERROR(logger_, "An error occurred");
-        is_client_connected_ = false;
-        break;
-      } else if (0 == size_recv) {
-        LOG4CXX_ERROR(logger_, "Connection closed");
-        is_client_connected_ = false;
-        break;
-      }
-    }
-
     while (is_client_connected_) {
+      server_->messages_.wait();
       protocol_handler::RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger_, "Null pointer message");
@@ -174,7 +160,6 @@ void VideoServer::VideoStreamer::threadMain() {
       }
 
       is_client_connected_ = send(msg);
-      server_->messages_.wait();
     }
 
     stop();

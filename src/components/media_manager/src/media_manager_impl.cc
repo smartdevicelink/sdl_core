@@ -250,12 +250,10 @@ void MediaManagerImpl::OnMessageReceived(
 
   if (message->is_fully_binary()) {
 
+    video_server_.sendMsg(message);
     if (false == is_stream_running_) {
-
-      LOG4CXX_ERROR(logger_, "Start streaming timer");
       is_stream_running_ = true;
       app_connection_key = (*message).connection_key();
-      video_server_.start();
       const std::string url = "http://localhost:5050";
       application_manager::MessageHelper::SendNaviStartStream(
         url, app_connection_key);
@@ -272,8 +270,6 @@ void MediaManagerImpl::OnMessageReceived(
                                           messsages_for_session);
       messsages_for_session = 0;
     }
-
-    video_server_.sendMsg(message);
   }
 }
 
