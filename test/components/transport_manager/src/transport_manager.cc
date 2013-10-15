@@ -187,7 +187,7 @@ MockTransportManagerListener *TransportManagerTest::tm_listener = nullptr;
 
 TEST_F(TransportManagerTest, ScanDeviceFailed) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
+  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 

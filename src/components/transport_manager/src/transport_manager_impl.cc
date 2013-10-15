@@ -682,6 +682,12 @@ void TransportManagerImpl::EventListenerThread(void) {
           RaiseEvent(&TransportManagerListener::OnScanDevicesFailed,
                      *static_cast<SearchDeviceError*>(error));
           if (da_scanned_ == transport_adapters_.size()) {
+            RaiseEvent(&TransportManagerListener::OnDeviceListUpdated,
+                       device_list_);
+            if (0 == device_list_.size()) {
+              LOG4CXX_INFO(logger_, "No device found event raised")
+              RaiseEvent(&TransportManagerListener::OnNoDeviceFound);
+            }
             RaiseEvent(&TransportManagerListener::OnScanDevicesFinished);
             search_in_progress_ = false;
           }
