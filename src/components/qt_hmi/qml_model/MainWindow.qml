@@ -58,6 +58,7 @@ Rectangle {
             sdlUI.onSystemContext(systemContext)
         }
 
+        // Please note that applicationContext is changed only after setting currentApplication
         onApplicationContextChanged: {
             if (applicationContext) {
                 sdlBasicCommunication.onAppActivated(currentApplication.appId)
@@ -112,8 +113,8 @@ Rectangle {
 
                 function go(path, appId) {
                     viewTransitionStack.push(source.toString())
-                    if (appId > 0) {
-                        dataContainer.applicationId = appId
+                    if (appId) {
+                        dataContainer.setCurrentApplication(appId)
                     }
                     source = path
                 }

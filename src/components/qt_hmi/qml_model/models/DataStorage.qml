@@ -51,6 +51,9 @@ Item {
     property int systemContext
 
     function setCurrentApplication(appId) {
+        var oldApplicationContext = systemContext;
+        applicationContext = false;
+
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
@@ -59,6 +62,10 @@ Item {
                 // ... etc
             }
         }
+
+        applicationContext = oldApplicationContext;
+
+        currentApplicationChanged()
     }
 
     function addApplication(app) {
