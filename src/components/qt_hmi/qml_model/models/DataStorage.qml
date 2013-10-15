@@ -51,7 +51,7 @@ Item {
     property int systemContext
 
     function setCurrentApplication(appId) {
-        var oldApplicationContext = applicationContext;
+        var oldApplicationContext = applicationtContext;
         applicationContext = false;
 
         for(var i = 0; i < applicationList.count; i++) {
