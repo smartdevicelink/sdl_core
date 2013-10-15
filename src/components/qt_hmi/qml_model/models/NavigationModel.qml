@@ -40,11 +40,11 @@ Item {
     property string totalDistance: ""
     property string eta: ""
     property var icon: null
-    property url pathIcon: ""
+    property url pathIcon: "../res/album_art.png"
     property string imageIcon: ""
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
     property bool maneuverComplete: null
-    property ListModel softButtons: ListModel {}
+    property ListModel softButtons: ListModel { }
     property int appId: -1
 }

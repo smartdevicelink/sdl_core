@@ -144,8 +144,5 @@ Item {
         hmiTTSVRLanguage = language
     }
 
-    NavigationModel {
-        id: navigationModel
-    }
-    property alias navigationModel: navigationModel
+    property NavigationModel navigationModel: NavigationModel { }
 }

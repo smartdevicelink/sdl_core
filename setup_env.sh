@@ -34,7 +34,7 @@ set -e
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
-if [ ${uname_result} = "i386" ]; then
+if [ ${uname_result} = "i386" ] || [ ${uname_result} = "i686" ]; then
   echo "x86 machine detected"
   ARCH="i386"
 elif [ ${uname_result} = "x86_64" ]; then

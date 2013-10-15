@@ -36,23 +36,26 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 Item {
-    property var source: undefined
+    property var iconSource
 
     Image {
         anchors.fill: parent
-
-        source: url(parent.source)
+        source: url(parent.iconSource)
 
         function image(turnIcon) {
-            return (turnIcon === undefined ||
-                    turnIcon.imageType !== Common.ImageType.STATIC) ? "" :
-                        turnIcon.value;
+            if (turnIcon && turnIcon.imageType === Common.ImageType.STATIC) {
+                return turnIcon.value;
+            } else {
+                return "";
+            }
         }
 
         function url(turnIcon) {
-            return (turnIcon === undefined ||
-                    turnIcon.imageType !== Common.ImageType.DYNAMIC) ? "" :
-                        turnIcon.value;
+            if (turnIcon && turnIcon.imageType === Common.ImageType.DYNAMIC) {
+                return turnIcon.value;
+            } else {
+                return "";
+            }
         }
     }
 }
