@@ -78,7 +78,7 @@ Item {
     function removeApplication(appId) {
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
-                applicationList.remove(is);
+                applicationList.remove(i);
                 break;
             }
         }
