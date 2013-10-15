@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
@@ -43,7 +44,6 @@ GeneralView {
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         anchors.fill: parent
-
         playerState: dataContainer.sdlPlayerState
 
         topOvalButtons: [

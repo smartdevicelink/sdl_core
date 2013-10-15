@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
 Item {
@@ -90,45 +91,54 @@ Item {
             id: mid
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
+            anchors.right: parent.right
             width: parent.width
             height: parent.height * 2/4
 
-            Row {
+            Image {
+                id: image
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                height: parent.height
-                width: parent.width
-                spacing: 20
+                source: playerState.albumImage
+            }
 
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.height
-                    height: parent.height
-                    source: playerState.albumImage
+            Item {
+                id: space
+                anchors.left: image.right
+                width: 20
+            }
+
+            Column {
+                anchors.left: space.right
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: parent.height / 5
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    color: Constants.primaryColor
+                    text: playerState.trackName
+                    font.pixelSize: 45
+                    font.bold: true
                 }
 
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: parent.height / 5
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    color: Constants.primaryColor
+                    text: playerState.albumName
+                    font.pixelSize: 25
+                }
 
-                    Text {
-                        color: Constants.primaryColor
-                        text: "Track " + playerState.trackNumber
-                        font.pixelSize: 20
-                    }
-
-                    Text {
-                        color: Constants.primaryColor
-                        text: playerState.trackName
-                        font.pixelSize: 45
-                        font.bold: true
-                    }
-
-                    Text {
-                        color: Constants.primaryColor
-                        text: playerState.albumName
-                        font.pixelSize: 25
-                    }
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    color: Constants.primaryColor
+                    text: playerState.trackNumber
+                    font.pixelSize: 20
                 }
             }
         }
@@ -147,7 +157,7 @@ Item {
                 anchors.leftMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
                 color: "white"
-                text: "02:36"
+                text: dataContainer.hmiUIText.mediaClock
                 font.pixelSize: 18
             }
 
@@ -193,6 +203,8 @@ Item {
         height: 1/4 * parent.height
 
         Row {
+            id: mediaControl
+
             anchors.centerIn: parent
             Image {
                 id: prevButton
@@ -231,6 +243,15 @@ Item {
                     }
                 }
             }
+        }
+
+        Text {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: mediaControl.bottom
+            anchors.bottom: parent.bottom
+            text: dataContainer.hmiUIText.statusBar
+            color: Constants.primaryColor
         }
     }
 }

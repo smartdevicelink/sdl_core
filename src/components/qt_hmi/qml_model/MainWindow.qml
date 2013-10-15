@@ -40,6 +40,7 @@ import "./views"
 import "./hmi_api" as HmiApi
 import "./models"
 import "./popups"
+import "hmi_api/Common.js" as Common
 import "./models/Constants.js" as Constants
 
 Rectangle {
@@ -53,8 +54,8 @@ Rectangle {
     DataStorage {
         id: dataContainer
 
-        onHmiContextChanged: {
-            sdlUI.onSystemContext(hmiContext)
+        onSystemContextChanged: {
+            sdlUI.onSystemContext(systemContext)
         }
 
         onApplicationContextChanged: {
@@ -109,8 +110,11 @@ Rectangle {
                     viewTransitionStack = []
                 }
 
-                function go(path) {
+                function go(path, appId) {
                     viewTransitionStack.push(source.toString())
+                    if (appId > 0) {
+                        dataContainer.applicationId = appId
+                    }
                     source = path
                 }
 
@@ -120,11 +124,24 @@ Rectangle {
 
                 onStatusChanged: {
                     if (status == Component.Ready) {
-                        dataContainer.hmiContext = item.systemContext
-                        dataContainer.applicationContext = item.applicationContext
+                        if (dataContainer.systemContext !== Common.SystemContext.SYSCTXT_ALERT) {
+                            dataContainer.systemContext = item.systemContext
+                            dataContainer.applicationContext = item.applicationContext
+                        }
+                        else {
+                            dataContainer.systemSavedContext = item.systemContext
+                            dataContainer.applicationSavedContext = item.applicationContext
+                        }
                     }
                 }
             }
+        }
+
+        AlertWindow {
+            id: alertWindow
+            objectName: "AlertWindow"
+            anchors.fill: parent
+            visible: false
         }
     }
 
@@ -193,11 +210,6 @@ Rectangle {
                 }
             }
         }
-    }
-
-    AlertWindow {
-        id: alertWindow
-        objectName: "AlertWindow"
     }
 
     Component.onCompleted: {
