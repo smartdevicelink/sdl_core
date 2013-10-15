@@ -154,28 +154,12 @@ Item {
 
         ListModel {
             id: languagesList
-            ListElement { lang: 'EN-US' }
-            ListElement { lang: 'ES-MX' }
-            ListElement { lang: 'FR-CA' }
-            ListElement { lang: 'DE-DE' }
-            ListElement { lang: 'ES-ES' }
-            ListElement { lang: 'EN-GB' }
-            ListElement { lang: 'RU-RU' }
-            ListElement { lang: 'TR-TR' }
-            ListElement { lang: 'PL-PL' }
-            ListElement { lang: 'FR-FR' }
-            ListElement { lang: 'IT-IT' }
-            ListElement { lang: 'SV-SE' }
-            ListElement { lang: 'PT-PT' }
-            ListElement { lang: 'NL-NL' }
-            ListElement { lang: 'ZH-TW' }
-            ListElement { lang: 'JA-JP' }
-            ListElement { lang: 'AR-SA' }
-            ListElement { lang: 'KO-KR' }
-            ListElement { lang: 'PT-BR' }
-            ListElement { lang: 'CS-CZ' }
-            ListElement { lang: 'DA-DK' }
-            ListElement { lang: 'NO-NO' }
+
+            Component.onCompleted: {
+                for (var name in Common.Language) {
+                    append({name: name.replace('_', '-')});
+                }
+            }
         }
 
         Row
@@ -207,6 +191,10 @@ Item {
                 ComboBox {
                     model: languagesList
                     width: 180
+                    onCurrentIndexChanged: {
+                        sdlTTS.onLanguageChange(currentIndex);
+                        sdlVR.onLanguageChange(currentIndex);
+                    }
                 }
             }
         }
