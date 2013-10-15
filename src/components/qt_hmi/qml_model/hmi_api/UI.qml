@@ -94,7 +94,7 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        dataContainer.currentApplication.options.append({"menuName": menuParams.menuName})
+        dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
         return {}
     }
 
@@ -102,6 +102,7 @@ Item {
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        dataContainer.addSubMenu(menuID, menuParams, appID)
     }
 
     function deleteSubMenu (menuID, appID) {

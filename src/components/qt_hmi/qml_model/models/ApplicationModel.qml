@@ -13,5 +13,6 @@ QtObject {
     property string helpPrompt
     property string timeoutPrompt
 
-    property ListModel options: ListModel {}
+    property ListModel options: ListModel {
+    }
 }

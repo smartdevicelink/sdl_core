@@ -57,9 +57,14 @@ GeneralView {
             model: dataContainer.currentApplication.options
 
             delegate: Text  {
-                text: menuName
+                text: name
                 color: Constants.primaryColor
                 font.pixelSize: 40
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                    }
+                }
             }
         }
     }
