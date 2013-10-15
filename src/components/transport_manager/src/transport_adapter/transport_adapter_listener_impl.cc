@@ -308,5 +308,5 @@ bool TransportAdapterListenerImpl::FindSharedPtr(
   return it != transport_manager_impl_->transport_adapters_.end();
 }
 
-}  //namespace transport_manager
+}  // namespace transport_manager
 
