@@ -701,9 +701,9 @@ SDL.SDLModel = Em.Object.create({
     deleteCommandResponse: function (result, responseID) {
 
         if(result === SDL.SDLModel.resultCode["SUCCESS"]){
-            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], responseID, "DeleteCommand");
+            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], responseID, "UI.DeleteCommand");
         } else {
-            FFW.UI.sendError(SDL.SDLModel.resultCode["IN_USE"], responseID, "DeleteCommand", "In use");
+            FFW.UI.sendError(SDL.SDLModel.resultCode["IN_USE"], responseID, "UI.DeleteCommand", "In use");
         }
     },
 

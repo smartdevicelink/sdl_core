@@ -661,12 +661,8 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
       if (((*i->second)[strings::cmd_icon].keyExists(strings::value))
           && (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
         msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
-
-        std::string file_path = file_system::FullPath(app->name());
-        file_path += "/";
-        file_path += (*i->second)[strings::cmd_icon][strings::value].asString();
-
-        msg_params[strings::cmd_icon][strings::value] = file_path;
+        msg_params[strings::cmd_icon][strings::value] =
+            (*i->second)[strings::cmd_icon][strings::value].asString();
       }
       (*ui_command)[strings::msg_params] = msg_params;
 
@@ -1128,6 +1124,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              request_soft_buttons[i].erase(strings::image);
+            }
             return verification_result;
           }
         } else {
@@ -1160,6 +1160,11 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
           if (mobile_apis::Result::SUCCESS != verification_result) {
             if (!text_exist) {
               return mobile_apis::Result::INVALID_DATA;
+            }
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              request_soft_buttons[i].erase(strings::image);
+              return verification_result;
             }
           }
         }

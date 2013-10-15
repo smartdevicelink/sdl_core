@@ -94,13 +94,7 @@ void ScrollabelMessageRequest::Run() {
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
-
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] =
-        (*message_)[strings::msg_params][strings::timeout];
-  } else {
-    msg_params[strings::timeout] = 30000;
-  }
+  msg_params[strings::timeout] = default_timeout_;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
