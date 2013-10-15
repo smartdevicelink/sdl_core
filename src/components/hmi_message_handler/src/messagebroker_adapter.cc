@@ -40,8 +40,10 @@ typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("HMIMessageHandler"));
 
-MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
-    : MessageBrokerController(std::string("127.0.0.1"), 8087, "SDL"),
+MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler,
+                                           const std::string& server_address,
+                                           uint16_t port)
+    : MessageBrokerController(server_address, port, "SDL"),
       HMIMessageAdapter(handler) {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }

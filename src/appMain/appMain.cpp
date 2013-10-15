@@ -127,7 +127,9 @@ bool InitMessageBroker() {  // TODO(AK): check memory allocation here.
 
   hmi_message_handler::MessageBrokerAdapter* mb_adapter =
     new hmi_message_handler::MessageBrokerAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance(),
+    profile::Profile::instance()->server_address(),
+    profile::Profile::instance()->server_port());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter);
@@ -387,10 +389,15 @@ int main(int argc, char** argv) {
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-  if (!InitHmi()) { 
-    exit(EXIT_FAILURE);
+
+  if(profile::Profile::instance()->server_address() == "127.0.0.1") {
+    LOG4CXX_INFO(logger, "Start HMI on localhost");
+
+    if (!InitHmi()) {
+      exit(EXIT_FAILURE);
+    }
+    LOG4CXX_INFO(logger, "InitHmi successful");
   }
-  LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
 
