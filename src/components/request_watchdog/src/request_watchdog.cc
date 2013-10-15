@@ -104,7 +104,7 @@ void RequestWatchdog::removeAllListeners() {
   queueDispatcherThread.stop();
 }
 
-void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
+void RequestWatchdog::notifySubscribers(const RequestInfo& requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   subscribersListMutex_.lock();
@@ -119,19 +119,19 @@ void RequestWatchdog::notifySubscribers(RequestInfo requestInfo) {
   subscribersListMutex_.unlock();
 }
 
-void RequestWatchdog::addRequest(RequestInfo requestInfo) {
+void RequestWatchdog::addRequest(RequestInfo* requestInfo) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   requestsMapMutex_.lock();
 
-  requests_.insert(std::pair<RequestInfo, struct timeval>(requestInfo,
+  requests_.insert(std::pair<RequestInfo*, TimevalStruct>(requestInfo,
                    date_time::DateTime::getCurrentTime()));
 
   LOG4CXX_INFO(logger_, "Add request "
-               << "\n ConnectionID : " << requestInfo.connectionID_
-               << "\n CorrelationID : " << requestInfo.correlationID_
-               << "\n FunctionID : " << requestInfo.functionID_
-               << "\n CustomTimeOut : " << requestInfo.customTimeout_
+               << "\n ConnectionID : " << requestInfo->connectionID_
+               << "\n CorrelationID : " << requestInfo->correlationID_
+               << "\n FunctionID : " << requestInfo->functionID_
+               << "\n CustomTimeOut : " << requestInfo->customTimeout_
                << "\n");
 
   requestsMapMutex_.unlock();
@@ -143,19 +143,22 @@ void RequestWatchdog::removeRequest(int connection_key,
 
   requestsMapMutex_.lock();
 
-  for (std::map<RequestInfo, struct timeval>::iterator it =
+  for (std::map<RequestInfo*, TimevalStruct>::iterator it =
          requests_.begin();
        requests_.end() != it;
        ++it) {
-    if (it->first.connectionID_ == connection_key
-        && it->first.correlationID_ == correlation_id) {
+    if (it->first->connectionID_ == connection_key
+        && it->first->correlationID_ == correlation_id) {
       LOG4CXX_INFO(logger_, "Delete request "
-                   << "\n ConnectionID : " << it->first.connectionID_
-                   << "\n CorrelationID : " << it->first.correlationID_
-                   << "\n FunctionID : " << it->first.functionID_
-                   << "\n CustomTimeOut : " << it->first.customTimeout_
+                   << "\n ConnectionID : " << it->first->connectionID_
+                   << "\n CorrelationID : " << it->first->correlationID_
+                   << "\n FunctionID : " << it->first->functionID_
+                   << "\n CustomTimeOut : " << it->first->customTimeout_
                    << "\n");
-      requests_.erase(it);
+      if (!it->first->delayed_delete_) {
+        delete it->first;
+        requests_.erase(it);
+      }
       break;
     }
   }
@@ -168,6 +171,10 @@ void RequestWatchdog::removeAllRequests() {
 
   requestsMapMutex_.lock();
 
+  for (std::map<RequestInfo*, TimevalStruct>::iterator it = requests_.begin();
+       requests_.end() != it; ++it) {
+    delete it->first;
+  }
   requests_.clear();
 
   requestsMapMutex_.unlock();
@@ -206,12 +213,12 @@ RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
 
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
-  std::map<RequestInfo, struct timeval>::iterator it;
-  std::map<RequestInfo, struct timeval>::iterator it_temp;
+  std::map<RequestInfo*, TimevalStruct>::iterator it;
+  std::map<RequestInfo*, TimevalStruct>::iterator it_temp;
 
   int cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
   int cycleDuration;
-  struct timeval cycleStartTime;
+  TimevalStruct cycleStartTime;
 
   RequestWatchdog* instance = static_cast<RequestWatchdog*>(
                                 RequestWatchdog::instance());
@@ -230,26 +237,41 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     it = instance->requests_.begin();
 
     while (it != instance->requests_.end()) {
+      if (it->first->delayed_delete_) {
+        if (instance->requests_.begin() == it) {
+          delete it->first;
+          instance->requests_.erase(it);
+          it = instance->requests_.begin();
+        } else {
+          it_temp = --it;
+          delete(++it)->first;
+          instance->requests_.erase(it);
+          it = ++it_temp;
+        }
+        continue;
+      }
       LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
-                   << "\n ConnectionID : " << (*it).first.connectionID_
-                   << "\n CorrelationID : " << (*it).first.correlationID_
-                   << "\n FunctionID : " << (*it).first.functionID_
-                   << "\n CustomTimeOut : " << (*it).first.customTimeout_
+                   << "\n ConnectionID : " << (*it).first->connectionID_
+                   << "\n CorrelationID : " << (*it).first->correlationID_
+                   << "\n FunctionID : " << (*it).first->functionID_
+                   << "\n CustomTimeOut : " << (*it).first->customTimeout_
                    << "\n");
 
-      if ((*it).first.customTimeout_ <
+      if ((*it).first->customTimeout_ <
           date_time::DateTime::calculateTimeSpan((*it).second)) {
         // Request is expired - notify all subscribers and remove request
 
+        it->first->delayed_delete_ = true;
+
         LOG4CXX_INFO(logger_, "Timeout had expired for the following request :"
-                     << "\n ConnectionID : " << (*it).first.connectionID_
-                     << "\n CorrelationID : " << (*it).first.correlationID_
-                     << "\n FunctionID : " << (*it).first.functionID_
-                     << "\n CustomTimeOut : " << (*it).first.customTimeout_
+                     << "\n ConnectionID : " << (*it).first->connectionID_
+                     << "\n CorrelationID : " << (*it).first->correlationID_
+                     << "\n FunctionID : " << (*it).first->functionID_
+                     << "\n CustomTimeOut : " << (*it).first->customTimeout_
                      << "\n");
 
         instance->requestsMapMutex_.unlock();
-        instance->notifySubscribers(it->first);
+        instance->notifySubscribers(*(it->first));
         instance->requestsMapMutex_.lock();
 
       }

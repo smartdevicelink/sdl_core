@@ -35,7 +35,10 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
 
+#if defined(OS_POSIX)
 #include <time.h>
+typedef struct timeval TimevalStruct;
+#endif
 
 namespace date_time {
 
@@ -44,8 +47,8 @@ class DateTime {
     static const int MILLISECONDS_IN_SECOND = 1000;
     static const int MICROSECONDS_IN_MILLISECONDS = 1000;
 
-    static struct timeval getCurrentTime();
-    static int calculateTimeSpan(struct timeval sinceTime);
+    static TimevalStruct getCurrentTime();
+    static int calculateTimeSpan(TimevalStruct sinceTime);
 };
 
 }  // namespace date_time

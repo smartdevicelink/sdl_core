@@ -72,7 +72,7 @@ void RequestController::addRequest(const Request& request) {
   LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
                << request_impl->default_timeout());
 
-  watchdog_->addRequest(request_watchdog::RequestInfo(
+  watchdog_->addRequest(new request_watchdog::RequestInfo(
                           request_impl->function_id(),
                           request_impl->connection_key(),
                           request_impl->correlation_id(),
