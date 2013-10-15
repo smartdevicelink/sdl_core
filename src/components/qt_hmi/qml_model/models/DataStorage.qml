@@ -160,4 +160,5 @@ Item {
         id: navigationModel
     }
     property alias navigationModel: navigationModel
+    property bool activeVR: false
 }

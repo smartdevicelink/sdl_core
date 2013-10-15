@@ -1,13 +1,6 @@
 import QtQuick 2.0
 
 Item {
-    signal started ()
-    signal stopped ()
-
-    signal onCommand (int cmdID, int appID)
-
-    signal onLanguageChange (int language)
-
     function isReady () {
         return {
             available: dataContainer.hmiVRAvailable
