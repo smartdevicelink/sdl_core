@@ -39,6 +39,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include "config_profile/profile.h"
 #include "media_manager/video_server.h"
 
 namespace media_manager {
@@ -49,7 +50,8 @@ log4cxx::LoggerPtr VideoServer::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("VideoServer"));
 
 VideoServer::VideoServer()
-: port_(5050),
+: port_(profile::Profile::instance()->navi_server_port()),
+  ip_(profile::Profile::instance()->server_address()),
   socket_(0),
   is_ready_(false),
   messages_(),
@@ -91,7 +93,7 @@ bool VideoServer::start() {
 
   struct sockaddr_in serv_addr_;
   memset(&serv_addr_, 0, sizeof(serv_addr_));
-  serv_addr_.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  serv_addr_.sin_addr.s_addr = inet_addr(ip_.c_str());
   serv_addr_.sin_family = AF_INET;
   serv_addr_.sin_port = htons(port_);
 

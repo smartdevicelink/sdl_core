@@ -45,9 +45,10 @@ Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
   , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
+  , server_port_(8087)
+  , navi_server_port_(5050)
   , help_promt_()
   , time_out_promt_()
-  , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false)
   , is_redecoding_enabled_(false)
@@ -113,6 +114,10 @@ const uint16_t& Profile::server_port() const {
   return server_port_;
 }
 
+const uint16_t& Profile::navi_server_port() const {
+  return navi_server_port_;
+}
+
 const uint64_t& Profile::thread_min_stach_size() const {
   return min_tread_stack_size_;
 }
@@ -155,6 +160,14 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     server_port_ = atoi(value);
     LOG4CXX_INFO(logger_, "Set server port to " << server_port_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "NaviServerPort", value))
+      && ('\0' != *value)) {
+    navi_server_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set navi server port to " << navi_server_port_);
   }
 
   *value = '\0';

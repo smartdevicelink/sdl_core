@@ -18,6 +18,7 @@ include_directories (
   ../connection_handler/include/
   ../transport_manager/include/
   ../protocol_handler/include/
+  ../config_profile/include/
   ../request_watchdog/include/
   ../smart_objects/include/
   ../formatters/include/

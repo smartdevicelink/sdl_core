@@ -75,6 +75,16 @@ class Profile {
     const std::string& server_address() const;
 
     /**
+     * @brief Returns server port
+     */
+    const uint16_t& server_port() const;
+
+    /**
+     * @brief Returns navi server port
+     */
+    const uint16_t& navi_server_port() const;
+
+    /**
      * @brief Returns policies file name
      */
     const std::string& policies_file_name() const;
@@ -104,11 +114,6 @@ class Profile {
      * @brief Default timeout for waiting for response to mobile app
      */
     const unsigned int default_timeout() const;
-
-    /**
-     * @brief Returns server port
-     */
-    const uint16_t& server_port() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -187,11 +192,12 @@ class Profile {
     // Members section
     std::string                     config_file_name_;
     std::string                     server_address_;
+    uint16_t                        server_port_;
+    uint16_t                        navi_server_port_;
     std::string                     policies_file_name_;
     std::vector<std::string>        help_promt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;
-    uint16_t                        server_port_;
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
     bool                            is_redecoding_enabled_;

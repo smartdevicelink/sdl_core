@@ -137,6 +137,7 @@ class VideoServer {
 
 
   int                                           port_;
+  std::string                                   ip_;
   int                                           socket_;
   bool                                          is_ready_;
   VideoStreamer*                                delegate_;
