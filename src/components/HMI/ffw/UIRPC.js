@@ -606,6 +606,29 @@ FFW.UI = FFW.RPCObserver.create({
     },
 
     /**
+     * Notification method to send touch event data to SDLCore
+     *
+     * @param {String} type
+     * @param {Object} touchLists
+     * @param {Object} info
+     */
+    onTouchEvent: function (type, touchLists, info) {
+
+        Em.Logger.log("FFW.UI.OnTouchEvent");
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "UI.OnTouchEvent",
+            "params": {
+                "eventType": type,
+                "touchLists": touchLists,
+                "info": info
+            }
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
      * send notification when command was triggered
      *
      * @param {Number}

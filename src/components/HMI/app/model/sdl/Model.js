@@ -321,11 +321,48 @@ SDL.SDLModel = Em.Object.create({
          */
         dialNumber: function(params) {
 
-        this.set('phoneCall', true);
-        SDL.States.goToStates('phone.dialpad');
-        SDL.PhoneModel.set('dialpadNumber', params.number);
-        SDL.PhoneController.onDialCall();
-    },
+            this.set('phoneCall', true);
+            SDL.States.goToStates('phone.dialpad');
+            SDL.PhoneModel.set('dialpadNumber', params.number);
+            SDL.PhoneController.onDialCall();
+        },
+
+        /**
+         * Notification method to send touch event data to SDLCore
+         *
+         * @param {Object}
+         */
+        onTouchEvent: function(event){
+
+            var type = "",
+                touches = event.originalEvent.touches.length,
+                changedTouches = event.originalEvent.touches.length,
+                touchLists = {"touches": touches, "changedTouches": changedTouches},
+                info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.5, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+
+            switch (event.originalEvent.type) {
+                case "touchstart": {
+                    type = "TOUCHSTART";
+                    break;
+                }
+                case "touchmove": {
+                    type = "TOUCHMOVE";
+                    break;
+                }
+                case "touchend": {
+                    type = "TOUCHEND";
+                    break;
+                }
+            }
+
+            for(var i = 0; i < touches; i++){
+
+                info.id = i;
+                info.point.xCoord = event.originalEvent.touches[i].pageX;
+                info.point.yCoord = event.originalEvent.touches[i].pageY;
+                FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
+            }
+        },
 
         /**
          * Method to open Phone view and dial phone number
