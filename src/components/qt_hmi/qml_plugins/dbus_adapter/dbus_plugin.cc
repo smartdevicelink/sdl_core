@@ -67,9 +67,13 @@ void DbusPlugin::registerTypes(const char *uri)
 
     RegisterDbusMetatypes();
     qDBusRegisterMetaType<OptionalArgument<int> >();
+    qDBusRegisterMetaType<OptionalArgument<QList<int> > >();
     qDBusRegisterMetaType<OptionalArgument<QString> >();
+    qDBusRegisterMetaType<OptionalArgument<QList<QString> > >();
     qDBusRegisterMetaType<OptionalArgument<bool> >();
+    qDBusRegisterMetaType<OptionalArgument<QList<bool> > >();
     qDBusRegisterMetaType<OptionalArgument<double> >();
+    qDBusRegisterMetaType<OptionalArgument<QList<double> > >();
 
     HmiProxy::api_adaptors_.Init(this);
 
