@@ -204,10 +204,67 @@ Item {
     }
     property alias navigationModel: navigationModel
 
+    function findIdMatch (root, id) {
+        if (root.id === id) {
+            console.log("findMatch(): returning {" + root.id + ", " + root.name + ", " + root.subMenu + "}")
+            return root
+        }
+        for (var childIndex = 0; childIndex < root.subMenu.count; ++childIndex) {
+            console.log("findMatch(): checking child #" + childIndex)
+            var child = root.options.get(childIndex)
+            var node = findMatch(child)
+            if (node) {
+                return node
+            }
+        }
+        console.log("findMatch(): returning nothing")
+    }
+
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        getApplication(appID).options.append({"name": menuParams.menuName, "subMenu": []})
+        console.log("addCommand(): menuParams = {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}")
+        if (menuParams !== undefined) {
+            if (menuParams.parentID !== undefined) {
+                for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
+                    var option = getApplication(appID).options.get(optionIndex)
+                    var node = findIdMatch(option, menuParams.parentID)
+                    if (node) {
+                        break
+                    }
+                }
+                if (node) {
+                    node.subMenu.append({"id": cmdID, "name": menuParams.menuName, "subMenu": []})
+                }
+                else {
+                    console.log("addCommand(): parentID " + menuParams.parentID + " not found")
+                }
+            }
+            else {
+                console.log("addCommand(): appending under root")
+                getApplication(appID).options.append({"id": cmdID, "name": menuParams.menuName, "subMenu": []})
+            }
+        }
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        console.log("addSubMenu(): menuParams = {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}")
+        if (menuParams.parentID !== undefined) {
+            for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
+                var option = getApplication(appID).options.get(optionIndex)
+                var node = findIdMatch(option, menuParams.parentID)
+                if (node) {
+                    break
+                }
+            }
+            if (node) {
+                node.subMenu.append({"id": menuID, "name": menuParams.menuName, "subMenu": []})
+            }
+            else {
+                console.log("addSubMenu(): parentID " + menuParams.parentID + " not found")
+            }
+        }
+        else {
+            console.log("addSubMenu(): appending under root")
+            getApplication(appID).options.append({"id": menuID, "name": menuParams.menuName, "subMenu": [{"name": "back"}]})
+        }
     }
 }

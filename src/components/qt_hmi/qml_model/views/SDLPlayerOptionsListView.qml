@@ -54,7 +54,7 @@ GeneralView {
             width:parent.width
             height:parent.height
 
-            model: dataContainer.currentApplication.options
+            model: dataContainer.currentApplication.currentSubMenu
 
             delegate: Text  {
                 text: name
@@ -63,6 +63,13 @@ GeneralView {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
+                        if (subMenu.count !== 0) {
+                            console.log("subMenu.count = " + subMenu.count)
+                            dataContainer.currentApplication.currentSubMenu = subMenu
+                        }
+                        else {
+                            console.log("NODE")
+                        }
                     }
                 }
             }

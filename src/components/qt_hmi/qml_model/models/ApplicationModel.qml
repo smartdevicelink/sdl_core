@@ -15,4 +15,6 @@ QtObject {
 
     property ListModel options: ListModel {
     }
+
+    property ListModel currentSubMenu: options
 }

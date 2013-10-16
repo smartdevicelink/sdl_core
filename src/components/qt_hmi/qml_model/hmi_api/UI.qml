@@ -103,6 +103,7 @@ Item {
 
     function addSubMenu (menuID, menuParams, appID) {
         dataContainer.addSubMenu(menuID, menuParams, appID)
+        return {}
     }
 
     function deleteSubMenu (menuID, appID) {
