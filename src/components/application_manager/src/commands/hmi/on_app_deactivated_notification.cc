@@ -82,6 +82,7 @@ void OnAppDeactivatedNotification::Run() {
               mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
+      ApplicationManagerImpl::instance()->DeactivateApplication(app);
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
@@ -94,6 +95,7 @@ void OnAppDeactivatedNotification::Run() {
           app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
+        ApplicationManagerImpl::instance()->DeactivateApplication(app);
         app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
       break;

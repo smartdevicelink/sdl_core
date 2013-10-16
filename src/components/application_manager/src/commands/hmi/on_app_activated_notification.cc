@@ -56,7 +56,9 @@ void OnAppActivatedNotification::Run() {
     (*message_)[strings::params][hmi_response::code] =
         hmi_apis::Common_Result::INVALID_DATA;
   } else {
-    ApplicationManagerImpl::instance()->ActivateApplication(application);
+    if (mobile_api::HMILevel::eType::HMI_LIMITED != application->hmi_level()) {
+      ApplicationManagerImpl::instance()->ActivateApplication(application);
+    }
   }
 }
 

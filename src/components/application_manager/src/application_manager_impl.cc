@@ -468,6 +468,12 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
   return true;
 }
 
+
+void ApplicationManagerImpl::DeactivateApplication(Application* application) {
+  MessageHelper::SendDeleteCommandRequestToHMI(application);
+  MessageHelper::ResetGlobalproperties(application);
+}
+
 void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
   // TODO(VS): Call function from ConnectionHandler
   if (!connection_handler_) {
