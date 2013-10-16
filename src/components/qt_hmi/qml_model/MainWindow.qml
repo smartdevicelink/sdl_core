@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import "./controls"
@@ -66,6 +67,11 @@ Rectangle {
                 sdlBasicCommunication.onAppDeactivated(currentApplication.appId, contentLoader.item.category)
             }
         }
+    }
+
+    Audio {
+        id: beep
+        source: "res/initial.wav"
     }
 
     SettingsStorage {
@@ -211,6 +217,10 @@ Rectangle {
 
         onAppUnregistered: {
             dataContainer.removeApplication(appId);
+        }
+
+        onPlayTone: {
+            beep.play()
         }
     }
 
