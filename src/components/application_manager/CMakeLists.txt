@@ -290,8 +290,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
-./src/commands/hmi/on_navi_start_stream_notification.cc
-
+./src/commands/hmi/navi_start_stream_request.cc
+./src/commands/hmi/navi_start_stream_response.cc
+./src/commands/hmi/navi_stop_stream_request.cc
+./src/commands/hmi/navi_stop_stream_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})

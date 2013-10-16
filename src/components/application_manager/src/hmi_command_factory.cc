@@ -163,7 +163,11 @@
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
-#include "application_manager/commands/hmi/on_navi_start_stream_notification.h"
+#include "application_manager/commands/hmi/navi_start_stream_request.h"
+#include "application_manager/commands/hmi/navi_start_stream_response.h"
+#include "application_manager/commands/hmi/navi_stop_stream_request.h"
+#include "application_manager/commands/hmi/navi_stop_stream_response.h"
+
 
 namespace application_manager {
 
@@ -707,8 +711,20 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnUITouchEventNotification(message));
       break;
     }
-    case  hmi_apis::FunctionID::Navigation_OnStartStream: {
-      command.reset(new commands::OnNaviStartStreamNotification(message));
+    case  hmi_apis::FunctionID::Navigation_StartStream: {
+      if (is_response) {
+        command.reset(new commands::NaviStartStreamResponse(message));
+      } else {
+        command.reset(new commands::NaviStartStreamRequest(message));
+      }
+      break;
+    }
+    case  hmi_apis::FunctionID::Navigation_StopStream: {
+      if (is_response) {
+        command.reset(new commands::NaviStopStreamResponse(message));
+      } else {
+        command.reset(new commands::NaviStopStreamRequest(message));
+      }
       break;
     }
   }

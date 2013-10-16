@@ -1034,9 +1034,9 @@ void MessageHelper::SendNaviStartStream(
   }
 
   (*start_stream)[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::Navigation_OnStartStream;
+    hmi_apis::FunctionID::Navigation_StartStream;
   (*start_stream)[strings::params][strings::message_type] =
-    hmi_apis::messageType::notification;
+    hmi_apis::messageType::request;
   (*start_stream)[strings::params][strings::protocol_version] =
     commands::CommandImpl::protocol_version_;
   (*start_stream)[strings::params][strings::protocol_type] =

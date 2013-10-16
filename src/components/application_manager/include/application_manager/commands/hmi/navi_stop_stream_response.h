@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_navi_start_stream_notification.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_STOP_STREAM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_STOP_STREAM_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnNaviStartStreamNotification::OnNaviStartStreamNotification(
-  const MessageSharedPtr& message): NotificationToHMI(message) {
-}
+/**
+ * @brief NaviStopStreamResponse command class
+ **/
+class NaviStopStreamResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief NaviStopStreamResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit NaviStopStreamResponse(const MessageSharedPtr& message);
 
-OnNaviStartStreamNotification::~OnNaviStartStreamNotification() {
-}
+  /**
+   * @brief OnNaviStopStreamResponse class destructor
+   **/
+  virtual ~NaviStopStreamResponse();
 
-void OnNaviStartStreamNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnNaviStartStreamNotification::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  SendNotification();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NaviStopStreamResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_STOP_STREAM_RESPONSE_H_

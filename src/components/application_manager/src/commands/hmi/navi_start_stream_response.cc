@@ -29,44 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_START_STREAM_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_START_STREAM_NOTIFICATION_H_
-
-#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include "application_manager/commands/hmi/navi_start_stream_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief OnNaviStartStreamNotification command class
- **/
-class OnNaviStartStreamNotification : public NotificationToHMI {
- public:
-  /**
-   * @brief OnNaviStartStreamNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnNaviStartStreamNotification(const MessageSharedPtr& message);
+NaviStartStreamResponse::NaviStartStreamResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
+}
 
-  /**
-   * @brief OnNaviStartStreamNotification class destructor
-   **/
-  virtual ~OnNaviStartStreamNotification();
+NaviStartStreamResponse::~NaviStartStreamResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void NaviStartStreamResponse::Run() {
+  LOG4CXX_INFO(logger_, "NaviStartStreamResponse::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnNaviStartStreamNotification);
-};
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_START_STREAM_NOTIFICATION_H_
