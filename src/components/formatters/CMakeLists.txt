@@ -19,6 +19,7 @@ set (FORMATTER_SOURCES
     ./src/CFormatterJsonSDLRPCv2.cpp
     ./src/formatter_json_rpc.cc
     ./src/meta_formatter.cc
+    ./src/generic_json_formatter.cc
 )
 
 add_library("formatters" ${SOURCES}
