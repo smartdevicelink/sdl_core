@@ -109,6 +109,8 @@
 #include "application_manager/commands/hmi/vr_get_supported_languages_response.h"
 #include "application_manager/commands/hmi/vr_get_language_request.h"
 #include "application_manager/commands/hmi/vr_get_language_response.h"
+#include "application_manager/commands/hmi/vr_get_capabilities_request.h"
+#include "application_manager/commands/hmi/vr_get_capabilities_response.h"
 #include "application_manager/commands/hmi/tts_is_ready_request.h"
 #include "application_manager/commands/hmi/tts_is_ready_response.h"
 #include "application_manager/commands/hmi/tts_change_registration_request.h"
@@ -165,17 +167,17 @@
 namespace application_manager {
 
 log4cxx::LoggerPtr HMICommandFactory::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
+      log4cxx::Logger::getLogger("ApplicationManager"));
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+  const MessageSharedPtr& message) {
   LOG4CXX_INFO(
-      logger_,
-      "HMICommandFactory::CreateCommand function_id: "
-          << (*message)[strings::params][strings::function_id].asInt());
+    logger_,
+    "HMICommandFactory::CreateCommand function_id: "
+    << (*message)[strings::params][strings::function_id].asInt());
 
   CommandSharedPtr command(
-      new application_manager::commands::CommandImpl(message));
+    new application_manager::commands::CommandImpl(message));
 
   bool is_response = false;
   if ((*message)[strings::params][strings::message_type]
@@ -183,7 +185,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type]
-      == MessageType::kErrorResponse) {
+             == MessageType::kErrorResponse) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
@@ -423,6 +425,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FunctionID::VR_GetCapabilities: {
+      if (is_response) {
+        command.reset(new commands::VRGetCapabilitiesResponse(message));
+      } else {
+        command.reset(new commands::VRGetCapabilitiesRequest(message));
+      }
+      break;
+    }
     case hmi_apis::FunctionID::TTS_IsReady: {
       if (is_response) {
         command.reset(new commands::TTSIsReadyResponse(message));
@@ -617,7 +627,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_OnDriverDistraction: {
       command.reset(
-          new commands::hmi::OnDriverDistractionNotification(message));
+        new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnUpdateDeviceList: {

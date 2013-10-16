@@ -848,6 +848,10 @@ void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::VR_GetSupportedLanguages));
     ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::VR_GetCapabilities));
+    ManageHMICommand(get_capabilities);
 
     MessageHelper::SendHelpVrCommand();
   }

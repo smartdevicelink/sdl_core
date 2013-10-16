@@ -732,6 +732,12 @@
   </element>
 </enum>
 
+<enum name="VrCapabilities">
+  <description>Contains information about the VR capabilities.</description>
+  <element name="TEXT" internal_name="VR_TEXT" />
+</enum>
+
+
 <!-- End of IVI part-->
 
 <struct name="ButtonCapabilities">
@@ -1415,6 +1421,14 @@
   </function>
   <function name="GetLanguage" messagetype="response">
     <param name="language" type="Common.Language" mandatory="true"/>
+  </function>
+  <function name="GetCapabilities" messagetype="request">
+    <description>Method is invoked at system startup by SDL to request information about VR capabilities of HMI.</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="vrCapabilities" type="Common.VrCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Types of input recognized by VR module.</description>
+    </param>
   </function>
 </interface>
 
