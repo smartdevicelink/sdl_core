@@ -272,9 +272,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
       }
     }
   }
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    msg_params[strings::vr_help] = (*message_)[strings::msg_params][strings::vr_help];
-  }
+
   CreateUIPerformInteraction(msg_params, app);
 }
 
