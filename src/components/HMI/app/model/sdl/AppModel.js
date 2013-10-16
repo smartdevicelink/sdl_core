@@ -214,8 +214,8 @@ SDL.SDLAppModel = Em.Object.extend({
         deleteCommand: function (commandID, requestID) {
 
             for (var i in this.commandsList) {
-                if (this.commandsList[i].filterProperty('commandID', commandID)) {
-                    if (i != this.currentSubMenuId) {
+                if (this.commandsList[i].filterProperty('commandID', commandID).length) {
+                    if (i != this.currentSubMenuId || this.currentSubMenuId == 'top') {
                         this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
                         SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["SUCCESS"], requestID);
                         return;
