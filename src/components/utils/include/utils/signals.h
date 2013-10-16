@@ -37,6 +37,7 @@
 
 namespace utils {
 bool SubscribeToTerminateSignal(void (*func)(int p));
+bool ResetSubscribeToTerminateSignal();
 void ForwardSignal();
 }  //  namespace utils
 

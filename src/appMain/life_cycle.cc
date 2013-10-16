@@ -184,6 +184,7 @@ bool LifeCycle::InitMessageBroker() {
 }
 
 void LifeCycle::StopComponents(int params) {
+  utils::ResetSubscribeToTerminateSignal();
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
