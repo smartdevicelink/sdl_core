@@ -2291,6 +2291,21 @@ SDL.RPCController = Em.Object
                 },
 
                 /**
+                 * Validate method for request GetCapabilities
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                GetCapabilities: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request GetLanguage
                  * 
                  * @param {Object}
