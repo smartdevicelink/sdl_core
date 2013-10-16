@@ -267,7 +267,7 @@ int main(int argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization
-
+log4cxx::Logger::Configure("logger.properties");
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                                 log4cxx::Logger::getLogger("appMain"));
   //log4cxx::PropertyConfigurator::configure("log4cxx.properties");

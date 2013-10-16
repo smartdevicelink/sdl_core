@@ -34,17 +34,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
- #include "utils/logger.h"
 
-namespace log4cxx
-{
+#include "utils/logger.h"
 
-std::map<std::string, LoggerPtr*> Logger::loggers_;
-LoggerPtr Logger::getLogger(std::string name) {
-		/*if (loggers_.end() == loggers_.find(name)){
-			loggers_.insert(std::pair<std::string, LoggerPtr*>(name, new LoggerPtr(name)));
-		}
-		return *loggers_[name];*/
-		return LoggerPtr(name);
-	}
+namespace log4cxx {
+
+LoggerPtr::LoggerPtr(const std::string& name)
+  : name_(name),
+    output_stream_(NULL) {
+}
+
+LoggerPtr::LoggerPtr()
+  : output_stream_(NULL) {}
+
+LoggerPtr::LoggerPtr(const LoggerPtr& other)
+  : name_(other.name_),
+    output_stream_(other.output_stream_) {
+}
+
+LoggerPtr::~LoggerPtr() {
+
+}
+
+const std::string& LoggerPtr::name() const {
+  return name_;
+}
+
+const LoggerPtr& Logger::getLogger(const std::string& name) {
+  static std::map<std::string, LoggerPtr> loggers_ ;
+  if (loggers_.end() == loggers_.find(name)) {
+    LoggerPtr fresh_logger(name);
+    loggers_.insert(std::pair<std::string, LoggerPtr>(name, fresh_logger));
+  }
+  return loggers_[name];
+  // TODO: clear
+}
+
+void Logger::Configure(const std::string& file_name) {
+  l4l::InternalLogger::Configure(file_name);
+}
+
+char* get_time() {
+  time_t rawtime;
+  time(&rawtime);
+  return ctime(&rawtime);
+}
+
 }  //  namespace log4cxx

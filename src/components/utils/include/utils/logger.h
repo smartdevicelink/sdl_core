@@ -35,67 +35,146 @@
  */
 
 #ifndef LOG4CXXLOGGER_HPP_
- // #include <log4cxx/logger.h>
- // #include <log4cxx/propertyconfigurator.h>
+#define LOG4CXXLOGGER_HPP_
+
+#include <assert.h>
 #include <iostream>
-#include <map>
 #include <cerrno>
+#include <time.h>
+#include "utils/l4l.h"
 
-namespace log4cxx
-{
+namespace log4cxx {
+
 class LoggerPtr {
-public:
-	LoggerPtr(const std::string & name):
-		name_(name){
-	}
-	const std::string & name() const {
-		return name_;
-	}
+  public:
+    explicit LoggerPtr(const std::string& name);
 
-private:
-	std::string name_;
+    LoggerPtr();
+    LoggerPtr(const LoggerPtr&);
+
+    ~LoggerPtr();
+
+    const std::string& name() const ;
+
+    bool Init(std::ostream* const stream) ;
+
+    std::ostream& output_stream() const ;
+
+    std::ostream& operator<<(std::ostream&);
+
+  private:
+    friend class Logger;
+    void Clear();
+    std::string name_;
+    std::ostream* output_stream_;
 };
 
+enum OutputType {
+  NONE = -1,
+  STANDART,
+  FILE,
+  TCP
+};
 
 class Logger {
-	public:
-	static LoggerPtr getLogger(std::string name);
-	
-	private:
-	static std::map<std::string, LoggerPtr*> loggers_;
+  public:
+    //Logger* instance(const std::string& file_name);
+    static const LoggerPtr& getLogger(const std::string& name);
+    //private:
+    static void Configure(const std::string& file_name);
+  private:
+    static std::map<std::string, OutputType> correspondense_output_;
 };
 
-#define LOG4CXX_INFO(logger, string) std::cout << "INFO: " << logger.name() << ": " << string << std::endl
-#define LOG4CXX_ERROR(logger, string) std::cout << "ERROR: " << logger.name() << ": " << string << std::endl
+char* get_time();
+
+/*#define LOG4CXX_INFO(logger, string) logger.output_stream() << "INFO: " << logger.name() << ": " << log4cxx::get_time() << ": " << \
+    __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+#define LOG4CXX_ERROR(logger, string) std::cout << "ERROR: " << logger.name() << ": " \
+    __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
 #define LOG4CXX_TRACE(logger, string) std::cout << "TRACE: " << logger.name() << ": " << string << std::endl
 #define LOG4CXX_WARN(logger, string) std::cout << "WARNING: " << logger.name() << ": " << string << std::endl
 #define LOG4CXX_FATAL(logger, string) std::cout << "FATAL: " << logger.name() << ": " << string << std::endl
 
-    #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_TRACE_EXT(logger, logEvent) LOG4CXX_TRACE(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_TRACE_STR_EXT(logger, logEvent) LOG4CXX_TRACE_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_TRACE_EXT(logger, logEvent) LOG4CXX_TRACE(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_TRACE_STR_EXT(logger, logEvent) LOG4CXX_TRACE_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_DEBUG_STR_EXT(logger, logEvent) LOG4CXX_DEBUG_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_DEBUG_STR_EXT(logger, logEvent) LOG4CXX_DEBUG_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_WARN_STR_EXT(logger, logEvent) LOG4CXX_WARN_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_WARN_STR_EXT(logger, logEvent) LOG4CXX_WARN_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_ERROR_STR_EXT(logger, logEvent) LOG4CXX_ERROR_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_ERROR_STR_EXT(logger, logEvent) LOG4CXX_ERROR_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
-    #define LOG4CXX_FATAL_STR_EXT(logger, logEvent) LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_FATAL_STR_EXT(logger, logEvent) LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
-    #define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
-    #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
+#define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
+#define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
-    #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
-};
+#define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+*/
+}
 
-#define LOG4CXXLOGGER_HPP_
+#define LOG4CXX_INFO(logger, string) l4l::InternalLogger::output_config_[ \
+    l4l::InternalLogger::KeyFromTypes(1,\
+                                      l4l::Severity::severity_id(l4l::Severity::kInfoType))]-> \
+output_stream() << l4l::Severity::kInfoType << ": " << logger.name() << \
+                ": " << log4cxx::get_time() << ": " << \
+                __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+#define LOG4CXX_ERROR(logger, string) l4l::InternalLogger::output_config_[ \
+    l4l::InternalLogger::KeyFromTypes(1,\
+                                      l4l::Severity::severity_id(l4l::Severity::kErrorType))]-> \
+output_stream() << l4l::Severity::kErrorType << ": " << logger.name() << \
+                ": " << log4cxx::get_time() << ": " << \
+                __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+#define LOG4CXX_TRACE(logger, string) l4l::InternalLogger::output_config_[ \
+    l4l::InternalLogger::KeyFromTypes(1,\
+                                      l4l::Severity::severity_id(l4l::Severity::kTraceType))]-> \
+output_stream() << l4l::Severity::kTraceType << ": " << logger.name() << \
+                ": " << log4cxx::get_time() << ": " << \
+                __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+#define LOG4CXX_WARN(logger, string) l4l::InternalLogger::output_config_[ \
+    l4l::InternalLogger::KeyFromTypes(1, \
+                                      l4l::Severity::severity_id(l4l::Severity::kWarningType))]-> \
+output_stream() << l4l::Severity::kWarningType << ": " << logger.name() << \
+                ": " << log4cxx::get_time() << ": " << \
+                __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+#define LOG4CXX_FATAL(logger, string) l4l::InternalLogger::output_config_[ \
+    l4l::InternalLogger::KeyFromTypes(1,\
+                                      l4l::Severity::severity_id(l4l::Severity::kFatalType))]-> \
+output_stream() << l4l::Severity::kFatalType << ": " << logger.name() << \
+                ": " << log4cxx::get_time() << ": " << \
+                __FILE__ << " : " << __LINE__  << " : " << string << std::endl;
+
+#define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_TRACE_EXT(logger, logEvent) LOG4CXX_TRACE(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_TRACE_STR_EXT(logger, logEvent) LOG4CXX_TRACE_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_DEBUG_STR_EXT(logger, logEvent) LOG4CXX_DEBUG_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_WARN_STR_EXT(logger, logEvent) LOG4CXX_WARN_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_ERROR_STR_EXT(logger, logEvent) LOG4CXX_ERROR_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+#define LOG4CXX_FATAL_STR_EXT(logger, logEvent) LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+#define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
+#define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
+
+#define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+
 
 
 #endif /* LOG4CXXLOGGER_HPP_ */
