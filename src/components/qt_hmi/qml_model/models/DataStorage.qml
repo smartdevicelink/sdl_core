@@ -48,6 +48,11 @@ Item {
         }
     }
 
+    onApplicationListChanged: {
+        console.log("onApplicationListChanged()")
+        setCurrentApplication(appId)
+    }
+
     function setCurrentApplication(appId) {
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
@@ -170,7 +175,8 @@ Item {
     }
     property int hmiUITextAlignment: Text.AlignLeft
     property ListModel deviceList: ListModel {}
-    property ListModel applicationList: ListModel {}
+    property ListModel applicationList: ListModel {
+    }
 
     property var vrCommands: []
 
@@ -197,4 +203,11 @@ Item {
         id: navigationModel
     }
     property alias navigationModel: navigationModel
+
+    function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        getApplication(appID).options.append({"name": menuParams.menuName, "subMenu": []})
+    }
+
+    function addSubMenu (menuID, menuParams, appID) {
+    }
 }
