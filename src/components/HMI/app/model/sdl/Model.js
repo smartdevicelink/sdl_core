@@ -369,7 +369,7 @@ SDL.SDLModel = Em.Object.create({
          *
          * @param {Object}
          */
-        onStartStream: function(params) {
+        startStream: function(params) {
 
             SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
             this.playVideo();
@@ -380,9 +380,10 @@ SDL.SDLModel = Em.Object.create({
          *
          * @param {Object}
          */
-        onStopStream: function(params) {
+        stopStream: function(params) {
 
             SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
+            this.pauseVideo();
         },
 
         /**
