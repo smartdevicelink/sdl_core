@@ -947,6 +947,16 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
   LOG4CXX_INFO(logger_, "Started session with type " << type);
   if (connection_handler::ServiceType::kNaviSession == type) {
     LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+
+    // send to HMI startStream request
+    char url[100] = {'\0'};
+    snprintf(url, sizeof(url)/sizeof(url[0]), "http://%s:%d",
+             profile::Profile::instance()->server_address().c_str(),
+             profile::Profile::instance()->navi_server_port());
+
+    application_manager::MessageHelper::SendNaviStartStream(
+      url, session_key);
+
     // !!!!!!!!!!!!!!!!!!!!!!!
     // TODO(DK): add check if navi streaming allowed for this app.
   }

@@ -35,7 +35,6 @@
 #include <vector>
 #include <stdio.h>
 #include "config_profile/profile.h"
-#include "application_manager/message_helper.h"
 #include "media_manager/media_manager_impl.h"
 
 namespace media_manager {
@@ -254,15 +253,6 @@ void MediaManagerImpl::OnMessageReceived(
     video_server_.sendMsg(message);
     if (false == is_stream_running_) {
       is_stream_running_ = true;
-      app_connection_key = (*message).connection_key();
-
-      char url[100] = {'\0'};
-      snprintf(url, sizeof(url)/sizeof(url[0]), "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->navi_server_port());
-
-      application_manager::MessageHelper::SendNaviStartStream(
-        url, app_connection_key);
     }
 
     // TODO(DK): only temporary
