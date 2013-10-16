@@ -398,11 +398,6 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).onDeleteApplication(appID);
-            this.getApplicationModel(appID).set('active', false);
-            var index = SDL.SDLModel.registeredApps
-                .indexOf(SDL.SDLModel.registeredApps.filterProperty('appID',
-                    appID)[0]);
-            SDL.SDLModel.registeredApps.replace(index, 1);
             this.set('model', null);
         },
         /**
