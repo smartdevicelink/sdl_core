@@ -215,19 +215,17 @@ class Impl(FordXmlParser):
             param_type = self.qt_param_type(param_desc)
             retstr = retstr + param_type + ' ' + param_desc.name + '_in'
             if i <> in_params_num - 1: retstr = retstr + ", "
+        if in_params_num > 0:
+            retstr += ", "
+        retstr += "const QDBusMessage& message"
         out_params_num = len(out_params)
         if out_params_num > 1:
-            if in_params_num > 0:
-                retstr = retstr + ", "
+            retstr = retstr + ", "
             for i in range(1, out_params_num):
                 param_desc = self.make_param_desc(out_params[i], interface)
                 param_type = self.qt_param_type(param_desc)
                 retstr = retstr + param_type + '& ' + param_desc.name + '_out'
                 if i <> out_params_num - 1: retstr = retstr + ", "
-
-        if in_params_num > 0 or out_params_num > 1:
-		retstr += ", "
-        retstr += "const QDBusMessage& message"
 
         retstr = retstr + ')'
         return retstr
