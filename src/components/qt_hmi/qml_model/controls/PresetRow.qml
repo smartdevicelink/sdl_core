@@ -34,7 +34,6 @@
 
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
-import "../controls"
 
 Item {
     id: presetRow

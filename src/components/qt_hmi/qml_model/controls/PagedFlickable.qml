@@ -36,11 +36,11 @@ import QtQuick 2.0
 
 Item
 {
-    id: qqq
+    id: flickablePage
     height: container.height + pager.height
     default property alias content: containerRow.children
     property alias spacing: containerRow.spacing
-    property int elementWidth: containerRow.spacing
+    property int elementWidth
     property int snapTo: 200
     property int count: 0
 
@@ -76,7 +76,7 @@ Item
         anchors.top: parent.top
 
         pages: {
-            if (container.contentWidth % container.width >= (qqq.elementWidth / 2 + qqq.spacing)) {
+            if (container.contentWidth % container.width >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
                 Math.ceil(container.contentWidth / container.width)
             }
             else {
@@ -92,7 +92,7 @@ Item
                 return pages -1
             }
             else {
-                if (container.contentX % container.width >= (qqq.elementWidth / 2 + qqq.spacing)) {
+                if (container.contentX % container.width >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
                     return Math.ceil(container.contentX / container.width)
                 }
                 else if (container.contentX % container.width > 0) {

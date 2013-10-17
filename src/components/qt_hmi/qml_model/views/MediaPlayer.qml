@@ -113,8 +113,6 @@ Item {
                     interactive: false
                     spacing: flickRow.spacing
 
-         //           visible: (mediaPlayerView.playerType === "SDL") ? true : false
-         //           enabled: (mediaPlayerView.playerType === "SDL") ? true : false
                     delegate: LongOvalButton {
                         anchors.verticalCenter: parent.verticalCenter
                         text: model.appName
