@@ -1,6 +1,6 @@
 /**
- * @file GeneralView.qml
- * @brief Base view class. Defines properties and behavior common for all views
+ * @file HardwareButtonsView.qml
+ * @brief Area of screen responsible for hardware buttons emulation
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

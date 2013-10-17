@@ -1,6 +1,6 @@
 /**
- * @file PopUp.qml
- * @brief General popup view.
+ * @file ExitAllApplicationsPopup.qml
+ * @brief Popup "Exit all applications"
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
