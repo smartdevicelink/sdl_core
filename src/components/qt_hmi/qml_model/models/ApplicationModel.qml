@@ -18,7 +18,8 @@ QtObject {
         "mainField3": "Track 13/16",
         "mainField4": "",
         "statusBar": "",
-        "mediaClock": "02:36"
+        "mediaClock": "02:36",
+        "picture": "../res/album_art.png"
     }
 
     property string helpPrompt
