@@ -43,9 +43,11 @@ GeneralView {
         onPlay: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
+        playerType: "SDL"
         anchors.fill: parent
         playerState: dataContainer.sdlPlayerState
 
+        /*
         topOvalButtons: [
             Row {
                 anchors.top: parent.top
@@ -66,5 +68,6 @@ GeneralView {
                 }
             }
         ]
+        */
     }
 }

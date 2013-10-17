@@ -39,6 +39,7 @@ GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
         playerName: "CD"
+        playerType: "CD"
         anchors.fill: parent
 
         playerState: dataContainer.cdPlayerState

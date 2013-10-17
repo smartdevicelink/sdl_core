@@ -132,8 +132,23 @@ Item {
         "mediaClock": "02:36"
     }
     property int hmiUITextAlignment: Text.AlignLeft
-    property ListModel deviceList: ListModel {}
-    property ListModel applicationList: ListModel {}
+
+    property ListModel deviceList: ListModel {
+        ListElement {
+            name: "Device 1"
+            devid: 1
+        }
+    }
+    property ListModel applicationList: ListModel {
+        ListElement {
+            appName: "SyncProxyTester"
+            icon: "../res/SPT.png"
+            deviceName: "Device 1"
+            appId: 1
+            hmiDisplayLanguageDesired: 0
+            isMediaApplication: 1
+        }
+    }
 
     property var vrCommands: []
 

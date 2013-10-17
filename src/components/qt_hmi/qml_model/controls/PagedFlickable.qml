@@ -36,10 +36,13 @@ import QtQuick 2.0
 
 Item
 {
+    id: qqq
     height: container.height + pager.height
     default property alias content: containerRow.children
     property alias spacing: containerRow.spacing
+    property int elementWidth: containerRow.spacing
     property int snapTo: 200
+    property int count: 0
 
     Flickable {
         id: container
@@ -72,7 +75,30 @@ Item
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 
-        pages: Math.round((container.contentWidth - containerRow.spacing )/ container.width)
-        activePage: Math.round(pages * container.contentX / container.contentWidth)
+        pages: {
+            if (container.contentWidth % container.width >= (qqq.elementWidth / 2 + qqq.spacing)) {
+                Math.ceil(container.contentWidth / container.width)
+            }
+            else {
+                Math.floor(container.contentWidth / container.width)
+            }
+        }
+
+        activePage: {
+            if (container.contentX <= 0) {
+                return 0
+            }
+            else if ((container.contentWidth - container.contentX) < container.width) {
+                return pages -1
+            }
+            else {
+                if (container.contentX % container.width >= (qqq.elementWidth / 2 + qqq.spacing)) {
+                    return Math.ceil(container.contentX / container.width)
+                }
+                else if (container.contentX % container.width > 0) {
+                    return Math.floor(container.contentX / container.width)
+                }
+            }
+        }
     }
 }

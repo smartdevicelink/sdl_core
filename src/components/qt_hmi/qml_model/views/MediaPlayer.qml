@@ -63,26 +63,65 @@ Item {
         anchors.left: parent.left
 
         Item {
-            // top part for buttons
             id: top
             anchors.top: parent.top
             anchors.left: parent.left
             width: parent.width
             height: parent.height * 1/4
 
-            LongOvalButton {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                text: playerName
-                pixelSize: Constants.fontSize
-                dest: "./views/MusicSourceView.qml"
-            }
+            PagedFlickable {
+                id: flickRow
+                width: parent.width
+                spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
+                                                                : (width - longOvalButton.width * 2)
+                snapTo: longOvalButton.width + spacing
+                elementWidth: longOvalButton.width
 
-            LongOvalButton {
-                anchors.right: parent.right
-                anchors.top: parent.top
-                text: "Browse"
-                pixelSize: Constants.fontSize
+                LongOvalButton {
+                    text: playerName
+                    pixelSize: Constants.fontSize
+                    dest: "./views/MusicSourceView.qml"
+                }
+
+                LongOvalButton {
+                    id: longOvalButton
+                    text: "SDL Menu"
+                    pixelSize: Constants.fontSize
+                    dest: "./views/ApplicationListView.qml"
+
+                    visible: (mediaPlayerView.playerType === "SDL") ? true : false
+                    enabled: (mediaPlayerView.playerType === "SDL") ? true : false
+                }
+
+                LongOvalButton {
+                    text: "Options"
+                    pixelSize: Constants.fontSize
+                    dest: "./views/SDLPlayerOptionsListView.qml"
+
+                    visible: (mediaPlayerView.playerType === "SDL") ? true : false
+                    enabled: (mediaPlayerView.playerType === "SDL") ? true : false
+                }
+
+                LongOvalButton {
+                    text: "Browse"
+                    pixelSize: Constants.fontSize
+                }
+
+                ListView {
+                    width: model.count * longOvalButton.width + (model.count - 1)* flickRow.spacing
+                    height: longOvalButton.height
+                    model: dataContainer.applicationList
+                    orientation: ListView.Horizontal
+                    interactive: false
+                    spacing: flickRow.spacing
+
+                    visible: (mediaPlayerView.playerType === "SDL") ? true : false
+                    enabled: (mediaPlayerView.playerType === "SDL") ? true : false                    
+                    delegate: LongOvalButton {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: model.appName
+                    }
+                }
             }
         }
 

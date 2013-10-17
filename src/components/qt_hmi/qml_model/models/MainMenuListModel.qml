@@ -50,7 +50,7 @@ ListModel
     ListElement {
         name: "Media"
         icon: "../res/notes.png"
-        qml: "./views/AMPlayerView.qml"
+        qml: "./views/MusicSourceView.qml"
     }
 
     ListElement {

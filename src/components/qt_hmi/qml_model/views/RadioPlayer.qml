@@ -146,7 +146,9 @@ Item {
         }
 
         PresetRow {
-            anchors.centerIn: parent
+//            anchors.centerIn: parent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
             presets: playerState.presets
             width: parent.width
             onSelectedIndexChanged: {

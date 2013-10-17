@@ -79,7 +79,7 @@ GeneralView{
                     anchors.horizontalCenter: parent.horizontalCenter
                     Repeater {
                         model: 9
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[upperRow.contentLoader.charAt(index)]
@@ -104,7 +104,7 @@ GeneralView{
                     anchors.horizontalCenter: parent.horizontalCenter
                     Repeater {
                         model: 9
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[middleRow.contentLoader.charAt(index)]
@@ -129,7 +129,7 @@ GeneralView{
                     anchors.horizontalCenter: parent.horizontalCenter
                     Repeater {
                         model: 8
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             textColorDefault: phoneKeyboard.activeButtons[lowerRow.contentLoader.charAt(index)]
@@ -146,7 +146,7 @@ GeneralView{
                             }
                         }
                     }
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: "123"

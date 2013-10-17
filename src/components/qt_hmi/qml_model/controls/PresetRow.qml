@@ -34,26 +34,35 @@
 
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
+import "../controls"
 
 Item {
     id: presetRow
-
+    height: childrenRect.height
     property variant presets: []
     property int selectedIndex: 0
-    signal presetSelected
+    signal presetSelected    
 
-    height: childrenRect.height
+    Image {
+        id: circleButton
+        source: "../res/buttons/preset_pressed_btn.png"
+        visible: false
+        enabled: false
+    }
 
     PagedFlickable {
         width: parent.width
-        spacing: (width - (63 * 4)) / 3
-        snapTo: spacing + 63
+        spacing: (width - (circleButton.width * 4)) / 3
+        snapTo: spacing + circleButton.width
+        elementWidth: circleButton.width
 
         Repeater {
             model: presetRow.presets.length
             delegate:
                 Column {
+                    width: circleButton.width
                     Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
                         source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
                         MouseArea {
                             anchors.fill: parent
