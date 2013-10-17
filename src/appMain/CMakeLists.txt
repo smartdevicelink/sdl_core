@@ -81,7 +81,28 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINAR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+IF (${QT_HMI})
+  execute_process(
+    COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlscene
+    OUTPUT_VARIABLE qmlscene_binary
+  )
+  set(main_qml "${CMAKE_HOME_DIRECTORY}/src/components/qt_hmi/qml_model/MainWindow.qml")
+  set(plugins_dir "${CMAKE_HOME_DIRECTORY}/src/components/qt_hmi/qml_model")
+  file(WRITE ${CMAKE_HOME_DIRECTORY}/start_hmi.sh
+             "#!/bin/sh\n${qmlscene_binary} ${main_qml} -I ${plugins_dir}")
+  file(COPY ${CMAKE_HOME_DIRECTORY}/start_hmi.sh
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+            GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+       NO_SOURCE_PERMISSIONS)
+  file(REMOVE ${CMAKE_HOME_DIRECTORY}/start_hmi.sh)
+ENDIF (${QT_HMI})
+
+IF (${WEB_HMI})
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+ENDIF (${WEB_HMI})
+
+
 
 install (TARGETS ${PROJECT} DESTINATION bin)
 
