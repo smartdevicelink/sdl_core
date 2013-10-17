@@ -48,7 +48,10 @@ Item {
         }
     }
 
-    property int systemContext
+    onApplicationListChanged: {
+        console.log("onApplicationListChanged()")
+        setCurrentApplication(appId)
+    }
 
     function setCurrentApplication(appId) {
         var oldApplicationContext = applicationContext;
@@ -59,13 +62,10 @@ Item {
                 currentApplication.appId = appId
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
+                currentApplication.options = applicationList.get(i).options
                 // ... etc
             }
         }
-
-        applicationContext = oldApplicationContext;
-
-        currentApplicationChanged()
     }
 
     function setApplicationProperties(appId, props) {
@@ -90,7 +90,8 @@ Item {
             isMediaApplication: app.isMediaApplication,
             appType: app.appType,
             helpPrompt: "",
-            timeoutPrompt: ""
+            timeoutPrompt: "",
+            options: []
         })
     }
 
@@ -102,6 +103,7 @@ Item {
             }
         }
     }
+    property int systemContext
 
     property bool applicationContext: false
 
@@ -187,7 +189,8 @@ Item {
     }
     property int hmiUITextAlignment: Text.AlignLeft
     property ListModel deviceList: ListModel {}
-    property ListModel applicationList: ListModel {}
+    property ListModel applicationList: ListModel {
+    }
 
     property var vrCommands: []
 
@@ -208,6 +211,13 @@ Item {
 
     function changeRegistrationTTSVR (language) {
         hmiTTSVRLanguage = language
+    }
+
+    function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        getApplication(appID).options.append({"name": menuParams.menuName, "subMenu": []})
+    }
+
+    function addSubMenu (menuID, menuParams, appID) {
     }
 
     property NavigationModel navigationModel: NavigationModel { }

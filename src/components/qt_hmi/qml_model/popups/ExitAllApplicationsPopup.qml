@@ -1,6 +1,6 @@
 /**
- * @file SDLPlayerOptionsListView.qml
- * @brief SDL player options screen view.
+ * @file ExitAllApplicationsPopup.qml
+ * @brief Popup "Exit all applications"
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,49 +33,40 @@
  */
 
 import QtQuick 2.0
-import "../controls"
-import "../hmi_api/Common.js" as Common
+import QtQuick.Controls 1.0
 import "../models/Constants.js" as Constants
+import "../hmi_api/Common.js" as Common
+import "../controls"
 
-GeneralView {
-    applicationContext: true
-    systemContext: Common.SystemContext.SYSCTXT_MENU
-    Item {
-        // 3/4 top screen
-        height: parent.height * 3/4
-        width: parent.width
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+PopUp {
 
-        ListView {
-            id: sdlPlayerOptionsListView
-            anchors.horizontalCenter: parent.horizontalCenter
-            width:parent.width
-            height:parent.height
+    Column
+    {
+        anchors.centerIn: parent
+        Row {
+            Text {
+                text: "Select reason: "
+                color: "white"
+            }
 
-            model: dataContainer.currentApplication.options
-
-            delegate: Text  {
-                text: name
-                color: Constants.primaryColor
-                font.pixelSize: 40
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
+            ComboBox {
+                id: reasonComboBox
+                model: {
+                    var rc = []
+                    for (var name in Common.ApplicationsCloseReason) {
+                        rc.push(name)
                     }
+                    return rc;
                 }
             }
         }
-    }
-
-    Item {
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        width: parent.width
-        height: 1/4 * parent.height
-
-        BackButton { anchors.centerIn: parent }
+        LongOvalButton {
+            text: "Exit"
+            anchors.horizontalCenter: parent.horizontalCenter
+            onClicked: {
+                sdlBasicCommunication.onExitAllApplications(Common.ApplicationsCloseReason[reasonComboBox.currentText])
+                hide()
+            }
+        }
     }
 }
