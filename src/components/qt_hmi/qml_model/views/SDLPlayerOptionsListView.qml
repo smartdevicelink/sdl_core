@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 GeneralView {
     applicationContext: true
@@ -56,19 +57,22 @@ GeneralView {
 
             model: dataContainer.currentApplication.currentSubMenu
 
-            delegate: Text  {
-                text: name
+            delegate: Text {
+                text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
                 color: Constants.primaryColor
                 font.pixelSize: 40
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if (subMenu.count !== 0) {
-                            console.log("subMenu.count = " + subMenu.count)
-                            dataContainer.currentApplication.currentSubMenu = subMenu
-                        }
-                        else {
-                            console.log("NODE")
+                        switch (type) {
+                            case Internal.MenuItemType.MI_NODE:
+                                sdlUI.onCommand(id, dataContainer.currentApplication.appId)
+                                break;
+                            case Internal.MenuItemType.MI_SUBMENU:
+                            case Internal.MenuItemType.MI_PARENT:
+                                dataContainer.currentApplication.currentSubMenu = subMenu
+                                break;
                         }
                     }
                 }
