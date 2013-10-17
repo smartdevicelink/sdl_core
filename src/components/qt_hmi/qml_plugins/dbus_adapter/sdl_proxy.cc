@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdlproxy.h"
+#include "sdl_proxy.h"
 
 SdlProxy::SdlProxy(QQuickItem *parent)
     : QQuickItem(parent) {

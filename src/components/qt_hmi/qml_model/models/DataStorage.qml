@@ -58,7 +58,9 @@ QtObject {
     function setCurrentApplication(appId) {
         console.log("Enter setCurrentApplication function");
         var oldApplicationContext = applicationContext;
-        applicationContext = false;
+        if (dataContainer.currentApplication.appId !== appId) {
+            applicationContext = false;
+        }
 
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {

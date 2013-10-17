@@ -35,8 +35,8 @@
 #include <QQmlContext>
 
 #include "dbus_plugin.h"
-#include "hmiproxy.h"
-#include "sdlproxy.h"
+#include "hmi_proxy.h"
+#include "sdl_proxy.h"
 
 #include <qqml.h>
 #include <log4cxx/logger.h>

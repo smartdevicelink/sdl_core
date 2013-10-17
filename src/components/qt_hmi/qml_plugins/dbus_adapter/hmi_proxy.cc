@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmiproxy.h"
+#include "hmi_proxy.h"
 #include <QtDBus/QDBusConnection>
 
 HmiProxy::HmiProxy(QQuickItem *parent):
