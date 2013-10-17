@@ -68,6 +68,16 @@ Item {
         currentApplicationChanged()
     }
 
+    function setApplicationProperties(appId, props) {
+        var app = getApplication(appId);
+        for (var p in props) {
+            app[p] = props[p];
+        }
+        if (currentApplication.appId === appId) {
+            setCurrentApplication(appId); // copy modified properties
+        }
+    }
+
     function addApplication(app) {
         applicationList.append(
         {
