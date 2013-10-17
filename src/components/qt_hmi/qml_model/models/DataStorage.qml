@@ -50,7 +50,10 @@ QtObject {
         console.log("dataContainer getApplication exit");
     }
 
-    property int systemContext
+    onApplicationListChanged: {
+        console.log("onApplicationListChanged()");
+        setCurrentApplication(appId);
+    }
 
     function setCurrentApplication(appId) {
         console.log("Enter setCurrentApplication function");
@@ -63,10 +66,10 @@ QtObject {
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
                 currentApplication.playPauseState = applicationList.get(i).playPauseState
+                currentApplication.options = applicationList.get(i).options
                 // ... etc
             }
         }
-
         applicationContext = oldApplicationContext;
         currentApplicationChanged()
         console.log("Exit setCurrentApplication function")
@@ -87,7 +90,8 @@ QtObject {
             helpPrompt: "",
             timeoutPrompt: "",
             playPauseState: 'Pause',
-            hmiUIText: app.hmiUIText
+            hmiUIText: app.hmiUIText,
+            options: []
         })
         console.log("Exit addApplication function");
     }
@@ -114,6 +118,7 @@ QtObject {
         }
         console.log("Exit removeApplication function");
     }
+    property int systemContext
 
     property bool applicationContext: false
 
@@ -212,6 +217,13 @@ QtObject {
         console.log("dataContainer changeRegistrationTTSVR enter");
         hmiTTSVRLanguage = language
         console.log("dataContainer changeRegistrationTTSVR exit");
+    }
+
+    function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        getApplication(appID).options.append({"name": menuParams.menuName, "subMenu": []})
+    }
+
+    function addSubMenu (menuID, menuParams, appID) {
     }
 
     property NavigationModel navigationModel: NavigationModel { }

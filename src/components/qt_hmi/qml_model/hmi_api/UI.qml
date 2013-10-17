@@ -31,13 +31,13 @@ Item {
                            Common.TextFieldName.alertText3]
 
         var fieldSubstrings = filter(alertStrings, alertFields)
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID, softButtons)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
         }
         else {
-            return {tryAgainTime: tryAgainTime}
+            return { tryAgainTime: tryAgainTime }
         }
     }
 
@@ -94,12 +94,15 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
+        return {}
     }
 
     function deleteCommand (cmdID, appID) {
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        dataContainer.addSubMenu(menuID, menuParams, appID)
     }
 
     function deleteSubMenu (menuID, appID) {
@@ -149,6 +152,7 @@ Item {
     }
 
     function setAppIcon (syncFileName, appID) {
+        dataContainer.setApplicationProperties(appID, { icon: syncFileName.value })
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
