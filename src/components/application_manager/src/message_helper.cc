@@ -1048,6 +1048,8 @@ void MessageHelper::SendNaviStartStream(
     commands::CommandImpl::protocol_version_;
   (*start_stream)[strings::params][strings::protocol_type] =
     commands::CommandImpl::hmi_protocol_type_;
+  (*start_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
