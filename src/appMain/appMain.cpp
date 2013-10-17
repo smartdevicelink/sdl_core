@@ -243,9 +243,11 @@ bool InitHmi() {
       dup2(fd_dev0, STDERR_FILENO);
 
       // Execute the program.
-      execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
-             reinterpret_cast<char*>(0));
-      LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
+      if (execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
+             reinterpret_cast<char*>(0) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execl() failed! Install chromium-browser!");
+        return false;
+      }
 
       return true;
     }
@@ -329,8 +331,10 @@ bool InitHmi() {
       dup2(fd_dev0, STDERR_FILENO);
 
       // Execute the program.
-      execlp(kStartHmi, kStartHmi, reinterpret_cast<char*>(0));
-      LOG4CXX_WARN(logger, "execl() failed! Install shell!");
+      if (execlp(kStartHmi, kStartHmi, reinterpret_cast<char*>(0)) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execl() failed! Can't start HMI!");
+        return false;
+      }
 
       return true;
     }
