@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * @file PopUp.qml
+ * @brief General popup view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,18 +33,29 @@
  */
 
 import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
 Item {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property var icon: null
-    property url pathIcon: "../res/album_art.png"
-    property string imageIcon: ""
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property ListModel softButtons: ListModel { }
-    property int appId: -1
+    default property alias content: content.children
+    width: 700
+    height: 500
+    Rectangle {
+        id: content
+        width: 600
+        height: 400
+        color: Constants.secondaryColor
+        radius: 20
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        border.width: 1
+        border.color: "white"
+    }
+
+    function show() {
+        visible = true;
+    }
+
+    function hide() {
+        visible = false;
+    }
 }

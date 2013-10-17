@@ -54,6 +54,9 @@ Item {
     }
 
     function setCurrentApplication(appId) {
+        var oldApplicationContext = applicationContext;
+        applicationContext = false;
+
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
@@ -91,6 +94,7 @@ Item {
         }
     }
     property int systemContext
+
     property bool applicationContext: false
 
     property int systemSavedContext
@@ -199,11 +203,6 @@ Item {
         hmiTTSVRLanguage = language
     }
 
-    NavigationModel {
-        id: navigationModel
-    }
-    property alias navigationModel: navigationModel
-
     function findIdMatch (root, id) {
         if (root.id === id) {
             console.log("findMatch(): returning {" + root.id + ", " + root.name + ", " + root.subMenu + "}")
@@ -267,4 +266,7 @@ Item {
             getApplication(appID).options.append({"id": menuID, "name": menuParams.menuName, "subMenu": [{"name": "back"}]})
         }
     }
+
+    property NavigationModel navigationModel: NavigationModel { }
+    property bool activeVR: false
 }

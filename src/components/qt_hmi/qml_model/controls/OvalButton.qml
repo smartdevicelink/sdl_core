@@ -39,7 +39,7 @@ Rectangle {
     id: main
     width: field.width * 1.5
     height: 65
-    color: "#00000000"
+    color: Constants.transparentColor
 
     signal clicked;
     signal pressed;
@@ -47,7 +47,7 @@ Rectangle {
     signal pressAndHold;
     property alias text: label.text
     property alias fontSize: label.font.pixelSize
-    property alias icon: icon.source
+    property alias iconSource: icon.iconSource
     property bool highlighted: false
 
     Image {
@@ -150,7 +150,7 @@ Rectangle {
             width: 40
             height: 40
             anchors.verticalCenter: parent.verticalCenter
-            visible: source !== undefined && source !== null
+            visible: iconSource ? 1 : 0
         }
 
         Text {
@@ -162,13 +162,12 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 16
             visible: text !== ""
-    }
+        }
     }
 
     states: [
         State {
             name: "pressed"
-
             PropertyChanges {
                 target: left
                 source: "../res/buttons/oval_btn_pressed_left.png"

@@ -34,7 +34,7 @@ set -e
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
-if [ ${uname_result} = "i386" ]; then
+if [ ${uname_result} = "i386" ] || [ ${uname_result} = "i686" ]; then
   echo "x86 machine detected"
   ARCH="i386"
 elif [ ${uname_result} = "x86_64" ]; then
@@ -58,26 +58,17 @@ APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
-if [ ${ARCH} = "i386" ]; then
-  CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-elif [ ${ARCH} = "x64" ]; then
-  CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
-fi
-if [ ${ARCH} = "i386" ]; then
-  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
-  QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-elif [ ${ARCH} = "x64" ]; then
-  QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
-  QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
-fi
 QT5_RUNFILE_DST="/tmp/qt5"
-QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
-AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
-AVAHI_COMMON="libavahi-common-dev"
+INSTALL_ALL=false
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev "
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
 BLUEZ_TOOLS="bluez-tools"
+LIB_UDEV="libudev-dev"
+ICECAST="icecast2"
+GSTREAMER="gstreamer1.0*"
+USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
@@ -86,6 +77,28 @@ GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/p
 
 FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
 FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
+
+while test $# -gt 0; do
+        case "$1" in
+                -h|--help)
+                        echo "$ setup_enc.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
+                        echo "                 and running." 
+                        echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
+                        echo " "
+                        echo "$ setup_enc.sh [options]"
+                        echo " "
+                        echo "options:"
+                        echo "-h, --help                show brief help"
+                        echo "-a, --all                 all mandatory and optional packages will be install"
+			
+                        exit 0
+                        ;;
+                -a)
+			INSTALL_ALL=true
+			shift
+                        ;;
+        esac
+done
 
 function apt-install() {
     if [ -z "$1" ]
@@ -97,19 +110,6 @@ function apt-install() {
     sudo apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
     set +x
 }
-
-echo "Installing Subversion"
-apt-install ${SUBVERSION}
-echo $OK
-
-echo "Checking out CMake packages, please be patient"
-svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
-echo $OK
-
-echo "Installing CMake build system"
-sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
-echo $OK
 
 echo "Installng GNU C++ compiler"
 apt-install ${GNU_CPP_COMPILER}
@@ -131,53 +131,13 @@ echo "Installing pulseaudio development files"
 apt-install ${PULSEAUDIO_DEV}
 echo $OK
 
-echo "Installing Avahi-common-dev library"
-apt-install ${AVAHI_COMMON}
-echo $OK
-
 echo "Installing Avahi-client-dev library"
 apt-install ${AVAHI_CLIENT_LIBRARY}
 echo $OK
 
-echo "Installing Doxygen"
-apt-install ${DOXYGEN}
+echo "Installing Libudev-dev library"
+apt-install ${LIB_UDEV}
 echo $OK
-
-echo "Installing Graphviz for doxygen"
-apt-install ${GRAPHVIZ}
-echo $OK
-
-echo "Installing Mscgen"
-apt-install ${MSCGEN}
-echo $OK
-
-echo "Installing OpenGL development files"
-apt-install ${OPENGL_DEV}
-echo $OK
-
-echo "Checking whether Qt5 with QML support is installed"
-qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
-if [ -n "$qmlscene_binary" ]; then
-  echo "Found Qt5 in "`dirname $qmlscene_binary`
-  NEED_QT5_INSTALL=false
-else
-  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
-  NEED_QT5_INSTALL=true
-fi
-echo $OK
-
-if $NEED_QT5_INSTALL; then
-
-  echo "Checking out Qt5 installation runfile, please be patient"
-  svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
-  echo $OK
-
-  echo "Installing Qt5 libraries"
-  chmod +x ${QT5_RUNFILE_BIN}
-  sudo ${QT5_RUNFILE_BIN}
-  echo $OK
-
-fi
 
 echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
@@ -203,7 +163,119 @@ if $UPDATE_SOURCES; then
 fi
 
 echo "Installing gstreamer..."
-apt-install gstreamer1.0*
- 
+apt-install ${GSTREAMER}
+echo $OK
 
+echo "Setting up USB permissions..."
+if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
+	echo "Create permission file"
+	sudo touch /etc/udev/rules.d/90-usbpermission.rules
+	sudo echo -e "\n" | sudo tee /etc/udev/rules.d/90-usbpermission.rules
+fi
 
+if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; then
+	echo "Adding permissions..."
+	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
+fi
+
+if $INSTALL_ALL; then
+	echo " "	
+	echo "Installing optional packages..."
+	echo " "
+
+	echo "Detecting machine architecture"
+	uname_result=`uname -i`
+	
+	if [ ${uname_result} = "i386" ]; then
+		echo "x86 machine detected"
+		ARCH="i386"
+	elif [ ${uname_result} = "x86_64" ]; then
+		echo "x64 machine detected"
+		ARCH="x64"
+	else
+		echo "unknown architecture - exit"
+		exit
+	fi
+	echo
+
+	if [ ${ARCH} = "i386" ]; then
+		CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+	elif [ ${ARCH} = "x64" ]; then
+		CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+	fi
+
+	if [ ${ARCH} = "i386" ]; then
+		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
+		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
+	elif [ ${ARCH} = "x64" ]; then
+		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
+		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
+	fi
+
+	echo "Installing Subversion"
+	apt-install ${SUBVERSION}
+	echo $OK	
+
+	echo "Checking out CMake packages, please be patient"
+	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+	echo $OK
+
+	echo "Installing CMake build system"
+	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	echo $OK
+
+	echo "Checking whether Qt5 with QML support is installed"
+	qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+	if [ -n "$qmlscene_binary" ]; then
+	  echo "Found Qt5 in "`dirname $qmlscene_binary`
+	  NEED_QT5_INSTALL=false
+	else
+	  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
+	  NEED_QT5_INSTALL=true
+	fi
+	echo $OK
+
+	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
+
+	if $NEED_QT5_INSTALL; then
+
+		echo "Checking out Qt5 installation runfile, please be patient"
+		svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
+		echo $OK
+
+		echo "Installing Qt5 libraries"
+		chmod +x ${QT5_RUNFILE_BIN}
+		sudo ${QT5_RUNFILE_BIN}
+		echo $OK
+
+	fi
+
+	echo "Installing Doxygen"
+	apt-install ${DOXYGEN}
+	echo $OK
+
+	echo "Installing Graphviz for doxygen"
+	apt-install ${GRAPHVIZ}
+	echo $OK
+
+	echo "Installing Mscgen"
+	apt-install ${MSCGEN}
+	echo $OK
+
+	echo "Installing icecast..."
+	apt-install ${ICECAST}
+	echo $OK
+
+	echo "Configuring icecast..."
+	sudo sed -i 's/ENABLE=false/ENABLE=true/g' /etc/default/icecast2
+	echo $OK
+
+	echo "Starting icecast..."
+	sudo /etc/init.d/icecast2 start
+	echo $OK
+
+	echo "Installing OpenGL development files"
+	apt-install ${OPENGL_DEV}
+	echo $OK
+fi
