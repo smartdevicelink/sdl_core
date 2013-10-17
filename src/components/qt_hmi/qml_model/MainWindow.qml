@@ -156,6 +156,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        ExitAllApplicationsPopup {
+            id: exitAllApplicationsPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

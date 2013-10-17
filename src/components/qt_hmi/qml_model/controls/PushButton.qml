@@ -13,6 +13,9 @@ Rectangle {
 
     signal pressed()
     signal unpressed()
+    signal clicked()
+
+    property bool toggleMode: false
 
     state: "unpressed"
     onStateChanged: {
@@ -38,10 +41,22 @@ Rectangle {
 
         anchors.fill: parent
         onPressed: {
-            if (parent.state == "unpressed") {
-                parent.state = "pressed"
+            if (toggleMode) {
+                if (parent.state == "unpressed") {
+                    parent.state = "pressed"
+                } else {
+                    parent.state = "unpressed"
+                }
             } else {
+                parent.state = "pressed"
+            }
+        }
+        onReleased: {
+            if (!toggleMode) {
                 parent.state = "unpressed"
+                if (mouse.isClick) {
+                    parent.clicked()
+                }
             }
         }
     }

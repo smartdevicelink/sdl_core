@@ -49,6 +49,6 @@ Item {
     }
 
     function activateApp() {
-
+        contentLoader.go("views/SDLPlayerView.qml", appID);
     }
 }
