@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import "./controls"
@@ -58,6 +59,7 @@ Rectangle {
             sdlUI.onSystemContext(systemContext)
         }
 
+        // Please note that applicationContext is changed only after setting currentApplication
         onApplicationContextChanged: {
             if (applicationContext) {
                 sdlBasicCommunication.onAppActivated(currentApplication.appId)
@@ -65,6 +67,11 @@ Rectangle {
                 sdlBasicCommunication.onAppDeactivated(currentApplication.appId, contentLoader.item.category)
             }
         }
+    }
+
+    Audio {
+        id: beep
+        source: "res/initial.wav"
     }
 
     SettingsStorage {
@@ -112,8 +119,8 @@ Rectangle {
 
                 function go(path, appId) {
                     viewTransitionStack.push(source.toString())
-                    if (appId > 0) {
-                        dataContainer.applicationId = appId
+                    if (appId) {
+                        dataContainer.setCurrentApplication(appId)
                     }
                     source = path
                 }
@@ -140,6 +147,12 @@ Rectangle {
         AlertWindow {
             id: alertWindow
             objectName: "AlertWindow"
+            anchors.fill: parent
+            visible: false
+        }
+
+        VRPopUp {
+            id: vrPopUp
             anchors.fill: parent
             visible: false
         }
@@ -189,7 +202,7 @@ Rectangle {
         id: sdlProxy
 
         onAppRegistered: {
-            dataContainer.applicationList.append(
+            dataContainer.addApplication(
             {
                  appName: application.appName,
                  ngnMediaScreenAppName: application.ngnMediaScreenAppName,
@@ -199,16 +212,15 @@ Rectangle {
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
                  appType: application.appType
-             })
+             });
         }
 
         onAppUnregistered: {
-            for (var i = 0; i < dataContainer.applicationList.count; i++) {
-                if (dataContainer.applicationList.get(i).appId === appId) {
-                    dataContainer.applicationList.remove(i);
-                    break;
-                }
-            }
+            dataContainer.removeApplication(appId);
+        }
+
+        onPlayTone: {
+            beep.play()
         }
     }
 

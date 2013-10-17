@@ -1,6 +1,6 @@
 /**
- * \file optional_argument.h
- * \brief OptionalArgument struct header file.
+ * @file MaskedButton.qml
+ * @brief Masked button.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,52 +32,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
+import QtQuick 2.0
+import com.ford.sdl.hmi.hw_buttons 1.0
 
-#include <QDBusArgument>
+MaskedContainer {
+    property string name
 
-template<class T>
-struct OptionalArgument
-{
-    T val;
-    bool presence;
-    OptionalArgument(const T& value)
-        : val(value),
-          presence(true)
-    { }
-    OptionalArgument()
-        : presence(false)
-    { }
-};
+    Image {
+        id: icon
+        source: "../res/controlButtons/" + name + "Button.png"
+    }
 
-template<class T>
-inline
-QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg << o.presence << o.val;
-    arg.endStructure();
-    return arg;
+    onPressed: {
+        state = "pressed";
+    }
+
+    onReleased: {
+        state = "";
+    }
+
+    states: [
+        State {
+            name: "pressed"
+            PropertyChanges  {
+                target: icon
+                source: "../res/controlButtons/" + name + "Button_pressed.png"
+            }
+        }
+
+    ]
 }
-
-template<class T>
-inline
-const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg >> o.presence >> o.val;
-    arg.endStructure();
-    return arg;
-}
-
-Q_DECLARE_METATYPE(OptionalArgument<int>)
-Q_DECLARE_METATYPE(OptionalArgument<QString>)
-Q_DECLARE_METATYPE(OptionalArgument<bool>)
-Q_DECLARE_METATYPE(OptionalArgument<double>)
-
-Q_DECLARE_METATYPE(OptionalArgument<QList<int> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<QString> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<bool> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<double> >)
-#endif // OPTIONALARGUMENT_H

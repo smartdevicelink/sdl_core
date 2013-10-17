@@ -1,6 +1,6 @@
 /**
- * \file optional_argument.h
- * \brief OptionalArgument struct header file.
+ * @file PopUp.qml
+ * @brief General popup view.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,52 +32,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
+import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
-#include <QDBusArgument>
+Item {
+    default property alias content: content.children
+    width: 700
+    height: 500
+    Rectangle {
+        id: content
+        width: 600
+        height: 400
+        color: Constants.secondaryColor
+        radius: 20
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        border.width: 1
+        border.color: "white"
+    }
 
-template<class T>
-struct OptionalArgument
-{
-    T val;
-    bool presence;
-    OptionalArgument(const T& value)
-        : val(value),
-          presence(true)
-    { }
-    OptionalArgument()
-        : presence(false)
-    { }
-};
+    function show() {
+        visible = true;
+    }
 
-template<class T>
-inline
-QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg << o.presence << o.val;
-    arg.endStructure();
-    return arg;
+    function hide() {
+        visible = false;
+    }
 }
-
-template<class T>
-inline
-const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg >> o.presence >> o.val;
-    arg.endStructure();
-    return arg;
-}
-
-Q_DECLARE_METATYPE(OptionalArgument<int>)
-Q_DECLARE_METATYPE(OptionalArgument<QString>)
-Q_DECLARE_METATYPE(OptionalArgument<bool>)
-Q_DECLARE_METATYPE(OptionalArgument<double>)
-
-Q_DECLARE_METATYPE(OptionalArgument<QList<int> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<QString> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<bool> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<double> >)
-#endif // OPTIONALARGUMENT_H
