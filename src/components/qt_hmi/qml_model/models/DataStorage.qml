@@ -86,6 +86,15 @@ Item {
         })
     }
 
+    function setApplicationProperties(appId, props) {
+        for (var p in props) {
+            applicationList.get(appId)[p] = props[p];
+            if (currentApplication.appId === appId) {
+                setCurrentApplication(appId); // copy new values to current application
+            }
+        }
+    }
+
     function removeApplication(appId) {
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
