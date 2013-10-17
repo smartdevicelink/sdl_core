@@ -94,12 +94,15 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
+        return {}
     }
 
     function deleteCommand (cmdID, appID) {
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        dataContainer.addSubMenu(menuID, menuParams, appID)
     }
 
     function deleteSubMenu (menuID, appID) {
