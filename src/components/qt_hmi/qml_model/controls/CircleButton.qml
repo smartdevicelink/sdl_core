@@ -1,5 +1,5 @@
 /**
- * @file CircleBtn.qml
+ * @file CircleButton.qml
  * @brief Parent class for circle button.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -62,20 +62,26 @@ Image {
     MouseArea {
         anchors.fill: parent
         onPressed: {
+            console.log("CircleButton onPressed enter");
             source = imgOn
             btnText.color = textColorOnPressed
             isPressed = true
+            console.log("CircleButton onPressed exit");
         }
         onReleased: {
+            console.log("CircleButton onReleased enter");
             source = imgOff
             btnText.color =  textColorDefault
             isPressed = false
+            console.log("CircleButton onReleased exit");
         }
         onClicked: {
+            console.log("CircleButton onClicked enter");
             if(dest !== ""){
                 contentLoader.go(dest)
             }
             circleBtn.wasClicked()
+            console.log("CircleButton onClicked enter");
         }
     }
 }

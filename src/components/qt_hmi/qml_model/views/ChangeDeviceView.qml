@@ -89,7 +89,9 @@ GeneralView {
         }
 
         Component.onCompleted: {
-            sdlBasicCommunication.onStartDeviceDiscovery()
+            console.log("ChangeDeviceView Component.onCompleted enter");
+            sdlBasicCommunication.onStartDeviceDiscovery();
+            console.log("ChangeDeviceView Component.onCompleted exit");
         }
     }
 }

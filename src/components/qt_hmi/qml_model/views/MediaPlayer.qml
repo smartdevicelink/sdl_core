@@ -87,8 +87,8 @@ Item {
                     pixelSize: Constants.fontSize
                     dest: "./views/ApplicationListView.qml"
 
-                    visible: (mediaPlayerView.playerType === "SDL") ? true : false
-                    enabled: (mediaPlayerView.playerType === "SDL") ? true : false
+                    visible: mediaPlayerView.playerType === "SDL"
+                    enabled: mediaPlayerView.playerType === "SDL"
                 }
 
                 LongOvalButton {
@@ -96,8 +96,8 @@ Item {
                     pixelSize: Constants.fontSize
                     dest: "./views/SDLPlayerOptionsListView.qml"
 
-                    visible: (mediaPlayerView.playerType === "SDL") ? true : false
-                    enabled: (mediaPlayerView.playerType === "SDL") ? true : false
+                    visible: mediaPlayerView.playerType === "SDL"
+                    enabled: mediaPlayerView.playerType === "SDL"
                 }
 
                 LongOvalButton {

@@ -41,11 +41,13 @@ QtObject {
     property ApplicationModel currentApplication: ApplicationModel { }
 
     function getApplication(appId) {
+        console.log("dataContainer getApplication enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 return applicationList.get(i);
             }
         }
+        console.log("dataContainer getApplication exit");
     }
 
     property int systemContext
@@ -195,15 +197,21 @@ QtObject {
     property int uiSliderPosition: 1
 
     function reset () {
+        console.log("dataContainer reset enter");
         route_text = ""
+        console.log("dataContainer reset exit");
     }
 
     function changeRegistrationUI (language) {
+        console.log("dataContainer changeRegistrarionUI enter");
         hmiUILanguage = language
+        console.log("dataContainer changeRegistrarionUI exit");
     }
 
     function changeRegistrationTTSVR (language) {
+        console.log("dataContainer changeRegistrationTTSVR enter");
         hmiTTSVRLanguage = language
+        console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
     property NavigationModel navigationModel: NavigationModel { }

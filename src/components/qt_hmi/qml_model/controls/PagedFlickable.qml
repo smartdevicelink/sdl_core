@@ -41,7 +41,7 @@ Item
     default property alias content: containerRow.children
     property alias spacing: containerRow.spacing
     property int elementWidth
-    property int snapTo: 200
+    property int snapTo
     property int count: 0
 
     Flickable {
@@ -53,6 +53,7 @@ Item
         width: parent.width
 
         onMovementEnded: {
+            console.log("PagedFlickabe onMovementEnded enter");
             var rest = contentX % snapTo
             var t = 0.25
             if (rest > parent.snapTo / 2) {
@@ -62,6 +63,7 @@ Item
             flickDeceleration = Math.abs(vel) / t
             flick(vel, 0)
             flickDeceleration = 1500
+            console.log("PagedFlickabe onMovementEnded exit");
         }
         Row {
             id: containerRow
@@ -76,29 +78,32 @@ Item
         anchors.top: parent.top
 
         pages: {
-            if (container.contentWidth % container.width >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
-                Math.ceil(container.contentWidth / container.width)
+            console.log("PagedFlickabe pages enter");
+            if ( (container.contentWidth % container.width) >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
+                return Math.ceil(container.contentWidth / container.width)
             }
             else {
-                Math.floor(container.contentWidth / container.width)
+                return Math.floor(container.contentWidth / container.width)
             }
         }
 
         activePage: {
+            console.log("PagedFlickabe activePage enter");
             if (container.contentX <= 0) {
                 return 0
             }
-            else if ((container.contentWidth - container.contentX) < container.width) {
+            else if ( (container.contentWidth - container.contentX) < container.width) {
                 return pages -1
             }
             else {
-                if (container.contentX % container.width >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
+                if ( (container.contentX % container.width) >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
                     return Math.ceil(container.contentX / container.width)
                 }
-                else if (container.contentX % container.width > 0) {
+                else if ( (container.contentX % container.width) > 0) {
                     return Math.floor(container.contentX / container.width)
                 }
             }
+            console.log("PagedFlickabe activePage exit");
         }
     }
 }
