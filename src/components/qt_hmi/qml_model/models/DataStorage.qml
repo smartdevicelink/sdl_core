@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
-Item {
+QtObject {
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
@@ -51,6 +51,7 @@ Item {
     property int systemContext
 
     function setCurrentApplication(appId) {
+        console.log("Enter setCurrentApplication function");
         var oldApplicationContext = applicationContext;
         applicationContext = false;
 
@@ -65,11 +66,12 @@ Item {
         }
 
         applicationContext = oldApplicationContext;
-
         currentApplicationChanged()
+        console.log("Exit setCurrentApplication function")
     }
 
     function addApplication(app) {
+        console.log("Enter addApplication function");
         applicationList.append(
         {
             appName: app.appName,
@@ -82,26 +84,33 @@ Item {
             appType: app.appType,
             helpPrompt: "",
             timeoutPrompt: "",
-            playPauseState: 'Pause'
+            playPauseState: 'Pause',
+            hmiUIText: app.hmiUIText
         })
+        console.log("Exit addApplication function");
     }
 
     function setApplicationProperties(appId, props) {
+        console.log("Enter setApplicationProperties function");
+        var app = getApplication(appId)
         for (var p in props) {
-            applicationList.get(appId)[p] = props[p];
-            if (currentApplication.appId === appId) {
-                setCurrentApplication(appId); // copy new values to current application
-            }
+            app[p] = props[p];
         }
+        if (currentApplication.appId === appId) {
+            setCurrentApplication(appId); // copy new values to current application
+        }
+        console.log("Exit setApplicationProperties function");
     }
 
     function removeApplication(appId) {
+        console.log("Enter removeApplication function");
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
                 applicationList.remove(i);
                 break;
             }
         }
+        console.log("Exit removeApplication function");
     }
 
     property bool applicationContext: false
@@ -112,7 +121,7 @@ Item {
     property string route_text: ""
 
     property PlayerState cdPlayerState: PlayerState {
-    //    playPauseState: 'Pause'
+        playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
@@ -126,28 +135,21 @@ Item {
         playPauseState: 'Pause'
     }
     property PlayerState usbPlayerState: PlayerState {
-    //    playPauseState: 'Pause'
+        playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
         albumName: "Florence and the Machine"
     }
     property PlayerState linePlayerState: PlayerState {
-     //   playPauseState: 'Pause'
-        albumImage: "../res/album_art.png"
-        trackNumber: "13/16"
-        trackName: "The Dog Days Are Over"
-        albumName: "Florence and the Machine"
-    }
-    property PlayerState sdlPlayerState: PlayerState {
-    //    playPauseState: 'Pause'
+        playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
         albumName: "Florence and the Machine"
     }
     property PlayerState btPlayerState: PlayerState {
-    //    playPauseState: 'Pause'
+        playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
@@ -178,14 +180,6 @@ Item {
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
 
-    property var hmiUIText: {
-        "mainField1": "The Dog Days Are Over",
-        "mainField2": "Florence and the Machine",
-        "mainField3": "Track 13/16",
-        "mainField4": "",
-        "statusBar": "",
-        "mediaClock": "02:36"
-    }
     property int hmiUITextAlignment: Text.AlignLeft
 
     property ListModel deviceList: ListModel { }

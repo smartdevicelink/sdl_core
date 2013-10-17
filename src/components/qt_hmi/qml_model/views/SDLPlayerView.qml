@@ -45,29 +45,5 @@ GeneralView {
         playerName: "SDL music"
         playerType: "SDL"
         anchors.fill: parent
-        playerState: dataContainer.sdlPlayerState
-
-        /*
-        topOvalButtons: [
-            Row {
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: (parent.width - 4 * longOvalButton.width) / 3
-                width: 2 * longOvalButton.width + spacing
-
-                LongOvalButton {
-                    id: longOvalButton
-                    text: "SDL Menu"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/ApplicationListView.qml"
-                }
-                LongOvalButton {
-                    text: "Options"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/SDLPlayerOptionsListView.qml"
-                }
-            }
-        ]
-        */
     }
 }
