@@ -120,6 +120,9 @@ Item {
                     delegate: LongOvalButton {
                         anchors.verticalCenter: parent.verticalCenter
                         text: model.appName
+                        onClicked: {
+                            contentLoader.go("./views/SDLPlayerView.qml", model.appId)
+                        }
                     }
                 }
             }
@@ -261,7 +264,7 @@ Item {
             }
 
             PlayPauseButton {
-                state: playerState.playPauseState
+                state: dataContainer.currentApplication.playPauseState
                 onClicked: {
                     (state == 'Play') ? play() : pause()
                     mediaPlayerView.playerState.playPauseState = state

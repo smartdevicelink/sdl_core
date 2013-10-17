@@ -9,6 +9,7 @@ QtObject {
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
     property var appType
+    property string playPauseState
 
     property string helpPrompt
     property string timeoutPrompt

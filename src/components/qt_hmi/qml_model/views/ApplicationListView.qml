@@ -53,7 +53,7 @@ GeneralView {
 
                 delegate: Row {
                     width: parent.width
-                    height: sdlIcon.height
+                    height: appName.height
                     Image { id: sdlIcon; source: icon }
                     Text  {
                         text: appName

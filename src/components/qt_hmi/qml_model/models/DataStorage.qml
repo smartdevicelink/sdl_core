@@ -59,6 +59,7 @@ Item {
                 currentApplication.appId = appId
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
+                currentApplication.playPauseState = applicationList.get(i).playPauseState
                 // ... etc
             }
         }
@@ -80,7 +81,8 @@ Item {
             isMediaApplication: app.isMediaApplication,
             appType: app.appType,
             helpPrompt: "",
-            timeoutPrompt: ""
+            timeoutPrompt: "",
+            playPauseState: 'Pause'
         })
     }
 
@@ -101,7 +103,7 @@ Item {
     property string route_text: ""
 
     property PlayerState cdPlayerState: PlayerState {
-        playPauseState: 'Pause'
+    //    playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
@@ -115,28 +117,28 @@ Item {
         playPauseState: 'Pause'
     }
     property PlayerState usbPlayerState: PlayerState {
-        playPauseState: 'Pause'
+    //    playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
         albumName: "Florence and the Machine"
     }
     property PlayerState linePlayerState: PlayerState {
-        playPauseState: 'Pause'
+     //   playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
         albumName: "Florence and the Machine"
     }
     property PlayerState sdlPlayerState: PlayerState {
-        playPauseState: 'Pause'
+    //    playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
         albumName: "Florence and the Machine"
     }
     property PlayerState btPlayerState: PlayerState {
-        playPauseState: 'Pause'
+    //    playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
         trackName: "The Dog Days Are Over"
@@ -177,22 +179,8 @@ Item {
     }
     property int hmiUITextAlignment: Text.AlignLeft
 
-    property ListModel deviceList: ListModel {
-        ListElement {
-            name: "Device 1"
-            devid: 1
-        }
-    }
-    property ListModel applicationList: ListModel {
-        ListElement {
-            appName: "SyncProxyTester"
-            icon: "../res/SPT.png"
-            deviceName: "Device 1"
-            appId: 1
-            hmiDisplayLanguageDesired: 0
-            isMediaApplication: 1
-        }
-    }
+    property ListModel deviceList: ListModel { }
+    property ListModel applicationList: ListModel { }
 
     property var vrCommands: []
 
