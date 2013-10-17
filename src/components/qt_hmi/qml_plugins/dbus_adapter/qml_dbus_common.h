@@ -190,6 +190,4 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgu
   return GetArgFromMap(map, name, v.val);
 }
 
-Q_DECLARE_METATYPE(OptionalArgument<QList<QString> >)
-
 #endif // QML_DBUS_COMMON_H

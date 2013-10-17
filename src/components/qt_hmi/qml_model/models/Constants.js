@@ -53,12 +53,14 @@ var pressedButtonTextColor = "black"
 // Color of text at "white" buttons, for all other buttons (which most) use primaryColor.
 var releasedButtonTextColor = "white"
 
+// Transparent background.
+var transparentColor = "#000000"
 //--------------------------------------------------------------------------------------
 
 // Other
 
 // Font size for most of text in HMI model.
-var fontSize = 25
+var fontSize = 20
 
 // Offset from the edges of the screen.
 var margin = 30

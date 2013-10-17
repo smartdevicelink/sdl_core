@@ -91,6 +91,50 @@ Item {
         }
     }
     property int systemContext
+
+    function setCurrentApplication(appId) {
+        var oldApplicationContext = applicationContext;
+        applicationContext = false;
+
+        for(var i = 0; i < applicationList.count; i++) {
+            if(applicationList.get(i).appId === appId) {
+                currentApplication.appId = appId
+                currentApplication.appName = applicationList.get(i).appName
+                currentApplication.appType = applicationList.get(i).appType
+                // ... etc
+            }
+        }
+
+        applicationContext = oldApplicationContext;
+
+        currentApplicationChanged()
+    }
+
+    function addApplication(app) {
+        applicationList.append(
+        {
+            appName: app.appName,
+            ngnMediaScreenAppName: app.ngnMediaScreenAppName,
+            icon: app.icon,
+            deviceName: app.deviceName,
+            appId: app.appId,
+            hmiDisplayLanguageDesired: app.hmiDisplayLanguageDesired,
+            isMediaApplication: app.isMediaApplication,
+            appType: app.appType,
+            helpPrompt: "",
+            timeoutPrompt: ""
+        })
+    }
+
+    function removeApplication(appId) {
+        for (var i = 0; i < applicationList.count; i++) {
+            if (applicationList.get(i).appId === appId) {
+                applicationList.remove(i);
+                break;
+            }
+        }
+    }
+
     property bool applicationContext: false
 
     property int systemSavedContext
@@ -199,15 +243,13 @@ Item {
         hmiTTSVRLanguage = language
     }
 
-    NavigationModel {
-        id: navigationModel
-    }
-    property alias navigationModel: navigationModel
-
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
         getApplication(appID).options.append({"name": menuParams.menuName, "subMenu": []})
     }
 
     function addSubMenu (menuID, menuParams, appID) {
     }
+
+    property NavigationModel navigationModel: NavigationModel { }
+    property bool activeVR: false
 }

@@ -74,6 +74,10 @@ bool DBusAdapter::Init() {
   DBusError err;
   int ret;
   dbus_error_init(&err);
+  if (!dbus_threads_init_default()) {
+    LOG4CXX_ERROR(logger_, "DBus: Can't initializes threads");
+    return false;
+  }
   conn_ = dbus_bus_get(DBUS_BUS_SESSION, &err);
   if (dbus_error_is_set(&err)) {
     LOG4CXX_ERROR(logger_, "DBus: Connection Error " << err.message);

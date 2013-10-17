@@ -215,19 +215,18 @@ class Impl(FordXmlParser):
             param_type = self.qt_param_type(param_desc)
             retstr = retstr + param_type + ' ' + param_desc.name + '_in'
             if i <> in_params_num - 1: retstr = retstr + ", "
+        if out_params:
+            if in_params_num > 0:
+                retstr += ", "
+            retstr += "const QDBusMessage& message"
         out_params_num = len(out_params)
         if out_params_num > 1:
-            if in_params_num > 0:
-                retstr = retstr + ", "
+            retstr = retstr + ", "
             for i in range(1, out_params_num):
                 param_desc = self.make_param_desc(out_params[i], interface)
                 param_type = self.qt_param_type(param_desc)
                 retstr = retstr + param_type + '& ' + param_desc.name + '_out'
                 if i <> out_params_num - 1: retstr = retstr + ", "
-
-        if in_params_num > 0 or out_params_num > 1:
-		retstr += ", "
-        retstr += "const QDBusMessage& message"
 
         retstr = retstr + ')'
         return retstr
@@ -373,14 +372,10 @@ class Impl(FordXmlParser):
             out.write("    LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
             out.write(return_statement + ";\n  }\n")
 
-
-            out.write("  if (out_arg_v.type() != QVariant::Map) {\n")
-            if out_params:
-                out.write("    RaiseDbusError(this, InvalidData);\n")
-                out.write("    LOG4CXX_ERROR(logger_, \"Output argument isn't map\");\n    ")
-            out.write("    " + return_statement + ";\n  }\n")
-
-            out.write("  QVariantMap out_arg = out_arg_v.toMap();\n")
+            out.write("  QVariantMap out_arg;\n")
+            out.write("  if (out_arg_v.type() == QVariant::Map) {\n")
+            out.write("    out_arg = out_arg_v.toMap();\n")
+            out.write("  };\n")
 
             out.write("  int err;\n")
             out.write("""  if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
