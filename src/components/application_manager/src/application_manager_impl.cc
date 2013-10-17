@@ -444,10 +444,13 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
         LOG4CXX_WARN(logger_, "Application is already active.");
         return false;
       }
-      if (application->has_been_activated()) {
-        MessageHelper::SendAppDataToHMI(application);
-      } else {
-        MessageHelper::SendChangeRegistrationRequestToHMI(application);
+      if (mobile_api::HMILevel::eType::HMI_LIMITED !=
+          application->hmi_level()) {
+        if (application->has_been_activated()) {
+          MessageHelper::SendAppDataToHMI(application);
+        } else {
+          MessageHelper::SendChangeRegistrationRequestToHMI(application);
+        }
       }
       if (!application->MakeFullscreen()) {
         return false;
