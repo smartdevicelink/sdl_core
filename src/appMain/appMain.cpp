@@ -244,7 +244,7 @@ bool InitHmi() {
 
       // Execute the program.
       if (execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
-             reinterpret_cast<char*>(0) == -1) {
+             reinterpret_cast<char*>(0)) == -1) {
         LOG4CXX_ERROR_WITH_ERRNO(logger, "execlp() failed! Install chromium-browser!");
         _exit(EXIT_FAILURE);
       }
