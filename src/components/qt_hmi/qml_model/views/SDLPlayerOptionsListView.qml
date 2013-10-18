@@ -57,22 +57,24 @@ GeneralView {
 
             model: dataContainer.currentApplication.currentSubMenu
 
-            delegate: Text {
-                text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
-                color: Constants.primaryColor
-                font.pixelSize: 40
+            delegate: Row {
+                Text {
+                    text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
+                    color: Constants.primaryColor
+                    font.pixelSize: 40
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        switch (type) {
-                            case Internal.MenuItemType.MI_NODE:
-                                sdlUI.onCommand(id, dataContainer.currentApplication.appId)
-                                break;
-                            case Internal.MenuItemType.MI_SUBMENU:
-                            case Internal.MenuItemType.MI_PARENT:
-                                dataContainer.currentApplication.currentSubMenu = subMenu
-                                break;
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            switch (type) {
+                                case Internal.MenuItemType.MI_NODE:
+                                    sdlUI.onCommand(id, dataContainer.currentApplication.appId)
+                                    break;
+                                case Internal.MenuItemType.MI_SUBMENU:
+                                case Internal.MenuItemType.MI_PARENT:
+                                    dataContainer.currentApplication.currentSubMenu = subMenu
+                                    break;
+                            }
                         }
                     }
                 }

@@ -34,6 +34,8 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "Internal.js" as Internal
+import com.ford.sdl.hmi.log4cxx 1.0
 
 QtObject {
 
@@ -250,68 +252,82 @@ QtObject {
         console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
-    function findIdMatch (root, id) {
-        if (root.id === id) {
-            console.log("findMatch(): returning {" + root.id + ", " + root.name + ", " + root.subMenu + "}")
-            return root
-        }
-        for (var childIndex = 0; childIndex < root.subMenu.count; ++childIndex) {
-            console.log("findMatch(): checking child #" + childIndex)
-            var child = root.options.get(childIndex)
-            var node = findMatch(child)
-            if (node) {
-                return node
-            }
-        }
-        console.log("findMatch(): returning nothing")
-    }
-
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        console.log("addCommand(): menuParams = {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}")
+        if (cmdIcon) {
+            console.debug("UI::addCommand(" + cmdID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, {" + cmdIcon.value + ", " + cmdIcon.imageType + "}, " + appID + ")")
+        }
+        else {
+            console.debug("UI::addCommand(" + cmdID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + cmdIcon + ", " + appID + ")")
+        }
         if (menuParams !== undefined) {
             if (menuParams.parentID !== undefined) {
+                var parentNotFound = true
                 for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
                     var option = getApplication(appID).options.get(optionIndex)
-                    var node = findIdMatch(option, menuParams.parentID)
-                    if (node) {
-                        break
+                    if (option.type === Internal.MenuItemType.MI_SUBMENU) {
+                        if (option.id === menuParams.parentID) {
+                            var count = option.subMenu.count
+                            var index = count
+                            if (menuParams.position !== undefined) {
+                                if (menuParams.position < count) {
+                                    index = menuParams.position
+                                }
+                            }
+//                          option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                            option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE}) // actually we do not need subMenu[] for node
+                            parentNotFound = false
+                            break
+                        }
                     }
                 }
-                if (node) {
-                    node.subMenu.append({"id": cmdID, "name": menuParams.menuName, "subMenu": []})
-                }
-                else {
-                    console.log("addCommand(): parentID " + menuParams.parentID + " not found")
+                if (parentNotFound) {
+                    console.log("UI::addCommand(): parentID " + menuParams.parentID + " not found")
                 }
             }
             else {
-                console.log("addCommand(): appending under root")
-                getApplication(appID).options.append({"id": cmdID, "name": menuParams.menuName, "subMenu": []})
-            }
-        }
-    }
-
-    function addSubMenu (menuID, menuParams, appID) {
-        console.log("addSubMenu(): menuParams = {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}")
-        if (menuParams.parentID !== undefined) {
-            for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
-                var option = getApplication(appID).options.get(optionIndex)
-                var node = findIdMatch(option, menuParams.parentID)
-                if (node) {
-                    break
+                count = getApplication(appID).options.count
+                index = count
+                if (menuParams.position !== undefined) {
+                    if (menuParams.position < count) {
+                        index = menuParams.position
+                    }
                 }
-            }
-            if (node) {
-                node.subMenu.append({"id": menuID, "name": menuParams.menuName, "subMenu": []})
-            }
-            else {
-                console.log("addSubMenu(): parentID " + menuParams.parentID + " not found")
+                getApplication(appID).options.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "subMenu": []})
             }
         }
         else {
-            console.log("addSubMenu(): appending under root")
-            getApplication(appID).options.append({"id": menuID, "name": menuParams.menuName, "subMenu": [{"name": "back"}]})
+            count = getApplication(appID).options.count
+            index = count
+            if (menuParams.position !== undefined) {
+                if (menuParams.position < count) {
+                    index = menuParams.position
+                }
+            }
+            getApplication(appID).options.insert(index, {"id": cmdID, "name": "cmdID = " + cmdID, "type": Internal.MenuItemType.MI_NODE, "subMenu": []})
         }
+        console.debug("UI::addCommand(): exit")
+    }
+
+    function addSubMenu (menuID, menuParams, appID) {
+        console.debug("addSubMenu(" + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID + ")")
+        var count = getApplication(appID).options.count
+        var index = count
+        if (menuParams.position !== undefined) {
+            if (menuParams.position < count) {
+                index = menuParams.position
+            }
+        }
+        getApplication(appID).options.insert(index, {
+            "id": menuID,
+            "name": menuParams.menuName,
+            "type": Internal.MenuItemType.MI_SUBMENU,
+            "subMenu": [{
+                "name": "..",
+                "type": Internal.MenuItemType.MI_PARENT,
+                "subMenu": getApplication(appID).options
+            }]
+        })
+        console.debug("addSubMenu(): exit")
     }
 
     property NavigationModel navigationModel: NavigationModel { }
