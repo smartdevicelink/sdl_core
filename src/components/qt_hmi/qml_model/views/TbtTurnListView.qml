@@ -36,7 +36,6 @@ import QtQuick 2.0
 import "../controls"
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
-import com.ford.sdl.hmi.log4cxx 1.0
 
 GeneralView {
     width: 600
