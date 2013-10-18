@@ -35,6 +35,7 @@
  */
 
 #ifndef LOG4CXXLOGGER_HPP_
+  #include <string.h>
   #include <log4cxx/logger.h>
   #include <log4cxx/propertyconfigurator.h>
 

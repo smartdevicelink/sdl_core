@@ -85,11 +85,13 @@ GeneralView {
             width: parent.width
             height: 1/4 * parent.height
 
-            BackButton { anchors.horizontalCenter: parent.horizontalCenter }
+            BackButton { anchors.centerIn: parent }
         }
 
         Component.onCompleted: {
-            sdlBasicCommunication.onStartDeviceDiscovery()
+            console.log("ChangeDeviceView Component.onCompleted enter");
+            sdlBasicCommunication.onStartDeviceDiscovery();
+            console.log("ChangeDeviceView Component.onCompleted exit");
         }
     }
 }

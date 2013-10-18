@@ -53,7 +53,7 @@ GeneralView {
 
                 delegate: Row {
                     width: parent.width
-                    height: sdlIcon.height
+                    height: appName.height
                     Image { id: sdlIcon; source: icon }
                     Text  {
                         text: appName
@@ -77,7 +77,7 @@ GeneralView {
             width: parent.width
             height: 1/4 * parent.height
 
-            BackButton { anchors.horizontalCenter: parent.horizontalCenter }
+            BackButton { anchors.centerIn: parent}
         }
     }
 }

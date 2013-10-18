@@ -33,6 +33,7 @@
  */
 import QtQuick 2.0
 
+// Player state for all players except SDL media player
 Item {
     // Media players
     property string playPauseState

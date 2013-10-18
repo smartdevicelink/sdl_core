@@ -1,6 +1,6 @@
 /**
- * @file MainMenuListModel.qml
- * @brief Main menu list of elements.
+ * @file CircleButton.qml
+ * @brief Parent class for circle button.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,49 +31,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
-ListModel
-{
-    ListElement {
-        name: "Climate"
-        icon: "../res/snow.png"
-        qml: "./views/ClimateControlView.qml"
+Image {
+    id: circleBtn
+    source: imgOff
+    property alias text: btnText.text
+    property alias pixelSize: btnText.font.pixelSize
+    property string  dest: ""
+    property bool isPressed: false
+    property string imgOff: "../res/buttons/round_btn.png"
+    property string imgOn: "../res/buttons/round_pressed_btn.png"
+    property string textColorOnPressed: Constants.secondaryColor
+    property string textColorDefault: Constants.primaryColor
+
+    signal clicked()
+    function wasClicked()
+    {
+        clicked()
     }
 
-    ListElement {
-        name: "Navigation"
-        icon: "../res/arrow.png"
-        qml: "./views/NavigationNoRouteGridView.qml"
+    Text {
+        anchors.centerIn: parent
+        id: btnText
+        color: textColorDefault
     }
 
-    ListElement {
-        name: "Media"
-        icon: "../res/notes.png"
-        qml: "./views/MusicSourceView.qml"
-    }
-
-    ListElement {
-        name: "Apps"
-        icon: "../res/apps.png"
-        qml: "./views/ApplicationListView.qml"
-    }
-
-    ListElement {
-        name: "Phone"
-        icon: "../res/phone/phone.png"
-        qml: "./views/PhoneMenuGridView.qml"
-    }
-
-    ListElement {
-        name: "Car"
-        icon: "../res/car.png"
-        qml: "./views/CarMenuGridView.qml"
-    }
-
-    ListElement {
-        name: "Preferences"
-        icon: "../res/gear.png"
-        qml: ""
+    MouseArea {
+        anchors.fill: parent
+        onPressed: {
+            console.log("CircleButton onPressed enter");
+            source = imgOn
+            btnText.color = textColorOnPressed
+            isPressed = true
+            console.log("CircleButton onPressed exit");
+        }
+        onReleased: {
+            console.log("CircleButton onReleased enter");
+            source = imgOff
+            btnText.color =  textColorDefault
+            isPressed = false
+            console.log("CircleButton onReleased exit");
+        }
+        onClicked: {
+            console.log("CircleButton onClicked enter");
+            if(dest !== ""){
+                contentLoader.go(dest)
+            }
+            circleBtn.wasClicked()
+            console.log("CircleButton onClicked enter");
+        }
     }
 }

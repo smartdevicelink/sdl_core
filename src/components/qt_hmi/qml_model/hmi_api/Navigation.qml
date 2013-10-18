@@ -56,18 +56,29 @@ Item {
         }
         if (softButtons !== undefined) {
             dataContainer.navigationModel.softButtons.clear();
-            softButtons.forEach(fillSoftButtons);
+            softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.softButtons);
         }
         dataContainer.navigationModel.appId = appID;
         contentLoader.go("./views/TurnByTurnView.qml");
     }
 
     function alertManeuver(softButtons) {
-
+        if (softButtons !== undefined) {
+            dataContainer.navigationModel.alertManeuverSoftButtons.clear();
+            softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.alertManeuverSoftButtons);
+        }
     }
 
     function updateTurnList(turnList, softButtons, appID) {
-
+        if (turnList !== undefined) {
+            dataContainer.getApplication(appID).turnList.clear();
+            turnList.forEach(fillTurnList, dataContainer.getApplication(appID).turnList);
+        }
+        if (softButtons !== undefined) {
+            dataContainer.getApplication(appID).turnListSoftButtons.clear();
+            softButtons.forEach(fillSoftButtons, dataContainer.getApplication(appID).turnListSoftButtons);
+        }
+        dataContainer.navigationModel.appId = appID;
     }
 
     function fillTexts(element, index, array) {
@@ -88,14 +99,20 @@ Item {
     }
 
     function fillSoftButtons(element, index, array) {
-        dataContainer.navigationModel.softButtons.append(
-                    {
+        this.append({
                         type: element.type,
                         name: element.text,
                         image: element.image,
                         isHighlighted: element.isHighlighted,
                         buttonId: element.softButtonID,
                         action: element.systemAction
+                    });
+    }
+
+    function fillTurnList(element, index, array) {
+        this.append({
+                        name: element.navigationText,
+                        image: element.turnIcon
                     });
     }
 }

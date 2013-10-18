@@ -243,9 +243,11 @@ bool InitHmi() {
       dup2(fd_dev0, STDERR_FILENO);
 
       // Execute the program.
-      execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
-             reinterpret_cast<char*>(0));
-      LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
+      if (execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
+             reinterpret_cast<char*>(0)) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execlp() failed! Install chromium-browser!");
+        _exit(EXIT_FAILURE);
+      }
 
       return true;
     }
@@ -294,8 +296,53 @@ bool InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  // TODO(KKolodiy): implement
-  return true;
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
+  pid_t pid_hmi = 0;
+  const char *kStartHmi = "./start_hmi.sh";
+  struct stat sb;
+  if (stat(kStartHmi, &sb) == -1) {
+    LOG4CXX_INFO(logger, "HMI start script doesn't exist!");
+    return false;
+  }
+
+  // Create a child process.
+  pid_hmi = fork();
+
+  switch (pid_hmi) {
+    case -1: {  // Error
+      LOG4CXX_INFO(logger, "fork() failed!");
+      return false;
+    }
+    case 0: {  // Child process
+      int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+      if (0 > fd_dev0) {
+        LOG4CXX_WARN(logger, "Open dev0 failed!");
+        return false;
+      }
+      // close input/output file descriptors.
+      close(STDIN_FILENO);
+      close(STDOUT_FILENO);
+      close(STDERR_FILENO);
+
+      // move input/output to /dev/null.
+      dup2(fd_dev0, STDIN_FILENO);
+      dup2(fd_dev0, STDOUT_FILENO);
+      dup2(fd_dev0, STDERR_FILENO);
+
+      // Execute the program.
+      if (execlp(kStartHmi, kStartHmi, reinterpret_cast<char*>(0)) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execlp() failed! Can't start HMI!");
+        _exit(EXIT_FAILURE);
+      }
+
+      return true;
+    }
+    default: { /* Parent process */
+      LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
+      return true;
+    }
+  }
 }
 #endif  // QT_HMI
 

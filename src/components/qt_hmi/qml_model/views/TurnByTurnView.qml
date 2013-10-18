@@ -37,6 +37,7 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 import "../models"
+import com.ford.sdl.hmi.log4cxx 1.0
 
 GeneralView {
     applicationContext: true
@@ -62,11 +63,16 @@ GeneralView {
                 height: 1/4 * parent.height
                 spacing: (width - 4 * turnListButton.width) / 3
 
-                LongOvalButton {
+                OvalButton {
                     id: turnListButton
+                    width: Constants.longOvalButtonWidth
                     anchors.verticalCenter: parent.verticalCenter
                     text: "TurnList"
-                    pixelSize: Constants.fontSize
+                    fontSize: Constants.fontSize
+                    onClicked: {
+                        console.log("Go to TurnListView");
+                        contentLoader.go("./views/TbtTurnListView.qml");
+                    }
                 }
 
                 ListView {
@@ -85,7 +91,7 @@ GeneralView {
                         width: turnListButton.width
                         height: turnListButton.height
                         text: name
-                        iconSource: model.image ? model.image : ""
+                        icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
                         fontSize: Constants.fontSize
                         highlighted: isHighlighted
                         onPressed: {
@@ -124,23 +130,20 @@ GeneralView {
                 anchors.left: parent.left
                 width: parent.width
                 height: 2/4 * parent.height
-                spacing: 1/2 * picture.width
+                spacing: 1/2 * turnIcon.width
 
-                Item {
-                    id: picture
+                Icon {
+                    id: turnIcon
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.height
                     height: parent.height
-                    Image {
-                        anchors.fill: parent
-                        source: dataContainer.navigationModel.pathIcon
-                    }
+                    source: dataContainer.navigationModel.icon
                 }
 
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
-                    width: parent.width - picture.width - spacing
+                    width: parent.width - turnIcon.width - spacing
                     spacing: (height - text1.height - text2.height - text3.height) / 2
 
                     Text {
@@ -151,6 +154,7 @@ GeneralView {
                     }
 
                     Text {
+                        // TODO(KKolodiy): make 2 columns for this text, and change font
                         id: text2
                         text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver + "Total datance: " + dataContainer.navigationModel.totalDistance
                         color: Constants.primaryColor

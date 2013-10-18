@@ -44,14 +44,12 @@ Item {
     property string playerName: ""
     property string playerType: ""
 
-    property alias topOvalButtons: top.children
-
     signal rewind
     signal forward
     signal play
     signal pause
 
-    // Holds players info (song name, play/pause state, track number etc)
+    // Holds players state(song name, play/pause state, track number etc). For all players except SDL.
     property PlayerState playerState;
 
     Item {
@@ -63,26 +61,66 @@ Item {
         anchors.left: parent.left
 
         Item {
-            // top part for buttons
             id: top
             anchors.top: parent.top
             anchors.left: parent.left
             width: parent.width
             height: parent.height * 1/4
 
-            LongOvalButton {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                text: playerName
-                pixelSize: Constants.fontSize
-                dest: "./views/MusicSourceView.qml"
-            }
+            PagedFlickable {
+                id: flickRow
+                width: parent.width
+                spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
+                                                                : (width - longOvalButton.width * 2)
+                snapTo: longOvalButton.width + spacing
+                elementWidth: longOvalButton.width
 
-            LongOvalButton {
-                anchors.right: parent.right
-                anchors.top: parent.top
-                text: "Browse"
-                pixelSize: Constants.fontSize
+                LongOvalButton {
+                    text: playerName
+                    pixelSize: Constants.fontSize
+                    dest: "./views/MusicSourceView.qml"
+                }
+
+                LongOvalButton {
+                    id: longOvalButton
+                    text: "SDL Menu"
+                    pixelSize: Constants.fontSize
+                    dest: "./views/ApplicationListView.qml"
+
+                    visible: mediaPlayerView.playerType === "SDL"
+                    enabled: mediaPlayerView.playerType === "SDL"
+                }
+
+                LongOvalButton {
+                    text: "Options"
+                    pixelSize: Constants.fontSize
+                    dest: "./views/SDLPlayerOptionsListView.qml"
+
+                    visible: mediaPlayerView.playerType === "SDL"
+                    enabled: mediaPlayerView.playerType === "SDL"
+                }
+
+                LongOvalButton {
+                    text: "Browse"
+                    pixelSize: Constants.fontSize
+                }
+
+                ListView {
+                    width: model.count * longOvalButton.width + (model.count - 1)* flickRow.spacing
+                    height: longOvalButton.height
+                    model: dataContainer.applicationList
+                    orientation: ListView.Horizontal
+                    interactive: false
+                    spacing: flickRow.spacing
+
+                    delegate: LongOvalButton {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: model.appName
+                        onClicked: {
+                            contentLoader.go("./views/SDLPlayerView.qml", model.appId)
+                        }
+                    }
+                }
             }
         }
 
@@ -99,7 +137,8 @@ Item {
                 id: image
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                source: playerState.albumImage
+                source: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.picture //TODO {ALeshin}: get picture correctly
+                                                               : playerState.albumImage
             }
 
             Item {
@@ -119,7 +158,8 @@ Item {
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: Constants.primaryColor
-                    text: playerState.trackName
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
+                                                                 : playerState.trackName
                     font.pixelSize: 45
                     font.bold: true
                 }
@@ -129,7 +169,8 @@ Item {
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: Constants.primaryColor
-                    text: playerState.albumName
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField2
+                                                                 : playerState.albumName
                     font.pixelSize: 25
                 }
 
@@ -137,7 +178,8 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     color: Constants.primaryColor
-                    text: playerState.trackNumber
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField3
+                                                                 : playerState.trackNumber
                     font.pixelSize: 20
                 }
             }
@@ -157,7 +199,8 @@ Item {
                 anchors.leftMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
                 color: "white"
-                text: dataContainer.hmiUIText.mediaClock
+                text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaClock
+                                                             : "02:36" //TODO {Aleshin}: get track time for all players except SDL
                 font.pixelSize: 18
             }
 
@@ -188,7 +231,8 @@ Item {
                 anchors.rightMargin: 1/10 * parent.width
                 anchors.verticalCenter: parent.verticalCenter
                 color: Constants.primaryColor
-                text: "04:23"
+                text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaClock
+                                                             : "04:23" //TODO {Aleshin}: get track time for all players except SDL
                 font.pixelSize: 18
             }
         }
@@ -222,10 +266,13 @@ Item {
             }
 
             PlayPauseButton {
-                state: playerState.playPauseState
+                anchors.verticalCenter: parent.verticalCenter
+                state: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.playPauseState : playerState.playPauseState
                 onClicked: {
-                    (state == 'Play') ? play() : pause()
-                    mediaPlayerView.playerState.playPauseState = state
+                    (state == 'Play') ? play() : pause();
+                    var newState = state === "Play" ? "Pause" : "Play";
+                    (mediaPlayerView.playerType === "SDL") ? dataContainer.setApplicationProperties(dataContainer.currentApplication.appId, { playPauseState: newState } )
+                                                           : playerState.playPauseState = newState
                 }
             }
 
@@ -250,7 +297,8 @@ Item {
             anchors.right: parent.right
             anchors.top: mediaControl.bottom
             anchors.bottom: parent.bottom
-            text: dataContainer.hmiUIText.statusBar
+            text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.statusBar
+                                                         : ""
             color: Constants.primaryColor
         }
     }

@@ -34,17 +34,16 @@
 
 import QtQuick 2.0
 
-Item {
+QtObject {
     property string text1: ""
     property string text2: ""
     property string totalDistance: ""
     property string eta: ""
     property var icon: null
-    property url pathIcon: "../res/album_art.png"
-    property string imageIcon: ""
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
     property bool maneuverComplete: null
-    property ListModel softButtons: ListModel { }
+    property ListModel softButtons: ListModel {}
     property int appId: -1
+    property ListModel alertManeuverSoftButtons: ListModel {}
 }

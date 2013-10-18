@@ -1,6 +1,6 @@
 /**
- * @file MainMenuListModel.qml
- * @brief Main menu list of elements.
+ * \file hmiproxy.cpp
+ * \brief HmiProxy class source file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,49 +31,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import QtQuick 2.0
 
-ListModel
-{
-    ListElement {
-        name: "Climate"
-        icon: "../res/snow.png"
-        qml: "./views/ClimateControlView.qml"
-    }
+#include "hmi_proxy.h"
+#include <QtDBus/QDBusConnection>
 
-    ListElement {
-        name: "Navigation"
-        icon: "../res/arrow.png"
-        qml: "./views/NavigationNoRouteGridView.qml"
-    }
-
-    ListElement {
-        name: "Media"
-        icon: "../res/notes.png"
-        qml: "./views/MusicSourceView.qml"
-    }
-
-    ListElement {
-        name: "Apps"
-        icon: "../res/apps.png"
-        qml: "./views/ApplicationListView.qml"
-    }
-
-    ListElement {
-        name: "Phone"
-        icon: "../res/phone/phone.png"
-        qml: "./views/PhoneMenuGridView.qml"
-    }
-
-    ListElement {
-        name: "Car"
-        icon: "../res/car.png"
-        qml: "./views/CarMenuGridView.qml"
-    }
-
-    ListElement {
-        name: "Preferences"
-        icon: "../res/gear.png"
-        qml: ""
-    }
+HmiProxy::HmiProxy(QQuickItem *parent):
+    QQuickItem(parent) {
 }
+
+void HmiProxy::componentComplete() {
+    QQuickItem::componentComplete();
+
+    api_adaptors_.SetApi(this);
+}
+
+ApiAdaptors HmiProxy::api_adaptors_;

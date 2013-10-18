@@ -48,7 +48,6 @@ Image {
         }
         onReleased: {
             playPauseButton.source = playPauseButton.sourceOnReleased
-            playPauseButton.state = ( playPauseButton.state == 'Play' ? 'Pause' : 'Play' )
         }
         onClicked: {
             playPauseButton.clicked()

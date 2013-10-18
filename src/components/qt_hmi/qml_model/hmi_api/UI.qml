@@ -4,6 +4,7 @@ import "Async.js" as Async
 
 Item {
     function filter (strings, fields) {
+        console.debug("UI::filter(" + strings + ", " + fields + ")")
 // substrings for each allowed field
         var fieldSubstrings = {}
 // this cycle concatenates allowed lines sorting them by field
@@ -21,6 +22,7 @@ Item {
                 }
             }
         }
+        console.debug("UI::filter(): exit")
         return fieldSubstrings
     }
 
@@ -31,17 +33,18 @@ Item {
                            Common.TextFieldName.alertText3]
 
         var fieldSubstrings = filter(alertStrings, alertFields)
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID, softButtons)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
         }
         else {
-            return {tryAgainTime: tryAgainTime}
+            return { tryAgainTime: tryAgainTime }
         }
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
+        console.debug("UI::show(" + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID + ")")
 // with this array we grab only the lines we need
         var showFields = [
             Common.TextFieldName.mainField1,
@@ -52,24 +55,19 @@ Item {
             Common.TextFieldName.mediaClock
         ]
         var fieldSubstrings = filter(showStrings, showFields)
-        if (fieldSubstrings[Common.TextFieldName.mainField1] !== undefined) {
-            dataContainer.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]
-        }
-        if (fieldSubstrings[Common.TextFieldName.mainField2] !== undefined) {
-            dataContainer.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]
-        }
-        if (fieldSubstrings[Common.TextFieldName.mainField3] !== undefined) {
-            dataContainer.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]
-        }
-        if (fieldSubstrings[Common.TextFieldName.mainField4] !== undefined) {
-            dataContainer.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]
-        }
-        if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) {
-            dataContainer.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]
-        }
-        if (fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined) {
-            dataContainer.hmiUIText.mediaClock = fieldSubstrings[Common.TextFieldName.mediaClock]
-        }
+        dataContainer.setApplicationProperties(
+            appID, {
+                "hmiUIText": {
+                    "mainField1": fieldSubstrings[Common.TextFieldName.mainField1],
+                    "mainField2": fieldSubstrings[Common.TextFieldName.mainField2],
+                    "mainField3": fieldSubstrings[Common.TextFieldName.mainField3],
+                    "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
+                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
+                    "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock],
+                    "picture": fieldSubstrings[Common.TextFieldName.picture]
+                  }
+            }
+        )
         if (alignment !== undefined) {
             switch (alignment) {
                 case Common.TextAlignment.LEFT_ALIGNED:
@@ -89,7 +87,7 @@ Item {
         else {
             dataContainer.hmiUITextAlignment = Text.AlignHCenter
         }
-
+        console.debug("UI::show(): exit")
         return {}
     }
 
@@ -153,6 +151,7 @@ Item {
     }
 
     function setAppIcon (syncFileName, appID) {
+        dataContainer.setApplicationProperties(appID, { icon: syncFileName.value })
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {

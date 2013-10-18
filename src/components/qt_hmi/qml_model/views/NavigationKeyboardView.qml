@@ -69,7 +69,7 @@ GeneralView {
 
                     Repeater {
                         model: 10
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: upperRow.qWERTY.charAt(index)
@@ -86,7 +86,7 @@ GeneralView {
                     property string aSDFGH : "ASDFGHJKL"
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: "123"
@@ -95,7 +95,7 @@ GeneralView {
                     //--------------
                     Repeater {
                         model: 9
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: middleRow.aSDFGH.charAt(index)
@@ -107,7 +107,7 @@ GeneralView {
                         }
                     }
                     //--------------
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         onIsPressedChanged: {
@@ -129,7 +129,7 @@ GeneralView {
                     property string zXCVBN : "ZXCVBNM"
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: "!@#"
@@ -138,7 +138,7 @@ GeneralView {
                     //-----------------
                     Repeater {
                         model: 7
-                        CircleBtn {
+                        CircleButton {
                             imgOff: "../res/buttons/preset_btn.png"
                             imgOn: "../res/buttons/preset_pressed_btn.png"
                             text: lowerRow.zXCVBN.charAt(index)
@@ -150,7 +150,7 @@ GeneralView {
                         }
                     }
                     //----------------
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: "Clear"
@@ -161,7 +161,7 @@ GeneralView {
                         }
                     }
                     //----------------
-                    CircleBtn {
+                    CircleButton {
                         imgOff: "../res/buttons/preset_btn.png"
                         imgOn: "../res/buttons/preset_pressed_btn.png"
                         text: "Space"

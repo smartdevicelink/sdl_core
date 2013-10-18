@@ -1,6 +1,6 @@
 /**
- * @file CircleBtn.qml
- * @brief Parent class for circle button.
+ * @file Entry.qml
+ * @brief Entry with icon and text for list.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,47 +35,34 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
-Image {
-    id: circleBtn
-    source: imgOff
-    property alias text: btnText.text
-    property alias pixelSize: btnText.font.pixelSize
-    property string  dest: ""
-    property bool isPressed: false
-    property string imgOff: "../res/buttons/round_btn.png"
-    property string imgOn: "../res/buttons/round_pressed_btn.png"
-    property string textColorOnPressed: Constants.secondaryColor
-    property string textColorDefault: Constants.primaryColor
+Rectangle {
+    id: main
+    color: Constants.transparentColor
 
-    signal clicked()
-    function wasClicked()
-    {
-        clicked()
+    property alias text: label.text
+    property alias fontSize: label.font.pixelSize
+    property alias icon: image.source
+
+    Icon {
+        id: image
+        width: Constants.iconItemListSize
+        height: Constants.iconItemListSize
+        anchors.left: parent.left
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenter: parent.verticalCenter
+        visible: source ? true : false
     }
-
     Text {
-        anchors.centerIn: parent
-        id: btnText
-        color: textColorDefault
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onPressed: {
-            source = imgOn
-            btnText.color = textColorOnPressed
-            isPressed = true
-        }
-        onReleased: {
-            source = imgOff
-            btnText.color =  textColorDefault
-            isPressed = false
-        }
-        onClicked: {
-            if(dest !== ""){
-                contentLoader.go(dest)
-            }
-            circleBtn.wasClicked()
-        }
+        id: label
+        anchors.verticalCenter: parent.verticalCenter
+        z: 50
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: Constants.fontSize
+        text: "Name Entry"
+        anchors.left: image.right
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenterOffset: 0
+        visible: text !== ""
+        color: Constants.primaryColor
     }
 }

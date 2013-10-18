@@ -35,40 +35,75 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
-Item {
+QtObject {
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
 
     function getApplication(appId) {
+        console.log("dataContainer getApplication enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 return applicationList.get(i);
             }
         }
+        console.log("dataContainer getApplication exit");
     }
 
     onApplicationListChanged: {
-        console.log("onApplicationListChanged()")
-        setCurrentApplication(appId)
+        console.log("onApplicationListChanged()");
+        setCurrentApplication(appId);
     }
 
     function setCurrentApplication(appId) {
+        console.log("Enter setCurrentApplication function");
         var oldApplicationContext = applicationContext;
-        applicationContext = false;
+        if (dataContainer.currentApplication.appId !== appId) {
+            applicationContext = false;
+        }
 
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
                 currentApplication.appName = applicationList.get(i).appName
                 currentApplication.appType = applicationList.get(i).appType
+                currentApplication.playPauseState = applicationList.get(i).playPauseState
                 currentApplication.options = applicationList.get(i).options
-                // ... etc
+
+                if (applicationList.get(i).hmiUIText.mainField1) {
+                    currentApplication.hmiUIText.mainField1 = applicationList.get(i).hmiUIText.mainField1
+                }
+                if (applicationList.get(i).hmiUIText.mainField2) {
+                    currentApplication.hmiUIText.mainField2 = applicationList.get(i).hmiUIText.mainField2
+                }
+                if (applicationList.get(i).hmiUIText.mainField3) {
+                    currentApplication.hmiUIText.mainField3 = applicationList.get(i).hmiUIText.mainField3
+                }
+                if (applicationList.get(i).hmiUIText.mainField4) {
+                    currentApplication.hmiUIText.mainField4 = applicationList.get(i).hmiUIText.mainField4
+                }
+                if (applicationList.get(i).hmiUIText.statusBar) {
+                    currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
+                }
+                if (applicationList.get(i).hmiUIText.mediaClock) {
+                    currentApplication.hmiUIText.mediaClock = applicationList.get(i).hmiUIText.mediaClock
+                }
+                if (applicationList.get(i).hmiUIText.picture) {
+                    currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
+                }
+                currentApplication.turnList = applicationList.get(i).turnList
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                // This place is for adding new properties
             }
         }
+        applicationContext = oldApplicationContext;
+        currentApplicationChanged()
+        console.log("Exit setCurrentApplication function")
     }
 
     function addApplication(app) {
+        console.log("Enter addApplication function");
         applicationList.append(
         {
             appName: app.appName,
@@ -81,20 +116,41 @@ Item {
             appType: app.appType,
             helpPrompt: "",
             timeoutPrompt: "",
-            options: []
+            playPauseState: 'Pause',
+            hmiUIText: app.hmiUIText,
+            options: [],
+            turnList: [],
+            turnListSoftButtons: []
+            // This place is for adding new properties
         })
+        console.log("Exit addApplication function");
+    }
+
+    function setApplicationProperties(appId, props) {
+        console.log("Enter setApplicationProperties function");
+        var app = getApplication(appId)
+        for (var p in props) {
+            app[p] = props[p];
+        }
+        if (currentApplication.appId === appId) {
+            setCurrentApplication(appId); // copy new values to current application
+        }
+        console.log("Exit setApplicationProperties function");
     }
 
     function removeApplication(appId) {
+        console.log("Enter removeApplication function");
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
                 applicationList.remove(i);
                 break;
             }
         }
+        console.log("Exit removeApplication function");
     }
     property int systemContext
 
+    property int hmiContext
     property bool applicationContext: false
 
     property int systemSavedContext
@@ -124,13 +180,6 @@ Item {
         albumName: "Florence and the Machine"
     }
     property PlayerState linePlayerState: PlayerState {
-        playPauseState: 'Pause'
-        albumImage: "../res/album_art.png"
-        trackNumber: "13/16"
-        trackName: "The Dog Days Are Over"
-        albumName: "Florence and the Machine"
-    }
-    property PlayerState sdlPlayerState: PlayerState {
         playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
         trackNumber: "13/16"
@@ -169,18 +218,10 @@ Item {
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
 
-    property var hmiUIText: {
-        "mainField1": "The Dog Days Are Over",
-        "mainField2": "Florence and the Machine",
-        "mainField3": "Track 13/16",
-        "mainField4": "",
-        "statusBar": "",
-        "mediaClock": "02:36"
-    }
     property int hmiUITextAlignment: Text.AlignLeft
-    property ListModel deviceList: ListModel {}
-    property ListModel applicationList: ListModel {
-    }
+
+    property ListModel deviceList: ListModel { }
+    property ListModel applicationList: ListModel { }
 
     property var vrCommands: []
 
@@ -192,15 +233,21 @@ Item {
     property int uiSliderPosition: 1
 
     function reset () {
+        console.log("dataContainer reset enter");
         route_text = ""
+        console.log("dataContainer reset exit");
     }
 
     function changeRegistrationUI (language) {
+        console.log("dataContainer changeRegistrarionUI enter");
         hmiUILanguage = language
+        console.log("dataContainer changeRegistrarionUI exit");
     }
 
     function changeRegistrationTTSVR (language) {
+        console.log("dataContainer changeRegistrationTTSVR enter");
         hmiTTSVRLanguage = language
+        console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
     function findIdMatch (root, id) {

@@ -34,6 +34,7 @@
 
 import QtQuick 2.0
 import QtQuick.Window 2.0
+import "../controls"
 import "../hmi_api/Common.js" as Common
 
 Rectangle {
@@ -45,24 +46,23 @@ Rectangle {
         id: rectangle
 
         anchors.centerIn: parent
-        width: 400
-        height: 256
         color: "black"
         border.color: "white"
+
+        width: alertContent.width + 60
+        height: alertContent.height + 60
+
+        MouseArea {
+            anchors.fill: alertContent
+            onClicked: complete()
+        }
 
         property alias alertString: alert.text
         property alias appNameString: appName.text
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: complete()
-        }
-
         Column {
-
-            anchors.fill: parent
-            anchors.topMargin: 20
-            anchors.leftMargin: 20
+            id: alertContent
+            anchors.centerIn: parent
             spacing: 20
 
             Text {
@@ -90,7 +90,46 @@ Rectangle {
                     color: "white"
                     font.pointSize: 16
                 }
-
+            }
+            Column {
+                Item {
+                    width: 360
+                    height: alertButton1.visible ? alertButton1.height : 0
+                    OvalButton {
+                        id: alertButton1
+                        text: softButtons && softButtons.length > 0 ? softButtons[0].text : ""
+                        anchors.left: parent.left
+                        anchors.right: alertButton2.visible ? alertButton2.left : parent.right
+                        width: 180
+                        visible: softButtons ? softButtons.length > 0 : false
+                    }
+                    OvalButton {
+                        id: alertButton2
+                        text: softButtons && softButtons.length > 1 ? softButtons[1].text : ""
+                        width: 180
+                        visible: softButtons ? softButtons.length > 1 : false
+                        anchors.right: parent.right
+                    }
+                }
+                Item {
+                    width: 360
+                    height: alertButton3.visible ? childrenRect.height : 0
+                    OvalButton {
+                        id: alertButton3
+                        text: softButtons && softButtons.length > 2 ? softButtons[2].text : ""
+                        anchors.right: alertButton4.visible ? alertButton4.left : parent.right
+                        width: 180
+                        visible: softButtons ? softButtons.length > 2 : false
+                        anchors.left: parent.left
+                    }
+                    OvalButton {
+                        id: alertButton4
+                        text: softButtons && softButtons.length > 3 ? softButtons[3].text : ""
+                        width: 180
+                        visible: softButtons ? softButtons.length > 3 : false
+                        anchors.right: parent.right
+                    }
+                }
             }
         }
     }
@@ -103,8 +142,9 @@ Rectangle {
     }
 
     property date lastAlertTime
+    property var softButtons
 
-    function alert (alertStrings, duration, appID) {
+    function alert (alertStrings, duration, appID, sButtons) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
@@ -121,6 +161,7 @@ Rectangle {
                 alertString += alertStrings[index]
                 alertString += "\n"
             }
+            softButtons = sButtons
             rectangle.alertString = alertString
             timer.interval = duration
             timer.start()

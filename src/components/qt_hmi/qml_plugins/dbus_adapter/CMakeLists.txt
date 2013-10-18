@@ -45,8 +45,8 @@ add_custom_command(
 set(SOURCES
   dbus_plugin.cc
   qml_dbus.cc
-  sdlproxy.cc
-  hmiproxy.cc
+  sdl_proxy.cc
+  hmi_proxy.cc
   stream_qvariant.cc
   moc_qml_dbus.cpp
   dbus_controller.cpp

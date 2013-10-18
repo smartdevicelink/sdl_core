@@ -1,6 +1,6 @@
 /**
- * \file hmiproxy.cpp
- * \brief HmiProxy class source file.
+ * @file ExitAllApplicationsPopup.qml
+ * @brief Popup "Exit all applications"
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,17 +32,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmiproxy.h"
-#include <QtDBus/QDBusConnection>
+import QtQuick 2.0
+import QtQuick.Controls 1.0
+import "../models/Constants.js" as Constants
+import "../hmi_api/Common.js" as Common
+import "../controls"
 
-HmiProxy::HmiProxy(QQuickItem *parent):
-    QQuickItem(parent) {
+PopUp {
+
+    Column
+    {
+        anchors.centerIn: parent
+        Row {
+            Text {
+                text: "Select reason: "
+                color: "white"
+            }
+
+            ComboBox {
+                id: reasonComboBox
+                model: {
+                    var rc = []
+                    for (var name in Common.ApplicationsCloseReason) {
+                        rc.push(name)
+                    }
+                    return rc;
+                }
+            }
+        }
+        LongOvalButton {
+            text: "Exit"
+            anchors.horizontalCenter: parent.horizontalCenter
+            onClicked: {
+                sdlBasicCommunication.onExitAllApplications(Common.ApplicationsCloseReason[reasonComboBox.currentText])
+                hide()
+            }
+        }
+    }
 }
-
-void HmiProxy::componentComplete() {
-    QQuickItem::componentComplete();
-
-    api_adaptors_.SetApi(this);
-}
-
-ApiAdaptors HmiProxy::api_adaptors_;

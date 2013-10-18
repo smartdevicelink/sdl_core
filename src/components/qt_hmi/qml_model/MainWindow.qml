@@ -85,7 +85,7 @@ Rectangle {
         anchors.top: parent. top
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
-        //TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
+        // TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
         height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
 
@@ -156,6 +156,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        ExitAllApplicationsPopup {
+            id: exitAllApplicationsPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -211,7 +217,16 @@ Rectangle {
                  appId: application.appId,
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
-                 appType: application.appType
+                 appType: application.appType,
+                 hmiUIText: {
+                    "mainField1": "The Dog Days Are Over",
+                    "mainField2": "Florence and the Machine",
+                    "mainField3": "Track 13/16",
+                    "mainField4": "",
+                    "statusBar": "",
+                    "mediaClock": "02:36",
+                    "picture": "../res/album_art.png"
+                 }
              });
         }
 
