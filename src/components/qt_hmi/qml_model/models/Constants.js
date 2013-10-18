@@ -54,7 +54,7 @@ var pressedButtonTextColor = "black"
 var releasedButtonTextColor = "white"
 
 // Transparent background.
-var transparentColor = "#000000"
+var transparentColor = "#00000000"
 //--------------------------------------------------------------------------------------
 
 // Other

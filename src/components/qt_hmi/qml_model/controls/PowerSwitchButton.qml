@@ -36,8 +36,8 @@ import QtQuick 2.0
 
 Rectangle {
     id: powerSwitchBtn
-    state: "ON"
-    width: 80
+    state: "Turn ON"
+    width: 160
     height: 80
     radius: 5
     property bool pressed;
@@ -54,14 +54,12 @@ Rectangle {
         }
         onReleased: {
             parent.pressed = false
-            parent.state = parent.state === "ON" ? "OFF" : "ON"
+            parent.state = parent.state === "Turn ON" ? "Turn OFF" : "Turn ON"
             btnText.text = parent.state
-            if (parent.state === "OFF") {
+            if (parent.state === "Turn OFF") {
                 contentLoader.reset()
                 mainScreen.visible = true
             }
-            else
-                Qt.quit();
         }
     }
 
@@ -70,7 +68,7 @@ Rectangle {
         color: "red"
         text: parent.state
         anchors.centerIn: parent
-        font.pixelSize: 40
+        font.pixelSize: 35
     }
 
 }

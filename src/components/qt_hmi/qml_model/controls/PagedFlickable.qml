@@ -78,7 +78,7 @@ Item
         anchors.top: parent.top
 
         pages: {
-            console.log("PagedFlickabe pages enter");
+            //console.log("PagedFlickabe pages enter");
             if ( (container.contentWidth % container.width) >= (flickablePage.elementWidth / 2 + flickablePage.spacing)) {
                 return Math.ceil(container.contentWidth / container.width)
             }
@@ -88,7 +88,7 @@ Item
         }
 
         activePage: {
-            console.log("PagedFlickabe activePage enter");
+            //console.log("PagedFlickabe activePage enter");
             if (container.contentX <= 0) {
                 return 0
             }
@@ -103,7 +103,7 @@ Item
                     return Math.floor(container.contentX / container.width)
                 }
             }
-            console.log("PagedFlickabe activePage exit");
+            //console.log("PagedFlickabe activePage exit");
         }
     }
 }

@@ -80,14 +80,13 @@ Rectangle {
 
     Item {
         id: mainScreen
-        x: 0
-        y: 0
         anchors.top: parent. top
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
         // TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
         height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
+
 
         Item {
             anchors.top: parent.top
@@ -143,6 +142,8 @@ Rectangle {
                 }
             }
         }
+
+        WarningInfo { }
 
         AlertWindow {
             id: alertWindow

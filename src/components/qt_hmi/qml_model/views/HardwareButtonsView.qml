@@ -93,7 +93,7 @@ Item {
                             }
                         }
                     }
-                    PowerSwitchBtn {}
+                    PowerSwitchButton {}
                 }
 
                 Grid {
