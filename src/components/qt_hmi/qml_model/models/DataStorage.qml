@@ -69,6 +69,28 @@ QtObject {
                 currentApplication.appType = applicationList.get(i).appType
                 currentApplication.playPauseState = applicationList.get(i).playPauseState
                 currentApplication.options = applicationList.get(i).options
+
+                if (applicationList.get(i).hmiUIText.mainField1) {
+                    currentApplication.hmiUIText.mainField1 = applicationList.get(i).hmiUIText.mainField1
+                }
+                if (applicationList.get(i).hmiUIText.mainField2) {
+                    currentApplication.hmiUIText.mainField2 = applicationList.get(i).hmiUIText.mainField2
+                }
+                if (applicationList.get(i).hmiUIText.mainField3) {
+                    currentApplication.hmiUIText.mainField3 = applicationList.get(i).hmiUIText.mainField3
+                }
+                if (applicationList.get(i).hmiUIText.mainField4) {
+                    currentApplication.hmiUIText.mainField4 = applicationList.get(i).hmiUIText.mainField4
+                }
+                if (applicationList.get(i).hmiUIText.statusBar) {
+                    currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
+                }
+                if (applicationList.get(i).hmiUIText.mediaClock) {
+                    currentApplication.hmiUIText.mediaClock = applicationList.get(i).hmiUIText.mediaClock
+                }
+                if (applicationList.get(i).hmiUIText.picture) {
+                    currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
+                }
                 // ... etc
             }
         }

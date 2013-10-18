@@ -217,7 +217,16 @@ Rectangle {
                  appId: application.appId,
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
-                 appType: application.appType
+                 appType: application.appType,
+                 hmiUIText: {
+                    "mainField1": "The Dog Days Are Over",
+                    "mainField2": "Florence and the Machine",
+                    "mainField3": "Track 13/16",
+                    "mainField4": "",
+                    "statusBar": "",
+                    "mediaClock": "02:36",
+                    "picture": "../res/album_art.png"
+                 }
              });
         }
 
