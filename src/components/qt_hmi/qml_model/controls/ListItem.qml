@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * @file Entry.qml
+ * @brief Entry with icon and text for list.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,17 +33,36 @@
  */
 
 import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
-QtObject {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property var icon: null
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property ListModel softButtons: ListModel {}
-    property int appId: -1
-    property ListModel alertManeuverSoftButtons: ListModel {}
+Rectangle {
+    id: main
+    color: Constants.transparentColor
+
+    property alias text: label.text
+    property alias fontSize: label.font.pixelSize
+    property alias icon: image.source
+
+    Icon {
+        id: image
+        width: Constants.iconItemListSize
+        height: Constants.iconItemListSize
+        anchors.left: parent.left
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenter: parent.verticalCenter
+        visible: source ? true : false
+    }
+    Text {
+        id: label
+        anchors.verticalCenter: parent.verticalCenter
+        z: 50
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: Constants.fontSize
+        text: "Name Entry"
+        anchors.left: image.right
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenterOffset: 0
+        visible: text !== ""
+        color: Constants.primaryColor
+    }
 }

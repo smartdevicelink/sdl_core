@@ -69,7 +69,10 @@ QtObject {
                 currentApplication.appType = applicationList.get(i).appType
                 currentApplication.playPauseState = applicationList.get(i).playPauseState
                 currentApplication.options = applicationList.get(i).options
-                // ... etc
+                currentApplication.turnList = applicationList.get(i).turnList
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                // This place is for adding new properties
             }
         }
         applicationContext = oldApplicationContext;
@@ -93,7 +96,10 @@ QtObject {
             timeoutPrompt: "",
             playPauseState: 'Pause',
             hmiUIText: app.hmiUIText,
-            options: []
+            options: [],
+            turnList: [],
+            turnListSoftButtons: []
+            // This place is for adding new properties
         })
         console.log("Exit addApplication function");
     }
@@ -122,6 +128,7 @@ QtObject {
     }
     property int systemContext
 
+    property int hmiContext
     property bool applicationContext: false
 
     property int systemSavedContext

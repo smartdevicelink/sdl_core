@@ -75,5 +75,20 @@ var mainScreenMiHeight = 600
 // Duration of appearance of icon/button at icon/button menus.
 var animationDuration = 500
 
+// Width for long oval button
+var longOvalButtonWidth = 163
+
+// Size icon for buttons
+var iconButtonSize = 30
+
+// Size icon for item list
+var iconItemListSize = 40
+
+// Height item list
+var itemListHeight = 60
+
+// Spasing between item on views
+var generalSpasing = 10
+
 // -------------------------
 
