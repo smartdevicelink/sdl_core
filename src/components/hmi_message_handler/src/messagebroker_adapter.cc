@@ -42,7 +42,8 @@ log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
-    : MessageBrokerController(std::string("127.0.0.1"), 8087, "SDL"),
+    : MessageBrokerController(profile::Profile::instance()->server_address(),
+      profile::Profile::instance()->server_port(), "SDL"),
       HMIMessageAdapter(handler) {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }

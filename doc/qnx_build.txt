@@ -7,7 +7,8 @@ Running project:
 Set target IP in ini file and change target IP in src/components/HMI/ffw/RPCClient.js
 Currently we don't have any configuration file for HMI.
 
-Copy executable and configuration file to qnx target.
+Change server IP in configuration file to qnx target IP.
+Copy executable, logger.properties and configuration file to qnx target.
 You can copy it using scp. Example:
 scp user_name@linux_pc_ip:/full_path/to/file .
 
