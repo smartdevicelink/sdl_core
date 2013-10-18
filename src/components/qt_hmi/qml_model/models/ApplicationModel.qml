@@ -17,7 +17,9 @@ QtObject {
 
     property string helpPrompt
     property string timeoutPrompt
-
     property ListModel options: ListModel {
     }
+    property ListModel turnList
+    property ListModel turnListSoftButtons
+    // This place is for adding new properties
 }

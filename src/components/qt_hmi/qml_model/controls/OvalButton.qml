@@ -35,9 +35,10 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
+// Don't change constants. It break button
 Rectangle {
     id: main
-    width: field.width * 1.5
+    width: field.width * 2
     height: 65
     color: Constants.transparentColor
 
@@ -47,7 +48,7 @@ Rectangle {
     signal pressAndHold;
     property alias text: label.text
     property alias fontSize: label.font.pixelSize
-    property alias iconSource: icon.iconSource
+    property alias icon: image.source
     property bool highlighted: false
 
     Image {
@@ -64,7 +65,6 @@ Rectangle {
 
     Image {
         id: right
-        x: 135
         width: 31
         anchors.top: parent.top
         anchors.topMargin: 0
@@ -90,7 +90,6 @@ Rectangle {
 
     Image {
         id: bottom
-        y: 50
         height: 11
         anchors.right: parent.right
         anchors.rightMargin: 31
@@ -138,7 +137,7 @@ Rectangle {
 
     Row {
         id: field
-        spacing: 5
+        spacing: 10
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 13
         anchors.top: parent.top
@@ -146,13 +145,12 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
 
         Icon {
-            id: icon
-            width: 40
-            height: 40
+            id: image
+            width: Constants.iconButtonSize
+            height: Constants.iconButtonSize
             anchors.verticalCenter: parent.verticalCenter
-            visible: iconSource ? 1 : 0
+            visible: source ? true : false
         }
-
         Text {
             id: label
             color: parent.parent.highlighted ? "yellow" : Constants.primaryColor
