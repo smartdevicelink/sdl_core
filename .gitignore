@@ -1,0 +1,24 @@
+# English video
+web/src/video/
+# French video (for iOS version)
+web/src/fr/video/
+
+# minified versions of the web sources
+web/src.min
+
+.metadata
+Thumbs.db
+.DS_Store
+
+# ignore all binaries, except for README.txt
+bin/*
+!bin/README.txt
+
+*.orig
+
+xcuserdata
+*.xccheckout
+
+.gradle
+.idea
+*.iml

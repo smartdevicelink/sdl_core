@@ -76,7 +76,7 @@ MFT.eng = {
     view_statusSettings_settings: 'Settings',
 	view_mediaStatus_entertainment: 'Entertainment',
 	view_mediaStatus_bluetooth: 'Bluetooth',
-	view_mediaStatus_avIn: 'AV In',	
+	view_mediaStatus_avIn: 'AV In',
 	
 	view_phone_0: '0',
 	view_phone_1: '1',
