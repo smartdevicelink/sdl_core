@@ -117,12 +117,16 @@ Rectangle {
                     viewTransitionStack = []
                 }
 
+                property string position
                 function go(path, appId) {
-                    viewTransitionStack.push(source.toString())
-                    if (appId) {
-                        dataContainer.setCurrentApplication(appId)
+                    if (position !== path) {
+                        viewTransitionStack.push(source.toString())
+                        if (appId) {
+                            dataContainer.setCurrentApplication(appId)
+                        }
+                        position = path
+                        source = path
                     }
-                    source = path
                 }
 
                 function back() {
