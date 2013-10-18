@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../controls"
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
+import com.ford.sdl.hmi.log4cxx 1.0
 
 GeneralView {
     width: 600
@@ -61,7 +62,8 @@ GeneralView {
         anchors.left: parent.left
         anchors.top: title.bottom
         anchors.bottomMargin: 0
-        delegate: ItemList {
+        delegate: ListItem {
+            height: Constants.itemListHeight
             width: parent.width
             text: name.fieldText
             icon: image
@@ -81,26 +83,29 @@ GeneralView {
         anchors.leftMargin: 0
         delegate: OvalButton {
             width: parent.width
-            height: 65
             text: name
             icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
             highlighted: isHighlighted
             onPressed: {
+                console.log("TbtTurnList view soft button: On press and hold");
                 sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
                                          Common.ButtonEventMode.BUTTONDOWN,
                                          buttonId);
             }
             onReleased: {
+                console.log("TBT view soft button: On press and hold");
                 sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
                                          Common.ButtonEventMode.BUTTONUP,
                                          buttonId);
             }
             onClicked: {
+                console.log("TBT view soft button: On press and hold");
                 sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                          Common.ButtonPressMode.SHORT,
                                          buttonId);
             }
             onPressAndHold: {
+                console.log("TBT view soft button: On press and hold");
                 sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                          Common.ButtonPressMode.LONG,
                                          buttonId);
@@ -113,7 +118,7 @@ GeneralView {
 
     OvalButton {
         id: back
-        width: 101
+        width: Constants.longOvalButtonWidth
         text: "Back"
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter

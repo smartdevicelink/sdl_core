@@ -37,8 +37,6 @@ import "../models/Constants.js" as Constants
 
 Rectangle {
     id: main
-    width: 200
-    height: 60
     color: Constants.transparentColor
 
     property alias text: label.text
@@ -47,10 +45,10 @@ Rectangle {
 
     Icon {
         id: image
-        width: 40
-        height: 40
+        width: Constants.iconItemListSize
+        height: Constants.iconItemListSize
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: Constants.generalSpasing
         anchors.verticalCenter: parent.verticalCenter
         visible: source ? true : false
     }
@@ -59,10 +57,10 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         z: 50
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 16
+        font.pixelSize: Constants.fontSize
         text: "Name Entry"
         anchors.left: image.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: Constants.generalSpasing
         anchors.verticalCenterOffset: 0
         visible: text !== ""
         color: Constants.primaryColor

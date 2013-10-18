@@ -37,6 +37,7 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 import "../models"
+import com.ford.sdl.hmi.log4cxx 1.0
 
 GeneralView {
     applicationContext: true
@@ -69,6 +70,7 @@ GeneralView {
                     text: "TurnList"
                     fontSize: Constants.fontSize
                     onClicked: {
+                        console.log("Go to TurnListView");
                         contentLoader.go("./views/TbtTurnListView.qml");
                     }
                 }

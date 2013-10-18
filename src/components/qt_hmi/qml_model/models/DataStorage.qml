@@ -91,7 +91,7 @@ Item {
             appType: app.appType,
             helpPrompt: "",
             timeoutPrompt: "",
-            options: []
+            options: [],
             turnList: [],
             turnListSoftButtons: []
             // This place is for adding new properties

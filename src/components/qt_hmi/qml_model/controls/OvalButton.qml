@@ -35,9 +35,10 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
+// Don't change constants. It break button
 Rectangle {
     id: main
-    width: field.width * 1.5
+    width: field.width * 2
     height: 65
     color: Constants.transparentColor
 
@@ -64,7 +65,6 @@ Rectangle {
 
     Image {
         id: right
-        x: 135
         width: 31
         anchors.top: parent.top
         anchors.topMargin: 0
@@ -90,7 +90,6 @@ Rectangle {
 
     Image {
         id: bottom
-        y: 50
         height: 11
         anchors.right: parent.right
         anchors.rightMargin: 31
@@ -147,8 +146,8 @@ Rectangle {
 
         Icon {
             id: image
-            width: 30
-            height: 30
+            width: Constants.iconButtonSize
+            height: Constants.iconButtonSize
             anchors.verticalCenter: parent.verticalCenter
             visible: source ? true : false
         }
