@@ -1,0 +1,53 @@
+/*
+ *
+ * @name Rate
+ *
+ * @desc Rate component
+ *          Allows the web app to invoke the rating function on mobile devices.
+ *
+ * @category    RPC component
+ * @filesource  common/Interfaces/Rate.json
+ * @version     1.0
+ *
+ */
+{
+    "transport": 	"???",
+    "envelope": 	"JSON-RPC",
+    "serviceUrl": 	"/localhost",
+    
+    /* custom errors */
+    "errors": [
+        {
+            "name": "RequestNotHandled",
+            "code": -1,
+            "description": "The request has been received and parsed correctly, but the component couldn't handle it."
+        },
+        {
+            "name": "RateNoNetwork",
+            "code": 42,
+            "description": "The rate request can't be processed because there is no internets on the device."
+        },
+        {
+            "name": "RateStoreNotAvailable",
+            "code": 43,
+            "description": "The rate request can't be processed because the device's Store seems to be down."
+        }
+    ],
+    
+    "methods": {
+        /*
+         * @descr Requests the native application to open the device's Store
+         *  so that the user can rate the application.
+         *
+         * @returns One of the following:
+         *  - "OK" if Store is opened successfully
+         *  - RateNoNetwork error if there is no internets
+         *  - RateStoreNotAvailable error if the store is down
+         *  - RequestNotHandled error on other failure
+         */
+        "Rate.rateApp": {
+        }
+    }
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

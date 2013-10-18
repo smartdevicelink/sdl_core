@@ -1,0 +1,74 @@
+// definition of Phone interface
+// Phone component provides access for UI to Phone API
+{
+	transport: 	"???",
+
+	envelope: 	"JSON-RPC",
+
+	serviceUrl: "/localhost",
+
+	methods: {
+		
+		Phone.makeCall: {
+		 	
+		 	parameters: {
+		 		phoneNumber: {type:"string"}
+		 	},
+		},
+
+		Phone.endCall: {
+		},
+
+		Phone.holdCall: {
+		},
+
+	    Phone.getContacts: {
+		
+		 	parameters: {
+	    		firstLetter: 	{type:"string"},
+	    		offset: 		{type:"integer"},
+	    		numberOfItems: 	{type:"integer"},
+	    	},
+
+	    	returns: [ // returns array of contacts
+	    		{ contactId: "integer", firstName: "string", lastName: "string", phoneNumber: "string" }
+	    	]
+	    },
+
+
+	    Phone.getHistory: {
+	    
+		 	parameters: {
+	    		typeOfContacts: 	{type:"string"}, // incoming/outgoing/missed/all calls
+	    		offset: 			{type:"integer"},	  
+	    		numberOfItems: 		{type:"integer"},
+	    	},
+
+	    	returns: [ // returns array of histoty items
+	    		{ contactId: "integer", firstName: "string", lastName: "string", phoneNumber: "string", time: "string" }
+	    	]
+	    },
+
+	    // notifications
+	    // 
+	    // this notification should be observed by UI (usually some JS model)
+	    // so UI will be updated to actual state
+	    // 
+	    Phone.onCallStatusChanged: {
+	    	params : {
+	    		callStatus: "integer" // call status values = in_progress/ended/hold .... 
+	    	}
+
+	    },
+
+	    Phone.onContactsUpdated: {
+	    },
+
+	    Phone.onHistoryUpdated: {
+	    },
+
+	}, // end methods
+
+ 	id: 	"integer" // REQUIRED for request methods. NOT to be used for notifications
+
+}

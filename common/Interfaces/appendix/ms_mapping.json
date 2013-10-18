@@ -1,0 +1,55 @@
+{
+    "0x102": {
+        "speed": 125000,
+        "messages": {
+            "846": {
+                "name": "MassageSeat_Req_MS",
+                "signals": {
+                    "SeatFnDrv_D_Rq": {
+                        "generic_name": "seat_valve_index",
+                        "states": {
+                            "off": [0],
+                            "lower_lumbar": [1],
+                            "middle_lumbar": [2],
+                            "upper_lumbar": [3],
+                            "lower_bolster": [4],
+                            "upper_bolster": [5],
+                            "lumbar_massage": [6],
+                            "cusion_massage": [7]
+                        },
+                        "writable": true
+                    },
+                    "SeatFnChngDrv_D_Rq": {
+                        "generic_name": "seat_command",
+                        "states": {
+                            "off": [0],
+                            "increase": [1],
+                            "decrease": [2]
+                        },
+                        "writable": true
+                    }
+                }
+            },
+            "842": {
+                "name": "MassageSeat_Data1",
+                "signals": {
+                    "SeatBlLoDrv_Pc_Actl": {
+                        "generic_name": "lower_bolster_position"
+                    },
+                    "SeatBlUpDrv_Pc_Actl": {
+                        "generic_name": "upper_bolster_position"
+                    },
+                    "SeatLmbrLoDrv_Pc_Actl": {
+                        "generic_name": "lower_lumbar_position"
+                    },
+                    "SeatLmbrMidDrv_Pc_Actl": {
+                        "generic_name": "middle_lumbar_position"
+                    },
+                    "SeatLmbrUpDrv_Pc_Actl": {
+                        "generic_name": "upper_lumbar_position"
+                    }
+                }
+            }
+        }
+    }
+}

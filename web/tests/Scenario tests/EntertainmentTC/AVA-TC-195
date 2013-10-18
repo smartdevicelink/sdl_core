@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-195</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-195</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_amButton &gt; p</td>
+	<td>AM 1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>3000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=band</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button4']/p</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_preset_button4']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a3 active</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button1']/p</td>
+	<td>530</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button2']/p</td>
+	<td>950</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button3']/p</td>
+	<td>1270</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button5']/p</td>
+	<td>1130</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button6']/p</td>
+	<td>760</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_usbButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>300</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.total</td>
+	<td>1/6</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.track-info &gt; div.title</td>
+	<td>Color of the Fall</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.track-number</td>
+	<td>Track 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.time</td>
+	<td>exact:0:00</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_usbButton']@class</td>
+	<td>ember-view ffw-button notpressed media-ls-item displayed active_menu</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_usb_rightmenu_moreinfoButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>300</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_usb_moreinfo_list_item0 &gt; span</td>
+	<td>Track 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_usb_moreinfo_list_item1 &gt; span</td>
+	<td>Luk Marko</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_usb_moreinfo_list_item2 &gt; span</td>
+	<td>Fall</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_usb_moreinfo_list_item3 &gt; span</td>
+	<td>Rock</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_usb_moreinfo_list_item4 &gt; span</td>
+	<td>Color of the Fall</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

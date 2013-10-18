@@ -1,0 +1,13 @@
+[General]
+ModelFile=WebApplicationArchitecture.rtmdl
+Version=Rational Rose RealTime 6.6
+DefaultLanguage=Analysis
+DefaultRTS=C++ TargetRTS
+[CMConfiguration]
+CM_EditOnlyCheckedOut=Yes
+CM_CheckOutOnEdit=Yes
+CM_CheckOutAfterTouch=Yes
+CM_AddOnFirstSave=No
+CM_RefreshSharedUnitStatusOnLoad=No
+CM_ProviderType=CM_ProviderType_None
+CM_ScriptPath=

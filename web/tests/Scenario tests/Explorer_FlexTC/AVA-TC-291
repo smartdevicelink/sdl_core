@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>New Test</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">New Test</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=woSkipButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=configueApp-button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=explorer</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=select_system_submit</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_climate</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_rearSwitcher</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls']@class</td>
+	<td>ember-view hidden</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls']@class</td>
+	<td>ember-view active_state</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_rearControls_powerButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_powerButton_1']@class</td>
+	<td>show mft_indicator ind_act</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_1']@class</td>
+	<td>mft_indicator indr_act show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_2']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_3']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_4']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_5']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_6']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_fanControls_indicator_7']@class</td>
+	<td>mft_indicator indr_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_1']@class</td>
+	<td>mft_indicator indt_inact_long show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_2']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_3']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_4']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_5']@class</td>
+	<td>indt_dot show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_6']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_7']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_8']@class</td>
+	<td>mft_indicator indt_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_9']@class</td>
+	<td>mft_indicator indt_inact_long show</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#climate_rearLabelOn &gt; span</td>
+	<td>Rear Climate On</td>
+</tr>
+<tr>
+	<td>mouseDown</td>
+	<td>id=climate_rearControls_tempControls_minusButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>2000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>mouseUp</td>
+	<td>id=climate_rearControls_tempControls_minusButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='climate_rearControls_tempControls_labels']/span[2]</td>
+	<td>Cool</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_rearControls_tempControls_indicator_1']@class</td>
+	<td>show mft_indicator indt_act_long</td>
+</tr>
+</tbody></table>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-81</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-81</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_amButton &gt; p</td>
+	<td>AM 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=band</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button4']/p</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_preset_button4']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a3 active</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button1']/p</td>
+	<td>530</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button2']/p</td>
+	<td>950</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button3']/p</td>
+	<td>1270</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button5']/p</td>
+	<td>1130</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button6']/p</td>
+	<td>760</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fmButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_fmButton &gt; p</td>
+	<td>FM 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button1']/p</td>
+	<td>99.1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button3']/p</td>
+	<td>100.9 HD2</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button4']/p</td>
+	<td>103.5 HD2</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button5']/p</td>
+	<td>106.1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button6']/p</td>
+	<td>105.2</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=band</td>
+	<td>98.8</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_preset_button2 &gt; p</td>
+	<td>98.8</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_preset_button2']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a1 active</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fm_directButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_fm_directButton &gt; span</td>
+	<td>Presets</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_tuneButtons1</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>media_directTune_tuneButtons10</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>media_directTune_tuneButtons10</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>media_directTune_tuneButtons4</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_keyEnter</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=band</td>
+	<td>100.4</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,744 @@
+#status_info {
+	top:0;
+	right:0;
+	text-align:right;
+	font-size:21px;
+	width:324px;
+	height:48px;
+	cursor:pointer;
+	background:url(../images/common/nav-status-bg.png) no-repeat;
+    z-index:10;
+}
+
+#status_info_label {
+	width: 100%;
+	display: block;
+}
+
+#status_info_label span {
+	padding-right: 11px;
+}
+
+#info_view .ls_border {
+	position: absolute;
+	top: -3px;
+	left: 0;
+	width: 153px;
+	height: 306px;
+	background: url(../images/common/ls_border.png) no-repeat;
+}
+
+#info_view {
+	width: 800px;
+	height: 480px;
+}
+
+#info_view.green_bg {
+	background: url(../images/nav/bg.png) no-repeat;
+}
+
+#info_leftMenu{
+	background: #333;
+	width: 150px;
+	height: 300px;
+	top: 90px;
+    z-index: 5;
+}
+#info_leftMenu .menu-item.info_active{
+	background: url("../images/common/button_active_green.png") repeat-x;
+}
+
+#info_leftMenu .menu-item {
+	position: relative;
+	width: 150px;
+	height: 50px;
+	cursor: pointer;
+}
+
+#info_leftMenu .menu-item span{
+	position: absolute;
+	left: 45px;
+	width: 100px;
+	height: 50px;
+	font-size: 18px;
+	line-height: 50px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#info_leftMenu .ico{
+	height: 50px;
+	width: 50px;
+}
+
+#info_leftMenu .settings_active {
+	background: url("../images/settings/menu_active.png") repeat-x;
+}
+
+#info_right_menu {left: 183px; top: 6px;}
+#info_sync_services {font-size: 32px; width: 280px;}
+#info_traff {font-size: 20px; width: 410px; top: 36px;}
+#info_traffic_report {width: 400px; top: 85px; font-size: 20px; color: #a6a6a6;}
+#info_traffic_pts {width: 400px; top: 120px; font-size: 20px; color: #65cdd9;}
+#info_traffic_hear {width: 355px; top: 192px; font-size: 20px; color: #a6a6a6;}
+#info_connect {width: 300px; top: 241px;  font-size: 20px; left: 15px;}
+#info_log {width: 500px; top: 285px; font-size: 20px;}
+#info_left_menu {top: 6px;}
+#info_left_menu div {font-size: 20px;left: 49px; }
+
+#info_left_services {top: 17px;}
+#info_left_travel_link {top: 66px; width: 200px;}
+#info_left_alerts {top: 118px;}
+#info_left_calendar {top: 166px;}
+#info_left_apps {top: 216px;}
+
+/******************* For Info.Services *******************/
+#info_services_view{
+	top: 48px;
+	left: 153px;
+	background: url(../images/info/info_services_bg.png) no-repeat 0 39px;
+	height: 384px;
+	width: 647px;
+}
+
+#info_services_view .inner-content{
+	left: 30px;
+	top: 49px;
+}
+
+/******************* For Info.travelLink *******************/
+#info_travelLink {
+	position: absolute;
+	top: 48px;
+	left: 153px;
+	width: 647px;
+	height: 384px;
+	float: left;
+}
+
+#info_travelLink_logo {
+	margin-top: 48px;
+	margin-left: 22px;
+}
+
+#info_travelLink .inner-content{
+	top: 71px;	
+}
+
+#info_travelLink .block-header-title {
+	top: 21px;
+	left: 75px;
+}
+
+#info_travelLink .list {
+	width: 308px;
+	border-radius: 2px;
+	max-height: 248px;
+	border:1px solid #393939;
+}
+
+#info_travelLink .list .list-item:last-of-type {
+	height: 50px;
+	border: none;
+}
+
+#info_travelLink .list-content {
+	position: relative;
+	float: left;
+	width: 100%;
+	border:none;
+}
+
+#info_travelLink_listLeft{
+	left: 12px;
+	top: 92px;
+}
+
+#info_travelLink_listRight {
+	position: absolute;
+	top: 43px;
+	right: 5px;
+	width: 310px;
+}
+
+#info_travelLink_listLeft .list-item span,
+#info_travelLink_listRight .list-item span{
+	position: absolute;
+	margin-left: 22px;
+	width: 258px;
+}
+
+#info_travelLink.fr #info_travelLink_listLeft .list-item span,
+#info_travelLink.fr #info_travelLink_listRight .list-item span{
+	margin-left: 22px;
+}
+
+#info_travelLink #info_travelLink_listRight_item0 span{
+	margin-left: 81px;
+	white-space: nowrap;
+}
+
+#info_travelLink_listRight .list-item:first-of-type {
+	height: 48px !important;
+}
+
+/******************* For Info.Alerts menu *****************/
+#info_alerts {
+	left: 153px;
+	top: 48px;
+	width: 647px;
+	height: 384px;
+	font-size: 20px;
+}
+
+#info_alerts_listCaption {
+	top: 66px;
+	left: 13px;
+	height: 39px;	
+}
+ 
+#info_alerts_listCaption .lableToggle {
+	position: relative;
+	line-height: 40px;
+	float: left;
+	margin-left: 0 !important;
+	margin-top: 0 !important;
+	width: 134px;
+	text-align: right;
+}
+
+#info_alerts_listCaption .lableToggle span{
+	position: relative;
+}
+
+#info_alerts_listCaption .toogleButtonContainer{
+	height: 39px;
+	width: 260px;
+	border-radius: 0;
+	margin: 0 11px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	line-height: 39px;
+	float: left;
+}
+
+#info_alerts_listCaption .toogleButtonContainer .delim{
+	width: 4px;
+	height: 39px;
+	background: url(../images/info/delim_40.png) no-repeat;
+	z-index: 100;
+	border: none;
+}
+
+#info_alerts_listCaption .toggles {
+	height: 39px;
+	width: 128px;
+}
+
+#info_alerts_listCaption .toogleButtonContainer span{
+	line-height: 40px;
+	margin-left: 0 !important;
+	margin-top: 0 !important;
+}
+
+#info_alerts  .toogleButtonContainer .active {
+	background: url(../images/info/btn_40_bg_active_invert.png) !important;
+}
+
+#info_alerts_list {
+	position: relative;
+	float: left;
+	top: 67px;
+	left: 13px;
+	width: 468px;
+	height: 301px;
+}
+
+#info_alerts_list .list-content {
+	width: 406px;
+	border-top: none;
+	border-left: none;
+}
+
+#info_alerts_list .list-item {
+	width: 405px;
+}
+
+#info_alerts_list .list-item:first-of-type{
+	height: 39px !important;
+	line-height: 39px !important;
+}
+
+#info_alerts_list_item1 {
+	border-left: 1px solid #393939;
+}
+
+#info_alerts_list_item1 .right_ico {
+	position: absolute;
+	right: 7px;
+}
+#info_alerts_list_item1 .ico {
+	border: none !important;
+}
+
+#info_alerts_list_item1 span {
+	position: absolute;
+	bottom: -2px;
+	width: 250px;
+	font-size: 19px;
+}
+
+.fr #info_alerts_list_item1 span {
+	line-height: 18px;
+	bottom: 4px;
+}
+
+#info_alerts_list .list-item.active {
+	background-image: url(../images/info/btn_50_bg_active_invert.png);
+}
+
+#info_alerts_list .toogleButtonContainer .delim {
+	width: 4px;
+	height: 39px;
+	background: url(../images/info/delim_40.png) no-repeat;
+	z-index: 100;
+	border: none;
+}
+
+#info_alerts_rightList {
+	position: relative;
+	float: left;
+	top: 67px;
+	left: 23px;
+	height: 151px;
+	width: 152px;
+}
+
+#info_alerts_rightList .list-content {
+	width: 150px;
+}
+
+#info_alerts_rightList .list-item {
+	border-bottom: 1px solid #393939 !important;
+}
+
+#info_alerts_rightList .list-item > span {
+	margin-left: 15px;
+	position: relative;
+}
+
+/******************* For Info.Calendar menu ***************/
+#info_calendar {
+	left: 153px;
+	top: 48px;
+	width: 647px;
+	height: 384px;
+	background: url(../images/info/view_info_calendar.png) no-repeat 4px 38px;
+}
+
+#info_calendar .inner-wrapper{
+	left: 99px;
+	top: 99px;
+}
+
+#info_calendar .c-btn {
+	width: 90px;
+	height: 33px;
+	background: url(../images/common/button_small.png);
+	text-align: center;
+	line-height: 33px;
+	border: 1px solid #393939;
+}
+
+#info_calendar .c-btn.active {
+	background: #3b3b3b url(../images/common/btn-28h-gray-active.png) repeat-x 0 5px !important;
+}
+
+#info_calendar .date {
+	white-space: nowrap;
+	font-size: 26px;
+	top: -43px;
+	left: 178px;
+}
+
+#info_calendar .today {
+	white-space: nowrap;
+	top: -58px;
+	left: 414px;
+	height: 48px;
+	width: 130px;
+	font-size: 20px;
+	line-height: 48px;
+	border: 1px #333 solid;
+	text-align: center;
+	border-radius: 2px;
+}
+
+#info_calendar .day {
+	width: 91px;
+	height: 36px;
+	text-align: center;
+	top: 5px;
+	line-height: 25px;
+}
+
+#info_calendar .day.active {
+	background: #f28b06;
+}
+
+#info_calendar .day-1 {
+	left: -86px;
+}
+#info_calendar .day-2 {
+	left: 3px;
+}
+#info_calendar .day-3 {
+	left: 93px;
+}
+#info_calendar .day-4 {
+	left: 183px;
+}
+#info_calendar .day-5 {
+	left: 272px;
+}
+#info_calendar .day-6 {
+	left: 363px;
+}
+#info_calendar .day-7 {
+	left: 453px;
+}
+
+#info_calendar .btn-1 {
+	left: -88px;
+	top: 40px;
+}
+#info_calendar .btn-8 {
+	left: -88px;
+	top: 74px;
+}
+#info_calendar .btn-15 {
+	left: -88px;
+	top: 108px;
+}
+#info_calendar .btn-22 {
+	left: -88px;
+	top: 141px;
+}
+#info_calendar .btn-29 {
+	left: -88px;
+	top: 175px;
+}
+
+#info_calendar .btn-7 {
+	left: 452px;
+	top: 40px;
+}
+#info_calendar .btn-14 {
+	left: 452px;
+	top: 74px;
+}
+#info_calendar .btn-21 {
+	left: 452px;
+	top: 108px;
+}
+#info_calendar .btn-28 {
+	left: 452px;
+	top: 141px;
+}
+
+#info_calendar .btn-6 {
+	left: 362px;
+	top: 40px;
+}
+#info_calendar .btn-13 {
+	left: 362px;
+	top: 74px;
+}
+#info_calendar .btn-20 {
+	left: 362px;
+	top: 108px;
+}
+#info_calendar .btn-27 {
+	left: 362px;
+	top: 141px;
+}
+
+#info_calendar .btn-5 {
+	left: 272px;
+	top: 40px;
+}
+#info_calendar .btn-12 {
+	left: 272px;
+	top: 74px;
+}
+#info_calendar .btn-19 {
+	left: 272px;
+	top: 108px;
+}
+#info_calendar .btn-26 {
+	left: 272px;
+	top: 141px;
+}
+
+#info_calendar .btn-4 {
+	left: 182px;
+	top: 40px;
+}
+#info_calendar .btn-11 {
+	left: 182px;
+	top: 74px;
+}
+#info_calendar .btn-18 {
+	left: 182px;
+	top: 108px;
+}
+#info_calendar .btn-25 {
+	left: 182px;
+	top: 141px;
+}
+
+#info_calendar .btn-3 {
+	left: 92px;
+	top: 40px;
+}
+#info_calendar .btn-10 {
+	left: 92px;
+	top: 74px;
+}
+#info_calendar .btn-17 {
+	left: 92px;
+	top: 108px;
+}
+#info_calendar .btn-24 {
+	left: 92px;
+	top: 141px;
+}
+#info_calendar .btn-31 {
+	left: 92px;
+	top: 175px;
+}
+
+#info_calendar .btn-2 {
+	left: 2px;
+	top: 40px;
+}
+#info_calendar .btn-9 {
+	left: 2px;
+	top: 74px;
+}
+#info_calendar .btn-16 {
+	left: 2px;
+	top: 108px;
+}
+#info_calendar .btn-23 {
+	left: 2px;
+	top: 141px;
+}
+#info_calendar .btn-30 {
+	left: 2px;
+	top: 175px;
+}
+
+#info_calendar span{
+	position: relative;
+}
+
+/******************* For Info.Apps menu*******************/
+#info_apps {
+	position: absolute;
+	top: 48px;
+	left: 153px;
+	width: 647px;
+	height: 384px;
+	float: left;
+}
+
+#info_apps .backButton{
+	top: 59px;
+}
+	
+#info_apps .block-header-title{
+	top: 67px;
+	left: 73px;
+}
+
+#info_apps_pushToTalk_buttton{
+	top: 80px;
+	right: 5px;
+	height: 48px;
+	width:  48px;
+	border: 1px solid #4bffff;
+	border-radius: 2px;
+}
+
+#info_apps_list{
+	top: 67px;
+	left: 13px;
+}
+
+#info_appst {
+	height: 250px;
+	position: relative;
+	float: left;
+	margin-top: 5px;
+	width: 554px;
+}
+
+
+#info_apps .list {
+	width: 629px;
+	height: 302px;
+}
+
+#info_apps_list .list-item .ico{
+	width: 50px;
+	height: 50px;
+}
+
+#info_apps_list .list-content {
+	width: 278px;
+}
+
+#info_apps_install_Button {
+	width: 278px;
+	float: left;
+	margin-right: 10px;
+	height: 49px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+}
+
+#info_apps_install_Button span{
+	position: absolute;
+}
+
+#info_apps .list-item .ico {
+	float: left;
+}
+
+#info_apps .list-item span {
+	height: 23px;
+}
+
+#info_apps .inner-wrapper {
+	left: 100px;
+	top: 71px;
+}
+
+#info_apps_install_Button{
+	border: 1px solid #393939;
+	border-radius: 2px;
+	top: 269px;
+	width: 283px;
+	left: 300px;
+}
+
+#info_apps_install_Button img {
+	float: left;
+}
+
+#info_apps span{
+	position: relative;
+}
+/******************* For Settings.Help.Where Am I Report Menu*******************/
+#info_whereAmI {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 800px;
+    height: 384px;
+}
+
+#info_whereAmI.no-sd .inner-block {
+    display: none;
+}
+
+#info_whereAmI .nosd-lat {
+    display: none;
+}
+
+#info_whereAmI.no-sd .nosd-lat {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 180px;
+    width: 560px;
+    text-align: center;
+}
+
+#info_whereAmI .next_street {
+    white-space: nowrap;
+    top: 17px;
+}
+
+#info_whereAmI .villagerd {
+    top: 44px;
+}
+
+#info_whereAmI .current_street {
+    white-space: nowrap;
+    top: 105px;
+}
+
+#info_whereAmI .mi {
+    white-space: nowrap;
+    top: 56px;
+    left: 530px;
+}
+
+#info_whereAmI .military_st {
+    white-space: nowrap;
+    top: 132px;
+    height: 115px;
+    background: url('../images/info/red-arrow.png') 97% 50% no-repeat;
+}
+
+#info_whereAmI .dmi {
+    white-space: nowrap;
+    top: 170px;
+    left: 22px;
+}
+
+#info_whereAmI .lat {
+    white-space: nowrap;
+    top: 210px;
+    color: #0f0;
+    left: 22px;
+}
+
+#info_whereAmI .previous_street {
+    white-space: nowrap;
+    top: 260px;
+}
+
+#info_whereAmI .rd {
+    white-space: nowrap;
+    top: 286px;
+}
+
+#info_whereAmI .ft {
+    white-space: nowrap;
+    top: 298px;
+    left: 528px;
+}
+.inner-block{
+    left: 180px;
+    top:70px;
+}
+.block-border{
+    width: 600px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 10px 20px;
+    border: 2px solid #323132;
+    border-radius: 3px;
+}
+#info_leftMenu .two-lines span{
+    line-height: 20px;
+    padding: 6px 7px 0 0;
+    white-space: normal;
+    width: 88px;
+}

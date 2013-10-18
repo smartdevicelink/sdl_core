@@ -1,0 +1,8 @@
+Import( 'env buildLibrary' )
+
+buildLibrary( env, Split( """
+    mb_client.cpp 
+    mb_controller.cpp 
+    mb_tcpclient.cpp
+     """ ),
+    'mb_client' )

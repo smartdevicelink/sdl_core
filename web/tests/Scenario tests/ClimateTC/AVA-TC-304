@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-304</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-304</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='caution']/div[2]</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_climate</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=auto</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[1]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[2]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[3]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[4]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[5]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[6]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[7]@style</td>
+	<td>left: 4px; display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='auto']@class</td>
+	<td>def blue_bg</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fullauto']@style</td>
+	<td>display: block;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='defrost']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='panel']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='feet']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='panelfeet']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='recycle']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='ac']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='maxac']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=auto</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=fullauto</td>
+	<td>Auto</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=windshield</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='auto']@class</td>
+	<td>def</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fullauto_man']@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='defrost']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='panel']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='feet']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='panelfeet']@class</td>
+	<td>def&nbsp;&nbsp;modebut</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='windshield']/div[1]@class</td>
+	<td>auto ind_act</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='recycle']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='ac']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='maxac']/div[1]@class</td>
+	<td>ind_inact auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[1]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[2]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[3]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[4]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[5]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[6]@style</td>
+	<td>display: none;</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='fan_indicators']/div[7]@style</td>
+	<td>left: 4px; display: none;</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=windshield</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=fullauto</td>
+	<td>Auto</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

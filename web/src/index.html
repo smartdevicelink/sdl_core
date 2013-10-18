@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ontouchmove="event.preventDefault();">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>MyFord Touch Guide</title>
+		<!--Styles-->
+		<link rel="stylesheet" type="text/css" href="css/ffw.css" />
+		<link rel="stylesheet" type="text/css" href="css/general.css" />
+		<link rel="stylesheet" type="text/css" href="css/home.css" />
+		<link rel="stylesheet" type="text/css" href="css/climate.css" />
+		<link rel="stylesheet" type="text/css" href="css/phone.css" />
+        <link rel="stylesheet" type="text/css" href="css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="css/info.css" />
+        <link rel="stylesheet" type="text/css" href="css/settings.css" />
+        <link rel="stylesheet" type="text/css" href="css/media.css" />
+        <link rel="stylesheet" type="text/css" href="css/help.css" />
+        <link rel="stylesheet" type="text/css" href="css/fr.css" />
+        <link rel="stylesheet" type="text/css" href="css/spa.css" />
+        <link rel="stylesheet" type="text/css" href="css/appSettings.css" />
+
+		<!--Libs-->
+		
+		<script type="text/javascript" src="lib/handlebars-1.0.0.beta.6.js"></script>
+		
+		<!-- RELEASE's min versions -->
+        <script type="text/javascript" src="lib/jquery-1.8.0.min.js"></script>
+        <script type="text/javascript" src="lib/ember-1.0.0-pre.2.min.js"></script>
+
+
+		<!-- DEBUG versions -->
+        <!--<script type="text/javascript" src="lib/jquery-1.8.0.js"></script>-->
+        <!--<script type="text/javascript" src="lib/ember-1.0.0-pre.2.js"></script>-->
+
+
+	</head>
+	<body ontouchmove="event.preventDefault();">
+		<div id="wrapper">
+         <video id="html5Player" onTimeUpdate="MFT.HTMLVideoPlayer.timeupdate()" onError="MFT.HTMLVideoPlayer.onError()" webkit-playsinline></video>	
+		<!--Flags-->
+        <script type="text/javascript" src="app/Flags.js"></script>
+		<!-- Framework -->
+		<script type="text/javascript" src="ffw/utils/iOSLoggingSupport.js"></script>
+		<script type="text/javascript" src="ffw/Framework.js"></script>
+        <script type="text/javascript" src="ffw/LoadBalancer/AppendScript.js"></script>
+
+		<script type="text/javascript" src="ffw/Size.js"></script>
+		<script type="text/javascript" src="ffw/WebSocketSimulator.js"></script>
+		<script type="text/javascript" src="ffw/WebSocket.js"></script>
+		<script type="text/javascript" src="ffw/RPCObserver.js"></script>
+		<script type="text/javascript" src="ffw/RPCClient.js"></script>
+		<script type="text/javascript" src="ffw/OSInfo.js"></script>	
+		<script type="text/javascript" src="ffw/BackendRPC.js"></script>	
+		<script type="text/javascript" src="ffw/VideoPlayerRPC.js"></script>
+        <script type="text/javascript" src="ffw/PhoneBookRPC.js"></script>
+        <script type="text/javascript" src="ffw/PhoneBookTestData.js"></script>
+		<script type="text/javascript" src="ffw/Scale.js"></script>
+        <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
+        <script type="text/javascript" src="ffw/RaterRPC.js"></script>        
+
+		<!-- APP -->
+		<script type="text/javascript" src="app/MFTApp.js"></script>
+        <script type="text/javascript" src="app/DataImages.js"></script>
+		<!-- locales -->
+		<script type="text/javascript" src="locale/eng.js"></script>
+        <script type="text/javascript" src="locale/fr.js"></script>
+        <script type="text/javascript" src="locale/spa.js"></script>
+		<script type="text/javascript" src="locale/rus.js"></script>
+		<script type="text/javascript" src="locale/locale.js"></script>
+		
+		<!-- UI controlls -->		
+		<script type="text/javascript" src="app/controlls/Button.js"></script>
+        <script type="text/javascript" src="app/view/WarningView.js"></script>
+		
+        
+		<script type="text/javascript" src="app/view/WOSkipButtonView.js"></script>
+		<script type="text/javascript" src="app/controlls/Label.js"></script>
+        <script type="text/javascript" src="app/controlls/TableLabel.js"></script>        
+		<script type="text/javascript" src="app/controlls/IndButton.js"></script>
+		<script type="text/javascript" src="app/controlls/IndBalanceButton.js"></script>
+		<script type="text/javascript" src="app/controlls/PlusMinusRangeBar.js"></script>
+		<script type="text/javascript" src="app/controlls/BalanceRangeBar.js"></script>
+		<script type="text/javascript" src="app/controlls/TogButton.js"></script>
+		<script type="text/javascript" src="app/controlls/ToggleIndicatorsButton.js"></script>
+		<script type="text/javascript" src="app/controlls/ScrollBar.js"></script>
+		<script type="text/javascript" src="app/controlls/List.js"></script>
+        <script type="text/javascript" src="app/controlls/PresetButton.js"></script>
+		<script type="text/javascript" src="app/controlls/Indicator.js"></script>
+		<script type="text/javascript" src="app/controlls/ButtonsGroup.js"></script>
+            <script type="text/javascript" src="app/controlls/ButtonGroup.js"></script>
+        <script type="text/javascript" src="app/controlls/LabelPlusToggleButton.js"></script>
+        <script type="text/javascript" src="app/controlls/LabelPlusButton.js"></script>
+
+		<!-- utils -->
+		<script type="text/javascript" src="app/util/TransitionIterator.js"></script>
+		<script type="text/javascript" src="app/util/StateVisitor.js"></script>
+		
+		<!-- Models -->
+		<script type="text/javascript" src="app/model/abstract/RangedValue.js"></script>
+		<script type="text/javascript" src="app/model/abstract/ToggleValue.js"></script>
+
+        <script type="text/javascript" src="app/model/SettingsModel.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateTemperature.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateData.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateModel.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateModelCAN.js"></script>
+		<script type="text/javascript" src="app/model/climate/EdgeClimateModel.js"></script>
+		<script type="text/javascript" src="app/model/climate/FocusClimateModel.js"></script>
+		<script type="text/javascript" src="app/model/climate/FusionClimateModel.js"></script>
+        <script type="text/javascript" src="app/model/media/PlaylistItem.js"></script>
+		
+		<script type="text/javascript" src="app/model/media/MediaCDPlayer.js"></script>
+       	<script type="text/javascript" src="app/model/media/Playlist.js"></script>
+       	<script type="text/javascript" src="app/model/media/CDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/USBModel.js"></script>
+        <script type="text/javascript" src="app/model/media/SDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/FmModel.js"></script>
+        <script type="text/javascript" src="app/model/media/SiriusModel.js"></script>
+		<script type="text/javascript" src="app/model/media/AmModel.js"></script>
+        <script type="text/javascript" src="app/model/media/BTModel.js"></script>
+        <script type="text/javascript" src="app/model/navigation/NavigationDistance.js"></script>
+		<script type="text/javascript" src="app/model/navigation/NavigationMapZoom.js"></script>
+		<script type="text/javascript" src="app/model/navigation/NavigationModel.js"></script>
+		<script type="text/javascript" src="app/model/PhoneModel.js"></script>
+		<script type="text/javascript" src="app/model/InformationModel.js"></script>
+        <script type="text/javascript" src="app/model/HTMLVideoPlayerModel.js"></script>
+        <script type="text/javascript" src="app/model/FAQModel.js"></script>
+        <script type="text/javascript" src="app/view/SelectSystemPopup.js"></script>
+
+        <script type="text/javascript" src="app/model/vehicle/Vehicle.js"></script>
+
+		<!-- Controllers -->
+
+        <script type="text/javascript" src="app/controller/AppController.js"></script>
+        <script type="text/javascript" src="app/controller/VideoPlayerController.js"></script>
+        <script type="text/javascript" src="app/controller/StartUpController.js"></script>                              
+		<script type="text/javascript" src="app/controller/ClimateController.js"></script>
+		<script type="text/javascript" src="app/controller/MediaController.js"></script>
+		<script type="text/javascript" src="app/controller/NavigationController.js"></script>
+		<script type="text/javascript" src="app/controller/PhoneController.js"></script>
+        <script type="text/javascript" src="app/controller/SettingsController.js"></script>
+        <script type="text/javascript" src="app/controller/FAQController.js"></script>
+        <script type="text/javascript" src="app/controller/InfoController.js"></script>
+        <script type="text/javascript" src="app/controller/RateController.js"></script>
+        <script type="text/javascript" src="app/controller/AppSettingsController.js"></script>
+
+            <!-- mixins -->
+        <script type="text/javascript" src="app/mixins/ScriptLoad.js"></script>
+		<script type="text/x-handlebars">
+			{{#if FLAGS.DEBUG_MODE}}
+			<div id="debug_view">
+				{{MFT.debugText}}
+			</div>
+			{{/if}}
+		</script>
+		<!-- Views -->
+        <!-- Bluetooth Device Popup View -->
+        <script type="text/javascript" src="app/view/BluetoothDevicePopupView.js"></script>
+
+        <!--Video Error Popup View-->
+        <script type="text/javascript" src="app/view/VideoErrorPopupView.js"></script>
+
+        <!-- Settings Warning Popup View -->
+        <script type="text/javascript" src="app/view/SettingsWarningPopupView.js"></script>
+                
+        <!--Welcome Orientation View-->
+		<script type="text/javascript" src="app/view/WOInfoView.js"></script>
+		<!-- media views -->
+		<script type="text/javascript" src="app/view/media/common/HomePresetView.js"></script>
+        <script type="text/javascript" src="app/view/media/common/PresetsView.js"></script>
+        <script type="text/javascript" src="app/view/media/common/DirectTune.js"></script>
+		<script type="text/javascript" src="app/view/media/common/LeftMenuView.js"></script>
+
+		<!-- Rate dialogue views -->
+        <script type="text/javascript" src="app/view/RatingNetworkWarningView.js"></script>
+        <script type="text/javascript" src="app/view/RatingNoRespondWarningView.js"></script>
+        
+		<!-- home views -->
+		<script type="text/javascript" src="app/view/home/topControls.js"></script>
+        <script type="text/javascript" src="app/view/home/bottomControls.js"></script>
+        
+        <script type="text/javascript" src="app/view/home/statusMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusInfoView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusNavigationView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetNavigationView.js"></script>	
+		<script type="text/javascript" src="app/view/home/statusClimateView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetClimateView.js"></script>
+        <script type="text/javascript" src="app/view/home/statusSettingsView.js"></script>
+        <script type="text/javascript" src="app/view/home/widgetDateView.js"></script>
+		
+		<script type="text/javascript" src="app/StateManager.js"></script>
+
+        <!--player view-->
+        <script type="text/javascript" src="app/view/player/PlayerControllsView.js"></script>
+				
+        <!-- STATE MACHINE -->
+        <script type="text/javascript" src="app/AppViews.js"></script>
+		
+        <!-- Big Images Preloader block -->
+        <div id="preloader">
+        </div>
+        
+</div>
+	</body>
+</html>

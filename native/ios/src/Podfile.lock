@@ -1,0 +1,25 @@
+PODS:
+  - CocoaAsyncSocket (7.2.2)
+  - CocoaLumberjack (1.6)
+  - GHUnitIOS (0.5.5)
+  - JSONKit (1.5pre)
+  - OCMock (2.0.1)
+  - Reachability (3.1.1)
+
+DEPENDENCIES:
+  - CocoaAsyncSocket (= 7.2.2)
+  - CocoaLumberjack (= 1.6)
+  - GHUnitIOS (= 0.5.5)
+  - JSONKit (= 1.5pre)
+  - OCMock (= 2.0.1)
+  - Reachability (= 3.1.1)
+
+SPEC CHECKSUMS:
+  CocoaAsyncSocket: e7bf69f5f609357b9a486469ac84681d25c12b2f
+  CocoaLumberjack: 0f2fa7090a23f13261072d882e017c688300efbe
+  GHUnitIOS: 8e23d8fe0b0514e50d1996b40e2f59c7a8d3d784
+  JSONKit: 409734ab3407fce90ef7eaa95d7168f38d9a6601
+  OCMock: f0c099603f851d07f8d7f2efe26d05da721ec43f
+  Reachability: 2be6bc2fd2bd31d97f5db33e75e4b29c79e95883
+
+COCOAPODS: 0.23.0

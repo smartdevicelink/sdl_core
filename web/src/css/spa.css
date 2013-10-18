@@ -1,0 +1,194 @@
+#app.spa #settings_settings_wirelessInternet .wifi {
+    left: 98px;
+}
+#app.spa #settings_settings_wirelessInternet .wdp {
+    left: 100px;
+}
+#app.spa #settings_settings_wirelessInternet .cn {
+    left: 86px;
+}
+#app.spa #settings_warning_popup_view .text {
+    font-size: 18px;
+}
+#app.spa #settings_settings_system_MasterResetNotifier_popUp {
+    height: 56px;
+    line-height: 26px;
+    top: 160px;
+    padding: 6px 0;
+}
+#app.spa #settings_help_911Assist .vri span {
+    margin: 12px 0 0 0;
+}
+#app.spa #settings_help_911Assist .icofesd {
+    width: 430px;
+}
+#app.spa #woSkipButton {
+    width: 150px;
+}
+#app.spa #configueApp-button {
+    height: 54px;
+    line-height: 28px;
+    padding: 8px 0;
+}
+#app.spa #select_system_label {
+    width: 134px;
+    margin-left: 22px;
+    margin-top: 50px;
+    text-align: center;
+}
+#app.spa #sdnav_label{
+    margin-top: 24px;
+}
+#app.spa #video_error_popup .error-title {
+    margin-top: 25px;
+    width: 360px;
+}
+#app.spa .rateDialogue .title {
+    top: 24px;
+}
+#app.spa #rateMFTGuideDialogue_view_content_separator {
+    top: 74px;
+}
+#app.spa #rateMFTGuideDialogue_view_content_message {
+    top: 104px;
+}
+#app.spa #rateMFTGuideDialogue_view_content_rateButton {
+    width: 330px;
+    margin-left: -165px;
+}
+#app.spa #video_error_popup .error-title {
+    text-align: center;
+}
+#app.spa #leavingMFTGuideWarning_view_content_title {
+    top: 36px;
+}
+#app.spa #media_sirius_options_PTYCategory_changePIN_enterPad_label {
+    top: 75px;
+    font-size: 20px;
+    width: 160px;
+}
+#app.spa #settings_vehicle_enableValetMode_enteringPin_enterPadLabel {
+    top: 84px;
+    font-size: 24px;
+}
+
+#app.spa #am_refreshPresetPopup,
+#app.spa #fm_refreshPresetPopup {
+    left: 185px;
+    width: 430px;
+}
+#app.spa #settings_help_911Assist .assist-911 {
+    width: 500px;
+}
+#app.spa #select_system_heading_lable{
+    margin-bottom: 20px;
+}
+#app.spa #select_system_info {
+    margin-top: 10px;
+    line-height: 26px;
+}
+#app.spa #select_system_submit {
+    margin: 8px auto 0;
+}
+#app.spa #no_freeway {
+    width: 280px;
+    margin-left: 78px;
+}
+#app.spa .btn_alert {
+    left: 380px;
+    width: 100px;
+}
+#app.spa #climate_full .temp_num.label_off span {
+    font-size: 24px;
+}
+#app.spa #climate_offLabel {
+    font-size: 24px;
+}
+#app.spa #climate_rearControls_controlButton span {
+    left: 12px;
+}
+#app.spa #street {
+     background-image: url(../images/nav/street_fr.png);
+}
+#app.spa #view_navi_destination_poi .recent {
+    left: 542px;
+}
+#app.spa #settings_display_list .toogleButtonContainer .toggles {
+    width: 112px;
+}
+#app.spa #settings_display_list .doubletoggle {
+    width: 226px;
+}
+#app.spa #settings_help_911Assist .a911-on,
+#app.spa #settings_help_911Assist .a911-off {
+    width: 120px;
+}
+#app.spa #settings_help_911Assist .a911-on {
+    right: 130px;
+}
+#app.spa #info_view .ls_border {
+    height: 206px;
+    background: url(../images/common/ls_border_spa.png) no-repeat;
+}
+#app.spa #info_view #info_leftMenu,
+#app.spa #info_view #info_leftMenu .ls-items {
+    height: 200px;
+}
+#app.spa #info_leftMenu .two-lines span{
+    width: 65px;
+}
+#app.spa #settings_help_driver_restrictions .text {
+    width: 580px;
+}
+#app.spa #settings_help_softwareLicenses .title-data  {
+    margin-left: 64px;
+}
+#app.spa #settings_help_softwareLicenses .title-users {
+    width: 130px;
+    margin-left: 16px;
+}
+#app.spa #appSettingsAbout-list_item0 {
+    line-height: 38px;
+}
+#app.spa #appSettingsAbout-list_item0 span {
+    display: block;
+    margin-left: 40px;
+}
+#app.spa #appSettingsAbout-list_item0 span.second-text {
+    line-height: 16px;
+}
+#app.spa #media_btButton {
+    top: -20px;
+    display: none;
+}
+#app.spa #media_btButton.displayed {
+    display: block !important;
+}
+#app.spa #media_cdButton, #app.spa #media_usbButton {
+    top: 20px;
+}
+#app.spa #media_sdButton, #app.spa #media_avinButton {
+    top: 0;
+}
+#app.spa #media_scrolldownButton {
+    top: 70px;
+}
+#app.spa #appSettings #appSettingsAppRate #rate_now_button {
+    width: 340px;
+}
+#app.spa #apps-vehicle-label {
+    width: 146px;
+    margin-left: -20px;
+}
+#app.spa #nav_menu_view #nav_menu_buttons .cancel-button {
+    margin-left: 114px;
+}
+#app.spa #select_system_info {
+    width: 585px;
+    padding: 0 60px 0 30px;
+    background: url("../images/common/start_help_i.png") 620px 5px no-repeat;
+}
+#app.spa #errorSendMailPopup .title {
+    top: 25px;
+    font-size: 23px;
+}

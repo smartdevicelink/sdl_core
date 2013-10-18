@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-269</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-269</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetPhone_label &gt; span</td>
+	<td>Paul’s Phone Connected</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=span.station</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=home_main_st</td>
+	<td>Main St</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetClimate_driverTemp &gt; span</td>
+	<td>70°</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetClimate_passengerTemp &gt; span</td>
+	<td>70°</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=help-p</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=faq_btn_c</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>500</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item0</td>
+	<td>Bluetooth Audio</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item1</td>
+	<td>Customize Your MyFord Touch System</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item2</td>
+	<td>Multiple Connected Phones</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item3</td>
+	<td>MFT Guide Welcome Orientation</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item4</td>
+	<td>MyFord Touch 4 Corner Menu System</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='faq_view_list']/div[2]/div[3]</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item5</td>
+	<td>MyFord Touch Nav System</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item6</td>
+	<td>Pair Your Phone and Make Hands-Free Calls</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item7</td>
+	<td>SYNC Services</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item8</td>
+	<td>Use Voice Commands</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=faq_view_list_item9</td>
+	<td>Wallpaper</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

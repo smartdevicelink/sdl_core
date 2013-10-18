@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-193</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-193</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_climate</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_frontControls_autoButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_1']@class</td>
+	<td>mft_indicator indf_act</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_2']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_3']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_4']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_5']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_6']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_7']@class</td>
+	<td>mft_indicator indf_inact</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_autoButton']@class</td>
+	<td>ember-view ffw-button notpressed helpmode_box_shadow active</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='climate_automode']/div</td>
+	<td>Auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_defrostButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_panelButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_bothButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_feetButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_acButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_recirculationButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_maxAcButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_fanControls_fanPlusButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_fanControls_fanIndicator_1']@class</td>
+	<td>mft_indicator indf_act show</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.label.auto_airflow</td>
+	<td>Auto</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_defrostButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_panelButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_bothButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_airflowControls_feetButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_acButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_recirculationButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='climate_frontControls_maxAcButton_1']@class</td>
+	<td>mft_indicator ind_inact show</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

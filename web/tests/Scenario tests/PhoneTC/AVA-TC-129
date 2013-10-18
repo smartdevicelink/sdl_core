@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-129</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-129</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_phone</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone']@class</td>
+	<td>ember-view phone_view inactive_state</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_dialpadButton']/span</td>
+	<td>Phone</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_quickdialButton']/span</td>
+	<td>Quick Dial</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_phonebookButton']/span</td>
+	<td>Phonebook</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_historyButton']/span</td>
+	<td>History</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_messagingButton']/span</td>
+	<td>Messaging</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_settingsButton']/span</td>
+	<td>Settings</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_menu_phonebookButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_menu_dialpadButton']@class</td>
+	<td>ember-view ffw-button notpressed ls-item lsp1_p active_in_helpmode phone_active</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_menu_phonebookButton']@class</td>
+	<td>ember-view ffw-button notpressed ls-item lsp1_p active_in_helpmode phone_active</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook']@class</td>
+	<td>ember-view active_state</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div[3]</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button disabled</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_phonebook_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

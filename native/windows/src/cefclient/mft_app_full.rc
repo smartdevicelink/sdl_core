@@ -1,0 +1,158 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Russian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MFT_APP_ICON_AVATAR_FULL ICON                    "mft_app_icon_avatar_full.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MFT_APP_SPLASH_AVATAR_FULL BITMAP                  "mft_app_splash_avatar_full.bmp"
+IDB_MFT_APP_SPLASH_AVATAR_FULL_FR BITMAP                  "mft_app_splash_avatar_full_fr.bmp"
+IDB_MFT_APP_SPLASH_AVATAR_FULL_SPA BITMAP                  "D:\\GitDepot\\ava\\native\\windows\\src\\mft_app_splash_avatar_full_spa.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_AVATAR ACCELERATORS 
+BEGIN
+    VK_OEM_PLUS,    ID_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
+    VK_OEM_MINUS,   ID_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
+END
+
+#endif    // Russian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 22, 17, 230, 75
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "System", 0, 0, 0x0
+BEGIN
+    ICON            107,IDC_MYICON,14,9,20,20
+    LTEXT           "Ford Avatar Version 1.0",IDC_STATIC,49,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2011",IDC_STATIC,49,20,119,8
+    DEFPUSHBUTTON   "OK",IDOK,195,6,30,11,WS_GROUP
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_APP_TITLE           "Ford Avatar"
+    IDC_CEFCLIENT_MCS_1     "MCS Concept 1"
+    IDC_CEFCLIENT_MCS_1_1   "MCS Concept 1.1"
+    IDC_CEFCLIENT_MCS_1_2   "MCS Concept 1.2"
+    IDC_CEFCLIENT_MCS_1_3   "MCS Concept 1.3"
+    IDC_CEFCLIENT_MCS_1_4   "MCS Concept 1.4"
+    IDC_CEFCLIENT           "Ford Avatar"
+    IDC_CEFCLIENT_MCS_1_5   "MCS Concept 1.5"
+    IDC_CEFCLIENT_MCS_2_1   "MCS Concept 2.1"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_CEFCLIENT_MCS_2_2   "MCS Concept 2.2"
+    IDC_CEFCLIENT_MCS_4_1   "MCS Concept 4.1"
+    IDC_CEFCLIENT_MCS_5_1   "MCS Concept 5.1"
+    IDC_CEFCLIENT_MCS_5_2   "MCS Concept 5.2"
+    IDC_CEFCLIENT_MCS_6_1   "MCS Concept 6.1"
+    IDC_CEFCLIENT_MCS_6_2   "MCS Concept 6.2"
+    IDC_CEFCLIENT_MCS_7_1   "MCS Concept 7.1"
+    IDC_CEFCLIENT_FR        "French Ford Avatar"
+    IDC_CEFCLIENT_SPA       "Spanish Ford Avatar"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

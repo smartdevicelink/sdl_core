@@ -1,0 +1,230 @@
+/*
+ * 
+ * @name Backend
+ * 
+ * @desc Backend component
+ * 		The aim of this component is to store/load settings of application 
+ * 		from OS. Such as: full screen mode, first app start and so on
+ * 
+ * @category	RPC component
+ * @filesource	common/Interfaces/backend.json
+ * @version	1.0
+ *
+ * @author	Sergey Solovey
+ *
+ */
+{
+    "transport": 	"???",
+    "envelope": 	"JSON-RPC",
+    "serviceUrl": 	"/localhost",
+    
+    /* custom errors */
+    "errors": [
+        {
+            "name": "RequestNotHandled",
+            "code": -1,
+            "description": "The request has been received and parsed correctly, but the component couldn't handle it."
+        },
+        {
+            "name": "CantSendEmail",
+            "code": -2,
+            "description": "The current configuration of the device doesn't support email sending."
+        }
+    ],
+    
+    "methods": {
+	/*
+	 * @descr is it first application start?
+	 *
+	 * @returns
+	 *	returns true if it is first application starts after installation/update
+	 */ 
+        "Backend.isFirstStart": {
+	    	returns:  
+	    		{ isFirstStart: "boolean"}
+        },
+
+	/*
+ 	 * @descr is application in full screen mode?
+	 *
+	 * @returns  
+	 *
+	 *	returns true if application is in full screen mode
+	 */ 
+        "Backend.isFullScreen": {
+	    	returns: 
+	    		{ isFullScreen: "boolean"}
+        },
+
+	/*
+  	 * @descr provides WebView window size
+	 *
+	 * returns
+	 *	returns width and height of the WebView window
+	 */ 
+        "Backend.getWindowSize": {
+	    	returns: 
+	    		{ width: "integer", height: "integer"}
+        },
+
+	/*
+	 * @descr device's screen Density 
+	 *
+	 * @returns
+	 *	returns window's Density (constant for device)
+	 */ 
+        "Backend.getWindowDensity": {
+	    	returns:
+	    		{ windowDensity: "float"}
+        },
+
+	/*
+         * @descr Provide information about OS running the application
+	 *
+	 * @returns
+	 *	OS type (Windows, iOS, Android), 
+	 *	osVersion (i.e. 2.3.6), 
+	 *	true if it is native application
+	 *	false if it is running under browser (false is default value)
+	 */ 
+        "Backend.getOSInfo": {
+	    	returns:  
+	    		{ osType: "string", osVersion: "string", isNativeApplication: "boolean"}
+        },
+
+
+	/*
+ 	 * @descr does application have navigation maps?
+	 *
+	 * @returns  
+	 *
+	 *	returns true if application has maps
+	 */ 
+        "Backend.hasMaps": {
+	    	returns: 
+	    		{ hasMaps: "boolean"}
+        },
+
+	/*
+ 	 * @descr ask for vehicle model
+	 *
+	 * @returns  
+	 *
+	 *	returns string with vehicle model. Currently, one of the following:
+	 *   edge, explorer, escape_2013, f150_2013, flex_2013, focus, fusion_2013, taurus_2013
+	 */ 
+        "Backend.getVehicleModel": {
+	    	returns: 
+	    		{ vehicle: "string"}
+        },
+
+	/*
+	 * @descr Saves the hasMaps flag.
+	 */
+	"Backend.setHasMaps": {
+		"parameters": {
+			"hasMaps": {
+				"type": "boolean"
+			}
+		}
+	},
+        
+        /**
+         * @descr Toggles full screen. Changing the full screen property with
+         * this method WILL NOT trigger the Backend.onFullScreenChanged
+         * notification.
+         */
+        "Backend.setFullScreen": {
+            "parameters": {
+                "isFullScreen": {
+                    "type": "boolean"
+                }
+            }
+        },
+
+	/*
+	 * @descr Saves the current vehicle model. Currently, one of the following:
+	 *   edge, explorer, escape_2013, f150_2013, flex_2013, focus, fusion_2013, taurus_2013
+	 */
+	"Backend.setVehicleModel": {
+		"parameters": {
+			"vehicle": {
+				"type": "string"
+			}
+		}
+	},
+
+   /*
+	 * @descr log messages to native app 
+	 */ 
+        "Backend.logToOS": {
+            "parameters": {
+                "message": {
+                    "type": "string"
+                }
+            },
+        },
+    
+    /*
+     * @descr Requests the native part to open EULA.
+     *
+     * @returns "OK" on success, or a RequestNotHandled error if the feature is
+     * not available.
+     */
+    "Backend.openEULA": {
+    },
+    
+    /**
+     * @descr Should open a “compose new email” window in the native email app.
+     * The email will be sent to mftguide@ford.com and contain device info
+     * (e.g., “Sent from Pramita’s iPhone 6.1.4”) in the body of the email.
+     *
+     * @returns "OK" if the email window is opened, a CantSendEmail or a
+     * RequestNotHandled error otherwise.
+     */
+    "Backend.sendSupportEmail": {
+    },
+
+	// notifications
+	/*
+	 * @descr Sent when the web part is fully loaded and ready to be displayed.
+	 */
+	"Backend.onAppLoaded": {
+	},
+
+	/*
+	 * @descr Sent when fullscreen option is changed.
+	 */
+	"Backend.onFullScreenChanged": {
+		"parameters": {
+			"isFullScreen": "boolean"
+		}
+	},
+	
+	/*
+	 * @descr Sent when application's status has changed (active/not active).
+	 */
+	"Backend.onAppStatusChanged": {
+		"parameters": {
+			"appBecameActive": "boolean"
+		}
+	},
+	/*
+	 * @descr Sent when maps option is changed.
+	 */
+	"Backend.onHasMapsChanged": {
+		"parameters": {
+			"hasMaps": "boolean"
+		}
+	},	/*
+	 * @descr Sent when vehicle model option is changed.
+	 */
+	"Backend.onVehicleChanged": {
+		"parameters": {
+			"vehicle": "string"
+		}
+	},
+    }, //methods end
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

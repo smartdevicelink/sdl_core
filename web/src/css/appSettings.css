@@ -1,0 +1,282 @@
+/**
+ * App Settings module CSS
+ *
+ * @category	Style Sheets
+ * @filesource	css/appSettings.css
+ */
+
+#app-settings-button{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 140px;
+    height: 49px;
+    cursor: pointer;
+    background: url(../images/help/app-settings-btn.png) no-repeat 0 0;
+    -webkit-transition: left 0.1s ease-in-out;
+
+}
+#app-btn-skew{
+    pointer-events: all;
+    width: 140px;
+    height: 49px;
+    -webkit-transform: skewX(43deg);
+    margin-left: 25px;
+}
+#app-settings-button.pressed{
+    background-image: url(../images/help/app-settings-btn-press.png);
+}
+.helpmode #app-settings-button {
+    left: -72px;
+}
+#app-settings-button.show-btn{
+    -webkit-animation: settings-button-show .5s;
+    -webkit-transform: translateX(0);
+}
+#app-settings-button.hide-btn{
+    -webkit-animation: settings-button-hide .5s;
+}
+#app-settings-button .btn-3ind{
+    left: 45px;
+    top:11px;
+}
+.btn-3ind > div{
+    background: #969696;
+    width: 24px;
+    height: 4px;
+    position: relative;
+    border-radius: 2px;
+    box-shadow: 0 0 5px 0 #969696;
+    margin-bottom: 5px;
+}
+#app-settings-button.active .btn-3ind > div{
+    background: #f3c800;
+    box-shadow: 0 0 6px 0 #f3c800
+}
+.appsettings-block{
+    position: absolute !important;
+    width: 760px;
+    height: 350px;
+    top:0;
+    left: 0;
+    padding: 30px 20px 20px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#363636), to(#626262));
+    background: -webkit-linear-gradient(top, #363636, #626262);
+}
+.appsettings-head{
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+.appsettings-block .list-item, .appsettings-block .lableToggleButton{
+    height: 65px;
+    line-height: 65px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#808080), to(#000));
+    background: -webkit-linear-gradient(top, #808080, #000);
+    font-size: 28px;
+}
+.appsettings-block .lableToggleButton{
+    background: #000;
+}
+.appsettings-block .toogleButtonContainer{
+    margin-top: 7px;
+    height: 50px;
+}
+.appsettings-block .toogleButtonContainer .toggles{
+    width: 100px;
+    height: 50px;
+}
+.appsettings-block .toogleButtonContainer .toggles span{
+    line-height: 50px;
+}
+.appsettings-block .button{
+    font-size: 24px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#808080), to(#000));
+    background: -webkit-linear-gradient(top, #808080, #000);
+    text-align: center;
+}
+.appsettings-block .button.active, .appsettings-block .button.pressed{
+    background: -webkit-gradient(linear, left top, left bottom, from(#434343), to(#808080));
+    background: -webkit-linear-gradient(top, #434343, #808080);
+}
+.appsettings-block .toogleButtonContainer .delim{
+    height: 48px;
+}
+.appsettings-block .arrow-ico{
+    top: 6px;
+}
+#appSettings{
+    top:45px;
+    z-index: 5;
+}
+#appSettings div{
+    position: relative;
+}
+#appSettings .backButton{
+    position: absolute !important;
+    top: 20px;
+    left: 45px;
+}
+#appSettings .backButton .ico{
+    margin-left: 0;
+}
+#appSettings .lableToggle{
+    float: left;
+}
+#appSettings .list-item > span, #appSettings .lableToggle > span {
+    margin-left: 40px;
+}
+.center-btn{
+    width: 700px;
+    margin: 0 auto;
+}
+#appsettings-configure-sdcard{
+    margin-bottom: 20px;
+}
+#apps-vehicle-label{
+    float: left;
+    font-size: 28px;
+    width: 120px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+#appSettings #appSettingsAppRate .app_rate_message {
+    font-size: 19px;
+    text-align: justify;
+    font-weight: bold;
+    margin: 36px 90px 0 90px;
+    line-height: 24px;
+}
+#appSettings #appSettingsAppRate .app_rate_message .text {
+    margin-bottom: 32px;
+    height: 100px;
+}
+#appSettings #appSettingsAppRate .app_rate_message .thanks {
+    text-align: center;
+    margin-bottom: 32px;
+}
+#appSettings #appSettingsAppRate #rate_now_button {
+    margin: 0 auto;
+    height: 50px;
+    width: 230px;
+    line-height: 50px;
+}
+#apps-vehicle-list{
+    float: right;
+    width: 548px;
+}
+#apps-vehicle-list .button{
+    width: 135px;
+    height: 60px;
+    line-height: 60px;
+    display: inline-block;
+    border: 1px solid #393939;
+    border-radius: 2px;
+}
+#appSettings .list-item > .second-text{
+    font-size: 22px;
+    margin-left: 10px;
+}
+#apps-version-block{
+    background: #000;
+}
+#apps-version-block > div{
+    float: right;
+    padding-right: 15px;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+#navsdcard-on-btn{
+    border-right: #393939 2px solid;
+}
+
+/* Rating dialogues */
+#errorSendMailPopup {
+    position: absolute!important;
+    top: -45px;
+    left: 0;
+    width: 800px;
+    height: 480px;
+    z-index: 100000;
+    opacity: 0;
+    -webkit-transition: opacity 0.5s ease;
+    -webkit-transform: translateX(-2000px);
+}
+
+#errorSendMailPopup.popUpIsVisible{
+    -webkit-transform: translateX(0px) !important;
+    -webkit-transition: opacity 1s ease;
+    opacity: 1;
+}
+
+#errorSendMailPopup div {
+    position: absolute!important;
+}
+#errorSendMailPopup .wrapper {
+    width: 800px;
+    height: 480px;
+}
+
+#errorSendMailPopup .content {
+    top: 72px;
+    left: 146px;
+    width: 500px;
+    height: 330px;
+    background: #000;
+    border: 3px solid #ffff68;
+    box-shadow: -1px 0 22px 5px #ffff68;
+    border-radius: 11px;
+}
+
+#errorSendMailPopup .icon {
+    background-image: url(../images/common/error-sign.png);
+    margin: 28px 0 0 26px;
+    width: 57px;
+    height: 51px;
+}
+
+#errorSendMailPopup .title {
+    top: 45px;
+    left: 80px;
+    width: 405px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#errorSendMailPopup .separator {
+    position: absolute;
+    top: 98px;
+    left: 26px;
+    background: #fff;
+    width: 453px;
+    height: 2px;
+}
+
+#errorSendMailPopup .text {
+    top: 150px;
+    left: 69px;
+    font-size: 20px;
+    text-align: center;
+    width: 370px;
+}
+
+#errorSendMailPopup .ffw-button {
+    left: 50%;
+    margin-left: -96px;
+    width: 195px;
+    height: 50px;
+    border: 2px solid #ffff68;
+    border-radius: 3px;
+    font-size: 20px;
+    text-align: center;
+}
+
+#errorSendMailPopup .okButton {
+    top: 246px;
+}
+
+#errorSendMailPopup .ffw-button span {
+    line-height: 54px;
+}

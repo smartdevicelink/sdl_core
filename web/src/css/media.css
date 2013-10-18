@@ -1,0 +1,2152 @@
+/*MEDIA*/
+
+/* Backgrpund for active toogleButton*/
+#media .toogleButtonContainer .active {
+    background: url(../images/media/bcs-item_bg_act.png);
+}
+
+/*LEFT MENU*/
+
+#media_leftmenu {
+    z-index: 5;
+    position: absolute;
+    top: 90px;
+    left: 0;
+    width: 150px;
+    height: 300px;
+    background: #333;
+}
+
+#media_directTune {
+    z-index: 503;
+    position: absolute;
+    top: 290px;
+    left: 165px;
+    width: 468px;
+    height: 100px;
+    border: 1px solid #393939;
+    border-radius: 3px;
+    visibility: hidden;
+}
+
+/* Direct Tune */
+#media_directTune_tuneButtons, #media_directTune_sirius_tuneButtons {
+    width: 390px;
+    height: 99px;
+
+}
+
+#media_directTune_keyBack {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+}
+
+#media_directTune_keyEnter {
+    position: absolute !important;
+    right: 0;
+    bottom: 0;
+}
+
+#media_directTune .key {
+    position: relative;
+    float: left;
+    width: 77px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 20px;
+    border-right: 1px solid #393939;
+    cursor: pointer;
+    background: url("../images/media/direct_tune_bg_s.png") repeat;
+}
+
+#media_directTune .key.pressed {
+    background: url("../images/media/direct_tune_bg_s_pressed.png") repeat !important;
+}
+
+/*AM*/
+
+.info_wrapper, .hdInfo {
+    position: relative;
+}
+#media_amButton {
+    top: 10px;
+    display: none;
+}
+
+#media_amButton div {
+    width: 22px;
+    height: 18px;
+    left: 120px;
+    bottom: -12px;
+    position: relative;
+    margin-top: -10px;
+}
+
+#media_amButton div.small_ind_def {
+    background: url(../images/media/passive_led.png) no-repeat;
+}
+
+#media_amButton div.small_ind_active {
+    background: url(../images/media/active_led.png) no-repeat;
+}
+
+/*FM*/
+
+#media_fmButton {
+    top: 20px;
+    display: none;
+}
+
+#media_fmButton div {
+    width: 22px;
+    height: 18px;
+    left: 120px;
+    bottom: -9px;
+    position: relative;
+    margin-top: -10px;
+}
+
+#media_fmButton div.small_ind_def {
+    background: url(../images/media/passive_led.png) no-repeat;
+}
+
+#media_fmButton div.small_ind_active {
+    background: url(../images/media/active_led.png) no-repeat;
+}
+
+/*Bluetooth*/
+
+#media_btButton {
+    top: 10px;
+    font-size: 18px;
+    line-height: 48px;
+    display: block;
+}
+
+#media_btButton div {
+    width: 22px;
+    height: 18px;
+    left: 120px;
+    bottom: -9px;
+    position: relative;
+    margin-top: -10px;
+}
+
+#media_btButton div.small_ind_def {
+    background: url(../images/media/passive_led.png) no-repeat;
+}
+
+#media_btButton div.small_ind_active {
+    background: url(../images/media/active_led.png) no-repeat;
+}
+
+#media_btButton.ind_hidden div.small_ind_def,
+#media_btButton.ind_hidden div.small_ind_active {
+    visibility: hidden;
+}
+#media_btButton.ind_hidden > p {
+    width: 90px;
+}
+
+#media_btButton.displayed {
+    display: none !important;
+}
+
+#media_bluetooth {
+    width: 648px;
+    left: 152px;
+    top: 55px;
+}
+
+#media_bluetooth .bt-info {
+    top: 0;
+    left: 12px;
+    width: 490px;
+    height: 368px;
+}
+
+#deviceListBTPopup, #connectBTPopup {
+    left: 0;
+    top: 0;
+    z-index: 10000;
+}
+#deviceListBTPopup .popup-window {
+    width: 462px;
+    border-width: 2px;
+}
+#connectBTPopup .popup-window {
+    width: 300px;
+    border-width: 2px;
+
+}
+#deviceListBTPopup .popup-window > .label {
+    font-size: 24px;
+    letter-spacing: 0.1em;
+    margin-bottom: 60px;
+}
+#deviceListBTPopup .popup-window .ffw-button,
+#connectBTPopup .popup-window .ffw-button {
+    padding: 0;
+    margin: 0;
+    line-height: 48px;
+}
+#deviceListBTPopup .popup-window .close_button,
+#connectBTPopup .popup-window .close_button {
+    width: 100%;
+    height: 49px;
+}
+#deviceListBTPopup .popup-window .ffw-button.connected {
+    background: url(../images/media/ls-item_bg_act.png) repeat-x !important;
+    color: #fff;
+}
+#connectBTPopup .popup-window .label {
+    padding-top: 50px;
+    margin: 100px 50px 36px 50px;
+    position: relative;
+}
+#connectBTPopup .popup-window .label:after {
+    content: " ";
+    display: block;
+    width: 100%;
+    height: 50px;
+    background: url("../images/common/wait.gif") 50% 0 no-repeat;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/*SIRIUS*/
+
+#media_sirius {
+    z-index: 502;
+}
+
+#media_siriusButton {
+    top: 30px;
+    display: none;
+}
+
+#media_siriusButton div {
+    width: 22px;
+    height: 18px;
+    left: 120px;
+    bottom: -9px;
+    position: relative;
+    margin-top: -10px;
+}
+
+#media_siriusButton div.small_ind_def {
+    background: url(../images/media/passive_led.png) no-repeat;
+}
+
+#media_siriusButton div.small_ind_active {
+    background: url(../images/media/active_led.png) no-repeat;
+}
+
+/* Change PIN View*/
+#media_sirius_options_PTYCategory_changePIN_view {
+    top: 0;
+    left: 0;
+    width: 800px;
+    height: 384px;
+    background-color: black;
+    font-size: 26px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_view .backButton,
+#media_sirius_options_PTYCategory_changePIN_view .block-header-title {
+    margin-top: 11px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_enterPad_label {
+    position: absolute;
+    top: 85px;
+    right: 518px;
+    font-size: 24px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_enterPad {
+    position: absolute;
+    top: 74px;
+    left: 285px;
+    width: 240px;
+    height: 289px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_PIN {
+    position: relative;
+    float: left;
+    width: 228px;
+    height: 48px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    text-align: center;
+}
+
+#media_sirius_options_PTYCategory_changePIN_enterPad .digitButton {
+    position: relative;
+    float: left;
+    height: 48px;
+    width: 68px;
+    border: 1px solid #393939;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 50px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_digit0 {
+    margin-left: 80px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_backspaceButton {
+    top: 74px;
+    right: 14px;
+    width: 63px;
+    height: 48px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_backspaceButton .ico {
+    margin-top: 15px;
+    margin-left: 19px;
+}
+
+#media_sirius_options_PTYCategory_changePIN_enterButton {
+    bottom: 21px;
+    right: 14px;
+    height: 48px;
+    width: 138px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    text-align: center;
+    line-height: 50px;
+    font-size: 24px;
+}
+
+/*CD,USB*/
+
+#media_cdButton, #media_usbButton {
+    top: 30px;
+    font-size: 18px;
+    padding-left: 48px;
+    line-height: 48px;
+    display: none;
+}
+
+.media_options_back_btn {
+    top: 11px;
+}
+
+.media_option_title_header {
+    top: 19px;
+}
+
+.media_options_view.usb .lablePlusButton .button {
+    width: 148px;
+    text-align: center;
+}
+
+.media_options_view.usb .lablePlusButton .button span {
+    margin-left: 0;
+}
+
+.media_options_view.sirius .fr #media_options_list_item1 .label {
+    line-height: 20px;
+    width: 346px;
+    margin: 3px 0 0 13px;
+}
+
+.media_options_view.sirius .fr #media_options_list_item1 .label span {
+    margin: 0 0 0 0;
+}
+
+/* Media option Refresh Preset Popup*/
+.optionPopup {
+    background: #000;
+    border: 1px solid #a03333;
+    border-radius: 3px;
+    font-size: 23px;
+    font-weight: bold;
+    height: 75px;
+    left: 271px;
+    line-height: 68px;
+    text-align: center;
+    top: 170px;
+    width: 250px;
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.optionPopup.popUpIsVisible {
+    -webkit-transition: opacity 1s ease;
+    opacity: 1;
+}
+.popup{
+    background: rgba(0, 0, 0, .5);
+    z-index: 1;
+    width: 800px;
+    height: 480px;
+    left: -152px;
+    top: -70px;
+    opacity: 0;
+    display: none;
+    text-align: center;
+}
+.helpmode .popup{
+    z-index: auto;
+}
+.popup:before{
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    content: "";
+}
+
+.popup  div{
+    position: static;
+}
+
+.popup-window{
+    background: #000;
+    border: 1px solid #a03333;
+    border-radius: 3px;
+    font-size: 18px;
+    text-align: center;
+    display: inline-block;
+    padding: 10px;
+    vertical-align: middle;
+}
+.popup-window .ffw-button{
+    display: inline-block;
+    padding: 0 15px;
+    border: 1px solid #393939;
+    margin: 0 5px;
+    line-height: 60px;
+}
+#tagStorePopupFormLabel{
+    margin-bottom: 20px;
+    line-height: 1.4em;
+}
+#tagStorePopup .popup-window {
+    min-width: 260px;
+}
+
+/* Media options PTY Category view*/
+.media_options_PTYCategory_view {
+    top: 0;
+    width: 800px;
+    height: 432px;
+    background-color: black;
+    font-size: 20px;
+}
+
+.media_options_PTYCategory_back_btn {
+    top: 11px;
+}
+
+.media_options_PTYCategory_title_header {
+    top: 19px;
+}
+
+.media_options_PTYCategory_listTitile {
+    top: 57px;
+    left: 65px;
+}
+
+.media_options_PTYCategory_listTitile span {
+    font-size: 20px;
+}
+
+.media_options_PTYCategory_list {
+    width: 730px !important;
+}
+
+.media_options_PTYCategory_list .list-item {
+    position: relative;
+    width: 670px;
+    float: left;
+    height: 49px;
+    border-bottom: 1px solid #393939;
+    line-height: 50px;
+
+}
+
+.media_options_PTYCategory_list .list-content {
+    width: 670px;
+}
+
+.media_options_PTYCategory_list .list-item {
+    position: relative;
+    width: 670px;
+    float: left;
+    height: 49px;
+    border-bottom: 1px solid #393939;
+    line-height: 50px;
+}
+
+.media_options_PTYCategory_list span {
+    margin-left: 13px;
+    position: relative;
+}
+
+.media_options_PTYCategory_list .list-item.active-category {
+    background: url(../images/media/ls-item_bg_act.png) repeat-x !important;
+    color: #fff !important;;
+}
+
+/* Media options Device Information view*/
+.media_options_deviceInformation_view {
+    top: 0;
+    width: 800px;
+    height: 432px;
+    background-color: black;
+    font-size: 20px;
+}
+
+.media_options_deviceInformation_back_btn {
+    top: 11px;
+}
+
+.media_options_deviceInformation_title_header {
+    top: 19px;
+}
+
+.media_options_deviceInformation_deviceImage {
+    margin-top: 91px;
+    margin-left: 5px;
+    height: 251px;
+    width: 251px;
+}
+
+.media_options_deviceInformation_view.usb .media_options_deviceInformation_deviceImage {
+    background-image: url(../images/media/media_usb_options_deviceInfo_image.png)
+}
+
+.media_options_deviceInformation_view.bt .media_options_deviceInformation_deviceImage {
+    background-image: url(../images/media/media_bt_options_deviceInfo_image.png)
+}
+
+.media_options_deviceInformation_view.sd .media_options_deviceInformation_deviceImage {
+    background-image: url(../images/media/media_usbSD_options_deviceInfo_image.png)
+}
+
+.media_options_deviceInformation_list {
+    margin-top: 91px;
+    margin-left: 266px !important;
+    width: 531px !important;
+    height: 251px !important;
+}
+
+.media_options_deviceInformation_list .list-item {
+    position: relative !important;
+    width: 471px !important;
+    float: left !important;
+    height: 49px !important;
+    border-bottom: 1px solid #393939;
+    line-height: 50px;
+
+}
+
+.media_options_deviceInformation_list .list-content {
+    width: 471px !important;
+}
+
+.media_options_deviceInformation_list span {
+    margin-left: 13px !important;
+}
+
+/* Media index updating */
+.bottom_message {
+    bottom: 10px;
+    margin-left: 17px;
+    font-size: 20px;
+    opacity: 0;
+    z-index: 1002;
+    pointer-events: none;
+}
+
+/*SD*/
+
+#media_sdButton {
+    font-size: 18px;
+    padding-left: 48px;
+    line-height: 48px;
+    display: block;
+    top: 10px;
+    z-index: 1;
+}
+
+#media_sdButton.displayed {
+    display: none !important;
+}
+
+.media_options_view.sd .lablePlusButton .button {
+    width: 148px;
+    text-align: center;
+}
+
+.media_options_view.sd .lablePlusButton .button span {
+    margin-left: 0;
+}
+
+/*AVIN*/
+
+#media_avinButton {
+    top: 10px;
+    font-size: 18px;
+    padding-left: 48px;
+    line-height: 48px;
+    display: block;
+    z-index: 1;
+}
+
+#media_avinButton.displayed {
+    display: none !important;
+}
+
+/*SCROLL DOWN*/
+
+#media_scrolldownButton {
+    top: 30px;
+    display: none;
+}
+
+#media_scrolldownButton img {
+    left: 50px;
+}
+
+/*SCROLL UP*/
+
+#media_scrollupButton {
+    display: block;
+}
+
+#media_scrollupButton.displayed {
+    display: none !important;
+}
+
+#media_scrollupButton img {
+    left: 50px;
+}
+
+.displayed {
+    display: block !important;
+}
+
+#media_status {
+    bottom: 0;
+    left: 0;
+    font-size: 21px;
+    width: 324px;
+    height: 48px;
+    cursor: pointer;
+    background: url(../images/common/media-status-bg.png) no-repeat;
+    z-index: 10;
+}
+
+#media_status_homestatus {
+    position: absolute;
+    visibility: hidden;
+    width: 100%;
+    line-height: 50px;
+}
+
+#media_status_homestatus span {
+    padding-left: 11px;
+}
+
+#media_leftmenu .ls_border {
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 153px;
+    height: 306px;
+    background: url(../images/common/ls_border.png) no-repeat;
+}
+
+.media-ls-items {
+    position: relative;
+    width: 150px;
+    height: 300px;
+}
+
+.media-ls-item {
+    position: relative;
+    height: 50px;
+    cursor: pointer;
+    background: url(../images/media/ls-item_bg.png) no-repeat;
+}
+
+.media-ls-item.active_menu {
+    background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
+}
+
+.media-ls-item > .bg {
+    z-index: 201;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 50px;
+}
+
+.media-ls-item > .ico {
+    z-index: 299;
+    position: absolute;
+    left: 0;
+    width: 50px;
+    height: 50px;
+}
+
+.media-ls-item > .ico.more {
+    left: 50px;
+}
+
+.media-ls-item > p {
+    z-index: 298;
+    position: absolute;
+    left: 48px;
+    width: 74px;
+    height: 50px;
+    font-size: 18px;
+    line-height: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.media-ls-item > .led {
+    z-index: 299;
+    position: absolute;
+    top: 0;
+    right: 8px;
+    width: 24px;
+    height: 50px;
+}
+
+.media-ls-item.empty {
+    background: #333333;
+}
+
+.right-stock-player {
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+    left: 492px;
+    top: 37px;
+}
+
+.right-stock {
+    position: relative;
+    margin-top: 37px;
+    margin-right: 4px;
+    float: right;
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+}
+
+.right-stock-bt {
+    position: absolute;
+    top: 35px;
+    right: -151px;
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+}
+
+.right-menu-fm {
+    z-index: 200;
+    position: relative;
+    margin-top: -154px;
+    margin-right: -162px;
+    float: right;
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+}
+
+.right-stock .ico, .right-menu-fm .ico {
+    opacity: 1 !important;
+}
+
+.rs-item {
+    position: relative;
+    width: 135px;
+    height: 49px;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    font-size: 18px;
+    line-height: 46px;
+    padding-left: 15px;
+}
+
+.rs-item.notpressed {
+    background: url(../images/list/list_item_bg.png) repeat-x;
+}
+
+.rs-item.pressed {
+    background: url(../images/list/list_item_pressed.png) repeat-x !important;
+}
+
+.led-hd {
+    height: 32px !important;
+    width: 19px !important;
+    top: 8px !important;
+    left: 116px;
+}
+
+.rs-item > .ico {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    width: 24px;
+    height: 50px;
+}
+
+.bcs_border {
+    z-index: 299;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 466px;
+    height: 98px;
+    border: 1px solid #393939;
+    border-radius: 3px;
+}
+
+.bcs_divider1 {
+    z-index: 298;
+    position: absolute;
+    top: 0px;
+    left: 154px;
+}
+
+.bcs_divider2 {
+    z-index: 298;
+    position: absolute;
+    top: 0;
+    left: 310px;
+}
+
+.main-preset-buttons-wraper {
+    position: relative;
+    width: 468px;
+    height: 100px;
+    float: left;
+    margin-left: 165px;
+    margin-top: 290px;
+    z-index: 1;
+}
+
+.main-preset-buttons-wraper .preset-items {
+    position: relative;
+    width: 467px;
+    height: 99px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+}
+
+.main-preset-buttons-wraper .preset-item {
+    position: relative;
+    float: left;
+    width: 155px;
+    height: 49px;
+    cursor: pointer;
+}
+
+.main-preset-buttons-wraper .preset-item.a0 {
+    background: url(../images/media/bcs-item_bgL.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+}
+
+.main-preset-buttons-wraper .preset-item.a0.pressed {
+    background: url(../images/media/bcs-item_bgL_pressed.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a0.active {
+    background: url(../images/media/bcs-item_bg_act.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a1 {
+    background: url(../images/media/bcs-item_bgS.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+    width: 157px;
+}
+
+.main-preset-buttons-wraper .preset-item.a1.pressed {
+    background: url(../images/media/bcs-item_bgS_pressed.png) no-repeat;
+    width: 157px;
+}
+
+.main-preset-buttons-wraper .preset-item.a1.active {
+    background: url(../images/media/bcs-item_bg_act.png) repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a2 {
+    background: url(../images/media/bcs-item_bgR.png) no-repeat;
+    border-bottom: 1px solid #393939;
+    width: 153px;
+}
+
+.main-preset-buttons-wraper .preset-item.a2.pressed {
+    background: url(../images/media/bcs-item_bgR_pressed.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a2.active {
+    background: url(../images/media/bcs-item_bg_act.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a3 {
+    background: url(../images/media/bcs-item_bgL.png) no-repeat;
+    border-right: 1px solid #393939;
+}
+
+.main-preset-buttons-wraper .preset-item.a3.pressed {
+    background: url(../images/media/bcs-item_bgL_pressed.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a3.active {
+    background: url(../images/media/bcs-item_bg_act.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a4 {
+    background: url(../images/media/bcs-item_bgS.png) no-repeat;
+    border-right: 1px solid #393939;
+    width: 157px;
+}
+
+.main-preset-buttons-wraper .preset-item.a4.pressed {
+    background: url(../images/media/bcs-item_bgS_pressed.png) no-repeat;
+    width: 157px;
+}
+
+.main-preset-buttons-wraper .preset-item.a4.active {
+    background: url(../images/media/bcs-item_bg_act.png) repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a5 {
+    background: url(../images/media/bcs-item_bgR.png) no-repeat;
+    width: 153px;
+}
+
+.main-preset-buttons-wraper .preset-item.a5.pressed {
+    background: url(../images/media/bcs-item_bgR_pressed.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item.a5.active {
+    background: url(../images/media/bcs-item_bg_act.png) no-repeat;
+}
+
+.main-preset-buttons-wraper .preset-item > .bg {
+    z-index: 201;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 155px;
+    height: 49px;
+}
+
+.main-preset-buttons-wraper .preset-item > span {
+    display: block;
+    position: absolute;
+    left: 10px;
+    width: 30px;
+    height: 50px;
+    font-size: 32px;
+    line-height: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #999;
+}
+
+.main-preset-buttons-wraper .preset-item > p {
+    position: absolute;
+    left: 40px;
+    width: 100px;
+    height: 50px;
+    font-size: 18px;
+    line-height: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.home-preset-buttons-wraper {
+    top: 82px;
+    left: 34px;
+}
+
+.home-preset-buttons-wraper .preset-items {
+    border-radius: 3px;
+    border: 1px solid #393939;
+    width: 328px;
+    height: 79px;
+}
+
+#home_presets_yellow_box {
+    border-radius: 3px;
+    border: 1px solid #393939;
+    width: 328px;
+    height: 79px;
+    cursor: pointer;
+    background: none;
+}
+
+.home-preset-buttons-wraper .preset-item {
+    position: relative;
+    float: left;
+    width: 109px;
+    height: 39px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 39px;
+}
+
+.home-preset-buttons-wraper .preset-item.a0 {
+    background: url(../images/media/h-media-l-bg.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+}
+
+.home-preset-buttons-wraper .preset-item.a0.pressed {
+    background: url(../images/media/h-media-l-bg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a0.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a1 {
+    background: url(../images/media/h-media-sbg.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+}
+
+.home-preset-buttons-wraper .preset-item.a1.pressed {
+    background: url(../images/media/h-media-sbg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a1.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a2 {
+    background: url(../images/media/h-media-rbg.png) no-repeat;
+    border-bottom: 1px solid #393939;
+    width: 108px;
+}
+
+.home-preset-buttons-wraper .preset-item.a2.pressed {
+    background: url(../images/media/h-media-rbg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a2.active {
+    background: url(../images/media/h-media-actbg.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a3 {
+    background: url(../images/media/h-media-l-bg.png) no-repeat;
+    border-right: 1px solid #393939;
+}
+
+.home-preset-buttons-wraper .preset-item.a3.pressed {
+    background: url(../images/media/h-media-l-bg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a3.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a4 {
+    background: url(../images/media/h-media-sbg.png) no-repeat;
+    border-right: 1px solid #393939;
+}
+
+.home-preset-buttons-wraper .preset-item.a4.pressed {
+    background: url(../images/media/h-media-sbg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a4.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a5 {
+    background: url(../images/media/h-media-rbg.png) no-repeat;
+    width: 108px;
+}
+
+.home-preset-buttons-wraper .preset-item.a5.pressed {
+    background: url(../images/media/h-media-rbg-pressed.png) no-repeat;
+}
+
+.home-preset-buttons-wraper .preset-item.a5.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.bc-stock-numpad {
+    z-index: 200;
+    position: absolute;
+    top: 290px;
+    left: 165px;
+    width: 467px;
+    height: 99px;
+    border-top: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+    border-left: 1px solid #393939;
+    border-radius: 3px;
+    background: #000;
+}
+
+.media-antenna {
+    width: 50px;
+    height: 50px;
+    background: url(../images/media/ico_antenna.png) no-repeat;
+    right: 50px;
+    top: 0;
+}
+
+.sir-ico {
+    background: url(../images/media/ico_dog.png) no-repeat;
+    width: 50px;
+    height: 50px;
+    top: 0;
+    right: 50px;
+}
+
+.bc-item-big {
+    position: relative;
+    float: left;
+    width: 156px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.bc-item-big.prevcd, .bc-item-big.prevusb, .bc-item-big.prevsd, .bc-item-big.prevblue {
+    width: 155px;
+    height: 98px;
+    border-right: 1px solid #393939;
+    cursor: pointer;
+    background: url(../images/media/cd-prev-btn.png) no-repeat;
+}
+
+.bc-item-big.prevcd.pressed, .bc-item-big.prevusb.pressed, .bc-item-big.prevsd.pressed, .bc-item-big.prevblue.pressed {
+    background: url(../images/media/cd-prev-btn_pressed.png) no-repeat;
+}
+
+.bc-item-big.playcd {
+    width: 157px;
+    height: 98px;
+    border-right: 1px solid #393939;
+    cursor: pointer;
+    background: url(../images/media/cd_play_btn.png) no-repeat;
+}
+
+.playIcon {
+    position: absolute;
+    left: 66px;
+}
+
+.playIcon.hideicon {
+    visibility: hidden;
+}
+
+.playIcon.showicon {
+    visibility: visible;
+}
+
+.bc-item-big.playcd.pressed, .bc-item-big.playusb.pressed, .bc-item-big.playsd.pressed, .bc-item-big.playblue.pressed {
+    background: url(../images/media/cd_play_btn_pressed.png) no-repeat;
+}
+
+.bc-item-big.nextcd, .bc-item-big.nextusb, .bc-item-big.nextsd, .bc-item-big.nextblue {
+    width: 154px;
+    height: 98px;
+    cursor: pointer;
+    background: url(../images/media/cd-next-btn.png) no-repeat;
+}
+
+.bc-item-big.nextcd.pressed, .bc-item-big.nextusb.pressed, .bc-item-big.nextsd.pressed, .bc-item-big.nextblue.pressed {
+    background: url(../images/media/cd-next-btn_pressed.png) no-repeat;
+}
+
+#bt-bg {
+    background: url(../images/media/bt_bg.png) no-repeat;
+    width: 417px;
+    height: 258px;
+    position: relative;
+    float: left;
+    top: -44px;
+    left: 14px;
+}
+
+.bt_title {
+    display: block;
+    margin-top: 210px;
+    font-size: 32px;
+}
+.bt_artist {
+    display: block;
+    font-size: 24px;
+}
+
+#bt-dis-controls {
+    background: url(../images/media/disabled_player_controls.png) no-repeat;
+    width: 470px;
+    height: 100px;
+    position: relative;
+    bottom: 21px;
+    float: left;
+    margin-left: 13px;
+}
+
+#avin-line {
+    width: 151px;
+    height: 297px;
+    margin-top: 100px;
+    margin-left: 171px;
+}
+
+.player_controlls {
+    position: absolute;
+    top: 237px;
+    left: 13px;
+    width: 468px;
+    height: 99px;
+    background: url("../images/media/btn_bg.png") repeat;
+    border: 1px solid #393939;
+    border-radius: 3px;
+}
+
+.track-info {
+    position: absolute;
+    left: 13px;
+    width: 470px;
+    height: 190px;
+}
+
+.track-info .total {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    width: 300px;
+    text-align: left;
+    font-size: 20px;
+    color: #999;
+}
+
+.track-info > .title {
+    top: 110px;
+    font-size: 37px;
+    left: 7px;
+}
+
+.track-info > .track-number {
+    top: 153px;
+    font-size: 26px;
+    left: 10px;
+}
+
+.track-info > .time {
+    top: 190px;
+    font-size: 26px;
+    left: 10px;
+}
+
+.track-info > .divider_o {
+    top: 65px;
+}
+
+#cd_logo {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    width: 109px;
+    height: 109px;
+    background: url(../images/media/small-lazerhorse-image.png) no-repeat;
+}
+
+#usb_logo {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    width: 109px;
+    height: 109px;
+    background: url(../images/media/small-fall-image.png) no-repeat;
+}
+
+.dash {
+    position: relative;
+    bottom: 3px;
+    float: left;
+    margin-left: 7px;
+    margin-right: 7px;
+    font-size: 25px;
+}
+
+.browse {
+    z-index: 250;
+    position: absolute;
+    top: 80px;
+    left: 5px;
+    bottom: 90px;
+    right: 5px;
+}
+
+.act_ar_ba {
+    position: absolute;
+    left: 300px;
+}
+
+/******************** FOR MoreInfo View********************************/
+
+.moreInfo_view {
+    position: absolute;
+    width: 800px;
+    height: 480px;
+    background-image: url(../images/media/bg.png);
+}
+
+.moreInfo_backButton .ico {
+    position: absolute;
+    margin-top: 13px;
+    margin-left: 8px;
+}
+
+.moreInfo_backButton {
+    width: 48px;
+    height: 48px;
+    float: left;
+    position: relative;
+    margin-top: 88px;
+    margin-left: 5px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.moreInfo_title {
+    position: relative;
+    margin-left: 20px;
+    margin-top: 88px;
+    width: 400px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 26px;
+    float: left;
+}
+
+.cd_poster {
+    background: url(../images/media/big-lazerhorse-image.png) no-repeat;
+    width: 250px;
+    height: 250px;
+}
+
+#usb_poster {
+    background: url(../images/media/big-fall-image.png) no-repeat;
+    width: 250px;
+    height: 250px;
+}
+
+.moreInfo_image {
+    position: relative;
+    margin-top: 148px;
+    margin-left: 5px;
+    width: 250px;
+    height: 250px;
+    float: left;
+}
+
+.cd-more-info {
+    margin-top: 148px;
+    margin-left: 265px;
+    width: 530px;
+    height: 251px;
+    border-radius: 3px;
+}
+
+.cd-more-info .list-content {
+    width: 468px;
+    background: #000;
+}
+
+.cd-more-info .list-item span {
+    font-size: 20px;
+    position: absolute;
+    top: 13px;
+    left: 70px;
+    line-height: 25px;
+}
+
+.cd-more-info .list-item img {
+    margin-top: 1px;
+}
+
+.moreInfo_whatIsPlayingButton {
+    position: relative;
+    float: right;
+    margin-right: 65px;
+    margin-top: 88px;
+    width: 135px;
+    height: 48px;
+    border-radius: 2px;
+    border: 1px solid #393939;
+}
+
+.moreInfo_whatIsPlayingButton .ico {
+    padding: 12px 11px 11px 13px;
+    position: relative;
+    float: left;
+}
+
+.moreInfo_whatIsPlayingButton span {
+    position: relative;
+    width: 55px;
+    padding: 6px 0 0 5px;
+    float: left;
+}
+
+.fr .moreInfo_whatIsPlayingButton {
+    white-space: nowrap;
+}
+
+.fr .moreInfo_whatIsPlayingButton span {
+    padding: 14px 0 0 5px;
+}
+
+/* Media options */
+.media_options_view {
+    top: 48px;
+    width: 800px;
+    height: 432px;
+    background-color: black;
+    font-size: 20px;
+}
+
+.media_options_view .list {
+    margin-top: 91px;
+    margin-left: 65px;
+    width: 672px;
+    height: 251px;;
+}
+
+.media_options_view .list.disable-click span {
+    pointer-events: none;
+}
+
+.media_options_view .list .arrow-ico {
+    z-index: 0;
+}
+
+.media_options_view .list .list-content {
+    width: 670px;
+}
+
+.media_options_view .list .list-item {
+    position: relative;
+    width: 670px;
+    float: left;
+    height: 49px;
+    border-bottom: 1px solid #393939;
+    line-height: 50px;
+}
+
+.media_options_view .list span {
+    margin-left: 13px;
+    position: relative;
+}
+
+.media_options_view .list .toogleButtonContainer span {
+    margin-left: 0;
+}
+
+.media_options_view .list .list-item .ico {
+    float: right;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    margin-top: 9px;
+    margin-right: 9px;
+}
+
+.media_options_view .list .list-item.big-ico img {
+    float: right;
+    border: none;
+    margin-top: 4px;
+    margin-right: 9px;
+}
+
+.media_options_view .list .toogleButtonContainer {
+    width: 198px;
+}
+
+.media_options_view .list .toggles, .media_options_view .list .toggles span {
+    width: 98px;
+}
+
+.media_options_view .list .toogleButtonContainer .delim {
+    position: relative;
+    float: left;
+    border: none;
+    height: 28px;
+    width: 2px;
+    background: #393939;
+}
+
+.help-mode .media_options_view .list .toogleButtonContainer {
+    margin-right: 11px;
+}
+
+/******************** FOR Browse View********************************/
+.browse_view {
+    width: 800px;
+    height: 480px;
+    background: url(../images/media/bg.png) no-repeat;
+}
+
+.browse_view .backButton .ico {
+    position: absolute;
+    margin-top: 13px;
+    margin-left: 8px;
+}
+
+.browse_view .backButton {
+    top: 80px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.browse_view .title {
+    top: 89px;
+    left: 75px;
+    font-size: 26px;
+}
+
+.browse_view .browesAllSources {
+    width: 148px;
+    height: 96px;
+    top: 190px;
+    left: 5px;
+    border: 1px solid #333;
+
+}
+
+.browse_view .browesAllSources.notpressed {
+    background: url(../images/media/browse_all_button.png) repeat-x;
+}
+
+.browse_view .browesAllSources.pressed {
+    background: url(../images/media/browse_all_button_pressed.png);
+}
+
+.browse_view .browesAllSources span {
+    width: 105px;
+    position: absolute;
+    top: 21px;
+    left: 16px;
+    font-size: 20px;
+    line-height: 25px;
+    cursor: pointer;
+}
+
+.all_sources_span {
+    top: 46px !important;
+}
+
+.browse_view .browesAllSources .arrow-ico {
+    position: absolute;
+    top: 24px;
+    right: 4px;
+}
+
+.guidelist {
+    width: 630px;
+    height: 251px;
+    top: 140px;
+    left: 165px;
+    border-radius: 3px;
+}
+
+.guidelist .list-content {
+    width: 568px;
+}
+
+.guidelist .list-item .ico {
+    float: left;
+}
+
+.guidelist .list-item span {
+    font-size: 20px;
+    position: absolute;
+    left: 50px;
+}
+
+.guidelist .list-item span.right_text {
+    font-size: 18px;
+    position: relative;
+    left: -8px;
+}
+
+.usbbrowselist {
+    height: 101px;
+}
+
+.usbbrowselist .list-item span {
+    left: 5px;
+}
+
+.media_usb_browse_list.list .list-content .list-item span {
+    left: 5px !important;
+}
+
+.media_usb_browse_browseall_button {
+    top: 325px !important;
+}
+
+.browseAlllist {
+    width: 340px;
+    height: 201px;
+    top: 140px;
+    left: 65px;
+}
+
+.browseAlllist.disable-click span {
+    pointer-events: none;
+}
+
+.browseAlllist .list-content {
+    width: 330px;
+}
+
+.browseAlllist .list-content div {
+    cursor: pointer;
+}
+
+.browseAlllist .list-item span {
+    font-size: 20px;
+    position: absolute;
+}
+
+.avin-info {
+    top: 70px;
+    left: 152px;
+    width: 490px;
+    height: 368px;
+}
+
+.am-info, .fm-info, .sirius-info {
+    top: 70px;
+    left: 152px;
+    width: 648px;
+    height: 368px;
+}
+
+.am-info .right-stock, .fm-info .right-stock, .sirius-info .right-stock {
+    margin-top: 22px;
+}
+
+#fm-info-view {
+    width: 497px;
+
+}
+
+#mi-divider {
+    position: absolute;
+    top: 110px;
+    left: 0;
+}
+
+#sirius-right {
+    height: 250px;
+}
+
+#btn_alert {
+    position: absolute;
+    top: 140px;
+    right: 10px;
+}
+
+#cd-right {
+    height: 300px;
+}
+
+#cd-info {
+    z-index: 200;
+    position: absolute;
+    top: 80px;
+    left: 165px;
+    width: 470px;
+    height: 190px;
+}
+
+#usb-right {
+    height: 300px;
+}
+
+#sd-right {
+    height: 300px;
+}
+
+#sd-info {
+    z-index: 200;
+    position: absolute;
+    top: 80px;
+    left: 165px;
+    width: 470px;
+    height: 190px;
+}
+
+.divider_o {
+    position: absolute;
+    top: 120px;
+    left: 0;
+    width: 470px;
+    height: 1px;
+    background: url("../images/media/divider_o.png") no-repeat;
+}
+
+.equalizer {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    width: 104px;
+    text-align: right;
+    font-size: 24px;
+}
+
+.siriusband {
+    position: absolute;
+    top: 50px;
+    left: 13px;
+    font-size: 62px;
+    width: 400px;
+}
+
+.directune_band {
+    position: absolute;
+    top: 50px;
+    left: 13px;
+    font-size: 62px;
+    width: 400px;
+    display: none;
+}
+
+#band {
+    position: absolute;
+    top: 38px;
+    left: 18px;
+    font-size: 62px;
+}
+
+#band_dir {
+    position: absolute;
+    top: 38px;
+    left: 18px;
+    font-size: 62px;
+}
+
+.nonHDsonginfo {
+    text-transform: uppercase;
+    position: absolute;
+    font-size: 20px;
+    float: left;
+    top: 148px;
+    left: 15px;
+}
+
+.fmInfoHdIco {
+    position: absolute;
+    right: 328px;
+    top: 10px;
+    background: url(../images/media/hd_ico.png) no-repeat;
+    width: 149px;
+    height: 30px;
+}
+
+.channel {
+    position: absolute;
+    top: 15px;
+    left: 23px;
+    width: 300px;
+    text-align: left;
+    font-size: 20px;
+    color: #999999;
+}
+
+.STAName {
+    font-size: 22px;
+    top: 15px;
+    left: 23px;
+    position: absolute;
+}
+
+.fmgenre {
+    position: absolute;
+    top: 15px;
+    right: 16px;
+    width: 200px;
+    text-align: right;
+    font-size: 24px;
+}
+
+.siriusgenre {
+    position: absolute;
+    top: 15px;
+    left: 273px;
+    width: 200px;
+    text-align: right;
+    font-size: 24px;
+}
+
+.titanium {
+    top: 50px;
+    position: absolute;
+    left: 13px;
+    display: none;
+    background: url(../images/media/sirius-logo.png) no-repeat;
+    width: 215px;
+    height: 87px;
+}
+
+.hdtitle {
+    /*-webkit-transform: translateX(-1000px);*/
+    position: absolute;
+    top: 137px;
+    left: 19px;
+    font-size: 32px;
+}
+
+.hdartist {
+    /*-webkit-transform: translateX(-1000px);*/
+    position: absolute;
+    top: 175px;
+    left: 20px;
+    font-size: 20px;
+}
+
+.btn_tag {
+	position: absolute;
+	top: 150px;
+	right: 17px;
+	width:80px;
+	height:40px;
+    font-size: 19px;
+    line-height: 39px;
+    padding: 0 5px 0 6px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.btn_tag .ico{
+    vertical-align: middle;
+    margin: -4px 5px 0 0;
+}
+
+.btn_alert {
+    position: absolute;
+    top: 150px;
+    left: 393px;
+    width: 78px;
+    height: 38px;
+    text-align: center;
+    font-size: 19px;
+    line-height: 39px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.btn_alert.disabled {
+    color: #999 !important;
+}
+
+.siriustitle {
+    position: absolute;
+    top: 138px;
+    left: 20px;
+    font-size: 32px;
+    width: 400px;
+}
+
+.siriusartist {
+    position: absolute;
+    top: 175px;
+    left: 23px;
+    font-size: 20px;
+    width: 400px;
+}
+
+.hdButton .ico {
+    background: url(../images/media/passiv_horiz_led.png) no-repeat;
+    right: 8px;
+}
+
+.hdButton.isHd .ico {
+    background: url(../images/media/active_horiz_led.png) no-repeat !important;
+}
+
+.stationInfo {
+    width: 200px;
+    height: 50px;
+    left: 115px;
+    top: 29px;
+}
+
+.stationInfo .stationimg {
+    background: url(../images/media/ant.png) no-repeat;
+    width: 27px;
+    height: 28px;
+    top: 6px;
+}
+
+.stationInfo .station {
+    font-size: 36px;
+    left: 40px;
+    position: absolute;
+    width: 243px;
+}
+
+.homehdicon {
+    background: url(../images/media/hd-radio-ico.png) no-repeat !important;
+    width: 28px !important;
+}
+
+.stationInfo .siriusico {
+    background: url(../images/media/hsir-ico.png) no-repeat;
+    width: 26px;
+    height: 28px;
+    top: 6px;
+}
+
+.stationInfo .logo {
+    left: 40px;
+    position: absolute;
+    top: -22px;
+}
+
+.statusInfo {
+    width: 275px;
+    height: 48px;
+}
+
+.statusInfo .station {
+    top: 12px;
+    left: 11px;
+}
+
+.statusInfo .station span {
+    display: none;
+}
+
+.statusInfo .icon {
+    width: 50px;
+    height: 50px;
+    left: 224px;
+}
+
+.statusInfo .antenaIco {
+    background: url(../images/media/ico_antenna.png) no-repeat;
+}
+
+.statusInfo .statushdicon {
+    background: url(../images/media/hd-radio-ico.png) no-repeat !important;
+    width: 28px !important;
+    height: 28px !important;
+    top: 10px;
+    left: 241px !important;
+}
+
+.info_holder {
+    top: 42px;
+}
+
+.siriusIco {
+    background: url(../images/media/ico_sirius.png) no-repeat !important;
+}
+
+.cdIco {
+    background: url(../images/media/ico_cd.png) no-repeat !important
+}
+
+.usbIco {
+    background: url(../images/media/ico_usb.png) no-repeat !important
+}
+
+.sdIco {
+    background: url(../images/media/ico_sd.png) no-repeat !important
+}
+
+.btIco {
+    background: url(../images/media/ico_bt.png) no-repeat !important
+}
+
+.avIco {
+    background: url(../images/media/ico_li.png) no-repeat !important
+}
+
+.media_player_view_wrapper {
+    width: 648px;
+    left: 152px;
+    top: 55px;
+}
+
+#home_widgetMedia_cd {
+    width: 399px;
+    height: 193px
+}
+
+#home_widgetMedia_cd .album_title {
+    width: 400px;
+    text-align: center;
+    font-size: 28px;
+}
+
+#home_widgetMedia_cd .song_title {
+    width: 400px;
+    text-align: center;
+    font-size: 24px;
+    top: 33px;
+}
+
+#home_widgetMedia_cd .info {
+    top: 55px;
+    width: 400px;
+}
+
+#home_widgetMedia_cd .ico_holder {
+    width: 400px;
+    margin-top: -7px;
+}
+
+#home_widgetMedia_cd .ico {
+    margin-left: 45%;
+}
+
+#home_widgetMedia_bluetooth .title {
+    width: 400px;
+    text-align: center;
+    font-size: 24px;
+}
+
+#home_widgetMedia_bluetooth .info {
+    top: 55px;
+    width: 100%;
+}
+
+#home_widgetMedia_bluetooth .ico_holder {
+    width: 400px;
+    top: -7px;
+}
+
+#home_widgetMedia_bluetooth .bluetooth_ico {
+    background: url(../images/media/bt-h-ico.png) no-repeat;
+    width: 24px;
+    height: 30px;
+    margin-left: 48%;
+}
+
+#home_widgetMedia_avin .title {
+    width: 400px;
+    text-align: center;
+    font-size: 24px;
+}
+
+#home_widgetMedia_avin .info {
+    top: 55px;
+    width: 100%;
+}
+
+#home_widgetMedia_avin .ico_holder {
+    width: 400px;
+    top: -7px;
+}
+
+#home_widgetMedia_avin .avin_ico {
+    background: url(../images/media/line-h-ico.png) no-repeat;
+    width: 14px;
+    height: 36px;
+    margin-left: 48%;
+}
+
+/* HELP MODE*/
+
+
+/* replay button*/
+.replay_button_help {
+    border-bottom: none;
+    cursor: pointer;
+    margin-bottom: 1px;
+    z-index: 3;
+}
+
+/* browse button*/
+.browse_button_help {
+    border-bottom: none;
+    cursor: pointer;
+    z-index: 4;
+}
+
+/*scan button*/
+.scan_button_help {
+    cursor: pointer;
+    z-index: 4;
+    border-bottom: none;
+    margin-bottom: 1px;
+}
+
+/*direct tune*/
+.direct_button_help {
+    border-bottom: none;
+    cursor: pointer;
+    margin-bottom: 1px;
+    z-index: 3;
+}
+
+
+/* repeat button / hd button*/
+
+.helpmode .right-stock {
+    border: 1px solid transparent !important;
+}
+
+/* shuffle button*/
+.shuffleButton_help {
+    cursor: pointer;
+    z-index: 4;
+}
+
+/* more info button*/
+.moreinfoButton_help {
+    cursor: pointer;
+    z-index: 4;
+    margin-bottom: 1px;
+    border-bottom: none;
+}
+
+.amfmDirect {
+    top: 140px;
+}
+
+/* cancel scrollbar animation */
+.cancelBarAnimation {
+    -webkit-transition: none !important;
+}

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-325</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-325</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_scrolldownButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>3000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_sdButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>3000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.total</td>
+	<td>5/6</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.track-info &gt; div.title</td>
+	<td>Lazerhorse</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.track-number</td>
+	<td>Track 5</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.time</td>
+	<td>exact:0:00</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>css=div.time</td>
+	<td>trackTime</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_player_sd_view_controlls_play_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_player_sd_view_controlls_play_button']/img@class</td>
+	<td>playIcon hideicon visible</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertNotText</td>
+	<td>css=div.time</td>
+	<td>${trackTime}</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_player_sd_view_controlls_play_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_player_sd_view_controlls_play_button']/img@class</td>
+	<td>playIcon hideicon</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>css=div.time</td>
+	<td>trackTime</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.time</td>
+	<td>${trackTime}</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+

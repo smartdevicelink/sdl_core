@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-117</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-117</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='caution']/div[2]</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_media</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#ls_am &gt; p</td>
+	<td>AM 1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='am-preset']/div[1]@class</td>
+	<td>bcs-items am1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[3]/p</td>
+	<td>1270</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='am-preset']/div[1]/div[3]@class</td>
+	<td>bcs-item a3 am-1 active</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[1]/p</td>
+	<td>530</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[2]/p</td>
+	<td>950</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[4]/p</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[5]/p</td>
+	<td>1130</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='am-preset']/div[1]/div[6]/p</td>
+	<td>760</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=ls_more-down</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=ls_line-in</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='linein-info']@style</td>
+	<td>display: block;</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

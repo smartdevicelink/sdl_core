@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-333</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-333</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_amButton &gt; p</td>
+	<td>AM 1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_am_optionButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_option_am_title_header &gt; span</td>
+	<td>Options</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_options_list_item0 &gt; span</td>
+	<td>Sound Settings</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_options_list_item1']/div</td>
+	<td>Set PTY for Seek / Scan</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_options_list_item2']/div</td>
+	<td>RDS Text Display</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_options_list_item3']/div</td>
+	<td>Autoset Presets (AST)</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_options_list_item4']/div</td>
+	<td>TAG Button</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_options_list_item2']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button0 toggles button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_options_list_item2']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button1 toggles button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_options_list_item4']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button0 toggles button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_options_list_item4']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button1 toggles button disabled</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+

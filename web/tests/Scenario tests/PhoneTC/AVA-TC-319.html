@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-319</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-319</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_phone</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone']@class</td>
+	<td>ember-view phone_view inactive_state</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_dialpadButton']/span</td>
+	<td>Phone</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_quickdialButton']/span</td>
+	<td>Quick Dial</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_phonebookButton']/span</td>
+	<td>Phonebook</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_historyButton']/span</td>
+	<td>History</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_messagingButton']/span</td>
+	<td>Messaging</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_settingsButton']/span</td>
+	<td>Settings</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>css=#phone_menu_settingsButton &gt; span</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>css=#phone_settings_list_item5 &gt; span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>css=#phone_settings_list_item5 &gt; span</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_phoneSettings_textMessageNotification_title &gt; span</td>
+	<td>Text Message Notification</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_settings_textMessageNotification_list_item0 &gt; span</td>
+	<td>Alert 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_settings_textMessageNotification_list_item2 &gt; span</td>
+	<td>Alert 2</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_settings_textMessageNotification_list_item4 &gt; span</td>
+	<td>Alert 3</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_settings_textMessageNotification_list_item6 &gt; span</td>
+	<td>Text to Speech</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#phone_settings_textMessageNotification_list_item7 &gt; span</td>
+	<td>Silent</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=phone_settings_textMessageNotification_list_item1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=phone_settings_textMessageNotification_list_item3</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=phone_settings_textMessageNotification_list_item5</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=phone_settings_textMessageNotification_backButton</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
+

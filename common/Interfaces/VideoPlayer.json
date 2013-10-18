@@ -1,0 +1,73 @@
+// definition of Video interface
+// 
+// VideoPlayer provides access to native Android video player functionality
+// Since old versions of Android doesn't support <video> tag in web-browser,
+// it is necessary to use native video player.
+{
+    "transport": 	"???",
+    "envelope": 	"JSON-RPC",
+    "serviceUrl": 	"/localhost",
+
+    "methods": {
+
+        "VideoPlayer.start": {
+            "params": {
+                "videoName": {
+                    "type": "string"
+                },
+		"scale": {
+                    "type": "double"
+		},
+		"position": {
+		    "x": {
+	                "type": "integer"
+		    },
+		    "y": {
+	                "type": "integer"
+		    }
+		}
+            }
+        },
+
+        "VideoPlayer.stop": {
+        },
+
+        "VideoPlayer.pause": {
+        },
+
+        "VideoPlayer.resume": {
+        },
+
+        "VideoPlayer.setPosition": {
+            "params": {
+                "position": {
+                    "type": "string"
+                }
+            },
+        },
+
+        "VideoPlayer.getPosition": {
+        },
+        
+	// notification
+        "VideoPlayer.stateChanged": {
+            "params": {
+                "state": {
+                    "type": "string"
+                }
+            },
+        },
+
+	// notification
+        "VideoPlayer.positionChanged": {
+            "params": {
+                "position": {
+                    "type": "double"
+                }
+            },
+        },
+
+    }, //methods end
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

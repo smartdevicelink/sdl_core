@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-233</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-233</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_nav</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=mi</td>
+	<td>3.1mi</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=nav_location</td>
+	<td>Central Parkway</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=street</td>
+	<td>Main St</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>css=div.time-dest</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=distance</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_zoomout_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_zoomin_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_typeview_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_mapview_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_topmenu_destination_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=navigation_topmenu_menu_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=nav_top_menu_arrow</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_mapview_button']/div@class</td>
+	<td>small_ind_active</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_mapview_button']/div[2]@class</td>
+	<td>small_ind_def</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_mapview_button']/div[3]@class</td>
+	<td>small_ind_def</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_typeview_button']/div@class</td>
+	<td>small_ind_active</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_typeview_button']/div[2]@class</td>
+	<td>small_ind_def</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_typeview_button']/div[3]@class</td>
+	<td>small_ind_def</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_zoomin_button']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='navigation_zoomout_button']@class</td>
+	<td>ember-view ffw-button notpressed disabled</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=span.distance</td>
+	<td>exact:15mi0:27HRS</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,44 @@
+// definition of MessageBroker interface
+// MessageBroker routes the JSON-RPC commands within the system
+{
+    "transport": "???",
+    "envelope": "JSON-RPC",
+    "serviceUrl": "/localhost",
+    "methods": {
+        "MB.registerComponent": {
+            "parameters": {
+                "componentName": {
+                    "type": "string"
+                }
+            },
+            
+        },
+        "MB.unregisterComponent": {
+            "parameters": {
+                "componentName": {
+                    "type": "string"
+                }
+            },
+            
+        },
+        "MB.subscribeTo": {
+            "parameters": {
+                "propertyName": {     // Property name contains controller name and property name in format:
+                    "type": "string"  // ControllerName.PropertyName
+                }
+            },
+            
+        },
+        "MB.unsubscribeFrom": {
+            "parameters": {
+                "propertyName": {     // Property name contains controller name and property name in format:
+                    "type": "string"  // ControllerName.PropertyName
+                }
+            },
+            
+        },
+        
+    }, //methods end
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

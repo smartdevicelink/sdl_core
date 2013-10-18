@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-193">AVA-TC-193</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-207">AVA-TC-207</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-272">AVA-TC-272</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-273">AVA-TC-273</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-295">AVA-TC-295</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-274">AVA-TC-274</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-275">AVA-TC-275</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-276">AVA-TC-276</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-277">AVA-TC-277</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-278">AVA-TC-278</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-283">AVA-TC-283</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-284">AVA-TC-284</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-285">AVA-TC-285</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-208">AVA-TC-208</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-453">AVA-TC-453</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-1">AVA-TC-1</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-286">AVA-TC-286</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-2">AVA-TC-2</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-4">AVA-TC-4</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-6">AVA-TC-6</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-287">AVA-TC-287</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-7">AVA-TC-7</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-9">AVA-TC-9</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-177">AVA-TC-177</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-178">AVA-TC-178</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-216">AVA-TC-216</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-209">AVA-TC-209</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-179">AVA-TC-179</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-180">AVA-TC-180</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-12">AVA-TC-12</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-13">AVA-TC-13</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-14">AVA-TC-14</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-15">AVA-TC-15</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-16">AVA-TC-16</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-17">AVA-TC-17</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-18">AVA-TC-18</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-19">AVA-TC-19</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-20">AVA-TC-20</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-21">AVA-TC-21</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-22">AVA-TC-22</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-23">AVA-TC-23</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-24">AVA-TC-24</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-25">AVA-TC-25</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-26">AVA-TC-26</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-27">AVA-TC-27</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-28">AVA-TC-28</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-29">AVA-TC-29</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-30">AVA-TC-30</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-31">AVA-TC-31</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-32">AVA-TC-32</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-33">AVA-TC-33</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-34">AVA-TC-34</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-35">AVA-TC-35</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-36">AVA-TC-36</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-37">AVA-TC-37</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-38">AVA-TC-38</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-39">AVA-TC-39</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-40">AVA-TC-40</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-41">AVA-TC-41</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-42">AVA-TC-42</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-43">AVA-TC-43</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-44">AVA-TC-44</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-45">AVA-TC-45</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-46">AVA-TC-46</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-48">AVA-TC-48</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-49">AVA-TC-49</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-50">AVA-TC-50</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-51">AVA-TC-51</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-52">AVA-TC-52</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-53">AVA-TC-53</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-54">AVA-TC-54</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-55">AVA-TC-55</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-200">AVA-TC-200</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-201">AVA-TC-201</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-202">AVA-TC-202</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-217">AVA-TC-217</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-218">AVA-TC-218</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-219">AVA-TC-219</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-220">AVA-TC-220</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-206">AVA-TC-206</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-205">AVA-TC-205</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-470.html">AVA-TC-470</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-472.html">AVA-TC-472</a></td></tr>
+<tr><td><a href="ClimateTC/AVA-TC-560.html">AVA-TC-560</a></td></tr>
+</tbody></table>
+</body>
+</html>

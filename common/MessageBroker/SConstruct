@@ -1,0 +1,124 @@
+## 
+# MessageBroker build file.
+#
+
+import sys;
+import os;
+import platform as pltfrm;
+
+# Configure compiler arguments
+cflags = ['-std=c++98', '-Wall', '-Wextra', '-pedantic', '-Wredundant-decls', '-Wshadow', '-O2'];
+
+cpppath = [];
+libpath = [];
+
+# Command line parsing
+
+# Build with debug symbols or not
+if ARGUMENTS.get('mode', 0) == 'debug':
+  cflags.append('-g');
+
+# Installation directory
+if ARGUMENTS.get('prefix', 0) != 0:
+  install_dir =  ARGUMENTS.get('prefix', ''); 
+else:
+  if sys.platform == 'win32':
+      install_dir = 'C:\\MinGW\\';
+  else:
+    install_dir = '/usr/local';
+
+cpppath = [];
+libpath = [];
+linkflags = [];
+
+platform = "default";
+
+if sys.platform == 'win32':
+  platform = "mingw";
+  # Remove flags that cause compilation errors
+  cflags.remove('-std=c++98'); #::swprintf and ::vswprintf has not been declared
+#  linkflags.append('-enable-auto-import');
+  cpppath.append('-Ic:\\MinGW\\include');
+  cpppath.append('-Iinclude');
+  cpppath.append('-Isrc\\server');
+  cpppath.append('-Isrc\\client');
+  cpppath.append('-Isrc\\example');
+
+# Create an environment
+env = Environment(ENV= os.environ.copy(), tools = [platform, "doxygen"], toolpath = ['.', './doc'], CXXFLAGS = cflags, CPPPATH = cpppath, LIBPATH = libpath, LINKFLAGS = linkflags);
+
+# Sources and name of the JsonRpc-Cpp library
+lib_target  = 'messagebroker';
+
+lib_sources = ['src/lib_messagebroker/CMessageBroker.cpp',
+               'src/lib_messagebroker/system.cpp',
+               'src/lib_messagebroker/CMessageBrokerRegistry.cpp',
+               'src/lib_messagebroker/md5.cpp',
+               'src/lib_messagebroker/websocket_handler.cpp'];
+
+lib_includes = ['include/CMessageBroker.hpp',
+                'include/CSender.hpp',
+                'include/system.h',
+                'include/websocket_handler.hpp',
+                'include/CMessageBrokerRegistry.hpp'];
+                
+
+# Build libmessagebroker
+libs = ['json'];
+
+# Add winsock library for MS Windows
+if sys.platform == 'win32':
+  libs.append('ws2_32');
+else:
+  libs.append('pthread');
+
+libmessagebroker = env.SharedLibrary(target = lib_target, source = lib_sources, LIBS = libs);
+
+# Build examples
+libs.append('messagebroker');
+
+messagebroker_server = ['src/example/MessageBrokerServer.cpp',
+                        'src/example/MessageBrokerControllerAVA.cpp',
+                        'src/example/MessageBrokerControllerPhone.cpp',
+                        'src/example/MessageBrokerControllerBackend.cpp',
+                        'src/server/mb_server.cpp',
+                        'src/server/mb_tcpserver.cpp',
+                        'src/server/networking.cpp',
+                        'src/client/mb_controller.cpp',
+                        'src/client/mb_client.cpp',
+                        'src/client/mb_tcpclient.cpp'];
+
+mbserver = env.Program(target = 'MessageBrokerServer', source = messagebroker_server, LIBS = libs);
+
+# Install script
+env.Install(dir = install_dir + "/lib/", source = libmessagebroker);
+env.Install(dir = install_dir + "/include/messagebroker/", source = lib_includes);
+
+# Doxygen
+doxygen = env.Doxygen("Doxyfile");
+Clean(doxygen, "doc/doxygen.pyc");
+AlwaysBuild(doxygen);
+env.Alias('doxygen', doxygen);
+
+# Alias for targets
+env.Alias('build', [libmessagebroker]);
+env.Alias('examples', ['build', mbserver]);
+env.Alias('install', [install_dir]);
+env.Alias('all', ['build', 'examples']);
+#env.Alias('all', ['build', 'examples', 'doc', 'test']);
+
+# Help documentation
+Help("""
+Type: 'scons build' to build messagebroker library,
+      'scons install' to install shared library and include files on the system,
+      'scons doc' to build documentation (doxygen),
+      'scons all' to build everything,
+      'scons -c' to cleanup object and shared library files,
+      'scons -c install' to uninstall shared library and include files,
+      'scons -c all' to cleanup everything.
+      \n
+      Default target when launching scons without arguments is 'scons build'.
+""");
+
+# Default target when running scons without arguments
+Default('build');

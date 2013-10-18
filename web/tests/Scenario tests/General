@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-271">AVA-TC-271</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-356">AVA-TC-356</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-264">AVA-TC-264</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-265">AVA-TC-265</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-266">AVA-TC-266</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-267">AVA-TC-267</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-268">AVA-TC-268</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-269">AVA-TC-269</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-270">AVA-TC-270</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-313.html">AVA-TC-313</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-311.html">AVA-TC-311</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-312.html">AVA-TC-312</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-310.html">AVA-TC-310</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-452.html">AVA-TC-452</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-339.html">AVA-TC-339</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-437.html">AVA-TC-437</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-441.html">AVA-TC-441</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-308.html">AVA-TC-308</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-306.html">AVA-TC-306</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-307.html">AVA-TC-307</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-517.html">AVA-TC-517</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-523.html">AVA-TC-523</a></td></tr>
+<tr><td><a href="GeneralTC/AVA-TC-521.html">AVA-TC-521</a></td></tr>
+</tbody></table>
+</body>
+</html>

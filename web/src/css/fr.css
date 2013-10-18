@@ -1,0 +1,235 @@
+/** Welcome orientation */
+#app.fr #woSkipButton {
+	top: 402px;
+	width: 169px;
+	height: 64px;
+	line-height: 27px;
+}
+
+#app.fr #woSkipButton span {
+	position: relative;
+	top: 5px;
+}
+
+#warning_view .br { 
+	margin-top: 18px;
+}
+
+/** Video error Popup */
+#app.fr #video_error_popup .error-message.narrow {
+	width: 377px !important;
+}
+
+/** Navigation */
+#app.fr .nav2_ctrls{
+	font-size: 17px;	
+}
+
+#app.fr #nav_wyoming_street{
+	top: 193px;
+}
+
+#app.fr #nav_main_street {
+	top: 144px;
+}
+
+#app.fr #nav_outer {
+	top: 94px;
+}
+
+#app.fr #nav_mich{
+	top: 44px;
+}
+
+/** Navigation Destination */
+#app.fr #navigation_destination #navigation_destination_editRoute_Button span {
+	font-size: 18px;
+}
+
+#app.fr #navigation_destination_myHome_view .view {
+	left: 71px;
+	font-size: 18px;
+}
+
+#app.fr #view_navi_destination_map .poi {
+	top: 314px;
+	font-size: 18px;
+}
+
+#app.fr #view_navi_destination_map .view{
+	top: 122px;
+	left: -20px;
+	font-size: 18px;
+}
+
+#app.fr #street {
+	background-image:url(../images/nav/street_fr.png)
+}
+
+/* Phone */
+/** Phone settings Internet Data Connection */
+#app.fr #phone_settings_phoneRinger_dataUsage_label {
+	line-height: 21px
+}
+
+/** Phone settings phonebook */
+#app.fr #phone_settings_phoneBook_list_item0 .lableToggle {
+	line-height: 20px;
+	width: 355px;
+	margin: 5px 0 0 13px;
+}
+
+/** Info.travelLink */
+#app.fr #info_travelLink #info_travelLink_listRight_item0 span{
+	margin-left: 0;
+	font-size: 19px;
+	width: 308px;
+	text-align: center;
+}
+
+#app.fr #info_leftMenu_services {
+	display: none;
+}
+
+#app.fr #info_leftMenu_whereAmI span{
+    white-space: nowrap;
+    line-height: 42px;
+}
+
+/* Media */
+
+/** Media.Options.ResetPresets PopUp */
+#app.fr .optionPopup {
+	font-size: 20px; 
+}
+
+/** Media.Sirius.Options.ChangePIN */
+#app.fr #media_sirius_options_PTYCategory_changePIN_enterPad_label {
+	top: 70px;
+	left: 86px;
+	width: 198px;
+}
+
+#app.fr .browesAllSources span {
+    top: 35px;
+    left: 16px;
+}
+
+/* Navigation */
+
+/** Navigation.Destination menu */
+#app.fr #navigation_destination_cancelRoute_Button span {
+	font-size: 18px;
+}
+
+
+/** Rate MFTGuide Dialogues */
+#app.fr #rateMFTGuideDialogue_view_content_title.title {
+	left: 47px;
+	width: 454px;
+	font-size: 22px;
+}
+
+#app.fr .rateDialogue #rateMFTGuideDialogue_view_content_message {
+	top: 116px;
+	font-size: 20px;
+}
+
+#app.fr .rateDialogue #rateMFTGuideDialogue_view_content_rateButton {
+	width: 295px;
+	margin-left: -147px;
+}
+
+#app.fr #ratingNetworkWarning_view.rateDialogue.rateDialogue .title,
+#app.fr #ratingNoRespondWarning_view.rateDialogue.rateDialogue .title {
+	top: 21px;
+}
+
+#app.fr #settings_warning_popup_view .content.reset-verification {
+	margin-top: 40px;
+	height: 370px;
+}
+
+#app.fr #settings_warning_popup_view .content.reset-verification .settings-waring-notification{
+	margin-top: 263px;
+}
+
+/* Settings */
+
+/** Settings.System.Master Reset */
+#app.fr #settings_settings_system_MasterResetNotifier_popUp {
+	width: 426px;
+	margin-left: -213px;
+}
+
+/** Settings.Help.SoftwareLicenses**/
+#app.fr #settings_help_softwareLicenses .title-name {
+    left: -15px;
+    width: 162px;
+}
+
+#app.fr #settings_help_softwareLicenses .title-data {
+    margin-left: 43px;
+}
+
+#app.fr #settings_help_softwareLicenses .title-users{
+    width: 89px;
+}
+
+#app.fr #info_view .ls_border {
+    height: 256px;
+    background: url(../images/common/ls_border_fr.png) no-repeat;
+}
+#app.fr #info_view #info_leftMenu,
+#app.fr #info_view #info_leftMenu .ls-items {
+    height: 250px;
+}
+
+/* App Settings */
+#app.fr #appsettings-head{
+    font-size: 28px;
+    width: 400px;
+    left: 50%;
+    margin-left: -200px;
+}
+
+#app.fr #appsettings-about-head span{
+    max-width: 390px;
+    display: -webkit-inline-box;
+    font-size: 30px;
+}
+
+#app.fr #apps-version-block span,
+#app.fr #apps-version-block div,
+#app.fr #appSettingsAbout-list span{
+    font-size: 24px;
+}
+
+#app.fr #appSettingsAbout-list_item0 {
+    line-height: 20px;
+}
+
+#app.fr #appSettingsAbout-list_item0 span:first-child {
+    margin-top: 14px;
+}
+
+#app.fr #appSettingsAbout-list_item0 span {
+    display: -webkit-inline-box;
+}
+
+#app.fr #appSettings .list-item > .second-text {
+    margin-left: 40px;
+}
+#app.fr #appSettings #appSettingsAppRate .appsettings-head{
+    font-size: 28px;
+}
+#app.fr #appSettings #appSettingsAppRate #rate_now_button {
+    width: 380px;
+}
+#app.fr #appSettings #appSettingsAppRate .app_rate_message .text {
+    height: 120px;
+}
+#app.fr #appSettings #apps-vehicle-label {
+    width: 150px;
+    margin-left: -20px;
+}

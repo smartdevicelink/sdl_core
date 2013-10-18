@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-284</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-284</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_climate</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=climate_powerButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.ind_act</td>
+	<td></td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//div[@id='climate_driverTemp_label']/span</td>
+	<td>driverTemp</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//div[@id='climate_passangerTemp_label']/span</td>
+	<td>passTemp</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_airflowControls_panelButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_fanControls_fanPlusButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_powerButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.ind_inact</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#climate_driverTemp_label &gt; span</td>
+	<td>OFF</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#climate_passangerTemp_label &gt; span</td>
+	<td>OFF</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#climate_offLabel &gt; span</td>
+	<td>OFF</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=climate_fanControls_fanPlusButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.ind_act</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='climate_driverTemp_label']/span</td>
+	<td>${driverTemp}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='climate_passangerTemp_label']/span</td>
+	<td>${passTemp}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.label.auto_airflow</td>
+	<td>Auto</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

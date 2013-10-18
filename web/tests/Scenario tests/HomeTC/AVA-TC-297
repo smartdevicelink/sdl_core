@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-297</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-297</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetPhone_label &gt; span</td>
+	<td>Paul’s Phone Connected</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=home_main_st</td>
+	<td>Main St</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=span.station</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetClimate_driverTemp &gt; span</td>
+	<td>70°</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#home_widgetClimate_passengerTemp &gt; span</td>
+	<td>70°</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status_homestatus</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>2000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fmButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>2000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fm_directButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_tuneButtons1</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_tuneButtons10</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_tuneButtons10</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_tuneButtons4</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_directTune_keyEnter</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>id=band</td>
+	<td>band</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=home_but_click</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=span.station</td>
+	<td>${band}</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button1']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a0</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button2']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button3']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a2</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button4']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a3</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button5']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a4</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_home_preset_button6']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a5</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

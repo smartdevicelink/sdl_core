@@ -1,0 +1,10 @@
+Import( 'env buildLibrary' )
+
+buildLibrary( env, Split( """
+    CMessageBroker.cpp 
+    CMessageBrokerRegistry.cpp 
+    system.cpp
+    md5.cpp
+    websocket_handler.cpp
+     """ ),
+    'messagebroker' )

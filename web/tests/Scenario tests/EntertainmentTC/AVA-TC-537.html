@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-537</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-537</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>3000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fmButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_fm_optionButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>200</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_fm_options_list_item2']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button0 toggles button</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='media_fm_options_list_item2']/div[2]/div</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_fm_options_list_item1']/div[2]@class</td>
+	<td>ember-view ffw-button notpressed button</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_options_fm_back_btn</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='fm-info-view']/div/div[3]</td>
+	<td>JUMP AND DOWN - THE PROJECT X</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='fm-info-view']/div/span</td>
+	<td>STA-988</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='fm-info-view']/div/div[4]</td>
+	<td>Club</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#fm-info-view &gt; #band</td>
+	<td>98.8</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>

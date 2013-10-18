@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-335</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-335</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_siriusButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_sirius_rightmenu_optionButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_option_sirius_title_header']/span</td>
+	<td>SIRIUS Options</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_sirius_options_list_item0']/span</td>
+	<td>Sound Settings</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_sirius_options_list_item1']/div/span</td>
+	<td>Set Category for Seek/Scan</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_sirius_options_list_item2']/div/span</td>
+	<td>Parental Lockout</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_sirius_options_list_item3']/div/span</td>
+	<td>Artist / Title / Team Alerts</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_sirius_options_list_item4']/span</td>
+	<td>Electronic Serial Number (ESN) 034424346821</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_options_list_item3']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button0 toggles button</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_options_list_item3']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed&nbsp;&nbsp;button1 toggles button active</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+

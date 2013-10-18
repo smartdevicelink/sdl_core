@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:id="@+id/sv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp" 
+        android:background="@drawable/eula_background" 
+        >
+
+        <TextView
+            android:id="@+id/tvEulaText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="fill_horizontal"
+            android:text="@string/str_eula_text"
+            android:textColor="@android:color/white"
+            />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnAgree"
+        android:layout_width="240dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/btn_gradient"
+        android:text="@string/btn_agree_text"
+        android:textSize="24sp" />
+
+</RelativeLayout>

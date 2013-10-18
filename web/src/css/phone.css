@@ -1,0 +1,1300 @@
+/**
+ * Phone module CSS
+ *
+ * @category	Style Sheets
+ * @filesource	css/phone.css
+ * @version		2.0
+ */
+
+.phone_view {
+	width: 800px;
+	height: 480px;
+	background: url(../images/phone/bg.png) no-repeat 0 0;
+}
+
+/* Backgrpund for active toogleButton*/
+#phone .toogleButtonContainer .active {
+	background: url(../images/phone/bcs-item_bg_act.png);
+}
+
+#phone .delim {
+	position: relative;
+	float: left;
+	border: #393939 1px solid;
+	height: 26px;
+	width: 0;
+}
+
+/* LEFT MENU */
+#phone_menu {
+    position: absolute;
+    top: 90px;
+    left: 0;
+    width: 150px;
+    height: 300px;
+    z-index:5;
+}
+	#phone_menu .ls_border {z-index:5;position:absolute;top:-3px;left:0;width:153px;height:306px;}
+	.ls-items{position:relative;width:150px;height:300px;}
+	.ls-item{
+		position:relative;
+		width:150px;
+	}
+	.ls-item > .bg{z-index:201;position:absolute;top:0;left:0;width:150px;height:50px;}
+	.ls-item > .ico{z-index:299;position:absolute;left:10px;width:30px;height:30px;top:10px;}
+	.ls-item > .ico.more {left:50px;}
+	.ls-item span {z-index:298;position:absolute;left:50px;width:100px;height:50px;font-size:18px;line-height:50px;white-space:nowrap;overflow:hidden;}
+	.ls-item > .led{z-index:299;position:absolute;top:0;right:8px;width:24px;height:50px;}
+	.ls-item.empty{background:#333333;}
+
+.firts_item {
+    border-top-right-radius: 3px;
+}
+	.last_item{border-bottom-right-radius:3px;}
+	.lsp1_p{background:url("../images/phone/menu_bg.png") repeat-x bottom;}
+	.phone_active {
+		background:url("../images/phone/menu_active.png") repeat-x bottom !important;
+		border-top: 1px solid #3e3115;
+		border-bottom: 1px solid #4a3a17
+	}
+#phone_menu .ls-item {
+	height:48px;
+		border-bottom: 1px solid #656565;
+		border-top: 1px solid #393939;
+}
+
+.navigation {
+    width: 26px;
+    height: 25px;
+    left: 60px;
+    top: 10px;
+}
+
+#phone_menu.hide {
+	left: -170px;
+}
+
+#phone_menu_quickdialButton,
+#phone_menu_messagingButton,
+#phone_menu_settingsButton {
+	z-index: 5;
+}
+
+#phone .list-item.active {
+	background: url(../images/phone/phone_button_bg_active.png) repeat-x;
+}
+/* PHONE STATUS BAR */
+#status_phone {
+	top: 0;
+	left: 0;
+	font-size: 21px;
+	cursor: pointer;
+	width: 324px;
+	height: 48px;
+	background: url(../images/common/phone-statusbar-bg.png) no-repeat;
+	z-index: 10;
+}
+
+#status_phone_label {
+	width: 100%;
+	display: block;
+	visibility: hidden;
+}
+
+#status_phone_label span {
+	padding-left: 11px;
+}
+
+#status_phone_call {
+	position: absolute;
+	top: 0;
+	left: 11px;
+}
+
+#status_phone_antena {
+	background: url(../images/phone/phone_antena.png) no-repeat;
+	width: 28px;
+	height: 18px;
+	top: 15px;
+	left: 236px;
+}
+
+
+/* PHONE HOME WIDGET */
+
+#home_widgetPhone_dndButton {
+	border-radius: 3px;
+	border: 1px solid #393939;
+	padding: 12px 53px 11px 14px;
+	font-size: 21px;
+	top: 104px;
+	left: 96px;
+}
+
+#home_widgetPhone_onCall {
+	width: 100%;
+}
+
+#home_widgetPhone_dndButton .ind_inact {
+	position: absolute;
+	right: 17px;
+	top: 13px;
+	width:6px;
+	height:21px;
+	background:url(../images/common/ind_vert_def.png) no-repeat;
+}
+
+#home_widgetPhone_dndButton .ind_act {
+	position: absolute;
+	right: 11px;
+	top: 8px;
+	background:url(../images/common/ind_vert_active.png) no-repeat;
+	width:19px;
+	height:32px;
+}
+
+#home_widgetPhone_endCallButton {
+	border-radius: 3px;
+	width: 157px;
+	height: 48px;	
+	border: 1px solid #393939;
+	font-size: 21px;
+	top: 104px;
+	left: 96px;
+	line-height: 49px;
+}
+
+#home_widgetPhone_endCallButton span{
+	margin-left: 14px;
+}
+
+#home_widgetPhone_endCallButton .ico {
+	position: relative;
+	float: right;
+	margin: 14px 17px 0 0;
+}
+
+#home_widgetPhone_icons {
+	background: url(../images/home/home_phone.png) no-repeat;
+	width: 137px;
+	height: 35px;
+	left: 132px;
+	top: 18px;
+}
+
+#home_widgetPhone_label {
+	font-size: 27px;
+	top: 60px;
+	left: 5px;
+	width: 390px;
+	text-align: center;
+}
+
+#home_widgetPhone_nameInfo {
+	position: relative;
+	left: 100px;
+	top: 25px;
+}
+
+#home_widgetPhone_nameInfo span {
+	font-size: 24px;
+	margin-left: 43px;
+}
+
+#home_widgetPhone_callInfo {
+	position: relative;
+	left: 100px;
+	top: 38px;
+}
+
+#home_widgetPhone_callInfo span {
+	font-size: 24px;
+	margin-left: 20px;
+}
+
+/* PHONE MODULE */
+
+/* DIALPAD  */
+
+
+#phone_endCallMessage {
+	background: black;
+	border: 1px solid #A28542;
+	border-radius: 3px;
+	width: 320px;
+	top: 160px;
+	left: 230px;
+	z-index: 1000;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    opacity: 0;
+    display: none;
+}
+
+#phone_endCallMessage_text {
+    position: relative;
+    font-size: 24px;
+    height: 60px;
+    line-height: 60px;
+	margin: 20px;
+}
+
+#phone_endCallMessage_okButton {
+    position: relative;
+    font-size: 28px;
+    height: 48px;
+    line-height: 50px;
+    border: 1px solid #393939;
+}
+
+#phone_info {
+	width: 248px;
+	height: 27px;
+	top: 15px;
+	left: 15px;
+}
+
+#phone_info_number {
+	font-size: 15px;
+}
+
+#phone_info_name {
+	font-size: 20px;
+	width: 132px;
+    z-index: 1;
+}
+
+#phone_info_name p {
+	margin-top: -3px;
+}
+
+#phone_dialpad_number {
+	width: 283px;
+	height: 30px;
+	position: absolute;
+	left: 258px;
+	top: 87px;
+	text-align: center;
+	font-size: 22px;
+	padding: 10px 0 0 0;
+	background: black;
+	border: 1px solid #393939;
+	border-radius: 3px;
+}
+
+#phone_dialpad_keypad {
+	width: 282px;
+	height: 200px;
+	position: absolute;
+	left: 259px;
+	top: 141px;
+}
+
+#phone_dialpad_keypad div {
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+
+#phone_dialpad_keypad .words {
+	font-size: 17px;
+	margin: -11px 0 0 0;
+	display: block;
+	color: #999;
+}
+
+#phone_dialpad_keypad .left {
+	left: 0;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	border-top: 1px solid #393939;
+}
+
+#phone_dialpad_keypad .center {
+	left: 95px;
+	width: 93px;
+	height: 49px;
+	border-top: 1px solid #393939;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+}
+
+#phone_dialpad_keypad .right {
+	left: 190px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+}
+
+#phone_dialpad_keypad_key4, #phone_dialpad_keypad_key5, #phone_dialpad_keypad_key6 {
+	top:50px;
+}
+
+#phone_dialpad_keypad_key7, #phone_dialpad_keypad_key8, #phone_dialpad_keypad_key9 {
+	top:100px;
+}
+
+
+#phone_dialpad_keypad_key0, #phone_dialpad_keypad_keyDiez, #phone_dialpad_keypad_keyStar {
+	top:150px;
+	border-bottom: 1px solid #393939;
+}
+
+#phone_dialpad_keypad_key1 {
+	border-top-left-radius: 3px;
+}
+
+#phone_dialpad_keypad_key3 {
+	border-top-right-radius: 3px;
+}
+
+#phone_dialpad_keypad_keyStar {
+	border-bottom-left-radius:3px;
+}
+#phone_dialpad_keypad_keyDiez {
+	border-bottom-right-radius:3px;
+}
+
+
+/* Dialpad controls */
+
+#phone_dialpad_controls {
+	width: 526px;
+	height: 38px;
+	border: 1px solid #393939;
+	border-radius: 3px;
+	top: 355px;
+	left: 259px;
+}
+
+#phone_dialpad_controls div {
+	position: absolute;
+	background-repeat: repeat-x;
+	height: 38px;
+	width: 130px;
+	text-align: center;
+	line-height: 38px;
+	font-size: 20px;
+}
+
+#phone_dialpad_controls_privacyButton {
+	border-right: 1px solid  #000;
+}
+
+#phone_dialpad_controls .ind_inact {
+	position: absolute;
+	right: 8px;
+	top: 8px;
+	width:6px;
+	height:21px;
+	background:url(../images/common/ind_vert_def.png) no-repeat;
+}
+
+#phone_dialpad_controls .ind_act {
+	position: absolute;
+	right: 2px;
+	top: 3px;
+	background:url(../images/common/ind_vert_active.png) no-repeat;
+	width:19px;
+	height:32px;
+}
+
+
+#phone_dialpad_controls_holdButton {
+	left: 131px;
+	border-left: 1px solid  #393939;
+	border-right: 1px solid  #000;
+		cursor: pointer;
+}
+
+#phone_dialpad_controls_muteButton {
+	left: 263px;
+	border-left: 1px solid  #393939;
+	border-right: 1px solid  #000;
+		cursor: pointer;
+}
+
+#phone_dialpad_controls_joinButton {
+	border-left: 1px solid  #393939;
+	left: 395px;
+}
+
+#phone_dialpad_deleteButton {
+	opacity:0;
+	cursor: pointer;
+	width: 93px;
+	height: 49px;
+	border-radius: 3px;
+	left: 554px;
+	top: 291px;
+	border: 1px solid #393939;
+}
+
+#phone_dialpad_deleteButton .ico {
+	position: absolute;
+	left: 34px;
+	top: 15px;
+}
+
+
+#phone_dialpad_dialButton {
+	cursor: pointer;
+	border: 1px solid #393939;
+	left: 661px;
+	top: 241px;
+	width: 128px;
+	height: 49px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+}
+
+#phone_dialpad_dialButton span {
+	font-size: 18px;
+	position: absolute;
+	left: 14px;
+	top: 14px;
+}
+
+#phone_dialpad_dialButton .ico {
+	position: absolute;
+	right: 14px;
+	top: 11px;
+}
+
+
+#phone_dialpad_endButton {
+	cursor: pointer;
+	border: 1px solid #393939;
+	left: 661px;
+	top: 291px;
+	width: 128px;
+	height: 49px;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+#phone_dialpad_endButton span {
+	font-size: 18px;
+	position: absolute;
+	left: 14px;
+	top: 14px;
+}
+
+#phone_dialpad_endButton .ico {
+	position: absolute;
+	right: 9px;
+	top: 16px;
+}
+
+#phone_dialpad_contactImage {
+	opacity: 0;
+	width: 130px;
+	height: 135px;
+	background: url("../images/phone/dial_photo.png") repeat-x;
+	left: 658px;
+	top: 86px;
+}
+
+/* QUICK DIAL */
+
+#phone_quickdial_content {
+	width: 630px;
+	height: 250px;
+	left: 166px;
+	top: 98px;
+	background: url(../images/phone/quick_dial_inact_bg.png) no-repeat;
+}
+
+#phone_quickdial ul.l-block {
+	list-style: none;
+	position: relative;
+	float: left;
+	width: 320px;
+	height: 250px;
+}
+
+#phone_quickdial ul.r-block {
+	list-style: none;
+	position: relative;
+	float: left;
+	width: 310px;
+	height: 250px;
+}
+
+#phone_quickdial ul li {
+	line-height: 50px;
+	font-size: 20px;
+}
+
+#phone_quickdial ul li span.number {
+	position: relative;
+	float: left;
+	padding-left: 5px;
+	padding-right: 15px;
+	font-size: 29px;
+	width: 22px;
+}
+
+/* PHONEBOOK */
+#phone_phonebook_content {
+	left: 166px;
+	top: 98px;
+	width: 633px;
+	height: 295px;
+}
+
+#phone_phonebook_filters {
+	width: 470px;
+	height: 40px;
+	position: relative;
+	margin-left: 100px;
+	background: url(../images/phone/book-filter-bg.png) no-repeat;
+}
+
+#phone_phonebook_filters ul {
+	list-style: none;
+}
+
+#phone_phonebook_filters li {
+	float: left;
+	width: 94px;
+	text-align: center;
+	line-height: 40px;
+	font-size: 20px;
+}
+
+#phone_phonebook_list {
+	height: 251px;
+	position: relative;
+	float: left;
+	margin-top: 5px;
+	width: 630px;
+}
+
+#phone_phonebook_list .list-content {
+	width: 568px;
+}
+
+#phone_phonebook .list-item span {
+	padding-left: 10px;
+}
+
+/* HISTORY */
+
+#phone_history_content {
+	left: 166px;
+	top: 98px;
+	width: 625px;
+	height: 295px;
+}
+
+#phone_history_filters {
+	background: url(../images/phone/history-filter-bg.png) no-repeat;
+	width: 470px;
+	height: 40px;
+	position: relative;
+}
+
+#phone_history_filters ul {
+	list-style: none;
+}
+
+#phone_history_filters li {
+	float: left;
+	width: 117px;
+	text-align: center;
+	line-height: 40px;
+	font-size: 20px;
+}
+
+#phone_history_list {
+	width: 470px;
+	height: 251px;
+	position: relative;
+	top: 5px;
+	float: left;
+}
+
+#phone_history_list .list-content {
+	width: 413px;
+}
+
+#phone_history_list .list-item .ico {
+	margin-top: 7px;
+	margin-right: 5px;
+	margin-left: 5px;
+	float: left;
+}
+
+#phone_history_list .list-item .right_text {
+	margin-right: 6px;
+}
+
+#phone_history_controls {
+	width: 150px;
+	left: 5px;
+	top: 5px;
+	position: relative;
+	float: left;
+	border: 1px solid #393939;
+	border-radius:3px;
+}
+
+#phone_history_dial {
+	position: relative;
+	height: 50px;
+	width: 150px;
+	font-size: 20px;
+	line-height: 43px;
+}
+
+#phone_history_dial span {
+	padding-left: 10px;
+}
+
+#phone_history_dial .ico {
+	float: right;
+	margin: 10px;
+}
+
+#phone_history_savedial {
+	position: relative;
+	width: 150px;
+	font-size: 20px;
+	line-height: 43px;
+}
+
+#phone_history_savedial span {
+	padding-left: 10px;
+}
+
+/* MESSAGING */
+
+#phone_messaging_content {
+	left: 166px;
+	top: 98px;
+	width: 570px;
+	height: 295px;
+}
+
+#phone_messaging_send {
+	background: url(../images/phone/btn_bg.png) repeat-x;
+	width: 150px;
+	height: 38px;
+	position: relative;
+	float: left;
+	font-size: 20px;
+	line-height: 40px;
+	border: 1px solid #393939;
+	border-radius:3px;
+}
+
+#phone_messaging_send span {
+	padding-left: 10px;
+}
+
+#phone_messaging_send .arrow-ico {
+	top: -5px;
+}
+
+#phone_messaging_controls {
+	background: url(../images/phone/msg-r-group-bg.png) no-repeat;
+	width: 300px;
+	height: 40px;
+	position: relative;
+	float: right;
+}
+
+#phone_messaging_controls ul {
+	list-style: none;
+}
+
+#phone_messaging_controls ul li {
+	float: left;
+	width: 150px;
+	text-align: center;
+	line-height: 40px;
+	font-size: 20px;
+}
+
+#phone_messaging_list {
+	width: 570px;
+	height: 250px;
+	position: relative;
+	margin-top: 45px;
+	background: url(../images/phone/msg-list-bg.png) no-repeat;
+}
+
+#phone_messaging_list ul.list {
+	float: left;
+	list-style: none;
+}
+
+#phone_messaging_list ul.del {
+	float: right;
+	list-style: none;
+}
+
+#phone_messaging_list ul.list li {
+	width: 320px;
+	height: 50px;
+	font-size: 20px;
+	line-height: 50px;
+	padding-left: 50px;
+}
+
+#phone_messaging_list ul.del li {
+	width: 100px;
+	height: 50px;
+	font-size: 20px;
+	line-height: 50px;
+	text-align: center;
+}
+
+/* SETTINGS */
+#phone_settings_content {
+	width: 627px;
+	height: 300px;
+	left: 166px;
+	top: 87px;
+}
+
+#phone_settings_list {
+	width: 630px;
+	height: 301px;
+	top: 5px;
+    left: -5px;
+    padding-left: 5px;
+}
+
+#phone_settings_list .list-content {
+	width: 570px;
+}
+
+#phone_settings_list .list-item > span,
+#phone_settings_list .lableToggle span{
+	padding-left: 7px;
+}
+
+#phone_settings_list .list-item .ico {
+	position: absolute;
+	right: 10px;
+	top: 8px;
+	opacity: 1;
+}
+
+#phone_settings_list .lableToggleButton{
+	background-image: url(../images/list/list_item_bg.png);
+}
+
+#phone_settings .toogleButtonContainer {
+	position: relative;
+	width: 198px;
+	height: 28px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	float: right;
+	margin-top: 10px;
+	margin-right: 10px;
+}
+
+/* Phone settings Bluetooth Devices */
+#phone_settings_bluetoothDevices {
+	font-size: 20px;
+}
+
+#phone .backButton {
+	margin-top: 59px;
+	z-index: 2001;
+}
+
+#phone_settings_bluetoothDevices .block-header-title {
+	top: 69px;
+}
+
+#phone_settings_bluetoothDevices .bluetoothLogo{
+	background: url(../images/phone/ico_bluetoothConnect.png) no-repeat;
+	top: 109px;
+	left: 5px;
+	height: 50px;
+	width: 50px;	
+}
+
+#phone_settings_BluetoothDevices_list {
+	margin-top: 109px;
+	margin-left: 65px;
+	width: 570px;
+	height: 301px;;
+}
+ 
+
+#phone_settings_BluetoothDevices_list .list-content {
+	border-right: none;
+	border-top: none;
+}
+
+#phone_settings_BluetoothDevices_list .list-item:first-child {
+	border-top: 1px solid #393939;
+	height: 48px;
+}
+
+#phone_settings_BluetoothDevices_list .list-item {
+	position: relative;
+	width: 503px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	border-right: 1px solid #393939;
+	line-height: 50px;
+}
+
+#phone_settings_BluetoothDevices_list .list-item.pressed {
+	background: url(../images/phone/phone_button_bg_active.png) repeat-x !important;
+}
+
+#phone_settings_BluetoothDevices_list .list-item > span {
+	position: absolute;
+	left: 63px;
+}
+
+#phone_settings_BluetoothDevices_list .list-item .ico {
+	position: absolute;
+	float: left;
+	left: 9px;
+}
+
+#phone_settings_BluetoothDevices_list .list-item .right_ico {
+	float: right;
+}
+
+#phone_settings_BluetoothDevices_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#phone_settings_bluetoothDevices .right-menu{
+	top: 109px;
+	right: 3px;
+	float: right;
+	width: 150px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	border-radius: 3px;
+}
+
+#view_phone_phoneSettings_bluetoothDevices_rightmenu .menu-item{
+	position: relative;
+	width: 135px;
+	height: 49px;
+	cursor: pointer;
+	border-bottom: 1px solid #333;
+	font-size: 18px;
+	line-height: 46px;
+	padding-left: 15px;
+}
+
+/* Phone settings Phone Ringer */
+#phone_settings_phoneRinger {
+	font-size: 20px;
+}
+
+#phone_settings_phoneRinger .block-header-title {
+	top: 69px;
+}
+
+#phone_settings_phoneRinger_list {
+	margin-top: 139px;
+	margin-left: 65px;
+	width: 734px;
+	height: 251px;;
+}
+
+#phone_settings_phoneRinger_list .list-content {
+	width: 674px;
+	border-right: none;
+	border-top: none;
+}
+
+#phone_settings_phoneRinger_list .list-item:first-child, 
+#phone_settings_phoneRinger_list .soundButton:first-child{
+	border-top: 1px solid #393939;
+	height: 48px;
+}
+
+#phone_settings_phoneRinger_list .list-item {
+	position: relative;
+	width: 613px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	border-right: 1px solid #393939;
+	line-height: 50px;
+}
+
+#phone_settings_phoneRinger_list .list-item.soundButton {
+	width: 48px;
+	border-left: 1px solid #393939;
+	margin-left: 10px;
+}
+
+#phone_settings_phoneRinger_list .list-item.soundButton .ico {
+	border: none;
+	margin-top: 12px;
+	margin-right: 11px;
+}
+
+#phone_settings_phoneRinger_list .list-item.pressed {
+	background: url(../images/phone/phone_button_bg_active.png) repeat-x !important;
+}
+
+#phone_settings_phoneRinger_list .list-item > span {
+	margin-left: 13px;
+}
+
+#phone_settings_phoneRinger_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#phone_settings_phoneRinger_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#phone_settings_phoneRinger_list .toggles, #phone_settings_phoneRinger_list .toggles span {
+	width: 148px;
+}
+
+
+/* Phone settings Text Message Notification */
+#phone_settings_textMessageNotification {
+	font-size: 20px;
+}
+
+#phone_settings_textMessageNotification .block-header-title {
+	top: 69px;
+}
+
+#phone_settings_textMessageNotification_list {
+	margin-top: 139px;
+	margin-left: 65px;
+	width: 731px;
+	height: 251px;
+}
+
+#phone_settings_textMessageNotification_list .list-content {
+	width: 674px;
+	border-right: none;
+	border-top: none;
+}
+
+#phone_settings_textMessageNotification_list .list-item:first-child, 
+#phone_settings_textMessageNotification_list .soundButton:first-child{
+	border-top: 1px solid #393939;
+	height: 48px;
+}
+
+#phone_settings_textMessageNotification_list .list-item {
+	position: relative;
+	width: 613px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	border-right: 1px solid #393939;
+	line-height: 50px;
+}
+
+#phone_settings_textMessageNotification_list .list-item.soundButton {
+	width: 48px;
+	border-left: 1px solid #393939;
+	margin-left: 10px;
+}
+
+#phone_settings_textMessageNotification_list .list-item.soundButton .ico {
+	border: none;
+	margin-top: 12px;
+	margin-right: 11px;
+}
+
+#phone_settings_textMessageNotification_list .list-item.pressed {
+	background: url(../images/phone/phone_button_bg_active.png) repeat-x !important;
+}
+
+#phone_settings_textMessageNotification_list .list-item > span {
+	margin-left: 13px;
+}
+
+#phone_settings_textMessageNotification_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#phone_settings_textMessageNotification_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#phone_settings_textMessageNotification_list .toggles, #phone_settings_textMessageNotification_list .toggles span {
+	width: 148px;
+}
+
+/* Phone settings Internet Data Connection */
+#phone_settings_internetDataConnection {
+	font-size: 20px;
+}
+
+#phone_settings_internetDataConnection .block-header-title {
+	top: 69px;
+}
+
+#phone_settings_internetDataConnection .content {
+	top: 119px;
+	left: 100px;
+	width: 650px;
+	height: 300px;
+}
+
+#phone_settings_phoneRinger_phone_label {
+	position: relative;
+	width: 300px;
+	height: 29px;
+	float: left;
+	margin-left: 12px;
+}
+
+#phone_settings_phoneRinger_phone_label .ico {
+	margin-top: -15px;
+	margin-left: -6px;
+	float: left;
+}
+
+#phone_settings_phoneRinger_phone_label span {
+	margin-left: 13px;
+}
+
+#phone_settings_internetDataConnection .lableToggleButton {
+	position: relative;
+	margin-top: 1px;
+	width: 560px;
+	height: 50px;
+	line-height: 50px;
+	float: left;
+}
+
+#phone_settings_internetDataConnection .toogleButtonContainer {
+	width: 298px;
+	margin-left: 213px;
+	margin-right: 9px;
+	margin-top: 9px;
+}
+
+#phone_settings_internetDataConnection .lableToggleButton .lableToggle > span {
+	margin-left: 12px;
+}
+
+#phone_settings_internetDataConnection .helpButton {
+	position: relative;
+	float: right;
+	margin-top: 10px;
+	height: 28px;
+	width: 88px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#phone_settings_internetDataConnection .helpButton .ico{
+	margin-top: 4px;
+	margin-left: 38px;
+}
+
+#phone_settings_phoneRinger_DUNSettings_button {
+	position: relative;
+	float: left;
+	width: 648px;
+	height: 48px;
+	line-height: 50px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#phone_settings_phoneRinger_DUNSettings_button span {
+	margin-left: 12px;
+}
+
+#phone_settings_internetDataConnection .wraper {
+	position: relative;
+	float: left;
+	top: -1px;
+	border: 1px solid #333;
+	border-radius: 2px;
+	height: 109px;
+	padding-left: 10px;
+	padding-top: 9px;
+	width: 638px;
+}
+
+#phone_settings_phoneRinger_dataUsage_label {
+	width: 613px; 
+	line-height: 25px
+}
+
+#phone_settings_internetDataConnection.fr #phone_settings_phoneRinger_dataUsage_label {
+	line-height: 21px;
+}
+
+#phone_settings_internetDataConnection.fr #phone_settings_phoneRinger_dataUsage_label span{
+	line-height: 21px;
+}
+
+/* Phone settings phonebook */
+#phone_settings_phoneBook {
+	font-size: 20px;
+}
+
+#phone_settings_phoneBook .block-header-title {
+	top: 69px;
+}
+
+#phone_settings_phoneBook_list {
+	margin-top: 139px;
+	margin-left: 65px;
+	width: 731px;
+	height: 251px;;
+}
+
+#phone_settings_phoneBook_list .list-content {
+	width: 670px;
+}
+
+#phone_settings_phoneBook_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#phone_settings_phoneBook_list .list-item > span {
+	margin-left: 13px;
+}
+
+#phone_settings_phoneBook_list .list-item .lableToggle{
+	margin-left: 13px;
+}
+
+#phone_settings_phoneBook_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#phone_settings_phoneBook_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#phone_settings_phoneBook_list .toogleButtonContainer {
+	width: 298px;
+}
+
+#phone_settings_phoneBook.fr #phone_settings_phoneBook_list_item0 .lableToggle {
+	line-height: 19px;
+	width: 360px;
+	margin: 5px 0 0 13px;
+}
+
+#phone_settings_phoneBook.fr #phone_settings_phoneBook_list_item0 .lableToggle span {
+	margin-left: 0;
+}
+#phone_settings_list_item2{
+    z-index: 4;
+}
+
+/********************* PHONE FILTER STYLES   ************************/
+#phone_phonebook_filters {
+    width: 469px;
+    height: 38px;
+    position: relative;
+    margin-left: 99px;
+    border:1px solid #393939;
+    /*background: url(../images/phone/book-filter-bg.png) no-repeat;*/
+}
+
+#phone_phonebook_filters div {
+    height:38px;
+    width:92px;
+    position:relative;
+    float:left;
+    text-align:center;
+    line-height:40px;
+}
+
+#phone_phonebook_filters .ffw-button.active{
+    background:url(../images/phone/filter_active_bg.png) repeat-x !important;
+
+}
+
+#phone_phonebook_filters div{
+    border-left:1px solid #393939;
+    border-right:1px solid #000000;
+}
+
+
+#phone_phonebook_filters div:last-child{
+    border-right: none;
+}
+
+#phone_phonebook_filters div:first-child{
+    border-left: none;
+}
+
+#phone_phonebook_filters ul {
+    list-style: none;
+}
+
+#phone_phonebook_filters li {
+    float: left;
+    width: 94px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+}
+
+#phone_phonebook_list {
+    height: 251px;
+    position: relative;
+    float: left;
+    margin-top: 5px;
+    width: 630px;
+}
+
+#phone_phonebook_list .list-content {
+    width: 568px;
+}
+
+#phone_phonebook .list-item span {
+    padding-left: 10px;
+}

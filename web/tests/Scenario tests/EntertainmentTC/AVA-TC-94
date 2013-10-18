@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-94</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-94</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_status</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_amButton &gt; p</td>
+	<td>AM 1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>3000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=band</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button4']/p</td>
+	<td>800</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_preset_button4']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a3 active</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button1']/p</td>
+	<td>530</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button2']/p</td>
+	<td>950</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button3']/p</td>
+	<td>1270</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button5']/p</td>
+	<td>1130</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button6']/p</td>
+	<td>760</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_siriusButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_siriusButton &gt; p</td>
+	<td>SIRIUS 1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button1']/p</td>
+	<td>80s on 8</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button2']/p</td>
+	<td>ClsVinyl</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button3']/p</td>
+	<td>Hits</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button4']/p</td>
+	<td>1st Wave</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button5']/p</td>
+	<td>Titanium</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='media_preset_button6']/p</td>
+	<td>Margvlle</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.channel</td>
+	<td>Channel 2</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.siriusband</td>
+	<td>1st Wave</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.siriustitle</td>
+	<td>Rainbow</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.siriusartist</td>
+	<td>The Sky</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=div.siriusgenre</td>
+	<td>Pop</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_preset_button4']@class</td>
+	<td>ember-view ffw-button notpressed preset-item a3 active</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=media_sirius_rightmenu_browseButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>500</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>css=#media_sirius_browse_heading_lable &gt; span</td>
+	<td>SIRIUS Channel Guide</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']@class</td>
+	<td>ember-view list guidelist</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_browseall_button']@class</td>
+	<td>ember-view ffw-button notpressed browesAllSources</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div[3]</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button disabled</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div@class</td>
+	<td>ember-view ffw-button notpressed sb-top button disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='media_sirius_browse_list']/div[2]/div[3]@class</td>
+	<td>ember-view ffw-button notpressed sb-bottom button</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

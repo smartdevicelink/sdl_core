@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-119">AVA-TC-119</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-120">AVA-TC-120</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-121">AVA-TC-121</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-122">AVA-TC-122</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-124">AVA-TC-124</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-181">AVA-TC-181</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-182">AVA-TC-182</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-183">AVA-TC-183</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-184">AVA-TC-184</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-185">AVA-TC-185</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-186">AVA-TC-186</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-125">AVA-TC-125</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-126">AVA-TC-126</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-127">AVA-TC-127</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-128">AVA-TC-128</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-129">AVA-TC-129</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-133">AVA-TC-133</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-135">AVA-TC-135</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-136">AVA-TC-136</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-137">AVA-TC-137</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-224">AVA-TC-224</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-225">AVA-TC-225</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-187">AVA-TC-187</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-188">AVA-TC-188</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-189">AVA-TC-189</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-190">AVA-TC-190</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-191">AVA-TC-191</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-192">AVA-TC-192</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-316.html">AVA-TC-316</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-317.html">AVA-TC-317</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-319.html">AVA-TC-319</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-315.html">AVA-TC-315</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-314.html">AVA-TC-314</a></td></tr>
+<tr><td><a href="PhoneTC/AVA-TC-479.html">AVA-TC-479</a></td></tr>
+</tbody></table>
+</body>
+</html>

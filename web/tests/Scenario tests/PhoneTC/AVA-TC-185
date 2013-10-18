@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="file:///C:/Users/Tshcherbak/My%20Documents/ava/web/src/" />
+<title>AVA-TC-185 (TBD)</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">AVA-TC-185 (TBD)</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>//div[@id='warning_ok_button']@class</td>
+	<td>ember-view ffw-button notpressed okbut&nbsp;&nbsp;visible_display</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=warning_ok_button</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_phone</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone']@class</td>
+	<td>ember-view phone_view inactive_state</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_dialpadButton']/span</td>
+	<td>Phone</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_quickdialButton']/span</td>
+	<td>Quick Dial</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_phonebookButton']/span</td>
+	<td>Phonebook</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_historyButton']/span</td>
+	<td>History</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_messagingButton']/span</td>
+	<td>Messaging</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='phone_menu_settingsButton']/span</td>
+	<td>Settings</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_dialpad_keypad_key9</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_deleteButton']@class</td>
+	<td>ember-view ffw-button notpressed show</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_dialpad_keypad_key1</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_dialpad_keypad_key1</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=phone_dialpad_number</td>
+	<td>911</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_dialpad_dialButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_contactImage']@class</td>
+	<td>ember-view show</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_dialButton']@class</td>
+	<td>ember-view ffw-button notpressed disabled</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_endButton']@class</td>
+	<td>ember-view ffw-button notpressed</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_controls_privacyButton']@class</td>
+	<td>ember-view ffw-button notpressed helpmode_box_shadow small active_in_helpmode</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_controls_holdButton']@class</td>
+	<td>ember-view ffw-button notpressed small</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_controls_muteButton']@class</td>
+	<td>ember-view ffw-button notpressed small</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_controls_joinButton']@class</td>
+	<td>ember-view ffw-button notpressed helpmode_box_shadow small active_in_helpmode disabled</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=phone_dialpad_controls_muteButton</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>assertAttribute</td>
+	<td>//div[@id='phone_dialpad_controls_muteButton']/div@class</td>
+	<td>show mft_indicator ind_act</td>
+</tr>
+<tr>
+	<td>clickAt</td>
+	<td>id=status_climate</td>
+	<td>1,1</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>id=status_phone_call</td>
+	<td>Microphone mute</td>
+</tr>
+</tbody></table>
+</body>
+</html>
+
+
+
+
+

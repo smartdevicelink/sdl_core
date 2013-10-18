@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!--
+    <item
+        android:id="@+id/mnuSettings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/str_menu_settings"/>
+    <item
+        android:id="@+id/mnuRate"
+        android:icon="@android:drawable/star_big_on"
+        android:title="@string/str_menu_rate"/>
+
+    -->
+    <item
+        android:id="@+id/mnuQuit"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:title="@string/str_menu_quit"/>
+</menu>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DownloadTitleText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="DownloadSmallText" parent="DownloadTitleText">
+        <item name="android:textSize">10sp</item>
+    </style>
+    
+    <style name="DownloadCancelButton" parent="DownloadTitleText">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    
+    <style name="WarningDownloadSmallText" parent="DownloadTitleText">
+        <item name="android:textColor">#FFFFFF00</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="DownloadMicroText" parent="DownloadTitleText">
+        <item name="android:textSize">5sp</item>
+    </style>
+
+    <!-- NORMAL  3.7 " -->
+
+    <style name="TabNormalText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="CompNormalHeader" parent="TabNormalText">
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_marginTop">7dp</item>
+    </style>
+
+    <style name="CompNormalBottom" parent="TabNormalText">
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_marginBottom">9dp</item>
+    </style>
+
+    <!-- LARGE 5.1 " -->
+
+    <style name="TabLargeText" parent="TabNormalText">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="CompLargeHeader" parent="TabLargeText">
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_marginTop">13dp</item>
+    </style>
+
+    <style name="CompLargeBottom" parent="TabLargeText">
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_marginBottom">13dp</item>
+    </style>
+
+    <!-- EXTRA LARGE 10.1 " -->
+
+    <style name="TabXLargeText" parent="TabNormalText">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textScaleX">0.975</item>
+    </style>
+
+    <style name="CompXLargeHeader" parent="TabXLargeText">
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_marginTop">9dp</item>
+    </style>
+
+    <style name="CompXLargeBottom" parent="TabXLargeText">
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_marginBottom">23dp</item>
+    </style>
+
+</resources>
