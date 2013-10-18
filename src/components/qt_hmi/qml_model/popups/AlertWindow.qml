@@ -117,7 +117,7 @@ Rectangle {
                     OvalButton {
                         id: alertButton3
                         text: softButtons && softButtons.length > 2 ? softButtons[2].text : ""
-                        anchors.right: alertButton4.visible ? alertButton2.left : parent.right
+                        anchors.right: alertButton4.visible ? alertButton4.left : parent.right
                         width: 180
                         visible: softButtons ? softButtons.length > 2 : false
                         anchors.left: parent.left
