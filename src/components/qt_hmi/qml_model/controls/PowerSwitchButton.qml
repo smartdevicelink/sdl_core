@@ -37,7 +37,7 @@ import QtQuick 2.0
 Rectangle {
     id: powerSwitchBtn
     state: "Turn ON"
-    width: 160
+    width: 120
     height: 80
     radius: 5
     property bool pressed;
@@ -68,7 +68,7 @@ Rectangle {
         color: "red"
         text: parent.state
         anchors.centerIn: parent
-        font.pixelSize: 35
+        font.pixelSize: 25
     }
 
 }
