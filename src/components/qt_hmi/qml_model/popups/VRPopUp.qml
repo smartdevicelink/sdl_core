@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 import "../views"
+import "../controls"
 
 PopUp {
     Text {
@@ -70,18 +71,19 @@ PopUp {
         anchors.bottomMargin: 15
         anchors.rightMargin: 15
         anchors.leftMargin: 15
-        anchors.top: title.bottom
+        anchors.top: voice.bottom
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.topMargin: 0
-        model: ListModel {
-            ListElement {
-                name: "Grey"
+        clip: true
+        model: dataContainer.vrCommands
+        delegate: OvalButton {
+            width: parent.width
+            text: command
+            onClicked: {
+                sdlVR.onCommand(cmdID, appID);
             }
-        }
-        delegate: Text {
-            text: name
         }
     }
 
