@@ -162,6 +162,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        InteractionPopup {
+            id: interactionPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

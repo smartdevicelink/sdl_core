@@ -35,7 +35,6 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 import "Internal.js" as Internal
-import com.ford.sdl.hmi.log4cxx 1.0
 
 QtObject {
 
@@ -268,20 +267,18 @@ QtObject {
             var parentNotFound = true
             for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
                 var option = getApplication(appID).options.get(optionIndex)
-                if (option.type === Internal.MenuItemType.MI_SUBMENU) {
-                    if (option.id === menuParams.parentID) {
-                        var count = option.subMenu.count
-                        var index = count
-                        if (menuParams.position !== undefined) {
-                            if (menuParams.position < count) {
-                                index = menuParams.position
-                            }
+                if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuParams.parentID)) {
+                    var count = option.subMenu.count
+                    var index = count
+                    if (menuParams.position !== undefined) {
+                        if (menuParams.position < count) {
+                            index = menuParams.position
                         }
-//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon}) // actually we do not need subMenu[] for node
-                        parentNotFound = false
-                        break
                     }
+//                  option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                    option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon}) // actually we do not need subMenu[] for node
+                    parentNotFound = false
+                    break
                 }
             }
             if (parentNotFound) {
@@ -363,16 +360,14 @@ QtObject {
         console.debug("deleteSubMenu(" + menuID + ", " + appID + ")")
         for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
             var option = getApplication(appID).options.get(optionIndex)
-            if (option.type === Internal.MenuItemType.MI_SUBMENU) {
-                if (option.id === menuID) {
-                    if (option.subMenu !== currentApplication.currentSubMenu) {
-                        getApplication(appID).options.remove(optionIndex)
-                    }
-                    else {
-                        console.log("UI::deleteSubMenu(): cannot remove current submenu")
-                    }
-                    break
+            if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuID)) {
+                if (option.subMenu !== currentApplication.currentSubMenu) {
+                    getApplication(appID).options.remove(optionIndex)
                 }
+                else {
+                    console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                }
+                break
             }
         }
         console.debug("deleteSubMenu(): exit")

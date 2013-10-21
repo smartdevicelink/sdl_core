@@ -112,6 +112,7 @@ Item {
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
+        interactionPopup.activate(initialText, choiceSet, vrHelp, timeout, appID)
         return {}
     }
 
