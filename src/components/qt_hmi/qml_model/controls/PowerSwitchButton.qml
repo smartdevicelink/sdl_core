@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
 Rectangle {
     id: powerSwitchBtn
@@ -68,7 +69,6 @@ Rectangle {
         color: "red"
         text: parent.state
         anchors.centerIn: parent
-        font.pixelSize: 25
+        font.pixelSize: Constants.powerButtonFornSize
     }
-
 }

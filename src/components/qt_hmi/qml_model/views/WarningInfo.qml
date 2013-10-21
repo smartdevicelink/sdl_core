@@ -43,14 +43,14 @@ Rectangle {
     Text {
         anchors.top: parent.top
         anchors.left: parent.left
-        height: 1/4* parent.height
+        height: 1/4 * parent.height
         width: parent.width
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
 
         text: "WARNING!"
-        color: "red"
-        font.pixelSize: 45
+        color: Constants.warningColor
+        font.pixelSize: Constants.tittleFontSize
         font.bold: true
         style: Text.Raised
         styleColor: "gray"
@@ -61,7 +61,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.margin
-        height: 1/2* parent.height
+        height: 1/2 * parent.height
         width: parent.width
         verticalAlignment: Text.AlignVCenter
         wrapMode: Text.WordWrap

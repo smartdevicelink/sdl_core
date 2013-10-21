@@ -55,12 +55,21 @@ var releasedButtonTextColor = "white"
 
 // Transparent background.
 var transparentColor = "#00000000"
+
+// "Warning" word color
+var warningColor = "red"
 //--------------------------------------------------------------------------------------
 
 // Other
 
 // Font size for most of text in HMI model.
 var fontSize = 20
+
+// Tittle font size
+var tittleFontSize = 45
+
+// Power on/off button font size
+var powerButtonFornSize = 25
 
 // Offset from the edges of the screen.
 var margin = 30
