@@ -91,9 +91,10 @@ QtObject {
                 if (applicationList.get(i).hmiUIText.picture) {
                     currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
                 }
+                currentApplication.deviceName = applicationList.get(i).deviceName
+                currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
                 currentApplication.turnList = applicationList.get(i).turnList
-                currentApplication.turnListSoftButtons =
-                        applicationList.get(i).turnListSoftButtons
+                currentApplication.turnListSoftButtons = applicationList.get(i).turnListSoftButtons
                 // This place is for adding new properties
             }
         }

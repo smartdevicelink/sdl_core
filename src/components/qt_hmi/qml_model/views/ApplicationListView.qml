@@ -64,7 +64,8 @@ GeneralView {
                           anchors.fill: parent
                           onClicked: {
                               dataContainer.setCurrentApplication(appId)
-                              contentLoader.go("./views/SDLPlayerView.qml")
+                              dataContainer.currentApplication.isMediaApplication ? contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
+                                                                                  : contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
                             }
                         }
                     }

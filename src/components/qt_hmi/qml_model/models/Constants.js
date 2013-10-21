@@ -62,6 +62,9 @@ var transparentColor = "#000000"
 // Font size for most of text in HMI model.
 var fontSize = 20
 
+// Tittle font size
+var tittleFornSize = 45
+
 // Offset from the edges of the screen.
 var margin = 30
 
