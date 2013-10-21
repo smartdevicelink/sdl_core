@@ -58,6 +58,12 @@ GeneralView {
             model: dataContainer.currentApplication.currentSubMenu
 
             delegate: Row {
+                Icon {
+                    id: image
+                    source: model.icon
+                    visible: source !== undefined
+                }
+
                 Text {
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
                     color: Constants.primaryColor
@@ -66,6 +72,7 @@ GeneralView {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
+                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick()")
                             switch (type) {
                                 case Internal.MenuItemType.MI_NODE:
                                     sdlUI.onCommand(id, dataContainer.currentApplication.appId)
@@ -75,6 +82,7 @@ GeneralView {
                                     dataContainer.currentApplication.currentSubMenu = subMenu
                                     break;
                             }
+                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick(): exit")
                         }
                     }
                 }

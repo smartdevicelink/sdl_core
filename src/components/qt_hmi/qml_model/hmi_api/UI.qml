@@ -97,6 +97,8 @@ Item {
     }
 
     function deleteCommand (cmdID, appID) {
+        dataContainer.deleteCommand(cmdID, appID)
+        return {}
     }
 
     function addSubMenu (menuID, menuParams, appID) {
@@ -105,6 +107,8 @@ Item {
     }
 
     function deleteSubMenu (menuID, appID) {
+        dataContainer.deleteSubMenu(menuID, appID)
+        return {}
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {

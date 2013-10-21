@@ -253,46 +253,39 @@ QtObject {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        if (cmdIcon) {
-            console.debug("UI::addCommand(" + cmdID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, {" + cmdIcon.value + ", " + cmdIcon.imageType + "}, " + appID + ")")
-        }
-        else {
-            console.debug("UI::addCommand(" + cmdID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + cmdIcon + ", " + appID + ")")
-        }
-        if (menuParams !== undefined) {
-            if (menuParams.parentID !== undefined) {
-                var parentNotFound = true
-                for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
-                    var option = getApplication(appID).options.get(optionIndex)
-                    if (option.type === Internal.MenuItemType.MI_SUBMENU) {
-                        if (option.id === menuParams.parentID) {
-                            var count = option.subMenu.count
-                            var index = count
-                            if (menuParams.position !== undefined) {
-                                if (menuParams.position < count) {
-                                    index = menuParams.position
-                                }
+        console.debug("UI::addCommand(" +
+                      cmdID +
+                      ", " +
+                      (menuParams ?
+                          "{" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}" : menuParams) +
+                          ", " +
+                      (cmdIcon ?
+                          "{" + cmdIcon.value + ", " + cmdIcon.imageType + "}" : cmdIcon) +
+                      ", " +
+                      appID +
+                      ")")
+        if ((menuParams !== undefined) && (menuParams.parentID !== undefined)) {
+            var parentNotFound = true
+            for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
+                var option = getApplication(appID).options.get(optionIndex)
+                if (option.type === Internal.MenuItemType.MI_SUBMENU) {
+                    if (option.id === menuParams.parentID) {
+                        var count = option.subMenu.count
+                        var index = count
+                        if (menuParams.position !== undefined) {
+                            if (menuParams.position < count) {
+                                index = menuParams.position
                             }
-//                          option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                            option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE}) // actually we do not need subMenu[] for node
-                            parentNotFound = false
-                            break
                         }
+//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon}) // actually we do not need subMenu[] for node
+                        parentNotFound = false
+                        break
                     }
-                }
-                if (parentNotFound) {
-                    console.log("UI::addCommand(): parentID " + menuParams.parentID + " not found")
                 }
             }
-            else {
-                count = getApplication(appID).options.count
-                index = count
-                if (menuParams.position !== undefined) {
-                    if (menuParams.position < count) {
-                        index = menuParams.position
-                    }
-                }
-                getApplication(appID).options.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "subMenu": []})
+            if (parentNotFound) {
+                console.log("UI::addCommand(): parentID " + menuParams.parentID + " not found")
             }
         }
         else {
@@ -303,9 +296,43 @@ QtObject {
                     index = menuParams.position
                 }
             }
-            getApplication(appID).options.insert(index, {"id": cmdID, "name": "cmdID = " + cmdID, "type": Internal.MenuItemType.MI_NODE, "subMenu": []})
+            var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
+            getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []})
         }
         console.debug("UI::addCommand(): exit")
+    }
+
+    function deleteCommand (cmdID, appID) {
+        console.debug("UI::deleteCommand(" + cmdID + ", " + appID + ")")
+        for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
+            var option = getApplication(appID).options.get(optionIndex)
+            if (option.type === Internal.MenuItemType.MI_NODE) {
+                if (option.id === cmdID) {
+                    getApplication(appID).options.remove(optionIndex)
+                    break
+                }
+            }
+            if (option.type === Internal.MenuItemType.MI_SUBMENU) {
+                var subMenu = option.subMenu
+                var idMatchFound = false
+                for (var subOptionIndex = 0; subOptionIndex < subMenu.count; ++subOptionIndex) {
+                    if (subMenu.get(subOptionIndex).id === cmdID) {
+                        idMatchFound = true
+                        if (subMenu !== currentApplication.currentSubMenu) {
+                            subMenu.remove(subOptionIndex)
+                        }
+                        else {
+                            console.log("UI::deleteCommand(): cannot remove item from current submenu")
+                        }
+                        break
+                    }
+                }
+                if (idMatchFound) {
+                    break
+                }
+            }
+        }
+        console.debug("UI::deleteCommand(): exit")
     }
 
     function addSubMenu (menuID, menuParams, appID) {
@@ -321,13 +348,34 @@ QtObject {
             "id": menuID,
             "name": menuParams.menuName,
             "type": Internal.MenuItemType.MI_SUBMENU,
+            "icon": undefined,
             "subMenu": [{
                 "name": "..",
                 "type": Internal.MenuItemType.MI_PARENT,
+                "icon": undefined,
                 "subMenu": getApplication(appID).options
             }]
         })
         console.debug("addSubMenu(): exit")
+    }
+
+    function deleteSubMenu (menuID, appID) {
+        console.debug("deleteSubMenu(" + menuID + ", " + appID + ")")
+        for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
+            var option = getApplication(appID).options.get(optionIndex)
+            if (option.type === Internal.MenuItemType.MI_SUBMENU) {
+                if (option.id === menuID) {
+                    if (option.subMenu !== currentApplication.currentSubMenu) {
+                        getApplication(appID).options.remove(optionIndex)
+                    }
+                    else {
+                        console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                    }
+                    break
+                }
+            }
+        }
+        console.debug("deleteSubMenu(): exit")
     }
 
     property NavigationModel navigationModel: NavigationModel { }
