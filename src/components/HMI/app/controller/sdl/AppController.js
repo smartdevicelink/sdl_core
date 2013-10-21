@@ -104,7 +104,7 @@ SDL.SDLAppController = Em.Object.create({
     },
 
     /**
-     * Handeler for preform interaction choice send response to device and
+     * Handler for preform interaction choice send response to device and
      * deactivate interactions window
      *
      * @param element:
@@ -112,7 +112,22 @@ SDL.SDLAppController = Em.Object.create({
      */
     onChoiceInteraction: function (element) {
 
-        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.performInteractionRequestID, element.choiceID);
+        SDL.InteractionChoicesView.deactivate("SUCCESS", element.choiceID);
+    },
+
+    /**
+     * Handeler for Navigation preform interaction choice send response to device and
+     * deactivate interactions window
+     *
+     * @param {Object}
+     */
+    onChoiceNaviInteraction: function(element) {
+
+        SDL.SDLModel.uiShowKeyboard();
+
+        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
+            element.performInteractionRequestID,
+            element.choiceID);
 
         SDL.InteractionChoicesView.deactivate("SUCCESS");
     },

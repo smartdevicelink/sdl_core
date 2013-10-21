@@ -169,7 +169,6 @@ void AlertRequest::SendAlertRequest(int app_id) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  // alert1
   msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
   msg_params[hmi_request::alert_strings][0][hmi_request::field_name] =
@@ -198,11 +197,16 @@ void AlertRequest::SendAlertRequest(int app_id) {
   msg_params[strings::app_id] = app_id;
   msg_params[strings::duration] = default_timeout_;
 
+  // NAVI platform progressIndicator
+  if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
+    msg_params[strings::progress_indicator] =
+      (*message_)[strings::msg_params][strings::progress_indicator];
+  }
+
   SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
 void AlertRequest::SendSpeakRequest(int app_id) {
-  // check TTSChunk parameter
 
   // crate HMI speak request
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

@@ -17,4 +17,12 @@ install_manifest.txt
 
 # ctags-generated
 tags
-
+# Mac OS Specific
+.DS_Store
+# Android specific
+*.iml
+*.orig
+.idea
+.gradle
+local.properties
+mobile/android/FordSnadbox

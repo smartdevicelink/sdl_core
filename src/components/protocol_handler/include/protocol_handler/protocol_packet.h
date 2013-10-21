@@ -98,6 +98,11 @@ const unsigned char SERVICE_TYPE_RPC = 0x07;
 const unsigned char SERVICE_TYPE_BULK = 0x0F;
 
 /**
+ * \brief Constant: Mobile Navi type of session for map streaming
+ */
+const unsigned char SERVICE_TYPE_NAVI = 0x0B;
+
+/**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for hear beat.
  */
 const unsigned char FRAME_DATA_HEART_BEAT = 0x00;   // Unused
@@ -126,7 +131,12 @@ const unsigned char FRAME_DATA_END_SESSION = 0x04;
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: End session not acknowledgement frame
  */
-const unsigned char FRAME_DATA_END_SESSION_NACK = 0x05;  // Assumption
+const unsigned char FRAME_DATA_END_SESSION_NACK = 0x05;
+
+/**
+ * \brief if FRAME_TYPE_CONTROL: Constant: Signalizes regular Mobile Navi session Ack
+ */
+const unsigned char FRAME_DATA_MOBILE_NAVE_ACK = 0x06;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum of consecutive frame numbers
@@ -185,14 +195,14 @@ struct ProtocolHeader {
    * \brief Constructor
    */
   ProtocolHeader()
-      : version(0x00),
-        compress(0x00),
-        frameType(0x00),
-        serviceType(0x00),
-        frameData(0x00),
-        sessionId(0x00),
-        dataSize(0x00),
-        messageId(0x00) {
+    : version(0x00),
+      compress(0x00),
+      frameType(0x00),
+      serviceType(0x00),
+      frameData(0x00),
+      sessionId(0x00),
+      dataSize(0x00),
+      messageId(0x00) {
   }
 
   /**
@@ -242,8 +252,8 @@ struct ProtocolHeader {
  */
 struct ProtocolData {
   ProtocolData()
-      : data(0),
-        totalDataBytes(0x00) {
+    : data(0),
+      totalDataBytes(0x00) {
   }
 
   unsigned char* data;
@@ -256,184 +266,184 @@ struct ProtocolData {
  * handling multiple frames of the message.
  */
 class ProtocolPacket {
- public:
-  /**
-   * \brief Default constructor
-   */
-  ProtocolPacket();
+  public:
+    /**
+     * \brief Default constructor
+     */
+    ProtocolPacket();
 
-  /**
-   * \brief Constructor
-   * \param version Version of protocol
-   * \param compress Compression flag
-   * \param frameType Type of frame (Single/First/Consecutive)
-   * \param serviceType Type of session (RPC/Bulk data)
-   * \param frameData Information about frame: start/end session, number of
-   * frame, etc
-   * \param sessionID Number of frame within connection
-   * \param dataSize Size of message string
-   * \param messageID ID of message or hash code - only for second protocol
-   * \param data Message string if provided
-   */
-  ProtocolPacket(unsigned char version, bool compress, unsigned char frameType,
-                 unsigned char serviceType, unsigned char frameData,
-                 unsigned char sessionId, unsigned int dataSize,
-                 unsigned int messageID, const unsigned char* data = 0,
-                 unsigned int packet_id = 0);
-  /**
-   * \brief Destructor
-   */
-  ~ProtocolPacket();
+    /**
+     * \brief Constructor
+     * \param version Version of protocol
+     * \param compress Compression flag
+     * \param frameType Type of frame (Single/First/Consecutive)
+     * \param serviceType Type of session (RPC/Bulk data)
+     * \param frameData Information about frame: start/end session, number of
+     * frame, etc
+     * \param sessionID Number of frame within connection
+     * \param dataSize Size of message string
+     * \param messageID ID of message or hash code - only for second protocol
+     * \param data Message string if provided
+     */
+    ProtocolPacket(unsigned char version, bool compress, unsigned char frameType,
+                   unsigned char serviceType, unsigned char frameData,
+                   unsigned char sessionId, unsigned int dataSize,
+                   unsigned int messageID, const unsigned char* data = 0,
+                   unsigned int packet_id = 0);
+    /**
+     * \brief Destructor
+     */
+    ~ProtocolPacket();
 
-  /*Serialization*/
-  /**
-   * \brief Serializes info about message into protocol header.
-   * \param version Version of protocol
-   * \param compress Compression flag
-   * \param frameType Type of frame (Single/First/Consecutive)
-   * \param serviceType Type of session (RPC/Bulk data)
-   * \param frameData Information about frame: start/end session, number of
-   * frame, etc
-   * \param sessionID Number of frame within connection
-   * \param dataSize Size of message string
-   * \param messageID ID of message or hash code - only for second protocol
-   * \param data Message string if provided
-   * \return \saRESULT_CODE Status of serialization
-   */
-  RESULT_CODE serializePacket(unsigned char version, bool compress,
-                              unsigned char frameType,
-                              unsigned char serviceType,
-                              unsigned char frameData, unsigned char sessionId,
-                              unsigned int dataSize, unsigned int messageID,
-                              const unsigned char* data = 0);
+    /*Serialization*/
+    /**
+     * \brief Serializes info about message into protocol header.
+     * \param version Version of protocol
+     * \param compress Compression flag
+     * \param frameType Type of frame (Single/First/Consecutive)
+     * \param serviceType Type of session (RPC/Bulk data)
+     * \param frameData Information about frame: start/end session, number of
+     * frame, etc
+     * \param sessionID Number of frame within connection
+     * \param dataSize Size of message string
+     * \param messageID ID of message or hash code - only for second protocol
+     * \param data Message string if provided
+     * \return \saRESULT_CODE Status of serialization
+     */
+    RESULT_CODE serializePacket(unsigned char version, bool compress,
+                                unsigned char frameType,
+                                unsigned char serviceType,
+                                unsigned char frameData, unsigned char sessionId,
+                                unsigned int dataSize, unsigned int messageID,
+                                const unsigned char* data = 0);
 
-  /**
-   * \brief Appends message frame to existing message in
-   * recieving multiframe messages.
-   * \param chunkData Current frame's message string
-   * \param chunkDataSize Size of current message string
-   * \return \saRESULT_CODE Status of serialization
-   */
-  RESULT_CODE appendData(unsigned char* chunkData, unsigned int chunkDataSize);
+    /**
+     * \brief Appends message frame to existing message in
+     * recieving multiframe messages.
+     * \param chunkData Current frame's message string
+     * \param chunkDataSize Size of current message string
+     * \return \saRESULT_CODE Status of serialization
+     */
+    RESULT_CODE appendData(unsigned char* chunkData, unsigned int chunkDataSize);
 
-  /**
-   * \brief Getter of serialized message with protocol header
-   * \return unsigned char * Message string or 0 if not serialized properly.
-   */
-  unsigned char* packet() const;
+    /**
+     * \brief Getter of serialized message with protocol header
+     * \return unsigned char * Message string or 0 if not serialized properly.
+     */
+    unsigned char* packet() const;
 
-  /**
-   * \brief Getter of message ID
-   * \return unsigned int size of message string
-   */
-  unsigned int packet_size() const;
+    /**
+     * \brief Getter of message ID
+     * \return unsigned int size of message string
+     */
+    unsigned int packet_size() const;
 
-  /**
-   * \brief Getter of message size including protocol header
-   * \return unsigned int size of message string
-   */
-  unsigned int packet_id() const;
+    /**
+     * \brief Getter of message size including protocol header
+     * \return unsigned int size of message string
+     */
+    unsigned int packet_id() const;
 
-  /*End of Serialization*/
+    /*End of Serialization*/
 
-  /*Deserialization*/
+    /*Deserialization*/
 
-  /**
-   * \brief Parses protocol header
-   * \param message Incoming message string containing both header and
-   * message body
-   * \param messageSize Incoming message size
-   * \return \saRESULT_CODE Status of serialization
-   */
-  RESULT_CODE deserializePacket(const unsigned char* message,
-                                unsigned int messageSize);
+    /**
+     * \brief Parses protocol header
+     * \param message Incoming message string containing both header and
+     * message body
+     * \param messageSize Incoming message size
+     * \return \saRESULT_CODE Status of serialization
+     */
+    RESULT_CODE deserializePacket(const unsigned char* message,
+                                  unsigned int messageSize);
 
-  /**
-   * \brief Getter of protocol version.
-   */
-  unsigned char version() const;
+    /**
+     * \brief Getter of protocol version.
+     */
+    unsigned char version() const;
 
-  /**
-   * \brief Getter of compression flag
-   */
-  bool is_compress() const;
+    /**
+     * \brief Getter of compression flag
+     */
+    bool is_compress() const;
 
-  /**
-   * \brief Getter of frame type (single/first/etc)
-   */
-  unsigned char frame_type() const;
+    /**
+     * \brief Getter of frame type (single/first/etc)
+     */
+    unsigned char frame_type() const;
 
-  /**
-   *\brief Getter of service type (RPC/Bulk data)
-   */
-  unsigned char service_type() const;
+    /**
+     *\brief Getter of service type (RPC/Bulk data)
+     */
+    unsigned char service_type() const;
 
-  /**
-   *\brief Getter of frame data (start/end session, number of frame etc)
-   */
-  unsigned char frame_data() const;
+    /**
+     *\brief Getter of frame data (start/end session, number of frame etc)
+     */
+    unsigned char frame_data() const;
 
-  /**
-   *\brief Getter of session number
-   */
-  unsigned char session_id() const;
+    /**
+     *\brief Getter of session number
+     */
+    unsigned char session_id() const;
 
-  /**
-   *\brief Getter of size of message body
-   */
-  unsigned int data_size() const;
+    /**
+     *\brief Getter of size of message body
+     */
+    unsigned int data_size() const;
 
-  /**
-   *\brief Getter of message id for second version of protocol
-   */
-  unsigned int message_id() const;
+    /**
+     *\brief Getter of message id for second version of protocol
+     */
+    unsigned int message_id() const;
 
-  /**
-   *\brief Getter of message string
-   */
-  unsigned char* data() const;
+    /**
+     *\brief Getter of message string
+     */
+    unsigned char* data() const;
 
-  /**
-   *\brief Setter for size of multiframe message
-   */
-  void set_total_data_bytes(unsigned int dataBytes);
+    /**
+     *\brief Setter for size of multiframe message
+     */
+    void set_total_data_bytes(unsigned int dataBytes);
 
-  /**
-   *\brief Getter for size of multiframe message
-   */
-  unsigned int total_data_bytes() const;
-  /*End of Deserialization*/
+    /**
+     *\brief Getter for size of multiframe message
+     */
+    unsigned int total_data_bytes() const;
+    /*End of Deserialization*/
 
- private:
-  /**
-   *\brief Serialized message string
-   */
-  unsigned char* packet_;
+  private:
+    /**
+     *\brief Serialized message string
+     */
+    unsigned char* packet_;
 
-  /**
-   *\brief Serialized message string size
-   */
-  unsigned int total_packet_size_;
+    /**
+     *\brief Serialized message string size
+     */
+    unsigned int total_packet_size_;
 
-  /**
-   *\brief Protocol header
-   */
-  ProtocolHeader packet_header_;
+    /**
+     *\brief Protocol header
+     */
+    ProtocolHeader packet_header_;
 
-  /**
-   *\brief Message body
-   */
-  ProtocolData packet_data_;
+    /**
+     *\brief Message body
+     */
+    ProtocolData packet_data_;
 
-  /**
-   *\brief Offset for multiframe messages
-   */
-  unsigned int data_offset_;
+    /**
+     *\brief Offset for multiframe messages
+     */
+    unsigned int data_offset_;
 
-  /**
-   *\brief ID for multiframe messages
-   */
-  unsigned int packet_id_;
+    /**
+     *\brief ID for multiframe messages
+     */
+    unsigned int packet_id_;
 };
 }  // namespace protocol_handler
 

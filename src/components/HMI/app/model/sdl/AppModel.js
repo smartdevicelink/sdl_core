@@ -48,11 +48,23 @@ SDL.SDLAppModel = Em.Object.extend({
         appName: '',
 
         /**
+         * Navigation streaming url
+         */
+        navigationStream: null,
+
+        /**
          * Chosen device name
          *
          * @type {String}
          */
         deviceName: '',
+
+        /**
+         * Global properties for current application
+         *
+         * @type {Object}
+         */
+        globalProperties: {},
 
         /**
          * Statusbar text
@@ -67,6 +79,13 @@ SDL.SDLAppModel = Em.Object.extend({
          * @type: {Em.Object}
          */
         appInfo: null,
+
+        /**
+         * Info navigation data for ShowConstantTBT request
+         *
+         * @type: {Object}
+         */
+        constantTBTParams: null,
 
         /**
          * Current language of applications UI component
@@ -292,14 +311,13 @@ SDL.SDLAppModel = Em.Object.extend({
 
             if (message) {
 
-                SDL.InteractionChoicesView.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
-
-                SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
 
             } else {
-                //Magic number is standard 30 seconds for popUp Timer
-                SDL.InteractionChoicesView.preformChoices([], performInteractionRequestId, 30000);
-                SDL.InteractionChoicesView.activate("");
+//                SDL.InteractionChoicesView.preformChoices([],
+//                    performInteractionRequestId,
+//                    30000);
+                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
             }
 
             SDL.SDLController.VRMove();

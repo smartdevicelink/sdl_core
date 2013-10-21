@@ -64,48 +64,50 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
         distanceToManeuverScale: null,
         maneuverComplete: null,
 
-        activate: function(params) {
+        activate: function(appID) {
 
-            if (params) {
+            var naviParams = SDL.SDLController.getApplicationModel(appID).constantTBTParams;
 
-                for ( var i = 0; i < params.navigationTexts.length; i++) {
-                    switch (params.navigationTexts[i].fieldName) {
+            if (naviParams) {
+
+                for ( var i = 0; i < naviParams.navigationTexts.length; i++) {
+                    switch (naviParams.navigationTexts[i].fieldName) {
                     case 'navigationText1': {
                         this.set('captionText.content',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'navigationText2': {
                         this.set('navigationText2',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'ETA': {
-                        this.set('eta', params.navigationTexts[i].fieldText);
+                        this.set('eta', naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'totalDistance': {
                         this.set('totalDistance',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     }
                 }
 
-                if (params.softButtons) {
-                    this.softButtons.addItems(params.softButtons);
+                if (naviParams.softButtons) {
+                    this.softButtons.addItems(naviParams.softButtons);
                 }
-                if (params.maneuverComplete) {
-                    this.set('maneuverComplete', params.maneuverComplete);
+                if (naviParams.maneuverComplete) {
+                    this.set('maneuverComplete', naviParams.maneuverComplete);
                 }
-                this.set('appID', params.appID);
-                if (params.turnIcon) {
+                this.set('appID', naviParams.appID);
+                if (naviParams.turnIcon) {
 
-                    this.set('turnIcon', params.turnIcon.value);
+                    this.set('turnIcon', naviParams.turnIcon.value);
                 }
-                this.set('distanceToManeuver', params.distanceToManeuver);
+                this.set('distanceToManeuver', naviParams.distanceToManeuver);
                 this.set('distanceToManeuverScale',
-                    params.distanceToManeuverScale);
+                    naviParams.distanceToManeuverScale);
 
                 this.set('active', true);
             }

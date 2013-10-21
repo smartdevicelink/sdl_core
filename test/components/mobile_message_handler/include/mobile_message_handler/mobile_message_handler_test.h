@@ -52,7 +52,7 @@
 //! ---------------------------------------------------------------------------
 
 log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("mobile_message_handler_test"));
+                              log4cxx::Logger::getLogger("mobile_message_handler_test"));
 
 sync_primitives::SynchronisationPrimitives synchronisation;
 sync_primitives::Timer* timer;
@@ -71,7 +71,9 @@ class MobileMessageHandlerTester :
   public mobile_message_handler::MobileMessageObserver,
   public protocol_handler::ProtocolHandler {
   public:
-    virtual void set_protocol_observer(protocol_handler::ProtocolObserver* observer) {}
+    virtual void AddProtocolObserver(protocol_handler::ProtocolObserver* observer) {}
+
+    virtual void RemoveProtocolObserver(protocol_handler::ProtocolObserver* observer) {}
 
     /**
      * \brief Sets pointer for Connection Handler layer for managing sessions
@@ -86,64 +88,66 @@ class MobileMessageHandlerTester :
      */
     void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) {}
 
-    unsigned int GetPacketSize(unsigned int size, unsigned char *data) {
+    unsigned int GetPacketSize(unsigned int size, unsigned char* data) {
       return 0;
     }
 
+    void SendFramesNumber(int connection_key, int number_of_frames) {}
+
     MobileMessageHandlerTester()
       : mmh_(NULL) {
-  }
-
-  bool init(const MobileMessage& message) {
-    message_ = message;
-    mmh_ = mobile_message_handler::MobileMessageHandlerImpl::instance();
-    DCHECK(mmh_);
-
-    return true;
-  }
-
-  void OnMobileMessageReceived(const MobileMessage& message) {
-    ASSERT_TRUE(message_->operator ==(*message));
-
-    flag = true;
-    synchronisation.signal();
-  }
-
-    void sendMessageToMobileApp(const transport_manager::RawMessageSptr message) {
-//      mmh_->OnMessageReceived(message);//todo: YK uncoment sometime
     }
 
- private:
-  mobile_message_handler::MobileMessageHandlerImpl* mmh_;
-  MobileMessage message_;
+    bool init(const MobileMessage& message) {
+      message_ = message;
+      mmh_ = mobile_message_handler::MobileMessageHandlerImpl::instance();
+      DCHECK(mmh_);
 
-  DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerTester);
+      return true;
+    }
+
+    void OnMobileMessageReceived(const MobileMessage& message) {
+      ASSERT_TRUE(message_->operator ==(*message));
+
+      flag = true;
+      synchronisation.signal();
+    }
+
+    void sendMessageToMobileApp(const transport_manager::RawMessageSptr message) {
+      //      mmh_->OnMessageReceived(message);//todo: YK uncoment sometime
+    }
+
+  private:
+    mobile_message_handler::MobileMessageHandlerImpl* mmh_;
+    MobileMessage message_;
+
+    DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerTester);
 };
 
 /**
  * @class MobileMessageHandlerTestObserverThread
  */
 class MobileMessageHandlerTestObserverThread : public threads::ThreadDelegate {
- public:
-  explicit MobileMessageHandlerTestObserverThread(const MobileMessage& message)
+  public:
+    explicit MobileMessageHandlerTestObserverThread(const MobileMessage& message)
       : message_(message) {
-  }
-  ~MobileMessageHandlerTestObserverThread() {
-  }
+    }
+    ~MobileMessageHandlerTestObserverThread() {
+    }
 
-  void threadMain() {
-    mobile_message_handler::MobileMessageHandlerImpl* mmh =
+    void threadMain() {
+      mobile_message_handler::MobileMessageHandlerImpl* mmh =
         mobile_message_handler::MobileMessageHandlerImpl::instance();
-    DCHECK(mmh);
+      DCHECK(mmh);
 
-    mmh->SendMessageToMobileApp(message_);
-    timer->StartWait(kTimeout);
-    //ASSERT_TRUE(flag);
-  }
+      mmh->SendMessageToMobileApp(message_);
+      timer->StartWait(kTimeout);
+      //ASSERT_TRUE(flag);
+    }
 
- private:
-  MobileMessage message_;
-  DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerTestObserverThread);
+  private:
+    MobileMessage message_;
+    DISALLOW_COPY_AND_ASSIGN(MobileMessageHandlerTestObserverThread);
 };
 
 //! ---------------------------------------------------------------------------
@@ -171,15 +175,15 @@ TEST(mobile_message_handler_test, component_test) {
   observer.init(message);
 
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
-      mobile_message_handler::MobileMessageHandlerImpl::instance();
+    mobile_message_handler::MobileMessageHandlerImpl::instance();
   DCHECK(mmh);
   mmh->set_protocol_handler(&observer);
   mmh->AddMobileMessageListener(&observer);
 
   // Message processing
   threads::Thread* observer_thread = new threads::Thread(
-      "MobileMessageHandler::MobileMessageHandlerTestObserverThread",
-      new MobileMessageHandlerTestObserverThread(message));
+    "MobileMessageHandler::MobileMessageHandlerTestObserverThread",
+    new MobileMessageHandlerTestObserverThread(message));
 
   observer_thread->start();
   observer_thread->join();

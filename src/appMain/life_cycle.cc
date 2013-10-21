@@ -94,7 +94,8 @@ bool LifeCycle::StartComponents() {
   hmi_handler_->set_message_observer(app_manager_);
 
   protocol_handler_->set_session_observer(connection_handler_);
-  protocol_handler_->set_protocol_observer(mmh_);
+  protocol_handler_->AddProtocolObserver(mmh_);
+  // TODO(PV): add media manager
 
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
@@ -146,7 +147,9 @@ bool LifeCycle::InitMessageBroker() {
 
   mb_adapter_ =
     new hmi_message_handler::MessageBrokerAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance(),
+    profile::Profile::instance()->server_address(),
+    profile::Profile::instance()->server_port());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter_);
@@ -198,7 +201,7 @@ void LifeCycle::StopComponents(int params) {
   instance()->connection_handler_->~ConnectionHandlerImpl();
 
   LOG4CXX_INFO(logger_, "Destroying Mobile Message Handler.");
-  instance()->protocol_handler_->set_protocol_observer(NULL);
+  instance()->protocol_handler_->RemoveProtocolObserver(instance()->mmh_);
   delete instance()->mmh_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");

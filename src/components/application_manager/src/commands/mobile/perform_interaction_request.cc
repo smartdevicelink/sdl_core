@@ -306,6 +306,12 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
       CommandImpl::hmi_protocol_type_;
 
   request[strings::msg_params] = msg_params;
+  if((*message_)[strings::msg_params].
+      keyExists(hmi_request::interaction_layout)) {
+    request[strings::msg_params][hmi_request::interaction_layout] =
+        (*message_)[strings::msg_params][hmi_request::interaction_layout].
+        asInt();
+  }
 
   msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
       connection_key, correlation_id, hmi_correlation_id, msg_chaining_,

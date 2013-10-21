@@ -42,7 +42,7 @@ FFW.RPCClient = Em.Object
         /*
          * url for message broker
          */
-        url: "ws://localhost:8087",
+        url: FLAGS.WEBSOCKET_URL,
 
         /*
          * Component name in RPC system It is unique.
@@ -75,7 +75,7 @@ FFW.RPCClient = Em.Object
             this.observer = observer;
             this.idStart = startId;
 
-            this.socket = new WebSocket(this.url, 'sample');
+            this.socket = new WebSocket(this.url);
 
             var self = this;
 

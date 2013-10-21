@@ -50,6 +50,7 @@ const char error_msg[] = "message";
 const char msg_params[] = "msg_params";
 const char info[] = "info";
 const char app_id[] = "appID";
+const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
 const char success[] = "success";
@@ -105,6 +106,7 @@ const char tts_chunks[] = "ttsChunks";
 const char initial_prompt[] = "initialPrompt";
 const char initial_text[] = "initialText";
 const char duration[] = "duration";
+const char progress_indicator[] = "progressIndicator";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
 const char custom_presets[] = "customPresets";
@@ -218,6 +220,10 @@ const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
 const char navi_text[] = "navigationText";
 const char show_strings[] = "showStrings";
+const char interaction_layout[] = "interactionLayout";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
 }  // namespace hmi_request
 
 namespace hmi_response {

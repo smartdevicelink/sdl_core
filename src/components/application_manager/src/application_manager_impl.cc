@@ -37,7 +37,7 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_chaining.h"
-#include "audio_manager/audio_stream_sender_thread.h"
+#include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
@@ -80,7 +80,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
     hmi_so_factory_(NULL),
-    request_ctrl() {
+    request_ctrl(),
+    media_manager_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
@@ -165,8 +166,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   message_chaining_.clear();
 
-  if (audioManager_) {
-    delete audioManager_;
+  if (media_manager_) {
+    delete media_manager_;
   }
 }
 
@@ -746,24 +747,16 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int sampling_rate,
     int bits_per_sample,
     int audio_type) {
-  audioManager_ = audio_manager::AudioManagerImpl::getAudioManager();
+  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
 
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
-  if (NULL != audioManager_) {
-    Application* application =
-      ApplicationManagerImpl::instance()->application(session_key);
-
-    std::string record_file = file_system::CreateDirectory(application->name());
-
-    record_file += "/";
-    record_file +=  "record.wav";
-
-    audioManager_->startMicrophoneRecording(record_file,
-                                            static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-                                            max_duration,
-                                            static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
-                                            static_cast<unsigned int>(session_key),
-                                            static_cast<unsigned int>(correlation_id));
+  if (NULL != media_manager_) {
+    media_manager_->startMicrophoneRecording(std::string("record.wav"),
+        static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+        max_duration,
+        static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+        static_cast<unsigned int>(session_key),
+        static_cast<unsigned int>(correlation_id));
   }
 }
 
@@ -816,8 +809,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 void ApplicationManagerImpl::StopAudioPassThru() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if (NULL != audioManager_) {
-    audioManager_->stopMicrophoneRecording();
+  if (NULL != media_manager_) {
+    media_manager_->stopMicrophoneRecording();
   }
 }
 
@@ -968,33 +961,57 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-void ApplicationManagerImpl::OnSessionStartedCallback(
+bool ApplicationManagerImpl::OnSessionStartedCallback(
   connection_handler::DeviceHandle device_handle, int session_key,
-  int first_session_key) {
+  int first_session_key, connection_handler::ServiceType type) {
+  LOG4CXX_INFO(logger_, "Started session with type " << type);
+  if (connection_handler::ServiceType::kNaviSession == type) {
+    LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+
+    // send to HMI startStream request
+    char url[100] = {'\0'};
+    snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+             profile::Profile::instance()->server_address().c_str(),
+             profile::Profile::instance()->navi_server_port());
+
+    application_manager::MessageHelper::SendNaviStartStream(
+      url, session_key);
+
+    // !!!!!!!!!!!!!!!!!!!!!!!
+    // TODO(DK): add check if navi streaming allowed for this app.
+  }
+  return true;
 }
 
 void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
-    int first_session_key) {
+    int first_session_key,
+    connection_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
     "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << first_session_key);
-  if (session_key == first_session_key) {
-    std::map<int, Application*>::iterator it = applications_.find(
-          first_session_key);
-    if (it == applications_.end()) {
-      LOG4CXX_ERROR(logger_, "Trying to remove not existing session.");
-      for (std::map<int, Application*>::iterator itr = applications_.begin();
-           applications_.end() != itr; ++itr) {
-        LOG4CXX_ERROR(logger_, "\n\t\t\tapplication session " << itr->first);
+    << first_session_key << " type " << type);
+  switch (type) {
+    case connection_handler::ServiceType::kRPCSession: {
+      LOG4CXX_INFO(logger_, "Remove application.");
+      std::map<int, Application*>::iterator it = applications_.find(
+            first_session_key);
+      if (it == applications_.end()) {
+        LOG4CXX_ERROR(logger_, "Trying to remove not existing session.");
+        return;
       }
-      return;
+      MessageHelper::RemoveAppDataFromHMI(it->second);
+      MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
+      UnregisterApplication(first_session_key);
+      break;
     }
-    MessageHelper::RemoveAppDataFromHMI(it->second);
-    MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-    UnregisterApplication(first_session_key);
-  } else {
-    applications_.erase(session_key);
+    case connection_handler::ServiceType::kNaviSession: {
+      LOG4CXX_INFO(logger_, "Stop video streaming.");
+      // TODO(PK): add some intelligent logic
+      break;
+    }
+    default:
+      LOG4CXX_WARN(logger_, "Unknown type of service to be ended.");
+      break;
   }
 }
 
@@ -1376,8 +1393,6 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
   }
-
-  printf("\n\n\nfunction_id: %d\n\n\n", message->function_id());
 
   if (!ConvertMessageToSO(*message, *so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
