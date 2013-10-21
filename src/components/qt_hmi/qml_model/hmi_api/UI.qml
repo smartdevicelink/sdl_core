@@ -154,9 +154,19 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        return {
-            sliderPosition: dataContainer.uiSliderPosition
-        }
+        console.log("UI.slider entered " + numTicks + " " + position + " "  + sliderHeader + " "  + sliderFooter + " "  + timeout + " "  + appID)
+
+        dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
+        dataContainer.uiSlider.header = sliderHeader
+        dataContainer.uiSlider.footer = sliderFooter
+        dataContainer.uiSlider.numTicks = numTicks
+        dataContainer.uiSlider.position = position
+        dataContainer.uiSlider.timeout = timeout
+
+        sliderPopup.showSlider()
+        sliderPopup.async = new Async.AsyncCall();
+        console.log("UI.slider exited")
+        return sliderPopup.async;
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {

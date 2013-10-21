@@ -230,7 +230,14 @@ QtObject {
         "timeoutPrompt": ""
     }
 
-    property int uiSliderPosition: 1
+    property var uiSlider : {
+        "appName":"Application Name",
+        "header": "Slider Header",
+        "footer": ["Slider Footer"],
+        "numTicks": "0",
+        "position": 0,
+        "timeout": 0
+    }
 
     function reset () {
         console.log("dataContainer reset enter");

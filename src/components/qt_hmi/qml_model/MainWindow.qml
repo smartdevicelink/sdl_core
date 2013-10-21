@@ -163,6 +163,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        SliderPopup {
+            id: sliderPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
