@@ -269,7 +269,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-  if (0 != poll_fds[0].revents & POLLIN) {
+  if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
     const bool receive_ok = Receive();
     if (!receive_ok) {
       LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");
