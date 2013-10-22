@@ -168,6 +168,10 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        InteractionModel {
+            id: interactionModel
+        }
     }
 
     Item {

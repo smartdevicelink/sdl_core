@@ -39,24 +39,31 @@ import "../models/Constants.js" as Constants
 PopUp {
     Text {
         id: prompt
+        text: interactionModel.initialText
         anchors.top: parent.top
+        anchors.topMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 15
         font.pixelSize: 14
         color: Constants.primaryColor
     }
 
     ListView {
         id: choiceView
-        model: ListModel {
-            id: choiceModel
-        }
+        anchors.top: prompt.bottom
+        anchors.bottom: parent.bottom
+        model: interactionModel.choice
         delegate: Text {
             text: name
             font.pixelSize: 14
             color: Constants.primaryColor
 
             MouseArea {
+                anchors.fill: parent
                 onClicked: {
-                    console.debug("interactionPopup::choiceView::delegate::MouseArea::onClicked()")
+                    console.debug("interactionPopup::choiceView::delegate::MouseArea::onClicked(): id = " + id)
+                    DBus.sendReply(interactionModel.async, {"choiceID": id})
+                    deactivate()
                     console.debug("interactionPopup::choiceView::delegate::MouseArea::onClicked(): exit")
                 }
             }
@@ -67,30 +74,26 @@ PopUp {
         Timer {
             id: timer
             onTriggered: {
-                complete()
+                deactivate()
             }
         }
     }
 
-    function activate (initialText, choiceSet, vrHelp, timeout, appID) {
+    function activate () {
+        console.debug("InteractionPopup::activate()")
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
-        prompt.text = initialText.fieldText
-        for (var i = 0; i < choiceSet.length; ++i) {
-            choiceModel.append({"name": choiceSet[i].menuName})
-        }
-        timer.interval = timeout
+        timer.interval = interactionModel.timeout
         timer.start()
         show()
+        console.debug("InteractionPopup::activate(): exit")
     }
 
     function deactivate () {
+        console.debug("InteractionPopup::deactivate()")
+        timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         hide()
-    }
-
-    function complete () {
-        timer.stop()
-        deactivate()
+        console.debug("InteractionPopup::deactivate(): exit")
     }
 }
