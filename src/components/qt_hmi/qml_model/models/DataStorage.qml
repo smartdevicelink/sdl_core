@@ -94,6 +94,7 @@ QtObject {
                 currentApplication.turnList = applicationList.get(i).turnList
                 currentApplication.turnListSoftButtons =
                         applicationList.get(i).turnListSoftButtons
+                currentApplication.languageTTSVR = applicationList.get(i).languageTTSVR
                 // This place is for adding new properties
             }
         }
@@ -120,7 +121,8 @@ QtObject {
             hmiUIText: app.hmiUIText,
             options: [],
             turnList: [],
-            turnListSoftButtons: []
+            turnListSoftButtons: [],
+            languageTTSVR: 0
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -242,12 +244,6 @@ QtObject {
         console.log("dataContainer changeRegistrarionUI enter");
         hmiUILanguage = language
         console.log("dataContainer changeRegistrarionUI exit");
-    }
-
-    function changeRegistrationTTSVR (language) {
-        console.log("dataContainer changeRegistrationTTSVR enter");
-        hmiTTSVRLanguage = language
-        console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {

@@ -21,5 +21,6 @@ QtObject {
     }
     property ListModel turnList
     property ListModel turnListSoftButtons
+    property int languageTTSVR
     // This place is for adding new properties
 }

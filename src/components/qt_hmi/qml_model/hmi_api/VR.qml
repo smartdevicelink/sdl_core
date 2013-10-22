@@ -42,7 +42,9 @@ Item {
         }
     }
 
-    function changeRegistration(language) {
-        dataContainer.changeRegistrationTTSVR(language)
+    function changeRegistration(language, appID) {
+        if (dataContainer.getApplication(appID)) {
+            dataContainer.getApplication(appID).TTSVRLanguage = language;
+        }
     }
 }
