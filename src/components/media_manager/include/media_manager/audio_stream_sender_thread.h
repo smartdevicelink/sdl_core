@@ -71,69 +71,69 @@ typedef enum {
  * and send it every 1 second to mobile device.
  */
 class AudioStreamSenderThread : public threads::ThreadDelegate {
- public:
-  /*
-   * @brief AudioStreamSenderThread class constructor
-   *
-   * @param session_key     Session key of connection for Mobile side
-   * @param correlation_id  Correlation id for response for Mobile side
-   */
-  AudioStreamSenderThread(const std::string fileName, unsigned int session_key,
-                          unsigned int correlation_id);
+  public:
+    /*
+     * @brief AudioStreamSenderThread class constructor
+     *
+     * @param session_key     Session key of connection for Mobile side
+     * @param correlation_id  Correlation id for response for Mobile side
+     */
+    AudioStreamSenderThread(const std::string fileName, unsigned int session_key,
+                            unsigned int correlation_id);
 
-  /*
-   * @brief AudioStreamSenderThread class destructor
-   */
-  ~AudioStreamSenderThread();
+    /*
+     * @brief AudioStreamSenderThread class destructor
+     */
+    ~AudioStreamSenderThread();
 
-  /**
-   * @brief Thread procedure.
-   */
-  void threadMain();
+    /**
+     * @brief Thread procedure.
+     */
+    void threadMain();
 
-  /*
-   * @brief Retrieve session key
-   *
-   * @return Stored session key
-   */
-  unsigned int session_key() const;
+    /*
+     * @brief Retrieve session key
+     *
+     * @return Stored session key
+     */
+    unsigned int session_key() const;
 
-  /*
-   * @brief Retrieve correlation id
-   *
-   * @return Stored correlation id
-   */
-  unsigned int correlation_id() const;
+    /*
+     * @brief Retrieve correlation id
+     *
+     * @return Stored correlation id
+     */
+    unsigned int correlation_id() const;
 
-  void exitThreadMain();
+    bool exitThreadMain();
 
- private:
-  /*
-   * @brief Sends AudioPassThru request
-   */
-  bool SendEndAudioPassThru();
+  private:
+    /*
+     * @brief Sends AudioPassThru request
+     */
+    bool SendEndAudioPassThru();
 
-  void sendAudioChunkToMobile();
+    void sendAudioChunkToMobile();
 
-  /*
-   * @brief Creates command for corresponding smart object
-   *
-   * @param cmd Smart object representing command
-   */
-  void FactoryCreateCommand(
+    /*
+     * @brief Creates command for corresponding smart object
+     *
+     * @param cmd Smart object representing command
+     */
+    void FactoryCreateCommand(
       NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
-  unsigned int session_key_;
-  unsigned int correlation_id_;
-  const std::string fileName_;
+    unsigned int session_key_;
+    unsigned int correlation_id_;
+    const std::string fileName_;
     int offset_;
-  bool shouldBeStoped_;
-  sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+    bool shouldBeStoped_;
+    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
 
-  static const int kAudioPassThruTimeout;
-  static log4cxx::LoggerPtr logger_;
+    static const int kAudioPassThruTimeout;
+    static log4cxx::LoggerPtr logger_;
 
-  DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
+    DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };
 }  // namespace media_manager
 
