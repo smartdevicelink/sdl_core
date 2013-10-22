@@ -67,7 +67,7 @@ Rectangle {
         wrapMode: Text.WordWrap
 
         text: "This application is intended to be used as a demonstrative aid only, "
-            + "while the vehicle is parked. Don'n use it while driving. <br /><br />"
+            + "while the vehicle is parked. Don't use it while driving. <br /><br />"
             + "Use extreme caution when using any device that takes your attention off the road. "
             + "Ford recommends against the use of any hand-held device while driving and that you comply "
             + "with all applicable laws. Your primary responsibility is the safe operation of the vehicle."
