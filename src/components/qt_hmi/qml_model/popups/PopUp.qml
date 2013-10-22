@@ -37,18 +37,17 @@ import "../models/Constants.js" as Constants
 
 Item {
     default property alias content: content.children
-    width: 700
-    height: 500
+    property int padding: 20
     Rectangle {
         id: content
-        width: 600
-        height: 400
+        width: parent.width - 2 * padding
+        height: parent.height - 2 * padding
         color: Constants.secondaryColor
-        radius: 20
+        radius: padding
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
-        border.color: "white"
+        border.color: Constants.popUpColor
     }
 
     function show() {

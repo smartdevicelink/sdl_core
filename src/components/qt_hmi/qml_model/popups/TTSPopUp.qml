@@ -33,27 +33,40 @@
  */
 
 import QtQuick 2.0
-import QtQuick.Controls 1.0
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
-Item {
-    property alias bgColor: rect.color
-    property alias border: rect.border
-    property alias textColor: text.color
+PopUp {
+    height: 100
+    width: 250
+    padding: 10
+    property var async
 
-    Rectangle {
-        id: rect
-        width: parent.width
-        height: parent.height
-        ScrollView {
-            width: parent.width
-            height: parent.height
-            Text {
-                id: text
-                color: textColor
-                text: ttsModel.speakedText
-            }
+    Text {
+        id: text
+        anchors.fill: parent
+        color: Constants.popUpColor
+        font.pixelSize: Constants.ttsFontSize
+        Timer {
+            id: timer
+            interval: Constants.ttsSpeakTime
+            onTriggered: deactivate()
         }
+    }
+
+    function activate(message) {
+        dataContainer.activeTTS = true;
+        text.text = message;
+        show();
+        timer.restart();
+    }
+
+    function deactivate() {
+        dataContainer.activeTTS = false;
+        text.text = '';
+        timer.stop();
+        hide();
+        DBus.sendReply(async, {});
     }
 }
 

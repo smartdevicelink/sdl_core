@@ -186,16 +186,6 @@ Item {
             }
         }
 
-        TTSSpeaker {
-            id: ttsSpeaker
-            width: parent.width
-            height: 100
-            bgColor: "#003"
-            textColor: "white"
-            border.color: "black"
-            border.width: 2
-        }
-
         ListModel {
             id: languagesList
 

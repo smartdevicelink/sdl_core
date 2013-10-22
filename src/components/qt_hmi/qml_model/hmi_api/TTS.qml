@@ -32,76 +32,50 @@
 
 import QtQuick 2.0
 import "Common.js" as Common
-import "../models/Constants.js" as Constants
 import "Async.js" as Async
 
 Item {
-    property string speakText
-    property var async
-
-    signal onLanguageChange (int language)
-
-    function isReady () {
+    function isReady() {
         return {
             available: dataContainer.hmiTTSAvailable
         }
     }
 
-    function speak (ttsChunks, appID) {
-        console.log('enter function speak')
-        var str = ''
-        for (var i in ttsChunks) {
-            str = str + ttsChunks[i].text + "\n"
-        }
-        timer.stop()
-        if (async) {
-            console.log("function speak send abort")
-            DBus.sendError(async, Common.Result.ABORTED)
-        }
-        async = new Async.AsyncCall()
-        ttsModel.speakedText = str
-        timer.start()
-        console.log('exit function speak')
-        return async
+    function speak(ttsChunks, appID) {
+        // appID unused
+        console.log('enter function speak');
+        var message = "";
+        for (var i = 0; i < ttsChunks.length; ++i)
+            message += ttsChunks[i].text + "\n";
+        ttsPopUp.activate(message);
+        ttsPopUp.async = new Async.AsyncCall();
+        console.log('exit function speak');
+        return ttsPopUp.async;
     }
 
-    function stopSpeaking () {
+    function stopSpeaking() {
+//        ttsPopUp.deactivate();
     }
 
-    function getLanguage () {
+    function getLanguage() {
         return {
             language: dataContainer.hmiTTSVRLanguage
         }
     }
 
-    function getSupportedLanguages () {
+    function getSupportedLanguages() {
         return {
             languages: settingsContainer.sdlLanguagesList
         }
     }
 
-    function changeRegistration (language) {
+    function changeRegistration(language) {
         dataContainer.changeRegistrationTTSVR(language)
     }
 
-    function setGlobalProperties (helpPrompt, timeoutPrompt, appID) {
+    function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
         dataContainer.globalProperties.helpPrompt = helpPrompt
         dataContainer.globalProperties.timeoutPrompt = timeoutPrompt
-    }
-
-    Timer {
-        id: timer
-        interval: Constants.ttsSpeakTime
-        onTriggered: {
-            console.log("function speak timer triggered enter")
-            if (async) {
-                console.log("function speak send OK")
-                DBus.sendReply(async, {})
-            }
-            async = undefined
-            ttsModel.speakedText = ''
-            console.log("function speak timer triggered exit")
-        }
     }
 }
 

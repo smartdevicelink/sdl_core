@@ -58,6 +58,10 @@ var transparentColor = "#00000000"
 
 // "Warning" word color
 var warningColor = "red"
+
+// Color for PopUp
+var popUpColor = "white"
+
 //--------------------------------------------------------------------------------------
 
 // Other
@@ -104,6 +108,9 @@ var generalSpasing = 10
 
 // Speak text for a given time
 var ttsSpeakTime = 2000
+
+// font size fo TTS popup
+var ttsFontSize = 12
 
 // -------------------------
 
