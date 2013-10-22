@@ -176,6 +176,7 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.SetGlobalProperties":
                 {
+                    SDL.SDLModel.setProperties(request.params);
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 

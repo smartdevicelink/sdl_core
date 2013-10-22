@@ -31,13 +31,13 @@
  * @version 1.0
  */
 
-SDL.QWERTYLayout = Em.ContainerView.extend( {
+SDL.AZERTYLayout = Em.ContainerView.extend( {
 
-    classNames: 'keyboardLayout QWERTYLayout',
+    classNames: 'keyboardLayout AZERTYLayout wide',
 
     childViews: [
-        'q',
-        'w',
+        'a',
+        'z',
         'e',
         'r',
         't',
@@ -46,7 +46,7 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         'i',
         'o',
         'p',
-        'a',
+        'q',
         's',
         'd',
         'f',
@@ -55,27 +55,27 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         'j',
         'k',
         'l',
-        'z',
+        'm',
+        'w',
         'x',
         'c',
         'v',
         'b',
         'n',
-        'm',
         'dash',
         'ampersand'
     ],
 
-    q: SDL.Button.extend({
-        classNames: 'q k0',
-        text      : 'q',
+    a: SDL.Button.extend({
+        classNames: 'a k0',
+        text      : 'a',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
 
-    w: SDL.Button.extend({
-        classNames: 'w k1',
-        text      : 'w',
+    z: SDL.Button.extend({
+        classNames: 'z k1',
+        text      : 'z',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
@@ -136,9 +136,9 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         action    : 'inputChanges'
     }),
 
-    a: SDL.Button.extend({
-        classNames: 'a k10',
-        text      : 'a',
+    q: SDL.Button.extend({
+        classNames: 'q k10',
+        text      : 'q',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
@@ -199,9 +199,16 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         action    : 'inputChanges'
     }),
 
-    z: SDL.Button.extend({
-        classNames: 'z k21',
-        text      : 'z',
+    m: SDL.Button.extend({
+        classNames: 'm k19',
+        text      : 'm',
+        target    : 'parentView.parentView',
+        action    : 'inputChanges'
+    }),
+
+    w: SDL.Button.extend({
+        classNames: 'w k21',
+        text      : 'w',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
@@ -241,22 +248,15 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         action    : 'inputChanges'
     }),
 
-    m: SDL.Button.extend({
-        classNames: 'm k27',
-        text      : 'm',
-        target    : 'parentView.parentView',
-        action    : 'inputChanges'
-    }),
-
     dash: SDL.Button.extend({
-        classNames: 'dash k28',
+        classNames: 'dash k27',
         text      : '-',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
 
     ampersand: SDL.Button.extend({
-        classNames: 'ampersand k29',
+        classNames: 'ampersand k28',
         text      : '&',
         target    : 'parentView.parentView',
         action    : 'inputChanges'

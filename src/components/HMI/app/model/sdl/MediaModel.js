@@ -47,7 +47,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 customPresets: [
                     '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>'
                 ],
-                alignment    : "text-align:left"
+                alignment    : "text-align:center"
             }));
 
             this.set('constantTBTParams', {
@@ -104,6 +104,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
+            this.set('globalProperties.keyboardProperties', Em.Object.create());
+            this.set('globalProperties.keyboardProperties.keyboardLayout', 'QWERTY');
 
             this.set('commandsList', {"top": []});
             this.set('softButtons', []);

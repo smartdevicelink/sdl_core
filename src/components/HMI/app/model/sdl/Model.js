@@ -33,57 +33,57 @@
 
 SDL.SDLModel = Em.Object.create({
 
-        /**
-         * Video player object for navigation
-         *
-         * @type {Object}
-         */
-        naviVideo: null,
+    /**
+     * Video player object for navigation
+     *
+     * @type {Object}
+     */
+    naviVideo: null,
 
-        /**
-         * Flag to indicate AudioPassThruPopUp activity
-         *
-         * @type {Boolean}
-         */
-        AudioPassThruState: false,
+    /**
+     * Flag to indicate AudioPassThruPopUp activity
+     *
+     * @type {Boolean}
+     */
+    AudioPassThruState: false,
 
-        /**
-         * Current device information
-         *
-         * @type {Object}
-         */
-        CurrDeviceInfo: {
-            "name": null,
-            "id": null
-        },
+    /**
+     * Current device information
+     *
+     * @type {Object}
+     */
+    CurrDeviceInfo: {
+        "name": null,
+        "id": null
+    },
 
-        /**
-         * Driver Distraction State
-         *
-         * @type bool
-         */
-        driverDistractionState: false,
+    /**
+     * Driver Distraction State
+     *
+     * @type bool
+     */
+    driverDistractionState: false,
 
-        /**
-         * Flag to sent Send Data extended params
-         *
-         * @type {Boolean}
-         */
-        sendDataExtend: false,
+    /**
+     * Flag to sent Send Data extended params
+     *
+     * @type {Boolean}
+     */
+    sendDataExtend: false,
 
-        /**
-         * VR active status
-         *
-         * @type {Boolean}
-         */
-        VRActive: false,
+    /**
+     * VR active status
+     *
+     * @type {Boolean}
+     */
+    VRActive: false,
 
-        /**
-         * Flag to be set true when phone call is initialised
-         *
-         * @type {Boolean}
-         */
-        phoneCall: false,
+    /**
+     * Flag to be set true when phone call is initialised
+     *
+     * @type {Boolean}
+     */
+    phoneCall: false,
 
     /**
      * Device list search progress flag
@@ -92,67 +92,56 @@ SDL.SDLModel = Em.Object.create({
      */
     deviceSearchProgress: false,
 
- /**
+    /**
      * Flag to be set true when VRHelpList are activated
      *
      * @param {Boolean}
      */
     VRHelpListActivated: false,
 
-        /**
-         * Flag to be set true when VRHelpList are activated
-         *
-         * @type {Object}
-         */
-        keyboardLayout: {
-            'QWERTY': SDL.QWERTYLayout.create(),
-            'QWERTZ': null,
-            'AZERTY': null
-        },
+    /**
+     * Flag to be set true when VRHelpList are activated
+     *
+     * @type {String}
+     */
+    keyboardInputValue: "",
 
-        /**
-         * Flag to be set true when VRHelpList are activated
-         *
-         * @type {String}
-         */
-        keyboardInputValue: "",
-
-        /**
-         * List of states for OnTBTClientState notification
-         */
-        tbtClientStates: [
-            {
-                name: "ROUTE_UPDATE_REQUEST",
-                id: 0
-            }, {
-                name: "ROUTE_ACCEPTED",
-                id: 1
-            }, {
-                name: "ROUTE_REFUSED",
-                id: 2
-            }, {
-                name: "ROUTE_CANCELLED",
-                id: 3
-            }, {
-                name: "ETA_REQUEST",
-                id: 4
-            }, {
-                name: "NEXT_TURN_REQUEST",
-                id: 5
-            }, {
-                name: "ROUTE_STATUS_REQUEST",
-                id: 6
-            }, {
-                name: "ROUTE_SUMMARY_REQUEST",
-                id: 7
-            }, {
-                name: "TRIP_STATUS_REQUEST",
-                id: 8
-            }, {
-                name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
-                id: 9
-            }
-        ],
+    /**
+     * List of states for OnTBTClientState notification
+     */
+    tbtClientStates: [
+        {
+            name: "ROUTE_UPDATE_REQUEST",
+            id: 0
+        }, {
+            name: "ROUTE_ACCEPTED",
+            id: 1
+        }, {
+            name: "ROUTE_REFUSED",
+            id: 2
+        }, {
+            name: "ROUTE_CANCELLED",
+            id: 3
+        }, {
+            name: "ETA_REQUEST",
+            id: 4
+        }, {
+            name: "NEXT_TURN_REQUEST",
+            id: 5
+        }, {
+            name: "ROUTE_STATUS_REQUEST",
+            id: 6
+        }, {
+            name: "ROUTE_SUMMARY_REQUEST",
+            id: 7
+        }, {
+            name: "TRIP_STATUS_REQUEST",
+            id: 8
+        }, {
+            name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
+            id: 9
+        }
+    ],
     /**
      * List of states for ExitApplication notification
      */
@@ -171,12 +160,12 @@ SDL.SDLModel = Em.Object.create({
         }
     ],
 
-/**
-         * Data for AudioPassThruPopUp that contains params for visualisation
-         *
-         * @type {Object}
-         */
-        AudioPassThruData: {},
+    /**
+     * Data for AudioPassThruPopUp that contains params for visualisation
+     *
+     * @type {Object}
+     */
+    AudioPassThruData: {},
 
     /**
      * Enum with result codes for RPC
@@ -208,227 +197,227 @@ SDL.SDLModel = Em.Object.create({
         "USER_DISALLOWED"           : 23
     },
 
-        /**
-         * List of registered applications, To prevent errors without registered
-         * application "-1" used as test appID
-         *
-         * @type object
-         */
-        registeredApps: [],
+    /**
+     * List of registered applications, To prevent errors without registered
+     * application "-1" used as test appID
+     *
+     * @type object
+     */
+    registeredApps: [],
 
-        /**
-         * List of registered components
-         *
-         * @type object
-         */
-        registeredComponents: [
-            {
-                type: "UI",
-                state: false
-            }, {
-                type: "TTS",
-                state: false
-            }, {
-                type: "VR",
-                state: false
-            }, {
-                type: "BasicCommunication",
-                state: false
-            }, {
-                type: "VehicleInfo",
-                state: false
-            }, {
-                type: "Buttons",
-                state: false
-            }, {
-                type: "Navigation",
-                state: false
+    /**
+     * List of registered components
+     *
+     * @type object
+     */
+    registeredComponents: [
+        {
+            type: "UI",
+            state: false
+        }, {
+            type: "TTS",
+            state: false
+        }, {
+            type: "VR",
+            state: false
+        }, {
+            type: "BasicCommunication",
+            state: false
+        }, {
+            type: "VehicleInfo",
+            state: false
+        }, {
+            type: "Buttons",
+            state: false
+        }, {
+            type: "Navigation",
+            state: false
+        }
+    ],
+
+    /**
+     * List of icons
+     *
+     * @type {Object}
+     */
+    listOfIcons: {
+        // appID: syncFileName
+        0: "images/media/ico_li.png"
+    },
+
+    /**
+     * Array of active applications
+     *
+     * @type {Array}
+     */
+    applicationsList: [],
+
+    /**
+     * Array of connected devices
+     *
+     * @type {Array}
+     */
+    devicesList: [],
+
+    /**
+     * TTS + VR language
+     *
+     * @type {String}
+     */
+    hmiTTSVRLanguage: 'EN-US',
+
+    /**
+     * UI language
+     *
+     * @type {String}
+     */
+    hmiUILanguage: 'EN-US',
+
+    /**
+     * List of supported languages
+     *
+     * @type {Array}
+     */
+    sdlLanguagesList: [
+        'EN-US',
+        'ES-MX',
+        'FR-CA',
+        'DE-DE',
+        'ES-ES',
+        'EN-GB',
+        'RU-RU',
+        'TR-TR',
+        'PL-PL',
+        'FR-FR',
+        'IT-IT',
+        'SV-SE',
+        'PT-PT',
+        'NL-NL',
+        'ZH-TW',
+        'JA-JP',
+        'AR-SA',
+        'KO-KR',
+        'PT-BR',
+        'CS-CZ',
+        'DA-DK',
+        'NO-NO'
+    ],
+
+    /**
+     * Method to open Phone view and dial phone number
+     *
+     * @param {Object}
+     */
+    dialNumber: function(params) {
+
+        this.set('phoneCall', true);
+        SDL.States.goToStates('phone.dialpad');
+        SDL.PhoneModel.set('dialpadNumber', params.number);
+        SDL.PhoneController.onDialCall();
+    },
+
+    /**
+     * Notification method to send touch event data to SDLCore
+     *
+     * @param {Object}
+     */
+    onTouchEvent: function(event){
+
+        var type = "",
+            touches = event.originalEvent.touches.length,
+            changedTouches = event.originalEvent.touches.length,
+            touchLists = {"touches": touches, "changedTouches": changedTouches},
+            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.5, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+
+        switch (event.originalEvent.type) {
+            case "touchstart": {
+                type = "TOUCHSTART";
+                break;
             }
-        ],
-
-        /**
-         * List of icons
-         *
-         * @type {Object}
-         */
-        listOfIcons: {
-            // appID: syncFileName
-            0: "images/media/ico_li.png"
-        },
-
-        /**
-         * Array of active applications
-         *
-         * @type {Array}
-         */
-        applicationsList: [],
-
-        /**
-         * Array of connected devices
-         *
-         * @type {Array}
-         */
-        devicesList: [],
-
-        /**
-         * TTS + VR language
-         *
-         * @type {String}
-         */
-        hmiTTSVRLanguage: 'EN-US',
-
-        /**
-         * UI language
-         *
-         * @type {String}
-         */
-        hmiUILanguage: 'EN-US',
-
-        /**
-         * List of supported languages
-         *
-         * @type {Array}
-         */
-        sdlLanguagesList: [
-            'EN-US',
-            'ES-MX',
-            'FR-CA',
-            'DE-DE',
-            'ES-ES',
-            'EN-GB',
-            'RU-RU',
-            'TR-TR',
-            'PL-PL',
-            'FR-FR',
-            'IT-IT',
-            'SV-SE',
-            'PT-PT',
-            'NL-NL',
-            'ZH-TW',
-            'JA-JP',
-            'AR-SA',
-            'KO-KR',
-            'PT-BR',
-            'CS-CZ',
-            'DA-DK',
-            'NO-NO'
-        ],
-
-        /**
-         * Method to open Phone view and dial phone number
-         *
-         * @param {Object}
-         */
-        dialNumber: function(params) {
-
-            this.set('phoneCall', true);
-            SDL.States.goToStates('phone.dialpad');
-            SDL.PhoneModel.set('dialpadNumber', params.number);
-            SDL.PhoneController.onDialCall();
-        },
-
-        /**
-         * Notification method to send touch event data to SDLCore
-         *
-         * @param {Object}
-         */
-        onTouchEvent: function(event){
-
-            var type = "",
-                touches = event.originalEvent.touches.length,
-                changedTouches = event.originalEvent.touches.length,
-                touchLists = {"touches": touches, "changedTouches": changedTouches},
-                info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.5, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
-
-            switch (event.originalEvent.type) {
-                case "touchstart": {
-                    type = "TOUCHSTART";
-                    break;
-                }
-                case "touchmove": {
-                    type = "TOUCHMOVE";
-                    break;
-                }
-                case "touchend": {
-                    type = "TOUCHEND";
-                    break;
-                }
+            case "touchmove": {
+                type = "TOUCHMOVE";
+                break;
             }
-
-            for(var i = 0; i < touches; i++){
-
-                info.id = i;
-                info.point.xCoord = event.originalEvent.touches[i].pageX;
-                info.point.yCoord = event.originalEvent.touches[i].pageY;
-                FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
+            case "touchend": {
+                type = "TOUCHEND";
+                break;
             }
-        },
+        }
 
-        /**
-         * Method to open Phone view and dial phone number
-         *
-         * @param {Object}
-         */
-        startStream: function(params) {
+        for(var i = 0; i < touches; i++){
 
-            SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-            this.playVideo();
-        },
+            info.id = i;
+            info.point.xCoord = event.originalEvent.touches[i].pageX;
+            info.point.yCoord = event.originalEvent.touches[i].pageY;
+            FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
+        }
+    },
 
-        /**
-         * Method to set navigation streaming url to current app model
-         *
-         * @param {Object}
-         */
-        stopStream: function(params) {
+    /**
+     * Method to open Phone view and dial phone number
+     *
+     * @param {Object}
+     */
+    startStream: function(params) {
 
-            SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
-            this.pauseVideo();
-        },
+        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
+        this.playVideo();
+    },
 
-        /**
-         * Method to reset navigation streaming url from current app model
-         */
-        playVideo: function(){
-            if (SDL.SDLAppController.model.navigationStream !== null) {
+    /**
+     * Method to set navigation streaming url to current app model
+     *
+     * @param {Object}
+     */
+    stopStream: function(params) {
 
-                SDL.SDLModel.naviVideo = document.getElementById("html5Player");
-                SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
-                SDL.SDLModel.naviVideo.play();
-            }
-        },
+        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
+        this.pauseVideo();
+    },
 
-        /**
-         * Video player trigger to stop playing video
-         */
-        pauseVideo: function(){
-            if (SDL.SDLModel.naviVideo != null) {
+    /**
+     * Method to reset navigation streaming url from current app model
+     */
+    playVideo: function(){
+        if (SDL.SDLAppController.model.navigationStream !== null) {
 
-                SDL.SDLModel.naviVideo.pause();
-            }
-        },
+            SDL.SDLModel.naviVideo = document.getElementById("html5Player");
+            SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+            SDL.SDLModel.naviVideo.play();
+        }
+    },
 
-        /**
-         * Method to open Turn By Turn view
-         *
-         * @param {Object}
-         */
-        tbtActivate: function(params) {
+    /**
+     * Video player trigger to stop playing video
+     */
+    pauseVideo: function(){
+        if (SDL.SDLModel.naviVideo != null) {
 
-            SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
-            SDL.TurnByTurnView.activate(params.appID);
-        },
+            SDL.SDLModel.naviVideo.pause();
+        }
+    },
 
-        /**
-         * Method to set data for Turn List in applications model
-         *
-         * @param {Object}
-         */
-        tbtTurnListUpdate: function(params) {
+    /**
+     * Method to open Turn By Turn view
+     *
+     * @param {Object}
+     */
+    tbtActivate: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
-        SDL.TBTTurnList.updateList(params.appID);
+        SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
+        SDL.TurnByTurnView.activate(params.appID);
+    },
+
+    /**
+     * Method to set data for Turn List in applications model
+     *
+     * @param {Object}
+     */
+    tbtTurnListUpdate: function(params) {
+
+    SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+    SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+    SDL.TBTTurnList.updateList(params.appID);
     },
 
         /**
@@ -527,20 +516,19 @@ SDL.SDLModel = Em.Object.create({
 
     },
 
-        /**
-         * setGlobalProperties
-         *
-         * @param {Object}
-         *            message Object with parameters come from SDLCore.
-         */
-        setProperties: function(params) {
+    /**
+     * setGlobalProperties
+     *
+     * @param {Object}
+     *            message Object with parameters come from SDLCore.
+     */
+    setProperties: function(params) {
 
-            SDL.SDLController.getApplicationModel(params.appID).set('globalProperties', params);
+        for (var i in params) {
+            SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
+        }
 
-            //this.set('globalProperties.helpPrompt', params.helpPrompt);
-            //this.set('globalProperties.timeoutPrompt', params.timeoutPrompt);
-
-        },
+    },
 
     /**
      * Method to call handler from model to show list of avaliable

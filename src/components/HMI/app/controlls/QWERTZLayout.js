@@ -31,9 +31,9 @@
  * @version 1.0
  */
 
-SDL.QWERTYLayout = Em.ContainerView.extend( {
+SDL.QWERTZLayout = Em.ContainerView.extend( {
 
-    classNames: 'keyboardLayout QWERTYLayout',
+    classNames: 'keyboardLayout QWERTZLayout',
 
     childViews: [
         'q',
@@ -41,7 +41,7 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         'e',
         'r',
         't',
-        'y',
+        'z',
         'u',
         'i',
         'o',
@@ -55,7 +55,7 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         'j',
         'k',
         'l',
-        'z',
+        'y',
         'x',
         'c',
         'v',
@@ -101,9 +101,9 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         action    : 'inputChanges'
     }),
 
-    y: SDL.Button.extend({
-        classNames: 'y k5',
-        text      : 'y',
+    z: SDL.Button.extend({
+        classNames: 'z k5',
+        text      : 'z',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),
@@ -199,9 +199,9 @@ SDL.QWERTYLayout = Em.ContainerView.extend( {
         action    : 'inputChanges'
     }),
 
-    z: SDL.Button.extend({
-        classNames: 'z k21',
-        text      : 'z',
+    y: SDL.Button.extend({
+        classNames: 'y k21',
+        text      : 'y',
         target    : 'parentView.parentView',
         action    : 'inputChanges'
     }),

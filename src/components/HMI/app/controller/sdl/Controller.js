@@ -426,7 +426,25 @@ SDL.SDLController = Em.Object
          */
         onKeyboardChanges: function() {
             if (null !== SDL.SDLModel.keyboardInputValue) {
-                FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+
+                var str = SDL.SDLModel.keyboardInputValue;
+
+                if (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                    switch (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                        case 'SINGLE_KEYPRESS':{
+                            FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ));
+                            break;
+                        }
+                        case 'QUEUE_KEYPRESS':{
+                            //FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+                            break;
+                        }
+                        case 'RESEND_CURRENT_ENTRY':{
+                            FFW.UI.OnKeyboardInput(str);
+                            break;
+                        }
+                    }
+                }
             }
         }.observes('SDL.SDLModel.keyboardInputValue'),
 

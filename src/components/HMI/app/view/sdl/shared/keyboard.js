@@ -41,7 +41,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         'microphone',
         'searchBar',
         'controlls',
-        'buttonsArea'
+        'buttonsAreaQWERTY',
+        'buttonsAreaQWERTZ',
+        'buttonsAreaAZERTY'
     ],
 
     /**
@@ -153,15 +155,11 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         numericBtn: SDL.Button.extend({
             classNames: 'numericBtn controll',
             text: '123'
-            //target: 'SDL.SDLController',
-            //action: 'numericBtn'
         }),
 
         symbolBtn: SDL.Button.extend({
             classNames: 'symbolBtn controll',
             text: '!@#'
-            //target: 'SDL.SDLController',
-            //action: 'symbolBtn'
         }),
 
         spaceBtn: SDL.Button.extend({
@@ -174,15 +172,11 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         caseSwitchBtn: SDL.Button.extend({
             classNames: 'caseSwitchBtn controll',
             text: 'ABC'
-            //target: 'SDL.SDLController',
-            //action: 'caseSwitchBtn'
         }),
 
         localisationBtn: SDL.Button.extend({
             classNames: 'localisationBtn controll',
             icon: 'images/info/info_leftMenu_apps_ico.png'
-            //target: 'SDL.SDLController',
-            //action: 'localisationBtn'
         }),
 
         searchBtn: SDL.Button.extend(SDL.PresetEvents, {
@@ -195,6 +189,71 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         })
     }),
 
-    buttonsArea: SDL.SDLModel.keyboardLayout['QWERTY']
+    disableButtons: function(){
+
+        if (!SDL.SDLAppController.model.globalProperties.keyboardProperties) {
+            return false;
+        }
+        var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;
+
+        if (SDL.SDLAppController.model && list){
+
+            for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
+                if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) >= 0) {
+                    this.buttonsAreaQWERTY._childViews[i].set('disabled', true);
+                    this.buttonsAreaQWERTZ._childViews[i].set('disabled', true);
+                    this.buttonsAreaAZERTY._childViews[i].set('disabled', true);
+                } else {
+                    this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
+                    this.buttonsAreaQWERTZ._childViews[i].set('disabled', false);
+                    this.buttonsAreaAZERTY._childViews[i].set('disabled', false);
+                }
+            }
+        }
+
+        return true;
+    }.observes('SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList.@each'),
+
+    buttonsAreaQWERTY: SDL.QWERTYLayout.create({
+
+        classNameBindings: 'this.pQWERTY::hide',
+
+        pQWERTY: function(){
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout == "QWERTY") {
+                return true;
+            } else {
+                return false;
+            }
+        }.property('SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout')
+
+    }),
+
+    buttonsAreaQWERTZ: SDL.QWERTZLayout.create({
+
+        classNameBindings: 'this.pQWERTZ::hide',
+
+        pQWERTZ: function(){
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout == "QWERTZ") {
+                return true;
+            } else {
+                return false;
+            }
+        }.property('SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout')
+
+    }),
+
+    buttonsAreaAZERTY: SDL.AZERTYLayout.create({
+
+        classNameBindings: 'this.pAZERTY::hide',
+
+        pAZERTY: function(){
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout == "AZERTY") {
+                return true;
+            } else {
+                return false;
+            }
+        }.property('SDL.SDLAppController.model.globalProperties.keyboardProperties.keyboardLayout')
+
+    })
 
 });
