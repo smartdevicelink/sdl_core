@@ -102,5 +102,8 @@ var itemListHeight = 60
 // Spasing between item on views
 var generalSpasing = 10
 
+// Speak text for a given time
+var ttsSpeakTime = 2000
+
 // -------------------------
 

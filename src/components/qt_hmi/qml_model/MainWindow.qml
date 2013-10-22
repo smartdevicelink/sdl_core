@@ -79,6 +79,10 @@ Rectangle {
         id: settingsContainer
     }
 
+    TTSModel {
+        id: ttsModel
+    }
+
     Item {
         id: mainScreen
         anchors.top: parent. top
