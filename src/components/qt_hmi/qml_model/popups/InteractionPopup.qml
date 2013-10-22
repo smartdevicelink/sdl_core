@@ -33,39 +33,39 @@
  */
 
 import QtQuick 2.0
+import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
 PopUp {
     Text {
-        id: prompt
+        id: initialText
         text: interactionModel.initialText
         anchors.top: parent.top
-        anchors.topMargin: 5
+        anchors.topMargin: Constants.popupMargin
         anchors.left: parent.left
-        anchors.leftMargin: 15
-        font.pixelSize: 14
+        anchors.leftMargin: Constants.popupMargin
+        font.pixelSize: Constants.fontSize
         color: Constants.primaryColor
     }
 
     ListView {
-        id: choiceView
-        anchors.top: prompt.bottom
+        anchors.top: initialText.bottom
+        anchors.topMargin: Constants.popupMargin
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: Constants.popupMargin
+        anchors.left: parent.left
+        anchors.leftMargin: Constants.popupMargin
+        anchors.right: parent.right
+        anchors.rightMargin: Constants.popupMargin
         model: interactionModel.choice
-        delegate: Text {
+        delegate: OvalButton {
+            width: parent.width
             text: name
-            font.pixelSize: 14
-            color: Constants.primaryColor
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    console.debug("interactionPopup::choiceView::delegate::MouseArea::onClicked(): id = " + id)
-                    DBus.sendReply(interactionModel.async, {"choiceID": id})
-                    deactivate()
-                    console.debug("interactionPopup::choiceView::delegate::MouseArea::onClicked(): exit")
-                }
+            onClicked: {
+                timer.stop()
+                DBus.sendReply(interactionModel.async, {"choiceID": id})
+                deactivate()
             }
         }
     }
@@ -91,7 +91,6 @@ PopUp {
 
     function deactivate () {
         console.debug("InteractionPopup::deactivate()")
-        timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         hide()
         console.debug("InteractionPopup::deactivate(): exit")

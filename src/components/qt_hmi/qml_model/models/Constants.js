@@ -74,6 +74,9 @@ var powerButtonFornSize = 25
 // Offset from the edges of the screen.
 var margin = 30
 
+// Offset from the edges of the popup
+var popupMargin = 15
+
 // Spacing between contacts at contact screen view.
 var contactListSpacing = 30
 
