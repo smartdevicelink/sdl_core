@@ -82,7 +82,7 @@ Item {
 
             Column {
                 Row {
-                    spacing: 25
+                    spacing: 10
                     MaskedButton {
                         name: "vr"
                         onReleased: {
@@ -93,7 +93,7 @@ Item {
                             }
                         }
                     }
-                    PowerSwitchBtn {}
+                    PowerSwitchButton {}
                 }
 
                 Grid {

@@ -224,7 +224,7 @@ QtObject {
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
 
-    property var vrCommands: []
+    property ListModel vrCommands: ListModel {}
 
     property var globalProperties: {
         "helpPrompt": "",
