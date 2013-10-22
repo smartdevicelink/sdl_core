@@ -41,7 +41,6 @@ import "../controls"
 PopUp {
 
     property var async
-    property date lastAlertTime
     property int position
 
     function showSlider(){
@@ -51,23 +50,12 @@ PopUp {
             console.debug("SliderPopup.showSlider exited")
             return;
         }
-        lastAlertTime = new Date()
-        timer.interval = dataContainer.uiSlider.timeout
 
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
 
         rectangle.width = 0
-        appNameText.text = dataContainer.uiSlider.appName
-        headerText.text = dataContainer.uiSlider.header
-        position = dataContainer.uiSlider.position
-
-        var pos = 0
-        if(dataContainer.uiSlider.footer.length > 1){
-            pos = dataContainer.uiSlider.position - 1
-        }
-        footerText.text = dataContainer.uiSlider.footer[pos]
         show()
         timer.start()
         console.debug("SliderPopup.showSlider exited")
@@ -85,7 +73,7 @@ PopUp {
             DBus.sendReply(async, {})
         } else {
             console.debug("send position " + position)
-            DBus.sendReply(async, {position:position})
+            DBus.sendReply(async, {sliderPosition:position})
         }
         console.debug("SliderPopup.complete exited")
     }
@@ -97,6 +85,7 @@ PopUp {
         anchors.centerIn: parent
         Timer {
             id: timer
+            interval: dataContainer.uiSlider.timeout
             onTriggered: {
                 complete(false)
             }
@@ -154,6 +143,7 @@ PopUp {
                 }
 
                 onPositionChanged: {
+                    console.log("SliderPopup.onPositionChanged entered")
                     if(mouseX <= 0){
                         rectangle.width  = borderRectangle.width / dataContainer.uiSlider.numTicks
                         position = 1
@@ -173,6 +163,7 @@ PopUp {
                     if(dataContainer.uiSlider.footer.length > 1){
                         footerText.text = dataContainer.uiSlider.footer[position - 1]
                     }
+                    console.log("SliderPopup.onPositionChanged exited")
                 }
             }
         }
@@ -180,7 +171,11 @@ PopUp {
         Text {
             id:footerText
             anchors.horizontalCenter: parent.horizontalCenter
-            text: ""
+            text: {
+                if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) return "";
+                console.log(dataContainer.uiSlider.position - 1)
+                return dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
+            }
             color: Constants.sliderTextColor
             font.pixelSize: Constants.fontSize * 2
         }

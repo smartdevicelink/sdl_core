@@ -154,7 +154,7 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        console.log("UI.slider entered " + numTicks + " " + position + " "  + sliderHeader + " "  + sliderFooter + " "  + timeout + " "  + appID)
+        console.log("UI.slider entered",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
 
         dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
         dataContainer.uiSlider.header = sliderHeader

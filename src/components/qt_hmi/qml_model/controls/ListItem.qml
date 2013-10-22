@@ -48,7 +48,7 @@ Rectangle {
         width: Constants.iconItemListSize
         height: Constants.iconItemListSize
         anchors.left: parent.left
-        anchors.leftMargin: Constants.generalSpasing
+        anchors.leftMargin: Constants.generalSpacing
         anchors.verticalCenter: parent.verticalCenter
         visible: source ? true : false
     }

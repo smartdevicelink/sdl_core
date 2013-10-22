@@ -39,11 +39,13 @@ QtObject {
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
+    property SliderModel uiSlider: SliderModel { }
 
     function getApplication(appId) {
         console.log("dataContainer getApplication enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
+                console.log("Application found", applicationList.get(i));
                 return applicationList.get(i);
             }
         }
@@ -228,15 +230,6 @@ QtObject {
     property var globalProperties: {
         "helpPrompt": "",
         "timeoutPrompt": ""
-    }
-
-    property var uiSlider : {
-        "appName":"Application Name",
-        "header": "Slider Header",
-        "footer": ["Slider Footer"],
-        "numTicks": "0",
-        "position": 0,
-        "timeout": 0
     }
 
     function reset () {
