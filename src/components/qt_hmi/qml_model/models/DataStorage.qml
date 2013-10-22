@@ -122,7 +122,7 @@ QtObject {
             options: [],
             turnList: [],
             turnListSoftButtons: [],
-            languageTTSVR: 0
+            languageTTSVR: Common.Language.EN_US
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -244,6 +244,12 @@ QtObject {
         console.log("dataContainer changeRegistrarionUI enter");
         hmiUILanguage = language
         console.log("dataContainer changeRegistrarionUI exit");
+    }
+
+    function changeRegistrationTTSVR(language, appID) {
+        console.log("dataContainer changeRegistrationTTSVR enter");
+        setApplicationProperties(appID, { TTSVRLanguage: language });
+        console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {

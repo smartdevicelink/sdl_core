@@ -28,7 +28,7 @@ Item {
     }
 
     function changeRegistration (language) {
-//        dataContainer.changeRegistrationTTSVR(language)
+        dataContainer.changeRegistrationTTSVR(language)
     }
 
     function setGlobalProperties (helpPrompt, timeoutPrompt, appID) {

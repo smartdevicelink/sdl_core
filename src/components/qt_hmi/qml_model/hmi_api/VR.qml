@@ -43,8 +43,6 @@ Item {
     }
 
     function changeRegistration(language, appID) {
-        if (dataContainer.getApplication(appID)) {
-            dataContainer.getApplication(appID).TTSVRLanguage = language;
-        }
+        dataContainer.changeRegistrationTTSVR(language, appID);
     }
 }
