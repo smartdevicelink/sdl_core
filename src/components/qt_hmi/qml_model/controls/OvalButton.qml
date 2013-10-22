@@ -103,7 +103,7 @@ Rectangle {
 
     Rectangle {
         id: background
-        color: "#00000000"
+        color: Constants.transparentColor
         anchors.rightMargin: 31
         anchors.leftMargin: 31
         anchors.bottomMargin: 10
@@ -124,7 +124,7 @@ Rectangle {
             parent.pressed();
         }
         onReleased: {
-            parent.state = "base state";
+            parent.state = "";
             parent.released();
         }
         onClicked: {
@@ -132,6 +132,9 @@ Rectangle {
         }
         onPressAndHold: {
             parent.pressAndHold();
+        }
+        onCanceled: {
+            parent.state = "";
         }
     }
 

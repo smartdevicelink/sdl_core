@@ -36,6 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -80,14 +81,13 @@ Rectangle {
 
     Item {
         id: mainScreen
-        x: 0
-        y: 0
         anchors.top: parent. top
         anchors.left: parent.left
         width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
         // TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
         height: (parent.height < minHeight) ? minHeight : parent.height
         visible: false
+
 
         Item {
             anchors.top: parent.top
@@ -117,12 +117,16 @@ Rectangle {
                     viewTransitionStack = []
                 }
 
+                property string position
                 function go(path, appId) {
-                    viewTransitionStack.push(source.toString())
-                    if (appId) {
-                        dataContainer.setCurrentApplication(appId)
+                    if (position !== path) {
+                        viewTransitionStack.push(source.toString())
+                        if (appId) {
+                            dataContainer.setCurrentApplication(appId)
+                        }
+                        position = path
+                        source = path
                     }
-                    source = path
                 }
 
                 function back() {
@@ -143,6 +147,8 @@ Rectangle {
                 }
             }
         }
+
+        WarningInfo { }
 
         AlertWindow {
             id: alertWindow

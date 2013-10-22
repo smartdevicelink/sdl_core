@@ -77,7 +77,7 @@ Q_DECLARE_METATYPE(OptionalArgument<bool>)
 Q_DECLARE_METATYPE(OptionalArgument<double>)
 
 Q_DECLARE_METATYPE(OptionalArgument<QList<int> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<QString> >)
+Q_DECLARE_METATYPE(OptionalArgument<QStringList>)
 Q_DECLARE_METATYPE(OptionalArgument<QList<bool> >)
 Q_DECLARE_METATYPE(OptionalArgument<QList<double> >)
 #endif // OPTIONALARGUMENT_H
