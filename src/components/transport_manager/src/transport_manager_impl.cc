@@ -764,15 +764,32 @@ void TransportManagerImpl::EventListenerThread(void) {
           //YK: temp solution until B1.0 release - begin
           if (!size_ready) {
             //get size only when last complete frame successfully sent to upper level
+            LOG4CXX_TRACE(
+                logger_,
+                "not size ready, adding to container, data_size:"
+                    << data->data_size() << ", container size:"
+                    << data_container[connection->id].first);
             this->AddDataToContainer(connection->id, data_container,
                                      data->data(), data->data_size());
-            if (!(size_ready = this->GetFrameSize(data->data(),
+            /*if (!(size_ready = this->GetFrameSize(data->data(),
                                                   data->data_size(), frame_size))) {
+              LOG4CXX_TRACE(logger_, "cannot get frame size");
+              //save data for future use because there is not enough data in current mesage to get frame size
+              break;
+            }*/
+            if (!(size_ready = this->GetFrameSize(data_container[connection->id].second,
+                                                  data_container[connection->id].first,
+                                                  frame_size))) {
               //save data for future use because there is not enough data in current mesage to get frame size
               break;
             }
           } else {
             //if current frame is not complete - accumulate data from each new message
+            LOG4CXX_TRACE(
+                logger_,
+                "size ready, adding to container, data size:"
+                    << data->data_size() << ", container size:"
+                    << data_container[connection->id].first);
             this->AddDataToContainer(connection->id, data_container,
                                      data->data(), data->data_size());
           }
@@ -784,8 +801,24 @@ void TransportManagerImpl::EventListenerThread(void) {
             frame_ready = false;
           } else {
             //get all completed frames from buffer until incomplete frame reached
+            LOG4CXX_TRACE(
+                logger_,
+                "getting frame from container of size:"
+                    << data_container[connection->id].first);
             frame_ready = this->GetFrame(data_container, connection->id,
                                          frame_size, &frame);
+            if (frame_ready) {
+              LOG4CXX_TRACE(
+                  logger_,
+                  "frame of size " << frame_size
+                      << " ready, new container size:"
+                      << data_container[connection->id].first);
+            } else {
+              LOG4CXX_TRACE(
+                  logger_,
+                  "frame not ready, new container size:"
+                      << data_container[connection->id].first);
+            }
           }
           while (frame_ready) {
             RawMessageSptr tmp_msg(
@@ -794,6 +827,9 @@ void TransportManagerImpl::EventListenerThread(void) {
                                                  frame, frame_size));
             RaiseEvent(&TransportManagerListener::OnTMMessageReceived, tmp_msg);
             delete[] frame;
+            LOG4CXX_TRACE(
+                logger_,
+                "message of size " << frame_size << " created and passed");
             size_ready = this->GetFrameSize(
                 data_container[connection->id].second,
                 data_container[connection->id].first, frame_size);
@@ -805,9 +841,26 @@ void TransportManagerImpl::EventListenerThread(void) {
               size_ready = false;
             }
             if (size_ready) {
+              LOG4CXX_TRACE(
+                  logger_,
+                  "(in loop) size ready, getting frame from container of size:"
+                      << data_container[connection->id].first);
               frame_ready = this->GetFrame(data_container, connection->id,
                                            frame_size, &frame);
+              if (frame_ready) {
+                LOG4CXX_TRACE(
+                    logger_,
+                    "(in loop) frame of size " << frame_size
+                        << " ready, new container size:"
+                        << data_container[connection->id].first);
+              } else {
+                LOG4CXX_TRACE(
+                    logger_,
+                    "(in loop) frame not ready, new container size:"
+                        << data_container[connection->id].first);
+              }
             } else {
+              LOG4CXX_TRACE(logger_, "(in loop) not size ready");
               frame_ready = false;
             }
           }

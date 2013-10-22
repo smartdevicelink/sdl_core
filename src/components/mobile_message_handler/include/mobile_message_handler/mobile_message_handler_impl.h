@@ -55,7 +55,7 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
     static MobileMessageHandlerImpl* instance();
 
     void set_protocol_handler(protocol_handler::ProtocolHandler* protocolHandler);
-    void OnMessageReceived(const protocol_handler::RawMessage* message);
+    void OnMessageReceived(const protocol_handler::RawMessagePtr& message);
     void SendMessageToMobileApp(const MobileMessage& message);
 
     void AddMobileMessageListener(MobileMessageObserver* listener);
@@ -68,10 +68,10 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
     //! -------------------------------------------------------------------------
 
     application_manager::Message* HandleIncomingMessageProtocolV1(
-      const protocol_handler::RawMessage* message);
+      const protocol_handler::RawMessagePtr& message);
 
     application_manager::Message* HandleIncomingMessageProtocolV2(
-      const protocol_handler::RawMessage* message);
+      const protocol_handler::RawMessagePtr& message);
 
     //! -------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
 
     protocol_handler::ProtocolHandler* protocol_handler_;
 
-    MessageQueue<const protocol_handler::RawMessage*> messages_from_mobile_app_;
+    MessageQueue<protocol_handler::RawMessagePtr> messages_from_mobile_app_;
     MessageQueue<MobileMessage> messages_to_mobile_app_;
 
     std::vector<MobileMessageObserver*> mobile_message_listeners_;

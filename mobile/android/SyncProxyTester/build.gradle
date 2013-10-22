@@ -1,9 +1,14 @@
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
+    instrumentTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
 android {

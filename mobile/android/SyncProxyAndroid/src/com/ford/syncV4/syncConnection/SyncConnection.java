@@ -1,19 +1,37 @@
 package com.ford.syncV4.syncConnection;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
-import com.ford.syncV4.transport.*;
+import com.ford.syncV4.streaming.AbstractPacketizer;
+import com.ford.syncV4.streaming.H264Packetizer;
+import com.ford.syncV4.streaming.IStreamListener;
+import com.ford.syncV4.transport.BTTransport;
+import com.ford.syncV4.transport.BaseTransportConfig;
+import com.ford.syncV4.transport.ITransportListener;
+import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransport;
+import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.transport.usb.USBTransport;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
-public class SyncConnection implements IProtocolListener, ITransportListener {
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+
+public class SyncConnection implements IProtocolListener, ITransportListener , IStreamListener{
 
 	SyncTransport _transport = null;
 	AbstractProtocol _protocol = null;
 	ISyncConnectionListener _connectionListener = null;
+    AbstractPacketizer mPacketizer = null;
 
 	// Thread safety locks
 	Object TRANSPORT_REFERENCE_LOCK = new Object();
@@ -37,16 +55,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 				}
 				_transport = null;
 			}
-			
-			if (transportConfig.getTransportType() == TransportType.BLUETOOTH)
-			{
-				_transport = new BTTransport(this);	
-			}
-			else if (transportConfig.getTransportType() == TransportType.TCP)
-			{
-                _transport = new TCPTransport((TCPTransportConfig) transportConfig, this);
+
+            switch (transportConfig.getTransportType()) {
+                case BLUETOOTH:
+                    _transport = new BTTransport(this);
+                    break;
+
+                case TCP:
+                    _transport = new TCPTransport(
+                            (TCPTransportConfig) transportConfig, this);
+                    break;
+
+                case USB:
+                    _transport = new USBTransport(
+                            (USBTransportConfig) transportConfig, this);
+                    break;
             }
-		}
+        }
 		
 		// Initialize the protocol
 		synchronized(PROTOCOL_REFERENCE_LOCK) {
@@ -62,6 +87,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public AbstractProtocol getWiProProtocol(){
 		return _protocol;
 	}
+
+    public void stopTransportReading() {
+        if (_transport != null) {
+            _transport.stopReading();
+        }
+    }
 	
 	public void closeConnection(byte rpcSessionID) {
 		synchronized(PROTOCOL_REFERENCE_LOCK) {
@@ -75,12 +106,44 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 		}
 		
 		synchronized (TRANSPORT_REFERENCE_LOCK) {
+            stopH264();
+
 			if (_transport != null) {
 				_transport.disconnect();
 			}
 			_transport = null;
 		}
 	}
+
+    public void closeMobileNavSession(byte mobileNavSessionId) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                // If transport is still connected, sent EndProtocolSessionMessage
+                if (_transport != null && _transport.getIsConnected()) {
+                    _protocol.EndProtocolSession(SessionType.Mobile_Nav, mobileNavSessionId);
+                }
+            } // end-if
+        }
+    }
+
+    public OutputStream startH264(byte rpcSessionID) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mPacketizer = new H264Packetizer(this, is, rpcSessionID);
+            mPacketizer.start();
+            return os;
+        } catch (Exception e) {
+            Log.e("SyncConnection", "Unable to start H.264 streaming:" + e.toString());
+        }
+        return null;
+    }
+
+    public void stopH264() {
+        if ( mPacketizer != null){
+            mPacketizer.stop();
+        }
+    }
 	
 	public void startTransport() throws SyncException {
 		_transport.openConnection();
@@ -97,8 +160,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	}
 	
 	public void sendMessage(ProtocolMessage msg) {
-		_protocol.SendMessage(msg);
+        if (msg != null && _protocol != null){
+		    _protocol.SendMessage(msg);
+        }
 	}
+
+    public void startMobileNavSession() {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.StartProtocolSession(SessionType.Mobile_Nav);
+            }
+        }
+    }
 	
 	@Override
 	public void onTransportBytesReceived(byte[] receivedBytes,
@@ -170,7 +243,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public void onProtocolError(String info, Exception e) {
 		_connectionListener.onProtocolError(info, e);
 	}
-	
+
+    @Override
+    public void onProtocolAppUnregistered() {
+        Log.d("SyncConnection", "onProtocolAppUnregistered");
+        _transport.stopReading();
+    }
+
+    @Override
+    public void onMobileNavAckReceived(int frameReceivedNumber) {
+        _connectionListener.onMobileNavAckReceived(frameReceivedNumber);
+    }
+
 	/**
 	 * Gets type of transport currently used by this connection.
 	 * 
@@ -181,4 +265,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	public TransportType getCurrentTransportType() {
 		return _transport.getTransportType();
 	}
+
+    @Override
+    public void sendH264(ProtocolMessage pm) {
+        if ( pm != null){
+            sendMessage(pm);
+        }
+    }
 }

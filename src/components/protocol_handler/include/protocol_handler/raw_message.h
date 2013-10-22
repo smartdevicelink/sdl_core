@@ -50,85 +50,99 @@ namespace protocol_handler {
  * between components.
  */
 class RawMessage {
- public:
-  /**
-   * \brief Constructor
-   * \param connectionKey Identifier of connection within wich message
-   * is transferred
-   * \param protocolVersion Version of protocol of the message
-   * \param data Message string
-   * \param dataSize Message size
-   */
-  RawMessage(int connectionKey, unsigned int protocolVersion,
-                            unsigned char* data, unsigned int dataSize);
+  public:
+    /**
+     * \brief Constructor
+     * \param connectionKey Identifier of connection within wich message
+     * is transferred
+     * \param protocolVersion Version of protocol of the message
+     * \param data Message string
+     * \param dataSize Message size
+     */
+    RawMessage(int connectionKey, unsigned int protocolVersion,
+               unsigned char* data, unsigned int dataSize);
 
-  /**
-   * \brief Destructor
-   */
-  ~RawMessage();
+    /**
+     * \brief Destructor
+     */
+    ~RawMessage();
 
-  /**
-   * \brief Getter for connection identifier
-   */
-  int connection_key() const;
+    /**
+     * \brief Getter for connection identifier
+     */
+    int connection_key() const;
 
-  void set_connection_key(unsigned int );
+    void set_connection_key(unsigned int);
 
-  /**
-   * \brief Getter for message string
-   */
-  unsigned char* data() const;
+    /**
+     * \brief Getter for message string
+     */
+    unsigned char* data() const;
 
-  /**
-   * \brief Getter for message size
-   */
-  unsigned int data_size() const;
+    /**
+     * \brief Getter for message size
+     */
+    unsigned int data_size() const;
 
-  /**
-   * \brief Getter for protocol version
-   */
-  unsigned int protocol_version() const;
+    /**
+     * \brief Getter for protocol version
+     */
+    unsigned int protocol_version() const;
 
-  bool IsWaiting() const;
+    bool IsWaiting() const;
 
-  void set_waiting(bool v);
+    void set_waiting(bool v);
 
- private:
-  /**
-   * \brief Connection Identifier
-   * Obtained from \saCconnection_handler
-   */
-  int connection_key_;
+    bool is_fully_binary() const {
+      return fully_binary_;
+    }
 
-  /**
-   * \brief Message string
-   */
-  unsigned char* data_;
+    void set_fully_binary(bool is_binary) {
+      fully_binary_ = is_binary;
+    }
 
-  /**
-   * \brief Size of message
-   */
-  unsigned int data_size_;
+  private:
+    /**
+     * \brief Connection Identifier
+     * Obtained from \saCconnection_handler
+     */
+    int connection_key_;
 
-  /**
-   * \brief Version of SmartDeviceLink protocol (currently 1,2)
-   * used for tranferring message.
-   */
-  unsigned int protocol_version_;
+    /**
+     * \brief Message string
+     */
+    unsigned char* data_;
 
-  /**
-   * specifies current state of message in queue. if false message is "ready to be processed"
-   * otherwise it is "waiting for response"
-   *
-   */
-  bool waiting_;
+    /**
+     * \brief Size of message
+     */
+    unsigned int data_size_;
 
-  /**
-   * \brief Id of connection (for service messages like start/end session)
-   *
-   */
+    /**
+     * \brief Version of SmartDeviceLink protocol (currently 1,2)
+     * used for tranferring message.
+     */
+    unsigned int protocol_version_;
 
-  DISALLOW_COPY_AND_ASSIGN(RawMessage);
+    /**
+     * specifies current state of message in queue. if false message is "ready to be processed"
+     * otherwise it is "waiting for response"
+     *
+     */
+    bool waiting_;
+
+    /**
+     * \brief Specifies if this is binary data
+     * (used by ProtocolObserver).
+     */
+    bool fully_binary_;
+
+    /**
+     * \brief Id of connection (for service messages like start/end session)
+     *
+     */
+
+    DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 }  // namespace protocol_handler
 

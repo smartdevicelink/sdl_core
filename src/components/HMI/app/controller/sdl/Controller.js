@@ -64,6 +64,7 @@ SDL.SDLController = Em.Object
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active'),
+
         /**
          * List of SDL application models
          * 
@@ -73,6 +74,7 @@ SDL.SDLController = Em.Object
             0: SDL.SDLMediaModel,
             1: SDL.SDLNonMediaModel
         },
+
         /**
          * Registered components handler
          * 
@@ -114,6 +116,13 @@ SDL.SDLController = Em.Object
             } else {
                 SDL.SDLModel.set('VRHelpListActivated', false);
             }
+        },
+
+        /**
+         * Activate navigation method to set navigation data to controlls on main screen
+         */
+        navigationAppUpdate: function() {
+            SDL.BaseNavigationView.update(SDL.SDLAppController.model.appID);
         },
 
         /**
@@ -256,8 +265,7 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result,
-            performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
 
             FFW.UI.interactionResponse(result, performInteractionRequestID);
         },
@@ -385,7 +393,8 @@ SDL.SDLController = Em.Object
                 .pushObject(this.applicationModels[applicationType].create( {
                     appID: params.appID,
                     appName: params.appName,
-                    deviceName: params.deviceName
+                    deviceName: params.deviceName,
+                    appType: params.appType
                 }));
         },
         /**
@@ -410,6 +419,17 @@ SDL.SDLController = Em.Object
                 FFW.UI.onDriverDistraction("DD_OFF");
             }
         }.observes('SDL.SDLModel.driverDistractionState'),
+
+        /**
+         * Ondisplay keyboard event handler
+         * Sends notification on SDL Core with changed value
+         */
+        onKeyboardChanges: function() {
+            if (null !== SDL.SDLModel.keyboardInputValue) {
+                FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+            }
+        }.observes('SDL.SDLModel.keyboardInputValue'),
+
         /**
          * Get application model
          * 

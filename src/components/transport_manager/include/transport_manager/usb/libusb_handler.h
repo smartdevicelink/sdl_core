@@ -37,7 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_HANDLER_H_
 
 #include <pthread.h>
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
@@ -120,6 +120,7 @@ class LibusbHandler {
   void StartControlTransferSequence(
       UsbControlTransferSequence* transfer_sequence);
   TransportAdapter::Error Init();
+  void CloseDeviceHandle(libusb_device_handle* device_handle);
  private:
   void DeviceArrived(libusb_device* device);
   void DeviceLeft(libusb_device* device);
@@ -136,6 +137,8 @@ class LibusbHandler {
 
   friend class LibusbListener;
   std::list<LibusbListener*> libusb_listeners_;
+
+  std::list<libusb_device_handle*> device_handles_to_close_;
 
   friend void* LibusbHandlerThread(void* data);
   friend int ArrivedCallback(libusb_context *context, libusb_device *device,

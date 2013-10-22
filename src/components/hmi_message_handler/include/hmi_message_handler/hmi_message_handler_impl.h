@@ -48,34 +48,34 @@ class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
 class HMIMessageHandlerImpl : public HMIMessageHandler {
-  public:
-    static HMIMessageHandlerImpl* instance();
-    ~HMIMessageHandlerImpl();
-    void OnMessageReceived(MessageSharedPointer message);
-    void SendMessageToHMI(MessageSharedPointer message);
-    void set_message_observer(HMIMessageObserver* observer);
-    void OnErrorSending(MessageSharedPointer message);
-    void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
-    void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+ public:
+  static HMIMessageHandlerImpl* instance();
+  ~HMIMessageHandlerImpl();
+  void OnMessageReceived(MessageSharedPointer message);
+  void SendMessageToHMI(MessageSharedPointer message);
+  void set_message_observer(HMIMessageObserver* observer);
+  void OnErrorSending(MessageSharedPointer message);
+  void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
 
-  private:
-    HMIMessageHandlerImpl();
+ private:
+  HMIMessageHandlerImpl();
 
-    HMIMessageObserver* observer_;
-    std::set<HMIMessageAdapter*> message_adapters_;
+  HMIMessageObserver* observer_;
+  std::set<HMIMessageAdapter*> message_adapters_;
 
-    threads::Thread* to_hmi_thread_;
-    friend class ToHMIThreadImpl;
+  threads::Thread* to_hmi_thread_;
+  friend class ToHMIThreadImpl;
 
-    threads::Thread* from_hmi_thread_;
-    friend class FromHMIThreadImpl;
+  threads::Thread* from_hmi_thread_;
+  friend class FromHMIThreadImpl;
 
-    MessageQueue<MessageSharedPointer> messages_to_hmi_;
-    MessageQueue<MessageSharedPointer> messages_from_hmi_;
+  MessageQueue<MessageSharedPointer> messages_to_hmi_;
+  MessageQueue<MessageSharedPointer> messages_from_hmi_;
 
-    static log4cxx::LoggerPtr logger_;
+  static log4cxx::LoggerPtr logger_;
 
-    DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
+  DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 

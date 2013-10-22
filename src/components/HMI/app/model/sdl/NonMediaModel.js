@@ -49,6 +49,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 alignment    : "text-align:left"
             }));
 
+            this.set('constantTBTParams', null);
+
             // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
 
             this.set('commandsList', {'top': []});
