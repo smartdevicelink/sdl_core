@@ -3086,23 +3086,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 }
                             });
 
-                            txtNumTicks.setOnFocusChangeListener(new OnFocusChangeListener() {
-                                @Override
-                                public void onFocusChange(View v, boolean hasFocus) {
-                                    if ((!hasFocus) && chkDynamicFooter.isChecked()) {
-                                        updateDynamicFooter(txtNumTicks, txtSliderFooter, JOIN_STRING);
-                                    }
-                                }
-                            });
-
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        if (chkDynamicFooter.isChecked()) {
-                                            updateDynamicFooter(txtNumTicks, txtSliderFooter, JOIN_STRING);
-                                        }
-
                                         Slider msg = new Slider();
                                         msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));

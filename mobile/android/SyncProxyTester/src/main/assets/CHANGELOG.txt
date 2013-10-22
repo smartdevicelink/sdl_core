@@ -1,3 +1,6 @@
+[CW43]
+* Slider dialog: allow to set custom dynamic footer values.
+
 [CW42]
 + KeyboardProperties dialog: add keypressMode parameter.
 * SyncProxyAndroid SDK: add PrerecordedSpeech, and KeypressMode enums; add GEN3_8-INCH to DisplayType enum; add AUDIO_AAC to FileType enum; add keypressMode parameter to KeyboardProperties request.
