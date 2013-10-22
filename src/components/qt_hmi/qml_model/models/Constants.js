@@ -84,5 +84,7 @@ var mainScreenMiHeight = 600
 // Duration of appearance of icon/button at icon/button menus.
 var animationDuration = 500
 
+// Duration of appearence of "OK" button at warning screen view, when HMI starts.
+var warningDuration = 500
 // -------------------------
 

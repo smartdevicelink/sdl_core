@@ -91,7 +91,7 @@ Rectangle {
             PauseAnimation { duration: 6*Constants.animationDuration }
             NumberAnimation {
                 target: ok
-                duration:  Constants.animationDuration
+                duration:  Constants.warningDuration
                 property: "opacity"
                 from: 0; to: 1;
             }
