@@ -1,10 +1,11 @@
 import QtQuick 2.0
+import "../controls"
 
 QtObject {
     property int appId
     property string appName
     property string ngnMediaScreenAppName
-    property url icon
+    property Icon appIcon
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication

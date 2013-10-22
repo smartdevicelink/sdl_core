@@ -157,6 +157,8 @@ class Impl(FordXmlParser):
         if param.array:
             param_copy = copy(param)
             param_copy.array = False
+            if param.type == 'String':
+                return "QStringList "
             return "QList<" + self.qt_param_type(param_copy) + "> "
         if param.type == 'Integer' or param.enum:
             return 'int'

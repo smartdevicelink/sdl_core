@@ -54,13 +54,22 @@ var pressedButtonTextColor = "black"
 var releasedButtonTextColor = "white"
 
 // Transparent background.
-var transparentColor = "#000000"
+var transparentColor = "#00000000"
+
+// "Warning" word color
+var warningColor = "red"
 //--------------------------------------------------------------------------------------
 
 // Other
 
 // Font size for most of text in HMI model.
 var fontSize = 20
+
+// Title font size
+var tittleFontSize = 45
+
+// Power on/off button font size
+var powerButtonFornSize = 25
 
 // Offset from the edges of the screen.
 var margin = 30
@@ -74,6 +83,9 @@ var mainScreenMiHeight = 600
 
 // Duration of appearance of icon/button at icon/button menus.
 var animationDuration = 500
+
+// Duration of appearence of "OK" button at warning screen view, when HMI starts.
+var warningDuration = 500
 
 // Width for long oval button
 var longOvalButtonWidth = 163
