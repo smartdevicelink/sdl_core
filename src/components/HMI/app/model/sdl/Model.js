@@ -740,6 +740,21 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * SDL DeleteCommand response handler to sent delete command error or normal result
+     *
+     * @param {Number}
+     * @param {Number}
+     */
+    deleteCommandResponse: function (resultCode, requestID) {
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+            FFW.UI.sendUIResult(resultCode, requestID, "UI.DeleteCommand");
+        } else {
+            FFW.UI.sendError(resultCode, requestID, "UI.DeleteCommand", "SubMenu is opened")
+        }
+    },
+
+    /**
      * SDL VR AddCommand response handler add command to voice recognition
      * window
      *
@@ -753,6 +768,17 @@ SDL.SDLModel = Em.Object.create({
         }
 
         SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appId);
+    },
+
+    /**
+     * SDL VR DeleteCommand response handler delete command from voice
+     * recognition window
+     *
+     * @param {Number}
+     */
+    deleteCommandVR: function (commandID) {
+
+        SDL.VRPopUp.DeleteCommand(commandID);
     },
 
     /**

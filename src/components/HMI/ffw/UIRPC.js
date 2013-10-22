@@ -198,8 +198,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.DeleteCommand":
                 {
 
-                    SDL.SDLController.getApplicationModel(request.params.appID).deleteCommand(request.params.cmdID);
-                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+                    SDL.SDLController.getApplicationModel(request.params.appID).deleteCommand(request.params.cmdID, request.id);
 
                     break;
                 }
