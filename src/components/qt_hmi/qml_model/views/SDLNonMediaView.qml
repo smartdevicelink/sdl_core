@@ -22,7 +22,7 @@ GeneralView {
             height: 1/4 * parent.height
             verticalAlignment: Text.AlignHCenter
             text: "Device: " + dataContainer.currentApplication.deviceName
-            font.pixelSize: Constants.tittleFornSize
+            font.pixelSize: Constants.titleFornSize
             color: Constants.primaryColor
         }
 

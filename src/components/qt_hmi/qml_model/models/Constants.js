@@ -63,7 +63,7 @@ var transparentColor = "#000000"
 var fontSize = 20
 
 // Tittle font size
-var tittleFornSize = 45
+var titleFornSize = 45
 
 // Offset from the edges of the screen.
 var margin = 30
