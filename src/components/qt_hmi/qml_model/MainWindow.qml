@@ -163,6 +163,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        VIPopUp {
+            id: viPopUp
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

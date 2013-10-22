@@ -258,5 +258,6 @@ QtObject {
     }
 
     property NavigationModel navigationModel: NavigationModel { }
+    property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property bool activeVR: false
 }
