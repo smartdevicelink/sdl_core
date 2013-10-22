@@ -73,6 +73,7 @@ class UsbDeviceScanner : public DeviceScanner, public LibusbListener {
   virtual void OnDeviceArrived(libusb_device* device);
   virtual void OnDeviceLeft(libusb_device* device);
  private:
+  void UpdateList();
   void TurnIntoAccessoryMode(const libusb_device_descriptor& descriptor,
                              libusb_device_handle* device_handle);
   void GoogleAccessoryFound(libusb_device* device,
