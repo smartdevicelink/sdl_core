@@ -1,6 +1,6 @@
 /**
- * \file optional_argument.h
- * \brief OptionalArgument struct header file.
+ * @file Entry.qml
+ * @brief Entry with icon and text for list.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,52 +32,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
+import QtQuick 2.0
+import "../models/Constants.js" as Constants
 
-#include <QDBusArgument>
+Rectangle {
+    id: main
+    color: Constants.transparentColor
 
-template<class T>
-struct OptionalArgument
-{
-    T val;
-    bool presence;
-    OptionalArgument(const T& value)
-        : val(value),
-          presence(true)
-    { }
-    OptionalArgument()
-        : presence(false)
-    { }
-};
+    property alias text: label.text
+    property alias fontSize: label.font.pixelSize
+    property alias icon: image.source
 
-template<class T>
-inline
-QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg << o.presence << o.val;
-    arg.endStructure();
-    return arg;
+    Icon {
+        id: image
+        width: Constants.iconItemListSize
+        height: Constants.iconItemListSize
+        anchors.left: parent.left
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenter: parent.verticalCenter
+        visible: source ? true : false
+    }
+    Text {
+        id: label
+        anchors.verticalCenter: parent.verticalCenter
+        z: 50
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: Constants.fontSize
+        text: "Name Entry"
+        anchors.left: image.right
+        anchors.leftMargin: Constants.generalSpasing
+        anchors.verticalCenterOffset: 0
+        visible: text !== ""
+        color: Constants.primaryColor
+    }
 }
-
-template<class T>
-inline
-const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg >> o.presence >> o.val;
-    arg.endStructure();
-    return arg;
-}
-
-Q_DECLARE_METATYPE(OptionalArgument<int>)
-Q_DECLARE_METATYPE(OptionalArgument<QString>)
-Q_DECLARE_METATYPE(OptionalArgument<bool>)
-Q_DECLARE_METATYPE(OptionalArgument<double>)
-
-Q_DECLARE_METATYPE(OptionalArgument<QList<int> >)
-Q_DECLARE_METATYPE(OptionalArgument<QStringList>)
-Q_DECLARE_METATYPE(OptionalArgument<QList<bool> >)
-Q_DECLARE_METATYPE(OptionalArgument<QList<double> >)
-#endif // OPTIONALARGUMENT_H

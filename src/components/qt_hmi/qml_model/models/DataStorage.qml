@@ -69,7 +69,32 @@ QtObject {
                 currentApplication.appType = applicationList.get(i).appType
                 currentApplication.playPauseState = applicationList.get(i).playPauseState
                 currentApplication.options = applicationList.get(i).options
-                // ... etc
+
+                if (applicationList.get(i).hmiUIText.mainField1) {
+                    currentApplication.hmiUIText.mainField1 = applicationList.get(i).hmiUIText.mainField1
+                }
+                if (applicationList.get(i).hmiUIText.mainField2) {
+                    currentApplication.hmiUIText.mainField2 = applicationList.get(i).hmiUIText.mainField2
+                }
+                if (applicationList.get(i).hmiUIText.mainField3) {
+                    currentApplication.hmiUIText.mainField3 = applicationList.get(i).hmiUIText.mainField3
+                }
+                if (applicationList.get(i).hmiUIText.mainField4) {
+                    currentApplication.hmiUIText.mainField4 = applicationList.get(i).hmiUIText.mainField4
+                }
+                if (applicationList.get(i).hmiUIText.statusBar) {
+                    currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
+                }
+                if (applicationList.get(i).hmiUIText.mediaClock) {
+                    currentApplication.hmiUIText.mediaClock = applicationList.get(i).hmiUIText.mediaClock
+                }
+                if (applicationList.get(i).hmiUIText.picture) {
+                    currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
+                }
+                currentApplication.turnList = applicationList.get(i).turnList
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                // This place is for adding new properties
             }
         }
         applicationContext = oldApplicationContext;
@@ -93,7 +118,10 @@ QtObject {
             timeoutPrompt: "",
             playPauseState: 'Pause',
             hmiUIText: app.hmiUIText,
-            options: []
+            options: [],
+            turnList: [],
+            turnListSoftButtons: []
+            // This place is for adding new properties
         })
         console.log("Exit addApplication function");
     }
@@ -122,6 +150,7 @@ QtObject {
     }
     property int systemContext
 
+    property int hmiContext
     property bool applicationContext: false
 
     property int systemSavedContext
@@ -194,7 +223,7 @@ QtObject {
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
 
-    property var vrCommands: []
+    property ListModel vrCommands: ListModel {}
 
     property var globalProperties: {
         "helpPrompt": "",

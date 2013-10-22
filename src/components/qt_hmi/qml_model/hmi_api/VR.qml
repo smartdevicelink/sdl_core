@@ -8,12 +8,13 @@ Item {
     }
 
     function addCommand (cmdID, vrCommands, appID) {
+        console.log("VR.AddCommand");
         for (var i = 0; i < vrCommands.length; ++i) {
-            dataContainer.vrCommands.push({
-                                              cmdID: cmdID,
-                                              command: vrCommands[i],
-                                              appID: appID
-                                          })
+            dataContainer.vrCommands.append({
+                                               cmdID: cmdID,
+                                               command: vrCommands[i],
+                                               appID: appID
+                                           })
         }
     }
 

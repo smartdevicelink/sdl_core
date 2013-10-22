@@ -36,6 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -116,12 +117,16 @@ Rectangle {
                     viewTransitionStack = []
                 }
 
+                property string position
                 function go(path, appId) {
-                    viewTransitionStack.push(source.toString())
-                    if (appId) {
-                        dataContainer.setCurrentApplication(appId)
+                    if (position !== path) {
+                        viewTransitionStack.push(source.toString())
+                        if (appId) {
+                            dataContainer.setCurrentApplication(appId)
+                        }
+                        position = path
+                        source = path
                     }
-                    source = path
                 }
 
                 function back() {
@@ -218,7 +223,16 @@ Rectangle {
                  appId: application.appId,
                  hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                  isMediaApplication: application.isMediaApplication,
-                 appType: application.appType
+                 appType: application.appType,
+                 hmiUIText: {
+                    "mainField1": "The Dog Days Are Over",
+                    "mainField2": "Florence and the Machine",
+                    "mainField3": "Track 13/16",
+                    "mainField4": "",
+                    "statusBar": "",
+                    "mediaClock": "02:36",
+                    "picture": "../res/album_art.png"
+                 }
              });
         }
 

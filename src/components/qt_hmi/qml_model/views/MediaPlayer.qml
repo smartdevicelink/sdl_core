@@ -156,7 +156,7 @@ Item {
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    horizontalAlignment: dataContainer.currentApplication.hmiUITextAlignment
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
                                                                  : playerState.trackName
@@ -169,7 +169,7 @@ Item {
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: Constants.primaryColor
-                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField2
                                                                  : playerState.albumName
                     font.pixelSize: 25
                 }
@@ -178,7 +178,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     color: Constants.primaryColor
-                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField3
                                                                  : playerState.trackNumber
                     font.pixelSize: 20
                 }

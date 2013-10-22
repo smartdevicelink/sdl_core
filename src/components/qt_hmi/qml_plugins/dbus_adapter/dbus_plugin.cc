@@ -69,7 +69,7 @@ void DbusPlugin::registerTypes(const char *uri)
     qDBusRegisterMetaType<OptionalArgument<int> >();
     qDBusRegisterMetaType<OptionalArgument<QList<int> > >();
     qDBusRegisterMetaType<OptionalArgument<QString> >();
-    qDBusRegisterMetaType<OptionalArgument<QList<QString> > >();
+    qDBusRegisterMetaType<OptionalArgument<QStringList> >();
     qDBusRegisterMetaType<OptionalArgument<bool> >();
     qDBusRegisterMetaType<OptionalArgument<QList<bool> > >();
     qDBusRegisterMetaType<OptionalArgument<double> >();
