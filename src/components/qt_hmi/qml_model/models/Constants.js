@@ -102,5 +102,13 @@ var itemListHeight = 60
 // Spasing between item on views
 var generalSpasing = 10
 
+// Width for popup view
+var popupWidth = 700
+
+// Height for popup view
+var popupHeigth = 500
+
+// Width for combobox
+var comboboxWidth = 300
 // -------------------------
 
