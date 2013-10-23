@@ -74,6 +74,7 @@ PopUp {
         Timer {
             id: timer
             onTriggered: {
+                DBus.sendError(interactionModel.async, Common.Result.TIMED_OUT)
                 deactivate()
             }
         }
