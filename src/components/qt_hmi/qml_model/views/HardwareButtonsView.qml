@@ -191,7 +191,9 @@ Item {
 
             Component.onCompleted: {
                 for (var name in Common.Language) {
-                    append({name: name.replace('_', '-')});
+                    if (settingsContainer.sdlLanguagesList.indexOf(Common.Language[name]) != -1) {
+                        append({name: name.replace('_', '-')});
+                    }
                 }
             }
         }
@@ -226,8 +228,8 @@ Item {
                     model: languagesList
                     width: 180
                     onCurrentIndexChanged: {
-                        sdlTTS.onLanguageChange(currentIndex);
-                        sdlVR.onLanguageChange(currentIndex);
+                        sdlTTS.onLanguageChange(settingsContainer.sdlLanguagesList[currentIndex]);
+                        sdlVR.onLanguageChange(settingsContainer.sdlLanguagesList[currentIndex]);
                     }
                 }
             }
