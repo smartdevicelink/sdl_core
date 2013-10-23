@@ -56,7 +56,7 @@ namespace media_manager {
 class MediaManagerImpl : public MediaManager,
   public protocol_handler::ProtocolObserver {
   public:
-    static MediaManager* getMediaManager();
+    static MediaManagerImpl* getMediaManager();
 
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_hndlr);

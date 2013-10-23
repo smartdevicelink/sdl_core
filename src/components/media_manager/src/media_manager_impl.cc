@@ -46,7 +46,7 @@ MediaManagerImpl* MediaManagerImpl::sInstance_ = 0;
 
 const std::string MediaManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
 
-MediaManager* MediaManagerImpl::getMediaManager() {
+MediaManagerImpl* MediaManagerImpl::getMediaManager() {
   if (0 == sInstance_) {
     sInstance_ = new MediaManagerImpl;
   }
