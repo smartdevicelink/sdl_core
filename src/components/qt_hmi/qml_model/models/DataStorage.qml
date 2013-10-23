@@ -380,5 +380,6 @@ QtObject {
     }
 
     property NavigationModel navigationModel: NavigationModel { }
+    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
 }

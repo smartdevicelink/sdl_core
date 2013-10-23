@@ -38,7 +38,7 @@ import "../models/Constants.js" as Constants
 // Don't change constants. It break button
 Rectangle {
     id: main
-    width: field.width * 2
+    width: field.width + (left.width * 2)
     height: 65
     color: Constants.transparentColor
 

@@ -103,7 +103,6 @@ var itemListHeight = 60
 var generalSpacing = 10
 
 // -------------------------
-
 var sliderBarWidth = 400
 var sliderBarHeight = 50
 var sliderBarRadius = 3
@@ -111,3 +110,10 @@ var sliderBarBorderWidth = 1
 var sliderTextColor = "white"
 var sliderBarBorderColor = "white"
 var sliderBarFillColor = "white"
+
+// -------------------------
+var scrollableMessageTextColor = "white"
+var scrollableMessageScrollBarColor = "gray"
+var scrollableMessageScrollBarWidth = 10
+
+// -------------------------
