@@ -44,6 +44,11 @@ Item {
     function speak(ttsChunks, appID) {
         // appID unused
         console.log('enter function speak');
+        if (ttsPopUp.async) {
+            console.log('function speak send abort');
+            throw Common.Result.ABORTED;
+        }
+
         var message = "";
         for (var i = 0; i < ttsChunks.length; ++i)
             message += ttsChunks[i].text + "\n";

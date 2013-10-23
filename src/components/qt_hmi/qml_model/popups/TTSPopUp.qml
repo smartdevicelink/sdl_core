@@ -67,6 +67,7 @@ PopUp {
         timer.stop();
         hide();
         DBus.sendReply(async, {});
+        async = null;
     }
 }
 
