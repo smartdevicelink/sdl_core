@@ -23,6 +23,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   AudioManager
+  policies
 #  usb-1.0
 )
 

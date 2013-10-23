@@ -36,3 +36,6 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./audio_manager)
+
+# --- Policies
+add_subdirectory(./policies)
