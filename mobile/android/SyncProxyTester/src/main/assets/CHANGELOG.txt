@@ -1,4 +1,5 @@
 [CW43]
++ SyncProxyAndroid SDK: add SAVED value to Result enum.
 * Slider dialog: allow to set custom dynamic footer values.
 
 [CW42]
