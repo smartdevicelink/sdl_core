@@ -100,7 +100,14 @@ var iconItemListSize = 40
 var itemListHeight = 60
 
 // Spasing between item on views
-var generalSpasing = 10
+var generalSpacing = 10
 
 // -------------------------
 
+var sliderBarWidth = 400
+var sliderBarHeight = 50
+var sliderBarRadius = 3
+var sliderBarBorderWidth = 1
+var sliderTextColor = "white"
+var sliderBarBorderColor = "white"
+var sliderBarFillColor = "white"
