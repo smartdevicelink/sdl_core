@@ -127,11 +127,19 @@ void ShowConstantTBTRequest::Run() {
         (*message_)[strings::msg_params][strings::total_distance];
   }
 
+  if (msg_params.keyExists(strings::time_to_destination)) {
+      // erase useless param
+      msg_params.erase(strings::time_to_destination);
+      msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+          hmi_apis::Common_TextFieldName::timeToDestination;
+      msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+          (*message_)[strings::msg_params][strings::time_to_destination];
+  }
+
   app->set_tbt_show_command(msg_params);
   CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, msg_params,
                    true, 1);
 }
-
 }  // namespace commands
 
 }  // namespace application_manager

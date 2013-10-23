@@ -78,6 +78,7 @@ const char main_field_2[] = "mainField2";
 const char main_field_3[] = "mainField3";
 const char main_field_4[] = "mainField4";
 const char eta[] = "eta";
+const char time_to_destination[] = "timeToDestination";
 const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
@@ -123,6 +124,7 @@ const char custom_button_id[] = "customButtonID";
 const char data_type[] = "dataType";
 const char turn_list[] = "turnList";
 const char turn_icon[] = "turnIcon";
+const char next_turn_icon[] = "nextTurnIcon";
 const char value[] = "value";
 const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
@@ -224,6 +226,7 @@ const char interaction_layout[] = "interactionLayout";
 const char menu_title[] = "menuTitle";
 const char menu_icon[] = "menuIcon";
 const char keyboard_properties[] = "keyboardProperties";
+
 }  // namespace hmi_request
 
 namespace hmi_response {
