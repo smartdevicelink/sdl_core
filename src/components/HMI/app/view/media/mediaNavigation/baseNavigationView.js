@@ -120,28 +120,28 @@ SDL.BaseNavigationView = Em.ContainerView.create({
 
         classNames: 'mainField1 mainField',
 
-        contentBinding: 'parentView.mainField1'
+        contentBinding: 'SDL.SDLAppController.model.appInfo.field1'
     }),
 
     mainField2: SDL.Label.extend({
 
         classNames: 'mainField2 mainField',
 
-        contentBinding: 'parentView.mainField2'
+        contentBinding: 'SDL.SDLAppController.model.appInfo.field2'
     }),
 
     mainField3: SDL.Label.extend({
 
         classNames: 'mainField3 mainField',
 
-        contentBinding: 'parentView.mainField3'
+        contentBinding: 'SDL.SDLAppController.model.appInfo.field3'
     }),
 
     mainField4: SDL.Label.extend({
 
         classNames: 'mainField4 mainField',
 
-        contentBinding: 'parentView.mainField4'
+        contentBinding: 'SDL.SDLAppController.model.appInfo.field4'
     }),
 
     mainField5: SDL.Label.extend({

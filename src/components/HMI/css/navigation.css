@@ -45,6 +45,8 @@
     height: 30px;
     width: 90px;
     right: 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 #baseNavigation .mainField5{
     top: 100px;

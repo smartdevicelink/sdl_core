@@ -327,7 +327,7 @@ SDL.SDLModel = Em.Object.create({
             touches = event.originalEvent.touches.length,
             changedTouches = event.originalEvent.touches.length,
             touchLists = {"touches": touches, "changedTouches": changedTouches},
-            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.5, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
 
         switch (event.originalEvent.type) {
             case "touchstart": {

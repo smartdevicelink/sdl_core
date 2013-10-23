@@ -259,7 +259,10 @@ SDL.ControlButtons = Em.ContainerView
                 classNames: 'infoTable',
 
                 childViews: [
-                    'globalPropertiesLabel', 'gpHelpData', 'gpTimeoutData'
+                    'globalPropertiesLabel',
+                    'gpHelpData',
+                    'gpTimeoutData',
+                    'gpAUTOCOMPLETE'
                 ],
 
                 globalPropertiesLabel: SDL.Label.extend( {
@@ -268,7 +271,7 @@ SDL.ControlButtons = Em.ContainerView
 
                     classNames: 'sdlGPLabel',
 
-                    content: 'HELP_PROMPT: TIMEOUT_PROMPT:'
+                    content: 'HELP_PROMPT: TIMEOUT_PROMPT: AUTOCOMPLETE_TEXT:'
                 }),
 
                 gpHelpData: SDL.Label.extend( {
@@ -315,6 +318,29 @@ SDL.ControlButtons = Em.ContainerView
 
                         return str;
                     }.property('SDL.SDLAppController.model.globalProperties.timeoutPrompt.@each.text')
+                }),
+
+                gpAUTOCOMPLETE: SDL.Label.extend( {
+
+                    elementId: 'sdlGPAUTOCOMPLETE',
+
+                    classNames: 'sdlGPData',
+
+                    contentBinding: 'SDL.SDLAppController.model.globalProperties.keyboardProperties.autoCompleteText',
+
+                    propertiesData: function() {
+
+//                        var str = '';
+//                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.timeoutPrompt) {
+//                            var i = 0;
+//                            for (i = 0; i < SDL.SDLAppController.model.globalProperties.timeoutPrompt.length; i++) {
+//                                str += SDL.SDLAppController.model.globalProperties.timeoutPrompt[i].text
+//                                    + ' ';
+//                            }
+//                        }
+//
+//                        return str;
+                    }.property('SDL.SDLAppController.model.globalProperties.keyboardProperties.autoCompleteText.@each')
                 })
             }),
 

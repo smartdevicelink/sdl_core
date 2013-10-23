@@ -706,6 +706,15 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+                    if ("nextTurnIcon" in params
+                        && params.turnIcon.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
+                        };
+
+                        return this.resultStruct;
+                    }
                     if (params.navigationTexts == null) {
 
                         this.resultStruct = {

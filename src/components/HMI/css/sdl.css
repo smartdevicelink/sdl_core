@@ -647,6 +647,15 @@
 	left: 10px;
 }
 
+#AlertPopUp .progressIndicator {
+    width: 50px;
+    height: 50px;
+    background: url(../images/sdl/progressindicator.gif) no-repeat;
+    top: 0px;
+    background-size: contain;
+    left: 0px;
+}
+
 #AudioPassThruPopUp .audioPassThruImage {
 	width: 83px;
 	height: 74px;
@@ -805,6 +814,7 @@
 	height: 384px;
 	left: 153px;
 	width: 647px;
+    background: none;
 }
 
 #TurnByTurnView .caption-text {
@@ -897,21 +907,50 @@
 
 #TurnByTurnView .navigationText2 {
 	left: 440px;
-	top: 269px;
+	top: 268px;
 	width: 182px;
 	padding: 10px;
 	height: 20px;
 	background: #393939;
 }
 
+#TurnByTurnView .turnIcon,
+#TurnByTurnView .nextTurnIcon {
+    border: 1px solid #222;
+    left: 540px;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#TurnByTurnView .distanceToManeuver{
+    top: 80px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
+#TurnByTurnView .distanceToManeuverScale{
+    top: 144px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
+#TurnByTurnView .timeToDestination{
+    top: 207px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
 #TurnByTurnView .turnIcon {
-	border: 1px solid #222;
-	top: 64px;
-	left: 440px;
-	width: 200px;
-	height: 200px;
-	background-size: contain;
-	background-repeat: no-repeat;
+    top: 65px;
+}
+
+#TurnByTurnView .nextTurnIcon {
+    top: 166px;
 }
 
 #tbtTurnListList .list-content .label>img {

@@ -252,7 +252,7 @@
     top: 124px;
 }
 #infoTable.infoTable {
-	width: 375px;
+	width: 400px;
 	height: 96px;
 	top: 308px;
 	left: 801px;
@@ -263,7 +263,7 @@
 }
 
 #infoTable .sdlGPLabel {
-	width: 157px;
+	width: 190px;
 	border-right: 1px solid #14100F;
 	height: 96px;
 	position: relative;

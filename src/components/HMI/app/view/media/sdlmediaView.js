@@ -39,8 +39,18 @@ SDL.sdlView = Em.ContainerView
         elementId: 'sdl_view_container',
 
         classNameBindings: [
-            'SDL.States.media.sdlmedia.active:active_state:inactive_state'
+            'this.activeState:active_state:inactive_state'
         ],
+
+        activeState: function(){
+            if (SDL.TurnByTurnView.active) {
+                return false;
+            } else if (SDL.States.media.sdlmedia.active) {
+                return true;
+            } else {
+                return false;
+            }
+        }.property('SDL.States.media.sdlmedia.active', 'SDL.TurnByTurnView.active'),
 
         /**
          * View Components
