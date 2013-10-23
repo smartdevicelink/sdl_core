@@ -40,7 +40,7 @@ import "../models/Constants.js" as Constants
 PopUp {
     Text {
         id: initialText
-        text: interactionModel.initialText
+        text: dataContainer.interactionModel.initialText
         anchors.top: parent.top
         anchors.topMargin: Constants.popupMargin
         anchors.left: parent.left
@@ -58,13 +58,13 @@ PopUp {
         anchors.leftMargin: Constants.popupMargin
         anchors.right: parent.right
         anchors.rightMargin: Constants.popupMargin
-        model: interactionModel.choice
+        model: dataContainer.interactionModel.choice
         delegate: OvalButton {
             width: parent.width
             text: name
             onClicked: {
                 timer.stop()
-                DBus.sendReply(interactionModel.async, {"choiceID": id})
+                DBus.sendReply(dataContainer.interactionModel.async, {"choiceID": id})
                 deactivate()
             }
         }
@@ -74,7 +74,7 @@ PopUp {
         Timer {
             id: timer
             onTriggered: {
-                DBus.sendError(interactionModel.async, Common.Result.TIMED_OUT)
+                DBus.sendError(dataContainer.interactionModel.async, Common.Result.TIMED_OUT)
                 deactivate()
             }
         }
@@ -84,7 +84,7 @@ PopUp {
         console.debug("InteractionPopup::activate()")
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
-        timer.interval = interactionModel.timeout
+        timer.interval = dataContainer.interactionModel.timeout
         timer.start()
         show()
         console.debug("InteractionPopup::activate(): exit")

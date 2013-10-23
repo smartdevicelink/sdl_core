@@ -174,10 +174,6 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
-
-        InteractionModel {
-            id: interactionModel
-        }
     }
 
     Item {
@@ -226,15 +222,15 @@ Rectangle {
         onAppRegistered: {
             dataContainer.addApplication(
             {
-                 appName: application.appName,
-                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
-                 icon: application.icon,
-                 deviceName: application.deviceName,
-                 appId: application.appId,
-                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
-                 isMediaApplication: application.isMediaApplication,
-                 appType: application.appType,
-                 hmiUIText: {
+                appName: application.appName,
+                ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                icon: application.icon,
+                deviceName: application.deviceName,
+                appId: application.appId,
+                hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                isMediaApplication: application.isMediaApplication,
+                appType: application.appType,
+                hmiUIText: {
                     "mainField1": "The Dog Days Are Over",
                     "mainField2": "Florence and the Machine",
                     "mainField3": "Track 13/16",
@@ -242,7 +238,12 @@ Rectangle {
                     "statusBar": "",
                     "mediaClock": "02:36",
                     "picture": "../res/album_art.png"
-                 }
+                },
+                mediaClock: {
+                    "hours": 0,
+                    "minutes": 2,
+                    "seconds": 36
+                }
              });
         }
 

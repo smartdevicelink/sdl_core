@@ -112,10 +112,24 @@ Item {
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
-        return interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        console.debug("enter")
+        var async = dataContainer.interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        console.debug("exit")
+        return async
     }
 
     function setMediaClockTimer (startTime, updateMode, appID) {
+        console.debug("enter")
+        dataContainer.setApplicationProperties(
+            appID, {
+                        "mediaClock": {
+                            "hours": startTime.hours,
+                            "minutes": startTime.minutes,
+                            "seconds": startTime.seconds
+                        }
+                    }
+        )
+        console.debug("exit")
     }
 
     function setGlobalProperties (vrHelpTitle, vrHelp, appID) {

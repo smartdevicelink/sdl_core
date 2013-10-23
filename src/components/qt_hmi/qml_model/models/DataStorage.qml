@@ -86,9 +86,6 @@ QtObject {
                 if (applicationList.get(i).hmiUIText.statusBar) {
                     currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
                 }
-                if (applicationList.get(i).hmiUIText.mediaClock) {
-                    currentApplication.hmiUIText.mediaClock = applicationList.get(i).hmiUIText.mediaClock
-                }
                 if (applicationList.get(i).hmiUIText.picture) {
                     currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
                 }
@@ -96,6 +93,9 @@ QtObject {
                 currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
                 currentApplication.turnList = applicationList.get(i).turnList
                 currentApplication.turnListSoftButtons = applicationList.get(i).turnListSoftButtons
+                currentApplication.mediaClock.hours = applicationList.get(i).mediaClock.hours
+                currentApplication.mediaClock.minutes = applicationList.get(i).mediaClock.minutes
+                currentApplication.mediaClock.seconds = applicationList.get(i).mediaClock.seconds
                 // This place is for adding new properties
             }
         }
@@ -106,8 +106,7 @@ QtObject {
 
     function addApplication(app) {
         console.log("Enter addApplication function");
-        applicationList.append(
-        {
+        applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
             icon: app.icon,
@@ -122,7 +121,8 @@ QtObject {
             hmiUIText: app.hmiUIText,
             options: [],
             turnList: [],
-            turnListSoftButtons: []
+            turnListSoftButtons: [],
+            mediaClock: app.mediaClock
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -376,4 +376,7 @@ QtObject {
 
     property NavigationModel navigationModel: NavigationModel { }
     property bool activeVR: false
+
+    property InteractionModel interactionModel: InteractionModel {
+    }
 }
