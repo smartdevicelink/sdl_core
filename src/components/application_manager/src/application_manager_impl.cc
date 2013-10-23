@@ -111,6 +111,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
   }
+
+  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -747,8 +749,6 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int sampling_rate,
     int bits_per_sample,
     int audio_type) {
-  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
-
   LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
   if (NULL != media_manager_) {
     media_manager_->startMicrophoneRecording(std::string("record.wav"),
