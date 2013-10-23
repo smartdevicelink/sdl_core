@@ -90,6 +90,9 @@ var warningDuration = 500
 // Width for long oval button
 var longOvalButtonWidth = 163
 
+// Height for oval button
+var ovalButtonHeight = 63
+
 // Size icon for buttons
 var iconButtonSize = 30
 

@@ -38,8 +38,8 @@ import "../models/Constants.js" as Constants
 // Don't change constants. It break button
 Rectangle {
     id: main
-    width: (dynamic) ? field.width + 2 * left.width : Constants.longOvalButtonWidth
-    height: 65
+    width: dynamic ? field.width + 2 * left.width : Constants.longOvalButtonWidth
+    height: Constants.ovalButtonHeight
     color: Constants.transparentColor
 
     signal clicked;
