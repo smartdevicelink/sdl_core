@@ -67,12 +67,14 @@ PopUp {
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
-        dataContainer.uiSlider.position = position
         if(isAbort) {
             console.debug("aborted")
-            DBus.sendReply(async, {})
+            DBus.sendReply(async, {sliderPosition:dataContainer.uiSlider.position})
+            //todo(ykazakov): send error because it is aborted with initial slider position
+            //DBus.sendError(async, {resultCode:Common.Result.ABORTED, sliderPosition:dataContainer.uiSlider.position})
         } else {
             console.debug("send position " + position)
+            dataContainer.uiSlider.position = position
             DBus.sendReply(async, {sliderPosition:position})
         }
         console.debug("SliderPopup.complete exited")
