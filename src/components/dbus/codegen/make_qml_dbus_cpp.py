@@ -386,8 +386,7 @@ class Impl(FordXmlParser):
                 out.write("  int async_uid;\n")
                 out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
                 out.write("      message.setDelayedReply(true);\n")
-                out.write("      QDBusMessage reply = message.createReply();\n")
-                out.write("      dbusController->addMessage(reply, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
+                out.write("      dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
                 out.write("      " + return_statement + ";\n");
                 out.write("  }\n")
 
