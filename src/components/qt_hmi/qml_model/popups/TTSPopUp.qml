@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Controls 1.0
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
@@ -42,15 +43,18 @@ PopUp {
     padding: 10
     property var async
 
-    Text {
-        id: text
+    ScrollView {
         anchors.fill: parent
-        color: Constants.popUpColor
-        font.pixelSize: Constants.ttsFontSize
-        Timer {
-            id: timer
-            interval: Constants.ttsSpeakTime
-            onTriggered: deactivate()
+        Text {
+            id: text
+            anchors.fill: parent
+            color: Constants.popUpColor
+            font.pixelSize: Constants.ttsFontSize
+            Timer {
+                id: timer
+                interval: Constants.ttsSpeakTime
+                onTriggered: deactivate()
+            }
         }
     }
 
