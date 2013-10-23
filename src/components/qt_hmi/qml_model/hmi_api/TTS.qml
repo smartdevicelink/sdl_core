@@ -13,6 +13,7 @@ Item {
     }
 
     function stopSpeaking() {
+        console.debug("Stop speaking");
         ttsPopUp.deactivate();
     }
 
@@ -29,6 +30,7 @@ Item {
     }
 
     function changeRegistration(language, appID) {
+        console.debug("ChangeRegistrationTTSVR:", language, appID);
         dataContainer.changeRegistrationTTSVR(language, appID)
     }
 
