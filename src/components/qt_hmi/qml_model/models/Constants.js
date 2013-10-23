@@ -116,6 +116,14 @@ var sliderTextColor = "white"
 var sliderBarBorderColor = "white"
 var sliderBarFillColor = "white"
 
+// Width for popup view
+var popupWidth = 700
+
+// Height for popup view
+var popupHeigth = 500
+
+// Width for combobox
+var comboboxWidth = 300
 // -------------------------
 var scrollableMessageTextColor = "white"
 var scrollableMessageScrollBarColor = "gray"

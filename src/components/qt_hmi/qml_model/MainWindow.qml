@@ -173,7 +173,15 @@ Rectangle {
 
         SliderPopup {
             id: sliderPopup
-            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+	    anchors.verticalCenter: parent.verticalCenter
+	    visible: false
+	}
+
+        TBTClientStatePopUp {
+            id: tbtClientStatePopUp
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
     }

@@ -301,32 +301,15 @@ Item {
                     label: "Send data"
                 }
 
-                Component {
-                    id: tbtStateDelegate
-                    TextButton {
-                        label: name
-                        width: parent.width
-                        onClicked: {
-                            sdlNavigation.onTBTClientState(value);
-                            console.log("Emit signal Navigation.onTBTClientState");
-                        }
-                    }
-                }
                 PushButton {
                     id: tbtClientState
                     label: "TBT Client state"
                     toggleMode: true
                     onPressed: {
-                        for (var name in Common.TBTState) {
-                            selectList.model.append({name: name, value: Common.TBTState[name]});
-                        }
-                        selectList.delegate = tbtStateDelegate;
-                        scrollbar.visible = true;
+                        tbtClientStatePopUp.show();
                     }
                     onUnpressed: {
-                        selectList.model.clear();
-                        selectList.delegate = null;
-                        scrollbar.visible = false;
+                        tbtClientStatePopUp.hide();
                     }
                 }
 
@@ -384,27 +367,6 @@ Item {
                                 text: "DD"
                             }
                         }
-                    }
-                }
-            }
-
-            Column {
-                ListView {
-                    id: selectList
-                    width: 300
-                    height: 200
-
-                    model: ListModel {}
-                    delegate: TextButton {}
-
-                    Rectangle {
-                        id: scrollbar
-                        visible: false
-                        anchors.right: selectList.right
-                        y: selectList.visibleArea.yPosition * selectList.height
-                        width: 10
-                        height: selectList.visibleArea.heightRatio * selectList.height
-                        color: "white"
                     }
                 }
             }

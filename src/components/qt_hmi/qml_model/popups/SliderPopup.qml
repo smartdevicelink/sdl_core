@@ -39,6 +39,8 @@ import "../hmi_api/Common.js" as Common
 import "../controls"
 
 PopUp {
+    width: Constants.popupWidth
+    height: Constants.popupHeigth
 
     property var async
     property int position
