@@ -90,5 +90,7 @@ var itemListHeight = 60
 // Spasing between item on views
 var generalSpasing = 10
 
+// Width of scrollBar
+var scrollBarWidth = 5
 // -------------------------
 

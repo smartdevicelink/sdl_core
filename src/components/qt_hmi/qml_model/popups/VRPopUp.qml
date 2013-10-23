@@ -85,7 +85,7 @@ PopUp {
             visible: true
             anchors.right: listCommands.right
             y: listCommands.visibleArea.yPosition * listCommands.height
-            width: 5
+            width: Constants.scrollBarWidth
             height: listCommands.visibleArea.heightRatio * listCommands.height
             color: Constants.primaryColor
         }
