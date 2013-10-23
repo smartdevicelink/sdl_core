@@ -168,6 +168,13 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        TBTClientStatePopUp {
+            id: tbtClientStatePopUp
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
     }
 
     Item {
