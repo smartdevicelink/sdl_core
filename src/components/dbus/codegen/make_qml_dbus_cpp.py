@@ -217,10 +217,9 @@ class Impl(FordXmlParser):
             param_type = self.qt_param_type(param_desc)
             retstr = retstr + param_type + ' ' + param_desc.name + '_in'
             if i <> in_params_num - 1: retstr = retstr + ", "
-        if out_params:
-            if in_params_num > 0:
-                retstr += ", "
-            retstr += "const QDBusMessage& message"
+        if in_params_num > 0:
+            retstr += ", "
+        retstr += "const QDBusMessage& message"
         out_params_num = len(out_params)
         if out_params_num > 1:
             retstr = retstr + ", "
@@ -337,20 +336,20 @@ class Impl(FordXmlParser):
             in_params = request.findall('param')
             out_params = response.findall('param')
 
-            if out_params:
-                out.write("bool fill%s%sReply(QDBusMessage& message, const QVariantMap& map)\n" % (classname, request.get('name')))
-                out.write("{\n")
-                for out_p in out_params:
-                    param_name = out_p.get('name')
-                    param_desc = self.make_param_desc(out_p, iface_name)
-                    param_type = self.qt_param_type(param_desc)
-                    out.write("  %s %s_out;\n" % (param_type, param_name))
-                    out.write('  if (!GetArgFromMap(map, \"' + param_name + '\", ' + param_name + "_out)) { return false; }\n")
-                    out.write("  QVariant %s_arg;\n" % param_name)
-                    out.write("  %s_arg.setValue(%s_out);" % (param_name, param_name))
-                    out.write("  message << %s_arg;\n" % param_name)
-                out.write("  return true;\n")
-                out.write("}\n\n")
+            out.write("bool fill%s%sReply(QDBusMessage& message, const QVariantMap& map)\n" % (classname, request.get('name')))
+            out.write("{\n")
+            for out_p in out_params:
+                param_name = out_p.get('name')
+                param_desc = self.make_param_desc(out_p, iface_name)
+                param_type = self.qt_param_type(param_desc)
+                out.write("  %s %s_out;\n" % (param_type, param_name))
+                out.write('  if (!GetArgFromMap(map, \"' + param_name + '\", ' + param_name + "_out)) { return false; }\n")
+                out.write("  QVariant %s_arg;\n" % param_name)
+                out.write("  %s_arg.setValue(%s_out);" % (param_name, param_name))
+                out.write("  message << %s_arg;\n" % param_name)
+            out.write("  return true;\n")
+            out.write("}\n\n")
+            
             signature = self.make_method_signature(request, response, iface_name, True)
             out.write(signature + " {\n")
             out.write("  LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
@@ -382,13 +381,12 @@ class Impl(FordXmlParser):
             out.write("  int err;\n")
             out.write("""  if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
 
-            if out_params:
-                out.write("  int async_uid;\n")
-                out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
-                out.write("      message.setDelayedReply(true);\n")
-                out.write("      dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
-                out.write("      " + return_statement + ";\n");
-                out.write("  }\n")
+            out.write("  int async_uid;\n")
+            out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
+            out.write("      message.setDelayedReply(true);\n")
+            out.write("      dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
+            out.write("      " + return_statement + ";\n");
+            out.write("  }\n")
 
             for param in out_params[1:]:
                 param_name = param.get('name')
