@@ -200,6 +200,7 @@ Item {
 
         Row
         {
+            spacing: 30
             Column
             {
                 Text {
@@ -212,11 +213,6 @@ Item {
                     width: 200
                 }
             }
-            Item {
-                width: 20
-                height: 1
-            }
-
             Column
             {
                 Text {
@@ -228,9 +224,37 @@ Item {
                     model: languagesList
                     width: 180
                     onCurrentIndexChanged: {
-                        sdlTTS.onLanguageChange(settingsContainer.sdlLanguagesList[currentIndex]);
-                        sdlVR.onLanguageChange(settingsContainer.sdlLanguagesList[currentIndex]);
+                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
                     }
+                }
+            }
+        }
+
+        Row
+        {
+            spacing: 20
+            Column
+            {
+                Text {
+                    text: "application UI Languages"
+                    color: "white"
+                }
+
+                Text {
+                    text: ""
+                }
+            }
+            Column
+            {
+                Text {
+                    text: "application TTS + VR Languages"
+                    color: "white"
+                }
+
+                Text {
+                    text: ""
                 }
             }
         }

@@ -98,7 +98,9 @@ QtObject {
                 currentApplication.deviceName = applicationList.get(i).deviceName
                 currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
                 currentApplication.turnList = applicationList.get(i).turnList
-                currentApplication.turnListSoftButtons = applicationList.get(i).turnListSoftButtons
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                currentApplication.languageTTSVR = applicationList.get(i).languageTTSVR
                 // This place is for adding new properties
             }
         }
@@ -125,7 +127,8 @@ QtObject {
             hmiUIText: app.hmiUIText,
             options: [],
             turnList: [],
-            turnListSoftButtons: []
+            turnListSoftButtons: [],
+            languageTTSVR: Common.Language.EN_US
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -247,9 +250,9 @@ QtObject {
         console.log("dataContainer changeRegistrarionUI exit");
     }
 
-    function changeRegistrationTTSVR (language) {
+    function changeRegistrationTTSVR(language, appID) {
         console.log("dataContainer changeRegistrationTTSVR enter");
-        hmiTTSVRLanguage = language
+        setApplicationProperties(appID, { TTSVRLanguage: language });
         console.log("dataContainer changeRegistrationTTSVR exit");
     }
 

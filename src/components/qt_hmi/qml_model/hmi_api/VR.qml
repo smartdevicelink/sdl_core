@@ -42,7 +42,7 @@ Item {
         }
     }
 
-    function changeRegistration(language) {
-        dataContainer.changeRegistrationTTSVR(language)
+    function changeRegistration(language, appID) {
+        dataContainer.changeRegistrationTTSVR(language, appID);
     }
 }
