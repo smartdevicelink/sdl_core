@@ -55,7 +55,6 @@ PopUp {
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
 
-        rectangle.width = 0
         show()
         timer.start()
         console.debug("SliderPopup.showSlider exited")
@@ -68,12 +67,12 @@ PopUp {
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
         if(isAbort) {
-            console.debug("aborted")
+            console.debug("aborted position is", dataContainer.uiSlider.position)
             DBus.sendReply(async, {sliderPosition:dataContainer.uiSlider.position})
             //todo(ykazakov): send error because it is aborted with initial slider position
             //DBus.sendError(async, {resultCode:Common.Result.ABORTED, sliderPosition:dataContainer.uiSlider.position})
         } else {
-            console.debug("send position " + position)
+            console.debug("send position", position)
             dataContainer.uiSlider.position = position
             DBus.sendReply(async, {sliderPosition:position})
         }
@@ -130,10 +129,8 @@ PopUp {
                 radius: parent.radius
 
                 onVisibleChanged: {
-                    if(position > 0 && position < dataContainer.uiSlider.numTicks) {
-                        var tickSize = borderRectangle.width / dataContainer.uiSlider.numTicks
-                        rectangle.width = position * tickSize;
-                    }
+                        var tickWidth = borderRectangle.width / dataContainer.uiSlider.numTicks
+                        rectangle.width = dataContainer.uiSlider.position * tickWidth;
                 }
             }
 
@@ -145,7 +142,6 @@ PopUp {
                 }
 
                 onPositionChanged: {
-                    console.log("SliderPopup.onPositionChanged entered")
                     if(mouseX <= 0){
                         rectangle.width  = borderRectangle.width / dataContainer.uiSlider.numTicks
                         position = 1
@@ -157,15 +153,14 @@ PopUp {
                     }
 
                     if(mouseX > 0 && mouseX < borderRectangle.width) {
-                        var tickSize = borderRectangle.width / dataContainer.uiSlider.numTicks
-                        rectangle.width = Math.ceil(mouseX / tickSize) * tickSize;
-                        position = Math.ceil(mouseX / tickSize)
+                        var tickWidth = borderRectangle.width / dataContainer.uiSlider.numTicks
+                        position = Math.ceil(mouseX / tickWidth)
+                        rectangle.width = position * tickWidth;
                     }
 
                     if(dataContainer.uiSlider.footer.length > 1){
                         footerText.text = dataContainer.uiSlider.footer[position - 1]
                     }
-                    console.log("SliderPopup.onPositionChanged exited")
                 }
             }
         }
@@ -175,17 +170,16 @@ PopUp {
             anchors.horizontalCenter: parent.horizontalCenter
             text: {
                 if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) return "";
-                console.log(dataContainer.uiSlider.position - 1)
                 return dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
             }
             color: Constants.sliderTextColor
             font.pixelSize: Constants.fontSize * 2
         }
 
-        LongOvalButton {
+        OvalButton {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Back"
-            pixelSize: Constants.fontSize
+            fontSize: Constants.fontSize
             onClicked: {
                 complete(true)
                 hide()
