@@ -120,6 +120,7 @@ Rectangle {
 
                 property string position
                 function go(path, appId) {
+                    console.debug(position, path)
                     if (position !== path) {
                         viewTransitionStack.push(source.toString())
                         if (appId) {
@@ -132,6 +133,7 @@ Rectangle {
 
                 function back() {
                     source = viewTransitionStack.pop()
+                    position = ""
                 }
 
                 onStatusChanged: {

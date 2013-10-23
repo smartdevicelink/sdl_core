@@ -92,3 +92,6 @@ var generalSpasing = 10
 
 // -------------------------
 
+var scrollableMessageTextColor = "white"
+var scrollableMessageScrollBarColor = "gray"
+var scrollableMessageScrollBarWidth = 10
