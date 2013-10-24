@@ -44,6 +44,7 @@ import "./models"
 import "./popups"
 import "hmi_api/Common.js" as Common
 import "./models/Constants.js" as Constants
+import "models/Internal.js" as Internal
 
 Rectangle {
     width: 1600
@@ -242,7 +243,8 @@ Rectangle {
                 mediaClock: {
                     "hours": 0,
                     "minutes": 2,
-                    "seconds": 36
+                    "seconds": 36,
+                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP
                 }
              });
         }

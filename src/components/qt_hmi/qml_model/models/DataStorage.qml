@@ -96,6 +96,7 @@ QtObject {
                 currentApplication.mediaClock.hours = applicationList.get(i).mediaClock.hours
                 currentApplication.mediaClock.minutes = applicationList.get(i).mediaClock.minutes
                 currentApplication.mediaClock.seconds = applicationList.get(i).mediaClock.seconds
+                currentApplication.mediaClock.updateMode = applicationList.get(i).mediaClock.updateMode
                 // This place is for adding new properties
             }
         }

@@ -35,3 +35,19 @@ var MenuItemType = {
     MI_SUBMENU: 1,
     MI_PARENT: 2
 }
+
+var MediaClockUpdateMode = {
+    MCU_COUNTUP: 0,
+    MCU_COUNTDOWN: 1
+}
+
+function pad (string, length, lead) {
+    if (!lead) {
+        lead = '0'
+    }
+    var paddedString = "" + string
+    while (paddedString.length < length) {
+        paddedString = lead + paddedString
+    }
+    return paddedString
+}

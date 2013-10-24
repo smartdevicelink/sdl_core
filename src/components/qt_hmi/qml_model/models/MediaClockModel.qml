@@ -33,9 +33,57 @@
  */
 
 import QtQuick 2.0
+import "Internal.js" as Internal
 
 QtObject {
     property int hours
     property int minutes
     property int seconds
+
+    property int updateMode
+
+    property real progress: 1 / 3
+
+    property Timer timer: Timer {
+        interval: 1000
+        repeat: true
+        running: true
+        onTriggered: onTimer()
+    }
+
+    function onTimer () {
+        switch (updateMode) {
+            case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                if (60 === ++seconds) {
+                    seconds = 0
+                    if (60 === ++minutes) {
+                        minutes = 0
+                        ++hours
+                    }
+                }
+                break
+            case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                if (0 === seconds) {
+                    if (0 === minutes) {
+                        if (0 === hours) {
+                            timer.stop()
+                            console.log("countdown timer stopped")
+                        }
+                        else {
+                            --hours
+                            minutes = 59
+                            seconds = 59
+                        }
+                    }
+                    else {
+                        --minutes
+                        seconds = 59
+                    }
+                }
+                else {
+                    --seconds
+                }
+                break
+        }
+    }
 }

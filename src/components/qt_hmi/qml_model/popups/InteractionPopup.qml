@@ -51,13 +51,10 @@ PopUp {
 
     ListView {
         anchors.top: initialText.bottom
-        anchors.topMargin: Constants.popupMargin
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: Constants.popupMargin
         anchors.left: parent.left
-        anchors.leftMargin: Constants.popupMargin
         anchors.right: parent.right
-        anchors.rightMargin: Constants.popupMargin
+        anchors.margins: Constants.popupMargin
         model: dataContainer.interactionModel.choice
         delegate: OvalButton {
             width: parent.width

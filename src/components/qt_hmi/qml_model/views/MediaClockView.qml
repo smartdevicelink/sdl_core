@@ -34,27 +34,41 @@
 
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 Item {
     Text {
         id: time
         anchors.left: parent.left
-        anchors.leftMargin: 1/10 * parent.width
+        width: 1/10 * parent.width
         anchors.verticalCenter: parent.verticalCenter
+        horizontalAlignment: Text.AlignRight
         color: "white"
-        text: (mediaPlayerView.playerType === "SDL") ? ((dataContainer.currentApplication.mediaClock.hours > 0) ? dataContainer.currentApplication.mediaClock.hours + ":" : "") + pad(dataContainer.currentApplication.mediaClock.minutes, 2) + ":" + pad(dataContainer.currentApplication.mediaClock.seconds, 2)
+        text: (mediaPlayerView.playerType === "SDL") ? ((dataContainer.currentApplication.mediaClock.hours > 0) ? dataContainer.currentApplication.mediaClock.hours + ":" : "") + Internal.pad(dataContainer.currentApplication.mediaClock.minutes, 2) + ":" + Internal.pad(dataContainer.currentApplication.mediaClock.seconds, 2)
                                                      : "02:36" //TODO {Aleshin}: get track time for all players except SDL
         font.pixelSize: 18
     }
 
-    function pad (string, length, lead) {
-        if (!lead) {
-            lead = '0'
+    Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
+        width: 2/3 * parent.width
+
+        Rectangle {
+           id: firstRect
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: dataContainer.currentApplication.mediaClock.progress * parent.width
+           color: "white"
         }
-        var paddedString = "" + string
-        while (paddedString.length < length) {
-            paddedString = lead + paddedString
+
+        Rectangle {
+           id: secondRect
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: (1 - dataContainer.currentApplication.mediaClock.progress) * parent.width
+           color: Constants.primaryColor
         }
-        return paddedString
     }
 }
