@@ -3299,7 +3299,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 add("b");
                                 add("c");
                             }});
-                            currentKbdProperties.setSendDynamicEntry(false);
+
 
                             Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
                             btnKbdProperties.setOnClickListener(

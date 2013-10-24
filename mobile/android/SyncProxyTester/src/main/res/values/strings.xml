@@ -177,8 +177,6 @@
     <string name="keyboardproperties_useLanguage">Language</string>
     <string name="keyboardproperties_useKbdLayout">Keyboard Layout</string>
     <string name="keyboardproperties_useKeypressMode">Keypress Mode</string>
-    <string name="keyboardproperties_useSendDynamicEntry">Use</string>
-    <string name="keyboardproperties_sendDynamicEntry">Send Dynamic Entry</string>
     <string name="keyboardproperties_useLimitedCharacterList">Limited Character List (comma-separated)</string>
     <string name="keyboardproperties_limitedCharacterListDefault">a,b,c,d,e,f</string>
     <string name="keyboardproperties_useAutoCompleteText">Autocomplete Text</string>
