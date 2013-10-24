@@ -3585,7 +3585,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.registerappinterface_hmiDesiredLangSpinner);
         final CheckBox useAppHMITypes = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
-        final Spinner appHMITypeSpinner = (Spinner) layout
+        final MultiSpinner<AppType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
         final CheckBox useAppID = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppID);
@@ -3607,7 +3607,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         desiredLangSpinner.setAdapter(languageAdapter);
         hmiDesiredLangSpinner.setAdapter(languageAdapter);
-        appHMITypeSpinner.setAdapter(appHMITypeAdapter);
+        appHMITypeSpinner
+                .setItems(Arrays.asList(AppType.values()), "All", null);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3668,10 +3669,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             hmiDesiredLangSpinner.getSelectedItemPosition()));
                 }
                 if (useAppHMITypes.isChecked()) {
-                    // FIXME
-                    AppType type = appHMITypeAdapter.getItem(appHMITypeSpinner.getSelectedItemPosition());
-                    msg.setAppType(new Vector<AppType>(Arrays.asList(
-                            new AppType[]{ type })));
+                    msg.setAppType(new Vector<AppType>(
+                            appHMITypeSpinner.getSelectedItems()));
                 }
                 if (useAppID.isChecked()) {
                     msg.setAppID(appID.getText().toString());

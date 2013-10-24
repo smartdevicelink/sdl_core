@@ -146,7 +146,7 @@
                 android:checked="true"
                 android:text="@string/registerappinterface_useAppHMITypes"/>
 
-        <Spinner
+        <com.ford.syncV4.android.activity.MultiSpinner
                 android:id="@+id/registerappinterface_appHMITypeSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
