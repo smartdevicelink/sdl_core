@@ -44,7 +44,6 @@ PopUp {
     //TODO{ALeshin}: Redraw this window as ListView or Column, when we'll get requirements
     Column {
         anchors.fill: parent
-        spacing: 0
         Text {
             id: viText
             width: parent.width
@@ -91,7 +90,6 @@ PopUp {
 
         Text {
             width: parent.width
-            anchors.leftMargin: 500
             height: 1/5 * parent.height
             text: "Revolutions per minute: " + dataContainer.vehicleInfoModel.rpm
             font.pixelSize: Constants.fontSize
