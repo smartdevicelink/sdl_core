@@ -101,7 +101,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -3585,7 +3585,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.registerappinterface_hmiDesiredLangSpinner);
         final CheckBox useAppHMITypes = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
-        final MultiSpinner<AppType> appHMITypeSpinner = (MultiSpinner) layout
+        final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
         final CheckBox useAppID = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppID);
@@ -3599,16 +3599,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         languageAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         // FIXME: use AppHMIType!
-        final ArrayAdapter<AppType> appHMITypeAdapter =
-                new ArrayAdapter<AppType>(mContext,
-                        android.R.layout.simple_spinner_item, AppType.values());
+        final ArrayAdapter<AppHMIType> appHMITypeAdapter =
+                new ArrayAdapter<AppHMIType>(mContext,
+                        android.R.layout.simple_spinner_item,
+                        AppHMIType.values());
         appHMITypeAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
 
         desiredLangSpinner.setAdapter(languageAdapter);
         hmiDesiredLangSpinner.setAdapter(languageAdapter);
         appHMITypeSpinner
-                .setItems(Arrays.asList(AppType.values()), "All", null);
+                .setItems(Arrays.asList(AppHMIType.values()), "All", null);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3669,7 +3670,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             hmiDesiredLangSpinner.getSelectedItemPosition()));
                 }
                 if (useAppHMITypes.isChecked()) {
-                    msg.setAppType(new Vector<AppType>(
+                    msg.setAppType(new Vector<AppHMIType>(
                             appHMITypeSpinner.getSelectedItems()));
                 }
                 if (useAppID.isChecked()) {
