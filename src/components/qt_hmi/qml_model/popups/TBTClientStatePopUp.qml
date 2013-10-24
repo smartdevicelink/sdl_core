@@ -1,6 +1,6 @@
 /**
- * @file Entry.qml
- * @brief Entry with icon and text for list.
+ * @file TBTClientStatePopUp.qml
+ * @brief Popup view for TBT interface (list of states).
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,36 +33,42 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Controls 1.0
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
-Rectangle {
-    id: main
-    color: Constants.transparentColor
+PopUp {
+    width: Constants.popupWidth
+    height: Constants.popupHeigth
 
-    property alias text: label.text
-    property alias fontSize: label.font.pixelSize
-    property alias icon: image.source
+    Item {
+        ListModel {
+            id: tbtState
 
-    Icon {
-        id: image
-        width: Constants.iconItemListSize
-        height: Constants.iconItemListSize
-        anchors.left: parent.left
-        anchors.leftMargin: Constants.generalSpacing
-        anchors.verticalCenter: parent.verticalCenter
-        visible: source ? true : false
+            Component.onCompleted: {
+                for (var name in Common.TBTState) {
+                    append({name: name});
+                }
+            }
+        }
     }
     Text {
-        id: label
-        anchors.verticalCenter: parent.verticalCenter
-        z: 50
+        text: "TBT Client State"
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: Constants.fontSize
-        text: "Name Entry"
-        anchors.left: image.right
-        anchors.leftMargin: Constants.generalSpasing
-        anchors.verticalCenterOffset: 0
-        visible: text !== ""
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.top: parent.top
         color: Constants.primaryColor
+    }
+    ComboBox {
+        id: comboBox
+        width: Constants.comboboxWidth
+        anchors.horizontalCenter: parent.horizontalCenter
+        model: tbtState
+        anchors.verticalCenter: parent.verticalCenter
+        onCurrentTextChanged: {
+            console.log("Send signal onTBTClientState:", currentText);
+            sdlNavigation.onTBTClientState(Common.TBTState[currentText]);
+        }
     }
 }

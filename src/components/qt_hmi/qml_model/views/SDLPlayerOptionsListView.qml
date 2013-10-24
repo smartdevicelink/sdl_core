@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 GeneralView {
     applicationContext: true
@@ -54,15 +55,35 @@ GeneralView {
             width:parent.width
             height:parent.height
 
-            model: dataContainer.currentApplication.options
+            model: dataContainer.currentApplication.currentSubMenu
 
-            delegate: Text  {
-                text: name
-                color: Constants.primaryColor
-                font.pixelSize: 40
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
+            delegate: Row {
+                Icon {
+                    id: image
+                    source: model.icon
+                    visible: source !== undefined
+                }
+
+                Text {
+                    text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
+                    color: Constants.primaryColor
+                    font.pixelSize: 40
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick()")
+                            switch (type) {
+                                case Internal.MenuItemType.MI_NODE:
+                                    sdlUI.onCommand(id, dataContainer.currentApplication.appId)
+                                    break;
+                                case Internal.MenuItemType.MI_SUBMENU:
+                                case Internal.MenuItemType.MI_PARENT:
+                                    dataContainer.currentApplication.currentSubMenu = subMenu
+                                    break;
+                            }
+                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick(): exit")
+                        }
                     }
                 }
             }

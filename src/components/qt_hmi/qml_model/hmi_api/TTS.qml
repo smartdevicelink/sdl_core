@@ -12,7 +12,9 @@ Item {
     function speak (ttsChunks, appID) {
     }
 
-    function stopSpeaking () {
+    function stopSpeaking() {
+        console.debug("Stop speaking");
+        ttsPopUp.deactivate();
     }
 
     function getLanguage () {
@@ -27,8 +29,9 @@ Item {
         }
     }
 
-    function changeRegistration (language) {
-        dataContainer.changeRegistrationTTSVR(language)
+    function changeRegistration(language, appID) {
+        console.debug("ChangeRegistrationTTSVR:", language, appID);
+        dataContainer.changeRegistrationTTSVR(language, appID)
     }
 
     function setGlobalProperties (helpPrompt, timeoutPrompt, appID) {

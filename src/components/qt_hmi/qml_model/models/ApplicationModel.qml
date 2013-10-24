@@ -20,7 +20,10 @@ QtObject {
     property string timeoutPrompt
     property ListModel options: ListModel {
     }
+
+    property ListModel currentSubMenu: options
     property ListModel turnList
     property ListModel turnListSoftButtons
+    property int languageTTSVR
     // This place is for adding new properties
 }

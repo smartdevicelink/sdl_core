@@ -97,13 +97,18 @@ Item {
     }
 
     function deleteCommand (cmdID, appID) {
+        dataContainer.deleteCommand(cmdID, appID)
+        return {}
     }
 
     function addSubMenu (menuID, menuParams, appID) {
         dataContainer.addSubMenu(menuID, menuParams, appID)
+        return {}
     }
 
     function deleteSubMenu (menuID, appID) {
+        dataContainer.deleteSubMenu(menuID, appID)
+        return {}
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
@@ -154,12 +159,46 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        return {
-            sliderPosition: dataContainer.uiSliderPosition
-        }
+        console.log("UI.slider entered",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+
+        dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
+        dataContainer.uiSlider.header = sliderHeader
+        dataContainer.uiSlider.footer = sliderFooter
+        dataContainer.uiSlider.numTicks = numTicks
+        dataContainer.uiSlider.position = position
+        dataContainer.uiSlider.timeout = timeout
+
+        sliderPopup.showSlider()
+        sliderPopup.async = new Async.AsyncCall();
+        console.log("UI.slider exited")
+        return sliderPopup.async;
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
+        console.debug("scrollableMessage ", messageText, timeout, softButtons, appID)
+        if(dataContainer.scrollableMessageModel.running){
+            //send error response if long message already running
+            console.debug("scrollableMessage throw")
+            throw Common.Result.ABORTED
+        }
+
+        if(messageText !== undefined) {
+            dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
+        }
+        if (softButtons !== undefined) {
+            dataContainer.scrollableMessageModel.softButtons.clear();
+            softButtons.forEach(fillSoftButtons, dataContainer.scrollableMessageModel.softButtons);
+        }
+        if(timeout !== undefined) {
+            dataContainer.scrollableMessageModel.timeout = timeout
+        }
+        if(appID !== undefined) {
+            dataContainer.scrollableMessageModel.appId = appID
+        }
+        dataContainer.scrollableMessageModel.async = new Async.AsyncCall()
+        contentLoader.go("./views/ScrollableMessageView.qml")
+        console.debug("scrollableMessage exit")
+        return dataContainer.scrollableMessageModel.async
     }
 
     function performAudioPassThru (audioPassThruDisplayTexts, maxDuration) {
@@ -170,4 +209,16 @@ Item {
 
     function closePopUp () {
     }
+
+    function fillSoftButtons(element, index, array) {
+        this.append({
+                        type: element.type,
+                        name: element.text,
+                        image: element.image,
+                        isHighlighted: element.isHighlighted,
+                        buttonId: element.softButtonID,
+                        action: element.systemAction
+                    });
+    }
+
 }

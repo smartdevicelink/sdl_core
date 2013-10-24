@@ -36,7 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -119,6 +119,7 @@ Rectangle {
 
                 property string position
                 function go(path, appId) {
+                    console.debug(position, path)
                     if (position !== path) {
                         viewTransitionStack.push(source.toString())
                         if (appId) {
@@ -131,6 +132,7 @@ Rectangle {
 
                 function back() {
                     source = viewTransitionStack.pop()
+                    position = ""
                 }
 
                 onStatusChanged: {
@@ -171,7 +173,22 @@ Rectangle {
 
         VIPopUp {
             id: viPopUp
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             anchors.fill: parent
+        }
+
+        SliderPopup {
+            id: sliderPopup
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
+
+        TBTClientStatePopUp {
+            id: tbtClientStatePopUp
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
     }
