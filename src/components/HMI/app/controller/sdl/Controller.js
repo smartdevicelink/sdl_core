@@ -429,8 +429,8 @@ SDL.SDLController = Em.Object
 
                 var str = SDL.SDLModel.keyboardInputValue;
 
-                if (SDL.SDLAppController.model.globalProperties.keypressMode) {
-                    switch (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                if (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
+                    switch (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
                         case 'SINGLE_KEYPRESS':{
                             FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ));
                             break;

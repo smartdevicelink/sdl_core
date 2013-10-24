@@ -349,8 +349,8 @@ SDL.SDLModel = Em.Object.create({
             info.id = i;
             info.point.xCoord = event.originalEvent.touches[i].pageX;
             info.point.yCoord = event.originalEvent.touches[i].pageY;
-            FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
         }
+        FFW.UI.onTouchEvent(type, touchLists, info);
     },
 
     /**
