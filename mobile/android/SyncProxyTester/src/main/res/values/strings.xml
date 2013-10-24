@@ -197,5 +197,10 @@
     <string name="alert_durationDefault">5000</string>
     <string name="alert_usePlayTone">Play Tone</string>
     <string name="alert_useProgressIndicator">Progress Indicator</string>
+    <string name="keyboard_properties">KeyboardProperties</string>
+    <string name="vr_help_items">VR help items</string>
+    <string name="vr_help_title">VR help title</string>
+    <string name="timeout_promt">Timeout prompt</string>
+    <string name="hello_promt">Help prompt</string>
 
 </resources>

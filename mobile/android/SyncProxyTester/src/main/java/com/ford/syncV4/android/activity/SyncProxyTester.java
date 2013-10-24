@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -3439,6 +3438,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceTimeoutPrompt);
                             final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpTitle);
                             final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpItems);
+                            final CheckBox choiceKeyboardProperties = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceKeyboardProperties);
 
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3460,6 +3460,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                     if (choiceVRHelpItem.isChecked()) {
                                         properties.add(GlobalProperty.VRHELPITEMS);
+                                    }
+
+                                    if (choiceKeyboardProperties.isChecked()) {
+                                        properties.add(GlobalProperty.KEYBOARDPROPERTIES);
                                     }
 
                                     if (!properties.isEmpty()) {
