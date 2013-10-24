@@ -88,7 +88,7 @@ Rectangle {
         {
             id: okButtonAnimation
             // Decrease this value while debugging
-            PauseAnimation { duration: Constants.animationDuration }
+            PauseAnimation { duration: Constants.warningDuration }
             NumberAnimation {
                 target: ok
                 duration:  Constants.warningDuration
