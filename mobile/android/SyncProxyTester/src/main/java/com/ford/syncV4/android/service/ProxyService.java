@@ -1321,9 +1321,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onOnTouchEvent(OnTouchEvent notification) {
         final  OnTouchEvent event = notification;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "OnTouchEvent Received = "+ notification.toString();
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+        else Log.i(TAG, "" + notification);
+
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
 
