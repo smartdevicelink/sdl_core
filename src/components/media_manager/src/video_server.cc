@@ -62,8 +62,6 @@ VideoServer::VideoServer()
   if (delegate_) {
     thread_ = new threads::Thread("VideoServer", delegate_);
   }
-
-  start();
 }
 
 VideoServer::~VideoServer() {
@@ -115,6 +113,20 @@ bool VideoServer::start() {
   return true;
 }
 
+bool VideoServer::stop() {
+  LOG4CXX_INFO(logger_, "VideoServer::stop");
+
+  if (delegate_ && thread_) {
+    thread_->stop();
+  }
+
+  if (socket_ != -1) {
+    ::close(socket_);
+  }
+
+  return true;
+}
+
 void VideoServer::sendMsg(const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "VideoServer::sendData");
 
@@ -127,7 +139,8 @@ VideoServer::VideoStreamer::VideoStreamer(VideoServer* const server)
   : server_(server),
     socket_fd_(0),
     is_first_loop_(true),
-    is_client_connected_(false) {
+    is_client_connected_(false),
+    stop_flag_(false) {
 }
 
 VideoServer::VideoStreamer::~VideoStreamer() {
@@ -137,7 +150,7 @@ VideoServer::VideoStreamer::~VideoStreamer() {
 void VideoServer::VideoStreamer::threadMain() {
   LOG4CXX_INFO(logger_, "VideoStreamer::threadMain");
 
-  while (1) {
+  while (!stop_flag_) {
 
     socket_fd_ = accept(server_->socket_, NULL, NULL);
 
@@ -165,7 +178,7 @@ void VideoServer::VideoStreamer::threadMain() {
 
 bool VideoServer::VideoStreamer::exitThreadMain() {
   LOG4CXX_INFO(logger_, "VideoStreamer::exitThreadMain");
-  is_client_connected_ = false;
+  stop_flag_ = true;
   stop();
   return true;
 }
@@ -173,6 +186,7 @@ bool VideoServer::VideoStreamer::exitThreadMain() {
 void VideoServer::VideoStreamer::stop() {
   LOG4CXX_INFO(logger_, "VideoStreamer::stop");
 
+  is_client_connected_ = false;
   if (!socket_fd_) {
     return;
   }

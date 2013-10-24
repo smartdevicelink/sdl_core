@@ -63,6 +63,8 @@ MediaManagerImpl::MediaManagerImpl()
     is_stream_running_(false),
     app_connection_key(0),
     video_server_() {
+
+  startVideoStreaming();
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
@@ -236,6 +238,15 @@ void MediaManagerImpl::stopMicrophoneRecording() {
     delete senderThread_;
     senderThread_ = NULL;
   }
+}
+
+
+void MediaManagerImpl::startVideoStreaming() {
+  video_server_.start();
+}
+
+void MediaManagerImpl::stopVideoStreaming() {
+  video_server_.stop();
 }
 
 void MediaManagerImpl::OnMessageReceived(

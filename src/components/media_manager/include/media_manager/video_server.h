@@ -69,6 +69,13 @@ class VideoServer {
     bool start();
 
     /*
+     * Stops server
+     *
+     * @param return TRUE on success, otherwise FALSE
+     */
+    bool stop();
+
+    /*
      * Sends message
      *
      * @param data  The received NAVI binary data
@@ -131,6 +138,7 @@ class VideoServer {
         int                             socket_fd_;
         bool                            is_first_loop_;
         volatile bool                   is_client_connected_;
+        volatile bool                   stop_flag_;
 
         DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
     };

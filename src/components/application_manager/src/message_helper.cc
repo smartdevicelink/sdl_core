@@ -1078,6 +1078,41 @@ void MessageHelper::SendNaviStartStream(
   ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
 }
 
+void MessageHelper::SendNaviStopStream(int connection_key) {
+  smart_objects::SmartObject* stop_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!stop_stream) {
+    return;
+  }
+
+  (*stop_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StopStream;
+  (*stop_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*stop_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*stop_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*stop_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // TODO(PV) : remove connectionhandler
+  unsigned int app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+      &app_id);
+
+  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+  msg_params[strings::app_id] = app_id;
+
+  (*stop_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {

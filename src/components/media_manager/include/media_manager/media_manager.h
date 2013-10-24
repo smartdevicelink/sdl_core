@@ -59,6 +59,8 @@ class MediaManager : public redecoding::RedecoderClient {
                                           mobile_apis::BitsPerSample::eType,
                                           unsigned int session_key, unsigned int correlation_id) = 0;
     virtual void stopMicrophoneRecording() = 0;
+    virtual void startVideoStreaming() = 0;
+    virtual void stopVideoStreaming() = 0;
 
     virtual ~MediaManager() {
     }

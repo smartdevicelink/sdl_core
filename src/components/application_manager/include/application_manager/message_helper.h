@@ -223,6 +223,14 @@ class MessageHelper {
      */
     static void SendNaviStartStream(const std::string& url, int connection_key);
 
+    /*
+     * @brief Sends notification to HMI to stop video streaming
+     *
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendNaviStopStream(int connection_key);
+
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);

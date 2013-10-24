@@ -78,6 +78,9 @@ class MediaManagerImpl : public MediaManager,
                                           unsigned int session_key, unsigned int correlation_id);
     virtual void stopMicrophoneRecording();
 
+    virtual void startVideoStreaming();
+    virtual void stopVideoStreaming();
+
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
 
