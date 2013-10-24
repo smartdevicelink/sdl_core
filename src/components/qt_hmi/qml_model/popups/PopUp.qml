@@ -37,6 +37,7 @@ import "../models/Constants.js" as Constants
 
 Item {
     default property alias content: content.children
+
     width: 700
     height: 500
     Rectangle {
@@ -49,6 +50,15 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
         border.color: "white"
+    }
+
+    onVisibleChanged: {
+        if (visible === true) {
+            dataContainer.activePopup = this
+        }
+        if (visible === false) {
+            dataContainer.activePopup = null
+        }
     }
 
     function show() {

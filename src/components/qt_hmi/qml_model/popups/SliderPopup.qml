@@ -62,21 +62,25 @@ PopUp {
         console.debug("SliderPopup.showSlider exited")
     }
 
-    function complete(isAbort){
+    function complete(reason){
         console.debug("SliderPopup.complete entered isAbout = ", isAbort)
         timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
-        visible = false
-        if(isAbort) {
+        dataContainer.uiSlider.running = false
+        hide()
+        switch(reason) {
+        case Common.Result.ABORT:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendReply(async, {sliderPosition:dataContainer.uiSlider.position})
-            //todo(ykazakov): send error because it is aborted with initial slider position
-            //DBus.sendError(async, {resultCode:Common.Result.ABORTED, sliderPosition:dataContainer.uiSlider.position})
-        } else {
+            DBus.sendError(async, Common.Result.ABORT)//todo(ykzakov): send abort with slider position
+            break;
+        case Common.Result.SUCCESS:
             console.debug("send position", position)
             dataContainer.uiSlider.position = position
             DBus.sendReply(async, {sliderPosition:position})
+            break
+        default:
+            break
         }
         console.debug("SliderPopup.complete exited")
     }
@@ -184,7 +188,6 @@ PopUp {
             fontSize: Constants.fontSize
             onClicked: {
                 complete(true)
-                hide()
             }
         }
     }

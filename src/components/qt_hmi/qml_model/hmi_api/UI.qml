@@ -159,7 +159,15 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
+<<<<<<< Updated upstream
         console.log("UI.slider entered",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+=======
+        console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        if (dataContainer.uiSlider.running) {
+            console.debug("aborted")
+            throw Common.Result.ABORTED
+        }
+>>>>>>> Stashed changes
 
         dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
         dataContainer.uiSlider.header = sliderHeader
@@ -208,6 +216,11 @@ Item {
     }
 
     function closePopUp () {
+        console.debug("enter")
+        if (dataContainer.activePopup) {
+            dataContainer.activePopup.complete(Common.Result.SUCCESS)
+        }
+        console.debug("exit")
     }
 
     function fillSoftButtons(element, index, array) {
