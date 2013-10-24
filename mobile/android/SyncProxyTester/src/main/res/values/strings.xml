@@ -94,14 +94,17 @@
     <string name="createinteractionchoiceset_choice1VRDefault">Command one,1st command</string>
 
     <string name="createinteractionchoiceset_choice1ImageValue">turn_left.png</string>
+    <string name="createinteractionchoiceset_choice1ImageValueSecondary">turn_left_secondary.png</string>
     <string name="createinteractionchoiceset_choice2">Choice 2</string>
     <string name="createinteractionchoiceset_choice2Default">2nd item</string>
     <string name="createinteractionchoiceset_choice2VRDefault">Command two,2nd command</string>
     <string name="createinteractionchoiceset_choice2ImageValue">turn_right.png</string>
+    <string name="createinteractionchoiceset_choice2ImageValueSecondary">turn_right_secondary.png</string>
     <string name="createinteractionchoiceset_choice3">Choice 3</string>
     <string name="createinteractionchoiceset_choice3Default">3rd item</string>
     <string name="createinteractionchoiceset_choice3VRDefault">Command three,third command</string>
     <string name="createinteractionchoiceset_choice3ImageValue">turn_forward.png</string>
+    <string name="createinteractionchoiceset_choice3ImageValueSecondary">turn_forward_secondary.png</string>
     <string name="showconstanttbt_navText1">Navigation Text 1</string>
     <string name="showconstanttbt_navText1Default">Navigation Text 1</string>
     <string name="showconstanttbt_navText2">Navigation Text 2</string>

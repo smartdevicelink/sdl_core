@@ -112,7 +112,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/createinteractionchoiceset_choice1ImageValue"/>
+            android:text="@string/createinteractionchoiceset_choice1ImageValueSecondary"/>
 
 
         <CheckBox
@@ -213,7 +213,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/createinteractionchoiceset_choice2ImageValue"/>
+            android:text="@string/createinteractionchoiceset_choice2ImageValueSecondary"/>
 
         <CheckBox
                 android:id="@+id/createcommands_choice3"
@@ -313,7 +313,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/createinteractionchoiceset_choiceSecondaryUseImage"/>
+            android:text="@string/createinteractionchoiceset_choice3ImageValueSecondary"/>
 
     </LinearLayout>
 
