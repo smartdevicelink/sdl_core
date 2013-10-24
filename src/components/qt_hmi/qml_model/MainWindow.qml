@@ -176,6 +176,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        PerformAudioPassThruPopup {
+            id: performAudioPassThruPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

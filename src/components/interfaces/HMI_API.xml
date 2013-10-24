@@ -1816,8 +1816,11 @@
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
       </param>
-      <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
+      <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
         <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
       </param>
     </function>
     <function name="PerformAudioPassThru" messagetype="response">
