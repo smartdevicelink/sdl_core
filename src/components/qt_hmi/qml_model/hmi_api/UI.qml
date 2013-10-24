@@ -214,9 +214,12 @@ Item {
     function closePopUp () {
         console.debug("enter")
         if (dataContainer.activePopup) {
-            dataContainer.activePopup.complete(Common.Result.SUCCESS)
+            //close pop-up that is currently active with ABORT code
+            dataContainer.activePopup.complete(Common.Result.ABORT)
         }
+        //response to this callwith SUCCESS code
         console.debug("exit")
+        return {}
     }
 
     function fillSoftButtons(element, index, array) {
