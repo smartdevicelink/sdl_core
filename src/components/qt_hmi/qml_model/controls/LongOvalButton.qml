@@ -81,6 +81,7 @@ Image {
             if(dest !== ""){
                 contentLoader.go(dest)
             }
+            console.log(dataContainer.vehicleInfoModel.get(0))
         }
     }
 }

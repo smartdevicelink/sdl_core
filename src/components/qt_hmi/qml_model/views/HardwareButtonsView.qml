@@ -267,9 +267,11 @@ Item {
                     label: "Vehicle info"
                     toggleMode: true
                     onPressed: {
-                        VIPopUp.show()
+                        viPopUp.show()
                     }
-
+                    onUnpressed: {
+                        viPopUp.hide()
+                    }
                 }
 
 

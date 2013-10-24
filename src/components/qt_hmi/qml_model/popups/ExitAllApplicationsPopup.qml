@@ -39,7 +39,6 @@ import "../hmi_api/Common.js" as Common
 import "../controls"
 
 PopUp {
-
     Column
     {
         anchors.centerIn: parent

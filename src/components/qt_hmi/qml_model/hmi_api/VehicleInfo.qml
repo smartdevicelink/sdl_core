@@ -18,12 +18,26 @@ Item {
         }
     }
 
-    function getVehicleData(speed) /*, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
+    function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
-                            wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) */{
+                            wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
+        console.debug("enter", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
+                      vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
+                      wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID)
 
+        var dataToSend = {};
+        var functionArgs = [ "gps", "speed", "rpm", "fuelLevel", "fuelLevel_State", "instantFuelConsumption", "externalTemperature",
+                        "vin", "prndl", "tirePressure", "odometer", "beltStatus", "bodyInformation", "deviceStatus", "driverBraking",
+                        "wiperStatus", "headLampStatus", "engineTorque", "accPedalPosition", "steeringWheelAngle", "myKey" ]
 
+        console.debug(arguments.length)
+        for (var i = 0; i < arguments.length - 1; i++) {
+            if (arguments[i] === true) {
+                dataToSend[functionArgs[i]] = dataContainer.vehicleInfoModel[functionArgs[i]];
+            }
+        }
 
+        console.debug("exit");
+        return dataToSend
     }
-
 }
