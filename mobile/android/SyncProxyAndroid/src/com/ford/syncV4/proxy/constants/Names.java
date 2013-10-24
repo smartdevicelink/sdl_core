@@ -439,4 +439,5 @@ public class Names {
     public static final String secondaryText = "secondaryText";
     public static String tertiaryText = "tertiaryText";
     public static final String keypressMode = "keypressMode";
+    public static final String progressIndicator = "progressIndicator";
 }
