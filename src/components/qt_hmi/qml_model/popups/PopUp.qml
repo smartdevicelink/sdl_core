@@ -53,12 +53,7 @@ Item {
     }
 
     onVisibleChanged: {
-        if (visible === true) {
-            dataContainer.activePopup = this
-        }
-        if (visible === false) {
-            dataContainer.activePopup = null
-        }
+        dataContainer.activePopup = visible ? this : null
     }
 
     function show() {
