@@ -58,25 +58,24 @@ PopUp {
         dataContainer.uiAudioPassThru.timeout = 0
         visible = false
         dataContainer.uiAudioPassThru.running = false
-        switch(reason) {
+        switch (reason) {
         case Common.Result.ABORTED:
-            console.debug("aborted")
+            console.debug("exit with abort")
             DBus.sendError(async, Common.Result.ABORTED)
             return
         case Common.Result.SUCCESS:
+            console.debug("exit with success")
             DBus.sendReply(async, {})
-            console.debug("exit")
             return
-        case Common.Result.REPLY:
+        case Common.Result.RETRY:
+            console.debug("exit with retry")
             DBus.sendError(async, Common.Result.RETRY)
-            console.debug("reply")
             return
         }
     }
 
 
-    Column
-    {
+    Column {
         spacing: Constants.generalSpacing
         anchors.centerIn: parent
         Timer {
