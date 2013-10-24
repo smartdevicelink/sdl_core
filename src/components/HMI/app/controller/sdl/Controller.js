@@ -436,7 +436,6 @@ SDL.SDLController = Em.Object
                             break;
                         }
                         case 'QUEUE_KEYPRESS':{
-                            //FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
