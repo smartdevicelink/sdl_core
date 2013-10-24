@@ -105,6 +105,10 @@ public abstract class SyncTransport {
 
 	public abstract void openConnection() throws SyncException;
 	public abstract void disconnect();
+
+    // This method is called when the SDK doesn't want to read anything from the
+    // transport anymore. It is required for the USB transport.
+    public abstract void stopReading();
 	
 	/**
 	 * Abstract method which should be implemented by subclasses in order to return actual type of the transport. 

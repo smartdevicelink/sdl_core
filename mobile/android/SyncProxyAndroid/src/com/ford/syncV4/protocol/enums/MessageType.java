@@ -7,5 +7,6 @@ public enum MessageType {
 //	END_SESSION,
 	UNDEFINED,
 	BULK,
-	RPC
+	RPC,
+    VIDEO
 }

@@ -55,8 +55,7 @@ class RequestWatchdog : public Watchdog {
     virtual void RemoveListener(WatchdogSubscriber* subscriber);
     virtual void removeAllListeners();
 
-    virtual void addRequest(RequestInfo requestInfo);
-    //virtual void removeRequest(RequestInfo requestInfo);
+    virtual void addRequest(RequestInfo* requestInfo);
     virtual void removeRequest(int connection_key,
                                int correlation_id);
     virtual void removeAllRequests();
@@ -74,7 +73,7 @@ class RequestWatchdog : public Watchdog {
 
     sync_primitives::SynchronisationPrimitives instanceMutex_;
 
-    void notifySubscribers(RequestInfo requestInfo);
+    void notifySubscribers(const RequestInfo& requestInfo);
 
     void startDispatcherThreadIfNeeded();
     void stopDispatcherThreadIfNeeded();
@@ -82,7 +81,8 @@ class RequestWatchdog : public Watchdog {
     std::list<WatchdogSubscriber*> subscribers_;
     sync_primitives::SynchronisationPrimitives subscribersListMutex_;
 
-    std::map<RequestInfo, struct timeval> requests_;
+    std::map<RequestInfo*, TimevalStruct> requests_;
+
     sync_primitives::SynchronisationPrimitives requestsMapMutex_;
     friend class QueueDispatcherThreadDelegate;
 

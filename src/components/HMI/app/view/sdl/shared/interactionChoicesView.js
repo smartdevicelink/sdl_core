@@ -32,26 +32,58 @@
  */
 
 SDL.InteractionChoicesView = SDL.SDLAbstractView
-    .create( {
+    .create({
 
         elementId: 'perform_interaction_view',
 
         childViews: [
-            'backButton', 'captionText', 'listOfChoices'
+            'backButton',
+            'captionText',
+            'listOfChoices',
+            'input',
+            'naviChoises'
         ],
 
-        backButton: SDL.Button.extend( {
-            classNames:
-                [
-                    'back-button'
-                ],
+        backButton: SDL.Button.extend({
+            classNames: [
+                'back-button'
+            ],
             target: 'SDL.SDLController',
             action: 'InteractionChoicesDeactivate',
             icon: 'images/media/ico_back.png',
             onDown: false
-        } ),
+        }),
 
-        listOfChoices: SDL.List.extend( {
+        input: Ember.TextArea.extend({
+            classNameBindings: ['this.parentView.search::hide'],
+            tagName: 'input',
+            attribute: ['type:text'],
+            attributeBindings: ['disabled'],
+            disabled: false,
+            click: function(){
+                SDL.SDLModel.uiShowKeyboard(this);
+            },
+            search: function(){
+                this.get('parentView').deactivate("SUCCESS");
+            }
+        }),
+
+        naviChoises: Em.ContainerView.extend({
+            classNameBindings: ['this.parentView.icon::hide'],
+            classNames: 'naviChoises',
+            childViews: []
+
+        }),
+
+        captionText: SDL.Label.extend({
+
+            classNameBindings: ['this.parentView.search:hide'],
+            classNames: ['caption-text'],
+            contentBinding: 'this.parentView.caption'
+        }),
+
+        listOfChoices: SDL.List.extend({
+            classNameBindings: ['this.parentView.list::hide'],
             elementId: 'perform_interaction_view_list',
             itemsOnPage: 5,
             items: []
@@ -59,90 +91,233 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
         timer: null,
 
+        search: false,
+
+        list: false,
+
+        icon: false,
+
         /**
          * Identifier of current request
          */
         performInteractionRequestID: null,
 
         /**
+         * Activate window and set caption text
+         *
+         * @param text: String
+         */
+        activate: function (message, performInteractionRequestId) {
+
+            if (message) {
+                this.set('caption', message.initialText.fieldText);
+            }
+
+            if (message.interactionLayout) {
+
+                switch (message.interactionLayout) {
+                    case "ICON_ONLY" : {
+
+                        this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+
+
+                        this.set('search', false);
+                        this.set('list', false);
+                        this.set('icon', true);
+                        this.set('active', true);
+                        break;
+                    }
+                    case "ICON_WITH_SEARCH" : {
+
+                        this.preformChoicesNavigation(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('icon', true);
+                        this.set('search', true);
+                        this.set('list', false);
+                        this.set('active', true);
+                        break;
+                    }
+                    case "LIST_ONLY" : {
+
+                        this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('list', true);
+                        this.set('icon', false);
+                        this.set('search', false);
+                        this.set('active', true);
+                        break;
+                    }
+                    case "LIST_WITH_SEARCH" : {
+
+                        this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                        this.set('list', true);
+                        this.set('search', true);
+                        this.set('icon', false);
+                        this.set('active', true);
+                        break;
+                    }
+                    case "KEYBOARD" : {
+                        this.preformChoices(null, performInteractionRequestId, message.timeout);
+                        SDL.SDLModel.uiShowKeyboard(this.input);
+
+
+                        this.set('list', false);
+                        this.set('search', false);
+                        this.set('icon', false);
+                        this.set('active', true);
+
+                        break;
+                    }
+                    default:
+                    {
+                        // default action
+                    }
+                }
+            } else {
+
+                this.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
+
+                this.set('list', true);
+                this.set('icon', false);
+                this.set('search', false);
+                this.set('active', true);
+            }
+
+        },
+
+        /**
          * Deactivate window
          */
-        deactivate: function(ABORTED) {
+        deactivate: function (result, choiceID) {
 
             clearTimeout(this.timer);
             this.set('active', false);
             SDL.SDLController.VRMove();
+            SDL.Keyboard.deactivate();
 
-            switch (ABORTED) {
-            case "ABORTED": {
-                SDL.SDLController
-                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
-                        this.performInteractionRequestID);
-                break;
-            }
-            case "TIMED_OUT": {
-                SDL.SDLController
-                    .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
-                        this.performInteractionRequestID);
-                break;
-            }
-            default: {
-                // default action
-            }
+
+
+            switch (result) {
+                case "ABORTED":
+                {
+                    SDL.SDLController
+                        .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"],
+                            this.performInteractionRequestID);
+                    break;
+                }
+                case "TIMED_OUT":
+                {
+                    SDL.SDLController
+                        .interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"],
+                            this.performInteractionRequestID);
+                    break;
+                }
+                case "SUCCESS":
+                {
+                    FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
+                        this.performInteractionRequestID,
+                        choiceID,
+                        this.input.value);
+                    break;
+                }
+                default:
+                {
+                    // default action
+                }
             }
         },
 
         /**
          * Clean choices caption and list before new proform
          */
-        clean: function() {
+        clean: function () {
 
+            this.input.set('value', null);
             this.set('captionText.content', 'Interaction Choices');
             this.listOfChoices.items = [];
             this.listOfChoices.list.refresh();
+            var length = this.get('naviChoises.childViews').length;
+            for (var i=0; i < length; i++) {
+                SDL.InteractionChoicesView.get('naviChoises.childViews').shiftObject();
+            }
         },
 
         /**
          * Update choises list with actual set id
-         * 
+         *
          * @param data:
          *            Array
          */
-        preformChoices: function(data, performInteractionRequestID, timeout) {
+        preformChoices: function (data, performInteractionRequestID, timeout) {
 
-            if (!data) {
-                Em.Logger.error('No choices to preform');
-                return;
+            this.set('performInteractionRequestID', performInteractionRequestID);
+
+            if (data) {
+
+                // temp for testing
+                for (var i = 0; i < data.length; i++) {
+                    this.listOfChoices.items
+                        .push({
+                            type: SDL.Button,
+                            params: {
+                                text: data[i].menuName,
+                                choiceID: data[i].choiceID,
+                                action: 'onChoiceInteraction',
+                                onDown: false,
+                                target: 'SDL.SDLAppController',
+                                performInteractionRequestID: performInteractionRequestID,
+                                templateName: data[i].image ? 'rightIcon' : 'text',
+                                icon: data[i].image ? data[i].image.value : null
+                            }
+                        });
+                }
+
+                this.listOfChoices.list.refresh();
             }
 
-            this
-                .set('performInteractionRequestID', performInteractionRequestID);
-
-            var i = 0, length = data.length, self = this;
-
-            // temp for testing
-            for (i = 0; i < length; i++) {
-                this.listOfChoices.items
-                    .push( {
-                        type: SDL.Button,
-                        params: {
-                            text: data[i].menuName,
-                            choiceID: data[i].choiceID,
-                            action: 'onChoiceInteraction',
-                            onDown: false,
-                            target: 'SDL.SDLAppController',
-                            performInteractionRequestID: performInteractionRequestID,
-                            templateName: data[i].image ? 'rightIcon' : 'text',
-                            icon: data[i].image ? data[i].image.value : null
-                        }
-                    });
-            }
-
-            this.listOfChoices.list.refresh();
+            var self = this;
 
             clearTimeout(this.timer);
-            this.timer = setTimeout(function() {
+            this.timer = setTimeout(function () {
 
+                self.deactivate("TIMED_OUT");
+            }, timeout);
+        },
+
+        /**
+         * Update choises list with actual set id
+         *
+         * @param data:
+         *            Array
+         */
+        preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
+
+             this.set('performInteractionRequestID', performInteractionRequestID);
+
+            if (data) {
+
+                 // temp for testing
+                 for (var i = 0; i < data.length; i++) {
+                     this.get('naviChoises.childViews').pushObject(SDL.Button.create({
+                             text: data[i].menuName,
+                             choiceID: data[i].choiceID,
+                             action: 'onChoiceInteraction',
+                             onDown: false,
+                             target: 'SDL.SDLAppController',
+                             performInteractionRequestID: performInteractionRequestID,
+                             templateName: data[i].image ? 'rightIcon' : 'text',
+                             icon: data[i].image ? data[i].image.value : null
+                         })
+                     );
+                 }
+
+            }
+
+            var self = this;
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
                 self.deactivate("TIMED_OUT");
             }, timeout);
         }

@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.rpc.enums;
 
 public enum Result {
     SUCCESS,
+    SAVED,
     INVALID_DATA,
     UNSUPPORTED_REQUEST,
     OUT_OF_MEMORY,

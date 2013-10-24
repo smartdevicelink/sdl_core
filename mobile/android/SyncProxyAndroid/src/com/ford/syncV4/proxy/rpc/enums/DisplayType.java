@@ -9,7 +9,8 @@ public enum DisplayType {
     GEN2_6_DMA,
     MFD3,
     MFD4,
-    MFD5;
+    MFD5,
+    GEN3_8_INCH;
 
     public static DisplayType valueForString(String value) {
         return valueOf(value);

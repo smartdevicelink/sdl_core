@@ -62,6 +62,9 @@ SDL.List = Em.ContainerView.extend( {
      */
     listCount: function() {
 
+        if ( (this.get('this.list.childViews.length') / this.get('columnsNumber') / this.get('itemsOnPage') ) < this.get('currentPage')) {
+            this.set('currentPage', 0);
+        }
         // console.log(this.get('this.list.childViews.length'));
         return this.get('this.list.childViews.length');
     }.property('this.list.childViews.length'),

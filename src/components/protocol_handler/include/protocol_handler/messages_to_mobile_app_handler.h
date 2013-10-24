@@ -39,18 +39,19 @@
 #include "protocol_handler/protocol_handler_impl.h"
 
 namespace protocol_handler {
+
 class MessagesToMobileAppHandler : public threads::ThreadDelegate {
- public:
-  explicit MessagesToMobileAppHandler(ProtocolHandlerImpl* handler);
-  ~MessagesToMobileAppHandler();
+  public:
+    explicit MessagesToMobileAppHandler(ProtocolHandlerImpl* handler);
+    ~MessagesToMobileAppHandler();
 
-  void threadMain();
+    void threadMain();
 
- private:
-  ProtocolHandlerImpl* handler_;
-  static log4cxx::LoggerPtr logger_;
+  private:
+    ProtocolHandlerImpl* handler_;
+    static log4cxx::LoggerPtr logger_;
 
-  DISALLOW_COPY_AND_ASSIGN(MessagesToMobileAppHandler);
+    DISALLOW_COPY_AND_ASSIGN(MessagesToMobileAppHandler);
 };
 }  // namespace protocol_handler
 

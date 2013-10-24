@@ -415,6 +415,37 @@
 	width: 578px;
 }
 
+#perform_interaction_view input{
+    width: 720px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background: rgba(119, 119, 119, 0.42);
+    cursor: pointer;
+    font-size: 32px;
+    color: #FFF;
+    top: 80px;
+    left: 65px;
+    position: absolute;
+}
+#perform_interaction_view .naviChoises{
+    top: 140px;
+    width: 750px;
+    height: 275px;
+    left: 25px;
+}
+
+#perform_interaction_view .naviChoises .ffw-button{
+    width: 110px;
+    height: 110px;
+    margin: 20px;
+    float: left;
+    position: relative;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background-repeat: repeat;
+}
+
 #sdl_view_container .cd_logo {
 	position: absolute;
 	top: 90px;
@@ -616,6 +647,15 @@
 	left: 10px;
 }
 
+#AlertPopUp .progressIndicator {
+    width: 50px;
+    height: 50px;
+    background: url(../images/sdl/progressindicator.gif) no-repeat;
+    top: 0px;
+    background-size: contain;
+    left: 0px;
+}
+
 #AudioPassThruPopUp .audioPassThruImage {
 	width: 83px;
 	height: 74px;
@@ -666,7 +706,7 @@
 	display: block;
 }
 
-#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+#baseNavigation .softButton,#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
 	{
 	border: 1px solid #393939;
 	border-radius: 3px;
@@ -774,12 +814,17 @@
 	height: 384px;
 	left: 153px;
 	width: 647px;
+    background: none;
 }
 
 #TurnByTurnView .caption-text {
 	left: 5px;
 	width: 607px;
 	top: 15px;
+}
+
+#TurnByTurnView .label {
+    overflow: hidden;
 }
 
 #TurnByTurnView .totalDistanceLabel {
@@ -862,21 +907,50 @@
 
 #TurnByTurnView .navigationText2 {
 	left: 440px;
-	top: 269px;
+	top: 268px;
 	width: 182px;
 	padding: 10px;
 	height: 20px;
 	background: #393939;
 }
 
+#TurnByTurnView .turnIcon,
+#TurnByTurnView .nextTurnIcon {
+    border: 1px solid #222;
+    left: 540px;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#TurnByTurnView .distanceToManeuver{
+    top: 80px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
+#TurnByTurnView .distanceToManeuverScale{
+    top: 144px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
+#TurnByTurnView .timeToDestination{
+    top: 207px;
+    left: 419px;
+    background: #393939;
+    padding: 15px;
+}
+
 #TurnByTurnView .turnIcon {
-	border: 1px solid #222;
-	top: 64px;
-	left: 440px;
-	width: 200px;
-	height: 200px;
-	background-size: contain;
-	background-repeat: no-repeat;
+    top: 65px;
+}
+
+#TurnByTurnView .nextTurnIcon {
+    top: 166px;
 }
 
 #tbtTurnListList .list-content .label>img {

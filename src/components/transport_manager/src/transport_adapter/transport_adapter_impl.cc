@@ -335,12 +335,13 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
   pthread_mutex_lock(&connections_mutex_);
   for (ConnectionMap::const_iterator it = connections_.begin();
       it != connections_.end(); ++it) {
-    if (it->first.first == device_id && it->first.second != app_handle) {
+    const DeviceUID& current_device_id = it->first.first;
+    const ApplicationHandle& current_app_handle = it->first.second;
+    if (current_device_id == device_id && current_app_handle != app_handle) {
       device_disconnected = false;
       break;
     }
   }
-  pthread_mutex_unlock(&connections_mutex_);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it) {
     TransportAdapterListener* listener = *it;

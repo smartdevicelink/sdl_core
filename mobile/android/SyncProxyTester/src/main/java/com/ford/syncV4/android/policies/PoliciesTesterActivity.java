@@ -1,38 +1,41 @@
 package com.ford.syncV4.android.policies;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Vector;
-import java.util.zip.GZIPInputStream;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Base64;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.service.EncodedSyncPDataHeader;
+import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -42,44 +45,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.syncV4.android.adapters.logAdapter;
-import com.ford.syncV4.android.service.EncodedSyncPDataHeader;
-import com.ford.syncV4.android.service.ProxyService;
-import com.ford.syncV4.marshal.JsonRPCMarshaller;
-import com.ford.syncV4.proxy.RPCRequestFactory;
-import com.ford.syncV4.proxy.SyncProxyALM;
-import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
-
-import android.os.AsyncTask;
-import android.os.Environment;
-
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
-
-import com.ford.syncV4.android.R;
-import com.ford.syncV4.exception.SyncException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Vector;
 
 @SuppressLint("NewApi")
 public class PoliciesTesterActivity extends Activity implements OnClickListener {
@@ -504,7 +478,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending syncp to sync: " + e, Log.ERROR, e);
 							}catch (UnsupportedEncodingException e) {
-								e.printStackTrace();
+                            Log.e("SyncProxyTester", e.toString());
 							}
 					}//if proxy is connected
 					else {
@@ -553,8 +527,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener 
 			Log.i(logTag, "json from file: " + jsonData);
 			scanner.close();
 		} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 				Log.e(logTag, "FileNotFoundException " + e);
 				runOnUiThread(new Runnable() {
 					public void run() { _UImsgAdapter1.add("connected to PC? file saved on sdcard?"); }

@@ -47,7 +47,7 @@ class Watchdog {
     virtual void RemoveListener(WatchdogSubscriber* listener) = 0;
     virtual void removeAllListeners() = 0;
 
-    virtual void addRequest(RequestInfo requestInfo) = 0;
+    virtual void addRequest(RequestInfo* requestInfo) = 0;
     virtual void removeRequest(int connection_key,
                                int correlation_id) = 0;
     virtual void removeAllRequests() = 0;

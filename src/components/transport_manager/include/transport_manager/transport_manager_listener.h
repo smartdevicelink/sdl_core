@@ -102,6 +102,15 @@ class TransportManagerListener {
   virtual void OnConnectionClosed(ConnectionUID connection_id) = 0;
 
   /**
+   * @brief Called when connection is closed unexpectedly, i.e. disconnect was not requested
+   *
+   * @param connection_id Connection ID.
+   * @param error Error information.
+   */
+  virtual void OnUnexpectedDisconnect(ConnectionUID connection_id,
+                                      const CommunicationError& error) = 0;
+
+  /**
    * @brief Reaction to the event, when connection close is failed.
    *
    * @param connection_id Connection unique identifier.

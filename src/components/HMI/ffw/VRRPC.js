@@ -236,6 +236,23 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 break;
             }
+            case "VR.GetCapabilities": {
+
+                Em.Logger.log("FFW." + request.method + "Response");
+
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
+                        "method": "VR.GetCapabilities",
+                        "vrCapabilities": ["TEXT"]
+                    }
+                };
+                this.client.send(JSONMessage);
+
+                break;
+            }
 
             default: {
                 // statements_def

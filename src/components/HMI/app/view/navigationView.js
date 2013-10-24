@@ -24,10 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.PlayerControllsView
- * @desc Video player visual representation
+ * @name SDL.NavigationView
+ * @desc Navigation component
  * @category View
- * @filesource app/view/player/PlayerView.js
+ * @filesource app/view/navigationView.js
  * @version 1.0
  */
 SDL.NavigationView = Em.ContainerView.create( {
@@ -39,14 +39,12 @@ SDL.NavigationView = Em.ContainerView.create( {
     ],
 
     childViews: [
-        'windowText'
+        //'videoView'
     ],
 
-    windowText: SDL.Label.extend( {
-
-        classNames: 'windowText',
-
-        content: 'Navigation'
+    videoView: Ember.View.extend({
+        templateName: "video",
+        template: Ember.Handlebars.compile('<video id="html5Player"></video>')
     })
 
 });

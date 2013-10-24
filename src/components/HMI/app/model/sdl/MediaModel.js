@@ -47,12 +47,67 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 customPresets: [
                     '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>'
                 ],
-                alignment    : "text-align:left"
+                alignment    : "text-align:center"
             }));
 
-            this.set('isPlaying', true);
+            this.set('constantTBTParams', {
+                "navigationTexts":[
+                    {
+                        "fieldName": "navigationText1",
+                        "fieldText": "mainField1"
+                    },
+                    {
+                        "fieldName": "navigationText2",
+                        "fieldText": "mainField2"
+                    },
+                    {
+                        "fieldName": "ETA",
+                        "fieldText": "mainField3"
+                    },
+                    {
+                        "fieldName": "totalDistance",
+                        "fieldText": "mainField4"
+                    },
+                    {
+                        "fieldName": "navigationText",
+                        "fieldText": "mainField5"
+                    },
+                    {
+                        "fieldName": "timeToDestination",
+                        "fieldText": "mainField6"
+                    }
+                ],
+                "softButtons": [
+                    {
+                        "text" : "Menu",
+                        "isHighlighted" : true,
+                        "softButtonID" : 1
+                    },
+                    {
+                        "text" : "Options",
+                        "isHighlighted" : false,
+                        "softButtonID" : 2
+                    },
+                    {
+                        "text" : "+",
+                        "isHighlighted" : true,
+                        "softButtonID" : 3
+                    },
+                    {
+                        "text" : "-",
+                        "isHighlighted" : false,
+                        "softButtonID" : 4
+                    }
+                ]
+            });
 
-            this.set('commandsList', {0: []});
+            this.set('isPlaying', true);
+            this.set('globalProperties.helpPrompt', []);
+            this.set('globalProperties.timeoutPrompt', []);
+            this.set('globalProperties.keyboardProperties', Em.Object.create());
+            this.set('globalProperties.keyboardProperties.keyboardLayout', 'QWERTY');
+
+            this.set('commandsList', {"top": []});
             this.set('softButtons', []);
         },
 
@@ -93,7 +148,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         currentSDLPerformInteractionChoiseId: null,
 
         countUp     : true,
-        pause       : false,
+        pause       : null,
         maxTimeValue: 68400, // 19 hours
         duration    : 0,
         currTime    : 0,
@@ -120,7 +175,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
             var self = this;
 
-            if (!this.pause) {
+            if (this.pause === false) {
                 this.timer = setInterval(function () {
 
                     self.set('currTime', self.currTime + 1);
@@ -133,6 +188,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
         stopTimer: function () {
 
             clearInterval(this.timer);
+            this.pause = null;
             this.appInfo.set('mediaClock', '');
         },
 
@@ -181,7 +237,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
          */
         sdlSetMediaClockTimer: function (params) {
 
-            if ((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause)) {
+            if ((params.updateMode == "PAUSE" && this.pause) || (params.updateMode == "RESUME" && !this.pause) || ((params.updateMode == "RESUME" || params.updateMode == "PAUSE") && this.pause === null )) {
                 return SDL.SDLModel.resultCode['IGNORED'];
             }
 

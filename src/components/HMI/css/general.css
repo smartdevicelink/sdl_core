@@ -297,12 +297,10 @@ div {
 }
 
 #html5Player {
-    position: absolute;
-    z-index: 1;
-    width: 800px;
-    height: 480px;
-    -webkit-transform: translateX(-810px);
-    -moz-transform: translateX(-810px);
+	position: absolute;
+	z-index: 1;
+	width: 800px;
+	height: 480px;
 }
 
 #html5Player.visible {
