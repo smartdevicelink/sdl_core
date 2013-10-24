@@ -290,7 +290,8 @@ CMessageBroker* CMessageBroker::getInstance() {
 
 void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
   DBG_MSG(("CMessageBroker::onMessageReceived()\n"));
-  while (1) {
+  while (!aJSONData.empty())
+  {
     Json::Value root;
     if (!p->m_reader.parse(aJSONData, root)) {
       DBG_MSG(("Received not JSON string! %s\n", aJSONData.c_str()));
@@ -299,9 +300,14 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
     std::string wmes = p->m_recieverWriter.write(root);
     DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
     DBG_MSG(("Buffer is:%s\n", aJSONData.c_str()));
-    ssize_t beginpos = aJSONData.find("{");
-    if (-1 != beginpos) {
-      aJSONData.erase(0, beginpos + wmes.length() - 1);
+    if (aJSONData.length() > wmes.length()) {
+      // wmes string length can differ from buffer substr length
+      size_t offset = wmes.length();
+      char msg_begin = '{';
+      if (aJSONData.at(offset) != msg_begin) {
+        offset = aJSONData.find_last_of(msg_begin, offset);
+      }
+      aJSONData.erase(aJSONData.begin(), aJSONData.begin() + offset);
       DBG_MSG(("Buffer after cut is:%s\n", aJSONData.c_str()));
     } else {
       aJSONData = "";
