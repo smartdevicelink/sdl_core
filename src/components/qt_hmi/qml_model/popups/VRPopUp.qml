@@ -39,8 +39,8 @@ import "../views"
 import "../controls"
 
 PopUp {
-    width: 700
-    height: 500
+    width: Constants.popupWidth
+    height: Constants.popupHeigth
 
     Text {
         id: title

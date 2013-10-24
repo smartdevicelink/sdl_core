@@ -259,7 +259,5 @@ QtObject {
 
     property NavigationModel navigationModel: NavigationModel { }
     property bool activeVR: false
-
-    property string speakedText
     property bool activeTTS: false
 }

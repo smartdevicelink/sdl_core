@@ -1,6 +1,6 @@
 /**
- * @file TTS.qml
- * @brief TTS representation model
+ * @file TTSPopUp.qml
+ * @brief Popup view for TTS
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -38,9 +38,9 @@ import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
 PopUp {
-    height: 100
-    width: 250
-    padding: 10
+    height: Constants.ttsPopUpHeight
+    width: Constants.ttsPopUpWidth
+    padding: Constants.ttsPopUpPadding
     property var async
 
     ScrollView {
@@ -48,7 +48,7 @@ PopUp {
         Text {
             id: text
             anchors.fill: parent
-            color: Constants.popUpColor
+            color: Constants.popUpBorderColor
             font.pixelSize: Constants.ttsFontSize
             Timer {
                 id: timer
@@ -59,19 +59,23 @@ PopUp {
     }
 
     function activate(message) {
+        console.debug("Activate TTS popup:", message);
         dataContainer.activeTTS = true;
         text.text = message;
         show();
         timer.restart();
+        console.debug("Exit");
     }
 
     function deactivate() {
+        console.debug("Deactivate TTS popup");
         dataContainer.activeTTS = false;
         text.text = '';
         timer.stop();
         hide();
         DBus.sendReply(async, {});
         async = null;
+        console.debug("Exit");
     }
 }
 

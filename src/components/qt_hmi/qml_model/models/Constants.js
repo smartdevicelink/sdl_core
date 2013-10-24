@@ -60,7 +60,7 @@ var transparentColor = "#00000000"
 var warningColor = "red"
 
 // Color for PopUp
-var popUpColor = "white"
+var popUpBorderColor = "white"
 
 //--------------------------------------------------------------------------------------
 
@@ -111,6 +111,18 @@ var ttsSpeakTime = 2000
 
 // font size fo TTS popup
 var ttsFontSize = 12
+
+// padding for popup view
+var popUpPadding = 20
+
+// Width for TTS popup
+var ttsPopUpWidth = 250
+
+// Height for TTS popup
+var ttsPopUpHeight = 100
+
+// Padding for TTS popup
+var ttsPopUpPadding = 10
 
 // -------------------------
 
