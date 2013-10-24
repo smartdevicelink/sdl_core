@@ -77,6 +77,7 @@ import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
@@ -91,6 +92,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
@@ -99,6 +101,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -1078,6 +1081,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             addToFunctionsAdapter(adapter, Names.AlertManeuver);
             addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
+            addToFunctionsAdapter(adapter, Names.RegisterAppInterface);
             addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
             addToFunctionsAdapter(adapter, GenericRequest.NAME);
 
@@ -1749,6 +1753,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which) ==
                                     Names.UnregisterAppInterface) {
                                 sendUnregisterAppInterface();
+                            } else if (adapter.getItem(which).equals(
+                                    Names.RegisterAppInterface)) {
+                                sendRegisterAppInterface();
                             } else if (adapter.getItem(which) == GenericRequest.NAME) {
                                 sendGenericRequest();
                             }
@@ -2936,18 +2943,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         Toast.makeText(mContext, "No interaction choice set selected", Toast.LENGTH_LONG).show();
                                     }
                                 }
-
-                                /**
-                                 * Splits the string with a comma and returns a vector of TTSChunks.
-                                 */
-                                private Vector<TTSChunk> ttsChunksFromString(String string) {
-                                    Vector<TTSChunk> chunks = new Vector<TTSChunk>();
-                                    for (String stringChunk : string.split(JOIN_STRING)) {
-                                        TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
-                                        chunks.add(chunk);
-                                    }
-                                    return chunks;
-                                }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 @Override
@@ -3544,6 +3539,175 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         } else if (v == findViewById(R.id.btnPlayPause)) {
             ProxyService.getInstance().playPauseAnnoyingRepetitiveAudio();
         }
+    }
+
+    /**
+     * Sends RegisterAppInterface message.
+     */
+    private void sendRegisterAppInterface() {
+        final Context mContext = this;
+        LayoutInflater inflater = (LayoutInflater) mContext
+                .getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View layout = inflater.inflate(R.layout.registerappinterface,
+                (ViewGroup) findViewById(R.id.registerappinterface_Root));
+
+        final CheckBox useSyncMsgVersion = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useSyncMsgVersion);
+        final EditText syncMsgVersionMajor = (EditText) layout
+                .findViewById(R.id.registerappinterface_syncMsgVersionMajor);
+        final EditText syncMsgVersionMinor = (EditText) layout
+                .findViewById(R.id.registerappinterface_syncMsgVersionMinor);
+        final CheckBox useAppName = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useAppName);
+        final EditText appName = (EditText) layout
+                .findViewById(R.id.registerappinterface_appName);
+        final CheckBox useTTSName = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useTTSName);
+        final EditText ttsName = (EditText) layout
+                .findViewById(R.id.registerappinterface_ttsName);
+        final CheckBox useNgnAppName = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useNgnAppName);
+        final EditText ngnAppName = (EditText) layout
+                .findViewById(R.id.registerappinterface_ngnAppName);
+        final CheckBox useVRSynonyms = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useVRSynonyms);
+        final EditText vrSynonyms = (EditText) layout
+                .findViewById(R.id.registerappinterface_vrSynonyms);
+        final CheckBox isMediaApp = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_isMediaApp);
+        final CheckBox useDesiredLang = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useDesiredLang);
+        final Spinner desiredLangSpinner = (Spinner) layout
+                .findViewById(R.id.registerappinterface_desiredLangSpinner);
+        final CheckBox useHMIDesiredLang = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useHMIDesiredLang);
+        final Spinner hmiDesiredLangSpinner = (Spinner) layout
+                .findViewById(R.id.registerappinterface_hmiDesiredLangSpinner);
+        final CheckBox useAppHMITypes = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useAppHMITypes);
+        final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
+                .findViewById(R.id.registerappinterface_appHMITypeSpinner);
+        final CheckBox useAppID = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useAppID);
+        final EditText appID =
+                (EditText) layout.findViewById(R.id.registerappinterface_appID);
+
+        final ArrayAdapter<Language> languageAdapter =
+                new ArrayAdapter<Language>(mContext,
+                        android.R.layout.simple_spinner_item,
+                        Language.values());
+        languageAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        // FIXME: use AppHMIType!
+        final ArrayAdapter<AppHMIType> appHMITypeAdapter =
+                new ArrayAdapter<AppHMIType>(mContext,
+                        android.R.layout.simple_spinner_item,
+                        AppHMIType.values());
+        appHMITypeAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+
+        desiredLangSpinner.setAdapter(languageAdapter);
+        hmiDesiredLangSpinner.setAdapter(languageAdapter);
+        appHMITypeSpinner
+                .setItems(Arrays.asList(AppHMIType.values()), "All", null);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                RegisterAppInterface msg = new RegisterAppInterface();
+                msg.setCorrelationID(autoIncCorrId++);
+
+                if (useSyncMsgVersion.isChecked()) {
+                    SyncMsgVersion version = new SyncMsgVersion();
+                    String versionStr = null;
+
+                    try {
+                        versionStr = syncMsgVersionMinor.getText().toString();
+                        version.setMinorVersion(Integer.parseInt(versionStr));
+                    } catch (NumberFormatException e) {
+                        version.setMinorVersion(2);
+                        Toast.makeText(mContext,
+                                "Couldn't parse minor version " + versionStr,
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    try {
+                        versionStr = syncMsgVersionMajor.getText().toString();
+                        version.setMajorVersion(Integer.parseInt(versionStr));
+                    } catch (NumberFormatException e) {
+                        version.setMajorVersion(2);
+                        Toast.makeText(mContext,
+                                "Couldn't parse major version " + versionStr,
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    msg.setSyncMsgVersion(version);
+                }
+
+                if (useAppName.isChecked()) {
+                    msg.setAppName(appName.getText().toString());
+                }
+                if (useTTSName.isChecked()) {
+                    msg.setTtsName(
+                            ttsChunksFromString(ttsName.getText().toString()));
+                }
+                if (useNgnAppName.isChecked()) {
+                    msg.setNgnMediaScreenAppName(
+                            ngnAppName.getText().toString());
+                }
+                if (useVRSynonyms.isChecked()) {
+                    msg.setVrSynonyms(new Vector<String>(Arrays.asList(
+                            vrSynonyms.getText().toString()
+                                    .split(JOIN_STRING))));
+                }
+                msg.setIsMediaApplication(isMediaApp.isChecked());
+                if (useDesiredLang.isChecked()) {
+                    msg.setLanguageDesired(languageAdapter.getItem(
+                            desiredLangSpinner.getSelectedItemPosition()));
+                }
+                if (useHMIDesiredLang.isChecked()) {
+                    msg.setHmiDisplayLanguageDesired(languageAdapter.getItem(
+                            hmiDesiredLangSpinner.getSelectedItemPosition()));
+                }
+                if (useAppHMITypes.isChecked()) {
+                    msg.setAppType(new Vector<AppHMIType>(
+                            appHMITypeSpinner.getSelectedItems()));
+                }
+                if (useAppID.isChecked()) {
+                    msg.setAppID(appID.getText().toString());
+                }
+
+                _msgAdapter.logMessage(msg, true);
+                try {
+                    ProxyService.getInstance().getProxyInstance()
+                            .sendRPCRequest(msg);
+                } catch (SyncException e) {
+                    _msgAdapter.logMessage("Error sending message: " + e,
+                            Log.ERROR, e);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.setView(layout);
+        builder.show();
+    }
+
+    /**
+     * Splits the string with a comma and returns a vector of TTSChunks.
+     */
+    private Vector<TTSChunk> ttsChunksFromString(String string) {
+        Vector<TTSChunk> chunks = new Vector<TTSChunk>();
+        for (String stringChunk : string.split(JOIN_STRING)) {
+            TTSChunk chunk = TTSChunkFactory
+                    .createChunk(SpeechCapabilities.TEXT, stringChunk);
+            chunks.add(chunk);
+        }
+        return chunks;
     }
 
     public void addSubMenuToList(final SyncSubMenu sm) {

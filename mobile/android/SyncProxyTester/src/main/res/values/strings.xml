@@ -203,4 +203,21 @@
     <string name="timeout_promt">Timeout prompt</string>
     <string name="hello_promt">Help prompt</string>
 
+    <string name="registerappinterface_useSyncMsgVersion">SyncMsgVersion (major, minor)</string>
+    <string name="registerappinterface_syncMsgVersionMajor">2</string>
+    <string name="registerappinterface_syncMsgVersionMinor">2</string>
+    <string name="registerappinterface_useAppName">App Name</string>
+    <string name="registerappinterface_useTTSName">TTS Name (comma-separated)</string>
+    <string name="registerappinterface_ttsNameDefault">TTS Name 1,Tester</string>
+    <string name="registerappinterface_useNgnAppName">Ngn Media Screen App Name</string>
+    <string name="registerappinterface_ngnAppNameDefault">SPT</string>
+    <string name="registerappinterface_useVRSynonyms">VR Synonyms (comma-separated)</string>
+    <string name="registerappinterface_vrSynonymsDefault">SPT,Tester</string>
+    <string name="registerappinterface_isMediaApp">Media Application</string>
+    <string name="registerappinterface_useDesiredLang">Desired Language</string>
+    <string name="registerappinterface_useHMIDesiredLang">HMI Display Desired Language</string>
+    <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
+    <string name="registerappinterface_useAppID">App ID</string>
+    <string name="registerappinterface_appIDDefault">8675309</string>
+
 </resources>
