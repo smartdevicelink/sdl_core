@@ -21,7 +21,7 @@ Item {
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                             wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
-        console.debug("enter", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
+        console.debug("enter getVehicleData()", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                       vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                       wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID)
 
@@ -30,14 +30,14 @@ Item {
                         "vin", "prndl", "tirePressure", "odometer", "beltStatus", "bodyInformation", "deviceStatus", "driverBraking",
                         "wiperStatus", "headLampStatus", "engineTorque", "accPedalPosition", "steeringWheelAngle", "myKey" ]
 
-        console.debug(arguments.length)
+        // no appID argument in response
         for (var i = 0; i < arguments.length - 1; i++) {
             if (arguments[i] === true) {
                 dataToSend[functionArgs[i]] = dataContainer.vehicleInfoModel[functionArgs[i]];
             }
         }
 
-        console.debug("exit");
+        console.debug("exit getVehicleData()", dataToSend);
         return dataToSend
     }
 }
