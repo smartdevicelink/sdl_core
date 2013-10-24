@@ -20,7 +20,7 @@
     <string name="updateturnlist_turnList">Turn List (comma-separated)</string>
     <string name="updateturnlist_defaultTurnList">Turn Left,Turn Right,Go Forward</string>
     <string name="includeSoftButtons">Include</string>
-    <string name="softButtons">Edit Soft Buttons</string>
+    <string name="softButtons">Soft Buttons</string>
     <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
     <string name="updateturnlist_defaultIconList">turn_left.png,turn_right.png,turn_forward.png</string>
     <string name="addcommand_iconFilename">action.png</string>
@@ -68,8 +68,6 @@
     <string name="show_mediaClockDefault">12:34</string>
     <string name="show_graphic">Graphic</string>
     <string name="show_graphicDefault">action.png</string>
-    <string name="show_includeSoftButtons">Include</string>
-    <string name="show_softButtons">Soft Buttons</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
     <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
     <string name="selectprotocol_media">Media</string>
@@ -185,5 +183,18 @@
     <string name="keyboardproperties_limitedCharacterListDefault">a,b,c,d,e,f</string>
     <string name="keyboardproperties_useAutoCompleteText">Autocomplete Text</string>
     <string name="keyboardproperties_autoCompleteTextDefault">Daemon, Freedom</string>
+
+    <string name="alert_textToSpeak">To Speak</string>
+    <string name="alert_textToSpeakDefault">Text To Speak</string>
+    <string name="alert_line1">Line 1</string>
+    <string name="alert_line1Default">Alert Line 1</string>
+    <string name="alert_line2">Line 2</string>
+    <string name="alert_line2Default">Alert Line 2</string>
+    <string name="alert_line3">Line 3</string>
+    <string name="alert_line3Default">Alert Line 3</string>
+    <string name="alert_duration">Duration</string>
+    <string name="alert_durationDefault">5000</string>
+    <string name="alert_usePlayTone">Play Tone</string>
+    <string name="alert_useProgressIndicator">Progress Indicator</string>
 
 </resources>
