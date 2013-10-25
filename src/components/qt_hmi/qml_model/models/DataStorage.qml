@@ -387,4 +387,5 @@ QtObject {
         sdlUI.onDriverDistraction(driverDistractionState);
     }
     property bool activeTTS: false
+    property var activePopup
 }

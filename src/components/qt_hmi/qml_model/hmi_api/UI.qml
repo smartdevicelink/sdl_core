@@ -159,7 +159,7 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        console.debug("enter",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
         if (dataContainer.uiSlider.running) {
             console.debug("aborted")
             throw Common.Result.ABORTED
@@ -236,6 +236,14 @@ Item {
     }
 
     function closePopUp () {
+        console.debug("enter")
+        if (dataContainer.activePopup) {
+            //close pop-up that is currently active with ABORT code
+            dataContainer.activePopup.complete(Common.Result.ABORT)
+        }
+        //response to this callwith SUCCESS code
+        console.debug("exit")
+        return {}
     }
 
     function fillSoftButtons(element, index, array) {

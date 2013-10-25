@@ -134,7 +134,6 @@ PopUp {
                 fontSize: Constants.fontSize
                 onClicked: {
                     complete(Common.Result.SUCCESS)
-                    hide()
                 }
             }
         }
@@ -145,7 +144,6 @@ PopUp {
             fontSize: Constants.fontSize
             onClicked: {
                 complete(Common.Result.ABORTED)
-                hide()
             }
         }
 

@@ -58,6 +58,10 @@ Item {
         }
     }
 
+    onVisibleChanged: {
+        dataContainer.activePopup = visible ? this : null
+    }
+
     function show() {
         visible = true;
     }

@@ -42,6 +42,10 @@ PopUp {
     width: Constants.popupWidth
     height: Constants.popupHeigth
 
+    function complete(reason){
+        hide()
+    }
+
     Column
     {
         anchors.centerIn: parent

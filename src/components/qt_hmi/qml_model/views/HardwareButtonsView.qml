@@ -89,7 +89,7 @@ Item {
                             if (!dataContainer.activeVR) {
                                 vrPopUp.activate();
                             } else {
-                                vrPopUp.deactivate();
+                                vrPopUp.complete();
                             }
                         }
                     }
@@ -336,6 +336,7 @@ Item {
                     toggleMode: true
                     onPressed: {
                         exitAllApplicationsPopup.show()
+
                     }
                     onUnpressed: {
                         exitAllApplicationsPopup.hide()
