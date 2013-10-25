@@ -1,4 +1,5 @@
 [CW43]
++ Fixed main thread blocking
 + Add RegisterAppInterface dialog.
 + Added KeyboardProperties to ResetGlobalProperties request
 + Added new API: TextFieldName new elements, KeyBoardproperties new param keyPreaaMode, etc.
