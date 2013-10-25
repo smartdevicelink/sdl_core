@@ -202,11 +202,7 @@ class Impl(FordXmlParser):
     def make_method_signature(self, request, response, interface, add_classname):
         in_params = request.findall('param')
         out_params = response.findall('param')
-        if out_params:
-            ret_param_desc = self.make_param_desc(out_params[0], interface)
-            ret_type = self.qt_param_type(ret_param_desc)
-        else:
-            ret_type = 'void'
+        ret_type = 'int'
         retstr = ret_type + ' '
         if add_classname:
             retstr = retstr + interface + 'Adaptor::'
@@ -221,9 +217,9 @@ class Impl(FordXmlParser):
             retstr += ", "
         retstr += "const QDBusMessage& message"
         out_params_num = len(out_params)
-        if out_params_num > 1:
+        if out_params_num > 0:
             retstr = retstr + ", "
-            for i in range(1, out_params_num):
+            for i in range(0, out_params_num):
                 param_desc = self.make_param_desc(out_params[i], interface)
                 param_type = self.qt_param_type(param_desc)
                 retstr = retstr + param_type + '& ' + param_desc.name + '_out'
@@ -338,6 +334,10 @@ class Impl(FordXmlParser):
 
             out.write("bool fill%s%sReply(QDBusMessage& message, const QVariantMap& map)\n" % (classname, request.get('name')))
             out.write("{\n")
+            out.write("  int retCode_out = 0;\n")
+            out.write("  GetArgFromMap(map, \"__retCode\", retCode_out);\n")
+            out.write("  QVariant retCode_arg = QVariant::fromValue(retCode_out);\n")
+            out.write("  message << retCode_arg;\n")
             for out_p in out_params:
                 param_name = out_p.get('name')
                 param_desc = self.make_param_desc(out_p, iface_name)
@@ -353,13 +353,10 @@ class Impl(FordXmlParser):
             signature = self.make_method_signature(request, response, iface_name, True)
             out.write(signature + " {\n")
             out.write("  LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
-            if out_params:
-                param_desc = self.make_param_desc(out_params[0], iface_name)
-                param_type = self.qt_param_type(param_desc)
-                out.write('  ' + param_type + " ret;\n")
-                return_statement = 'return ret'
-            else:
-                return_statement = 'return'
+
+            out.write('  int ret = 0;\n')
+            return_statement = 'return ret'
+
             out.write("  QVariantMap in_arg;\n");
             out.write("  QVariant out_arg_v;\n");
             for param in in_params:
@@ -388,20 +385,17 @@ class Impl(FordXmlParser):
             out.write("      " + return_statement + ";\n");
             out.write("  }\n")
 
-            for param in out_params[1:]:
+            for param in out_params:
                 param_name = param.get('name')
                 param_desc = self.make_param_desc(param, iface_name)
                 out.write('  if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); " + return_statement + "; }\n")
-            if out_params:
-                param_desc = self.make_param_desc(out_params[0], iface_name)
-                param_type = self.qt_param_type(param_desc)
-                out.write('  if (!GetArgFromMap(out_arg, \"' + param_desc.name + '\", ret)) { RaiseDbusError(this, InvalidData); ' + return_statement + "; }\n")
-                out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
-                out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
-                out.write("  return ret;\n")
-            else:
-                out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
+
+            out.write("  GetArgFromMap(out_arg, \"__retCode\", ret);\n")
+            out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
+            out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
+            out.write("  return ret;\n")
             out.write("}\n\n")
+
         for n in notifications:
             slotname = n.get('name') + '_qml'
             slot_signature = self.make_qml_signal_signature(n, iface_name, slotname, False, True)
