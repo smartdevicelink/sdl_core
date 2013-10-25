@@ -385,4 +385,9 @@ QtObject {
     property NavigationModel navigationModel: NavigationModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
+
+    property int driverDistractionState: Common.DriverDistractionState.DD_OFF
+    onDriverDistractionStateChanged: {
+        sdlUI.onDriverDistraction(driverDistractionState);
+    }
 }
