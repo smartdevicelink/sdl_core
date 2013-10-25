@@ -50,7 +50,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
             'message1',
             'message2',
             'message3',
-            'softbuttons'
+            'softbuttons',
+            'progressIndicatorView'
         ],
 
     /**
@@ -68,6 +69,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
     timer: null,
 
+    progressIndicator: false,
+
     /**
      * Wagning image on Alert PopUp
      */
@@ -75,6 +78,15 @@ SDL.AlertPopUp = Em.ContainerView.create({
         elementId: 'alertPopUpImage',
 
         classNames: 'alertPopUpImage'
+    }),
+
+    /**
+     * Wagning image on Alert PopUp
+     */
+    progressIndicatorView: Em.View.extend({
+        elementId: 'progressIndicator',
+
+        classNameBindings: 'this.parentView.progressIndicator:progressIndicator'
     }),
 
     applicationName: SDL.Label.extend({
@@ -198,6 +210,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
         if (message.softButtons) {
             this.addSoftButtons(message.softButtons, message.appID);
         }
+
+        this.set('progressIndicator', message.progressIndicator);
 
         this.set('appName', SDL.SDLController.getApplicationModel(message.appID).appName);
 

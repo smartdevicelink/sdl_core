@@ -1,8 +1,7 @@
 package com.ford.syncV4.trace;
 
-import java.sql.Timestamp;
-
 import android.bluetooth.BluetoothDevice;
+import android.hardware.usb.UsbAccessory;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Process;
@@ -21,6 +20,8 @@ import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.NativeLogTool;
+
+import java.sql.Timestamp;
 
 /* This class handles the global TraceSettings as requested by the users either through the combination of the following
    1. System defaults
@@ -231,7 +232,12 @@ public class SyncTrace {
 			return;
 		} // end-if
 
-		StringBuffer protoMsg = new StringBuffer();
+        // do not log mobile navi data frames
+        if (frameHeader.getSessionType() == SessionType.Mobile_Nav && frameHeader.getFrameType() == FrameType.Single) {
+            return;
+        }
+
+        StringBuffer protoMsg = new StringBuffer();
 		protoMsg.append("<frame>");
 		protoMsg.append(SyncTrace.getProtocolFrameHeaderInfo(frameHeader, frameData));
 		if (dl == DetailLevel.VERBOSE) {
@@ -334,6 +340,15 @@ public class SyncTrace {
 		sb.append("</btp>");
 		return sb.toString();
 	} // end-method
+
+    public static String getUSBAccessoryInfo(UsbAccessory accessory) {
+        // TODO: split info into different tags?
+        StringBuilder sb = new StringBuilder();
+        sb.append("<usba>");
+        sb.append(SyncTrace.B64EncodeForXML(accessory.toString()));
+        sb.append("</usba>");
+        return sb.toString();
+    }
 
 	public static void logTransportEvent(String preamble, String transportSpecificInfoXml, InterfaceActivityDirection msgDirection, byte buf[], int byteLength, String token) {
 		logTransportEvent(preamble, transportSpecificInfoXml, msgDirection, buf, 0, byteLength, token);

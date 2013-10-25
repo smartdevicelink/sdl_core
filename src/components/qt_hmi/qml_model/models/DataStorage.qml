@@ -40,11 +40,13 @@ QtObject {
 
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
+    property SliderModel uiSlider: SliderModel { }
 
     function getApplication(appId) {
         console.log("dataContainer getApplication enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
+                console.log("Application found", applicationList.get(i));
                 return applicationList.get(i);
             }
         }
@@ -95,7 +97,9 @@ QtObject {
                 currentApplication.deviceName = applicationList.get(i).deviceName
                 currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
                 currentApplication.turnList = applicationList.get(i).turnList
-                currentApplication.turnListSoftButtons = applicationList.get(i).turnListSoftButtons
+                currentApplication.turnListSoftButtons =
+                        applicationList.get(i).turnListSoftButtons
+                currentApplication.languageTTSVR = applicationList.get(i).languageTTSVR
                 // This place is for adding new properties
             }
         }
@@ -122,7 +126,8 @@ QtObject {
             hmiUIText: app.hmiUIText,
             options: [],
             turnList: [],
-            turnListSoftButtons: []
+            turnListSoftButtons: [],
+            languageTTSVR: Common.Language.EN_US
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -232,8 +237,6 @@ QtObject {
         "timeoutPrompt": ""
     }
 
-    property int uiSliderPosition: 1
-
     function reset () {
         console.log("dataContainer reset enter");
         route_text = ""
@@ -246,9 +249,9 @@ QtObject {
         console.log("dataContainer changeRegistrarionUI exit");
     }
 
-    function changeRegistrationTTSVR (language) {
+    function changeRegistrationTTSVR(language, appID) {
         console.log("dataContainer changeRegistrationTTSVR enter");
-        hmiTTSVRLanguage = language
+        setApplicationProperties(appID, { TTSVRLanguage: language });
         console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
@@ -375,5 +378,11 @@ QtObject {
     }
 
     property NavigationModel navigationModel: NavigationModel { }
+    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
+
+    property int driverDistractionState: Common.DriverDistractionState.DD_OFF
+    onDriverDistractionStateChanged: {
+        sdlUI.onDriverDistraction(driverDistractionState);
+    }
 }

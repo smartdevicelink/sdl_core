@@ -108,7 +108,18 @@ void RegisterAppInterfaceRequest::Run() {
 
     if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
       application_impl->set_app_types(
-          (*message_)[strings::msg_params][strings::app_hmi_type]);
+        (*message_)[strings::msg_params][strings::app_hmi_type]);
+
+      // check if app is NAVI
+      const int is_navi_type = 4;
+      smart_objects::SmartObject app_type =
+        (*message_)[strings::msg_params].getElement(strings::app_hmi_type);
+
+      for (size_t i = 0; i < app_type.length(); ++i) {
+        if (is_navi_type == app_type[i].asInt()) {
+          application_impl->set_allowed_support_navigation(true);
+        }
+      }
     }
 
     SendRegisterAppInterfaceResponseToMobile(*application_impl);

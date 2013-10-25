@@ -1,14 +1,15 @@
 import QtQuick 2.0
+import "Common.js" as Common
 
 Item {
-    function isReady () {
+    function isReady() {
         return {
             available: dataContainer.hmiVRAvailable
         }
     }
 
-    function addCommand (cmdID, vrCommands, appID) {
-        console.log("VR.AddCommand");
+    function addCommand(cmdID, vrCommands, appID) {
+        console.log("VR.AddCommand: cmd ", cmdID, ", app ", appID);
         for (var i = 0; i < vrCommands.length; ++i) {
             dataContainer.vrCommands.append({
                                                cmdID: cmdID,
@@ -18,35 +19,37 @@ Item {
         }
     }
 
-    function deleteCommand (cmdID, appID) {
-        for (var i = 0; i < dataContainer.vrCommands.length; ) {
-            if (dataContainer.vrCommands[i].cmdID === cmdID) {
-                if ((appID === undefined) || (dataContainer.vrCommands[i].appID === appID)) {
-                    dataContainer.vrCommands.splice(i, 1)
-                }
-                else {
-                    ++i
-                }
+    function deleteCommand(cmdID, appID) {
+        console.log("VR.DeleteCommand: cmd ", cmdID, ", app ", appID);
+        for (var i = 0; i < dataContainer.vrCommands.count; ) {
+            if ((dataContainer.vrCommands.get(i).cmdID === cmdID) &&
+                    ((appID === undefined) || (dataContainer.vrCommands.get(i).appID === appID))) {
+                dataContainer.vrCommands.remove(i);
+                continue;
             }
-            else {
-                ++i
-            }
+            ++i;
         }
     }
 
-    function getLanguage () {
+    function getLanguage() {
         return {
             language: dataContainer.hmiTTSVRLanguage
         }
     }
 
-    function getSupportedLanguages () {
+    function getSupportedLanguages() {
         return {
             languages: settingsContainer.sdlLanguagesList
         }
     }
 
-    function changeRegistration (language) {
-        dataContainer.changeRegistrationTTSVR(language)
+    function getCapabilities() {
+        return {
+            vrCapabilities: Common.VrCapabilities.VR_TEXT
+        }
+    }
+
+    function changeRegistration(language, appID) {
+        dataContainer.changeRegistrationTTSVR(language, appID);
     }
 }

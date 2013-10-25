@@ -95,4 +95,46 @@ public class SetGlobalProperties extends RPCRequest {
         	parameters.remove(Names.vrHelp);
         }
     }
+    public String getMenuTitle() {
+        final Object obj = parameters.get(Names.menuTitle);
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+        return null;
+    }
+    public void setMenuTitle(String menuTitle) {
+        if (menuTitle != null) {
+            parameters.put(Names.menuTitle, menuTitle);
+        } else {
+            parameters.remove(Names.menuTitle);
+        }
+    }
+    public Image getMenuIcon() {
+        final Object obj = parameters.get(Names.menuIcon);
+        if (obj instanceof Image) {
+            return (Image) obj;
+        }
+        return null;
+    }
+    public void setMenuIcon(Image menuIcon) {
+        if (menuIcon != null) {
+            parameters.put(Names.menuIcon, menuIcon);
+        } else {
+            parameters.remove(Names.menuIcon);
+        }
+    }
+    public KeyboardProperties getKeyboardProperties() {
+        final Object obj = parameters.get(Names.keyboardProperties);
+        if (obj instanceof KeyboardProperties) {
+            return (KeyboardProperties) obj;
+        }
+        return null;
+    }
+    public void setKeyboardProperties(KeyboardProperties keyboardProperties) {
+        if (keyboardProperties != null) {
+            parameters.put(Names.keyboardProperties, keyboardProperties);
+        } else {
+            parameters.remove(Names.keyboardProperties);
+        }
+    }
 }

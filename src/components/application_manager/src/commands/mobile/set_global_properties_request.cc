@@ -116,6 +116,15 @@ void SetGlobalPropertiesRequest::Run() {
     msg_params[strings::vr_help_title] = (*app->vr_help_title());
     msg_params[strings::vr_help] = (*app->vr_help());
     msg_params[strings::app_id] = app->app_id();
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_title)) {
+      msg_params[hmi_request::menu_title] = (*message_)[strings::msg_params][hmi_request::menu_title].asString();
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_icon)) {
+      msg_params[hmi_request::menu_icon] = (*message_)[strings::msg_params][hmi_request::menu_icon];
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::keyboard_properties)) {
+      msg_params[hmi_request::keyboard_properties] = (*message_)[strings::msg_params][hmi_request::keyboard_properties];
+    }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
                      true, chaining_counter);
@@ -144,6 +153,15 @@ void SetGlobalPropertiesRequest::Run() {
     msg_params[strings::vr_help_title] = (*app->vr_help_title());
     msg_params[strings::vr_help] = (*app->vr_help());
     msg_params[strings::app_id] = app->app_id();
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_title)) {
+      msg_params[hmi_request::menu_title] = (*message_)[strings::msg_params][hmi_request::menu_title].asString();
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_icon)) {
+      msg_params[hmi_request::menu_icon] = (*message_)[strings::msg_params][hmi_request::menu_icon];
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::keyboard_properties)) {
+      msg_params[hmi_request::keyboard_properties] = (*message_)[strings::msg_params][hmi_request::keyboard_properties];
+    }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
                      true, chaining_counter);

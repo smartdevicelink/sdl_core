@@ -93,6 +93,9 @@ var warningDuration = 500
 // Width for long oval button
 var longOvalButtonWidth = 163
 
+// Height for oval button
+var ovalButtonHeight = 63
+
 // Size icon for buttons
 var iconButtonSize = 30
 
@@ -103,7 +106,30 @@ var iconItemListSize = 40
 var itemListHeight = 60
 
 // Spasing between item on views
-var generalSpasing = 10
+var generalSpacing = 10
+
+// Width of scrollBar
+var scrollBarWidth = 5
+// -------------------------
+var sliderBarWidth = 400
+var sliderBarHeight = 50
+var sliderBarRadius = 3
+var sliderBarBorderWidth = 1
+var sliderTextColor = "white"
+var sliderBarBorderColor = "white"
+var sliderBarFillColor = "white"
+
+// Width for popup view
+var popupWidth = 700
+
+// Height for popup view
+var popupHeigth = 500
+
+// Width for combobox
+var comboboxWidth = 300
+// -------------------------
+var scrollableMessageTextColor = "white"
+var scrollableMessageScrollBarColor = "gray"
+var scrollableMessageScrollBarWidth = 10
 
 // -------------------------
-

@@ -64,6 +64,7 @@ SDL.SDLController = Em.Object
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active'),
+
         /**
          * List of SDL application models
          * 
@@ -73,6 +74,7 @@ SDL.SDLController = Em.Object
             0: SDL.SDLMediaModel,
             1: SDL.SDLNonMediaModel
         },
+
         /**
          * Registered components handler
          * 
@@ -117,6 +119,13 @@ SDL.SDLController = Em.Object
         },
 
         /**
+         * Activate navigation method to set navigation data to controlls on main screen
+         */
+        navigationAppUpdate: function() {
+            SDL.BaseNavigationView.update(SDL.SDLAppController.model.appID);
+        },
+
+        /**
          * Default action for SoftButtons: closes window, popUp or clears
          * applications screen
          * 
@@ -125,14 +134,14 @@ SDL.SDLController = Em.Object
         defaultActionSoftButton: function(element) {
 
             switch (element.groupName) {
-            case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate();
-                break;
-            }
-            case "ScrollableMessage": {
-                SDL.ScrollableMessage.deactivate();
-                break;
-            }
+                case "AlertPopUp": {
+                    SDL.AlertPopUp.deactivate();
+                    break;
+                }
+                case "ScrollableMessage": {
+                    SDL.ScrollableMessage.deactivate(true);
+                    break;
+                }
             }
         },
         /**
@@ -256,8 +265,7 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result,
-            performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
 
             FFW.UI.interactionResponse(result, performInteractionRequestID);
         },
@@ -292,6 +300,14 @@ SDL.SDLController = Em.Object
                     messageRequestId,
                     'UI.ScrollableMessage',
                     "ScrollableMessage aborted!");
+            }
+        },
+        /**
+         * Method to do necessary actions when user navigate throught the menu
+         */
+        userStateAction: function() {
+            if (SDL.ScrollableMessage.active) {
+                SDL.ScrollableMessage.deactivate(true);
             }
         },
         /**
@@ -377,7 +393,8 @@ SDL.SDLController = Em.Object
                 .pushObject(this.applicationModels[applicationType].create( {
                     appID: params.appID,
                     appName: params.appName,
-                    deviceName: params.deviceName
+                    deviceName: params.deviceName,
+                    appType: params.appType
                 }));
         },
         /**
@@ -389,11 +406,6 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).onDeleteApplication(appID);
-            this.getApplicationModel(appID).set('active', false);
-            var index = SDL.SDLModel.registeredApps
-                .indexOf(SDL.SDLModel.registeredApps.filterProperty('appID',
-                    appID)[0]);
-            SDL.SDLModel.registeredApps.replace(index, 1);
             this.set('model', null);
         },
         /**
@@ -407,6 +419,35 @@ SDL.SDLController = Em.Object
                 FFW.UI.onDriverDistraction("DD_OFF");
             }
         }.observes('SDL.SDLModel.driverDistractionState'),
+
+        /**
+         * Ondisplay keyboard event handler
+         * Sends notification on SDL Core with changed value
+         */
+        onKeyboardChanges: function() {
+            if (null !== SDL.SDLModel.keyboardInputValue) {
+
+                var str = SDL.SDLModel.keyboardInputValue;
+
+                if (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                    switch (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                        case 'SINGLE_KEYPRESS':{
+                            FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ));
+                            break;
+                        }
+                        case 'QUEUE_KEYPRESS':{
+                            //FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
+                            break;
+                        }
+                        case 'RESEND_CURRENT_ENTRY':{
+                            FFW.UI.OnKeyboardInput(str);
+                            break;
+                        }
+                    }
+                }
+            }
+        }.observes('SDL.SDLModel.keyboardInputValue'),
+
         /**
          * Get application model
          * 

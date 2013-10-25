@@ -50,6 +50,21 @@ ScrollabelMessageRequest::ScrollabelMessageRequest(
 ScrollabelMessageRequest::~ScrollabelMessageRequest() {
 }
 
+bool ScrollabelMessageRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  } else {
+    const int def_value = 30000;
+    default_timeout_ = def_value;
+  }
+
+  return true;
+}
+
 void ScrollabelMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
@@ -62,17 +77,12 @@ void ScrollabelMessageRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SendResponse(false, processing_result);
     return;
   }
 
@@ -84,13 +94,7 @@ void ScrollabelMessageRequest::Run() {
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
-
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] =
-        (*message_)[strings::msg_params][strings::timeout];
-  } else {
-    msg_params[strings::timeout] = 30000;
-  }
+  msg_params[strings::timeout] = default_timeout_;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =

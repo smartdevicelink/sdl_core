@@ -274,9 +274,10 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     return;
   }
 
+  CommunicationError* err = new CommunicationError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
-      *it, device, application, RawMessageSptr(), nullptr);
+      *it, device, application, RawMessageSptr(), err);
 
   transport_manager_impl_->ReceiveEventFromDevice(event);
 }
@@ -307,5 +308,5 @@ bool TransportAdapterListenerImpl::FindSharedPtr(
   return it != transport_manager_impl_->transport_adapters_.end();
 }
 
-}  //namespace transport_manager
+}  // namespace transport_manager
 

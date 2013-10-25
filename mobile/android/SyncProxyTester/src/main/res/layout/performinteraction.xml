@@ -137,6 +137,18 @@
                 android:freezesText="true"
                 android:inputType="textCapSentences"
                 android:text="@string/performinteraction_vrHelpItemImageDefault"/>
+
+        <CheckBox
+                android:id="@+id/performinteraction_interactionLayoutCheck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/performinteraction_interactionLayout"/>
+
+        <Spinner
+                android:id="@+id/performinteraction_interactionLayoutSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
     </LinearLayout>
 
 </ScrollView>

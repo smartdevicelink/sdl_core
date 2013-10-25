@@ -119,6 +119,7 @@ Rectangle {
 
                 property string position
                 function go(path, appId) {
+                    console.debug(position, path)
                     if (position !== path) {
                         viewTransitionStack.push(source.toString())
                         if (appId) {
@@ -131,6 +132,7 @@ Rectangle {
 
                 function back() {
                     source = viewTransitionStack.pop()
+                    position = ""
                 }
 
                 onStatusChanged: {
@@ -177,6 +179,20 @@ Rectangle {
 
         InteractionModel {
             id: interactionModel
+        }
+
+        SliderPopup {
+            id: sliderPopup
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
+
+        TBTClientStatePopUp {
+            id: tbtClientStatePopUp
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
         }
     }
 

@@ -127,7 +127,7 @@ void AvahiServiceBrowserCallback(AvahiServiceBrowser *avahi_service_browser,
           avahi_service_browser_get_client(avahi_service_browser));
       LOG4CXX_ERROR(
           logger_,
-          "AvahiServiceBrowser failure: " << avahi_strerror(avahi_errno))
+          "AvahiServiceBrowser failure: " << avahi_strerror(avahi_errno));
       break;
 
     case AVAHI_BROWSER_NEW:

@@ -40,6 +40,7 @@
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/usb/libusb_handler.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -48,7 +49,9 @@ class UsbConnection : public Connection {
  public:
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
-                TransportAdapterController* controller, libusb_device* device);
+                TransportAdapterController* controller,
+                const LibusbHandlerSptr& libusb_handler,
+                libusb_device* device);
 
   bool Init();
 
@@ -71,6 +74,7 @@ class UsbConnection : public Connection {
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
+  LibusbHandlerSptr libusb_handler_;
   libusb_device* libusb_device_;
   libusb_device_handle* device_handle_;
   uint8_t in_endpoint_;
