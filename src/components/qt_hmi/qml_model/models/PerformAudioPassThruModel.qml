@@ -1,6 +1,6 @@
 /**
- * @file SliderModel.qml
- * @brief Data model for slider.
+ * @file PerformAudioPassThruModel.qml
+ * @brief Data model audio pass thru.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,10 +36,8 @@ import QtQuick 2.0
 
 QtObject {
     property string appName: ""
-    property string header: ""
-    property var footer: []
-    property int numTicks: 0
-    property int position: 0
+    property string firstLine: ""
+    property string secondLine: ""
     property int timeout: 0
     property bool running: false
 }

@@ -156,3 +156,4 @@ var scrollableMessageScrollBarColor = "gray"
 var scrollableMessageScrollBarWidth = 10
 
 // -------------------------
+var audioPassThruTextColor = "white"

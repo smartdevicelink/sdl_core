@@ -159,7 +159,11 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        console.log("UI.slider entered",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        console.debug("enter",numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        if (dataContainer.uiSlider.running) {
+            console.debug("aborted")
+            throw Common.Result.ABORTED
+        }
 
         dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
         dataContainer.uiSlider.header = sliderHeader
@@ -170,7 +174,7 @@ Item {
 
         sliderPopup.showSlider()
         sliderPopup.async = new Async.AsyncCall();
-        console.log("UI.slider exited")
+        console.debug("exit")
         return sliderPopup.async;
     }
 
@@ -201,10 +205,34 @@ Item {
         return dataContainer.scrollableMessageModel.async
     }
 
-    function performAudioPassThru (audioPassThruDisplayTexts, maxDuration) {
+    function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
+        console.debug("enter", audioPassThruDisplayTexts, timeout)
+
+        if (dataContainer.uiAudioPassThru.running) {
+            console.debug("aborted")
+            throw Common.Result.ABORTED
+        }
+
+        dataContainer.uiAudioPassThru.appName = dataContainer.getApplication(appID).appName
+        dataContainer.uiAudioPassThru.timeout = timeout
+        if (audioPassThruDisplayTexts.length === 2) {
+            dataContainer.uiAudioPassThru.firstLine = audioPassThruDisplayTexts[0].fieldText
+            dataContainer.uiAudioPassThru.secondLine = audioPassThruDisplayTexts[1].fieldText
+        }
+        performAudioPassThruPopup.async = new Async.AsyncCall();
+        performAudioPassThruPopup.showAudioPassThru()
+        console.debug("exit")
+        return performAudioPassThruPopup.async;
     }
 
     function endAudioPassThru () {
+        console.debug("enter")
+        if (!dataContainer.uiAudioPassThru.running) {
+            console.debug("rejected")
+            throw Common.Result.REJECTED
+        }
+        performAudioPassThruPopup.complete(Common.Result.SUCCESS)
+        console.debug("exit")
     }
 
     function closePopUp () {

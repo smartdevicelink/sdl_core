@@ -202,6 +202,12 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
+
+        PerformAudioPassThruPopup {
+            id: performAudioPassThruPopup
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

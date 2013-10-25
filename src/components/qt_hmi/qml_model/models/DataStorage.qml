@@ -41,6 +41,7 @@ QtObject {
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
     property SliderModel uiSlider: SliderModel { }
+    property PerformAudioPassThruModel uiAudioPassThru: PerformAudioPassThruModel { }
 
     function getApplication(appId) {
         console.log("dataContainer getApplication enter");

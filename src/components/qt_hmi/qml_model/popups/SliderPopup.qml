@@ -47,12 +47,8 @@ PopUp {
 
     function showSlider(){
         console.debug("SliderPopup.showSlider entered")
-        if (timer.running) { // we have alert already
-            complete(true)
-            console.debug("SliderPopup.showSlider exited")
-            return;
-        }
 
+        dataContainer.uiSlider.running = true
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
@@ -68,6 +64,7 @@ PopUp {
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
+        dataContainer.uiSlider.running = false
         if(isAbort) {
             console.debug("aborted position is", dataContainer.uiSlider.position)
             DBus.sendReply(async, {sliderPosition:dataContainer.uiSlider.position})
