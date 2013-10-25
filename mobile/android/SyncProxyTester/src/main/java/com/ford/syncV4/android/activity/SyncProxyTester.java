@@ -4093,8 +4093,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void startMobileNaviSession() {
-        _msgAdapter.logMessage("Should start mobile nav session", true);
         if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should start mobile nav session", true);
             ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
         }
     }
@@ -4137,10 +4137,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void stopMobileNavSession() {
-        _msgAdapter.logMessage("Should stop mobile nav session", true);
         if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should stop mobile nav session", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
             closeMobileNaviOutputStream();
+
         }
     }
 
