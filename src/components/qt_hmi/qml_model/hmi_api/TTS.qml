@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "Common.js" as Common
 
 Item {
     signal onLanguageChange (int language)
@@ -26,6 +27,12 @@ Item {
     function getSupportedLanguages () {
         return {
             languages: settingsContainer.sdlLanguagesList
+        }
+    }
+
+    function getCapabilities() {
+        return {
+            capabilities: Common.SpeechCapabilities.SC_TEXT
         }
     }
 
