@@ -16,7 +16,8 @@ public enum ButtonName{
     PRESET_7,
     PRESET_8,
     PRESET_9,
-    CUSTOM_BUTTON;
+    CUSTOM_BUTTON,
+    SEARCH;
 
     public static ButtonName valueForString(String value) {
         return valueOf(value);

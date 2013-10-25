@@ -89,6 +89,20 @@ public class Alert extends RPCRequest {
         	parameters.remove(Names.playTone);
         }
     }
+    public Boolean getProgressIndicator() {
+        final Object obj = parameters.get(Names.progressIndicator);
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        return null;
+    }
+    public void setProgressIndicator(Boolean progressIndicator) {
+        if (progressIndicator != null) {
+            parameters.put(Names.progressIndicator, progressIndicator);
+        } else {
+        	parameters.remove(Names.progressIndicator);
+        }
+    }
     public Vector<SoftButton> getSoftButtons() {
         if (parameters.get(Names.softButtons) instanceof Vector<?>) {
 	    	Vector<?> list = (Vector<?>)parameters.get(Names.softButtons);

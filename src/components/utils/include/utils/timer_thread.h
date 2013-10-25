@@ -61,105 +61,105 @@ class TimerDelegate;
  */
 template <class T>
 class TimerThread {
- public:
+  public:
 
-  friend class TimerDelegate;
-  /*
-   * @brief Default constructor
-   *
-   * @param callee A class that use timer
-   * @param arg    CallBackFunction which will be called on timeout
-   */
-  TimerThread(const T* callee , void (T::*f)() const);
-
-  /*
-   * @brief Destructor
-   */
-  virtual ~TimerThread();
-
-  /*
-   * @brief Starts timer for specified timeout.
-   * Previously started timeout will be set to new value.
-   * On timeout TimerThread::onTimeOut interface will be called.
-   *
-   * @param timeout Timeout in seconds to be set
-   */
-  virtual void start(unsigned int timeout);
-
-  /*
-   * @brief Stops timer execution
-   */
-  virtual void stop();
-
- protected:
-
-  /*
-   * @brief Interface called by delegator on timeout
-   */
-  void onTimeOut() const;
-
- private:
-
-  class TimerDelegate : public threads::ThreadDelegate {
-   public:
-
+    friend class TimerDelegate;
     /*
      * @brief Default constructor
      *
-     * @param timer_thread The Timer_thread pointer
-     * @param timeout      Timeout to be set
+     * @param callee A class that use timer
+     * @param arg    CallBackFunction which will be called on timeout
      */
-    TimerDelegate(const TimerThread* timer_thread);
+    TimerThread(const T* callee , void (T::*f)() const);
 
     /*
      * @brief Destructor
      */
-    virtual ~TimerDelegate();
+    virtual ~TimerThread();
 
     /*
-     * @brief Thread main function.
-     */
-    virtual void threadMain();
-
-    /*
-     * @brief Called by thread::thread to free all allocated resources.
-     */
-    virtual void exitThreadMain();
-
-    /*
-     * @brief Restart timer
+     * @brief Starts timer for specified timeout.
+     * Previously started timeout will be set to new value.
+     * On timeout TimerThread::onTimeOut interface will be called.
      *
-     * @param timeout New timeout to be set
+     * @param timeout Timeout in seconds to be set
      */
-    virtual void setTimeOut(unsigned int timeout);
+    virtual void start(unsigned int timeout);
 
-   protected:
+    /*
+     * @brief Stops timer execution
+     */
+    virtual void stop();
 
-   private:
-    const TimerThread*                               timer_thread_;
-    unsigned int                                     timeout_;
-    sync_primitives::SynchronisationPrimitives       sync_primitive_;
-    volatile bool                                    stop_flag_;
+  protected:
 
-    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
-  };
+    /*
+     * @brief Interface called by delegator on timeout
+     */
+    void onTimeOut() const;
 
-  void (T::*callback_)() const;
-  const T*                                           callee_;
-  TimerDelegate*                                     delegate_;
-  threads::Thread*                                   thread_;
-  mutable bool                                       is_running_;
+  private:
 
-  DISALLOW_COPY_AND_ASSIGN(TimerThread);
+    class TimerDelegate : public threads::ThreadDelegate {
+      public:
+
+        /*
+         * @brief Default constructor
+         *
+         * @param timer_thread The Timer_thread pointer
+         * @param timeout      Timeout to be set
+         */
+        TimerDelegate(const TimerThread* timer_thread);
+
+        /*
+         * @brief Destructor
+         */
+        virtual ~TimerDelegate();
+
+        /*
+         * @brief Thread main function.
+         */
+        virtual void threadMain();
+
+        /*
+         * @brief Called by thread::thread to free all allocated resources.
+         */
+        virtual bool exitThreadMain();
+
+        /*
+         * @brief Restart timer
+         *
+         * @param timeout New timeout to be set
+         */
+        virtual void setTimeOut(unsigned int timeout);
+
+      protected:
+
+      private:
+        const TimerThread*                               timer_thread_;
+        unsigned int                                     timeout_;
+        sync_primitives::SynchronisationPrimitives       sync_primitive_;
+        volatile bool                                    stop_flag_;
+
+        DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
+    };
+
+    void (T::*callback_)() const;
+    const T*                                           callee_;
+    TimerDelegate*                                     delegate_;
+    threads::Thread*                                   thread_;
+    mutable bool                                       is_running_;
+
+    DISALLOW_COPY_AND_ASSIGN(TimerThread);
 };
 
 template <class T>
 TimerThread<T>::TimerThread(const T* callee, void (T::*f)() const)
-: callback_(f),
-  callee_(callee),
-  delegate_(NULL),
-  thread_(NULL),
-  is_running_(false) {
+  : callback_(f),
+    callee_(callee),
+    delegate_(NULL),
+    thread_(NULL),
+    is_running_(false) {
 
   delegate_ = new TimerDelegate(this);
   if (delegate_) {
@@ -190,7 +190,7 @@ void TimerThread<T>::start(unsigned int timeout) {
   if (delegate_ && thread_) {
     is_running_ = true;
     thread_->startWithOptions(
-        threads::ThreadOptions(threads::Thread::kMinStackSize));
+      threads::ThreadOptions(threads::Thread::kMinStackSize));
   }
 }
 
@@ -212,9 +212,9 @@ void TimerThread<T>::onTimeOut() const {
 
 template <class T>
 TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread)
-: timer_thread_(timer_thread),
-  timeout_(0),
-  stop_flag_(false) {
+  : timer_thread_(timer_thread),
+    timeout_(0),
+    stop_flag_(false) {
 
   sync_primitive_.init();
 }
@@ -244,9 +244,10 @@ void TimerThread<T>::TimerDelegate::threadMain() {
 }
 
 template <class T>
-void TimerThread<T>::TimerDelegate::exitThreadMain() {
+bool TimerThread<T>::TimerDelegate::exitThreadMain() {
   stop_flag_ = true;
   sync_primitive_.signal();
+  return true;
 }
 
 template <class T>

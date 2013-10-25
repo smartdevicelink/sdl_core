@@ -259,7 +259,10 @@ SDL.ControlButtons = Em.ContainerView
                 classNames: 'infoTable',
 
                 childViews: [
-                    'globalPropertiesLabel', 'gpHelpData', 'gpTimeoutData'
+                    'globalPropertiesLabel',
+                    'gpHelpData',
+                    'gpTimeoutData',
+                    'gpAUTOCOMPLETE'
                 ],
 
                 globalPropertiesLabel: SDL.Label.extend( {
@@ -268,58 +271,77 @@ SDL.ControlButtons = Em.ContainerView
 
                     classNames: 'sdlGPLabel',
 
-                    content: 'HELP_PROMPT: TIMEOUT_PROMPT:'
+                    content: 'HELP_PROMPT: TIMEOUT_PROMPT: AUTOCOMPLETE_TEXT:'
                 }),
 
-                gpHelpData: SDL.Label
-                    .extend( {
+                gpHelpData: SDL.Label.extend( {
 
-                        elementId: 'sdlGPHData',
+                    elementId: 'sdlGPHData',
 
-                        classNames: 'sdlGPData',
+                    classNames: 'sdlGPData',
 
-                        contentBinding: 'this.propertiesData',
+                    contentBinding: 'this.propertiesData',
 
-                        propertiesData: function() {
+                    propertiesData: function() {
 
-                            var str = '';
-                            if (SDL.SDLModel.globalProperties.helpPrompt) {
-                                var i = 0;
+                        var str = '';
+                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.helpPrompt) {
+                            var i = 0;
 
-                                for (i = 0; i < SDL.SDLModel.globalProperties.helpPrompt.length; i++) {
-                                    str += SDL.SDLModel.globalProperties.helpPrompt[i].text
-                                        + ' ';
-                                }
+                            for (i = 0; i < SDL.SDLAppController.model.globalProperties.helpPrompt.length; i++) {
+                                str += SDL.SDLAppController.model.globalProperties.helpPrompt[i].text
+                                    + ' ';
                             }
-                            return str;
                         }
-                            .property('SDL.SDLModel.globalProperties.helpPrompt.@each.text')
-                    }),
+                        return str;
+                    }.property('SDL.SDLAppController.model.globalProperties.helpPrompt.@each.text')
+                }),
 
-                gpTimeoutData: SDL.Label
-                    .extend( {
+                gpTimeoutData: SDL.Label.extend( {
 
-                        elementId: 'sdlGPTData',
+                    elementId: 'sdlGPTData',
 
-                        classNames: 'sdlGPData',
+                    classNames: 'sdlGPData',
 
-                        contentBinding: 'this.propertiesData',
+                    contentBinding: 'this.propertiesData',
 
-                        propertiesData: function() {
+                    propertiesData: function() {
 
-                            var str = '';
-                            if (SDL.SDLModel.globalProperties.timeoutPrompt) {
-                                var i = 0;
-                                for (i = 0; i < SDL.SDLModel.globalProperties.timeoutPrompt.length; i++) {
-                                    str += SDL.SDLModel.globalProperties.timeoutPrompt[i].text
-                                        + ' ';
-                                }
+                        var str = '';
+                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.timeoutPrompt) {
+                            var i = 0;
+                            for (i = 0; i < SDL.SDLAppController.model.globalProperties.timeoutPrompt.length; i++) {
+                                str += SDL.SDLAppController.model.globalProperties.timeoutPrompt[i].text
+                                    + ' ';
                             }
-
-                            return str;
                         }
-                            .property('SDL.SDLModel.globalProperties.timeoutPrompt.@each.text')
-                    })
+
+                        return str;
+                    }.property('SDL.SDLAppController.model.globalProperties.timeoutPrompt.@each.text')
+                }),
+
+                gpAUTOCOMPLETE: SDL.Label.extend( {
+
+                    elementId: 'sdlGPAUTOCOMPLETE',
+
+                    classNames: 'sdlGPData',
+
+                    contentBinding: 'SDL.SDLAppController.model.globalProperties.keyboardProperties.autoCompleteText',
+
+                    propertiesData: function() {
+
+//                        var str = '';
+//                        if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.timeoutPrompt) {
+//                            var i = 0;
+//                            for (i = 0; i < SDL.SDLAppController.model.globalProperties.timeoutPrompt.length; i++) {
+//                                str += SDL.SDLAppController.model.globalProperties.timeoutPrompt[i].text
+//                                    + ' ';
+//                            }
+//                        }
+//
+//                        return str;
+                    }.property('SDL.SDLAppController.model.globalProperties.keyboardProperties.autoCompleteText.@each')
+                })
             }),
 
         driverDistractionControl: Em.ContainerView.extend( {

@@ -57,7 +57,7 @@ void OnAppActivatedNotification::Run() {
         hmi_apis::Common_Result::INVALID_DATA;
   } else {
     ApplicationManagerImpl::instance()->ActivateApplication(application);
-  }
+ }
 }
 
 }  // namespace commands

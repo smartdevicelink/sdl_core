@@ -69,6 +69,8 @@ bool PerformInteractionRequest::Init() {
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::timeout].asUInt();
+  } else {
+    default_timeout_ = 10000;
   }
 
   return true;
@@ -251,13 +253,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][hmi_request::initial_text];
 
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] =
-        (*message_)[strings::msg_params][strings::timeout];
-  } else {
-    msg_params[strings::timeout] = 10000;
-  }
-
+  msg_params[strings::timeout] = default_timeout_;
   msg_params[strings::app_id] = app->app_id();
 
   msg_params[strings::choice_set] = smart_objects::SmartObject(
@@ -310,6 +306,12 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
       CommandImpl::hmi_protocol_type_;
 
   request[strings::msg_params] = msg_params;
+  if((*message_)[strings::msg_params].
+      keyExists(hmi_request::interaction_layout)) {
+    request[strings::msg_params][hmi_request::interaction_layout] =
+        (*message_)[strings::msg_params][hmi_request::interaction_layout].
+        asInt();
+  }
 
   msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
       connection_key, correlation_id, hmi_correlation_id, msg_chaining_,

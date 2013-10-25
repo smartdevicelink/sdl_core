@@ -60,6 +60,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
+  LOG4CXX_INFO(logger_, "Desctructing ConnectionHandler.");
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
@@ -264,37 +265,50 @@ void ConnectionHandlerImpl::RemoveConnection(
 }
 
 unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
-  transport_manager::ConnectionUID connection_handle) {
+  transport_manager::ConnectionUID connection_handle,
+  unsigned char service_type) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onSessionStartedCallback()");
-  int newSessionID = -1;
+  int new_session_id = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
-    newSessionID = (it->second).AddNewSession();
-    int firstSessionID = (it->second).GetFirstSessionID();
-    if (0 > newSessionID) {
-      LOG4CXX_ERROR(logger_, "Not possible to start session!");
-    } else {
-      LOG4CXX_INFO(logger_,
-                   "New session ID:" << static_cast<int>(newSessionID));
-      if (0 != connection_handler_observer_) {
-        if (0 < firstSessionID) {
-          firstSessionID = KeyFromPair(connection_handle, firstSessionID);
+    new_session_id = (it->second).GetFirstSessionID();
+    bool is_first_in_connection = false;
+    if (-1 == new_session_id) {
+      is_first_in_connection = true;
+      new_session_id = (it->second).AddNewSession();
+      if (0 > new_session_id) {
+        LOG4CXX_ERROR(logger_, "Not possible to start session!");
+        return -1;
+      }
+    }
+    if (connection_handler_observer_) {
+      int first_session_key = KeyFromPair(connection_handle,
+                                          (it->second).GetFirstSessionID());
+      int session_key = KeyFromPair(connection_handle, new_session_id);
+      ServiceType type = static_cast<ServiceType>(service_type);
+
+      bool success = connection_handler_observer_->OnSessionStartedCallback(
+                       (it->second).connection_device_handle(),
+                       session_key,
+                       first_session_key,
+                       type);
+      if (!success) {
+        if (is_first_in_connection) {
+          (it->second).RemoveSession(new_session_id);
         }
-        int sessionKey = KeyFromPair(connection_handle, newSessionID);
-        connection_handler_observer_->OnSessionStartedCallback(
-          (it->second).connection_device_handle(), sessionKey,
-          firstSessionID);
+        new_session_id = -1;
       }
     }
   }
-  return newSessionID;
+  return new_session_id;
 }
 
 unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
   unsigned int connection_handle, unsigned char sessionId,
-  unsigned int hashCode) {
+  unsigned int hashCode,
+  unsigned char service_type) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::onSessionEndedCallback()");
   int result = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -302,20 +316,24 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
     int firstSessionID = (it->second).GetFirstSessionID();
-    result = (it->second).RemoveSession(sessionId);
-    if (0 > result) {
-      LOG4CXX_ERROR(logger_, "Not possible to remove session!");
-    } else {
-      LOG4CXX_INFO(logger_, "Session removed:" << static_cast<int>(result));
-      if (0 != connection_handler_observer_) {
-        if (0 < firstSessionID) {
-          firstSessionID = KeyFromPair(connection_handle, firstSessionID);
-        }
-        int sessionKey = KeyFromPair(connection_handle, sessionId);
-        connection_handler_observer_->OnSessionEndedCallback(sessionKey,
-            firstSessionID);
-        result = sessionKey;
+    ServiceType type = static_cast<ServiceType>(service_type);
+    if (ServiceType::kRPCSession == type) {
+      result = (it->second).RemoveSession(sessionId);
+      if (0 > result) {
+        LOG4CXX_ERROR(logger_, "Not possible to remove session!");
+        return result;
       }
+    }
+    LOG4CXX_INFO(logger_, "Session to be removed");
+    if (0 != connection_handler_observer_) {
+      if (0 < firstSessionID) {
+        firstSessionID = KeyFromPair(connection_handle, firstSessionID);
+      }
+      int sessionKey = KeyFromPair(connection_handle, sessionId);
+      connection_handler_observer_->OnSessionEndedCallback(sessionKey,
+          firstSessionID,
+          type);
+      result = sessionKey;
     }
   }
   return result;
@@ -349,10 +367,6 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
     unsigned int* app_id,
     std::list<int>* sessions_list,
     unsigned int* device_id) {
-  DCHECK(app_id);
-  DCHECK(sessions_list);
-  //DCHECK(device_id);
-
   LOG4CXX_INFO(logger_, "CConnectionHandler::GetDataOnSessionKey()");
   int result = -1;
   transport_manager::ConnectionUID conn_handle = 0;
@@ -364,25 +378,35 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
     Connection connection = it->second;
-    *device_id = connection.connection_device_handle();
+    if (device_id) {
+      *device_id = connection.connection_device_handle();
+    }
     int first_session_id = connection.GetFirstSessionID();
-    sessions_list->clear();
+    if (sessions_list) {
+      sessions_list->clear();
+    }
     if (0 == first_session_id) {
       LOG4CXX_INFO(
         logger_,
         "No sessions in connection " << static_cast<int>(conn_handle) << ".");
-      *app_id = 0;
+      if (app_id) {
+        *app_id = 0;
+      }
     } else {
-      *app_id = KeyFromPair(conn_handle, first_session_id);
+      if (app_id) {
+        *app_id = KeyFromPair(conn_handle, first_session_id);
+      }
       SessionList session_list;
       connection.GetSessionList(session_list);
       LOG4CXX_INFO(
         logger_,
         "Connection " << static_cast<int>(conn_handle) << "has "
         << static_cast<int>(session_list.size()) << "sessions.");
-      for (SessionListIterator itr = session_list.begin();
-           itr != session_list.end(); ++itr) {
-        sessions_list->push_back(KeyFromPair(conn_handle, *itr));
+      if (sessions_list) {
+        for (SessionListIterator itr = session_list.begin();
+             itr != session_list.end(); ++itr) {
+          sessions_list->push_back(KeyFromPair(conn_handle, *itr));
+        }
       }
       result = 0;
     }

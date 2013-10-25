@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,20 +34,27 @@
 SDL.SDLModel = Em.Object.create({
 
     /**
+     * Video player object for navigation
+     *
+     * @type {Object}
+     */
+    naviVideo: null,
+
+    /**
      * Flag to indicate AudioPassThruPopUp activity
      *
-     * @param {Boolean}
+     * @type {Boolean}
      */
     AudioPassThruState: false,
 
     /**
      * Current device information
      *
-     * @param {Object}
+     * @type {Object}
      */
     CurrDeviceInfo: {
         "name": null,
-        "id"  : null
+        "id": null
     },
 
     /**
@@ -60,21 +67,21 @@ SDL.SDLModel = Em.Object.create({
     /**
      * Flag to sent Send Data extended params
      *
-     * @param {Boolean}
+     * @type {Boolean}
      */
     sendDataExtend: false,
 
     /**
      * VR active status
      *
-     * @param {Boolean}
+     * @type {Boolean}
      */
     VRActive: false,
 
     /**
      * Flag to be set true when phone call is initialised
      *
-     * @param {Boolean}
+     * @type {Boolean}
      */
     phoneCall: false,
 
@@ -93,23 +100,11 @@ SDL.SDLModel = Em.Object.create({
     VRHelpListActivated: false,
 
     /**
-     * Default values for global properties
+     * Flag to be set true when VRHelpList are activated
+     *
+     * @type {String}
      */
-    globalPropertiesDefault: {
-        helpPrompt: [
-            {
-                "text": "Some text for help prompt",
-                "type": "TEXT"
-            }
-        ],
-
-        timeoutPrompt: [
-            {
-                "text": "Some text for timeout prompt",
-                "type": "TEXT"
-            }
-        ]
-    },
+    keyboardInputValue: "",
 
     /**
      * List of states for OnTBTClientState notification
@@ -117,46 +112,36 @@ SDL.SDLModel = Em.Object.create({
     tbtClientStates: [
         {
             name: "ROUTE_UPDATE_REQUEST",
-            id  : 0
-        },
-        {
+            id: 0
+        }, {
             name: "ROUTE_ACCEPTED",
-            id  : 1
-        },
-        {
+            id: 1
+        }, {
             name: "ROUTE_REFUSED",
-            id  : 2
-        },
-        {
+            id: 2
+        }, {
             name: "ROUTE_CANCELLED",
-            id  : 3
-        },
-        {
+            id: 3
+        }, {
             name: "ETA_REQUEST",
-            id  : 4
-        },
-        {
+            id: 4
+        }, {
             name: "NEXT_TURN_REQUEST",
-            id  : 5
-        },
-        {
+            id: 5
+        }, {
             name: "ROUTE_STATUS_REQUEST",
-            id  : 6
-        },
-        {
+            id: 6
+        }, {
             name: "ROUTE_SUMMARY_REQUEST",
-            id  : 7
-        },
-        {
+            id: 7
+        }, {
             name: "TRIP_STATUS_REQUEST",
-            id  : 8
-        },
-        {
+            id: 8
+        }, {
             name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
-            id  : 9
+            id: 9
         }
     ],
-
     /**
      * List of states for ExitApplication notification
      */
@@ -174,6 +159,13 @@ SDL.SDLModel = Em.Object.create({
             id  : 2
         }
     ],
+
+    /**
+     * Data for AudioPassThruPopUp that contains params for visualisation
+     *
+     * @type {Object}
+     */
+    AudioPassThruData: {},
 
     /**
      * Enum with result codes for RPC
@@ -206,13 +198,6 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Data for AudioPassThruPopUp that contains params for visualisation
-     *
-     * @type {Object}
-     */
-    AudioPassThruData: {},
-
-    /**
      * List of registered applications, To prevent errors without registered
      * application "-1" used as test appID
      *
@@ -227,31 +212,25 @@ SDL.SDLModel = Em.Object.create({
      */
     registeredComponents: [
         {
-            type : "UI",
+            type: "UI",
             state: false
-        },
-        {
-            type : "TTS",
+        }, {
+            type: "TTS",
             state: false
-        },
-        {
-            type : "VR",
+        }, {
+            type: "VR",
             state: false
-        },
-        {
-            type : "BasicCommunication",
+        }, {
+            type: "BasicCommunication",
             state: false
-        },
-        {
-            type : "VehicleInfo",
+        }, {
+            type: "VehicleInfo",
             state: false
-        },
-        {
-            type : "Buttons",
+        }, {
+            type: "Buttons",
             state: false
-        },
-        {
-            type : "Navigation",
+        }, {
+            type: "Navigation",
             state: false
         }
     ],
@@ -281,16 +260,6 @@ SDL.SDLModel = Em.Object.create({
     devicesList: [],
 
     /**
-     * Global properties
-     *
-     * @type {Object}
-     */
-    globalProperties: {
-        helpPrompt   : [],
-        timeoutPrompt: []
-    },
-
-    /**
      * TTS + VR language
      *
      * @type {String}
@@ -310,7 +279,28 @@ SDL.SDLModel = Em.Object.create({
      * @type {Array}
      */
     sdlLanguagesList: [
-        'EN-US', 'ES-MX', 'FR-CA', 'DE-DE', 'ES-ES', 'EN-GB', 'RU-RU', 'TR-TR', 'PL-PL', 'FR-FR', 'IT-IT', 'SV-SE', 'PT-PT', 'NL-NL', 'ZH-TW', 'JA-JP', 'AR-SA', 'KO-KR', 'PT-BR', 'CS-CZ', 'DA-DK', 'NO-NO'
+        'EN-US',
+        'ES-MX',
+        'FR-CA',
+        'DE-DE',
+        'ES-ES',
+        'EN-GB',
+        'RU-RU',
+        'TR-TR',
+        'PL-PL',
+        'FR-FR',
+        'IT-IT',
+        'SV-SE',
+        'PT-PT',
+        'NL-NL',
+        'ZH-TW',
+        'JA-JP',
+        'AR-SA',
+        'KO-KR',
+        'PT-BR',
+        'CS-CZ',
+        'DA-DK',
+        'NO-NO'
     ],
 
     /**
@@ -318,7 +308,7 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      */
-    dialNumber: function (params) {
+    dialNumber: function(params) {
 
         this.set('phoneCall', true);
         SDL.States.goToStates('phone.dialpad');
@@ -327,13 +317,95 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * Notification method to send touch event data to SDLCore
+     *
+     * @param {Object}
+     */
+    onTouchEvent: function(event){
+
+        var type = "",
+            touches = event.originalEvent.touches.length,
+            changedTouches = event.originalEvent.touches.length,
+            touchLists = {"touches": touches, "changedTouches": changedTouches},
+            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+
+        switch (event.originalEvent.type) {
+            case "touchstart": {
+                type = "TOUCHSTART";
+                break;
+            }
+            case "touchmove": {
+                type = "TOUCHMOVE";
+                break;
+            }
+            case "touchend": {
+                type = "TOUCHEND";
+                break;
+            }
+        }
+
+        for(var i = 0; i < touches; i++){
+
+            info.id = i;
+            info.point.xCoord = event.originalEvent.touches[i].pageX;
+            info.point.yCoord = event.originalEvent.touches[i].pageY;
+            FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
+        }
+    },
+
+    /**
+     * Method to open Phone view and dial phone number
+     *
+     * @param {Object}
+     */
+    startStream: function(params) {
+
+        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
+        this.playVideo();
+    },
+
+    /**
+     * Method to set navigation streaming url to current app model
+     *
+     * @param {Object}
+     */
+    stopStream: function(params) {
+
+        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
+        this.pauseVideo();
+    },
+
+    /**
+     * Method to reset navigation streaming url from current app model
+     */
+    playVideo: function(){
+        if (SDL.SDLAppController.model.navigationStream !== null) {
+
+            SDL.SDLModel.naviVideo = document.getElementById("html5Player");
+            SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+            SDL.SDLModel.naviVideo.play();
+        }
+    },
+
+    /**
+     * Video player trigger to stop playing video
+     */
+    pauseVideo: function(){
+        if (SDL.SDLModel.naviVideo != null) {
+
+            SDL.SDLModel.naviVideo.pause();
+        }
+    },
+
+    /**
      * Method to open Turn By Turn view
      *
      * @param {Object}
      */
-    tbtActivate: function (params) {
+    tbtActivate: function(params) {
 
-        SDL.TurnByTurnView.activate(params);
+        SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
+        SDL.TurnByTurnView.activate(params.appID);
     },
 
     /**
@@ -341,20 +413,20 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      */
-    tbtTurnListUpdate: function (params) {
+    tbtTurnListUpdate: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
-        SDL.TBTTurnList.updateList(params.appID);
+    SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+    SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+    SDL.TBTTurnList.updateList(params.appID);
     },
 
-    /**
-     * Method to VRHelpList on UI with request parameters
-     * It opens VrHelpList PopUp with current list of readable VR commands
-     *
-     * @param {Object}
-     */
-    ShowVrHelp: function (params) {
+        /**
+         * Method to VRHelpList on UI with request parameters
+         * It opens VrHelpList PopUp with current list of readable VR commands
+         *
+         * @param {Object}
+         */
+        ShowVrHelp: function(params) {
 
         SDL.VRHelpListView.showVRHelp(params);
     },
@@ -445,34 +517,16 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Handler for reset globalProperties
-     *
-     * @param {Object}
-     */
-    resetProperties: function (params) {
-
-        var i, len = params.properties.length;
-        for (i = 0; i < len; i++) {
-            if (params.properties[i] == "HELPPROMPT") {
-                this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
-            }
-
-            if (params.properties[i] == "TIMEOUTPROMPT") {
-                this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
-            }
-        }
-    },
-
-    /**
      * setGlobalProperties
      *
      * @param {Object}
      *            message Object with parameters come from SDLCore.
      */
-    setProperties: function (message) {
+    setProperties: function(params) {
 
-        this.set('globalProperties.helpPrompt', message.helpPrompt);
-        this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
+        for (var i in params) {
+            SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
+        }
 
     },
 
@@ -604,13 +658,23 @@ SDL.SDLModel = Em.Object.create({
         }
     },
 
-    /**
-     * SDL UI AudioPassThru response handler show popup window
-     *
-     * @param {Object}
-     *            message Object with parameters come from SDLCore.
-     */
-    UIPerformAudioPassThru: function (message) {
+        /**
+         * SDL ShowKeyboard show method with incoming parameters of layout, language etc...
+         *
+         * @param {Object}
+         *            message Object with parameters come from SDLCore
+         */
+        uiShowKeyboard: function(element){
+            SDL.Keyboard.activate(element);
+        },
+
+        /**
+         * SDL UI AudioPassThru response handler show popup window
+         *
+         * @param {Object}
+         *            message Object with parameters come from SDLCore.
+         */
+        UIPerformAudioPassThru: function(message) {
 
         this.set('AudioPassThruData', message);
         this.set('AudioPassThruState', true);
@@ -664,6 +728,21 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * SDL DeleteCommand response handler to sent delete command error or normal result
+     *
+     * @param {Number}
+     * @param {Number}
+     */
+    deleteCommandResponse: function (resultCode, requestID) {
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+            FFW.UI.sendUIResult(resultCode, requestID, "UI.DeleteCommand");
+        } else {
+            FFW.UI.sendError(resultCode, requestID, "UI.DeleteCommand", "SubMenu is opened")
+        }
+    },
+
+    /**
      * SDL VR AddCommand response handler add command to voice recognition
      * window
      *
@@ -677,6 +756,17 @@ SDL.SDLModel = Em.Object.create({
         }
 
         SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appId);
+    },
+
+    /**
+     * SDL VR DeleteCommand response handler delete command from voice
+     * recognition window
+     *
+     * @param {Number}
+     */
+    deleteCommandVR: function (commandID) {
+
+        SDL.VRPopUp.DeleteCommand(commandID);
     },
 
     /**

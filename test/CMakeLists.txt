@@ -49,7 +49,7 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
-    AudioManager
+    MediaManager
     formatters
     HMI_API
     SmartObjects
@@ -71,6 +71,7 @@ set(LIBRARIES
     jsoncpp
     rt
     ${GSTREAMER_gstreamer_LIBRARY}
+    Libusb-1.0.16
 )
 
 add_executable("test_suit" "./test_suit.cc")

@@ -73,3 +73,13 @@ moc_*.cpp
 src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.cc
 src/components/qt_hmi/qml_plugins/dbus_adapter/qml_dbus.h
 src/components/qt_hmi/qml_model/hmi_api/*Proxy.qml
+
+# Mac OS Specific
+.DS_Store
+# Android specific
+*.iml
+*.orig
+.idea
+.gradle
+local.properties
+mobile/android/FordSnadbox
