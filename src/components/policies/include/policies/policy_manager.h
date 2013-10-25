@@ -35,6 +35,7 @@
 #ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 
+#include "policies/policy_configuration.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 
@@ -60,8 +61,10 @@ class PolicyManager {
   public:
     /**
      * @brief Constructor
+     *
+     * @param policy_config Policy configuration
      */
-    PolicyManager();
+    PolicyManager(const PolicyConfiguration& policy_config);
 
     /**
     * @brief Initialization method
@@ -99,6 +102,11 @@ class PolicyManager {
     **/
     bool validatePT(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& policy_table);
+
+    /**
+     * @brief Policy configuration
+     */
+    const PolicyConfiguration& policy_config_;
 };
 
 }  // namespace policies

@@ -1,6 +1,6 @@
 /**
- * @file policy_manager.cc
- * @brief Policy manager source file.
+ * @file policy_configuration.cc
+ * @brief Policy configuration source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,47 +32,25 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "policies/policy_manager.h"
-#include "smart_objects/always_true_schema_item.h"
+#include "policies/policy_configuration.h"
 
 namespace policies_ns = NsSmartDeviceLink::policies;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 
-//---------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-policies_ns::PolicyManager::PolicyManager(
-  const PolicyConfiguration& policy_config)
-  : policy_config_(policy_config) {
+policies_ns::PolicyConfiguration::PolicyConfiguration() 
+  : pt_fname_() {
 }
 
-//---------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-void policies_ns::PolicyManager::Init() {
-  // TODO(anybody): read file with policy table
-  // TODO()anybody): convert file content to smart object
+void policies_ns::PolicyConfiguration::setPTFileName(
+  std::string pt_file_path) {
+  pt_fname_ = pt_file_path;
 }
 
-//---------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-policies_ns::CheckPermissionResult::eType
-  policies_ns::PolicyManager::checkPermission(
-    uint32_t app_id,
-    const smart_objects_ns::SmartObject& rpc) {
-
-  return policies_ns::CheckPermissionResult::PERMISSION_OK;
-}
-
-//---------------------------------------------------------------
-
-smart_objects_ns::CSmartSchema policies_ns::PolicyManager::createSchemaSDL() {
-  return
-    smart_objects_ns::CSmartSchema(
-        smart_objects_ns::CAlwaysTrueSchemaItem::create());
-}
-
-//---------------------------------------------------------------
-
-bool policies_ns::PolicyManager::validatePT(
-    const smart_objects_ns::SmartObject& policy_table) {
-  return true;
+std::string policies_ns::PolicyConfiguration::getPTFile() const {
+  return pt_fname_;
 }

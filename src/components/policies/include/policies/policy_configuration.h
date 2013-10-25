@@ -1,6 +1,6 @@
 /**
- * @file policy_manager.cc
- * @brief Policy manager source file.
+ * @file policy_configuration.h
+ * @brief Policy configuration header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,47 +32,49 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "policies/policy_manager.h"
-#include "smart_objects/always_true_schema_item.h"
+#ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_CONFIGURATION_H_
+#define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_CONFIGURATION_H_
 
-namespace policies_ns = NsSmartDeviceLink::policies;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+#include <string>
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 
-//---------------------------------------------------------------
+namespace NsSmartDeviceLink {
+namespace policies {
 
-policies_ns::PolicyManager::PolicyManager(
-  const PolicyConfiguration& policy_config)
-  : policy_config_(policy_config) {
-}
+/**
+ * @brief Class contains configuration for policy table
+ */
+class PolicyConfiguration {
+  public:
+    /**
+    * @brief Constructor
+    */
+    PolicyConfiguration();
 
-//---------------------------------------------------------------
+    /**
+    * @brief set file path (with name) for policy table
+    *
+    * @param pt_file_path File path
+    */
+    void setPTFileName(std::string pt_file_path);
 
-void policies_ns::PolicyManager::Init() {
-  // TODO(anybody): read file with policy table
-  // TODO()anybody): convert file content to smart object
-}
+    /**
+     * @brief Get file path of policy table
+     *
+     * @return File path
+     */
+    std::string getPTFile() const;
 
-//---------------------------------------------------------------
+  private:
+    /**
+     * @brief policy table file name
+     */
+    std::string pt_fname_;  
+};
 
-policies_ns::CheckPermissionResult::eType
-  policies_ns::PolicyManager::checkPermission(
-    uint32_t app_id,
-    const smart_objects_ns::SmartObject& rpc) {
+}  // namespace policies
+}  // namespace NsSmartDeviceLink
 
-  return policies_ns::CheckPermissionResult::PERMISSION_OK;
-}
 
-//---------------------------------------------------------------
-
-smart_objects_ns::CSmartSchema policies_ns::PolicyManager::createSchemaSDL() {
-  return
-    smart_objects_ns::CSmartSchema(
-        smart_objects_ns::CAlwaysTrueSchemaItem::create());
-}
-
-//---------------------------------------------------------------
-
-bool policies_ns::PolicyManager::validatePT(
-    const smart_objects_ns::SmartObject& policy_table) {
-  return true;
-}
+#endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_CONFIGURATION_H_
