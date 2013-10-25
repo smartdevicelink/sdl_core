@@ -36,9 +36,8 @@ import QtQuick 2.0
 import "Internal.js" as Internal
 
 QtObject {
-    property int hours
-    property int minutes
-    property int seconds
+    property int hmsTime
+    property real magic // either difference or sum with current time - depends on update mode
 
     property int updateMode
 
@@ -47,43 +46,62 @@ QtObject {
     property Timer timer: Timer {
         interval: 1000
         repeat: true
-        running: true
         onTriggered: onTimer()
     }
 
     function onTimer () {
         switch (updateMode) {
             case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                if (60 === ++seconds) {
-                    seconds = 0
-                    if (60 === ++minutes) {
-                        minutes = 0
-                        ++hours
-                    }
-                }
+                ++hmsTime
                 break
             case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                if (0 === seconds) {
-                    if (0 === minutes) {
-                        if (0 === hours) {
-                            timer.stop()
-                            console.log("countdown timer stopped")
-                        }
-                        else {
-                            --hours
-                            minutes = 59
-                            seconds = 59
-                        }
-                    }
-                    else {
-                        --minutes
-                        seconds = 59
-                    }
-                }
-                else {
-                    --seconds
+                if (--hmsTime === 0) {
+                    timer.stop()
+                    console.log("countdown timer stopped")
                 }
                 break
+            case Internal.MediaClockUpdateMode.MCU_STOPPED:
+                timer.stop()
+                console.debug("warning: onTimer() launched for stopped clock")
+                break
         }
+    }
+
+    function restore (updateMode, runningMode, magic) {
+        console.debug("MediaClockModel::restore(" + updateMode + ", " + magic + ")")
+        timer.stop()
+        var date = new Date()
+        var secondsSinceEpoch = date.getTime() / 1000
+        this.updateMode = updateMode
+        this.magic = magic
+        var toStart
+        switch (runningMode) {
+            case Internal.MediaClockRunMode.MCR_RUNNING:
+                switch (updateMode) {
+                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                        hmsTime = Math.floor(secondsSinceEpoch - magic) // floor() works finer than round()
+                        toStart = true
+                        break
+                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                        hmsTime = Math.floor(magic - secondsSinceEpoch) // floor() works finer than round()
+                        if (hmsTime > 0) {
+                            toStart = true
+                        }
+                        else {
+                            console.log("MediaClockModel::restore(): countdown timer overdue")
+                            hmsTime = 0
+                            toStart = false
+                        }
+                        break
+                }
+                if (toStart) {
+                    timer.start()
+                }
+                break
+            case Internal.MediaClockRunMode.MCR_STOPPED:
+                hmsTime = magic
+                break
+        }
+        console.debug("MediaClockModel::restore(): exit")
     }
 }

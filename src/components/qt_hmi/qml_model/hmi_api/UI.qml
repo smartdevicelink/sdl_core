@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "Common.js" as Common
 import "Async.js" as Async
+import "../models/Internal.js" as Internal
 
 Item {
     function filter (strings, fields) {
@@ -120,15 +121,50 @@ Item {
 
     function setMediaClockTimer (startTime, updateMode, appID) {
         console.debug("enter")
-        dataContainer.setApplicationProperties(
-            appID, {
-                        "mediaClock": {
-                            "hours": startTime.hours,
-                            "minutes": startTime.minutes,
-                            "seconds": startTime.seconds
-                        }
+        var date = new Date()
+        var secondsSinceEpoch = date.getTime() / 1000
+        var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+        switch (updateMode) {
+            case Common.ClockUpdateMode.COUNTUP:
+                dataContainer.setApplicationProperties(appID, {
+                    "mediaClock": {
+                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
+                        "magic": secondsSinceEpoch - hmsTime
                     }
-        )
+                })
+                break
+            case Common.ClockUpdateMode.COUNTDOWN:
+                dataContainer.setApplicationProperties(appID, {
+                    "mediaClock": {
+                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTDOWN,
+                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
+                        "magic": secondsSinceEpoch + hmsTime
+                    }
+                })
+                break
+            case Common.ClockUpdateMode.PAUSE:
+                dataContainer.setApplicationProperties(appID, {
+                    "mediaClock": {
+                        "updateMode": dataContainer.currentApplication.mediaClock.updateMode,
+                        "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
+                        "magic": dataContainer.currentApplication.mediaClock.hmsTime
+                    }
+                })
+                break
+            case Common.ClockUpdateMode.RESUME:
+                dataContainer.setApplicationProperties(appID, {
+                    "mediaClock": {
+                       "updateMode": dataContainer.currentApplication.mediaClock.updateMode,
+                       "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
+                        "magic": dataContainer.currentApplication.mediaClock.hmsTime
+                    }
+                })
+                break
+            default:
+                console.log("UI::setMediaClockTimer(): updateMode = " + updateMode)
+                break
+        }
         console.debug("exit")
     }
 

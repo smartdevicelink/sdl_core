@@ -44,7 +44,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         horizontalAlignment: Text.AlignRight
         color: "white"
-        text: (mediaPlayerView.playerType === "SDL") ? ((dataContainer.currentApplication.mediaClock.hours > 0) ? dataContainer.currentApplication.mediaClock.hours + ":" : "") + Internal.pad(dataContainer.currentApplication.mediaClock.minutes, 2) + ":" + Internal.pad(dataContainer.currentApplication.mediaClock.seconds, 2)
+        text: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
                                                      : "02:36" //TODO {Aleshin}: get track time for all players except SDL
         font.pixelSize: 18
     }

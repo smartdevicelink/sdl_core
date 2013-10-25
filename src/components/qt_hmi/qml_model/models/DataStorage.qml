@@ -66,37 +66,35 @@ QtObject {
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
-                currentApplication.appName = applicationList.get(i).appName
-                currentApplication.appType = applicationList.get(i).appType
-                currentApplication.playPauseState = applicationList.get(i).playPauseState
-                currentApplication.options = applicationList.get(i).options
+                var application = applicationList.get(i)
+                currentApplication.appName = application.appName
+                currentApplication.appType = application.appType
+                currentApplication.playPauseState = application.playPauseState
+                currentApplication.options = application.options
 
-                if (applicationList.get(i).hmiUIText.mainField1) {
-                    currentApplication.hmiUIText.mainField1 = applicationList.get(i).hmiUIText.mainField1
+                if (application.hmiUIText.mainField1) {
+                    currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
                 }
-                if (applicationList.get(i).hmiUIText.mainField2) {
-                    currentApplication.hmiUIText.mainField2 = applicationList.get(i).hmiUIText.mainField2
+                if (application.hmiUIText.mainField2) {
+                    currentApplication.hmiUIText.mainField2 = application.hmiUIText.mainField2
                 }
-                if (applicationList.get(i).hmiUIText.mainField3) {
-                    currentApplication.hmiUIText.mainField3 = applicationList.get(i).hmiUIText.mainField3
+                if (application.hmiUIText.mainField3) {
+                    currentApplication.hmiUIText.mainField3 = application.hmiUIText.mainField3
                 }
-                if (applicationList.get(i).hmiUIText.mainField4) {
-                    currentApplication.hmiUIText.mainField4 = applicationList.get(i).hmiUIText.mainField4
+                if (application.hmiUIText.mainField4) {
+                    currentApplication.hmiUIText.mainField4 = application.hmiUIText.mainField4
                 }
-                if (applicationList.get(i).hmiUIText.statusBar) {
-                    currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
+                if (application.hmiUIText.statusBar) {
+                    currentApplication.hmiUIText.statusBar = application.hmiUIText.statusBar
                 }
-                if (applicationList.get(i).hmiUIText.picture) {
-                    currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
+                if (application.hmiUIText.picture) {
+                    currentApplication.hmiUIText.picture = application.hmiUIText.picture
                 }
-                currentApplication.deviceName = applicationList.get(i).deviceName
-                currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
-                currentApplication.turnList = applicationList.get(i).turnList
-                currentApplication.turnListSoftButtons = applicationList.get(i).turnListSoftButtons
-                currentApplication.mediaClock.hours = applicationList.get(i).mediaClock.hours
-                currentApplication.mediaClock.minutes = applicationList.get(i).mediaClock.minutes
-                currentApplication.mediaClock.seconds = applicationList.get(i).mediaClock.seconds
-                currentApplication.mediaClock.updateMode = applicationList.get(i).mediaClock.updateMode
+                currentApplication.deviceName = application.deviceName
+                currentApplication.isMediaApplication = application.isMediaApplication
+                currentApplication.turnList = application.turnList
+                currentApplication.turnListSoftButtons = application.turnListSoftButtons
+                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic)
                 // This place is for adding new properties
             }
         }
@@ -277,8 +275,8 @@ QtObject {
                             index = menuParams.position
                         }
                     }
-//                  option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                    option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon}) // actually we do not need subMenu[] for node
+//                  option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                    option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
                     parentNotFound = false
                     break
                 }
@@ -296,7 +294,7 @@ QtObject {
                 }
             }
             var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
-            getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []})
+            getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
         }
         console.debug("UI::addCommand(): exit")
     }

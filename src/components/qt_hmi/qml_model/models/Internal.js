@@ -38,7 +38,12 @@ var MenuItemType = {
 
 var MediaClockUpdateMode = {
     MCU_COUNTUP: 0,
-    MCU_COUNTDOWN: 1
+    MCU_COUNTDOWN: 1,
+}
+
+var MediaClockRunMode = {
+    MCR_RUNNING: 0,
+    MCR_STOPPED: 1
 }
 
 function pad (string, length, lead) {
@@ -50,4 +55,28 @@ function pad (string, length, lead) {
         paddedString = lead + paddedString
     }
     return paddedString
+}
+
+function hmsTime (hours, minutes, seconds) {
+    return 60 * (60 * hours + minutes) + seconds
+}
+
+function hmsTimeToString (hmsTime) {
+    var _time = hmsTime
+    var seconds = _time % 60
+    _time -= seconds
+    _time /= 60
+    var minutes = _time % 60
+    _time -= minutes
+    _time /= 60
+    var hours = _time
+    var string = ""
+    if (hours > 0) {
+        string += hours
+        string += ":"
+    }
+    string += pad(minutes, 2)
+    string += ":"
+    string += pad(seconds, 2)
+    return string
 }

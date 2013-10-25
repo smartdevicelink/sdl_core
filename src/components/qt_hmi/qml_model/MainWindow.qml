@@ -36,7 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -241,10 +241,9 @@ Rectangle {
                     "picture": "../res/album_art.png"
                 },
                 mediaClock: {
-                    "hours": 0,
-                    "minutes": 2,
-                    "seconds": 36,
-                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP
+                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                    "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
+                    "magic": 0
                 }
              });
         }
