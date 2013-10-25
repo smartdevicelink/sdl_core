@@ -37,6 +37,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from xml.etree import ElementTree
+from collections import OrderedDict
 
 
 node_name = '/com/ford/hmi'
@@ -92,12 +93,13 @@ class FordXmlParser:
 
 
     def find_structs(self):
-        self.structs = dict()
+        self.structs = OrderedDict()
         for interface_el in self.el_tree.findall('interface'):
             interface_name = interface_el.get('name')
             for struct_el in interface_el.findall('struct'):
                 struct_name = struct_el.get('name')
                 self.structs[(interface_name, struct_name)] = True
+
         for interface_el in self.el_tree.findall('interface'):
             interface_name = interface_el.get('name')
             for struct_el in interface_el.findall('struct'):
