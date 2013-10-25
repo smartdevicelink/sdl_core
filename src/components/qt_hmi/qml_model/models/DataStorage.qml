@@ -385,4 +385,5 @@ QtObject {
     onDriverDistractionStateChanged: {
         sdlUI.onDriverDistraction(driverDistractionState);
     }
+    property bool activeTTS: false
 }

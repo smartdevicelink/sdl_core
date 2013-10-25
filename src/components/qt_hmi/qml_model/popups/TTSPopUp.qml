@@ -1,6 +1,6 @@
 /**
- * @file PopUp.qml
- * @brief General popup view.
+ * @file TTSPopUp.qml
+ * @brief Popup view for TTS
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,36 +33,49 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Controls 1.0
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
-Item {
-    default property alias content: content.children
-    property int padding: Constants.popUpPadding
+PopUp {
+    height: Constants.ttsPopUpHeight
+    width: Constants.ttsPopUpWidth
+    padding: Constants.ttsPopUpPadding
+    property var async
 
-    Rectangle {
-        width: parent.width - padding / 2
-        height: parent.height - padding / 2
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: Constants.secondaryColor
-        border.width: 1
-        border.color: Constants.popUpBorderColor
-        radius: padding
-        Rectangle {
-            id: content
-            width: parent.width - padding
-            height: parent.height - padding
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: Constants.transparentColor
+    ScrollView {
+        anchors.fill: parent
+        Text {
+            id: text
+            anchors.fill: parent
+            color: Constants.popUpBorderColor
+            font.pixelSize: Constants.ttsFontSize
+            Timer {
+                id: timer
+                interval: Constants.ttsSpeakTime
+                onTriggered: deactivate()
+            }
         }
     }
 
-    function show() {
-        visible = true;
+    function activate(message) {
+        console.debug("Activate TTS popup:", message);
+        dataContainer.activeTTS = true;
+        text.text = message;
+        show();
+        timer.restart();
+        console.debug("Exit");
     }
 
-    function hide() {
-        visible = false;
+    function deactivate() {
+        console.debug("Deactivate TTS popup");
+        dataContainer.activeTTS = false;
+        text.text = '';
+        timer.stop();
+        hide();
+        DBus.sendReply(async, {});
+        async = null;
+        console.debug("Exit");
     }
 }
+

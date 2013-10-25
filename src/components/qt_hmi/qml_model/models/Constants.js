@@ -58,6 +58,10 @@ var transparentColor = "#00000000"
 
 // "Warning" word color
 var warningColor = "red"
+
+// Color for PopUp
+var popUpBorderColor = "white"
+
 //--------------------------------------------------------------------------------------
 
 // Other
@@ -110,6 +114,25 @@ var generalSpacing = 10
 
 // Width of scrollBar
 var scrollBarWidth = 5
+
+// Speak text for a given time
+var ttsSpeakTime = 2000
+
+// font size fo TTS popup
+var ttsFontSize = 12
+
+// padding for popup view
+var popUpPadding = 20
+
+// Width for TTS popup
+var ttsPopUpWidth = 250
+
+// Height for TTS popup
+var ttsPopUpHeight = 100
+
+// Padding for TTS popup
+var ttsPopUpPadding = 10
+
 // -------------------------
 var sliderBarWidth = 400
 var sliderBarHeight = 50

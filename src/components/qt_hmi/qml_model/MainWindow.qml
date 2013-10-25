@@ -161,7 +161,15 @@ Rectangle {
 
         VRPopUp {
             id: vrPopUp
-            anchors.fill: parent
+            visible: false
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        TTSPopUp {
+            id: ttsPopUp
+            anchors.top: parent.top
+            anchors.right: parent.right
             visible: false
         }
 
