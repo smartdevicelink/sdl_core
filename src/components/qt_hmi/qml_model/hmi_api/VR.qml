@@ -45,7 +45,7 @@ Item {
 
     function getCapabilities() {
         return {
-            vrCapabilities: Common.VrCapabilities.VR_TEXT
+            vrCapabilities: [ Common.VrCapabilities.VR_TEXT ]
         }
     }
 

@@ -26,7 +26,7 @@ Item {
         return fieldSubstrings
     }
 
-    function alert (alertStrings, duration, softButtons, appID) {
+    function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
 // with this array we grab only the lines we need
         var alertFields = [Common.TextFieldName.alertText1,
                            Common.TextFieldName.alertText2,
@@ -124,13 +124,14 @@ Item {
     function showVrHelp (vrHelpTitle, vrHelp, appID) {
     }
 
-    function getCapabilities () {
+/*    function getCapabilities () {
         return {
             displayCapabilities: settingsContainer.displayCapabilities,
             hmiZoneCapabilities: Common.HmiZoneCapabilities.FRONT,
             softButtonCapabilities: settingsContainer.softButtonCapabilities
         }
     }
+*/
 
     function isReady () {
         return {
@@ -203,6 +204,74 @@ Item {
         contentLoader.go("./views/ScrollableMessageView.qml")
         console.debug("scrollableMessage exit")
         return dataContainer.scrollableMessageModel.async
+    }
+
+    function getCapabilities() {
+        return {
+            "audioPassThruCapabilities": {
+                "samplingRate": Common.SamplingRate.RATE_44KHZ,
+                "bitsPerSample": Common.BitsPerSample.RATE_8_BIT,
+                "audioType": Common.AudioType.PCM
+            },
+            "displayCapabilities": {
+                "displayType": Common.DisplayType.GEN2_8_DMA,
+                "textFields": [
+                    Common.TextFieldName.mainField1,
+                    Common.TextFieldName.mainField2,
+                    Common.TextFieldName.mainField3,
+                    Common.TextFieldName.mainField4,
+                    Common.TextFieldName.statusBar,
+                    Common.TextFieldName.mediaClock,
+                    Common.TextFieldName.mediaTrack,
+                    Common.TextFieldName.alertText1,
+                    Common.TextFieldName.alertText2,
+                    Common.TextFieldName.alertText3,
+                    Common.TextFieldName.scrollableMessageBody,
+                    Common.TextFieldName.initialInteractionText,
+                    Common.TextFieldName.navigationText1,
+                    Common.TextFieldName.navigationText2,
+                    Common.TextFieldName.ETA,
+                    Common.TextFieldName.totalDistance,
+                    Common.TextFieldName.navigationText,
+                    Common.TextFieldName.audioPassThruDisplayText1,
+                    Common.TextFieldName.audioPassThruDisplayText2,
+                    Common.TextFieldName.sliderHeader,
+                    Common.TextFieldName.sliderFooter,
+                    Common.TextFieldName.notificationText
+                ],
+                "mediaClockFormats": [
+                    Common.MediaClockFormat.CLOCK1,
+                    Common.MediaClockFormat.CLOCK2,
+                    Common.MediaClockFormat.CLOCK3,
+                    Common.MediaClockFormat.CLOCKTEXT1,
+                    Common.MediaClockFormat.CLOCKTEXT2,
+                    Common.MediaClockFormat.CLOCKTEXT3,
+                    Common.MediaClockFormat.CLOCKTEXT4
+                ],
+                "graphicSupported": true,
+                "imageCapabilities": [ Common.ImageType.DYNAMIC ],
+                "templatesAvailable": [ "" ],
+                "screenParams": {
+                    "resolution": {
+                        "resolutionWidth": 800,
+                        "resolutionHeight": 480
+                    },
+                    "touchEventAvailable":{
+                        "pressAvailable": true,
+                        "multiTouchAvailable": true,
+                        "doublePressAvailable": true
+                    }
+                },
+                "numCustomPresetsAvailable": 6
+            },
+            "hmiZoneCapabilities": Common.HmiZoneCapabilities.FRONT,
+            "softButtonCapabilities": {
+                "shortPressAvailable": true,
+                "longPressAvailable": true,
+                "upDownAvailable": true,
+                "imageSupported": true
+            }
+        }
     }
 
     function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
