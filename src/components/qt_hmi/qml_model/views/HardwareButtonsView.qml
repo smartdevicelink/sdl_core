@@ -211,6 +211,10 @@ Item {
                 ComboBox {
                     model: languagesList
                     width: 200
+                    onCurrentIndexChanged: {
+                        dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
+                    }
                 }
             }
             Column
