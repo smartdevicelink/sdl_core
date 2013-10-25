@@ -702,6 +702,11 @@ SDL.SDLModel = Em.Object.create({
      */
     onPrompt: function (ttsChunks, id) {
 
+        if (SDL.TTSPopUp.active) {
+            FFW.TTS.sendError(SDL.SDLModel.resultCode["IN_USE"], id, "TTS.Speak", "TTS in progress. Rejected.");
+            return;
+        }
+
         var message = '';
         if (ttsChunks) {
             for (var i = 0; i < ttsChunks.length; i++) {
