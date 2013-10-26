@@ -79,4 +79,5 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND
+	${CMAKE_SOURCE_DIR}/ignore_ret ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
