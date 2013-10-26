@@ -61,18 +61,51 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      */
     sliderRequestId: null,
 
+    timer: null,
+
+    timeout: null,
+
     /**
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
     deactivate: function(ABORTED) {
         this._super();
+        this.timeout = null;
+        clearTimeout(this.timer);
+        this.timer = null;
+
         if (ABORTED === true) {
             FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
         } else {
             FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
         }
     },
+
+    activate: function(text, timeout) {
+        if( text ){
+            this.set( 'caption', text );
+        }
+
+        this.set( 'active', true );
+
+        this.set('timeout', timeout);
+
+        this.timer = setTimeout(function () {
+            if (SDL.SliderView.active) {
+                SDL.SliderView.deactivate(true);
+            }
+        }, timeout);
+    },
+
+    dataChange: function(){
+        var self = this;
+
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function () {
+            self.deactivate(true);
+        }, this.timeout);
+    }.observes('this.adjustControl.sliderValue.value'),
 
     adjustControl: Em.ContainerView.extend( {
 
