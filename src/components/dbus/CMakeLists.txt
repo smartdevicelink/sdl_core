@@ -1,12 +1,13 @@
+find_package(DBus)
 include_directories (
+  ${DBUS_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${CMAKE_SOURCE_DIR}/
   ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/formatters/include/
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
-  /usr/include/dbus-1.0/
-  /usr/lib/i386-linux-gnu/dbus-1.0/include/
 )
 
 set (SOURCES

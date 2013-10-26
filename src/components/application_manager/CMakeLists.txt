@@ -1,5 +1,6 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
+find_package(LibXml2 REQUIRED)
 
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
@@ -7,6 +8,10 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${LIBXML2_INCLUDE_DIR}
   ./include/
   ../utils/include/
   ../formatters/include/
@@ -21,11 +26,6 @@ include_directories (
   ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
-  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES

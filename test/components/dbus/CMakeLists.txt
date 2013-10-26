@@ -2,6 +2,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/

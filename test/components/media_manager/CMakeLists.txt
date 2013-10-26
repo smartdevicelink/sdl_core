@@ -1,4 +1,8 @@
 include_directories (
+  ${LIBXML2_INCLUDE_DIR}
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+  ${GLIB_glibconfig_2_INCLUDE_DIR}
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/media_manager/include
@@ -6,10 +10,6 @@ include_directories (
   ../../../src/components/utils/include/
   ../../../src/components/protocol_handler/include/
   ../../../test/components/media_manager/include
-    /usr/lib/i386-linux-gnu/glib-2.0/include
-    /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
