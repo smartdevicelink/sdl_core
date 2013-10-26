@@ -190,6 +190,9 @@ SDL.SDLController = Em.Object
             }
             case "ScrollableMessage": {
                 clearTimeout(SDL.ScrollableMessage.timer);
+                SDL.ScrollableMessage.timer = setTimeout(function() {
+                    SDL.ScrollableMessage.deactivate();
+                }, SDL.ScrollableMessage.timeout);
                 break;
             }
             }

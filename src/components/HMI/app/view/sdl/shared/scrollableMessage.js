@@ -55,24 +55,11 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
 
     timer: null,
 
-    timeoutValue: null,
+    timeout: null,
 
     childViews: [
         'backButton', 'captionText', 'softButtons', 'listOfCommands'
     ],
-
-    /**
-     * Reset timeout function
-     */
-    click: function(){
-
-        var self = this;
-
-        clearTimeout(this.timer);
-        this.timer = setTimeout(function () {
-            self.deactivate();
-        }, this.timeout);
-    },
 
     /**
      * Deactivate View
@@ -139,6 +126,19 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
         itemsOnPage: 11,
 
         /** Items array */
-        items: 'asdasdasd'
+        items: 'asdasdasd',
+
+        /**
+         * Reset timeout function
+         */
+        click: function(){
+
+            var self = this;
+
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function () {
+                self.deactivate();
+            }, this._parentView.timeout);
+        }
     })
 });
