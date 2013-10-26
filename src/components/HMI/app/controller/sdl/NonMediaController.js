@@ -104,9 +104,10 @@ SDL.NonMediaController = Em.Object.create( {
                 SDL.SDLAppController.model.set('active', false);
 
                 SDL.States.goToStates('info.apps');
-
-                SDL.InfoController.set('activeState', 'info.apps');
             }
+
+            SDL.InfoController.set('activeState', 'info.apps');
+
             this.set('currentAppId', 0);
         }
         SDL.SDLModel.get('registeredApps').removeObjects(SDL.SDLModel.get('registeredApps').filterProperty('appID', appID));
