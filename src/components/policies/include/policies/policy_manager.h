@@ -36,8 +36,10 @@
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 
 #include "policies/policy_configuration.h"
+#include "policies/policy_table.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
+#include "utils/logger.h"
 
 namespace NsSmartDeviceLink {
 namespace policies {
@@ -82,19 +84,26 @@ class PolicyManager {
     CheckPermissionResult::eType checkPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc);
 
+    /**
+     * @brief Store policy table to filesystem
+     */
+    void StorePolicyTable();
 
   private:
-    /**
-     * @brief create schema of Policy Table for SDL (non Ford-specific)
-     *
-     * @return created schema
-     **/
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema createSchemaSDL();
-
     /**
      * @brief Policy configuration
      */
     const PolicyConfiguration& policy_config_;
+
+    /**
+     * @brief Policy table
+     */
+    PolicyTable* policy_table_;
+
+    /**
+     * @brief Logger
+     */
+    static log4cxx::LoggerPtr logger_;
 };
 
 }  // namespace policies

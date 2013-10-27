@@ -34,40 +34,59 @@
 
 #include "policies/policy_manager.h"
 #include "smart_objects/always_true_schema_item.h"
+#include "utils/file_system.h"
 
 namespace policies_ns = NsSmartDeviceLink::policies;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
+
+log4cxx::LoggerPtr policies_ns::PolicyManager::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("Policies"));
 
 //---------------------------------------------------------------
 
 policies_ns::PolicyManager::PolicyManager(
   const PolicyConfiguration& policy_config)
-  : policy_config_(policy_config) {
+  : policy_config_(policy_config)
+  , policy_table_(0) {
 }
 
 //---------------------------------------------------------------
 
 void policies_ns::PolicyManager::Init() {
-  // TODO(anybody): read file with policy table
-  // TODO()anybody): convert file content to smart object
+  std::string pt_string;
+  if (true == file_system::ReadFile(policy_config_.getPTFileName(),
+                                    pt_string)) {
+    if (0 == policy_table_) {
+      policy_table_ = new policies_ns::PolicyTable(pt_string);
+    } else {
+      LOG4CXX_WARN(logger_,
+        "Policy table is already created.");
+    }
+  } else {
+    LOG4CXX_ERROR(logger_,
+      "Can't read policy table file " << policy_config_.getPTFileName());
+  }
 }
 
 //---------------------------------------------------------------
 
 policies_ns::CheckPermissionResult::eType
   policies_ns::PolicyManager::checkPermission(
-    uint32_t app_id,
-    const smart_objects_ns::SmartObject& rpc) {
-
+    uint32_t app_id, const so_ns::SmartObject& rpc) {
   return policies_ns::CheckPermissionResult::PERMISSION_OK;
 }
 
 //---------------------------------------------------------------
 
-smart_objects_ns::CSmartSchema policies_ns::PolicyManager::createSchemaSDL() {
-  return
-    smart_objects_ns::CSmartSchema(
-        smart_objects_ns::CAlwaysTrueSchemaItem::create());
+void policies_ns::PolicyManager::StorePolicyTable() {
+  if (0 != policy_table_) {
+    const std::string pt_string = policy_table_->AsString();
+    const std::vector<unsigned char> char_vector_pdata(pt_string.begin(),
+                                                     pt_string.end());
+    if (false ==
+      file_system::Write(policy_config_.getPTFileName(), char_vector_pdata)) {
+      LOG4CXX_ERROR(logger_,
+        "Can't write policy table file " << policy_config_.getPTFileName());
+    }
+  }
 }
-
-//---------------------------------------------------------------

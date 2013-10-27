@@ -38,7 +38,7 @@ namespace policies_ns = NsSmartDeviceLink::policies;
 
 //----------------------------------------------------------------------------
 
-policies_ns::PolicyConfiguration::PolicyConfiguration() 
+policies_ns::PolicyConfiguration::PolicyConfiguration()
   : pt_fname_() {
 }
 
@@ -51,6 +51,6 @@ void policies_ns::PolicyConfiguration::setPTFileName(
 
 //-----------------------------------------------------------------------------
 
-std::string policies_ns::PolicyConfiguration::getPTFile() const {
+std::string policies_ns::PolicyConfiguration::getPTFileName() const {
   return pt_fname_;
 }

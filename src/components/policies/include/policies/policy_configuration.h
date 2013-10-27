@@ -64,13 +64,13 @@ class PolicyConfiguration {
      *
      * @return File path
      */
-    std::string getPTFile() const;
+    std::string getPTFileName() const;
 
   private:
     /**
      * @brief policy table file name
      */
-    std::string pt_fname_;  
+    std::string pt_fname_;
 };
 
 }  // namespace policies
