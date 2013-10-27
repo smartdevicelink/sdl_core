@@ -70,6 +70,7 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
     deactivate: function (ABORTED) {
         clearTimeout(this.timer);
         this.set('active', false);
+        this.softButtons.set('page', 0);
 
         this.timeout = null;
 
