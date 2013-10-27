@@ -1,6 +1,6 @@
 /**
- * @file policy_manager.cc
- * @brief Policy manager source file.
+ * @file policy_table.cc
+ * @brief Policy table source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,42 +32,60 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "policies/policy_manager.h"
+#include "policies/policy_table.h"
 #include "smart_objects/always_true_schema_item.h"
 
 namespace policies_ns = NsSmartDeviceLink::policies;
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
-//---------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-policies_ns::PolicyManager::PolicyManager(
-  const PolicyConfiguration& policy_config)
-  : policy_config_(policy_config) {
+policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string)
+  : is_schema_set_(false)
+  , schema_(so_ns::CSmartSchema(so_ns::CAlwaysTrueSchemaItem::create()))
+  , pt_smart_object_()
+  , pt_default_smart_object_() {
 }
 
-//---------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-void policies_ns::PolicyManager::Init() {
-  // TODO(anybody): read file with policy table
-  // TODO()anybody): convert file content to smart object
+policies_ns::PolicyTable::~PolicyTable() {
 }
 
-//---------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-policies_ns::CheckPermissionResult::eType
-  policies_ns::PolicyManager::checkPermission(
-    uint32_t app_id,
-    const smart_objects_ns::SmartObject& rpc) {
-
-  return policies_ns::CheckPermissionResult::PERMISSION_OK;
+so_ns::SmartObject& policies_ns::PolicyTable::AsSmartObject() {
+  return pt_smart_object_;
 }
 
-//---------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-smart_objects_ns::CSmartSchema policies_ns::PolicyManager::createSchemaSDL() {
+const std::string policies_ns::PolicyTable::AsString() {
+  return std::string();
+}
+
+//---------------------------------------------------------------------------
+
+void policies_ns::PolicyTable::SetSchema(
+    NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema) {
+  schema_ = schema;
+}
+
+//---------------------------------------------------------------------------
+
+policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
+  return PTValidationResult::VALIDATION_FAILED;
+}
+
+//---------------------------------------------------------------------------
+
+/*static*/
+so_ns::CSmartSchema policies_ns::PolicyTable::createSchemaSDL() {
   return
-    smart_objects_ns::CSmartSchema(
-        smart_objects_ns::CAlwaysTrueSchemaItem::create());
+    so_ns::CSmartSchema(
+        so_ns::CAlwaysTrueSchemaItem::create());
 }
 
-//---------------------------------------------------------------
+so_ns::SmartObject& policies_ns::PolicyTable::CreateDefaultPT() {
+  return pt_default_smart_object_;
+}

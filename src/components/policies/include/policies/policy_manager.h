@@ -64,7 +64,7 @@ class PolicyManager {
      *
      * @param policy_config Policy configuration
      */
-    PolicyManager(const PolicyConfiguration& policy_config);
+    explicit PolicyManager(const PolicyConfiguration& policy_config);
 
     /**
     * @brief Initialization method
@@ -90,18 +90,6 @@ class PolicyManager {
      * @return created schema
      **/
     NsSmartDeviceLink::NsSmartObjects::CSmartSchema createSchemaSDL();
-
-    /**
-    * @brief Validate poicy table.
-    *
-    * Validates policy table against smart schema which describes policy table
-    *
-    * @param policy_table Policy table as smart object
-    *
-    * @return true if successful; false otherwise
-    **/
-    bool validatePT(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& policy_table);
 
     /**
      * @brief Policy configuration
