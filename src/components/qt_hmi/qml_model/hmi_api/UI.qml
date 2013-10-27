@@ -27,13 +27,11 @@ Item {
     }
 
     function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
-// with this array we grab only the lines we need
-        var alertFields = [Common.TextFieldName.alertText1,
-                           Common.TextFieldName.alertText2,
-                           Common.TextFieldName.alertText3]
+        var fieldSubstrings = alertStrings
+	    .sort(function(a, b) { return a.fieldName - b.fieldName })
+	    .map(function(val) { return val.fieldText });
 
-        var fieldSubstrings = filter(alertStrings, alertFields)
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID, softButtons)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, progressIndicator, softButtons, appID)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
@@ -88,27 +86,22 @@ Item {
             dataContainer.hmiUITextAlignment = Text.AlignHCenter
         }
         console.debug("UI::show(): exit")
-        return {}
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
         dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
-        return {}
     }
 
     function deleteCommand (cmdID, appID) {
         dataContainer.deleteCommand(cmdID, appID)
-        return {}
     }
 
     function addSubMenu (menuID, menuParams, appID) {
         dataContainer.addSubMenu(menuID, menuParams, appID)
-        return {}
     }
 
     function deleteSubMenu (menuID, appID) {
         dataContainer.deleteSubMenu(menuID, appID)
-        return {}
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
@@ -248,7 +241,6 @@ Item {
         }
         //response to this callwith SUCCESS code
         console.debug("exit")
-        return {}
     }
 
     function fillSoftButtons(element, index, array) {

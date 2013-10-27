@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.0
 import "../controls"
+import "controls"
 import "../hmi_api/Common.js" as Common
 
 Rectangle {
@@ -52,13 +53,9 @@ Rectangle {
         width: alertContent.width + 60
         height: alertContent.height + 60
 
-        MouseArea {
-            anchors.fill: alertContent
-            onClicked: complete()
-        }
-
         property alias alertString: alert.text
         property alias appNameString: appName.text
+        property int duration
 
         Column {
             id: alertContent
@@ -70,13 +67,9 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: "white"
                 font.pointSize: 16
-                horizontalAlignment: Text.AlignHCenter
             }
 
             Row {
-
-                anchors.left: parent.left
-                anchors.right: parent.right
                 spacing: 20
 
                 Image {
@@ -85,51 +78,66 @@ Rectangle {
 
                 Text {
                     id: alert
-                    width: 200
                     clip: true
                     color: "white"
                     font.pointSize: 16
                 }
             }
+
+            Rectangle {
+                id: progressIndicator
+                color: "white"
+                height: 10
+            }
+
             Column {
                 Item {
                     width: 360
                     height: alertButton1.visible ? alertButton1.height : 0
-                    OvalButton {
+
+                    AlertSoftButton {
                         id: alertButton1
-                        text: softButtons && softButtons.length > 0 ? softButtons[0].text : ""
+                        button: softButtons && softButtons.length > 0 ? softButtons[0] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton2.visible ? alertButton2.left : parent.right
                         width: 180
-                        visible: softButtons ? softButtons.length > 0 : false
                     }
-                    OvalButton {
+                    AlertSoftButton {
                         id: alertButton2
-                        text: softButtons && softButtons.length > 1 ? softButtons[1].text : ""
-                        width: 180
-                        visible: softButtons ? softButtons.length > 1 : false
+                        button: softButtons && softButtons.length > 1 ? softButtons[1] : undefined
                         anchors.right: parent.right
+                        width: 180
                     }
                 }
                 Item {
                     width: 360
                     height: alertButton3.visible ? childrenRect.height : 0
-                    OvalButton {
+                    AlertSoftButton {
                         id: alertButton3
-                        text: softButtons && softButtons.length > 2 ? softButtons[2].text : ""
+                        button: softButtons && softButtons.length > 2 ? softButtons[2] : undefined
+                        anchors.left: parent.left
                         anchors.right: alertButton4.visible ? alertButton4.left : parent.right
                         width: 180
-                        visible: softButtons ? softButtons.length > 2 : false
-                        anchors.left: parent.left
                     }
-                    OvalButton {
+                    AlertSoftButton {
                         id: alertButton4
-                        text: softButtons && softButtons.length > 3 ? softButtons[3].text : ""
-                        width: 180
-                        visible: softButtons ? softButtons.length > 3 : false
+                        button: softButtons && softButtons.length > 3 ? softButtons[3] : undefined
                         anchors.right: parent.right
+                        width: 180
                     }
                 }
+            }
+        }
+
+        SequentialAnimation {
+            id: animation
+            PropertyAction { target: progressIndicator; property: "width"; value: alertContent.width }
+            PropertyAnimation {
+                id: shrinkProgressAnimation
+                target: progressIndicator
+                property: "width"
+                to: 0
+                duration: rectangle.duration
             }
         }
     }
@@ -143,8 +151,9 @@ Rectangle {
 
     property date lastAlertTime
     property var softButtons
+    property int appId
 
-    function alert (alertStrings, duration, appID, sButtons) {
+    function alert (alertStrings, duration, showIndicator, sButtons, appID) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
@@ -154,18 +163,20 @@ Rectangle {
             return timeLeftRounded
         }
         else {
-            lastAlertTime = new Date()
-            rectangle.appNameString = dataContainer.getApplication(appID).appName
-            var alertString = ""
-            for (var index in alertStrings) {
-                alertString += alertStrings[index]
-                alertString += "\n"
-            }
-            softButtons = sButtons
-            rectangle.alertString = alertString
-            timer.interval = duration
-            timer.start()
-            show()
+            lastAlertTime = new Date();
+            appId = appID
+            rectangle.appNameString = dataContainer.getApplication(appID).appName;
+            softButtons = sButtons;
+            rectangle.alertString = alertStrings.join('\n');
+            timer.interval = duration;
+            rectangle.duration = duration;
+            timer.start();
+            show();
+
+            progressIndicator.visible = showIndicator
+            progressIndicator.width = alertContent.width
+            console.log("ProgressIndicator.width:", progressIndicator.width)
+            animation.start()
         }
     }
 
@@ -182,5 +193,14 @@ Rectangle {
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
         DBus.sendReply(async, {})
+    }
+
+    function restart() {
+        animation.restart();
+        timer.restart();
+    }
+
+    function keep() {
+        timer.stop();
     }
 }

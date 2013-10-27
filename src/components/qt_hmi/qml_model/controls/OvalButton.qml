@@ -35,12 +35,14 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
+// TODO: (dchmerev@luxoft.com) WTF?
+//                              |
+//                              v
 // Don't change constants. It break button
-Rectangle {
+Item {
     id: main
     width: dynamic ? field.width + 2 * left.width : Constants.longOvalButtonWidth
     height: Constants.ovalButtonHeight
-    color: Constants.transparentColor
 
     signal clicked;
     signal pressed;
