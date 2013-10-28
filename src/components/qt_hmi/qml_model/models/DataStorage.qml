@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 import "Internal.js" as Internal
+import "Constants.js" as Constants
 
 QtObject {
 
@@ -268,16 +269,22 @@ QtObject {
             for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
                 var option = getApplication(appID).options.get(optionIndex)
                 if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuParams.parentID)) {
-                    var count = option.subMenu.count
-                    var index = count
-                    if (menuParams.position !== undefined) {
-                        if (menuParams.position < count) {
-                            index = menuParams.position
-                        }
-                    }
-//                  option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                    option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
                     parentNotFound = false
+                    var count = option.subMenu.count
+                    if (count < Constants.maximumCommandsPerSubMenu) {
+                        var index = count
+                        if (menuParams.position !== undefined) {
+                            if (menuParams.position < count) {
+                                index = menuParams.position
+                            }
+                        }
+//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
+                    }
+                    else {
+                        console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")
+                        throw Common.Result.REJECTED
+                    }
                     break
                 }
             }
@@ -287,14 +294,20 @@ QtObject {
         }
         else {
             count = getApplication(appID).options.count
-            index = count
-            if (menuParams.position !== undefined) {
-                if (menuParams.position < count) {
-                    index = menuParams.position
+            if (count < Constants.maximumCommandsPerSubMenu) {
+                index = count
+                if (menuParams.position !== undefined) {
+                    if (menuParams.position < count) {
+                        index = menuParams.position
+                    }
                 }
+                var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
+                getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
             }
-            var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
-            getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
+            else {
+                console.log("addCommand(): too many commands in root menu, rejecting")
+                throw Common.Result.REJECTED
+            }
         }
         console.debug("UI::addCommand(): exit")
     }
@@ -319,7 +332,8 @@ QtObject {
                             subMenu.remove(subOptionIndex)
                         }
                         else {
-                            console.log("UI::deleteCommand(): cannot remove item from current submenu")
+                            console.log("UI::deleteCommand(): cannot remove item from current submenu, rejecting")
+                            throw Common.Result.REJECTED
                         }
                         break
                     }
@@ -335,24 +349,33 @@ QtObject {
     function addSubMenu (menuID, menuParams, appID) {
         console.debug("addSubMenu(" + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID + ")")
         var count = getApplication(appID).options.count
-        var index = count
-        if (menuParams.position !== undefined) {
-            if (menuParams.position < count) {
-                index = menuParams.position
+        if (count < Constants.maximumSubmenus) {
+            var index = count
+            if (menuParams.position !== undefined) {
+                if (menuParams.position < count) {
+                    index = menuParams.position
+                }
             }
-        }
-        getApplication(appID).options.insert(index, {
-            "id": menuID,
-            "name": menuParams.menuName,
-            "type": Internal.MenuItemType.MI_SUBMENU,
-            "icon": undefined,
-            "subMenu": [{
-                "name": "..",
-                "type": Internal.MenuItemType.MI_PARENT,
+            getApplication(appID).options.insert(index, {
+                "id": menuID,
+                "name": menuParams.menuName,
+                "type": Internal.MenuItemType.MI_SUBMENU,
                 "icon": undefined,
-                "subMenu": getApplication(appID).options
-            }]
-        })
+                "subMenu": [{
+                    "name": menuParams.menuName,
+                    "type": Internal.MenuItemType.MI_PARENT,
+                    "icon": {
+                        "imageType": Common.ImageType.DYNAMIC,
+                        "value": "../res/nav/turnArrow.png"
+                    },
+                    "subMenu": getApplication(appID).options
+                }]
+            })
+        }
+        else {
+            console.log("addSubMenu(): too many submenus, rejecting")
+            throw Common.Result.REJECTED
+        }
         console.debug("addSubMenu(): exit")
     }
 
@@ -365,7 +388,8 @@ QtObject {
                     getApplication(appID).options.remove(optionIndex)
                 }
                 else {
-                    console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                    console.log("UI::deleteSubMenu(): cannot remove current submenu, rejecting")
+                    throw Common.Result.REJECTED
                 }
                 break
             }

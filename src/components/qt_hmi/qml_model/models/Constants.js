@@ -99,11 +99,20 @@ var iconButtonSize = 30
 // Size icon for item list
 var iconItemListSize = 40
 
+// Spacing between icon and item in list
+var iconItemListSpacing = 20
+
 // Height item list
 var itemListHeight = 60
 
 // Spasing between item on views
 var generalSpasing = 10
+
+// Maximal number of submenus
+var maximumSubmenus = 1000
+
+// Maximal number of commands in submenu or root menu
+var maximumCommandsPerSubMenu = 1000
 
 // -------------------------
 
