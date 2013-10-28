@@ -70,7 +70,7 @@ var popUpBorderColor = "white"
 var fontSize = 20
 
 // Title font size
-var tittleFontSize = 45
+var titleFontSize = 45
 
 // Power on/off button font size
 var powerButtonFornSize = 25
