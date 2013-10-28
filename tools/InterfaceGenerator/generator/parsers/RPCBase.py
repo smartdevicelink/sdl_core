@@ -441,6 +441,7 @@ class Parser(object):
             raise ParseError("Unexpected subelements in enum element")
 
         self._ignore_attribute(attributes, "hexvalue")
+        self._ignore_attribute(attributes, "scope")
 
         internal_name = None
         value = None
