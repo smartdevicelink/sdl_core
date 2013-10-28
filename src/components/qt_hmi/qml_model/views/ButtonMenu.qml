@@ -150,6 +150,8 @@ GeneralView {
 
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
         activePage: {
+            // Change page number, when half of one elements width appears at screen.
+            // At this menu one element' width - 1/3 of screen width.
             if (flicker.contentX <= 0) {
                 return 0
             }
