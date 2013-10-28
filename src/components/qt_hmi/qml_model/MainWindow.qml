@@ -175,13 +175,15 @@ Rectangle {
 
         ExitAllApplicationsPopup {
             id: exitAllApplicationsPopup
-            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
 
         InteractionPopup {
             id: interactionPopup
-            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
 
@@ -205,7 +207,8 @@ Rectangle {
 
         PerformAudioPassThruPopup {
             id: performAudioPassThruPopup
-            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
     }
