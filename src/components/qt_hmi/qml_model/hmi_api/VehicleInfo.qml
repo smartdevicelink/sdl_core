@@ -72,7 +72,7 @@ Item {
         }
 */
 
-        console.debug("exit getVehicleData()", dataToSend);
+        console.debug("exit getVehicleData()");
         return { gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
                 speed: speed ? dataContainer.vehicleInfoModel.speed : undefined,
                 rpm: rpm ? dataContainer.vehicleInfoModel.rpm : undefined,

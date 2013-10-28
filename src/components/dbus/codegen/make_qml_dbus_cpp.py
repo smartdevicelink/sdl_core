@@ -58,6 +58,16 @@ class Impl(FordXmlParser):
         out.write("struct " + struct_name + " {\n")
         for param in params:
             out.write("  " + self.qt_param_type(param) + " " + param.name + ";\n")
+        out.write("  %s()" % struct_name)
+        firstParam = True
+        for param in params:
+            if param.type == "Boolean":
+                if firstParam:
+                    firstParam = False
+                    out.write("    : %s(false)" % param.name)
+                else:
+                    out.write(",\n    %s(false)" % param.name)
+        out.write(" { }\n")
         out.write("};\n")
         out.write('QDBusArgument& operator << (QDBusArgument&, const ' + struct_name + "&);\n")
         out.write('const QDBusArgument& operator >> (const QDBusArgument&, ' + struct_name + "&);\n")
