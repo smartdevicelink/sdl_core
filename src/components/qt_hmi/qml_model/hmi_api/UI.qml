@@ -131,7 +131,8 @@ Item {
                     "mediaClock": {
                         "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                         "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                        "magic": secondsSinceEpoch - hmsTime
+                        "magic": secondsSinceEpoch - hmsTime,
+                        "total": 0
                     }
                 })
                 break
@@ -140,7 +141,8 @@ Item {
                     "mediaClock": {
                         "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTDOWN,
                         "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                        "magic": secondsSinceEpoch + hmsTime
+                        "magic": secondsSinceEpoch + hmsTime,
+                        "total": hmsTime
                     }
                 })
                 break
@@ -160,7 +162,8 @@ Item {
                     "mediaClock": {
                         "updateMode": mediaClockUpdateMode,
                         "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
-                        "magic": newMediaClockTime
+                        "magic": newMediaClockTime,
+                        "total": dataContainer.getApplication(appID).mediaClock.total
                     }
                 })
                 break
@@ -180,7 +183,8 @@ Item {
                     "mediaClock": {
                        "updateMode": mediaClockUpdateMode,
                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                       "magic": newMediaClockTimeMagic
+                       "magic": newMediaClockTimeMagic,
+                       "total": dataContainer.getApplication(appID).mediaClock.total
                     }
                 })
                 break
@@ -189,7 +193,8 @@ Item {
                     "mediaClock": {
                         "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                         "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
-                        "magic": 0
+                        "magic": 0,
+                        "total": 0
                     }
                 })
                 break;

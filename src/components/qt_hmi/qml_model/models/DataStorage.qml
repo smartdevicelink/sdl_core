@@ -94,7 +94,7 @@ QtObject {
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
-                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic)
+                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 // This place is for adding new properties
             }
         }

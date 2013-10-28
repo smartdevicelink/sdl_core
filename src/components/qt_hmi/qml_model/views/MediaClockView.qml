@@ -56,7 +56,6 @@ Item {
         width: 2/3 * parent.width
 
         Rectangle {
-           id: firstRect
            anchors.verticalCenter: parent.verticalCenter
            height: 2
            width: dataContainer.currentApplication.mediaClock.progress * parent.width
@@ -64,7 +63,6 @@ Item {
         }
 
         Rectangle {
-           id: secondRect
            anchors.verticalCenter: parent.verticalCenter
            height: 2
            width: (1 - dataContainer.currentApplication.mediaClock.progress) * parent.width

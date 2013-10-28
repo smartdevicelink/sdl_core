@@ -38,10 +38,11 @@ import "Internal.js" as Internal
 QtObject {
     property int hmsTime
     property real magic // either difference or sum with current time - depends on update mode
+    property int total
 
     property int updateMode
 
-    property real progress: 1 / 3
+    property real progress: 0
 
     property Timer timer: Timer {
         interval: 1000
@@ -59,17 +60,19 @@ QtObject {
                     timer.stop()
                     console.log("countdown timer stopped")
                 }
+                progress = hmsTime / total
                 break
         }
     }
 
-    function restore (updateMode, runningMode, magic) {
-        console.debug("MediaClockModel::restore(" + updateMode + ", " + runningMode + ", " + magic + ")")
+    function restore (updateMode, runningMode, magic, total) {
+        console.debug("MediaClockModel::restore(" + updateMode + ", " + runningMode + ", " + magic + ", " + total + ")")
         timer.stop()
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
         this.updateMode = updateMode
         this.magic = magic
+        this.total = total
         var toStart
         switch (runningMode) {
             case Internal.MediaClockRunMode.MCR_RUNNING:
