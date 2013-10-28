@@ -1,6 +1,6 @@
 /**
  * @file policy_manager.h
- * @brief Polocy Manager  header file.
+ * @brief Policy Manager header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -36,8 +36,10 @@
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 
 #include "policies/policy_configuration.h"
+#include "policies/policy_table.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
+#include "utils/logger.h"
 
 namespace NsSmartDeviceLink {
 namespace policies {
@@ -64,7 +66,7 @@ class PolicyManager {
      *
      * @param policy_config Policy configuration
      */
-    PolicyManager(const PolicyConfiguration& policy_config);
+    explicit PolicyManager(const PolicyConfiguration& policy_config);
 
     /**
     * @brief Initialization method
@@ -82,31 +84,26 @@ class PolicyManager {
     CheckPermissionResult::eType checkPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc);
 
+    /**
+     * @brief Store policy table to filesystem
+     */
+    void StorePolicyTable();
 
   private:
-    /**
-     * @brief create schema of Policy Table for SDL (non Ford-specific)
-     *
-     * @return created schema
-     **/
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema createSchemaSDL();
-
-    /**
-    * @brief Validate poicy table.
-    *
-    * Validates policy table against smart schema which describes policy table
-    *
-    * @param policy_table Policy table as smart object
-    *
-    * @return true if successful; false otherwise
-    **/
-    bool validatePT(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& policy_table);
-
     /**
      * @brief Policy configuration
      */
     const PolicyConfiguration& policy_config_;
+
+    /**
+     * @brief Policy table
+     */
+    PolicyTable* policy_table_;
+
+    /**
+     * @brief Logger
+     */
+    static log4cxx::LoggerPtr logger_;
 };
 
 }  // namespace policies
