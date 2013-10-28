@@ -23,7 +23,7 @@ add_subdirectory(./utils)
 #add_subdirectory(./mobile_message_handler)
 
 # --- Audio Manager
-add_subdirectory(./audio_manager)
+add_subdirectory(./media_manager)
 
 # --- HMI Message Handler
 add_subdirectory(./hmi_message_handler)
@@ -32,4 +32,3 @@ add_subdirectory(./hmi_message_handler)
 IF (${QT_HMI})
     add_subdirectory(./dbus)
 ENDIF (${QT_HMI})
- 

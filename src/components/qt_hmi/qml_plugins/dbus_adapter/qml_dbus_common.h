@@ -103,10 +103,19 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, bool& v) {
   return true;
 }
 
+inline bool isNumber(QVariant v) {
+    QVariant::Type t = v.type();
+    return (t == QVariant::Double) ||
+           (t == QVariant::Int) ||
+           (t == QVariant::UInt) ||
+           (t == QVariant::LongLong) ||
+           (t == QVariant::ULongLong);
+}
+
 inline bool GetArgFromMap(const QVariantMap& map, const char* name, double& v) {
   QVariantMap::const_iterator it = map.find(name);
   if (map.end() == it) return false;
-  if (it->type() != QVariant::Double) return false;
+  if (!isNumber(*it)) return false;
   v = it->toDouble();
   return true;
 }

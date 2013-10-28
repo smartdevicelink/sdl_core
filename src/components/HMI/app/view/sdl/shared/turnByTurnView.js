@@ -52,7 +52,11 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
             'turnList',
             'homeScreen',
             'navigationText2',
-            'turnIconImage'
+            'turnIconImage',
+            'nextTurnIconImage',
+            'distanceToManeuver',
+            'distanceToManeuverScale',
+            'timeToDestination'
         ],
 
         appID: -1,
@@ -60,52 +64,64 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
         eta: null,
         totalDistance: null,
         turnIcon: null,
+        nextturnIcon: null,
         distanceToManeuver: null,
         distanceToManeuverScale: null,
+        timeToDestination: null,
         maneuverComplete: null,
 
-        activate: function(params) {
+        activate: function(appID) {
 
-            if (params) {
+            var naviParams = SDL.SDLController.getApplicationModel(appID).constantTBTParams;
 
-                for ( var i = 0; i < params.navigationTexts.length; i++) {
-                    switch (params.navigationTexts[i].fieldName) {
+            if (naviParams) {
+
+                for ( var i = 0; i < naviParams.navigationTexts.length; i++) {
+                    switch (naviParams.navigationTexts[i].fieldName) {
                     case 'navigationText1': {
                         this.set('captionText.content',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'navigationText2': {
                         this.set('navigationText2',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'ETA': {
-                        this.set('eta', params.navigationTexts[i].fieldText);
+                        this.set('eta', naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     case 'totalDistance': {
                         this.set('totalDistance',
-                            params.navigationTexts[i].fieldText);
+                            naviParams.navigationTexts[i].fieldText);
                         break;
                     }
                     }
                 }
 
-                if (params.softButtons) {
-                    this.softButtons.addItems(params.softButtons);
+                if (naviParams.softButtons) {
+                    this.softButtons.addItems(naviParams.softButtons);
                 }
-                if (params.maneuverComplete) {
-                    this.set('maneuverComplete', params.maneuverComplete);
-                }
-                this.set('appID', params.appID);
-                if (params.turnIcon) {
 
-                    this.set('turnIcon', params.turnIcon.value);
+                if (naviParams.maneuverComplete) {
+                    this.set('maneuverComplete', naviParams.maneuverComplete);
                 }
-                this.set('distanceToManeuver', params.distanceToManeuver);
-                this.set('distanceToManeuverScale',
-                    params.distanceToManeuverScale);
+
+                this.set('appID', naviParams.appID);
+
+                if (naviParams.turnIcon) {
+
+                    this.set('turnIcon', naviParams.turnIcon.value);
+                }
+
+                if (naviParams.nextTurnIcon) {
+
+                    this.set('nextTurnIcon', naviParams.nextTurnIcon.value);
+                }
+                this.set('distanceToManeuver', naviParams.distanceToManeuver);
+                this.set('distanceToManeuverScale', naviParams.distanceToManeuverScale);
+                this.set('timeToDestination', naviParams.timeToDestination);
 
                 this.set('active', true);
             }
@@ -122,6 +138,21 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
         totalDistanceLabel: SDL.Label.extend( {
             classNames: 'totalDistanceLabel',
             contentBinding: 'parentView.totalDistance'
+        }),
+
+        distanceToManeuverScale: SDL.Label.extend( {
+            classNames: 'distanceToManeuverScale',
+            contentBinding: 'parentView.distanceToManeuverScale'
+        }),
+
+        distanceToManeuver: SDL.Label.extend( {
+            classNames: 'distanceToManeuver',
+            contentBinding: 'parentView.distanceToManeuver'
+        }),
+
+        timeToDestination: SDL.Label.extend( {
+            classNames: 'timeToDestination',
+            contentBinding: 'parentView.timeToDestination'
         }),
 
         etaLabel: SDL.Label.extend( {
@@ -156,6 +187,22 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
                     return '';
                 }
             }.property('this.parentView.turnIcon')
+        }),
+
+        nextTurnIconImage: Em.View.create( {
+            classNames: 'nextTurnIcon btn',
+            attributeBindings: [
+                'style'
+            ],
+            style: function() {
+
+                if (this._parentView.nextTurnIcon) {
+                    return 'background-image: URL(' + this._parentView.nextTurnIcon
+                        + ');';
+                } else {
+                    return '';
+                }
+            }.property('this.parentView.nextTurnIcon')
         }),
 
         navigationText2: SDL.Label.extend( {

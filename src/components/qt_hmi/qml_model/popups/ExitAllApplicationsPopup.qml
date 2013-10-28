@@ -39,6 +39,9 @@ import "../hmi_api/Common.js" as Common
 import "../controls"
 
 PopUp {
+    function complete(reason){
+        hide()
+    }
 
     Column
     {

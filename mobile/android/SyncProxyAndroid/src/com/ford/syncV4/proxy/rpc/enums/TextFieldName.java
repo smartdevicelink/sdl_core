@@ -20,7 +20,10 @@ public enum TextFieldName {
     audioPassThruDisplayText1,
     audioPassThruDisplayText2,
     sliderHeader,
-    sliderFooter;
+    sliderFooter,
+    menuName,
+    secondaryText,
+    tertiaryText;
 
     public static TextFieldName valueForString(String value) {
         return valueOf(value);

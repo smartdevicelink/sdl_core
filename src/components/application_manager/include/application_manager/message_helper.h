@@ -213,28 +213,38 @@ class MessageHelper {
 
     static void SendActivateAppToHMI(Application* const app);
 
+    /*
+     * @brief Sends notification to HMI to start video streaming
+     *
+     * @param url             URL for video streamng
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendNaviStartStream(const std::string& url, int connection_key);
+
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
 
     /*
-     * @brief Finds "Image" structure in request and verify image file presence
-     *                      in Core.
+     * @brief Verify image and add image file full path
      *
-     * @param message SmartObject with request
+     * @param SmartObject with image
      *
      * @param app current application
      *
      * @return verification result
      *
      */
+    static mobile_apis::Result::eType VerifyImage(smart_objects::SmartObject& image,
+        const Application* app);
+
     static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, const Application* app);
 
-    static void AddSoftButtonsDefaultSystemAction(
-      smart_objects::SmartObject& msg_params);
-
-
+    static mobile_apis::Result::eType ProcessSoftButtons(
+      smart_objects::SmartObject& message_params,
+      const Application* app);
 
     /*
      * @brief Verify application and tts name in RefisterAppInterface request msg_params

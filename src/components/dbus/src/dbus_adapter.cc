@@ -67,6 +67,7 @@ DBusAdapter::DBusAdapter(const std::string& sdlServiceName,
 }
 
 DBusAdapter::~DBusAdapter() {
+  dbus_shutdown();
   delete schema_;
 }
 

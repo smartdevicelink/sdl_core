@@ -58,6 +58,10 @@ var transparentColor = "#00000000"
 
 // "Warning" word color
 var warningColor = "red"
+
+// Color for PopUp
+var popUpBorderColor = "white"
+
 //--------------------------------------------------------------------------------------
 
 // Other
@@ -66,7 +70,7 @@ var warningColor = "red"
 var fontSize = 20
 
 // Title font size
-var tittleFontSize = 45
+var titleFontSize = 45
 
 // Power on/off button font size
 var powerButtonFornSize = 25
@@ -93,6 +97,9 @@ var warningDuration = 500
 // Width for long oval button
 var longOvalButtonWidth = 163
 
+// Height for oval button
+var ovalButtonHeight = 63
+
 // Size icon for buttons
 var iconButtonSize = 30
 
@@ -106,7 +113,16 @@ var iconItemListSpacing = 20
 var itemListHeight = 60
 
 // Spasing between item on views
-var generalSpasing = 10
+var generalSpacing = 10
+
+// Width of scrollBar
+var scrollBarWidth = 5
+
+// Speak text for a given time
+var ttsSpeakTime = 2000
+
+// font size fo TTS popup
+var ttsFontSize = 12
 
 // Maximal number of submenus
 var maximumSubmenus = 1000
@@ -114,5 +130,40 @@ var maximumSubmenus = 1000
 // Maximal number of commands in submenu or root menu
 var maximumCommandsPerSubMenu = 1000
 
-// -------------------------
+// padding for popup view
+var popUpPadding = 20
 
+// Width for TTS popup
+var ttsPopUpWidth = 250
+
+// Height for TTS popup
+var ttsPopUpHeight = 100
+
+// Padding for TTS popup
+var ttsPopUpPadding = 10
+
+// -------------------------
+var sliderBarWidth = 400
+var sliderBarHeight = 50
+var sliderBarRadius = 3
+var sliderBarBorderWidth = 1
+var sliderTextColor = "white"
+var sliderBarBorderColor = "white"
+var sliderBarFillColor = "white"
+
+// Width for popup view
+var popupWidth = 700
+
+// Height for popup view
+var popupHeigth = 500
+
+// Width for combobox
+var comboboxWidth = 300
+
+// -------------------------
+var scrollableMessageTextColor = "white"
+var scrollableMessageScrollBarColor = "gray"
+var scrollableMessageScrollBarWidth = 10
+
+// -------------------------
+var audioPassThruTextColor = "white"

@@ -116,12 +116,12 @@ BluetoothDeviceScanner::~BluetoothDeviceScanner() {
 }
 
 void* bluetoothDeviceScannerThread(void* data) {
-  LOG4CXX_TRACE_ENTER(logger_)
+  LOG4CXX_TRACE_ENTER(logger_);
   BluetoothDeviceScanner* bluetoothDeviceScanner =
     static_cast<BluetoothDeviceScanner*>(data);
   assert(bluetoothDeviceScanner != 0);
   bluetoothDeviceScanner->Thread();
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
   return 0;
 }
 
@@ -143,14 +143,17 @@ void BluetoothDeviceScanner::DoInquiry() {
 
   const int device_id = hci_get_route(0);
   if (device_id < 0) {
-    LOG4CXX_INFO(logger_, "device_id < 0, exit DoInquiry");
+    LOG4CXX_INFO(logger_, "HCI device is not available");
+    shutdown_requested_ = true;
     controller_->SearchDeviceFailed(SearchDeviceError());
+    return;
   }
 
   int device_handle = hci_open_dev(device_id);
   if (device_handle < 0) {
     LOG4CXX_INFO(logger_, "device_handle < 0, exit DoInquiry");
     controller_->SearchDeviceFailed(SearchDeviceError());
+    return;
   }
 
   if (paired_devices_.empty()) {
@@ -195,13 +198,13 @@ void BluetoothDeviceScanner::DoInquiry() {
   delete[] inquiry_info_list;
 
   if (number_of_devices < 0) {
-    LOG4CXX_INFO(logger_, "number_of_devices < 0")
+    LOG4CXX_INFO(logger_, "number_of_devices < 0");
     LOG4CXX_TRACE_EXIT(logger_);
     controller_->SearchDeviceFailed(SearchDeviceError());
   }
 
   LOG4CXX_INFO(logger_, "Bluetooth inquiry finished");
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
@@ -347,20 +350,20 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
       logger_,
       "SmartDeviceLink service was discovered on device "
       << BluetoothDevice::GetUniqueDeviceId(device_address)
-      << " at channel(s): " << rfcomm_channels_string.str().c_str())
+      << " at channel(s): " << rfcomm_channels_string.str().c_str());
   } else {
     LOG4CXX_INFO(
       logger_,
       "SmartDeviceLink service was not discovered on device "
-      << BluetoothDevice::GetUniqueDeviceId(device_address))
+      << BluetoothDevice::GetUniqueDeviceId(device_address));
   }
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
 
 void BluetoothDeviceScanner::Thread() {
-  LOG4CXX_TRACE_ENTER(logger_)
-  LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized")
+  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_INFO(logger_, "Bluetooth adapter main thread initialized");
   ready_ = true;
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
@@ -383,15 +386,15 @@ void BluetoothDeviceScanner::Thread() {
     }
   }
 
-  LOG4CXX_INFO(logger_, "Bluetooth device scanner thread finished")
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_INFO(logger_, "Bluetooth device scanner thread finished");
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
-  LOG4CXX_TRACE_ENTER(logger_)
+  LOG4CXX_TRACE_ENTER(logger_);
 
   if (auto_repeat_pause_sec_ == 0) {
-    LOG4CXX_TRACE_EXIT(logger_)
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
 
@@ -411,32 +414,32 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   }
   device_scan_requested_sync_.unlock();
 
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Init() {
-  LOG4CXX_TRACE_ENTER(logger_)
+  LOG4CXX_TRACE_ENTER(logger_);
   const int thread_start_error = pthread_create(&thread_, 0,
                                  &bluetoothDeviceScannerThread,
                                  this);
 
   if (0 == thread_start_error) {
     thread_started_ = true;
-    LOG4CXX_INFO(logger_, "Bluetooth device scanner thread started")
+    LOG4CXX_INFO(logger_, "Bluetooth device scanner thread started");
   } else {
     LOG4CXX_ERROR(
       logger_,
       "Bluetooth device scanner thread start failed, error code "
-      << thread_start_error)
+      << thread_start_error);
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
   return TransportAdapter::OK;
 }
 
 void BluetoothDeviceScanner::Terminate() {
-  LOG4CXX_TRACE_ENTER(logger_)
+  LOG4CXX_TRACE_ENTER(logger_);
   shutdown_requested_ = true;
 
   if (true == thread_started_) {
@@ -449,12 +452,12 @@ void BluetoothDeviceScanner::Terminate() {
     pthread_join(thread_, 0);
     LOG4CXX_INFO(logger_, "Bluetooth device scanner thread terminated");
   }
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Scan() {
-  LOG4CXX_TRACE_ENTER(logger_)
-  if ((!thread_started_) && shutdown_requested_) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  if ((!thread_started_) || shutdown_requested_) {
     LOG4CXX_INFO(logger_, "bad state");
     return TransportAdapter::BAD_STATE;
   }
@@ -471,11 +474,11 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
     device_scan_requested_sync_.signal();
   } else {
     ret = TransportAdapter::BAD_STATE;
-    LOG4CXX_INFO(logger_, "Device Scan is currently in progress")
+    LOG4CXX_INFO(logger_, "Device Scan is currently in progress");
   }
   device_scan_requested_sync_.unlock();
 
-  LOG4CXX_TRACE_EXIT(logger_)
+  LOG4CXX_TRACE_EXIT(logger_);
   return ret;
 }
 

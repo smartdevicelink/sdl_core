@@ -39,7 +39,7 @@
 #include <list>
 
 #include <pthread.h>
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/usb/libusb_handler.h"
@@ -73,6 +73,7 @@ class UsbDeviceScanner : public DeviceScanner, public LibusbListener {
   virtual void OnDeviceArrived(libusb_device* device);
   virtual void OnDeviceLeft(libusb_device* device);
  private:
+  void UpdateList();
   void TurnIntoAccessoryMode(const libusb_device_descriptor& descriptor,
                              libusb_device_handle* device_handle);
   void GoogleAccessoryFound(libusb_device* device,

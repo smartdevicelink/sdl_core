@@ -89,7 +89,7 @@ Item {
                             if (!dataContainer.activeVR) {
                                 vrPopUp.activate();
                             } else {
-                                vrPopUp.deactivate();
+                                vrPopUp.complete();
                             }
                         }
                     }
@@ -191,13 +191,16 @@ Item {
 
             Component.onCompleted: {
                 for (var name in Common.Language) {
-                    append({name: name.replace('_', '-')});
+                    if (settingsContainer.sdlLanguagesList.indexOf(Common.Language[name]) != -1) {
+                        append({name: name.replace('_', '-')});
+                    }
                 }
             }
         }
 
         Row
         {
+            spacing: 30
             Column
             {
                 Text {
@@ -208,13 +211,12 @@ Item {
                 ComboBox {
                     model: languagesList
                     width: 200
+                    onCurrentIndexChanged: {
+                        dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
+                    }
                 }
             }
-            Item {
-                width: 20
-                height: 1
-            }
-
             Column
             {
                 Text {
@@ -226,9 +228,37 @@ Item {
                     model: languagesList
                     width: 180
                     onCurrentIndexChanged: {
-                        sdlTTS.onLanguageChange(currentIndex);
-                        sdlVR.onLanguageChange(currentIndex);
+                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
                     }
+                }
+            }
+        }
+
+        Row
+        {
+            spacing: 20
+            Column
+            {
+                Text {
+                    text: "application UI Languages"
+                    color: "white"
+                }
+
+                Text {
+                    text: ""
+                }
+            }
+            Column
+            {
+                Text {
+                    text: "application TTS + VR Languages"
+                    color: "white"
+                }
+
+                Text {
+                    text: ""
                 }
             }
         }
@@ -275,32 +305,15 @@ Item {
                     label: "Send data"
                 }
 
-                Component {
-                    id: tbtStateDelegate
-                    TextButton {
-                        label: name
-                        width: parent.width
-                        onClicked: {
-                            sdlNavigation.onTBTClientState(value);
-                            console.log("Emit signal Navigation.onTBTClientState");
-                        }
-                    }
-                }
                 PushButton {
                     id: tbtClientState
                     label: "TBT Client state"
                     toggleMode: true
                     onPressed: {
-                        for (var name in Common.TBTState) {
-                            selectList.model.append({name: name, value: Common.TBTState[name]});
-                        }
-                        selectList.delegate = tbtStateDelegate;
-                        scrollbar.visible = true;
+                        tbtClientStatePopUp.show();
                     }
                     onUnpressed: {
-                        selectList.model.clear();
-                        selectList.delegate = null;
-                        scrollbar.visible = false;
+                        tbtClientStatePopUp.hide();
                     }
                 }
 
@@ -323,6 +336,7 @@ Item {
                     toggleMode: true
                     onPressed: {
                         exitAllApplicationsPopup.show()
+
                     }
                     onUnpressed: {
                         exitAllApplicationsPopup.hide()
@@ -337,6 +351,7 @@ Item {
                     }
                 }
                 Row {
+                    spacing: 20
                     CheckBox {
                         style: CheckBoxStyle {
                             label: Text {
@@ -345,12 +360,6 @@ Item {
                             }
                         }
                     }
-
-                    Item {
-                        height: 1
-                        width: 20
-                    }
-
                     CheckBox {
                         style: CheckBoxStyle {
                             label: Text {
@@ -358,27 +367,15 @@ Item {
                                 text: "DD"
                             }
                         }
-                    }
-                }
-            }
-
-            Column {
-                ListView {
-                    id: selectList
-                    width: 300
-                    height: 200
-
-                    model: ListModel {}
-                    delegate: TextButton {}
-
-                    Rectangle {
-                        id: scrollbar
-                        visible: false
-                        anchors.right: selectList.right
-                        y: selectList.visibleArea.yPosition * selectList.height
-                        width: 10
-                        height: selectList.visibleArea.heightRatio * selectList.height
-                        color: "white"
+                        onClicked: {
+                            if (checked) {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_ON;
+                            } else {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_OFF;
+                            }
+                        }
                     }
                 }
             }

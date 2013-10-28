@@ -36,11 +36,11 @@ import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
 // Don't change constants. It break button
-Rectangle {
+// TODO (dchmerev@luxoft.com): make this comment more clear
+Item {
     id: main
-    width: field.width * 2
-    height: 65
-    color: Constants.transparentColor
+    width: dynamic ? field.width + 2 * left.width : Constants.longOvalButtonWidth
+    height: Constants.ovalButtonHeight
 
     signal clicked;
     signal pressed;
@@ -50,6 +50,7 @@ Rectangle {
     property alias fontSize: label.font.pixelSize
     property alias icon: image.source
     property bool highlighted: false
+    property bool dynamic: false
 
     Image {
         id: left

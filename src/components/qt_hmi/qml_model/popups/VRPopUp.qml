@@ -85,6 +85,15 @@ PopUp {
                 sdlVR.onCommand(cmdID, appID);
             }
         }
+        Rectangle {
+            id: scrollbar
+            visible: true
+            anchors.right: listCommands.right
+            y: listCommands.visibleArea.yPosition * listCommands.height
+            width: Constants.scrollBarWidth
+            height: listCommands.visibleArea.heightRatio * listCommands.height
+            color: Constants.primaryColor
+        }
     }
 
     function activate() {
@@ -95,7 +104,7 @@ PopUp {
         show();
     }
 
-    function deactivate() {
+    function complete(reason) {
         dataContainer.activeVR = false;
         dataContainer.systemContext = dataContainer.systemSavedContext
         sdlVR.stopped();

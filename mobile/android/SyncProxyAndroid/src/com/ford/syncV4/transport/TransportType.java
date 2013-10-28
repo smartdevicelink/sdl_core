@@ -13,5 +13,10 @@ public enum TransportType {
 	/**
 	 * Transport type is TCP.
 	 */
-	TCP
+	TCP,
+
+    /**
+     * Transport type is USB.
+     */
+    USB
 }

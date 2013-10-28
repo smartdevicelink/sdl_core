@@ -27,14 +27,12 @@ Item {
         return fieldSubstrings
     }
 
-    function alert (alertStrings, duration, softButtons, appID) {
-// with this array we grab only the lines we need
-        var alertFields = [Common.TextFieldName.alertText1,
-                           Common.TextFieldName.alertText2,
-                           Common.TextFieldName.alertText3]
+    function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
+        var fieldSubstrings = alertStrings
+	    .sort(function(a, b) { return a.fieldName - b.fieldName }) // sorting by fieldName
+	    .map(function(val) { return val.fieldText });              // mapping to array of strings
 
-        var fieldSubstrings = filter(alertStrings, alertFields)
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, appID, softButtons)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, progressIndicator, softButtons, appID)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
@@ -89,27 +87,22 @@ Item {
             dataContainer.hmiUITextAlignment = Text.AlignHCenter
         }
         console.debug("UI::show(): exit")
-        return {}
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
         dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
-        return {}
     }
 
     function deleteCommand (cmdID, appID) {
         dataContainer.deleteCommand(cmdID, appID)
-        return {}
     }
 
     function addSubMenu (menuID, menuParams, appID) {
         dataContainer.addSubMenu(menuID, menuParams, appID)
-        return {}
     }
 
     function deleteSubMenu (menuID, appID) {
         dataContainer.deleteSubMenu(menuID, appID)
-        return {}
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
@@ -208,14 +201,6 @@ Item {
     function showVrHelp (vrHelpTitle, vrHelp, appID) {
     }
 
-    function getCapabilities () {
-        return {
-            displayCapabilities: settingsContainer.displayCapabilities,
-            hmiZoneCapabilities: Common.HmiZoneCapabilities.FRONT,
-            softButtonCapabilities: settingsContainer.softButtonCapabilities
-        }
-    }
-
     function isReady () {
         return {
             available: dataContainer.hmiUIAvailable
@@ -243,20 +228,114 @@ Item {
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        return {
-            sliderPosition: dataContainer.uiSliderPosition
+        console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        if (dataContainer.uiSlider.running) {
+            console.debug("aborted")
+            throw Common.Result.ABORTED
         }
+
+        dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName
+        dataContainer.uiSlider.header = sliderHeader
+        dataContainer.uiSlider.footer = sliderFooter
+        dataContainer.uiSlider.numTicks = numTicks
+        dataContainer.uiSlider.position = position
+        dataContainer.uiSlider.timeout = timeout
+
+        sliderPopup.showSlider()
+        sliderPopup.async = new Async.AsyncCall();
+        console.debug("exit")
+        return sliderPopup.async;
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
+        console.debug("scrollableMessage ", messageText, timeout, softButtons, appID)
+        if(dataContainer.scrollableMessageModel.running){
+            //send error response if long message already running
+            console.debug("scrollableMessage throw")
+            throw Common.Result.ABORTED
+        }
+
+        if(messageText !== undefined) {
+            dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
+        }
+        if (softButtons !== undefined) {
+            dataContainer.scrollableMessageModel.softButtons.clear();
+            softButtons.forEach(fillSoftButtons, dataContainer.scrollableMessageModel.softButtons);
+        }
+        if(timeout !== undefined) {
+            dataContainer.scrollableMessageModel.timeout = timeout
+        }
+        if(appID !== undefined) {
+            dataContainer.scrollableMessageModel.appId = appID
+        }
+        dataContainer.scrollableMessageModel.async = new Async.AsyncCall()
+        contentLoader.go("./views/ScrollableMessageView.qml")
+        console.debug("scrollableMessage exit")
+        return dataContainer.scrollableMessageModel.async
     }
 
-    function performAudioPassThru (audioPassThruDisplayTexts, maxDuration) {
+    function getCapabilities() {
+        return {
+            "audioPassThruCapabilities": {
+                "samplingRate": Common.SamplingRate.RATE_44KHZ,
+                "bitsPerSample": Common.BitsPerSample.RATE_8_BIT,
+                "audioType": Common.AudioType.PCM
+            },
+            "displayCapabilities": settingsContainer.displayCapabilities,
+            "hmiZoneCapabilities": Common.HmiZoneCapabilities.FRONT,
+            "softButtonCapabilities": settingsContainer.softButtonCapabilities
+        }
+    }
+
+    function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
+        console.debug("enter", audioPassThruDisplayTexts, timeout)
+
+        if (dataContainer.uiAudioPassThru.running) {
+            console.debug("aborted")
+            throw Common.Result.ABORTED
+        }
+
+        dataContainer.uiAudioPassThru.appName = dataContainer.getApplication(appID).appName
+        dataContainer.uiAudioPassThru.timeout = timeout
+        if (audioPassThruDisplayTexts.length === 2) {
+            dataContainer.uiAudioPassThru.firstLine = audioPassThruDisplayTexts[0].fieldText
+            dataContainer.uiAudioPassThru.secondLine = audioPassThruDisplayTexts[1].fieldText
+        }
+        performAudioPassThruPopup.async = new Async.AsyncCall();
+        performAudioPassThruPopup.showAudioPassThru()
+        console.debug("exit")
+        return performAudioPassThruPopup.async;
     }
 
     function endAudioPassThru () {
+        console.debug("enter")
+        if (!dataContainer.uiAudioPassThru.running) {
+            console.debug("rejected")
+            throw Common.Result.REJECTED
+        }
+        performAudioPassThruPopup.complete(Common.Result.SUCCESS)
+        console.debug("exit")
     }
 
     function closePopUp () {
+        console.debug("enter")
+        if (dataContainer.activePopup) {
+            //close pop-up that is currently active with ABORT code
+            dataContainer.activePopup.complete(Common.Result.ABORT)
+        }
+        //response to this callwith SUCCESS code
+        console.debug("exit")
     }
+
+    function fillSoftButtons(element, index, array) {
+        this.append({
+                        type: element.type,
+                        name: element.text,
+                        image: element.image,
+                        isHighlighted: element.isHighlighted,
+                        buttonId: element.softButtonID,
+                        action: element.systemAction
+                    });
+    }
+
 }

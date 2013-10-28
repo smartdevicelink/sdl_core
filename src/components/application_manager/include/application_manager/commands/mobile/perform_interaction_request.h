@@ -74,14 +74,14 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   virtual ~PerformInteractionRequest();
 
   /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
-  /**
    * @brief Initialize request params
    **/
   virtual bool Init();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
   /**
    * @brief Interface method that is called whenever new event received

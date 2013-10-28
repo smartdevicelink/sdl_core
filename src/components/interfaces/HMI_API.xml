@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.0" date="2013-04-12">
+<interface name="Common" version="1.1" date="2013-10-02">
 
 <enum name="Result">
 	<element name="SUCCESS" value="0"/>
@@ -81,6 +81,7 @@
     <element name="PRESET_8"/>
     <element name="PRESET_9"/>
     <element name="CUSTOM_BUTTON"/>
+	<element name="SEARCH"/>
 </enum>
 
 <enum name="ButtonEventMode">
@@ -210,6 +211,20 @@
   <element name="SYSTEM" />
 </enum>
 
+<enum name="LayoutMode">
+  <description>For touchscreen interactions, the mode of how the choices are presented.</description>
+  <element name="ICON_ONLY" />
+    <description>This mode causes the interaction to display the previous set of choices as icons.</description>
+  <element name="ICON_WITH_SEARCH" />
+    <description>This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.</description>
+  <element name="LIST_ONLY" />
+    <description>This mode causes the interaction to display the previous set of choices as a list.</description>
+  <element name="LIST_WITH_SEARCH" />
+    <description>This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.</description>
+  <element name="KEYBOARD" />
+    <description>This mode causes the interaction to immediately display a keyboard entry through the HMI.</description>
+</enum>
+
 <enum name="DeactivateReason">
   <description>Specifies the functionality the User has switched to.</description>
   <element name="AUDIO">
@@ -251,8 +266,8 @@
   <description>Communicated to whichever app is in HMI FULL, except Alert.</description>
   <element name="MAIN" internal_name="SYSCTXT_MAIN">
     <description>The app's persistent display (whether media/non-media/navigation) is fully visible onscreen.</description>
-      <description> There is currently no user interaction (user-initiated or app-initiated) with the head-unit</description>
-</element>
+    <description> There is currently no user interaction (user-initiated or app-initiated) with the head-unit</description>
+  </element>
   <element name="VRSESSION" internal_name="SYSCTXT_VRSESSION">
     <description>The system is currently in a VR session (with whatever dedicated VR screen being overlaid onscreen).</description>
   </element>
@@ -272,6 +287,20 @@
   <description>For future use.</description>
   <element name="FRONT" />
   <element name="BACK" />
+</enum>
+
+<enum name="SpeechCapabilities">
+  <description>Contains information about the TTS capabilities.</description>
+  <element name="TEXT" internal_name="SC_TEXT" />
+  <element name="SAPI_PHONEMES" />
+  <element name="LHPLUS_PHONEMES" />
+  <element name="PRE_RECORDED" />
+  <element name="SILENCE" />
+</enum>
+
+<enum name="VrCapabilities">
+  <description>Contains information about the VR capabilities.</description>
+  <element name="TEXT" internal_name="VR_TEXT" />
 </enum>
 
 <enum name="TBTState">
@@ -346,13 +375,13 @@
     <description>The second line of second set of main fields of the persistent display; applies to "Show"</description>
   </element>
   <element name="statusBar">
-    <description>The status bar on Nav; applies to "Show"</description>
+    <description>The status bar on NGN; applies to "Show"</description>
   </element>
   <element name="mediaClock">
     <description>Text value for MediaClock field; applies to "Show"</description>
   </element>
   <element name="mediaTrack">
-    <description>The track field of NGN type ACMs. This field is only available for media applications; applies to "Show"</description>
+    <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
   </element>
   <element name="alertText1">
     <description>The first line of the alert text field; applies to "Alert"</description>
@@ -399,7 +428,58 @@
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
+  <element name="menuName">
+    <description> Primary text for Choice</description>
+  </element>
+  <element name="secondaryText">
+    <description> Secondary text for Choice</description>
+  </element>
+  <element name="tertiaryText">
+    <description> Tertiary text for Choice</description>
+  </element>
+  <element name="timeToDestination"/>
   <element name="turnText"/>
+</enum>
+
+<enum name="TouchEvent">
+  <element name="TOUCHSTART"/>
+  <element name="TOUCHMOVE"/>
+  <element name="TOUCHEND"/>
+  <element name="DOUBLETOUCH"/>
+</enum>
+
+<enum name="ImageFieldName">
+  <element name="softButtonImage">
+    <description>The image field for SoftButton</description>
+  </element>
+  <element name="choiceImage">
+    <description>The first image field for Choice</description>
+  </element>
+  <element name="choiceSecondaryImage">
+    <description>The secondary image field for Choice</description>
+  </element>
+  <element name="vrHelpItem">
+    <description>The image field for vrHelpItem</description>
+  </element>
+  <element name="turnIcon">
+    <description>The image field for Turn</description>
+  </element>
+  <element name="menuIcon">
+    <description>The image field for the menu icon in SetGlobalProperties</description>
+  </element>
+  <element name="cmdIcon">
+    <description>The image field for AddCommand</description>
+  </element>
+  <element name="graphic">
+    <description>The image field for Show</description>
+  </element>
+  <element name="showConstantTBTIcon">
+    <description>The primary image field for ShowConstantTBT</description>
+  </element>
+  <element name="showConstantTBTNextTurnIcon">
+    <description>The secondary image field for ShowConstantTBT</description>
+  </element>
+  <element name="nextTurnIcon"/>
 </enum>
 
 <enum name="TextAlignment">
@@ -732,6 +812,74 @@
   </element>
 </enum>
 
+<enum name="SamplingRate">
+  <description>Describes different sampling options for PerformAudioPassThru.</description>
+  <element name="8KHZ" internal_name="RATE_8KHZ"/>
+  <element name="16KHZ" internal_name="RATE_16KHZ"/>
+  <element name="22KHZ" internal_name="RATE_22KHZ"/>
+  <element name="44KHZ" internal_name="RATE_44KHZ"/>
+</enum>
+
+<enum name="BitsPerSample">
+  <description>Describes different quality options for PerformAudioPassThru.</description>
+  <element name="8_BIT" internal_name="RATE_8_BIT"/>
+  <element name="16_BIT" internal_name="RATE_16_BIT"/>
+</enum>
+
+<enum name="AudioType">
+  <description>Describes different audio type options for PerformAudioPassThru.</description>
+  <element name="PCM" />
+</enum>
+
+<enum name="KeyboardLayout">
+  <description>Enumeration listing possible keyboard layouts.</description>
+  <element name="QWERTY" />
+  <element name="QWERTZ" />
+  <element name="AZERTY" />
+</enum>
+
+<enum name="KeyboardEvent">
+  <description>Enumeration listing possible keyboard events.</description>
+  <element name="KEYPRESS" />
+  <element name="ENTRY_SUBMITTED" />
+  <element name="ENTRY_CANCELLED" />
+  <element name="ENTRY_ABORTED" />
+</enum>
+
+<enum name="KeypressMode">
+  <description>Enumeration listing possible keyboard events.</description>
+  <element name="SINGLE_KEYPRESS">
+    <description>Each keypress is individually sent as the user presses the keyboard keys.</description>
+  </element>
+  <element name="QUEUE_KEYPRESSES">
+    <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>
+  </element>
+  <element name="RESEND_CURRENT_ENTRY">
+    <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>
+  </element>
+</enum>
+
+<enum name="AmbientLightStatus">
+  <description>Reflects the status of the ambient light sensor.</description>
+  <element name="NIGHT" />
+  <element name="TWILIGHT_1" />
+  <element name="TWILIGHT_2" />
+  <element name="TWILIGHT_3" />
+  <element name="TWILIGHT_4" />
+  <element name="DAY" />
+  <element name="UNKNOWN" />
+  <element name="INVALID" />
+</enum>
+
+<enum name="FileType">
+  <description>Enumeration listing possible file types.</description>
+  <element name="GRAPHIC_BMP" />
+  <element name="GRAPHIC_JPEG" />
+  <element name="GRAPHIC_PNG" />
+  <element name="AUDIO_WAVE" />
+  <element name="AUDIO_MP3" />
+</enum>
+
 <!-- End of IVI part-->
 
 <struct name="ButtonCapabilities">
@@ -853,6 +1001,15 @@
   <param name="image" type="Common.Image" mandatory="false">
 	<description> The image for representing the choice </description>
   </param>
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false">
+    <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
+  </param>
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
+    <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
+  </param>
+  <param name="secondaryImage" type="Image" mandatory="false">
+    <description>Optional secondary image struct for choice</description>
+  </param>
 </struct>
 
 <struct name="VrHelpItem">
@@ -868,12 +1025,51 @@
 </struct>
 
 <struct name="TimeFormat">
-  <param name="hours" type="Integer" minvalue="0" maxvalue="59">
+  <param name="hours" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
     <description>The hour of the media clock.</description>
     <description>Some units only support a max of 19 hours. If out of range, it should be rejected.</description>
   </param>
-  <param name="minutes" type="Integer" minvalue="0" maxvalue="59" />
-  <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
+  <param name="minutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true"/>
+  <param name="seconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true"/>
+</struct>
+
+<struct name="TouchEventCapabilities">
+  <param name="pressAvailable" type="Boolean" mandatory="true">
+  </param>
+  <param name="multiTouchAvailable" type="Boolean" mandatory="true">
+  </param>
+  <param name="doublePressAvailable" type="Boolean" mandatory="true">
+  </param>
+</struct>
+
+<struct name="ImageResolution">
+  <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000" mandatory="true">
+    <description>The image resolution width.</description>
+  </param>
+  <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000" mandatory="true">
+    <description>The image resolution height.</description>
+  </param>
+</struct>
+
+<struct name="ScreenParams">
+  <param name="resolution" type="Common.ImageResolution" mandatory="true">
+    <description>The resolution of the prescribed screen area.</description>
+  </param>
+  <param name="touchEventAvailable" type="Common.TouchEventCapabilities" mandatory="false">
+    <description>Types of screen touch events available in screen area.</description>
+  </param>
+</struct>
+
+<struct name="ImageField">
+  <param name="name" type="Common.ImageFieldName" mandatory="true">
+    <description>The name that identifies the field. See ImageFieldName.</description>
+  </param>
+  <param name="imageTypeSupported" type="Common.FileType" maxsize="100" array="true" mandatory="false" minsize="1">
+    <description>The image types that are supported in this field. See FileType.</description>
+  </param>
+  <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
+    <description>The image resolution of this field.</description>
+  </param>
 </struct>
 
 <struct name="DisplayCapabilities">
@@ -883,14 +1079,28 @@
   </param>
   <param name="textFields" type="Common.TextFieldName" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
-   <description>If there are no textfields supported, the empty array must be returned</description>
+    <description>If there are no textfields supported, the empty array must be returned</description>
+  </param>
+  <param name="imageFields" type="Common.ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
+    <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
-  <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="true">
-      <description>List of supported image types (static/dynamic).</description>
-    </param>
+  <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
+  </param>
+  <param name="graphicSupported" type="Boolean" mandatory="true">
+    <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  </param>
+  <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true">
+    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
+  </param>
+  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
+    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
+  </param>
+  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
+  </param>
 </struct>
 
 <struct name="SoftButtonCapabilities">
@@ -913,6 +1123,51 @@
   </param>
 </struct>
 
+<struct name="AudioPassThruCapabilities">
+  <description>
+    Describes different audio type configurations for PerformAudioPassThru.
+    e.g. 8kHz,8-bit,PCM
+  </description>
+  <param name="samplingRate" type="Common.SamplingRate"/>
+  <param name="bitsPerSample" type="Common.BitsPerSample"/>
+  <param name="audioType" type="Common.AudioType"/>
+</struct>
+
+<struct name="TouchLists">
+  <param name="touches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
+	<description>List of fingers currently on screen</description>
+  </param>
+  <param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
+	<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
+  </param>
+</struct>
+
+<struct name="Coordinate">
+  <param name="xCoord" type="Integer" mandatory="true">
+  </param>
+  <param name="yCoord" type="Integer" mandatory="true">
+  </param>
+</struct>
+
+<struct name="TouchArea">
+  <param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
+  </param>
+  <param name="radiusCoord" type="Common.Coordinate" mandatory="true">
+  </param>
+</struct>
+
+<struct name="TouchEventInfo">
+  <param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
+	<description>Finger / stylus ID</description>
+  </param>
+  <param name="point" type="Common.Coordinate" mandatory="true">
+	<description>XY coordinate of where on screen the event happened</description>
+  </param>
+  <param name="area" type="Common.TouchArea" mandatory="false">
+	<description>Describe the ellipse approximating touch input shape</description>
+  </param>
+</struct>
+
 <struct name="TextFieldStruct">
   <param name="fieldName" type="Common.TextFieldName" mandatory="true">
 	<description>The name of the field for displaying the text.</description>
@@ -922,8 +1177,31 @@
   </param>
 </struct>
 
+<struct name="KeyboardProperties">
+  <description>Configuration of on-screen keyboard (if available).</description>
+  <param name="language" type="Common.Language" mandatory="false">
+    <description>The keyboard language.</description>
+  </param>
+  <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="false" >
+    <description>Desired keyboard layout.</description>
+  </param>
+  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+    <description>In this mode, all keypresses will be sent as they occur.</description>
+    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+    <description>If omitted, this value will be set to FALSE.</description>
+  </param>
+  <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>Array of keyboard characters to enable.</description>
+    <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+    <description>If omitted, the entire keyboard will be enabled.</description>
+  </param>
+  <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+    <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+  </param>
+</struct>
+
 <struct name="Turn">
-  <param name="navigationText" type="TextFieldStruct" mandatory="false">
+  <param name="navigationText" type="Common.TextFieldStruct" mandatory="false">
     <description>Uses navigationText from TextFieldStruct.</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
@@ -961,59 +1239,59 @@
 <!--IVI part-->
 <struct name="GPSData">
   <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180">
+  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
   </param>
-  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90">
+  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
   </param>
-  <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100">
+  <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
     <description>The current UTC year.</description>
   </param>
-  <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12">
+  <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
     <description>The current UTC month.</description>
   </param>
-  <param name="utcDay" type="Integer" minvalue="1" maxvalue="31">
+  <param name="utcDay" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
     <description>The current UTC day.</description>
   </param>
-  <param name="utcHours" type="Integer" minvalue="0" maxvalue="23">
+  <param name="utcHours" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
     <description>The current UTC hour.</description>
   </param>
-  <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59">
+  <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
     <description>The current UTC minute.</description>
   </param>
-  <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59">
+  <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
     <description>The current UTC second.</description>
   </param>
-  <param name="compassDirection" type="CompassDirection">
+  <param name="compassDirection" type="Common.CompassDirection" mandatory="false">
     <description>See CompassDirection.</description>
   </param>
-  <param name="pdop" type="Float" minvalue="0" maxvalue="10">
+  <param name="pdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
     <description>PDOP.</description>
   </param>
-  <param name="hdop" type="Float" minvalue="0" maxvalue="10">
+  <param name="hdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
     <description>HDOP.</description>
   </param>
-  <param name="vdop" type="Float" minvalue="0" maxvalue="10">
+  <param name="vdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
     <description>VDOP.</description>
   </param>
-  <param name="actual" type="Boolean">
+  <param name="actual" type="Boolean" mandatory="false">
     <description>
       True, if actual.
       False, if infered.
     </description>
   </param>
-  <param name="satellites" type="Integer" minvalue="0" maxvalue="31">
+  <param name="satellites" type="Integer" minvalue="0" maxvalue="31" mandatory="false">
     <description>Number of satellites in view</description>
   </param>
-  <param name="dimension" type="Dimension">
+  <param name="dimension" type="Common.Dimension" mandatory="false">
     <description>See Dimension</description>
   </param>
-  <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000">
+  <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000" mandatory="false">
     <description>Altitude in meters</description>
   </param>
-<param name="heading" type="Float" minvalue="0" maxvalue="359.99">
+  <param name="heading" type="Float" minvalue="0" maxvalue="359.99" mandatory="false">
     <description>The heading. North is 0. Resolution is 0.01</description>
   </param>
-  <param name="speed" type="Float" minvalue="0" maxvalue="500">
+  <param name="speed" type="Float" minvalue="0" maxvalue="500" mandatory="false">
     <description>The speed in KPH</description>
   </param>
 </struct>
@@ -1040,33 +1318,36 @@
 <struct name="HeadLampStatus">
   <param name="lowBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the low beam lamps.</description>
-</param>
+  </param>
   <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.</description>
-</param>
+  </param>
+  <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="true">
+    <description>Status of the ambient light sensor.</description>
+  </param>
 </struct>
 
 <struct name="TireStatus">
 <description>The status and pressure of the tires.</description>
-<param name="pressureTelltale" type="WarningLightStatus">
+<param name="pressureTelltale" type="Common.WarningLightStatus" mandatory="false">
   <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
 </param>
-  <param name="leftFront" type="SingleTireStatus">
+  <param name="leftFront" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the left front tire.</description>
 </param>
-  <param name="rightFront" type="SingleTireStatus">
+  <param name="rightFront" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the right front tire.</description>
 </param>
-  <param name="leftRear" type="SingleTireStatus">
+  <param name="leftRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the left rear tire.</description>
 </param>
-  <param name="rightRear" type="SingleTireStatus">
+  <param name="rightRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the right rear tire.</description>
 </param>
-  <param name="innerLeftRear" type="SingleTireStatus">
+  <param name="innerLeftRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the inner left rear.</description>
 </param>
-  <param name="innerRightRear" type="SingleTireStatus">
+  <param name="innerRightRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the inner right rear.</description>
 </param>
 </struct>
@@ -1126,7 +1407,7 @@
   <param name="ignitionStableStatus" type="Common.IgnitionStableStatus" mandatory="true">
     <description>Information about the ignition switch. See IgnitionStableStatus.</description>
 </param>
-  <param name="ignitionStatus" type="IgnitionStatus" mandatory="true">
+  <param name="ignitionStatus" type="Common.IgnitionStatus" mandatory="true">
     <description>The status of the ignition. See IgnitionStatus.</description>
 </param>
 </struct>
@@ -1217,40 +1498,40 @@
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
     <function name="UpdateDeviceList" messagetype="request">
-        <description>Request from SmartDeviceLink to HMI to change device list.</description>
-        <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100">
-			<description>The array of names/IDs of connected devices</description>
-        </param>
-	</function>
+      <description>Request from SmartDeviceLink to HMI to change device list.</description>
+      <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100">
+        <description>The array of names/IDs of connected devices</description>
+      </param>
+    </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
-	<function name="AllowDeviceToConnect" messagetype="request">
+    <function name="AllowDeviceToConnect" messagetype="request">
         <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
         <param name="device" type="Common.DeviceInfo" mandatory="true"/>
     </function>
     <function name="AllowDeviceToConnect" messagetype="response">
-		<param name="allow" type="Boolean" mandatory="true"/>
-	</function>
-	<function name="OnDeviceChosen" messagetype="notification">
+      <param name="allow" type="Boolean" mandatory="true"/>
+    </function>
+    <function name="OnDeviceChosen" messagetype="notification">
       <description>Notification must be initiated by HMI on user selecting device in the list of devices.</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
-     <description>The name and ID of the device chosen</description>
-    </param>
+        <description>The name and ID of the device chosen</description>
+      </param>
     </function>
     <function name="OnFindApplications" messagetype="notification">
-        <description>This method must be invoked by HMI to get list of registered apps.</description>
-    <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
-      <description>The name and ID of the device the list of registered applications is required for.</description>
-    </param>
+      <description>This method must be invoked by HMI to get list of registered apps.</description>
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+        <description>The name and ID of the device the list of registered applications is required for.</description>
+      </param>
     </function>
-     <function name="UpdateAppList" messagetype="request">
+    <function name="UpdateAppList" messagetype="request">
       <description>Issued by SDL to notify HMI about new applications registered.</description>
       <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
     </function>
-	<function name="UpdateAppList" messagetype="response">
+    <function name="UpdateAppList" messagetype="response">
     </function>
     <function name="ActivateApp" messagetype="request">
       <description>Request from SDL to HMI to bring specified application to front on UI e.g make it HMI status 'FULL'.</description>
@@ -1278,13 +1559,13 @@
     <function name="OnAppRegistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about new application registered.</description>
       <param name="application" type="Common.HMIApplication" mandatory="true">
-      <description>The information about application registered. See HMIApplication. </description>
+        <description>The information about application registered. See HMIApplication. </description>
       </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appID" type="Integer" mandatory="true">
-     <description>ID of the application unregistered</description>
+        <description>ID of the application unregistered</description>
       </param>
     </function>
     <function name="OnExitApplication" messagetype="notification">
@@ -1321,7 +1602,7 @@
       </param>
     </function>
     <function name="AllowApp" messagetype="request">
-     <description>Initiated by SDL for requesting the allowance for the application</description>
+      <description>Initiated by SDL for requesting the allowance for the application</description>
       <param name="app" type="Common.HMIApplication" mandatory="true">
         <description>Information about the application. See HMIApplication. </description>
       </param>
@@ -1416,10 +1697,25 @@
   <function name="GetLanguage" messagetype="response">
     <param name="language" type="Common.Language" mandatory="true"/>
   </function>
+  <function name="GetCapabilities" messagetype="request">
+    <description>Method is invoked at system startup by SDL to request information about VR capabilities of HMI.</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="vrCapabilities" type="Common.VrCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Types of input recognized by VR module.</description>
+    </param>
+  </function>
 </interface>
 
 <interface name="TTS" version="1.0" date="2013-04-18">
   <description>RPCs for communication between TTS and SDL.</description>
+  <function name="GetCapabilities" messagetype="request">
+    <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
+    </param>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
@@ -1477,61 +1773,64 @@
     <param name="language" type="Common.Language" mandatory="true"/>
   </function>
   <function name="SetGlobalProperties" messagetype="request">
-      <description>Sets some properties for the application initiated request.</description>
-      <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description>
+    <description>Sets some properties for the application initiated request.</description>
+    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description>
           The help prompt.
           An array of text chunks of type TTSChunk. See TTSChunk.
           The array must have at least one item.
-        </description>
-      </param>
-      <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description>
+      </description>
+    </param>
+    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description>
           Help text for a wait timeout.
           An array of text chunks of type TTSChunk. See TTSChunk.
           The array must have at least one item.
-        </description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-      </param>
+      </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
   </function>
 </interface>
 
 <interface name="UI" version="1.0" date="2013-04-16">
-    <function name="Alert" messagetype="request">
-        <description>Request from SDL to show an alert message on the display.</description>
-        <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
-          <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
-        </param>
-        <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000" defvalue="5000">
-          <description>Timeout in milliseconds.</description>
-        </param>
-        <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
-          <description>App defined SoftButtons</description>
-        </param>
-        <param name="appID" type="Integer" mandatory="true">
-          <description>ID of application requested this RPC.</description>
-        </param>
-    </function>
-    <function name="Alert" messagetype="response">
-      <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="360000">
-        <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
-      </param>
-    </function>
-    <function name="ShowNotification" messagetype="notification">
-      <description>Initiated by SDL in order to notify user about some actions, i.e. while waiting for updates from server etc.</description>
-      <param name="text" type="Common.TextFieldStruct" mandatory="true"/>
-      <param name="icon" type="Common.Image" mandatory="false"/>
-      <param name="timeout" type="Integer" mandatory="true">
-        <description>Pop-up is expected to be shown before time specified with timeout is up and then closed by HMI or closed upon ClosePopUp request from SDL.</description>
-      </param>
-    </function>
-    <function name="Show" messagetype="request">
-      <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
-        <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
+  <function name="Alert" messagetype="request">
+    <description>Request from SDL to show an alert message on the display.</description>
+    <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
+      <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
+    </param>
+    <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000" defvalue="5000">
+      <description>Timeout in milliseconds.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
+      <description>App defined SoftButtons</description>
+    </param>
+    <param name="progressIndicator" type="Boolean" mandatory="false">
+      <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="Alert" messagetype="response">
+    <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="360000">
+      <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
+    </param>
+  </function>
+  <function name="ShowNotification" messagetype="notification">
+    <description>Initiated by SDL in order to notify user about some actions, i.e. while waiting for updates from server etc.</description>
+    <param name="text" type="Common.TextFieldStruct" mandatory="true"/>
+    <param name="icon" type="Common.Image" mandatory="false"/>
+    <param name="timeout" type="Integer" mandatory="true">
+      <description>Pop-up is expected to be shown before time specified with timeout is up and then closed by HMI or closed upon ClosePopUp request from SDL.</description>
+    </param>
+  </function>
+  <function name="Show" messagetype="request">
+    <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="7">
+      <description>Array of lines of show text fields. See TextFieldStruct. Uses mainField1, mainField2, mainField3, mainField4. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
           mainField1: The text that should be displayed in a single or upper display line.
           mainField2: The text that should be displayed on the second display line.
           mainField3: The text that should be displayed on the second "page" first display line.
@@ -1539,380 +1838,514 @@
           statusBar: statusBar.
           mediaClock: Text value for MediaClock field.
           mediaTrack: The text that should be displayed in the track field. This field is only valid for media applications on NGN type ACMs.
-        </description>
-      </param>
-      <param name="alignment" type="Common.TextAlignment" mandatory="false">
-        <description>Specifies how mainField1 and mainField2 texts should be aligned on the display.</description>
-        <description>If omitted, texts must be centered</description>
-      </param>
-      <param name="graphic" type="Common.Image" mandatory="false">
-        <description>Path to optional dynamic image or the static binary image itself.  See Image. If omitted, the displayed graphic should not change.</description>
-      </param>
-      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
-        <description>App defined SoftButtons.</description>
-        <description>If omitted, the currently displayed SoftButton values should not change.</description>
-      </param>
-      <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
-        <description>App labeled on-screen presets (i.e. GEN2).</description>
-        <description>If omitted on supported displays, the presets will be shown as not defined.</description>
-      </param>
-	  <param name="appID" type="Integer" mandatory="true">
-          <description>Id of application related to this RPC.</description>
-      </param>
+      </description>
+    </param>
+    <param name="alignment" type="Common.TextAlignment" mandatory="false">
+      <description>Specifies how mainField1 and mainField2 texts should be aligned on the display.</description>
+      <description>If omitted, texts must be centered</description>
+    </param>
+    <param name="graphic" type="Common.Image" mandatory="false">
+      <description>Path to optional dynamic image or the static binary image itself.  See Image. If omitted, the displayed graphic should not change.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
+      <description>App defined SoftButtons.</description>
+      <description>If omitted, the currently displayed SoftButton values should not change.</description>
+    </param>
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
+      <description>App labeled on-screen presets (i.e. GEN3 media presets or dynamic search suggestions).</description>
+      <description>If omitted on supported displays, the presets will be shown as not defined.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Id of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="Show" messagetype="response">
+  </function>
+  <function name="AddCommand" messagetype="request">
+    <description>Request from SDL to add a command to the application menu.</description>
+    <param name="cmdID" type="Integer" minvalue="0" mandatory="true">
+      <description>ID of the command to be added.</description>
+    </param>
+    <param name="menuParams" type="Common.MenuParams" mandatory="false">
+      <description>Optional sub value containing parameters of the command (position, name, etc.). See MenuParams. If omitted the command should be added to the end of the list of commands.</description>
+    </param>
+    <param name="cmdIcon" type="Common.Image" mandatory="false">
+      <description>Image to be displayed for representing the command. See Image.</description>
+      <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="AddCommand" messagetype="response">
     </function>
-    <function name="Show" messagetype="response">
-    </function>
-    <function name="AddCommand" messagetype="request">
-      <description>Request from SDL to add a command to the application menu.</description>
-      <param name="cmdID" type="Integer" minvalue="0" mandatory="true">
-        <description>ID of the command to be added.</description>
-      </param>
-      <param name="menuParams" type="Common.MenuParams" mandatory="false">
-        <description>Optional sub value containing parameters of the command (position, name, etc.). See MenuParams. If omitted the command should be added to the end of the list of commands.</description>
-      </param>
-      <param name="cmdIcon" type="Common.Image" mandatory="false">
-         <description>Image to be displayed for representing the command. See Image.</description>
-         <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="AddCommand" messagetype="response">
-    </function>
-    <function name="DeleteCommand" messagetype="request">
-      <description>Request from SDL to delete a command from the in-application menu with the specified command id.</description>
-      <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
-        <description>cmdId previously sent via AddCommand request - id of the command to be deleted.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="DeleteCommand" messagetype="response">
-    </function>
-    <function name="AddSubMenu" messagetype="request">
-      <description>Request from SDL to add a sub menu to the in-application menu.</description>
-      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-        <description>ID of the sub menu to be added. Unique for the application.</description>
-      </param>
-      <param name="menuParams" type="Common.MenuParams" mandatory="true">
-        <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that requested this RPC.</description>
-      </param>
-    </function>
-    <function name="AddSubMenu" messagetype="response">
-    </function>
-    <function name="DeleteSubMenu" messagetype="request">
-      <description>Request from SDL to delete a submenu from the in-application menu.</description>
-      <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" >
-        <description>The "menuID" of the sub-menu to be deleted. (See addSubMenu.menuID)</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="DeleteSubMenu" messagetype="response">
-    </function>
-    <function name="PerformInteraction" messagetype="request">
-      <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-      <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
-        <description>Uses initialInteractionText. See TextFieldStruct.</description>
-      </param>
-      <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
-        <description>The list of choices to be used for the interaction with the user</description>
-      </param>
-	  <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
-        <description>If omitted on supported displays, the default system-generated help items should be used.</description>
-      </param>
-      <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
-        <description>Timeout in milliseconds.</description>
-
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="PerformInteraction" messagetype="response">
-      <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-        <description>ID of the choice that was selected in response to PerformInteraction.</description>
-      </param>
-    </function>
-    <function name="SetMediaClockTimer" messagetype="request">
-      <description>Sets the initial media clock value and automatic update method.</description>
-      <param name="startTime" type="Common.TimeFormat" mandatory="false">
-
-        <description>startTime should be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
-      </param>
-      <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
-        <description>The update method of the media clock.</description>
-        <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that requested this RPC.</description>
-      </param>
-    </function>
-    <function name="SetMediaClockTimer" messagetype="response">
-    </function>
-    <function name="SetGlobalProperties" messagetype="request">
-      <description>Request from SDL to set some properties for VR help.</description>
-      <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-        <description>VR Help Title text.</description>
-        <description>If omitted on supported displays, the default HU system help title should be used.</description>
-      </param>
-      <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-        <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-		  </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="SetGlobalProperties" messagetype="response">
-    </function>
-    <function name="ShowVrHelp" messagetype="request">
-      <description>Request from SDL to show help about available VR commands.</description>
-      <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-        <description>VR Help Title text.</description>
-        <description>If omitted on supported displays, the default HU system help title should be used.</description>
-      </param>
-      <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-          <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="false">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="ShowVrHelp" messagetype="response">
-    </function>
-    <function name="OnCommand" messagetype="notification">
-      <description>Notification must be initiated by HMI on user choosing menu item.</description>
-      <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
-        <description>Command ID, which is related to a specific menu entry (previously sent with AddCommand).</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that is related to this RPC.</description>
-      </param>
-    </function>
-    <function name="OnSystemContext" messagetype="notification">
-      <description>Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
-      <param name="systemContext" type="Common.SystemContext" mandatory="true">
-       <description>The context the application is brought into.</description>
-	  </param>
-    </function>
-    <function name="GetCapabilities" messagetype="request">
-      <description>Method is invoked at system startup by SDL to request information about UI capabilities of HMI.</description>
-    </function>
-    <function name="GetCapabilities" messagetype="response">
-      <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true">
-       <description>Information about the capabilities of the display: its type, text field supported, etc. See DisplayCapabilities. </description>
-      </param>
-      <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
-        <description>Must be returned if the platform supports on-screen SoftButtons.</description>
-      </param>
-    </function>
-    <function name="ChangeRegistration" messagetype="request">
-      <description>Request from SmartDeviceLink to HMI to change language for app.</description>
-      <param name="language" type="Common.Language" mandatory="true">
-        <description>The language application wants to switch to.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="ChangeRegistration" messagetype="response">
-    </function>
-    <function name="OnLanguageChange" messagetype="notification">
-      <description>Notification from HMI to SmartDeviceLink about change of  language.</description>
-      <param name="language" type="Common.Language" mandatory="true">
-        <description>Language UI has switched to.</description>
-      </param>
-    </function>
-    <function name="GetSupportedLanguages" messagetype="request">
-      <description>Method should be invoked at system startup. Response provides information about UI supported languages.</description>
-    </function>
-    <function name="GetSupportedLanguages" messagetype="response">
-      <param name="languages" type="Common.Language" mandatory="true" array="true" minsize="1" maxsize="100">
-        <description>List of languages supported in UI.</description>
-      </param>
-    </function>
-    <function name="GetLanguage" messagetype="request">
-      <description>Request from SmartDeviceLink to HMI to get currently active  UI language</description>
-    </function>
-    <function name="GetLanguage" messagetype="response">
-      <param name="language" type="Common.Language" mandatory="true"/>
-    </function>
-    <function name="OnDriverDistraction" messagetype="notification">
-      <description>Notification must be sent from HMI to SDL when driver distraction state is changed. Driver distraction rules are defined by the platform.</description>
-      <param name="state" type="Common.DriverDistractionState" mandatory="true">
-       <description>See DriverDistractionState. </description>
-      </param>
-    </function>
-    <function name="SetAppIcon" messagetype="request">
-      <description>Used to set existing local file on SYNC as the app's icon.</description>
-      <param name="syncFileName" type="Common.Image" mandatory="true">
-       <description>Either the path to the dynamic image stored on HY or the static binary image itself. See Image</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-      </param>
-    </function>
-    <function name="SetAppIcon" messagetype="response">
-    </function>
-    <function name="Slider" messagetype="request">
-      <description>Creates a full screen or pop-up overlay (depending on platform) with a single user controlled slider.</description>
-      <param name="numTicks" type="Integer" minvalue="2" maxvalue="26" mandatory="true">
-        <description>Number of selectable items on a horizontal axis</description>
-      </param>
-      <param name="position" type="Integer" minvalue="1" maxvalue="26" mandatory="true">
-        <description>Initial position of slider control (cannot exceed numTicks)</description>
-      </param>
-      <param name="sliderHeader" type="String" maxlength="500" mandatory="true">
-        <description>Text header to be displayed.</description>
-      </param>
-      <param name="sliderFooter" type="String" maxlength="500"  minsize="1" maxsize="26" array="true" mandatory="false">
-        <description>Text footer to be displayed (meant to display min/max threshold descriptors).</description>
-        <description>For a static text footer, only one footer string shall be provided in the array.</description>
-        <description>For a dynamic text footer, the number of footer text string in the array must match the numTicks value.</description>
-        <description>For a dynamic text footer, text array string should correlate with potential slider position index.</description>
-        <description>If omitted on supported displays, no footer text shall be displayed.</description>
-      </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
-       <description>Timeout. The slider should be displayed until the defined amount of time has elapsed. </description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that concerns this RPC.</description>
-      </param>
-    </function>
-    <function name="Slider" messagetype="response">
-      <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="true">
-        <description>Current slider position. Must be returned when the user has clicked the ‘Save’ or ‘Canceled’ button or by the timeout </description>
-      </param>
-    </function>
-    <function name="ScrollableMessage" messagetype="request">
-      <description>Creates a full screen overlay containing a large block of formatted text that can be scrolled with up to 8 SoftButtons defined</description>
-      <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
-        <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
-      </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
-        <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
-      </param>
-      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
-        <description>App defined SoftButtons.</description>
-        <description>If omitted on supported displays, only the system defined "Close" SoftButton should be displayed.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-      </param>
-    </function>
-    <function name="ScrollableMessage" messagetype="response">
-    </function>
-    <function name="PerformAudioPassThru" messagetype="request">
-      <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
-        <description>Uses
+  <function name="DeleteCommand" messagetype="request">
+    <description>Request from SDL to delete a command from the in-application menu with the specified command id.</description>
+    <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
+      <description>cmdId previously sent via AddCommand request - id of the command to be deleted.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="DeleteCommand" messagetype="response">
+  </function>
+  <function name="AddSubMenu" messagetype="request">
+    <description>Request from SDL to add a sub menu to the in-application menu.</description>
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
+      <description>ID of the sub menu to be added. Unique for the application.</description>
+    </param>
+    <param name="menuParams" type="Common.MenuParams" mandatory="true">
+      <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+  </function>
+  <function name="AddSubMenu" messagetype="response">
+  </function>
+  <function name="DeleteSubMenu" messagetype="request">
+    <description>Request from SDL to delete a submenu from the in-application menu.</description>
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" >
+      <description>The "menuID" of the sub-menu to be deleted. (See addSubMenu.menuID)</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="DeleteSubMenu" messagetype="response">
+  </function>
+  <function name="PerformInteraction" messagetype="request">
+    <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
+    <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
+      <description>Uses initialInteractionText. See TextFieldStruct.</description>
+    </param>
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
+      <description>The list of choices to be used for the interaction with the user</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
+      <description>If omitted on supported displays, the default system-generated help items should be used.</description>
+    </param>
+    <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
+      <description>Timeout in milliseconds.</description>
+    </param>
+    <param name="interactionLayout" type="Common.LayoutMode" mandatory="false">
+      <description>See LayoutMode.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="PerformInteraction" messagetype="response">
+    <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      <description>ID of the choice that was selected in response to PerformInteraction.</description>
+    </param>
+    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+      <description>
+	       	Manually entered text selection, e.g. through keyboard
+        	Can be returned in lieu of choiceID, depending on trigger source
+      </description>
+    </param>
+  </function>
+  <function name="SetMediaClockTimer" messagetype="request">
+    <description>Sets the initial media clock value and automatic update method.</description>
+    <param name="startTime" type="Common.TimeFormat" mandatory="false">
+      <description>startTime should be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
+    </param>
+    <param name="endTime" type="Common.TimeFormat" mandatory="false">
+      <description>
+          See StartTime.
+      	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+      	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+      	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+      </description>
+    </param>
+    <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
+      <description>The update method of the media clock.</description>
+      <description>In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SetMediaClockTimer" messagetype="response">
+  </function>
+  <function name="SetGlobalProperties" messagetype="request">
+    <description>Request from SDL to set some properties for VR help.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
+    </param>
+    <param name="menuTitle" maxlength="500" type="String" mandatory="false">
+      <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    <param name="menuIcon" type="Common.Image" mandatory="false">
+      <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    <param name="keyboardProperties" type="Common.KeyboardProperties" mandatory="false">
+      <description>On-screen keybaord configuration (if available).</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="SetGlobalProperties" messagetype="response">
+  </function>
+  <function name="ShowVrHelp" messagetype="request">
+    <description>Request from SDL to show help about available VR commands.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="ShowVrHelp" messagetype="response">
+  </function>
+  <function name="OnCommand" messagetype="notification">
+    <description>Notification must be initiated by HMI on user choosing menu item.</description>
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>Command ID, which is related to a specific menu entry (previously sent with AddCommand).</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that is related to this RPC.</description>
+    </param>
+  </function>
+  <function name="OnSystemContext" messagetype="notification">
+    <description>Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
+    <param name="systemContext" type="Common.SystemContext" mandatory="true">
+      <description>The context the application is brought into.</description>
+    </param>
+  </function>
+  <function name="GetCapabilities" messagetype="request">
+    <description>Method is invoked at system startup by SDL to request information about UI capabilities of HMI.</description>
+  </function>
+  <function name="GetCapabilities" messagetype="response">
+    <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="true">
+      <description>Information about the capabilities of the display: its type, text field supported, etc. See DisplayCapabilities. </description>
+    </param>
+    <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
+    <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+      <description>Must be returned if the platform supports on-screen SoftButtons.</description>
+    </param>
+  </function>
+  <function name="ChangeRegistration" messagetype="request">
+    <description>Request from SmartDeviceLink to HMI to change language for app.</description>
+    <param name="language" type="Common.Language" mandatory="true">
+      <description>The language application wants to switch to.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="ChangeRegistration" messagetype="response">
+  </function>
+  <function name="OnLanguageChange" messagetype="notification">
+    <description>Notification from HMI to SmartDeviceLink about change of  language.</description>
+    <param name="language" type="Common.Language" mandatory="true">
+      <description>Language UI has switched to.</description>
+    </param>
+  </function>
+  <function name="GetSupportedLanguages" messagetype="request">
+    <description>Method should be invoked at system startup. Response provides information about UI supported languages.</description>
+  </function>
+  <function name="GetSupportedLanguages" messagetype="response">
+    <param name="languages" type="Common.Language" mandatory="true" array="true" minsize="1" maxsize="100">
+      <description>List of languages supported in UI.</description>
+    </param>
+  </function>
+  <function name="GetLanguage" messagetype="request">
+    <description>Request from SmartDeviceLink to HMI to get currently active  UI language</description>
+  </function>
+  <function name="GetLanguage" messagetype="response">
+    <param name="language" type="Common.Language" mandatory="true"/>
+  </function>
+  <function name="OnDriverDistraction" messagetype="notification">
+    <description>Notification must be sent from HMI to SDL when driver distraction state is changed. Driver distraction rules are defined by the platform.</description>
+    <param name="state" type="Common.DriverDistractionState" mandatory="true">
+      <description>See DriverDistractionState. </description>
+    </param>
+  </function>
+  <function name="SetAppIcon" messagetype="request">
+    <description>Used to set existing local file on SYNC as the app's icon.</description>
+    <param name="syncFileName" type="Common.Image" mandatory="true">
+      <description>Either the path to the dynamic image stored on HY or the static binary image itself. See Image</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="SetAppIcon" messagetype="response">
+  </function>
+  <function name="ShowCustomForm" messagetype="request">
+    <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
+    <param name="customFormID" type="String" maxlength="500" mandatory="true">
+      <description>
+			Predefined or dynamically created screen layout.
+			Currently only predefined forms are defined.
+			Predefined layouts include:
+				"DEFAULT" - Default media / non-media screen
+				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+				"KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
+				"NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
+				"NAV_POI_MENU" - Custom template containing app-defined POI options.
+				"NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
+				"NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
+      </description>
+    </param>
+    <param name="parentFormID" type="String" maxlength="500" defvalue="DEFAULT" mandatory="false">
+      <description>
+			Parent screen of predefined form to display.
+			Currently only predefined forms are defined.
+			If not provided, then set to "DEFAULT".
+			Predefined layouts include:
+				"DEFAULT" - Default media / non-media screen
+				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+				"NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
+      </description>
+    </param>
+  </function>
+  <function name="ShowCustomForm" messagetype="response">
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+  <function name="ShowKeyboard" messagetype="request">
+    <description>Configures and populates on-screen keyboard.</description>
+    <param name="language" type="Common.Language" mandatory="true">
+      <description>The keyboard language.</description>
+    </param>
+    <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true" >
+      <description>Desired keyboard layout.</description>
+    </param>
+    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+      <description>In this mode, all keypresses will be sent as they occur.</description>
+      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+      <description>If omitted, this value will be set to FALSE.</description>
+    </param>
+    <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Array of keyboard characters to enable.</description>
+      <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+      <description>If omitted, the entire keyboard will be enabled.</description>
+    </param>
+    <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+      <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+    </param>
+  </function>
+  <function name="ShowKeyboard" messagetype="response">
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+  <function name="OnKeyboardInput" messagetype="notification">
+    <description>On-screen keyboard event.</description>
+    <description>Can be full string or individual keypresses depending on keyboard mode.</description>
+    <param name="event" type="Common.KeyboardEvent" mandatory="true">
+      <description>On-screen keyboard input data.</description>
+    </param>
+    <param name="data" type="String" maxlength="500" mandatory="false">
+      <description>On-screen keyboard input data.</description>
+      <description>For dynamic keypress events, this will be the current compounded string of entry text.</description>
+      <description>For entry submission events, this will be the full text entry (this will always return regardless of the mode).</description>
+      <description>For entry cancelled and entry aborted events, this data param will be omitted.</description>
+    </param>
+  </function>
+  <function name="OnTouchEvent" messagetype="notification">
+    <description>Notifies about touch events on the screen's prescribed area</description>
+    <param name="eventType" type="Common.TouchEvent" mandatory="true">
+      <description>Type of event - start, move, stop, etc.</description>
+    </param>
+    <param name="touchLists" type="Common.TouchLists" mandatory="false">
+      <description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
+    </param>
+    <param name="info" type="Common.TouchEventInfo" mandatory="true">
+      <description>Coordinate of the touch, radius of touch input and input ID.</description>
+    </param>
+  </function>
+  <function name="Slider" messagetype="request">
+    <description>Creates a full screen or pop-up overlay (depending on platform) with a single user controlled slider.</description>
+    <param name="numTicks" type="Integer" minvalue="2" maxvalue="26" mandatory="true">
+      <description>Number of selectable items on a horizontal axis</description>
+    </param>
+    <param name="position" type="Integer" minvalue="1" maxvalue="26" mandatory="true">
+      <description>Initial position of slider control (cannot exceed numTicks)</description>
+    </param>
+    <param name="sliderHeader" type="String" maxlength="500" mandatory="true">
+      <description>Text header to be displayed.</description>
+    </param>
+    <param name="sliderFooter" type="String" maxlength="500"  minsize="1" maxsize="26" array="true" mandatory="false">
+      <description>Text footer to be displayed (meant to display min/max threshold descriptors).</description>
+      <description>For a static text footer, only one footer string shall be provided in the array.</description>
+      <description>For a dynamic text footer, the number of footer text string in the array must match the numTicks value.</description>
+      <description>For a dynamic text footer, text array string should correlate with potential slider position index.</description>
+      <description>If omitted on supported displays, no footer text shall be displayed.</description>
+    </param>
+    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" mandatory="true">
+      <description>Timeout. The slider should be displayed until the defined amount of time has elapsed. </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+  </function>
+  <function name="Slider" messagetype="response">
+    <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="false">
+      <description>Current slider position. Must be returned when the user has clicked the ‘Save’ or ‘Canceled’ button or by the timeout </description>
+    </param>
+  </function>
+  <function name="ScrollableMessage" messagetype="request">
+    <description>Creates a full screen overlay containing a large block of formatted text that can be scrolled with up to 8 SoftButtons defined</description>
+    <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
+      <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
+    </param>
+    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="true">
+      <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
+      <description>App defined SoftButtons.</description>
+      <description>If omitted on supported displays, only the system defined "Close" SoftButton should be displayed.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="ScrollableMessage" messagetype="response">
+  </function>
+  <function name="PerformAudioPassThru" messagetype="request">
+    <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
+      <description>Uses
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
-      </param>
-      <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
-        <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
-      </param>
-    </function>
-    <function name="PerformAudioPassThru" messagetype="response">
-    </function>
-    <function name="EndAudioPassThru" messagetype="request">
-      <description>Request is sent by SDL to stop the audio capturing.</description>
-    </function>
-    <function name="EndAudioPassThru" messagetype="response">
-    </function>
-    <function name="IsReady" messagetype="request">
-      <description>Method is invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
-    </function>
-    <function name="IsReady" messagetype="response">
-      <param name="available" type="Boolean" mandatory="true">
-        <description>Must be true if UI is present and ready to communicate with SDL.</description>
-      </param>
-    </function>
-    <function name="ClosePopUp" messagetype="request">
-      <description>Initiated by SDL to close currently active pop-up on HMI.</description>
-    </function>
-    <function name="ClosePopUp" messagetype="response">
-      <description>Provides the result of operation.</description>
-    </function>
+    </param>
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
+      <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="PerformAudioPassThru" messagetype="response">
+  </function>
+  <function name="EndAudioPassThru" messagetype="request">
+    <description>Request is sent by SDL to stop the audio capturing.</description>
+  </function>
+  <function name="EndAudioPassThru" messagetype="response">
+  </function>
+  <function name="IsReady" messagetype="request">
+    <description>Method is invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
+  </function>
+  <function name="IsReady" messagetype="response">
+    <param name="available" type="Boolean" mandatory="true">
+      <description>Must be true if UI is present and ready to communicate with SDL.</description>
+    </param>
+  </function>
+  <function name="ClosePopUp" messagetype="request">
+    <description>Initiated by SDL to close currently active pop-up on HMI.</description>
+  </function>
+  <function name="ClosePopUp" messagetype="response">
+    <description>Provides the result of operation.</description>
+  </function>
 </interface>
 
 <interface name="Navigation" version="1.0" date="2013-05-22">
-    <function name="IsReady" messagetype="request">
-      <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
-    </function>
-    <function name="IsReady" messagetype="response">
-      <param name="available" type="Boolean" mandatory="true">
-        <description>Must be true if Navigation is present and ready to communicate with SDL.</description>
-      </param>
-    </function>
-    <function name="ShowConstantTBT" messagetype="request">
-      <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
-      <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
-        <description>See TextFieldStruct. Uses:
+  <function name="IsReady" messagetype="request">
+    <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
+  </function>
+  <function name="IsReady" messagetype="response">
+    <param name="available" type="Boolean" mandatory="true">
+      <description>Must be true if Navigation is present and ready to communicate with SDL.</description>
+    </param>
+  </function>
+  <function name="ShowConstantTBT" messagetype="request">
+    <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
+    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
+      <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
           ETA
-          totalDistance.</description>
-      </param>
-      <param name="turnIcon" type="Common.Image" mandatory="false">
-       <description>Icon (as a prompting for the turn) to be displayed.</description>
-      </param>
-      <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
-        <description>Fraction of distance till next maneuver (from previous maneuver).</description>
-        <description>May be used to calculate progress bar.</description>
-      </param>
-      <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
-        <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
-        <description>May be used to calculate progress bar.</description>
-      </param>
-      <param name="maneuverComplete" type="Boolean" mandatory="false">
-        <description>If and when a maneuver has completed while an AlertManeuver is active, SDL will send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
-        <description>If omitted the value should be assumed as FALSE.</description>
-      </param>
-      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
-        <description>Three dynamic SoftButtons available</description>
-        <description>If omitted on supported displays, the currently displayed SoftButton values will not change.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-      </param>
-    </function>
-    <function name="ShowConstantTBT" messagetype="response">
-    </function>
-    <function name="AlertManeuver" messagetype="request">
-      <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
-      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
-        <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
-      </param>
-    </function>
-    <function name="AlertManeuver" messagetype="response">
-    </function>
-    <function name="UpdateTurnList" messagetype="request">
-      <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>
-      <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="true">
-      </param>
-      <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
-        <description>If omitted, app-defined SoftButton should be left blank.</description>
-      </param>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-      </param>
-    </function>
-    <function name="UpdateTurnList" messagetype="response">
-    </function>
-    <function name="OnTBTClientState" messagetype="notification">
-      <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
-      <param name="state" type="Common.TBTState" mandatory="true">
-        <description>Current State of TBT client</description>
-      </param>
-    </function>
+          totalDistance.
+      </description>
+    </param>
+    <param name="turnIcon" type="Common.Image" mandatory="false">
+    </param>
+    <param name="nextTurnIcon" type="Common.Image" mandatory="false">
+    </param>
+    <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
+      <description>Fraction of distance till next maneuver (from previous maneuver).</description>
+      <description>May be used to calculate progress bar.</description>
+    </param>
+    <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
+      <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
+      <description>May be used to calculate progress bar.</description>
+    </param>
+    <param name="maneuverComplete" type="Boolean" mandatory="false">
+      <description>If and when a maneuver has completed while an AlertManeuver is active, SDL will send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
+      <description>If omitted the value should be assumed as FALSE.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <description>Three dynamic SoftButtons available</description>
+      <description>If omitted on supported displays, the currently displayed SoftButton values will not change.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="ShowConstantTBT" messagetype="response">
+  </function>
+  <function name="AlertManeuver" messagetype="request">
+    <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
+    </param>
+  </function>
+  <function name="AlertManeuver" messagetype="response">
+  </function>
+  <function name="UpdateTurnList" messagetype="request">
+    <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>
+    <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="true">
+    </param>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
+      <description>If omitted, app-defined SoftButton should be left blank.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="UpdateTurnList" messagetype="response">
+  </function>
+  <function name="OnTBTClientState" messagetype="notification">
+    <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
+    <param name="state" type="Common.TBTState" mandatory="true">
+      <description>Current State of TBT client</description>
+    </param>
+  </function>
+  <function name="StartStream" messagetype="request">
+    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+      <description>URL that HMI start playing.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="StartStream" messagetype="response">
+  </function>
+  <function name="StopStream" messagetype="request">
+    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="StopStream" messagetype="response">
+  </function>
 </interface>
 
 <interface name="VehicleInfo" version="1.0" date="2013-04-21">
@@ -1935,7 +2368,7 @@
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of ECU.</description>
     </param>
-    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
+    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="1" maxsize="1000" array="true" mandatory="true">
       <description>Get raw data from vehicle data DID location(s).</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -1965,9 +2398,9 @@
     </param>
     <param name="dtc" type="String" mandatory="false" minsize="1" maxsize="15" maxlength="10" array="true">
       <description>
-       Array of all reported DTCs on module. Each DTC is represented with 4 bytes:
-		3 bytes for data
-		1 byte for status
+        Array of all reported DTCs on module. Each DTC is represented with 4 bytes:
+        3 bytes for data
+        1 byte for status
       </description>
     </param>
   </function>
@@ -2040,7 +2473,6 @@
       <description>ID of application requested this RPC.</description>
     </param>
   </function>
-
   <function name="GetVehicleData" messagetype="response">
     <param name="gps" type="Common.GPSData" mandatory="false">
       <description>See GPSData</description>
@@ -2106,7 +2538,6 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-
   <function name="OnVehicleData" messagetype="notification">
     <description>Callback for the periodic and non periodic vehicle data read function.</description>
     <param name="gps" type="Common.GPSData" mandatory="false">
@@ -2174,6 +2605,4 @@
     </param>
   </function>
 </interface>
-
 </interfaces>
-
