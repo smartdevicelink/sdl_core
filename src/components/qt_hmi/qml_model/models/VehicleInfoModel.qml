@@ -4,7 +4,7 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 QtObject {
-    property real speed: 80.0
+    property real speed: 80.1
     property int rpm: 5000
     property real fuelLevel: 0.2
     property int fuelLevel_State: Common.ComponentVolumeStatus.CVS_UNKNOWN

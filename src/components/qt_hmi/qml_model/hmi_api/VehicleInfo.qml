@@ -58,7 +58,7 @@ Item {
         console.debug("enter getVehicleData()", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                       vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                       wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID)
-
+/*
         var dataToSend = {};
         var functionArgs = [ "gps", "speed", "rpm", "fuelLevel", "fuelLevel_State", "instantFuelConsumption", "externalTemperature",
                         "vin", "prndl", "tirePressure", "odometer", "beltStatus", "bodyInformation", "deviceStatus", "driverBraking",
@@ -69,6 +69,11 @@ Item {
             if (arguments[i] === true) {
                 dataToSend[functionArgs[i]] = dataContainer.vehicleInfoModel[functionArgs[i]];
             }
+        }
+*/
+        return { gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
+                   speed: speed ? dataContainer.vehicleInfoModel.speed : undefined
+
         }
 
         console.debug("exit getVehicleData()", dataToSend);
