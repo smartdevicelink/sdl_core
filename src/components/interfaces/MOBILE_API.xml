@@ -3667,9 +3667,9 @@
     </param>
     <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="timeToDestination" type="String" maxlength="500" mandatory="false" scope="partner">
+    <param name="timeToDestination" type="String" minlength="0" maxlength="500" mandatory="false" scope="partner">
     </param>
-    <param name="totalDistance" type="String"  minlength="0" maxlength="500" mandatory="false">
+    <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="turnIcon" type="Image" mandatory="false">
     </param>
