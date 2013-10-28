@@ -71,12 +71,31 @@ Item {
             }
         }
 */
-        return { gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
-                   speed: speed ? dataContainer.vehicleInfoModel.speed : undefined
-
-        }
 
         console.debug("exit getVehicleData()", dataToSend);
-        return dataToSend
+        return { gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
+                speed: speed ? dataContainer.vehicleInfoModel.speed : undefined,
+                rpm: rpm ? dataContainer.vehicleInfoModel.rpm : undefined,
+                fuelLevel: fuelLevel ? dataContainer.vehicleInfoModel.fuelLevel : undefined,
+                fuelLevel_State: fuelLevel_State ? dataContainer.vehicleInfoModel.fuelLevel_State : undefined,
+                instantFuelConsumption: instantFuelConsumption ? dataContainer.vehicleInfoModel.instantFuelConsumption : undefined,
+                externalTemperature: externalTemperature ? dataContainer.vehicleInfoModel.externalTemperature : undefined,
+                vin: vin ? dataContainer.vehicleInfoModel.vin : undefined,
+                prndl: prndl ? dataContainer.vehicleInfoModel.prndl : undefined,
+                tirePressure: tirePressure ? dataContainer.vehicleInfoModel.tirePressure : undefined,
+                odometer: odometer ? dataContainer.vehicleInfoModel.odometer : undefined,
+                beltStatus: beltStatus ? dataContainer.vehicleInfoModel.beltStatus : undefined,
+                bodyInformation: bodyInformation ? dataContainer.vehicleInfoModel.bodyInformation : undefined,
+                deviceStatus: deviceStatus ? dataContainer.vehicleInfoModel.deviceStatus : undefined,
+                driverBraking: driverBraking ? dataContainer.vehicleInfoModel.driverBraking : undefined,
+                wiperStatus: wiperStatus ? dataContainer.vehicleInfoModel.wiperStatus : undefined,
+                headLampStatus: headLampStatus ? dataContainer.vehicleInfoModel.headLampStatus : undefined,
+                engineTorque: engineTorque ? dataContainer.vehicleInfoModel.engineTorque : undefined,
+                accPedalPosition: accPedalPosition ? dataContainer.vehicleInfoModel.accPedalPosition : undefined,
+                steeringWheelAngle: steeringWheelAngle ? dataContainer.vehicleInfoModel.steeringWheelAngle : undefined,
+                myKey: myKey ? dataContainer.vehicleInfoModel.myKey : undefined
+        }
+
+    //    return dataToSend
     }
 }
