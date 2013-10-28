@@ -60,15 +60,11 @@ QtObject {
                     console.log("countdown timer stopped")
                 }
                 break
-            case Internal.MediaClockUpdateMode.MCU_STOPPED:
-                timer.stop()
-                console.debug("warning: onTimer() launched for stopped clock")
-                break
         }
     }
 
     function restore (updateMode, runningMode, magic) {
-        console.debug("MediaClockModel::restore(" + updateMode + ", " + magic + ")")
+        console.debug("MediaClockModel::restore(" + updateMode + ", " + runningMode + ", " + magic + ")")
         timer.stop()
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
@@ -79,11 +75,11 @@ QtObject {
             case Internal.MediaClockRunMode.MCR_RUNNING:
                 switch (updateMode) {
                     case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        hmsTime = Math.floor(secondsSinceEpoch - magic) // floor() works finer than round()
+                        hmsTime = Math.round(secondsSinceEpoch - magic)
                         toStart = true
                         break
                     case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        hmsTime = Math.floor(magic - secondsSinceEpoch) // floor() works finer than round()
+                        hmsTime = Math.round(magic - secondsSinceEpoch)
                         if (hmsTime > 0) {
                             toStart = true
                         }

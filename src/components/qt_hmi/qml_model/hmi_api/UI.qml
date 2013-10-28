@@ -124,6 +124,7 @@ Item {
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
         var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+        var mediaClockUpdateMode
         switch (updateMode) {
             case Common.ClockUpdateMode.COUNTUP:
                 dataContainer.setApplicationProperties(appID, {
@@ -144,26 +145,54 @@ Item {
                 })
                 break
             case Common.ClockUpdateMode.PAUSE:
+                var newMediaClockTime
+                var mediaClockMagic = dataContainer.getApplication(appID).mediaClock.magic
+                mediaClockUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                switch (mediaClockUpdateMode) {
+                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                        newMediaClockTime = secondsSinceEpoch - mediaClockMagic
+                        break
+                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                        newMediaClockTime = mediaClockMagic - secondsSinceEpoch
+                        break
+                }
                 dataContainer.setApplicationProperties(appID, {
                     "mediaClock": {
-                        "updateMode": dataContainer.currentApplication.mediaClock.updateMode,
+                        "updateMode": mediaClockUpdateMode,
                         "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
-                        "magic": dataContainer.currentApplication.mediaClock.hmsTime
+                        "magic": newMediaClockTime
                     }
                 })
                 break
             case Common.ClockUpdateMode.RESUME:
+                mediaClockUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                var mediaClockTime = dataContainer.getApplication(appID).mediaClock.magic
+                var newMediaClockTimeMagic
+                switch (mediaClockUpdateMode) {
+                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                        newMediaClockTimeMagic = secondsSinceEpoch - mediaClockTime
+                        break
+                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                        newMediaClockTimeMagic = secondsSinceEpoch + mediaClockTime
+                        break
+                }
                 dataContainer.setApplicationProperties(appID, {
                     "mediaClock": {
-                       "updateMode": dataContainer.currentApplication.mediaClock.updateMode,
+                       "updateMode": mediaClockUpdateMode,
                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                        "magic": dataContainer.currentApplication.mediaClock.hmsTime
+                       "magic": newMediaClockTimeMagic
                     }
                 })
                 break
-            default:
-                console.log("UI::setMediaClockTimer(): updateMode = " + updateMode)
-                break
+            case Common.ClockUpdateMode.CLEAR:
+                dataContainer.setApplicationProperties(appID, {
+                    "mediaClock": {
+                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                        "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
+                        "magic": 0
+                    }
+                })
+                break;
         }
         console.debug("exit")
     }
