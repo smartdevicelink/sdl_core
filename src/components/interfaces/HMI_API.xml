@@ -1128,9 +1128,9 @@
     Describes different audio type configurations for PerformAudioPassThru.
     e.g. 8kHz,8-bit,PCM
   </description>
-  <param name="samplingRate" type="Common.SamplingRate"/>
-  <param name="bitsPerSample" type="Common.BitsPerSample"/>
-  <param name="audioType" type="Common.AudioType"/>
+  <param name="samplingRate" type="Common.SamplingRate" mandatory="true"/>
+  <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
+  <param name="audioType" type="Common.AudioType" mandatory="true"/>
 </struct>
 
 <struct name="TouchLists">
