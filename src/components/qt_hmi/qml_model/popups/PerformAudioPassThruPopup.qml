@@ -39,7 +39,6 @@ import "../hmi_api/Common.js" as Common
 import "../controls"
 
 PopUp {
-
     property var async
 
     function showAudioPassThru(){

@@ -1,6 +1,6 @@
 /**
- * @file TBTClientStatePopUp.qml
- * @brief Popup view for TBT interface (list of states).
+ * @file AlertSoftButton.js
+ * @brief AlertSoftButton's constants
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,41 +31,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+.pragma library
 
-import QtQuick 2.0
-import QtQuick.Controls 1.0
-import "../hmi_api/Common.js" as Common
-import "../models/Constants.js" as Constants
-
-PopUp {
-    Item {
-        ListModel {
-            id: tbtState
-
-            Component.onCompleted: {
-                for (var name in Common.TBTState) {
-                    append({name: name});
-                }
-            }
-        }
-    }
-    Text {
-        text: "TBT Client State"
-        verticalAlignment: Text.AlignVCenter
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.top: parent.top
-        color: Constants.primaryColor
-    }
-    ComboBox {
-        id: comboBox
-        width: Constants.comboboxWidth
-        anchors.horizontalCenter: parent.horizontalCenter
-        model: tbtState
-        anchors.verticalCenter: parent.verticalCenter
-        onCurrentTextChanged: {
-            console.log("Send signal onTBTClientState:", currentText);
-            sdlNavigation.onTBTClientState(Common.TBTState[currentText]);
-        }
-    }
+var Action = {
+	doNothing      : 0,
+        closeOnClicked : 1,
+        keepOnClicked  : 2,
+        onRelease      : 4,
+        closeOnRelease : 5,
+        keepOnRelease  : 6,
 }
