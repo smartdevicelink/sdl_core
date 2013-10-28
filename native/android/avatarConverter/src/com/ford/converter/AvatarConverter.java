@@ -328,7 +328,8 @@ public class AvatarConverter {
 				e.printStackTrace();
 			}
 
-			System.out.println("File copied from " + logoSrc + " to " + logoDest);
+			System.out.println("File copied from " + logoSrc + " to "
+					+ logoDest);
 		}
 
 	}
@@ -342,12 +343,12 @@ public class AvatarConverter {
 		String strPort = strOldPort.substring(strOldPort.indexOf('=') + 1);
 		int oldPort = Integer.parseInt(strPort.trim());
 		String strNewPort = strConst + String.valueOf(oldPort);
-		if(LANGUAGE.compareTo(FRENCH)==0){
-			strNewPort = strConst + String.valueOf(oldPort+1);
+		if (LANGUAGE.compareTo(FRENCH) == 0) {
+			strNewPort = strConst + String.valueOf(oldPort + 1);
 		} else {
-			strNewPort = strConst + String.valueOf(oldPort+2);
+			strNewPort = strConst + String.valueOf(oldPort + 2);
 		}
-		if(!changeTextInFile(filePath, strOldPort, strNewPort)){
+		if (!changeTextInFile(filePath, strOldPort, strNewPort)) {
 			System.out.println("!!!ERROR " + filePath + " was not refactored");
 		}
 	}
@@ -395,41 +396,11 @@ public class AvatarConverter {
 
 	private static void changeSettings(String root) {
 		String filePath = root + "\\res\\xml\\settings.xml";
-		File settingsFile = new File(filePath);
-		if (settingsFile.exists()) {
-//			String oldValue = "str_preference_general";
-//			String newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_summary_fullscreen";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_title_fullscreen";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_summary_maps";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_title_maps";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_summary_vehicles";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-//			oldValue = "str_preference_title_vehicles";
-//			newValue = oldValue + "_" + LANGUAGE;
-//			changeTextInFile(settingsFile.getAbsolutePath(), oldValue, newValue);
-		}
 		filePath = root + "\\res\\menu\\optionsmenu.xml";
 		File menuFile = new File(filePath);
 		if (menuFile.exists()) {
-			String oldValue = "str_menu_settings";
+			String oldValue = "str_menu_quit";
 			String newValue = oldValue + "_" + LANGUAGE;
-			changeTextInFile(menuFile.getAbsolutePath(), oldValue, newValue);
-			oldValue = "str_menu_quit";
-			newValue = oldValue + "_" + LANGUAGE;
-			changeTextInFile(menuFile.getAbsolutePath(), oldValue, newValue);
-			oldValue = "str_menu_rate";
-			newValue = oldValue + "_" + LANGUAGE;
 			changeTextInFile(menuFile.getAbsolutePath(), oldValue, newValue);
 		}
 

@@ -1,0 +1,104 @@
+apply plugin: 'android'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+    compile project(':GooglePlayDownloaderLibrary')
+    compile project(':GooglePlayZipLibrary')
+}
+
+android {
+    compileSdkVersion 8
+    buildToolsVersion "18.1.1"
+
+    sourceSets {
+        // Move the tests to tests/java, tests/res, etc...
+        instrumentTest.setRoot('tests')
+
+        // Move the build types to build-types/<type>
+        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
+        // This moves them out of them default location under src/<type>/... which would
+        // conflict with src/ being used by the main source set.
+        // Adding new build types or product flavors should be accompanied
+        // by a similar customization.
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+}
+
+/////////////
+// NDK Support
+//////////////
+// If using this, Android studio will fail run the following to set the environment variable for android studio:
+// export ANDROID_NDK_HOME=/Android/android-ndk-r8e (Linux)
+// launchctl setenv ANDROID_NDK_HOME /Android/android-ndk-r8e (Mac)
+// or, better, add the export to the .profile of your user home and re-login
+
+// https://groups.google.com/d/msg/adt-dev/SOs6mxZGjMM/pdRQaA7tyEkJ
+// http://stackoverflow.com/questions/16683775/include-so-library-in-apk-in-android-studio
+// https://gist.github.com/khernyo/4226923
+
+def mainSrcDir = new File(projectDir, 'src/main').absolutePath
+
+task copyNativeLibs(type: Copy, dependsOn: 'buildNative') {
+    def destLibsDir = new File(buildDir, 'lib')
+    destLibsDir.mkdir()
+    exclude('**/*.jar')
+    from(new File(mainSrcDir, 'libs'))
+    into destLibsDir
+}
+
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn copyNativeLibs
+}
+
+clean.dependsOn 'cleanCopyNativeLibs'
+
+tasks.withType(com.android.build.gradle.tasks.PackageApplication) { pkgTask ->
+    pkgTask.jniDir new File(buildDir, 'lib')
+}
+
+task buildNative(type: Exec) {
+    def ndkBuild;
+    def ndkBuildingDir = mainSrcDir;
+    def hasNdk = false;
+    if (System.env.ANDROID_NDK_HOME != null) {
+        hasNdk = true;
+        ndkBuild = new File(System.env.ANDROID_NDK_HOME, 'ndk-build')
+    }
+
+    commandLine ndkBuild, "--directory", ndkBuildingDir
+
+    doFirst {
+        if (!hasNdk) {
+            logger.error('##################')
+            logger.error("Failed NDK build")
+            logger.error('Reason: Reason: ANDROID_NDK_HOME not set.')
+            logger.error('##################')
+        }
+        assert hasNdk : "ANDROID_NDK_HOME not set."
+    }
+}
+
+task cleanNative(type: Exec) {
+    def ndkBuild;
+    def ndkBuildingDir = mainSrcDir;
+    def hasNdk = false;
+    if (System.env.ANDROID_NDK_HOME != null) {
+        hasNdk = true;
+        ndkBuild = new File(System.env.ANDROID_NDK_HOME, 'ndk-build')
+    }
+
+    commandLine ndkBuild, "--directory", ndkBuildingDir, "clean"
+
+    doFirst {
+        if (!hasNdk) {
+            logger.error('##################')
+            logger.error("Failed NDK build")
+            logger.error('Reason: Reason: ANDROID_NDK_HOME not set.')
+            logger.error('##################')
+        }
+        assert hasNdk : "ANDROID_NDK_HOME not set."
+    }
+}
+
+clean.dependsOn 'cleanNative'

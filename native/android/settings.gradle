@@ -1,0 +1,4 @@
+include ':GooglePlayDownloaderLibrary'
+include ':GooglePlayLicensingLibrary'
+include ':GooglePlayZipLibrary'
+include ':avatar'

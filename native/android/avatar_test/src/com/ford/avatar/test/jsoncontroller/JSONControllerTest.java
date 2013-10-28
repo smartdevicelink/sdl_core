@@ -7,11 +7,11 @@ import org.json.JSONObject;
 
 import android.util.TimeUtils;
 
+import com.ford.avatar.jsoncontroller.JSONController;
+import com.ford.avatar.jsonparser.EBEMethods;
+import com.ford.avatar.jsonparser.EMBMethods;
 import com.ford.avatar.test.stubs.TCPClientStub;
-import com.ford.sdlreverse.jsoncontroller.JSONController;
-import com.ford.sdlreverse.jsonparser.EBEMethods;
-import com.ford.sdlreverse.jsonparser.EMBMethods;
-import com.ford.sdlreverse.util.RPCConst;
+import com.ford.avatar.util.RPCConst;
 
 import junit.framework.TestCase;
 

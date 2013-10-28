@@ -6,9 +6,9 @@ import java.net.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.sdlreverse.jsoncontroller.ITcpClient;
-import com.ford.sdlreverse.jsonparser.EMBMethods;
-import com.ford.sdlreverse.util.RPCConst;
+import com.ford.avatar.jsoncontroller.ITcpClient;
+import com.ford.avatar.jsonparser.EMBMethods;
+import com.ford.avatar.util.RPCConst;
 
 public class TCPClientStub implements ITcpClient{
 	

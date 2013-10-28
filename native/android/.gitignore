@@ -1,46 +1,12 @@
-#=============ANDROID============================
-#ignore directories
+# Android: generated files
+bin
+gen
+obj
+out
 
-src/bin/*
-src/gen/*
-src/obj/*
-src/assets/*
-src/.*
-src/default.properties
-src/lint.*
-src/NULL_win.*
-src/produard.cfg
+# gradle
+.gradle*
 
-#ignore directories
-
-GooglePlayDownloaderLibrary/bin/*
-GooglePlayDownloaderLibrary/gen/*
-GooglePlayDownloaderLibrary/bin/.*
-
-
-#ignore directories
-
-GooglePlayZipLibrary/bin/*
-GooglePlayZipLibrary/gen/*
-GooglePlayZipLibrary/.*
-
-#ignore directories
-
-GooglePlayLicensingLibrary/bin/*
-GooglePlayLicensingLibrary/gen/*
-GooglePlayLicensingLibrary/.*
-
-#ignore directories
-
-avatar_test/bin/*
-avatar_test/gen/*
-avatar_test/.*
-avatar_test/proguard-project.*
-
-#ignore directories
-
-avatarConverter/bin/*
-avatarConverter/.settings/*
-avatarConverter/.*
-
+# Android: properties local to every dev
+local.properties
 
