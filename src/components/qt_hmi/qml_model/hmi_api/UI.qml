@@ -28,8 +28,8 @@ Item {
 
     function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
         var fieldSubstrings = alertStrings
-	    .sort(function(a, b) { return a.fieldName - b.fieldName })
-	    .map(function(val) { return val.fieldText });
+	    .sort(function(a, b) { return a.fieldName - b.fieldName }) // sorting by fieldName
+	    .map(function(val) { return val.fieldText });              // mapping to array of strings
 
         var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, progressIndicator, softButtons, appID)
         if (tryAgainTime === undefined) {

@@ -34,6 +34,7 @@
 import QtQuick 2.0
 import "../../controls"
 import "../../hmi_api/Common.js" as Common
+import "AlertSoftButton.js" as SoftButton
 
 OvalButton {
     property var button
@@ -51,14 +52,14 @@ OvalButton {
         alertWindow.keep();
         switch (button.systemAction) {
         case Common.SystemAction.DEFAULT_ACTION:
-            actionOnRelease = 3; // close alert
+            actionOnRelease = SoftButton.Action.closeOnClicked;
             break;
         case Common.SystemAction.STEAL_FOCUS:
             contentLoader.go("views/SDLPlayerView.qml", appId);
-            actionOnRelease = 3; // close alert
+            actionOnRelease = SoftButton.Action.closeOnClicked;
             break;
         case Common.SystemAction.KEEP_CONTEXT:
-            actionOnRelease = 4; // keep alert
+            actionOnRelease = SoftButton.Action.keepOnClicked;
             break;
         }
         sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONDOWN, button.softButtonID)
@@ -66,9 +67,9 @@ OvalButton {
 
     onReleased: {
         sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID)
-        if (actionOnRelease == 1) {
+        if (actionOnRelease == SoftButton.Action.closeOnRelease) {
             alertWindow.complete();
-        } else if (actionOnRelease == 2) {
+        } else if (actionOnRelease == SoftButton.Action.keepOnRelease) {
             alertWindow.restart();
         }
     }
@@ -77,9 +78,9 @@ OvalButton {
         sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                      Common.ButtonPressMode.SHORT,
                                  button.softButtonID);
-        if (actionOnRelease == 3) {
+        if (actionOnRelease == SoftButton.Action.closeOnClicked) {
             alertWindow.complete();
-        } else if (actionOnRelease == 4) {
+        } else if (actionOnRelease == SoftButton.Action.keepOnClicked) {
             alertWindow.restart();
         }
     }
@@ -88,7 +89,7 @@ OvalButton {
         sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                      Common.ButtonPressMode.LONG,
                                  button.softButtonID);
-        actionOnRelease -= 2; // action should be triggered on release
+        actionOnRelease |= SoftButton.Action.onRelease; // action should be triggered on release
     }
 
     onButtonChanged: {

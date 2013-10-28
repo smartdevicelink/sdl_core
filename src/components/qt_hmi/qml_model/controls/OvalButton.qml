@@ -35,10 +35,8 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
-// TODO: (dchmerev@luxoft.com) WTF?
-//                              |
-//                              v
 // Don't change constants. It break button
+// TODO (dchmerev@luxoft.com): make this comment more clear
 Item {
     id: main
     width: dynamic ? field.width + 2 * left.width : Constants.longOvalButtonWidth

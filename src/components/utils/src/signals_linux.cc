@@ -38,6 +38,7 @@ namespace utils {
 bool SubscribeToTerminateSignal(void (*func)(int p)) {
   void (*prev_func)(int p);
 
+  // FIXME (dchmerev@luxoft.com): prev_func is useless
   prev_func = signal(SIGABRT, func);
   prev_func = signal(SIGINT, func);
   prev_func = signal(SIGQUIT, func);
