@@ -1,6 +1,6 @@
 /**
  * @file policy_manager.h
- * @brief Polocy Manager  header file.
+ * @brief Policy Manager header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.

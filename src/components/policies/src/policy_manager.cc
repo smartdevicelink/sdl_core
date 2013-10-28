@@ -53,18 +53,20 @@ policies_ns::PolicyManager::PolicyManager(
 //---------------------------------------------------------------
 
 void policies_ns::PolicyManager::Init() {
+  //TODO: Implement Preload PT load logic.
   std::string pt_string;
-  if (true == file_system::ReadFile(policy_config_.getPTFileName(),
+  if (0 == policy_table_) {
+    if (true == file_system::ReadFile(policy_config_.getPTFileName(),
                                     pt_string)) {
-    if (0 == policy_table_) {
       policy_table_ = new policies_ns::PolicyTable(pt_string);
     } else {
-      LOG4CXX_WARN(logger_,
-        "Policy table is already created.");
+      LOG4CXX_ERROR(logger_,
+      "Can't read policy table file " << policy_config_.getPTFileName());
     }
   } else {
-    LOG4CXX_ERROR(logger_,
-      "Can't read policy table file " << policy_config_.getPTFileName());
+    LOG4CXX_WARN(logger_,
+    "Policy table is already created.");
+
   }
 }
 

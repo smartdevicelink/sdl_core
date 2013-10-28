@@ -39,7 +39,8 @@ namespace policies_ns = NsSmartDeviceLink::policies;
 //----------------------------------------------------------------------------
 
 policies_ns::PolicyConfiguration::PolicyConfiguration()
-  : pt_fname_() {
+  : pt_fname_()
+  , preload_pt_fname_() {
 }
 
 //-----------------------------------------------------------------------------
@@ -53,4 +54,17 @@ void policies_ns::PolicyConfiguration::setPTFileName(
 
 std::string policies_ns::PolicyConfiguration::getPTFileName() const {
   return pt_fname_;
+}
+
+//-----------------------------------------------------------------------------
+
+void policies_ns::PolicyConfiguration::setPreloadPTFileName(
+  std::string preload_pt_file_path) {
+  preload_pt_fname_ = preload_pt_file_path;
+}
+
+//-----------------------------------------------------------------------------
+
+std::string policies_ns::PolicyConfiguration::getPreloadPTFileName() const {
+  return preload_pt_fname_;
 }

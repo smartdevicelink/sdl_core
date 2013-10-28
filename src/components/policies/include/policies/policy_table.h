@@ -86,7 +86,7 @@ class PolicyTable {
     void SetSchema(NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema);
 
     /**
-    * @brief Validate poicy table.
+    * @brief Validate policy table.
     *
     * Validates policy table against smart schema which should be set before.
     *
@@ -128,7 +128,7 @@ class PolicyTable {
     NsSmartDeviceLink::NsSmartObjects::SmartObject pt_smart_object_;
 
     /**
-     * @brief deafult polivy table smart object
+     * @brief deafult policy table smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject pt_default_smart_object_;
 };
