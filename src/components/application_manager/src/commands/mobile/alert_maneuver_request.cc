@@ -67,8 +67,14 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SendResponse(false, processing_result);
+    return;
+  }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);

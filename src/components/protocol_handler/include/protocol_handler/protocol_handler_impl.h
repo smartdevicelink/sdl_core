@@ -37,15 +37,15 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
 #include <map>
-
+#include <set>
 #include "utils/logger.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
-#include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
+#include "protocol_handler/protocol_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -62,6 +62,10 @@ class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
 
 using transport_manager::TransportManagerListenerEmpty;
+
+typedef std::multimap<int, RawMessagePtr> MessagesOverNaviMap;
+typedef std::set<ProtocolObserver*> ProtocolObservers;
+typedef transport_manager::ConnectionUID ConnectionID;
 
 /**
  * \class ProtocolHandlerImpl
@@ -82,36 +86,51 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
     explicit ProtocolHandlerImpl(
       transport_manager::TransportManager* transport_manager);
 
-  /**
-   * \brief Destructor
-   */
-  ~ProtocolHandlerImpl();
+    /**
+     * \brief Destructor
+     */
+    ~ProtocolHandlerImpl();
 
-  /**
-   * \brief Sets pointer for higher layer handler for message exchange
-   * \param observer Pointer to object of the class implementing
-   * IProtocolObserver
-   */
-  void set_protocol_observer(ProtocolObserver* observer);
+    /**
+     * \brief Adds pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver
+     */
+    void AddProtocolObserver(ProtocolObserver* observer);
 
-  /**
-   * \brief Sets pointer for Connection Handler layer for managing sessions
-   * \param observer Pointer to object of the class implementing
-   * ISessionObserver
-   */
-  void set_session_observer(SessionObserver* observer);
+    /**
+     * \brief Removes pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver.
+     */
+    void RemoveProtocolObserver(ProtocolObserver* observer);
+
+    /**
+     * \brief Sets pointer for Connection Handler layer for managing sessions
+     * \param observer Pointer to object of the class implementing
+     * ISessionObserver
+     */
+    void set_session_observer(SessionObserver* observer);
 
     /**
      * \brief Method for sending message to Mobile Application.
      * \param message Message with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message);
+    void SendMessageToMobileApp(const RawMessagePtr& message);
 
     /**
      * \brief Returns size of frame to be formed from raw bytes.
      * expects first bytes of message which will be treated as frame header.
      */
-    unsigned int GetPacketSize(unsigned int size, unsigned char *data);
+    unsigned int GetPacketSize(unsigned int size, unsigned char* data);
+
+    /**
+     * \brief Sends number of processed frames in case of binary nav streaming
+     * \param connection_key Id of connection over which message is to be sent
+     * \param number_of_frames Number of frames processed by
+     * streaming server and displayed to user.
+     */
+    void SendFramesNumber(int connection_key, int number_of_frames);
 
   protected:
     /**
@@ -122,7 +141,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendEndSessionNAck(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id ,
       unsigned int session_id,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
@@ -139,7 +158,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionAck(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id,
       unsigned char session_id,
       unsigned char protocol_version,
       unsigned int hash_code = 0,
@@ -152,7 +171,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionNAck(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id,
       unsigned char service_type = SERVICE_TYPE_RPC);
 
   private:
@@ -162,7 +181,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * @param message Recieved message
      **/
     virtual void OnTMMessageReceived(
-      const transport_manager::RawMessageSptr message);
+      const RawMessagePtr message);
 
     /**
      * @brief Notifies about error on receiving message from TM.
@@ -187,7 +206,14 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      **/
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
-      const transport_manager::RawMessageSptr& message);
+      const RawMessagePtr& message);
+
+    /**
+     * @brief Notifies subscribers about message
+     * recieved from mobile device.
+     * @param message Message with already parsed header.
+     */
+    void NotifySubscribers(const RawMessagePtr& message);
 
     /**
      * \brief Sends message which size permits to send it in one frame.
@@ -202,7 +228,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -224,7 +250,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendMultiFrameMessage(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id,
       const unsigned char session_id,
       unsigned int protocol_version,
       const unsigned char service_type,
@@ -241,7 +267,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendFrame(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id,
       const ProtocolPacket& packet);
 
     /**
@@ -252,7 +278,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMessage(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id ,
       ProtocolPacket* packet);
 
     /**
@@ -264,7 +290,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleMultiFrameMessage(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id ,
       ProtocolPacket* packet);
 
     /**
@@ -275,25 +301,42 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE HandleControlMessage(
-      const transport_manager::RawMessageSptr& original_message,
+      ConnectionID connection_id ,
       const ProtocolPacket* packet);
 
-  /**
-   * \brief For logging.
-   */
-  static log4cxx::LoggerPtr logger_;
+    /**
+     * \brief Sends Mobile Navi Ack message
+     */
+    RESULT_CODE SendMobileNaviAck(
+      ConnectionID connection_id ,
+      int connection_key);
 
-  /**
-   *\brief Pointer on instance of class implementing IProtocolObserver
-   *\brief (JSON Handler)
-   */
-  ProtocolObserver* protocol_observer_;
+    /**
+     * \brief Handles Map Streaming message
+     * \param original_message Message, recieved from TM as is
+     * \param connection_key Id of session over which message was received
+     * \param recieved_msg Parsed message
+     */
+    RESULT_CODE HandleStreamingMessage(ConnectionID connection_id ,
+                                       int connection_key,
+                                       RawMessagePtr recieved_msg);
 
-  /**
-   *\brief Pointer on instance of class implementing ISessionObserver
-   *\brief (Connection Handler)
-   */
-  SessionObserver* session_observer_;
+    /**
+     * \brief For logging.
+     */
+    static log4cxx::LoggerPtr logger_;
+
+    /**
+     *\brief Pointer on instance of class implementing IProtocolObserver
+     *\brief (JSON Handler)
+     */
+    ProtocolObservers protocol_observers_;
+
+    /**
+     *\brief Pointer on instance of class implementing ISessionObserver
+     *\brief (Connection Handler)
+     */
+    SessionObserver* session_observer_;
 
     /**
      *\brief Pointer on instance of Transport layer handler for message exchange.
@@ -303,30 +346,42 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
     /**
      *\brief Queue for message from Mobile side.
      */
-    MessageQueue<transport_manager::RawMessageSptr> messages_from_mobile_app_;
+    MessageQueue<RawMessagePtr> messages_from_mobile_app_;
 
     /**
      *\brief Queue for message to Mobile side.
      */
-    MessageQueue<transport_manager::RawMessageSptr> messages_to_mobile_app_;
+    MessageQueue<RawMessagePtr> messages_to_mobile_app_;
 
     /**
      *\brief Map of frames for messages received in multiple frames.
      */
     std::map<int, ProtocolPacket*> incomplete_multi_frame_messages_;
 
-  /**
-   *\brief Counter of messages sent in each session.
-   */
-  std::map<unsigned char, unsigned int> message_counters_;
+    /**
+     * \brief Map of messages (frames) recieved over mobile nave session
+     * for map streaming.
+     */
+    MessagesOverNaviMap message_over_navi_session_;
 
-  // Thread for handling messages from Mobile side.
-  threads::Thread* handle_messages_from_mobile_app_;
-  friend class MessagesFromMobileAppHandler;
+    /**
+     * \brief Untill specified otherwise, amount of message recievied
+     * over streaming session to send Ack
+     */
+    const unsigned int kPeriodForNaviAck;
 
-  // Thread for handling message to Mobile side.
-  threads::Thread* handle_messages_to_mobile_app_;
-  friend class MessagesToMobileAppHandler;
+    /**
+     *\brief Counter of messages sent in each session.
+     */
+    std::map<unsigned char, unsigned int> message_counters_;
+
+    // Thread for handling messages from Mobile side.
+    threads::Thread* handle_messages_from_mobile_app_;
+    friend class MessagesFromMobileAppHandler;
+
+    // Thread for handling message to Mobile side.
+    threads::Thread* handle_messages_to_mobile_app_;
+    friend class MessagesToMobileAppHandler;
 };
 }  // namespace protocol_handler
 

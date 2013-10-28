@@ -264,6 +264,30 @@
     </description>
   </enum>
 
+  <enum name="LayoutMode">
+    <description>For touchscreen interactions, the mode of how the choices are presented.</description>
+    <element name="ICON_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons.
+    </description>
+    <element name="ICON_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.
+    </description>
+    <element name="LIST_ONLY" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list.
+    </description>
+    <element name="LIST_WITH_SEARCH" />
+    <description>
+    	This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.
+    </description>
+    <element name="KEYBOARD" />
+    <description>
+    	This mode causes the interaction to immediately display a keyboard entry through the HMI.
+    </description>    
+  </enum>
+
   <enum name="HMILevel">
     <description>Enumeraction that describes current levels of HMI.</description>
     <element name="FULL" internal_name="HMI_FULL" />
@@ -438,6 +462,7 @@
     <element name="PRESET_8" />
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
+    <element name="SEARCH" />
   </enum>
 
   <enum name="MediaClockFormat">
@@ -686,6 +711,15 @@
     <param name="menuName" type="String" maxlength="500" />
     <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" />
     <param name="image" type="Image" mandatory="false"/>
+    <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
+    </param>
+    <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
+    </param>
+    <param name="secondaryImage" type="Image" mandatory="false" scope="partner">
+      <description>Optional secondary image struct for choice</description>
+    </param>
   </struct>
 
   <struct name="VrHelpItem">
@@ -1433,6 +1467,57 @@
     </param>
   </struct>
 
+  <struct name="ImageResolution">
+    <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution width.</description>
+    </param>
+    <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution height.</description>
+    </param>
+  </struct>
+
+  <enum name="TouchEvent">
+    <element name="TOUCHSTART"/>
+		<element name="TOUCHMOVE"/>
+		<element name="TOUCHEND"/>
+		<element name="DOUBLETOUCH"/>
+  </enum>
+
+  <struct name="TouchLists">
+		<param name="touches" type="Integer" array="true" mandatory="true" minvalue="0" maxvalue="9" minsize="1" maxsize="10">
+			<description>List of fingers currently on screen</description>
+		</param>
+		<param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
+			<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
+		</param>
+  </struct>
+
+  <struct name="Coordinate">
+		<param name="xCoord" type="Integer" mandatory="true">
+		</param>
+		<param name="yCoord" type="Integer" mandatory="true">
+		</param>
+  </struct> 
+
+  <struct name="TouchArea">
+		<param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
+		</param>
+		<param name="radiusCoord" type="Coordinate" mandatory="true">
+		</param>
+  </struct>
+
+  <struct name="TouchEventInfo">
+		<param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
+			<description>Finger / stylus ID</description>
+		</param>
+		<param name="point" type="Coordinate" mandatory="true">
+			<description>XY coordinate of where on screen the event happened</description>
+		</param>
+		<param name="area" type="TouchArea" mandatory="false">
+			<description>Describe the ellipse approximating touch input shape</description>
+		</param>
+  </struct>
+
   <enum name="PermissionStatus">
     <description>Enumeration that describes possible permission states of a policy table entry.</description>
     <element name="ALLOWED" internal_name="PS_ALLOWED"/>
@@ -1599,6 +1684,49 @@
       <description>Trim of the vehicle, e.g. SE</description>
     </param>
   </struct>
+  
+  <enum name="KeyboardLayout" scope="partner">
+    <description>Enumeration listing possible keyboard layouts.</description>
+    <element name="QWERTY" />
+    <element name="QWERTZ" />
+    <element name="AZERTY" />    
+  </enum>
+
+  <enum name="KeyboardEvent" platform="MobileNav">
+    <description>Enumeration listing possible keyboard events.</description>
+    <element name="KEYPRESS" />
+    <element name="ENTRY_SUBMITTED" />
+    <element name="ENTRY_CANCELLED" />
+    <element name="ENTRY_ABORTED" />    
+  </enum>
+
+  <struct name="KeyboardProperties">
+    <description>Configuration of on-screen keyboard (if available).</description>
+
+    <param name="language" type="Language" mandatory="false">
+      <description>The keyboard language.</description>
+    </param> 
+
+    <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
+      <description>Desired keyboard layout.</description>
+    </param> 
+    
+    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
+      <description>In this mode, all keypresses will be sent as they occur.</description>
+      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
+      <description>If omitted, this value will be set to FALSE.</description>      
+    </param>
+
+    <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Array of keyboard characters to enable.</description>
+      <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
+      <description>If omitted, the entire keyboard will be enabled.</description>      
+    </param>
+    
+    <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
+      <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
+    </param>   
+  </struct>
 
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
@@ -1684,6 +1812,8 @@
     <element name="OnPermissionsChangeID" value="32776" hexvalue="8008" />
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
     <element name="OnLanguageChangeID" value="32778" hexvalue="800A" />
+    <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
+    <element name="OnTouchEventID" value="32780" hexvalue="800C" />  
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -1943,7 +2073,17 @@
       	If omitted and a vrHelpTitle is provided, the request will be rejected.
       </description>
     </param>
-
+    <param name="menuTitle" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    
+    <param name="menuIcon" type="Image" mandatory="false" scope="partner">
+      <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
+    </param>
+    
+    <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" scope="partner">
+      <description>On-screen keybaord configuration (if available).</description>
+    </param>   
   </function>
 
   <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response">
@@ -2259,6 +2399,10 @@
       </description>
     </param>
 
+    <param name="interactionLayout" type="LayoutMode" mandatory="false" scope="partner">
+      <description>See LayoutMode.</description>
+    </param>
+
   </function>
 
   <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="response">
@@ -2370,6 +2514,12 @@
       <description>
       	Defines if tone should be played. Tone is played before TTS.
       	If omitted, no tone is played.
+      </description>
+    </param>
+    
+    <param name="progressIndicator" type="Boolean" mandatory="false" platform="MobileNav">
+      <description>
+      	If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.
       </description>
     </param>
 
@@ -3517,9 +3667,13 @@
     </param>
     <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
+    <param name="timeToDestination" type="String" maxlength="500" mandatory="false" scope="partner">
+    </param>
+    <param name="totalDistance" type="String"  minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="turnIcon" type="Image" mandatory="false">
+    </param>
+    <param name="nextTurnIcon" type="Image" mandatory="false">
     </param>
     <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
       <description>
@@ -4080,6 +4234,42 @@
       <description>Current display language</description>
     </param>
   </function>
+
+  <function name="OnKeyboardInput" functionID="OnKeyboardInputID" messagetype="notification" platform="MobileNav">
+   
+    <description>On-screen keyboard event.</description>
+    <description>Can be full string or individual keypresses depending on keyboard mode.</description>
+   
+    <param name="event" type="KeyboardEvent" mandatory="true">
+      <description>On-screen keyboard input data.</description>
+    </param>    
+
+    <param name="data" type="String" maxlength="500" mandatory="false">
+      <description>On-screen keyboard input data.</description>
+      <description>For dynamic keypress events, this will be the current compounded string of entry text.</description>
+      <description>For entry submission events, this will be the full text entry (this will always return regardless of the mode).</description>
+      <description>For entry cancelled and entry aborted events, this data param will be omitted.</description>
+    </param>
+
+  </function>
+  
+  <function name="OnTouchEvent" functionID="OnTouchEventID" messagetype="notification" platform="MobileNav">
+  
+		<description>Notifies about touch events on the screen's prescribed area</description>
+		
+		<param name="eventType" type="TouchEvent" mandatory="true">
+			<description>Type of event - start, move, stop, etc.</description>
+		</param>
+		
+		<param name="touchLists" type="TouchLists" mandatory="false">
+			<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
+		</param>
+		
+		<param name="info" type="TouchEventInfo" mandatory="true">
+			<description>Coordinate of the touch, radius of touch input and input ID.</description>
+		</param>ZZ
+	</function>	
+  
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->

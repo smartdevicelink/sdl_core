@@ -58,6 +58,10 @@ var transparentColor = "#00000000"
 
 // "Warning" word color
 var warningColor = "red"
+
+// Color for PopUp
+var popUpBorderColor = "white"
+
 //--------------------------------------------------------------------------------------
 
 // Other
@@ -73,6 +77,9 @@ var powerButtonFornSize = 25
 
 // Offset from the edges of the screen.
 var margin = 30
+
+// Offset from the edges of the popup
+var popupMargin = 15
 
 // Spacing between contacts at contact screen view.
 var contactListSpacing = 30
@@ -107,6 +114,25 @@ var generalSpacing = 10
 
 // Width of scrollBar
 var scrollBarWidth = 5
+
+// Speak text for a given time
+var ttsSpeakTime = 2000
+
+// font size fo TTS popup
+var ttsFontSize = 12
+
+// padding for popup view
+var popUpPadding = 20
+
+// Width for TTS popup
+var ttsPopUpWidth = 250
+
+// Height for TTS popup
+var ttsPopUpHeight = 100
+
+// Padding for TTS popup
+var ttsPopUpPadding = 10
+
 // -------------------------
 var sliderBarWidth = 400
 var sliderBarHeight = 50
@@ -130,3 +156,4 @@ var scrollableMessageScrollBarColor = "gray"
 var scrollableMessageScrollBarWidth = 10
 
 // -------------------------
+var audioPassThruTextColor = "white"

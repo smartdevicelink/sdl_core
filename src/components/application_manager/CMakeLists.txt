@@ -1,5 +1,6 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
+find_package(LibXml2 REQUIRED)
 
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
@@ -7,6 +8,10 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${LIBXML2_INCLUDE_DIR}
   ./include/
   ../utils/include/
   ../formatters/include/
@@ -14,19 +19,13 @@ include_directories (
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
-  ../audio_manager/include
+  ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../audio_manager/include/
   ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
-  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES
@@ -150,6 +149,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/sync_pdata_request.cc
 ./src/commands/mobile/sync_pdata_response.cc
 ./src/commands/mobile/on_sync_pdata_notification.cc
+./src/commands/mobile/on_keyboard_input_notification.cc
+./src/commands/mobile/on_touch_event_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES
@@ -190,6 +191,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vr_get_supported_languages_response.cc
 ./src/commands/hmi/vr_get_language_request.cc
 ./src/commands/hmi/vr_get_language_response.cc
+./src/commands/hmi/vr_get_capabilities_request.cc
+./src/commands/hmi/vr_get_capabilities_response.cc
 ./src/commands/hmi/tts_is_ready_request.cc
 ./src/commands/hmi/tts_is_ready_response.cc
 ./src/commands/hmi/tts_change_registration_request.cc
@@ -286,6 +289,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 ./src/commands/hmi/on_find_applications.cc
+./src/commands/hmi/on_ui_keyboard_input_notification.cc
+./src/commands/hmi/on_ui_touch_event_notification.cc
+./src/commands/hmi/navi_start_stream_request.cc
+./src/commands/hmi/navi_start_stream_response.cc
+./src/commands/hmi/navi_stop_stream_request.cc
+./src/commands/hmi/navi_stop_stream_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})

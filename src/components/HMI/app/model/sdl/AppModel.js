@@ -48,11 +48,23 @@ SDL.SDLAppModel = Em.Object.extend({
         appName: '',
 
         /**
+         * Navigation streaming url
+         */
+        navigationStream: null,
+
+        /**
          * Chosen device name
          *
          * @type {String}
          */
         deviceName: '',
+
+        /**
+         * Global properties for current application
+         *
+         * @type {Object}
+         */
+        globalProperties: {},
 
         /**
          * Statusbar text
@@ -67,6 +79,13 @@ SDL.SDLAppModel = Em.Object.extend({
          * @type: {Em.Object}
          */
         appInfo: null,
+
+        /**
+         * Info navigation data for ShowConstantTBT request
+         *
+         * @type: {Object}
+         */
+        constantTBTParams: null,
 
         /**
          * Current language of applications UI component
@@ -127,7 +146,7 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @type {Number}
          */
-        currentSubMenuId: 0,
+        currentSubMenuId: 'top',
 
         /**
          * Return current submenu name
@@ -136,8 +155,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         currentSubMenuLabel: function () {
 
-            //Magic number 0 is Top level menu index
-            var submenu, commands = this.commandsList[0];
+            //Param "top" is Top level menu index
+            var submenu, commands = this.commandsList["top"];
 
             for (var i = 0; i < commands.length; i++) {
                 if (commands[i].menuID == this.currentSubMenuId) {
@@ -145,7 +164,7 @@ SDL.SDLAppModel = Em.Object.extend({
                 }
             }
 
-            return this.get('currentSubMenuId') != 0 ? submenu : 'Options';
+            return this.get('currentSubMenuId') != 'top' ? submenu : 'Options';
         }.property('this.currentSubMenuId'),
 
         /**
@@ -176,7 +195,7 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addCommand: function (request) {
 
-            var parentID = request.params.menuParams.parentID ? request.params.menuParams.parentID : 0;
+            var parentID = request.params.menuParams.parentID >= 0 ? request.params.menuParams.parentID : 'top';
 
             if (!this.get('commandsList.' + parentID)) {
                 this.commandsList[parentID] = [];
@@ -194,9 +213,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     icon     : request.params.cmdIcon ? request.params.cmdIcon.value : null
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
@@ -210,11 +230,18 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @param {Number}
          */
-        deleteCommand: function (commandID) {
+        deleteCommand: function (commandID, requestID) {
 
             for (var i in this.commandsList) {
-                if (this.commandsList[i].filterProperty('commandID', commandID)) {
-                    this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
+                if (this.commandsList[i].filterProperty('commandID', commandID).length) {
+                    if (i != this.currentSubMenuId || this.currentSubMenuId == 'top') {
+                        this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
+                        SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["SUCCESS"], requestID);
+                        return;
+                    } else {
+                        SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["IN_USE"], requestID);
+                        return;
+                    }
                 }
             }
         },
@@ -226,8 +253,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addSubMenu: function (request) {
 
-            // parentID is equal to 0 cause Top level menu ID is 0
-            var parentID = 0;
+            // parentID is equal to 'top' cause Top level menu ID
+            var parentID = 'top';
 
             var commands = this.get('commandsList.' + parentID);
 
@@ -243,9 +270,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     position: request.params.menuParams.position ? request.params.menuParams.position : 0
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
@@ -260,8 +288,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         deleteSubMenu: function (menuID) {
 
-            if (this.commandsList[0].filterProperty('commandID', menuID)) {
-                this.get('commandsList.0').removeObjects(this.get('commandsList.0').filterProperty('menuID', menuID));
+            if (this.commandsList['top'].filterProperty('commandID', menuID)) {
+                this.get('commandsList.top').removeObjects(this.get('commandsList.top').filterProperty('menuID', menuID));
                 delete(this.commandsList[menuID]);
             }
 
@@ -283,14 +311,13 @@ SDL.SDLAppModel = Em.Object.extend({
 
             if (message) {
 
-                SDL.InteractionChoicesView.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
-
-                SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
 
             } else {
-                //Magic number is standard 30 seconds for popUp Timer
-                SDL.InteractionChoicesView.preformChoices([], performInteractionRequestId, 30000);
-                SDL.InteractionChoicesView.activate("");
+//                SDL.InteractionChoicesView.preformChoices([],
+//                    performInteractionRequestId,
+//                    30000);
+                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
             }
 
             SDL.SDLController.VRMove();

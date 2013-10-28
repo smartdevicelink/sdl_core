@@ -37,18 +37,29 @@ import "../models/Constants.js" as Constants
 
 Item {
     default property alias content: content.children
-    width: 700
-    height: 500
+    property int padding: Constants.popUpPadding
+
     Rectangle {
-        id: content
-        width: 600
-        height: 400
-        color: Constants.secondaryColor
-        radius: 20
+        width: parent.width - padding / 2
+        height: parent.height - padding / 2
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
+        color: Constants.secondaryColor
         border.width: 1
-        border.color: "white"
+        border.color: Constants.popUpBorderColor
+        radius: padding
+        Rectangle {
+            id: content
+            width: parent.width - padding
+            height: parent.height - padding
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            color: Constants.transparentColor
+        }
+    }
+
+    onVisibleChanged: {
+        dataContainer.activePopup = visible ? this : null
     }
 
     function show() {

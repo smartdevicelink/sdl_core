@@ -48,6 +48,18 @@ SliderRequest::SliderRequest(const MessageSharedPtr& message)
 SliderRequest::~SliderRequest() {
 }
 
+bool SliderRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  }
+
+  return true;
+}
+
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
@@ -86,7 +98,7 @@ void SliderRequest::Run() {
   msg_params[strings::app_id] = application_impl->app_id();
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] = 10000;
+    msg_params[strings::timeout] = default_timeout_;
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);

@@ -57,9 +57,15 @@ class ScrollabelMessageRequest : public CommandRequestImpl {
   virtual ~ScrollabelMessageRequest();
 
   /**
+   * @brief Initialize request params
+   **/
+  virtual bool Init();
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();
+
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ScrollabelMessageRequest);

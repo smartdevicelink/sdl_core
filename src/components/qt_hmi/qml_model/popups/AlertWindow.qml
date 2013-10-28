@@ -176,7 +176,7 @@ Rectangle {
         visible = true
     }
 
-    function complete () {
+    function complete (reason) {
         timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext

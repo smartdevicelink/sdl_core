@@ -65,9 +65,9 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   const int correlation_id =
-    (*message_)[strings::params][strings::correlation_id];
+      (*message_)[strings::params][strings::correlation_id];
   const int connection_key =
-    (*message_)[strings::params][strings::connection_key];
+      (*message_)[strings::params][strings::connection_key];
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
                       .length();

@@ -161,7 +161,15 @@ Rectangle {
 
         VRPopUp {
             id: vrPopUp
-            anchors.fill: parent
+            visible: false
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        TTSPopUp {
+            id: ttsPopUp
+            anchors.top: parent.top
+            anchors.right: parent.right
             visible: false
         }
 
@@ -176,6 +184,15 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.fill: parent
+
+        InteractionPopup {
+            id: interactionPopup
+            anchors.fill: parent
+            visible: false
+        }
+
+        InteractionModel {
+            id: interactionModel
         }
 
         SliderPopup {
@@ -189,6 +206,12 @@ Rectangle {
             id: tbtClientStatePopUp
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
+
+        PerformAudioPassThruPopup {
+            id: performAudioPassThruPopup
+            anchors.fill: parent
             visible: false
         }
     }

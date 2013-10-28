@@ -566,6 +566,110 @@ SDL.RPCController = Em.Object
                 },
 
                 /**
+                 * Validate method for request StartStream
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                StartStream: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.url == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'url' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.url != 'string') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'url'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request StopStream
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                StopStream: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request Navigation.ShowConstantTBT
                  * 
                  * @param {Object}
@@ -594,6 +698,15 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("turnIcon" in params
+                        && params.turnIcon.imageType !== "DYNAMIC") {
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Unsupported image type!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if ("nextTurnIcon" in params
                         && params.turnIcon.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2282,6 +2395,21 @@ SDL.RPCController = Em.Object
                  *            params
                  */
                 IsReady: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request GetCapabilities
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                GetCapabilities: function(params) {
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

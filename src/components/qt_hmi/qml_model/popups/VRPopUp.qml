@@ -39,6 +39,9 @@ import "../views"
 import "../controls"
 
 PopUp {
+    width: Constants.popupWidth
+    height: Constants.popupHeigth
+
     Text {
         id: title
         height: 50
@@ -104,7 +107,7 @@ PopUp {
         show();
     }
 
-    function deactivate() {
+    function complete(reason) {
         dataContainer.activeVR = false;
         dataContainer.systemContext = dataContainer.systemSavedContext
         sdlVR.stopped();

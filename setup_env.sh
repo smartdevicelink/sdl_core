@@ -51,6 +51,7 @@ GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
+CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
@@ -69,7 +70,6 @@ LIB_UDEV="libudev-dev"
 ICECAST="icecast2"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
-
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -125,6 +125,10 @@ echo $OK
 
 echo "Installing Chromium browser"
 apt-install ${CHROMIUM_BROWSER}
+echo $OK
+
+echo "Installing Chromium ffmpeg codec"
+apt-install ${CHROMIUM_CODEC_FFMPEG}
 echo $OK
 
 echo "Installing pulseaudio development files"

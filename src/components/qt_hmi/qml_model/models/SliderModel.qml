@@ -41,4 +41,5 @@ QtObject {
     property int numTicks: 0
     property int position: 0
     property int timeout: 0
+    property bool running: false
 }

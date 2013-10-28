@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "Common.js" as Common
 
 Item {
     function isReady() {
@@ -39,6 +40,12 @@ Item {
     function getSupportedLanguages() {
         return {
             languages: settingsContainer.sdlLanguagesList
+        }
+    }
+
+    function getCapabilities() {
+        return {
+            vrCapabilities: Common.VrCapabilities.VR_TEXT
         }
     }
 

@@ -1,9 +1,18 @@
+find_package(LibXml2)
+
 IF (${WEB_HMI})
 set (BROKER_LIBRARIES
   MessageBrokerClient
   MessageBrokerServer
 )
 ENDIF (${WEB_HMI})
+
+cmake_policy(PUSH)
+# make link_directories() treat paths relative to the source dir
+# info: cmake --help-policy CMP0015
+cmake_policy(SET CMP0015 NEW)
+link_directories(../thirdPartyLibs/libusbx)
+cmake_policy(POP)
 
 set(LIBRARIES
   ApplicationManager
@@ -26,10 +35,10 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-  AudioManager
-#  usb-1.0
   MessageBroker
   ${BROKER_LIBRARIES}
+  MediaManager
+  Libusb-1.0.16
 )
 
 # required to find 'glibconfig.h'
@@ -38,6 +47,9 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+  ${LIBXML2_INCLUDE_DIR}
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
@@ -51,21 +63,19 @@ include_directories (
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
-  ../components/audio_manager/include/
+  ../components/media_manager/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set (SOURCES
   appMain.cpp
+  life_cycle.cc
 )
 
 if( NOT CMAKE_BUILD_TYPE )

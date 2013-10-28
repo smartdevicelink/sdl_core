@@ -1,9 +1,11 @@
 package com.ford.syncV4.transport;
 
 import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -178,6 +180,11 @@ public class TCPTransport extends SyncTransport {
         }
     }
 
+    @Override
+    public void stopReading() {
+        logInfo("TCPTransport: stop reading requested, doing nothing");
+    }
+
     /**
      * Performs actual work related to disconnecting from ApplinkCore.
      *
@@ -309,7 +316,7 @@ public class TCPTransport extends SyncTransport {
                         mSocket = new Socket();
                         mSocket.connect(new InetSocketAddress(mConfig.getIPAddress(), mConfig.getPort()));
                         mOutputStream = mSocket.getOutputStream();
-                        mInputStream = mSocket.getInputStream();
+                        mInputStream =  new BufferedInputStream(mSocket.getInputStream());
 
                     } catch (IOException e) {
                         logInfo("TCPTransport.connect: Exception during connect stage: " + e.getMessage());
