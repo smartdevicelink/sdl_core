@@ -19,10 +19,6 @@ Item {
         }
     }
 
-    // name="resultCode" type="Common.VehicleDataResultCode"
-    //name="didLocation" type="Integer" minvalue="0" maxvalue="65535"
-    //name="data" type="String" maxlength="5000" mandatory="false"
-
     function readDID(ecuName, didLocation, appID) {
         var didResult = []
 

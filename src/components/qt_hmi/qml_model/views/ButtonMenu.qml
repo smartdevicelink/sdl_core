@@ -149,7 +149,22 @@ GeneralView {
         anchors.top: parent.top
 
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
-        activePage: Math.round(pages * (flicker.contentX / flicker.contentWidth + 0.005))
+        activePage: {
+            if (flicker.contentX <= 0) {
+                return 0
+            }
+            else if ( (flicker.contentWidth - flicker.contentX) < flicker.width) {
+                return pages -1
+            }
+            else {
+                if ( (flicker.contentX % flicker.width) >= (1/6 * flicker.width)) {
+                    return Math.ceil(flicker.contentX / flicker.width)
+                }
+                else if ( (flicker.contentX % flicker.width) > 0) {
+                    return Math.floor(flicker.contentX / flicker.width)
+                }
+            }
+        }
     }
 
     Item {
