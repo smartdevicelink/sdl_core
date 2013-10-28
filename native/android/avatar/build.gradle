@@ -4,11 +4,12 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':GooglePlayDownloaderLibrary')
     compile project(':GooglePlayZipLibrary')
+    compile project(':sdl:SyncProxyAndroid')
 }
 
 android {
-    compileSdkVersion 8
-    buildToolsVersion "18.1.1"
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
 
     sourceSets {
         // Move the tests to tests/java, tests/res, etc...
