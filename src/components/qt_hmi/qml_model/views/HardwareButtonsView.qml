@@ -294,6 +294,14 @@ Item {
             Column {
                 PushButton {
                     label: "Vehicle info"
+                    toggleMode: true
+                    onPressed: {
+                        viPopUp.show();
+                    }
+                    onUnpressed: {
+                        viPopUp.hide();
+                    }
+
                 }
 
                 Item {
