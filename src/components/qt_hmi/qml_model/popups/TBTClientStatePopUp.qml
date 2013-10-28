@@ -38,9 +38,6 @@ import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
 PopUp {
-    width: Constants.popupWidth
-    height: Constants.popupHeigth
-
     Item {
         ListModel {
             id: tbtState

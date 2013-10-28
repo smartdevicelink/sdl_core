@@ -119,11 +119,6 @@ bool InitHmi() {
 log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                               log4cxx::Logger::getLogger("appMain"));
 
-if (profile::Profile::instance()->server_address() ==
-    std::string(kLocalHostAddress)) {
-  LOG4CXX_INFO(logger, "Start HMI on localhost");
-}
-
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
   LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
@@ -281,10 +276,15 @@ int main(int argc, char** argv) {
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-  if (!InitHmi()) {
-    exit(EXIT_FAILURE);
+  if (profile::Profile::instance()->server_address() ==
+      std::string(kLocalHostAddress)) {
+    LOG4CXX_INFO(logger, "Start HMI on localhost");
+
+    if (!InitHmi()) {
+      exit(EXIT_FAILURE);
+    }
+    LOG4CXX_INFO(logger, "InitHmi successful");
   }
-  LOG4CXX_INFO(logger, "InitHmi successful");
 
   // --------------------------------------------------------------------------
 

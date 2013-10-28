@@ -1,3 +1,5 @@
+find_package(LibXml2)
+
 IF (${WEB_HMI})
 set (BROKER_LIBRARIES
   MessageBrokerClient
@@ -45,6 +47,9 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+  ${LIBXML2_INCLUDE_DIR}
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
@@ -63,12 +68,9 @@ include_directories (
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/
+  ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set (SOURCES
