@@ -39,6 +39,9 @@ Item {
     default property alias content: content.children
     property int padding: Constants.popUpPadding
 
+    width: Constants.popupWidth
+    height: Constants.popupHeigth
+
     Rectangle {
         width: parent.width - padding / 2
         height: parent.height - padding / 2
