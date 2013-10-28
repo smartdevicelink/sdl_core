@@ -74,9 +74,6 @@ PopUp {
                 model: prndlList
                 onCurrentIndexChanged: {
                     dataContainer.vehicleInfoModel.prndl = currentIndex
-                    sdlVehicleInfo.onVehicleData( undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,
-                                                 dataContainer.vehicleInfoModel.prndl,undefined,undefined,undefined,undefined,
-                                                 undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined)
                 }
                 Component.onCompleted: {comboBox.currentIndex = dataContainer.vehicleInfoModel.prndl}
                 ListModel {
@@ -93,7 +90,7 @@ PopUp {
         Text {
             width: parent.width
             height: 1/5 * parent.height
-            text: "Speed: " + dataContainer.vehicleInfoModel.speed
+            text: "ECU 1:     " + dataContainer.vehicleInfoModel.ecuDIDData.data1
             font.pixelSize: Constants.fontSize
             verticalAlignment: Text.AlignVCenter
             color: Constants.primaryColor
@@ -102,7 +99,7 @@ PopUp {
         Text {
             width: parent.width
             height: 1/5 * parent.height
-            text: "Revolutions per minute: " + dataContainer.vehicleInfoModel.rpm
+            text: "ECU 2:     " + dataContainer.vehicleInfoModel.ecuDIDData.data2
             font.pixelSize: Constants.fontSize
             verticalAlignment: Text.AlignVCenter
             color: Constants.primaryColor

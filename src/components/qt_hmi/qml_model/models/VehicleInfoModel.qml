@@ -90,4 +90,8 @@ QtObject {
         'heading': 173,
         'speed': 2
     }
+    property var ecuDIDData: {
+        'data1': 'ECU 1 Test Data',
+        'data2': 'ECU 2 Test Data'
+    }
 }

@@ -150,7 +150,7 @@ Rectangle {
             }
         }
 
-        WarningInfo { }
+        WarningInfo { id: warningInfo }
 
         AlertWindow {
             id: alertWindow
