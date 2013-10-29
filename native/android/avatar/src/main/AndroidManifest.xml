@@ -45,6 +45,10 @@
 
         <!--<service android:name=".downloader.AvatarDownloaderService" />-->
 
+        <service
+                android:name=".service.SDLService"
+                android:exported="false"/>
+
         <receiver android:name=".downloader.AlarmReceiver" />
     </application>
 

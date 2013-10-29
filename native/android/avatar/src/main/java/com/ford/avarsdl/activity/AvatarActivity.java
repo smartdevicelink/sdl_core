@@ -54,6 +54,7 @@ import com.ford.avarsdl.jsoncontroller.JSONVideoController;
 import com.ford.avarsdl.jsonserver.JSONServer;
 import com.ford.avarsdl.media.AvatarOnPreparedListener;
 import com.ford.avarsdl.rater.AppRater;
+import com.ford.avarsdl.service.SDLService;
 import com.ford.avarsdl.util.ActivityUtils;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.ExtStorageUtils;
@@ -646,11 +647,18 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
                 }
             }
 		}
+
+        Intent sdlServiceIntent = new Intent(this, SDLService.class);
+        startService(sdlServiceIntent);
 	}
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+        Log.d(TAG, "onDestroy");
+
+        Intent sdlServiceIntent = new Intent(this, SDLService.class);
+        stopService(sdlServiceIntent);
+
 		if (!isFirstStart()) {
 			// switch of timer
 			stopVideoTimer();
@@ -665,6 +673,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 				e.printStackTrace();
 			}
 		}
+        super.onDestroy();
 	}
 
     /**
