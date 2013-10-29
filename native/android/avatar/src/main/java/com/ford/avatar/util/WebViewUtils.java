@@ -49,7 +49,6 @@ public class WebViewUtils {
 		settings.setAllowFileAccess(true);
 		settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		settings.setJavaScriptEnabled(true);
-		settings.setPluginsEnabled(true);
 		settings.setSupportZoom(false);
 		settings.setDomStorageEnabled(true);
 		
