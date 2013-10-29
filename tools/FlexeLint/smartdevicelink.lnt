@@ -1,0 +1,11 @@
+// misra rules
+au-misra-cpp.lnt
+
+// include path used by the gcc compiler
+gcc-include-path.lnt
+
+// sdl include path
+sdl-include-path.lnt
+
+// sdl modules
+sdl-modules.lnt
