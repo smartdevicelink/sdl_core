@@ -53,23 +53,14 @@ Item {
         }
     }
 
-    function readDID(ecuName, didLocation, appID) {
-        var didResult = []
+    function getDTCs(ecuName, dtcMask, appID) {
+        var ecuHeader = 2
+        var dtc = []
 
-        for (var i = 0; i < didLocation.length; i++) {
-            if (i < 10) {
-                didResult[i] = {}
-                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_SUCCESS
-                didResult[i].didLocation = didLocation[i]
-                didResult[i].data = '0'
-            }
-            else {
-                didResult[i] = {}
-                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_SUCCESS
-                didResult[i].didLocation = didLocation[i]
-                didResult[i].data = '0'
-            }
-            return {didResult: didResult}
+        for (var i = 0; i < 3; i++) {
+            dtc.push("line" + i)
         }
+
+        return {ecuHeader: ecuHeader, dtc: dtc}
     }
 }
