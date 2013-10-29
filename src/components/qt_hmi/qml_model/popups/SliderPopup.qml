@@ -69,7 +69,7 @@ PopUp {
         switch(reason) {
         case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendReply(async, {__retCode:Common.Result.ABORTED, sliderPosition:position})
+            DBus.sendReply(async, {__retCode: Common.Result.ABORTED, sliderPosition: position})
             break;
         case Common.Result.SUCCESS:
             console.debug("send position", position)
