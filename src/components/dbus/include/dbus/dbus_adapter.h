@@ -272,6 +272,10 @@ class DBusAdapter {
   bool GetArguments(DBusMessage* msg, const ListArgs& rules,
                     smart_objects::SmartObject& args);
 
+
+  bool GetArguments(DBusMessage* msg, const ListArgs& rules,
+                    smart_objects::SmartObject& args,
+                    smart_objects::SmartObject& s_args);
   /**
    * \brief gets one argument from message
    * \param iter DBus message iter
