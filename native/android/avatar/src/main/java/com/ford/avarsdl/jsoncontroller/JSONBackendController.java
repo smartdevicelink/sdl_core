@@ -110,7 +110,7 @@ public class JSONBackendController extends JSONController {
 		case onAppLoaded:
 			logMsg('i', "onAppLoaded");
 			Message msg = mActivity.getMainHandler().obtainMessage(
-					Const.CONTENT_CHECKER_START, null);
+					Const.WEBVIEW_SHOW, null);
 			mActivity.getMainHandler().sendMessage(msg);
 			out = null;
 			break;
