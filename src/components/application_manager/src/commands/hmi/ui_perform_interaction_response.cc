@@ -46,7 +46,7 @@ UIPerformInteractionResponse::~UIPerformInteractionResponse() {
 }
 
 void UIPerformInteractionResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIPerformInteractionResponse::Run1");
+  LOG4CXX_INFO(logger_, "UIPerformInteractionResponse::Run");
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
   event.set_smart_object(*message_);
   event.raise();

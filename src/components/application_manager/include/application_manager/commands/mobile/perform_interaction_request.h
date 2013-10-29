@@ -98,12 +98,13 @@ class PerformInteractionRequest : public CommandRequestImpl  {
 
  private:
   /*
-   * @brief Sends response to mobile side
+   * @brief Function will be called when VR_OnCommand event
+   * comes
    *
    * @param message which should send to mobile side
    *
    */
-  void ProcessMessageFromVR(const smart_objects::SmartObject& message);
+  void ProcessVRNotification(const smart_objects::SmartObject& message);
 
   /*
    * @brief Sends VRDeleteCommand request to HMI

@@ -42,7 +42,6 @@
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -191,7 +190,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::VR_OnCommand: {
       LOG4CXX_INFO(logger_, "Received VR_OnCommand event");
-      ProcessMessageFromVR(event.smart_object());
+      ProcessVRNotification(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
@@ -216,10 +215,9 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-//called when vrnotification comes
-void PerformInteractionRequest::ProcessMessageFromVR(
+void PerformInteractionRequest::ProcessVRNotification(
     const smart_objects::SmartObject& message) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcesMessageFromVR");
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRNotification");
   const unsigned int app_id = message[strings::msg_params][strings::app_id]
                                 .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
@@ -264,6 +262,7 @@ void PerformInteractionRequest::ProcessMessageFromVR(
       SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
 
     } else {
+      LOG4CXX_INFO(logger_, "Sending OnCommand notification");
       smart_objects::SmartObject* notification_so =
           new smart_objects::SmartObject(smart_objects::SmartType_Map);
       if (!notification_so) {
@@ -300,8 +299,6 @@ void PerformInteractionRequest::SendVrDeleteCommand (Application* const app) {
     }
   }
 }
-
-
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
