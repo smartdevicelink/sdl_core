@@ -191,7 +191,7 @@ inline void PutArgToMap(QVariantMap& map, const char* name, const OptionalArgume
 template<typename T>
 inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgument<T>& v) {
   QVariantMap::const_iterator it = map.find(name);
-  if (map.end() == it) {
+  if (map.end() == it || !it->isValid()) {
     v.presence = false;
     return true;
   }
