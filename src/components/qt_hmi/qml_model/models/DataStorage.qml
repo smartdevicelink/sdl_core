@@ -368,6 +368,7 @@ QtObject {
                 "type": Internal.MenuItemType.MI_SUBMENU,
                 "icon": undefined,
                 "subMenu": [{
+                    "id": -1,
                     "name": menuParams.menuName,
                     "type": Internal.MenuItemType.MI_PARENT,
                     "icon": {
