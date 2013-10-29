@@ -184,6 +184,24 @@ Item {
     }
 
     function showVrHelp (vrHelpTitle, vrHelp, appID) {
+        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + appID)
+        vrHelpPopup.title = vrHelpTitle ? vrHelpTitle : "VR HELP"
+        dataContainer.vrHelp.clear()
+        var index
+        for (var i = 0; i < vrHelp.length; ++i) {
+            index = 0
+// sort by simple inserts
+            while ((index < dataContainer.vrHelp.count) && (dataContainer.vrHelp.get(index).position < vrHelp[i].position)) {
+                ++index
+            }
+            dataContainer.vrHelp.insert(index, {
+                                            "text": vrHelp[i].text,
+                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
+                                            "position": vrHelp[i].position
+                                        })
+        }
+        vrHelpPopup.activate()
+        console.debug("exit")
     }
 
     function isReady () {

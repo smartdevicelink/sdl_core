@@ -208,6 +208,12 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        VRHelpPopup {
+            id: vrHelpPopup
+            anchors.centerIn: parent
+            visible: false
+        }
     }
 
     Item {

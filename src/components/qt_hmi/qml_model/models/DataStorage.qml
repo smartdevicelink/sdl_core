@@ -232,6 +232,8 @@ QtObject {
 
     property ListModel vrCommands: ListModel {}
 
+    property ListModel vrHelp: ListModel {}
+
     property var globalProperties: {
         "helpPrompt": "",
         "timeoutPrompt": ""
