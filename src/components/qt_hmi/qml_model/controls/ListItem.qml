@@ -60,7 +60,7 @@ Rectangle {
         font.pixelSize: Constants.fontSize
         text: "Name Entry"
         anchors.left: image.right
-        anchors.leftMargin: Constants.generalSpasing
+        anchors.leftMargin: Constants.generalSpacing
         anchors.verticalCenterOffset: 0
         visible: text !== ""
         color: Constants.primaryColor
