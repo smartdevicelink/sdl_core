@@ -57,13 +57,12 @@ Item {
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                             wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
+        //TODO {ALeshin}: Refactoring of this function
         throw Common.Result.UNSUPPORTED_REQUEST
 
-        console.debug("enter getVehicleData()", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
-                      vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
-                      wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID)
+        console.debug("enter")
 
-        console.debug("exit getVehicleData()");
+        console.debug("exit");
         return {
                 gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
                 speed: speed ? dataContainer.vehicleInfoModel.speed : undefined,
