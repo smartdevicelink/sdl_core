@@ -36,19 +36,19 @@ var MenuItemType = {
     MI_PARENT: 2
 }
 
-function activePageChoose(Qwe, pages) {
-    if (Qwe.contentX <= 0) {
+function activePageChoose(flickElement, pages) {
+    if (flickElement.contentX <= 0) {
         return 0
     }
-    else if ( (Qwe.contentWidth - Qwe.contentX) < Qwe.width) {
+    else if ( (flickElement.contentWidth - flickElement.contentX) < flickElement.width) {
         return pages -1
     }
     else {
-        if ( (Qwe.contentX % Qwe.width) >= (1/6 * Qwe.width)) {
-            return Math.ceil(Qwe.contentX / Qwe.width)
+        if ( (flickElement.contentX % flickElement.width) >= (1/6 * flickElement.width)) {
+            return Math.ceil(flickElement.contentX / flickElement.width)
         }
-        else if ( (Qwe.contentX % Qwe.width) > 0) {
-            return Math.floor(Qwe.contentX / Qwe.width)
+        else if ( (flickElement.contentX % flickElement.width) > 0) {
+            return Math.floor(flickElement.contentX / flickElement.width)
         }
     }
 }

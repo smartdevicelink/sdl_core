@@ -54,6 +54,7 @@ Item {
     }
 
     function readDID(ecuName, didLocation, appID) {
+        console.debug("Enter")
         //TODO{ALeshin}: refactoring of this function, when we'll have Vehicle Info module
         var didResult = []
 
@@ -70,6 +71,7 @@ Item {
                 didResult[i].didLocation = didLocation[i]
                 didResult[i].data = '0'
             }
+            console.debug("Exit")
             return {didResult: didResult}
         }
     }
