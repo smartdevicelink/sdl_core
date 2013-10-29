@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.GiveControlResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
@@ -382,6 +383,12 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
 
+    }
+
+    @Override
+    public void onGiveControlResponse(GiveControlResponse response) {
+        Log.i(TAG, "onGiveControlResponse success " + response.getSuccess() +
+                ", " + response.getResultCode() + ", " + response.getInfo());
     }
 
     @Override
