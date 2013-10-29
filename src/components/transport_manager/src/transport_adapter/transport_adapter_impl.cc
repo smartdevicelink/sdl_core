@@ -342,6 +342,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
       break;
     }
   }
+  pthread_mutex_unlock(&connections_mutex_);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
       it != listeners_.end(); ++it) {
     TransportAdapterListener* listener = *it;
