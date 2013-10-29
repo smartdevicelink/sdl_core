@@ -35,3 +35,20 @@ var MenuItemType = {
     MI_SUBMENU: 1,
     MI_PARENT: 2
 }
+
+function activePageChoose(Qwe, pages) {
+    if (Qwe.contentX <= 0) {
+        return 0
+    }
+    else if ( (Qwe.contentWidth - Qwe.contentX) < Qwe.width) {
+        return pages -1
+    }
+    else {
+        if ( (Qwe.contentX % Qwe.width) >= (1/6 * Qwe.width)) {
+            return Math.ceil(Qwe.contentX / Qwe.width)
+        }
+        else if ( (Qwe.contentX % Qwe.width) > 0) {
+            return Math.floor(Qwe.contentX / Qwe.width)
+        }
+    }
+}

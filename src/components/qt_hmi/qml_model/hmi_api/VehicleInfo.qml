@@ -54,6 +54,7 @@ Item {
     }
 
     function readDID(ecuName, didLocation, appID) {
+        //TODO{ALeshin}: refactoring of this function, when we'll have Vehicle Info module
         var didResult = []
 
         for (var i = 0; i < didLocation.length; i++) {
@@ -65,7 +66,7 @@ Item {
             }
             else {
                 didResult[i] = {}
-                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_SUCCESS
+                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_DATA_NOT_AVAILABLE
                 didResult[i].didLocation = didLocation[i]
                 didResult[i].data = '0'
             }

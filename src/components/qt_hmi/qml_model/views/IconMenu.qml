@@ -34,6 +34,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 GeneralView{
     id: menuView
@@ -160,7 +161,8 @@ GeneralView{
         anchors.top: parent.top
 
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
-        activePage: {
+        activePage: Internal.activePageChoose(flicker, pager.pages)
+            /*
             // Change page number, when half of one elements width appears at screen.
             // At this menu one element' width - 1/3 of screen width.
             if (flicker.contentX <= 0) {
@@ -177,6 +179,7 @@ GeneralView{
                     return Math.floor(flicker.contentX / flicker.width)
                 }
             }
-        }
+            */
+
     }
 }
