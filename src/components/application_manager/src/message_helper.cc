@@ -326,6 +326,7 @@ smart_objects::SmartObject* MessageHelper::CreateModuleInfoSO(
 
 smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
   const std::string& path_to_icon, unsigned int app_id) {
+  // FIXME (dchmerev@luxoft.com): memory leak
   smart_objects::SmartObject* set_icon = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
