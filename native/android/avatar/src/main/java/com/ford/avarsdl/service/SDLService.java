@@ -2,9 +2,13 @@ package com.ford.avarsdl.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.ford.avarsdl.util.Const;
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
@@ -53,10 +57,13 @@ import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.transport.TCPTransportConfig;
 
 /**
  * Service that is responsible for communicating with the SDL.
@@ -67,16 +74,24 @@ import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
  */
 public class SDLService extends Service implements IProxyListenerALM {
     private static final String TAG = SDLService.class.getSimpleName();
+    private static final String APPID = "42";
+    private static final String APPNAME = "MFTGuide";
+    private SyncProxyALM mSyncProxy;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand " + intent + ", " + flags + ", " + startId);
+
+        startProxy();
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
+
+        stopProxy();
         super.onDestroy();
     }
 
@@ -85,6 +100,44 @@ public class SDLService extends Service implements IProxyListenerALM {
         Log.d(TAG, "onBind unsupported");
         // binding is not supported
         return null;
+    }
+
+    private void startProxy() {
+        Log.d(TAG, "starting proxy");
+
+        SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR,
+                Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT,
+                Const.PREFS_DEFAULT_TCPPORT);
+
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        try {
+            mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
+                    null, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                    null, false, false, 2,
+                    new TCPTransportConfig(tcpPortInt, ipAddressString));
+        } catch (SyncException e) {
+            Log.e(TAG, "Failed to start proxy", e);
+            if (mSyncProxy == null) {
+                stopSelf();
+            }
+        }
+    }
+
+    private void stopProxy() {
+        Log.d(TAG, "stopping proxy");
+
+        if (mSyncProxy != null) {
+            try {
+                mSyncProxy.dispose();
+            } catch (SyncException e) {
+                Log.e(TAG, "Failed to stop proxy", e);
+            }
+            mSyncProxy = null;
+        }
     }
 
     @Override

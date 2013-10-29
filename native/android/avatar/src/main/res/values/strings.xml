@@ -37,4 +37,9 @@
         Download Complete.\nVideos are available to view.
         </string>
 
+    <string name="selectprotocol_ipAddress">IP Address:</string>
+    <string name="selectprotocol_ipAddressDefault">10.10.0.1</string>
+    <string name="selectprotocol_tcpPort">TCP Port:</string>
+    <string name="selectprotocol_tcpPortDefault">12345</string>
+
 </resources>

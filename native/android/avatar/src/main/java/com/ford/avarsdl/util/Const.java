@@ -88,5 +88,12 @@ public class Const {
 	//=========================================================================================
 	//eula
 	public static final int REQUESTCODE_EULA = 3000;
-		
+
+    public static final String PREFS_NAME = "AvaRSDLPrefs";
+
+    public static final String PREFS_KEY_IPADDR = "ipAddr";
+    public static final String PREFS_KEY_TCPPORT = "tcpPort";
+
+    public static final String PREFS_DEFAULT_IPADDR = "10.10.0.1";
+    public static final Integer PREFS_DEFAULT_TCPPORT = 12345;
 }

@@ -6,7 +6,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
@@ -23,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -34,6 +37,7 @@ import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -461,7 +465,8 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 							Toast.LENGTH_LONG).show();
 					logMsg(str);
 				}
-				break;
+                showSDLSetupDialog();
+                break;
 
 			default:
 				break;
@@ -647,17 +652,67 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
                 }
             }
 		}
-
-        Intent sdlServiceIntent = new Intent(this, SDLService.class);
-        startService(sdlServiceIntent);
 	}
 
-	@Override
+    private void showSDLSetupDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.sdl_settings, null);
+
+        final EditText ipAddressText =
+                (EditText) dialogView.findViewById(R.id.sdl_ipAddr);
+        final EditText tcpPortText =
+                (EditText) dialogView.findViewById(R.id.sdl_tcpPort);
+
+        final SharedPreferences prefs =
+                getSharedPreferences(Const.PREFS_NAME, 0);
+        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR,
+                Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT,
+                Const.PREFS_DEFAULT_TCPPORT);
+
+        ipAddressText.setText(ipAddressString);
+        tcpPortText.setText(String.valueOf(tcpPortInt));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView)
+               .setTitle("Please provide SDL address")
+               .setPositiveButton(android.R.string.ok,
+                       new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialog,
+                                               int which) {
+                               String ipAddressString =
+                                       ipAddressText.getText().toString();
+                               int tcpPortInt;
+                               try {
+                                   tcpPortInt = Integer.parseInt(
+                                           tcpPortText.getText().toString());
+                               } catch (NumberFormatException e) {
+                                   Log.i(TAG, "Couldn't parse port number", e);
+                                   tcpPortInt = Const.PREFS_DEFAULT_TCPPORT;
+                               }
+
+                               SharedPreferences.Editor prefsEditor =
+                                       getSharedPreferences(Const.PREFS_NAME, 0)
+                                               .edit();
+                               prefsEditor.putString(Const.PREFS_KEY_IPADDR,
+                                       ipAddressString);
+                               prefsEditor.putInt(Const.PREFS_KEY_TCPPORT,
+                                       tcpPortInt);
+                               prefsEditor.commit();
+
+                               startService(new Intent(getApplicationContext(),
+                                       SDLService.class));
+                           }
+                       })
+               .show();
+    }
+
+    @Override
 	protected void onDestroy() {
         Log.d(TAG, "onDestroy");
 
-        Intent sdlServiceIntent = new Intent(this, SDLService.class);
-        stopService(sdlServiceIntent);
+        stopService(new Intent(this, SDLService.class));
 
 		if (!isFirstStart()) {
 			// switch of timer
