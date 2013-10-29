@@ -134,13 +134,27 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 		final int itemId = item.getItemId();
 		switch (itemId) {
 		case R.id.mnuQuit:
-			android.os.Process.killProcess(android.os.Process.myPid());
+			exitApp();
 			break;
 		default:
 			break;
 		}
 		return false;
 	}
+
+    private void exitApp() {
+        Log.d(TAG, "Exiting application");
+
+        finish();
+        // the delay should be long enough, so that UnregisterAppInterface and
+        // EndSession messages are sent
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                android.os.Process.killProcess(android.os.Process.myPid());
+            }
+        }, 2000);
+    }
 
 	public boolean isFirstStart() {
 		SharedPreferences prefs = getSharedPreferences(

@@ -42,7 +42,10 @@ public class MBWrapper {
 	
 	public void destroy(){
 		LogMsg("Destroy MB");
-		DestroyMessageBroker();
+        // FIXME: fix a crash while destroying
+        // A/libc﹕ @@@ ABORTING: INVALID HEAP ADDRESS IN dlfree
+        // A/libc﹕ Fatal signal 11 (SIGSEGV) at 0xdeadbaad (code=1)
+//		DestroyMessageBroker();
 		mIsMsgBrokerCreated = false;
 		mWraper = null;
 	}
