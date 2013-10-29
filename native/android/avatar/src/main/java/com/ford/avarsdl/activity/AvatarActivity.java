@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -82,7 +83,15 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		logMsg("onCreate");
-		if (isFirstStart()) {
+
+        // FIXME: the old code with new SDK crashes with
+        // android.os.NetworkOnMainThreadException
+        // this hotfix is a bad idea. Don't try this at home!
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().
+                permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        if (isFirstStart()) {
 			Intent intent = new Intent(this, EulaActivity.class);
 			startActivityForResult(intent, Const.REQUESTCODE_EULA);
 		} else {
