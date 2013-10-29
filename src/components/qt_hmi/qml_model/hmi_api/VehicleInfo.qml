@@ -34,6 +34,8 @@
 
 import QtQuick 2.0
 
+import "../hmi_api/Common.js" as Common
+
 Item {
     function isReady () {
         return {
@@ -55,25 +57,15 @@ Item {
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                             wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
+        throw Common.Result.UNSUPPORTED_REQUEST
+
         console.debug("enter getVehicleData()", gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                       vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                       wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID)
-/*
-        var dataToSend = {};
-        var functionArgs = [ "gps", "speed", "rpm", "fuelLevel", "fuelLevel_State", "instantFuelConsumption", "externalTemperature",
-                        "vin", "prndl", "tirePressure", "odometer", "beltStatus", "bodyInformation", "deviceStatus", "driverBraking",
-                        "wiperStatus", "headLampStatus", "engineTorque", "accPedalPosition", "steeringWheelAngle", "myKey" ]
-
-        // no appID argument in response
-        for (var i = 0; i < arguments.length - 1; i++) {
-            if (arguments[i] === true) {
-                dataToSend[functionArgs[i]] = dataContainer.vehicleInfoModel[functionArgs[i]];
-            }
-        }
-*/
 
         console.debug("exit getVehicleData()");
-        return { gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
+        return {
+                gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
                 speed: speed ? dataContainer.vehicleInfoModel.speed : undefined,
                 rpm: rpm ? dataContainer.vehicleInfoModel.rpm : undefined,
                 fuelLevel: fuelLevel ? dataContainer.vehicleInfoModel.fuelLevel : undefined,
@@ -95,7 +87,5 @@ Item {
                 steeringWheelAngle: steeringWheelAngle ? dataContainer.vehicleInfoModel.steeringWheelAngle : undefined,
                 myKey: myKey ? dataContainer.vehicleInfoModel.myKey : undefined
         }
-
-    //    return dataToSend
     }
 }
