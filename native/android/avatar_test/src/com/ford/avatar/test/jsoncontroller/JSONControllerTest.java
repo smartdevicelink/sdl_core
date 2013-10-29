@@ -1,17 +1,15 @@
-package com.ford.avatar.test.jsoncontroller;
-
-import java.util.concurrent.TimeUnit;
+package com.ford.avarsdl.test.jsoncontroller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.TimeUtils;
 
-import com.ford.avatar.jsoncontroller.JSONController;
-import com.ford.avatar.jsonparser.EBEMethods;
-import com.ford.avatar.jsonparser.EMBMethods;
-import com.ford.avatar.test.stubs.TCPClientStub;
-import com.ford.avatar.util.RPCConst;
+import com.ford.avarsdl.jsoncontroller.JSONController;
+import com.ford.avarsdl.jsonparser.EBEMethods;
+import com.ford.avarsdl.jsonparser.EMBMethods;
+import com.ford.avarsdl.test.stubs.TCPClientStub;
+import com.ford.avarsdl.util.RPCConst;
 
 import junit.framework.TestCase;
 

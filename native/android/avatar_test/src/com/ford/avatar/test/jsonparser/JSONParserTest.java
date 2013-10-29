@@ -1,14 +1,14 @@
 /**
  * 
  */
-package com.ford.avatar.test.jsonparser;
+package com.ford.avarsdl.test.jsonparser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.avatar.jsonparser.JSONParser;
-import com.ford.avatar.util.Const;
-import com.ford.avatar.util.RPCConst;
+import com.ford.avarsdl.jsonparser.JSONParser;
+import com.ford.avarsdl.util.Const;
+import com.ford.avarsdl.util.RPCConst;
 
 import android.test.AndroidTestCase;
 

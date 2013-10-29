@@ -1,14 +1,14 @@
 /**
  * 
  */
-package com.ford.avatar.test.jsoncontroller;
+package com.ford.avarsdl.test.jsoncontroller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.avatar.jsoncontroller.JSONAVAController;
-import com.ford.avatar.test.stubs.TCPClientStub;
-import com.ford.avatar.util.RPCConst;
+import com.ford.avarsdl.jsoncontroller.JSONAVAController;
+import com.ford.avarsdl.test.stubs.TCPClientStub;
+import com.ford.avarsdl.util.RPCConst;
 
 import junit.framework.TestCase;
 
@@ -42,21 +42,21 @@ public class JSONAVAControllerTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link com.ford.avatar.jsoncontroller.JSONAVAController#processRequest(java.lang.String)}.
+	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#processRequest(java.lang.String)}.
 	 */
 	public final void testProcessRequest() {
 		fail("Not yet implemented"); // TODO
 	}
 
 	/**
-	 * Test method for {@link com.ford.avatar.jsoncontroller.JSONAVAController#processResponse(java.lang.String)}.
+	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#processResponse(java.lang.String)}.
 	 */
 	public final void testProcessResponse() {
 		fail("Not yet implemented"); // TODO
 	}
 
 	/**
-	 * Test method for {@link com.ford.avatar.jsoncontroller.JSONAVAController#JSONAVAController(com.ford.avatar.activity.AvatarActivity, java.lang.String)}.
+	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#JSONAVAController(com.ford.avarsdl.activity.AvatarActivity, java.lang.String)}.
 	 */
 	public final void testJSONAVAController() {
 		JSONAVAController controller = new JSONAVAController(RPCConst.CN_AVATAR, mTcpStub);
@@ -64,7 +64,7 @@ public class JSONAVAControllerTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link com.ford.avatar.jsoncontroller.JSONAVAController#sendJSMessage(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#sendJSMessage(java.lang.String, java.lang.String)}.
 	 */
 	public final void testSendJSMessage() {
 		JSONObject obj = new JSONObject();

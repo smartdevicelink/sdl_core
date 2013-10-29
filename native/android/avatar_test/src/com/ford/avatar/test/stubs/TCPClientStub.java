@@ -1,14 +1,13 @@
-package com.ford.avatar.test.stubs;
+package com.ford.avarsdl.test.stubs;
 
-import java.io.IOException;
 import java.net.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.avatar.jsoncontroller.ITcpClient;
-import com.ford.avatar.jsonparser.EMBMethods;
-import com.ford.avatar.util.RPCConst;
+import com.ford.avarsdl.jsoncontroller.ITcpClient;
+import com.ford.avarsdl.jsonparser.EMBMethods;
+import com.ford.avarsdl.util.RPCConst;
 
 public class TCPClientStub implements ITcpClient{
 	

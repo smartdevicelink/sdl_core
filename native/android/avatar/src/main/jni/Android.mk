@@ -13,7 +13,7 @@ include $(CLEAR_VARS)
 LOCAL_PATH := $(MY_APP_PATH)
 
 LOCAL_MODULE := nativepart
-LOCAL_SRC_FILES := com_ford_avatar_jsonserver_MBWrapper.cpp
+LOCAL_SRC_FILES := com_ford_avarsdl_jsonserver_MBWrapper.cpp
 
 #path for libjson headers
 LOCAL_C_INCLUDES += $(JSON_INCLUDE)

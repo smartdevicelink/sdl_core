@@ -26,8 +26,8 @@ public class AvatarConverter {
 
 	private static final String LANGUAGE = SPANISH;
 
-	private static final String OLD_PACK_NAME = "com.ford.avatar";
-	private static final String NEW_PACK_NAME = "com.ford.avatar" + LANGUAGE;
+	private static final String OLD_PACK_NAME = "com.ford.avarsdl";
+	private static final String NEW_PACK_NAME = "com.ford.avarsdl" + LANGUAGE;
 
 	/**
 	 * @param args
@@ -203,7 +203,7 @@ public class AvatarConverter {
 
 	private static void changePackage(String root) {
 		// change package folder name
-		String packPath = root + "\\src\\com\\ford\\avatar";
+		String packPath = root + "\\src\\com\\ford\\avarsdl";
 		File packDir = new File(packPath);
 		File newPackDir = new File(packPath + LANGUAGE);
 		if (packDir.renameTo(newPackDir)) {
@@ -335,7 +335,7 @@ public class AvatarConverter {
 	}
 
 	private static void changeServerPort(String root) {
-		String filePath = root + "\\src\\com\\ford\\avatar" + LANGUAGE
+		String filePath = root + "\\src\\com\\ford\\avarsdl" + LANGUAGE
 				+ "\\util\\RPCConst.java";
 		// change server port
 		String strOldPort = "TCP_SERVER_PORT = 21111";
@@ -361,12 +361,12 @@ public class AvatarConverter {
 	}
 
 	private static void changeJniFiles(String root) {
-		String oldValue = "com_ford_avatar";
+		String oldValue = "com_ford_avarsdl";
 		String newValue = oldValue + LANGUAGE;
 		// rename cpp files
 		String oldFilePath = root
-				+ "\\jni\\com_ford_avatar_jsonserver_MBWrapper.cpp";
-		String newFilePath = root + "\\jni\\com_ford_avatar" + LANGUAGE
+				+ "\\jni\\com_ford_avarsdl_jsonserver_MBWrapper.cpp";
+		String newFilePath = root + "\\jni\\com_ford_avarsdl" + LANGUAGE
 				+ "_jsonserver_MBWrapper.cpp";
 		File jniFile = new File(oldFilePath);
 		if (jniFile.exists()) {
@@ -376,8 +376,8 @@ public class AvatarConverter {
 			}
 		}
 		// rename .h files
-		oldFilePath = root + "\\jni\\com_ford_avatar_jsonserver_MBWrapper.h";
-		newFilePath = root + "\\jni\\com_ford_avatar" + LANGUAGE
+		oldFilePath = root + "\\jni\\com_ford_avarsdl_jsonserver_MBWrapper.h";
+		newFilePath = root + "\\jni\\com_ford_avarsdl" + LANGUAGE
 				+ "_jsonserver_MBWrapper.h";
 		jniFile = new File(oldFilePath);
 		if (jniFile.exists()) {
@@ -407,7 +407,7 @@ public class AvatarConverter {
 	}
 
 	private static void changeDownloader(String root) {
-		String filePath = root + "\\src\\com\\ford\\avatar" + LANGUAGE
+		String filePath = root + "\\src\\com\\ford\\avarsdl" + LANGUAGE
 				+ "\\downloader\\DownloaderClient.java";
 		String oldValue = "toast_download_complete";
 		String newValue = oldValue + "_" + LANGUAGE;
@@ -430,10 +430,10 @@ public class AvatarConverter {
 		String filePath = dest + "\\.project";
 		File projectFile = new File(filePath);
 		if (projectFile.exists()) {
-			String oldValue = "<name>avatar";
+			String oldValue = "<name>avarsdl";
 			String newValue = oldValue + LANGUAGE;
 			changeTextInFile(projectFile.getAbsolutePath(), oldValue, newValue);
-			oldValue = "workspace_loc:/avatar";
+			oldValue = "workspace_loc:/avarsdl";
 			newValue = oldValue + LANGUAGE;
 			changeTextInFile(projectFile.getAbsolutePath(), oldValue, newValue);
 		}
@@ -441,10 +441,10 @@ public class AvatarConverter {
 		filePath = dest + "\\.cproject";
 		projectFile = new File(filePath);
 		if (projectFile.exists()) {
-			String oldValue = "workspace_loc:/avatar";
+			String oldValue = "workspace_loc:/avarsdl";
 			String newValue = oldValue + LANGUAGE;
 			changeTextInFile(projectFile.getAbsolutePath(), oldValue, newValue);
-			oldValue = "workspacePath=\"/avatar";
+			oldValue = "workspacePath=\"/avarsdl";
 			newValue = oldValue + LANGUAGE;
 			changeTextInFile(projectFile.getAbsolutePath(), oldValue, newValue);
 		}
