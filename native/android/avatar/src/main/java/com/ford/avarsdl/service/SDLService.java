@@ -142,22 +142,24 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnHMIStatus(OnHMIStatus notification) {
-
+        Log.i(TAG, "HMI Status " + notification.getHmiLevel() + ", " +
+                notification.getSystemContext() + ", first run " +
+                notification.getFirstRun());
     }
 
     @Override
     public void onProxyClosed(String info, Exception e) {
-
+        Log.i(TAG, "Info: " + info, e);
     }
 
     @Override
     public void onError(String info, Exception e) {
-
+        Log.i(TAG, "Error: " + info, e);
     }
 
     @Override
     public void onGenericResponse(GenericResponse response) {
-
+        Log.i(TAG, "Generic response " + response.getResultCode());
     }
 
     @Override
