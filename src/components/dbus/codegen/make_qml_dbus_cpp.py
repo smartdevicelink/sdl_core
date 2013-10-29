@@ -347,6 +347,8 @@ class Impl(FordXmlParser):
                 out.write("  QVariant %s_arg;\n" % param_name)
                 out.write("  %s_arg.setValue(%s_out);" % (param_name, param_name))
                 out.write("  message << %s_arg;\n" % param_name)
+                out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(map));\n")
+            out.write("  LOG4CXX_TRACE(logger_, \"REPLY ASYNC: \" << __PRETTY_FUNCTION__ );\n")
             out.write("  return true;\n")
             out.write("}\n\n")
             
@@ -382,6 +384,7 @@ class Impl(FordXmlParser):
             out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
             out.write("      message.setDelayedReply(true);\n")
             out.write("      dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
+            out.write("  LOG4CXX_TRACE(logger_, \"EXIT ASYNC: \" << __PRETTY_FUNCTION__ );\n")
             out.write("      " + return_statement + ";\n");
             out.write("  }\n")
 

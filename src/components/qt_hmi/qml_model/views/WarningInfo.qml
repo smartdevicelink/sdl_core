@@ -50,7 +50,7 @@ Rectangle {
 
         text: "WARNING!"
         color: Constants.warningColor
-        font.pixelSize: Constants.tittleFontSize
+        font.pixelSize: Constants.titleFontSize
         font.bold: true
         style: Text.Raised
         styleColor: "gray"
