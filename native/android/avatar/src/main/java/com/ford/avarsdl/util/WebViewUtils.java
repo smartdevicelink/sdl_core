@@ -11,6 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -23,6 +25,7 @@ import com.ford.avarsdl.jssupport.JavaScriptFacade;
  * 
  */
 public class WebViewUtils {
+    private static final boolean WEB_LOGS_ENABLED = false;
 
 	private static Boolean isPushed = false;
 	private final static String TAG = WebViewUtils.class.getName();
@@ -43,6 +46,16 @@ public class WebViewUtils {
 		wv.setVerticalScrollBarEnabled(false);
 		wv.setHorizontalScrollBarEnabled(false);
 		wv.setPadding(0, 0, 0, 0);
+
+        wv.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                if (WEB_LOGS_ENABLED) {
+                    return super.onConsoleMessage(consoleMessage);
+                }
+                return true;
+            }
+        });
 
 		final WebSettings settings = wv.getSettings();
 		settings.setBuiltInZoomControls(true);
