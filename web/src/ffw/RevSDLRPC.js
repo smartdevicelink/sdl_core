@@ -56,9 +56,9 @@ FFW.RevSDL = FFW.RPCObserver.create({
         Em.Logger.log("FFW.RevSDL.onRPCNotification");
         this._super();
 
-        if (notification.method == "RevSDL.SDLAccessRequest") {
-            MFT.MediaController.set('sdlAccessStatus', 1);
-        }
+//        if (notification.method == "RevSDL.SDLAccessRequest") {
+//            MFT.MediaController.set('sdlAccessStatus', 1);
+//        }
     },
 
     /*
@@ -66,6 +66,9 @@ FFW.RevSDL = FFW.RPCObserver.create({
      */
     sendSDLAccessRequestId: -1,
 
+    /**
+     * Sends a request for access to the management of HMI, through SDL interface
+     **/
     sendSDLAccessRequest: function(){
         this.sendSDLAccessRequestId = this.client.generateId();
 
