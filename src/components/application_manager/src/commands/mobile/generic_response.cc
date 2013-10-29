@@ -56,7 +56,7 @@ void GenericResponse::Run() {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::msg_params][strings::success] = false;
   (*message_)[strings::msg_params][strings::result_code] =
-    mobile_apis::Result::INVALID_DATA;
+      mobile_apis::Result::INVALID_DATA;
 
   SendResponse(false);
 }

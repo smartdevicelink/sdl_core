@@ -104,7 +104,7 @@ PopUp {
         show();
     }
 
-    function deactivate() {
+    function complete(reason) {
         dataContainer.activeVR = false;
         dataContainer.systemContext = dataContainer.systemSavedContext
         sdlVR.stopped();

@@ -55,9 +55,24 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
 
     timer: null,
 
+    timeoutValue: null,
+
     childViews: [
         'backButton', 'captionText', 'softButtons', 'listOfCommands'
     ],
+
+    /**
+     * Reset timeout function
+     */
+    click: function(){
+
+        var self = this;
+
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function () {
+            self.deactivate();
+        }, this.timeout);
+    },
 
     /**
      * Deactivate View
@@ -68,6 +83,8 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
     deactivate: function (ABORTED) {
         clearTimeout(this.timer);
         this.set('active', false);
+
+        this.timeout = null;
 
         SDL.SDLController.scrollableMessageResponse(ABORTED ? SDL.SDLModel.resultCode['ABORTED'] : SDL.SDLModel.resultCode['SUCCESS'], this.messageRequestId);
     },
@@ -86,6 +103,7 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
             this.softButtons.addItems(params.softButtons, params.appID);
             this.set('active', true);
             clearTimeout(this.timer);
+            this.timeout = params.timeout;
             this.timer = setTimeout(function () {
                 self.deactivate();
             }, params.timeout);

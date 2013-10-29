@@ -3,11 +3,11 @@ FILE(TO_CMAKE_PATH "${GLIB2_DIR}" TRY2_DIR)
 FILE(GLOB GLIB2_DIR ${TRY1_DIR} ${TRY2_DIR})
 
 FIND_PATH(GLIB_glib_2_INCLUDE_DIR glib.h
-                                  PATHS ${GLIB2_DIR}/include ${GLIB2_DIR}/include/glib-2.0 /usr/local/include/glib-2.0 /usr/include/glib-2.0
+                                  PATHS ${GLIB2_DIR}/include ${GLIB2_DIR}/include/glib-2.0 /usr/local/include/glib-2.0 /usr/include/glib-2.0 /usr/lib/glib-2.0/include/
                                   ENV INCLUDE DOC "Directory containing glib.h include file")
 
 FIND_PATH(GLIB_glibconfig_2_INCLUDE_DIR glibconfig.h
-                                        PATHS ${GLIB2_DIR}/include ${GLIB2_DIR}/include/glib-2.0 ${GLIB2_DIR}/lib/include ${GLIB2_DIR}/lib/glib-2.0/include /usr/local/include/glib-2.0 /usr/include/glib-2.0 /usr/lib/glib-2.0/include /usr/local/lib/glib-2.0/include
+                                        PATHS ${GLIB2_DIR}/include ${GLIB2_DIR}/include/glib-2.0 ${GLIB2_DIR}/lib/include ${GLIB2_DIR}/lib/glib-2.0/include /usr/local/include/glib-2.0 /usr/include/glib-2.0 /usr/lib/glib-2.0/include /usr/local/lib/glib-2.0/include /usr/lib/i386-linux-gnu/glib-2.0/include/
                                         ENV INCLUDE DOC "Directory containing glibconfig.h include file")
 
 FIND_LIBRARY(GLIB_glib_2_LIBRARY NAMES glib-2.0

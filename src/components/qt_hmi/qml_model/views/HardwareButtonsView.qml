@@ -89,7 +89,7 @@ Item {
                             if (!dataContainer.activeVR) {
                                 vrPopUp.activate();
                             } else {
-                                vrPopUp.deactivate();
+                                vrPopUp.complete();
                             }
                         }
                     }
@@ -211,6 +211,10 @@ Item {
                 ComboBox {
                     model: languagesList
                     width: 200
+                    onCurrentIndexChanged: {
+                        dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
+                    }
                 }
             }
             Column
@@ -332,6 +336,7 @@ Item {
                     toggleMode: true
                     onPressed: {
                         exitAllApplicationsPopup.show()
+
                     }
                     onUnpressed: {
                         exitAllApplicationsPopup.hide()
@@ -346,6 +351,7 @@ Item {
                     }
                 }
                 Row {
+                    spacing: 20
                     CheckBox {
                         style: CheckBoxStyle {
                             label: Text {
@@ -354,17 +360,20 @@ Item {
                             }
                         }
                     }
-
-                    Item {
-                        height: 1
-                        width: 20
-                    }
-
                     CheckBox {
                         style: CheckBoxStyle {
                             label: Text {
                                 color: "white"
                                 text: "DD"
+                            }
+                        }
+                        onClicked: {
+                            if (checked) {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_ON;
+                            } else {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_OFF;
                             }
                         }
                     }

@@ -1,10 +1,5 @@
 package com.ford.syncV4.transport;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.UUID;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -19,6 +14,11 @@ import com.ford.syncV4.trace.enums.DetailLevel;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.trace.enums.Mod;
 import com.ford.syncV4.util.DebugTool;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.UUID;
 
 /**
  * Bluetooth Transport Implementation. This transport advertises its existence to SYNC by publishing an SDP record and waiting for an incoming connection from SYNC. Connection is verified by checking for the SYNC UUID. For more detailed information please refer to the <a href="#bluetoothTransport">Bluetooth Transport Guide</a>.
@@ -104,7 +104,7 @@ public class BTTransport extends SyncTransport {
         } catch (SyncException e) {
             // Log
             Log.e(TAG, e.getMessage());
-            e.printStackTrace();
+
             throw e;
         }
     } // end-method
@@ -113,7 +113,12 @@ public class BTTransport extends SyncTransport {
 		disconnect(null, null);
 	}
 
-	/**
+    @Override
+    public void stopReading() {
+        DebugTool.logInfo("BTTransport: stop reading requested, doing nothing");
+    }
+
+    /**
 	 * Destroys the transport between SYNC and the mobile app
 	 * 
 	 * @param msg

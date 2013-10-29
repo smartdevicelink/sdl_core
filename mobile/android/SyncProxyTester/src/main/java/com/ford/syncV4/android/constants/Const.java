@@ -2,8 +2,6 @@ package com.ford.syncV4.android.constants;
 
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
-import com.ford.syncV4.android.constants.FlavorConst;
-
 /** Stores application-wide constants. */
 public class Const {
 	// Shared preference name for protocol properties
@@ -11,6 +9,7 @@ public class Const {
 
 	// Protocol properties
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
+    public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
 	public static final String PREFS_KEY_APPNAME = "appName";
 	public static final String PREFS_KEY_LANG = "desiredLang";
 	public static final String PREFS_KEY_HMILANG = "desiredHMILang";
@@ -19,6 +18,7 @@ public class Const {
 
 	// Default values
 	public static final boolean PREFS_DEFAULT_ISMEDIAAPP = true;
+    public static final boolean PREFS_DEFAULT_ISNAVIAPP = true;
 	public static final String PREFS_DEFAULT_APPNAME = FlavorConst.PREFS_DEFAULT_APPNAME;
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
@@ -38,11 +38,12 @@ public class Const {
 
 		public static final String TCP = "WiFi";
 		public static final String BLUETOOTH = "Bluetooth";
+		public static final String USB = "USB";
 		public static final int KEY_TCP = 1;
 		public static final int KEY_BLUETOOTH = 2;
+		public static final int KEY_USB = 3;
 
-		//public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_TCP;
-		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_BLUETOOTH;
+		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_USB;
 		public static final int PREFS_DEFAULT_TRANSPORT_PORT = 12345;
 		public static final String PREFS_DEFAULT_TRANSPORT_IP = "10.10.0.1";
 	}
@@ -50,6 +51,7 @@ public class Const {
 	// Keys to pass objects via IntentHelper
 	public static final String INTENTHELPER_KEY_SOFTBUTTON = "IntentSoftButton";
 	public static final String INTENTHELPER_KEY_SOFTBUTTONSLIST = "IntentSoftButtonsList";
+    public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES = "IntentKeyboardProperties";
 
 	// Keys to pass values via Intent
 	public static final String INTENT_KEY_SOFTBUTTONS_MAXNUMBER = "MaxSoftButtonsNumber";
@@ -58,4 +60,6 @@ public class Const {
 	public static final int REQUEST_EDIT_SOFTBUTTON = 42;
 	// Request id for SoftButtonsListActivity
 	public static final int REQUEST_LIST_SOFTBUTTONS = 43;
+	// Request id for KeyboardPropertiesActivity
+	public static final int REQUEST_EDIT_KBDPROPERTIES = 44;
 }

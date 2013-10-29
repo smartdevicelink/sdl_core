@@ -43,7 +43,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestController"));
 
 RequestController::RequestController()
-: watchdog_(NULL) {
+  : watchdog_(NULL) {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   list_mutex_.init();
   watchdog_ = request_watchdog::RequestWatchdog::instance();
@@ -54,7 +54,10 @@ RequestController::~RequestController() {
   LOG4CXX_INFO(logger_, "RequestController::~RequestController()");
   request_list_.clear();
 
-  watchdog_->RemoveListener(this);
+  if (watchdog_) {
+    watchdog_->RemoveListener(this);
+    watchdog_->~Watchdog();
+  }
 }
 
 void RequestController::addRequest(const Request& request) {
@@ -64,16 +67,16 @@ void RequestController::addRequest(const Request& request) {
   request_list_.push_back(request);
 
   const commands::CommandRequestImpl* request_impl =
-      (static_cast<commands::CommandRequestImpl*>(&(*request)));
+    (static_cast<commands::CommandRequestImpl*>(&(*request)));
 
   LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
                << request_impl->default_timeout());
 
-  watchdog_->addRequest(request_watchdog::RequestInfo(
-      request_impl->function_id(),
-      request_impl->connection_key(),
-      request_impl->correlation_id(),
-      request_impl->default_timeout()));
+  watchdog_->addRequest(new request_watchdog::RequestInfo(
+                          request_impl->function_id(),
+                          request_impl->connection_key(),
+                          request_impl->correlation_id(),
+                          request_impl->default_timeout()));
 
   LOG4CXX_INFO(logger_, "Added request to watchdog.");
 
@@ -89,10 +92,10 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   std::list<Request>::iterator it = request_list_.begin();
   for (; request_list_.end() != it; ++it) {
     const commands::CommandRequestImpl* request_impl =
-        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+      (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
     if (request_impl->correlation_id() == mobile_correlation_id) {
       watchdog_->removeRequest(
-          request_impl->connection_key(), request_impl->correlation_id());
+        request_impl->connection_key(), request_impl->correlation_id());
       request_list_.erase(it);
       break;
     }

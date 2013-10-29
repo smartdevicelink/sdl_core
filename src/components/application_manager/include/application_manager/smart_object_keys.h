@@ -50,6 +50,7 @@ const char error_msg[] = "message";
 const char msg_params[] = "msg_params";
 const char info[] = "info";
 const char app_id[] = "appID";
+const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
 const char success[] = "success";
@@ -77,6 +78,7 @@ const char main_field_2[] = "mainField2";
 const char main_field_3[] = "mainField3";
 const char main_field_4[] = "mainField4";
 const char eta[] = "eta";
+const char time_to_destination[] = "timeToDestination";
 const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
@@ -105,6 +107,7 @@ const char tts_chunks[] = "ttsChunks";
 const char initial_prompt[] = "initialPrompt";
 const char initial_text[] = "initialText";
 const char duration[] = "duration";
+const char progress_indicator[] = "progressIndicator";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
 const char custom_presets[] = "customPresets";
@@ -121,6 +124,7 @@ const char custom_button_id[] = "customButtonID";
 const char data_type[] = "dataType";
 const char turn_list[] = "turnList";
 const char turn_icon[] = "turnIcon";
+const char next_turn_icon[] = "nextTurnIcon";
 const char value[] = "value";
 const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
@@ -142,6 +146,7 @@ const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
 const char image_type[] = "imageType";
 const char image[] = "image";
+const char type[] = "type";
 
 const char filenames[] = "filenames";
 
@@ -217,6 +222,11 @@ const char initial_text[] = "initialText";
 const char navi_texts[] = "navigationTexts";
 const char navi_text[] = "navigationText";
 const char show_strings[] = "showStrings";
+const char interaction_layout[] = "interactionLayout";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
+
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -233,6 +243,7 @@ const char language[] = "language";
 const char display_capabilities[] = "displayCapabilities";
 const char hmi_zone_capabilities[] = "hmiZoneCapabilities";
 const char soft_button_capabilities[] = "softButtonCapabilities";
+const char image_supported[] = "imageSupported";
 const char button_capabilities[] = "buttonCapabilities";
 const char capabilities[] = "capabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";

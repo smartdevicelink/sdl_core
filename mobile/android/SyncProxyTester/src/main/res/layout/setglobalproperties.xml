@@ -96,5 +96,66 @@
                 android:text="@string/setglobalproperties_vrHelpItemImageDefault"
                 android:visibility="visible"/>
 
+        <CheckBox
+                android:id="@+id/setglobalproperties_choiceMenuTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/setglobalproperties_menuTitle"/>
+
+        <EditText
+                android:id="@+id/setglobalproperties_menuTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/setglobalproperties_menuTitleDefault"
+                android:visibility="visible"/>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <CheckBox
+                    android:id="@+id/setglobalproperties_choiceMenuIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:checked="true"
+                    android:text="@string/setglobalproperties_menuIcon"/>
+
+            <Spinner
+                    android:id="@+id/setglobalproperties_menuIconType"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+        </LinearLayout>
+
+        <EditText
+                android:id="@+id/setglobalproperties_menuIcon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:text="@string/setglobalproperties_menuIconDefault"/>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <CheckBox
+                    android:id="@+id/setglobalproperties_choiceKbdProperties"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/setglobalproperties_choiceKbdProperties"/>
+
+            <Button
+                    android:id="@+id/setglobalproperties_kbdProperties"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setglobalproperties_kbdProperties"/>
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

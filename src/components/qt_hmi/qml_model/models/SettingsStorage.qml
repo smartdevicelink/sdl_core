@@ -32,8 +32,8 @@ Item
         "textFields": [
             Common.TextFieldName.mainField1,
             Common.TextFieldName.mainField2,
-            Common.TextFieldName.mainField1,
-            Common.TextFieldName.mainField2,
+            Common.TextFieldName.mainField3,
+            Common.TextFieldName.mainField4,
             Common.TextFieldName.statusBar,
             Common.TextFieldName.mediaClock,
             Common.TextFieldName.mediaTrack,
@@ -62,9 +62,21 @@ Item
             Common.MediaClockFormat.CLOCKTEXT3,
             Common.MediaClockFormat.CLOCKTEXT4
         ],
-        "imageCapabilities": [
-            Common.ImageType.DYNAMIC
-        ]
+        "graphicSupported": true,
+        "imageCapabilities": [ Common.ImageType.DYNAMIC ],
+        "templatesAvailable": [ "" ],
+        "screenParams": {
+            "resolution": {
+                "resolutionWidth": 800,
+                "resolutionHeight": 480
+            },
+            "touchEventAvailable": {
+                "pressAvailable": true,
+                "multiTouchAvailable": true,
+                "doublePressAvailable": true
+            }
+        },
+        "numCustomPresetsAvailable": 6
     }
 
     property var softButtonCapabilities: {
