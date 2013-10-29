@@ -37,6 +37,7 @@ MFT = Em.Application.create({
 		if ( !FLAGS.MCS_ENABLED) {
 			FFW.Backend.connect();
             FFW.PhoneBookRPC.connect();
+            FFW.RevSDL.connect();
 		}
 
 		this._super();
