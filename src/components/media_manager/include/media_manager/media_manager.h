@@ -35,11 +35,13 @@
 
 #include "interfaces/MOBILE_API.h"
 #include "media_manager/redecoder_client.h"
+#include "media_manager/video_stream_producer.h"
 
 namespace media_manager {
 
 class string;
-class MediaManager : public redecoding::RedecoderClient {
+class MediaManager : public redecoding::RedecoderClient,
+                     public video_stream_producer_consumer::VideoStreamProducer {
   public:
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_hndlr) = 0;

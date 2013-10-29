@@ -63,13 +63,27 @@ MediaManagerImpl::MediaManagerImpl()
     is_stream_running_(false),
     app_connection_key(0),
     video_server_() {
-
-  startVideoStreaming();
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
+
+
+  if (NULL  != video_server_) {
+    delete video_server_;
+    video_server_ = NULL;
+  }
+
+  if (NULL != redecoder_) {
+    delete redecoder_;
+    redecoder_ = NULL;
+  }
+
+  if (NULL != server_) {
+    delete server_;
+    server_ = NULL;
+  }
+
   protocol_handler_ = NULL;
-  redecoder_ = NULL;
 }
 
 void MediaManagerImpl::SetProtocolHandler(
@@ -242,11 +256,11 @@ void MediaManagerImpl::stopMicrophoneRecording() {
 
 
 void MediaManagerImpl::startVideoStreaming() {
-  video_server_.start();
+  video_server_->start();
 }
 
 void MediaManagerImpl::stopVideoStreaming() {
-  video_server_.stop();
+  video_server_->stop();
 }
 
 void MediaManagerImpl::OnMessageReceived(
@@ -261,7 +275,7 @@ void MediaManagerImpl::OnMessageReceived(
 
   if (message->is_fully_binary()) {
 
-    video_server_.sendMsg(message);
+    video_server_->sendMsg(message);
     if (false == is_stream_running_) {
       is_stream_running_ = true;
     }
@@ -286,6 +300,13 @@ void MediaManagerImpl::onRedecoded(const protocol_handler::RawMessagePtr&
 
 void MediaManagerImpl::setVideoRedecoder(redecoding::VideoRedecoder* redecoder) {
    redecoder_ = redecoder;
+}
+
+void MediaManagerImpl::setConsumer(video_stream_producer_consumer::VideoStreamConsumer* server) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  video_server_ = server;
+
+  startVideoStreaming();
 }
 
 }  // namespace media_manager

@@ -100,6 +100,17 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
+
+  media_manager::MediaManagerImpl::getMediaManager()->setVideoRedecoder(NULL);
+
+  if ("socket" == profile::Profile::instance()->video_server_type()) {
+    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
+       new media_manager::video_stream_producer_consumer::SocketVideoServer());
+  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
+    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
+       new media_manager::video_stream_producer_consumer::PipeVideoServer());
+  }
+
   // TODO(PV): add media manager
 
   connection_handler_->set_transport_manager(transport_manager_);

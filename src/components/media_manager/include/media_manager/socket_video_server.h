@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
 
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
@@ -39,14 +39,15 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "protocol_handler/protocol_handler.h"
+#include "media_manager/video_stream_consumer.h"
 
 namespace media_manager {
 
-namespace video_server {
+namespace video_stream_producer_consumer {
 
 class VideoStreamer;
 
-class VideoServer {
+class SocketVideoServer : public VideoStreamConsumer {
   public:
 
     friend class VideoStreamer;
@@ -54,12 +55,12 @@ class VideoServer {
     /*
      * Default constructor
      */
-    VideoServer();
+    SocketVideoServer();
 
     /*
      * Destructor
      */
-    ~VideoServer();
+    ~SocketVideoServer();
 
     /*
      * Starts server
@@ -94,7 +95,7 @@ class VideoServer {
          *
          * @param server  Server pointer
          */
-        explicit VideoStreamer(VideoServer* const server);
+        explicit VideoStreamer(SocketVideoServer* const server);
 
         /*
          * Destructor
@@ -134,7 +135,7 @@ class VideoServer {
       protected:
 
       private:
-        VideoServer* const              server_;
+        SocketVideoServer* const              server_;
         int                             socket_fd_;
         bool                            is_first_loop_;
         volatile bool                   is_client_connected_;
@@ -153,11 +154,11 @@ class VideoServer {
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
     static log4cxx::LoggerPtr                     logger_;
 
-    DISALLOW_COPY_AND_ASSIGN(VideoServer);
+    DISALLOW_COPY_AND_ASSIGN(SocketVideoServer);
 };
 
-}  //  namespace video_server
+}  //  namespace video_stream_producer_consumer
 
 }  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_VIDEO_SERVER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
