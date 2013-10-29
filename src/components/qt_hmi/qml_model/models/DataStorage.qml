@@ -256,7 +256,7 @@ QtObject {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        console.debug("UI::addCommand(" +
+        console.debug("enter: " +
                       cmdID +
                       ", " +
                       (menuParams ?
@@ -265,8 +265,8 @@ QtObject {
                       (cmdIcon ?
                           "{" + cmdIcon.value + ", " + cmdIcon.imageType + "}" : cmdIcon) +
                       ", " +
-                      appID +
-                      ")")
+                      appID
+        )
         if ((menuParams !== undefined) && (menuParams.parentID !== undefined)) {
             var parentNotFound = true
             for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
@@ -314,11 +314,11 @@ QtObject {
                 throw Common.Result.REJECTED
             }
         }
-        console.debug("UI::addCommand(): exit")
+        console.debug("exit")
     }
 
     function deleteCommand (cmdID, appID) {
-        console.debug("UI::deleteCommand(" + cmdID + ", " + appID + ")")
+        console.debug("enter: " + cmdID + ", " + appID)
         for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
             var option = getApplication(appID).options.get(optionIndex)
             if (option.type === Internal.MenuItemType.MI_NODE) {
@@ -348,11 +348,11 @@ QtObject {
                 }
             }
         }
-        console.debug("UI::deleteCommand(): exit")
+        console.debug("exit")
     }
 
     function addSubMenu (menuID, menuParams, appID) {
-        console.debug("addSubMenu(" + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID + ")")
+        console.debug("enter: " + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID)
         var count = getApplication(appID).options.count
         if (count < Constants.maximumSubmenus) {
             var index
@@ -382,11 +382,11 @@ QtObject {
             console.log("addSubMenu(): too many submenus, rejecting")
             throw Common.Result.REJECTED
         }
-        console.debug("addSubMenu(): exit")
+        console.debug("exit")
     }
 
     function deleteSubMenu (menuID, appID) {
-        console.debug("deleteSubMenu(" + menuID + ", " + appID + ")")
+        console.debug("enter: " + menuID + ", " + appID)
         for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
             var option = getApplication(appID).options.get(optionIndex)
             if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuID)) {
@@ -400,7 +400,7 @@ QtObject {
                 break
             }
         }
-        console.debug("deleteSubMenu(): exit")
+        console.debug("exit")
     }
 
     property NavigationModel navigationModel: NavigationModel { }

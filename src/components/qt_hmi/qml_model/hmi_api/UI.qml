@@ -5,7 +5,7 @@ import "../models/Internal.js" as Internal
 
 Item {
     function filter (strings, fields) {
-        console.debug("UI::filter(" + strings + ", " + fields + ")")
+        console.debug("enter")
 // substrings for each allowed field
         var fieldSubstrings = {}
 // this cycle concatenates allowed lines sorting them by field
@@ -23,7 +23,7 @@ Item {
                 }
             }
         }
-        console.debug("UI::filter(): exit")
+        console.debug("exit")
         return fieldSubstrings
     }
 
@@ -43,7 +43,7 @@ Item {
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
-        console.debug("UI::show(" + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID + ")")
+        console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
 // with this array we grab only the lines we need
         var showFields = [
             Common.TextFieldName.mainField1,
@@ -86,7 +86,7 @@ Item {
         else {
             dataContainer.hmiUITextAlignment = Text.AlignHCenter
         }
-        console.debug("UI::show(): exit")
+        console.debug("exit")
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {

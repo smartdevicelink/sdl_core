@@ -66,7 +66,7 @@ QtObject {
     }
 
     function restore (updateMode, runningMode, magic, total) {
-        console.debug("MediaClockModel::restore(" + updateMode + ", " + runningMode + ", " + magic + ", " + total + ")")
+        console.debug("enter: " + updateMode + ", " + runningMode + ", " + magic + ", " + total)
         timer.stop()
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
@@ -101,6 +101,6 @@ QtObject {
                 hmsTime = magic
                 break
         }
-        console.debug("MediaClockModel::restore(): exit")
+        console.debug("exit")
     }
 }

@@ -78,19 +78,19 @@ PopUp {
     }
 
     function activate () {
-        console.debug("InteractionPopup::activate()")
+        console.debug("enter")
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         timer.interval = dataContainer.interactionModel.timeout
         timer.start()
         show()
-        console.debug("InteractionPopup::activate(): exit")
+        console.debug("exit")
     }
 
     function deactivate () {
-        console.debug("InteractionPopup::deactivate()")
+        console.debug("enter")
         dataContainer.systemContext = dataContainer.systemSavedContext
         hide()
-        console.debug("InteractionPopup::deactivate(): exit")
+        console.debug("exit")
     }
 }

@@ -68,7 +68,7 @@ GeneralView {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            console.debug("sdlPlayerOptionsListView::delegate::Icon::MouseArea::onClick()")
+                            console.debug("enter")
                             if (model.icon.value) {
                                 switch (type) {
                                     case Internal.MenuItemType.MI_NODE:
@@ -80,7 +80,7 @@ GeneralView {
                                         break;
                                 }
                             }
-                            console.debug("sdlPlayerOptionsListView::delegate::Icon::MouseArea::onClick(): exit")
+                            console.debug("exit")
                         }
                     }
                 }
@@ -95,7 +95,7 @@ GeneralView {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick()")
+                            console.debug("enter")
                             switch (type) {
                                 case Internal.MenuItemType.MI_NODE:
                                     sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
@@ -105,7 +105,7 @@ GeneralView {
                                     dataContainer.currentApplication.currentSubMenu = subMenu
                                     break;
                             }
-                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick(): exit")
+                            console.debug("exit")
                         }
                     }
                 }
