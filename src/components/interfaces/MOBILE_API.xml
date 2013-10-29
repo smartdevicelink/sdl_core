@@ -362,6 +362,7 @@
     <description>Indicates the source from where the command was triggered.</description>
     <element name="MENU" internal_name="TS_MENU" />
     <element name="VR" internal_name="TS_VR" />
+    <element name="KEYBOARD" internal_name="TS_KEYBOARD" />
   </enum>
 
   <enum name="HmiZoneCapabilities">
