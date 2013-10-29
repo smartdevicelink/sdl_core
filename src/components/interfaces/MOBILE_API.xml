@@ -759,6 +759,12 @@
     <element name="VRHELPITEMS">
     	<description>The property array of vrHelp of setGlobalProperties</description>
     </element>
+    <element name="MENUNAME" scope="partner">
+    	<description>The property in-app menu name of setGlobalProperties</description>
+    </element>     
+    <element name="MENUICON" scope="partner">
+    	<description>The property in-app menu icon of setGlobalProperties</description>
+    </element>
     <element name="KEYBOARDPROPERTIES" scope="partner">
       <description>The on-screen keyboard configuration of setGlobalProperties</description>
     </element>
@@ -1703,6 +1709,19 @@
     <element name="ENTRY_ABORTED" />    
   </enum>
 
+  <enum name="KeypressMode" scope="partner">
+    <description>Enumeration listing possible keyboard events.</description>
+    <element name="SINGLE_KEYPRESS">
+      <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
+    </element>
+    <element name="QUEUE_KEYPRESSES">
+      <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>    
+    </element>
+    <element name="RESEND_CURRENT_ENTRY">
+      <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
+    </element>
+  </enum>
+  
   <struct name="KeyboardProperties">
     <description>Configuration of on-screen keyboard (if available).</description>
 
@@ -1712,6 +1731,13 @@
 
     <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
       <description>Desired keyboard layout.</description>
+    </param> 
+
+    <param name="keypressMode" type="KeypressMode" mandatory="false" >
+      <description>
+      	Desired keypress mode.
+      	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+      </description>
     </param> 
     
     <param name="sendDynamicEntry" type="Boolean" mandatory="false">
