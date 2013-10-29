@@ -40,32 +40,36 @@ import "../controls"
 
 PopUp {
     property var async
-    property int position
+    property int position: 0
 
     function showSlider(){
-        console.debug("SliderPopup.showSlider entered")
+        console.debug("enter")
 
         dataContainer.uiSlider.running = true
         dataContainer.systemSavedContext = dataContainer.systemContext
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
-
+        if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) {
+            footerText.text = "";
+        } else {
+            footerText.text = dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
+        }
         show()
         timer.start()
-        console.debug("SliderPopup.showSlider exited")
+        console.debug("exit")
     }
 
     function complete(reason){
-        console.debug("SliderPopup.complete entered isAbout = ", isAbort)
+        console.debug("enter reason = ", reason)
         timer.stop()
         dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         dataContainer.uiSlider.running = false
         hide()
         switch(reason) {
-        case Common.Result.ABORT:
+        case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendError(async, Common.Result.ABORT)//todo(ykzakov): send abort with slider position
+            DBus.sendReply(async, {__retCode: Common.Result.ABORTED, sliderPosition: position})
             break;
         case Common.Result.SUCCESS:
             console.debug("send position", position)
@@ -75,7 +79,8 @@ PopUp {
         default:
             break
         }
-        console.debug("SliderPopup.complete exited")
+        position = 0;
+        console.debug("exit")
     }
 
 
@@ -87,7 +92,7 @@ PopUp {
             id: timer
             interval: dataContainer.uiSlider.timeout
             onTriggered: {
-                complete(false)
+                complete(Common.Result.SUCCESS)
             }
         }
 
@@ -167,10 +172,7 @@ PopUp {
         Text {
             id:footerText
             anchors.horizontalCenter: parent.horizontalCenter
-            text: {
-                if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) return "";
-                return dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
-            }
+            text: ""
             color: Constants.sliderTextColor
             font.pixelSize: Constants.fontSize * 2
         }
@@ -180,7 +182,7 @@ PopUp {
             text: "Back"
             fontSize: Constants.fontSize
             onClicked: {
-                complete(true)
+                complete(Common.Result.ABORTED)
             }
         }
     }
