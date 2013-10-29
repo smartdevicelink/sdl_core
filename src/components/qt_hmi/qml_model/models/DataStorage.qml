@@ -273,14 +273,16 @@ QtObject {
                 var option = getApplication(appID).options.get(optionIndex)
                 if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuParams.parentID)) {
                     parentNotFound = false
-                    var count = option.subMenu.count
-                    if (count < Constants.maximumCommandsPerSubMenu) {
-                        var index = count
-                        if (menuParams.position !== undefined) {
-                            if (menuParams.position < count) {
-                                index = menuParams.position
-                            }
+                    var count = option.subMenu.count - 1 // decremented because of "back" item
+                    if (count < Constants.maximumCommandsPerSubmenu) {
+                        var index
+                        if ((menuParams.position !== undefined) && (menuParams.position < count)) {
+                            index = menuParams.position
                         }
+                        else {
+                            index = count
+                        }
+                        ++index // incremented because of "back" item with index 0
 //                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
                         option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
                     }
@@ -297,12 +299,12 @@ QtObject {
         }
         else {
             count = getApplication(appID).options.count
-            if (count < Constants.maximumCommandsPerSubMenu) {
-                index = count
-                if (menuParams.position !== undefined) {
-                    if (menuParams.position < count) {
-                        index = menuParams.position
-                    }
+            if (count < Constants.maximumCommandsPerSubmenu) {
+                if ((menuParams.position !== undefined) && (menuParams.position < count)) {
+                    index = menuParams.position
+                }
+                else {
+                    index = count
                 }
                 var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
                 getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
@@ -353,11 +355,12 @@ QtObject {
         console.debug("addSubMenu(" + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID + ")")
         var count = getApplication(appID).options.count
         if (count < Constants.maximumSubmenus) {
-            var index = count
-            if (menuParams.position !== undefined) {
-                if (menuParams.position < count) {
-                    index = menuParams.position
-                }
+            var index
+            if ((menuParams.position !== undefined) && (menuParams.position < count)) {
+                index = menuParams.position
+            }
+            else {
+                index = count
             }
             getApplication(appID).options.insert(index, {
                 "id": menuID,

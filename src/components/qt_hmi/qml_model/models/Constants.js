@@ -128,7 +128,7 @@ var ttsFontSize = 12
 var maximumSubmenus = 1000
 
 // Maximal number of commands in submenu or root menu
-var maximumCommandsPerSubMenu = 1000
+var maximumCommandsPerSubmenu = 1000
 
 // padding for popup view
 var popUpPadding = 20
