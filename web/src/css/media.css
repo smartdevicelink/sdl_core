@@ -2150,3 +2150,12 @@
 .cancelBarAnimation {
     -webkit-transition: none !important;
 }
+#media_fm_sendRequestButton {
+    background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
+}
+#media_fm_sendRequestButton {
+    background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
+}
+#media_fm_sendRequestButton.pressed {
+    background: url(../images/media/bcs-item_bg_act.png) repeat !important;
+}

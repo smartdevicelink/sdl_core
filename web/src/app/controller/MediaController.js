@@ -13,6 +13,9 @@ MFT.MediaController = Em.Object.create({
 	
 	/** Initial substate */
 	activeState: 'media.radio.am',
+
+    /** Reverse SDL functionality **/
+    sdlAccessStatus: 0,
 	
 	/** Visibility of Home Media Status */
 	isHomeMediaStatusHidden: false,
