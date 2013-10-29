@@ -98,6 +98,13 @@ class PerformInteractionRequest : public CommandRequestImpl  {
 
  private:
   /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+    virtual void onTimeOut() const;
+
+  /*
    * @brief Function will be called when VR_OnCommand event
    * comes
    *
