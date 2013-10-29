@@ -1,5 +1,4 @@
 include_directories (
-  ${LIBXML2_INCLUDE_DIR}
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${GLIB_glibconfig_2_INCLUDE_DIR}
