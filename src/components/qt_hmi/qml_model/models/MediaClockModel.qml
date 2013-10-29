@@ -75,7 +75,7 @@ QtObject {
         this.total = total
         var toStart
         switch (runningMode) {
-            case Internal.MediaClockRunMode.MCR_RUNNING:
+            case Internal.MediaClockRunningMode.MCR_RUNNING:
                 switch (updateMode) {
                     case Internal.MediaClockUpdateMode.MCU_COUNTUP:
                         hmsTime = Math.round(secondsSinceEpoch - magic)
@@ -97,7 +97,7 @@ QtObject {
                     timer.start()
                 }
                 break
-            case Internal.MediaClockRunMode.MCR_STOPPED:
+            case Internal.MediaClockRunningMode.MCR_STOPPED:
                 hmsTime = magic
                 break
         }

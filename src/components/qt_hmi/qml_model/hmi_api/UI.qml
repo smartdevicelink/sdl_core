@@ -117,81 +117,66 @@ Item {
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
         var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
-        var mediaClockUpdateMode
+        var newUpdateMode
+        var newRunningMode
+        var newMagic
+        var newTotal
         switch (updateMode) {
             case Common.ClockUpdateMode.COUNTUP:
-                dataContainer.setApplicationProperties(appID, {
-                    "mediaClock": {
-                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
-                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                        "magic": secondsSinceEpoch - hmsTime,
-                        "total": 0
-                    }
-                })
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newMagic = secondsSinceEpoch - hmsTime
+                newTotal = 0
                 break
             case Common.ClockUpdateMode.COUNTDOWN:
-                dataContainer.setApplicationProperties(appID, {
-                    "mediaClock": {
-                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTDOWN,
-                        "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                        "magic": secondsSinceEpoch + hmsTime,
-                        "total": hmsTime
-                    }
-                })
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTDOWN
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newMagic = secondsSinceEpoch + hmsTime
+                newTotal = hmsTime
                 break
             case Common.ClockUpdateMode.PAUSE:
-                var newMediaClockTime
                 var mediaClockMagic = dataContainer.getApplication(appID).mediaClock.magic
-                mediaClockUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
-                switch (mediaClockUpdateMode) {
+                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                switch (newUpdateMode) {
                     case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        newMediaClockTime = secondsSinceEpoch - mediaClockMagic
+                        newMagic = secondsSinceEpoch - mediaClockMagic
                         break
                     case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        newMediaClockTime = mediaClockMagic - secondsSinceEpoch
+                        newMagic = mediaClockMagic - secondsSinceEpoch
                         break
                 }
-                dataContainer.setApplicationProperties(appID, {
-                    "mediaClock": {
-                        "updateMode": mediaClockUpdateMode,
-                        "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
-                        "magic": newMediaClockTime,
-                        "total": dataContainer.getApplication(appID).mediaClock.total
-                    }
-                })
+                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                newTotal = dataContainer.getApplication(appID).mediaClock.total
                 break
             case Common.ClockUpdateMode.RESUME:
-                mediaClockUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
                 var mediaClockTime = dataContainer.getApplication(appID).mediaClock.magic
-                var newMediaClockTimeMagic
-                switch (mediaClockUpdateMode) {
+                switch (newUpdateMode) {
                     case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        newMediaClockTimeMagic = secondsSinceEpoch - mediaClockTime
+                        newMagic = secondsSinceEpoch - mediaClockTime
                         break
                     case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        newMediaClockTimeMagic = secondsSinceEpoch + mediaClockTime
+                        newMagic = secondsSinceEpoch + mediaClockTime
                         break
                 }
-                dataContainer.setApplicationProperties(appID, {
-                    "mediaClock": {
-                       "updateMode": mediaClockUpdateMode,
-                       "runningMode": Internal.MediaClockRunMode.MCR_RUNNING,
-                       "magic": newMediaClockTimeMagic,
-                       "total": dataContainer.getApplication(appID).mediaClock.total
-                    }
-                })
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newTotal = dataContainer.getApplication(appID).mediaClock.total
                 break
             case Common.ClockUpdateMode.CLEAR:
-                dataContainer.setApplicationProperties(appID, {
-                    "mediaClock": {
-                        "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
-                        "runningMode": Internal.MediaClockRunMode.MCR_STOPPED,
-                        "magic": 0,
-                        "total": 0
-                    }
-                })
-                break;
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                newMagic = 0
+                newTotal = 0
+                break
         }
+        dataContainer.setApplicationProperties(appID, {
+            "mediaClock": {
+                "updateMode": newUpdateMode,
+                "runningMode": newRunningMode,
+                "magic": newMagic,
+                "total": newTotal
+            }
+        })
         console.debug("exit")
     }
 

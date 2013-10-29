@@ -41,7 +41,7 @@ var MediaClockUpdateMode = {
     MCU_COUNTDOWN: 1,
 }
 
-var MediaClockRunMode = {
+var MediaClockRunningMode = {
     MCR_RUNNING: 0,
     MCR_STOPPED: 1
 }
