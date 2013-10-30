@@ -6,3 +6,4 @@
 --i"/usr/lib/gcc/i686-linux-gnu/4.6/include-fixed"
 --i"/usr/include/i386-linux-gnu"
 --i"/usr/include"
+--i"/usr/include/gstreamer-1.0"
