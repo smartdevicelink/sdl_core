@@ -294,7 +294,7 @@ Item {
 
         Text {
             width: 200
-            text: "HELP_PROPMT:"
+            text: "HELP_PROMPT:"
             color: "white"
         }
         Item {
@@ -304,7 +304,7 @@ Item {
 
         Text {
             width: 200
-            text: "TIMEOUT_PROPMT:"
+            text: "TIMEOUT_PROMPT:"
             color: "white"
         }
 
