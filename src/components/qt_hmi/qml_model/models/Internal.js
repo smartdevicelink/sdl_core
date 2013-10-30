@@ -51,6 +51,7 @@ function activePageChoose(flickElement, pages) {
             return Math.floor(flickElement.contentX / flickElement.width)
         }
     }
+}
 
 var MediaClockUpdateMode = {
     MCU_COUNTUP: 0,
