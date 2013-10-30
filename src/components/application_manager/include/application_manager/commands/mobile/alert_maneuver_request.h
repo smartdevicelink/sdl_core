@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -64,6 +65,8 @@ class AlertManeuverRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  mobile_apis::Result::eType  navi_result_;
+
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };
 

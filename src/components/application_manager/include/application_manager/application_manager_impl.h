@@ -76,6 +76,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace threads {
 class Thread;
 }
+class CommandNotificationImpl;
 
 namespace application_manager {
 
@@ -83,6 +84,11 @@ namespace application_manager {
  *@brief Typedef for shared pointer
  */
 typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
+
+/**
+ *@brief Typedef for shared pointer HMI notification
+ */
+typedef utils::SharedPtr<CommandNotificationImpl> NotificationPtr;
 
 /**
  *@brief Map representing hmi request
@@ -439,13 +445,34 @@ class ApplicationManagerImpl : public ApplicationManager,
         unsigned int connection_key);
 
     /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void addNotification(const NotificationPtr& ptr);
+
+    /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void removeNotification(const NotificationPtr& ptr);
+
+    /**
      * @brief Map of connection keys and associated applications
      */
     std::map<int, Application*> applications_;
+
     /**
      * @brief List of applications
      */
     std::set<Application*> application_list_;
+
+    /**
+     * @brief Set of HMI notifications with timeout.
+     */
+    std::set<NotificationPtr> notification_list_;
+
     MessageChain message_chaining_;
     bool audio_pass_thru_flag_;
     bool is_distracting_driver_;

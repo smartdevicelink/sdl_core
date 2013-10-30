@@ -30,43 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
-
-#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief OnUIResetTimeoutNotification command class
- **/
-class OnUIResetTimeoutNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnUIResetTimeoutNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnUIResetTimeoutNotification(const MessageSharedPtr& message);
+namespace hmi {
 
-  /**
-   * @brief OnUIResetTimeoutNotification class destructor
-   **/
-  virtual ~OnUIResetTimeoutNotification();
+OnUIResetTimeoutNotification::OnUIResetTimeoutNotification(
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
+}
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
-};
+void OnUIResetTimeoutNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnUIResetTimeoutNotification::Run");
+
+  event_engine::Event event(hmi_apis::FunctionID::);
+  event.set_smart_object(*message_);
+  event.raise();
+
+  //prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+  mobile_apis::FunctionID::OnTouchEventID;
+  SendNotificationToMobile(message_);
+}
+
+}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_

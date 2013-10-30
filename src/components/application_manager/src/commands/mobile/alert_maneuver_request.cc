@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ : CommandRequestImpl(message),
+   navi_result_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 AlertManeuverRequest::~AlertManeuverRequest() {
@@ -71,9 +72,15 @@ void AlertManeuverRequest::Run() {
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
-    SendResponse(false, processing_result);
-    return;
+    if (mobile_apis::Result::INVALID_DATA == processing_result) {
+      LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+      SendResponse(false, processing_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+      navi_result_ = processing_result;
+    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

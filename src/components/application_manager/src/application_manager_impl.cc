@@ -167,6 +167,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   message_chaining_.clear();
+  notification_list_.clear();
 
   if (media_manager_) {
     delete media_manager_;
@@ -1488,6 +1489,20 @@ bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
                "HMICapabilities::IsHMICapabilitiesInitialized() " << result);
 
   return result;
+}
+
+void ApplicationManagerImpl::addNotification(const NotificationPtr& ptr) {
+  notification_list_.insert(ptr);
+}
+
+void ApplicationManagerImpl::removeNotification(const NotificationPtr& ptr) {
+  std::set<NotificationPtr>::iterator it = notification_list_.begin();
+  for (; applications_.end() != it; +it) {
+    if (*it == ptr) {
+      notification_list_.erase(it);
+      break;
+    }
+  }
 }
 
 }  // namespace application_manager
