@@ -60,7 +60,6 @@ GeneralView {
             delegate: Row {
                 spacing: Constants.iconItemListSpacing
                 Icon {
-                    id: image
                     source: model.icon
                     width: Constants.iconItemListSize
                     height: Constants.iconItemListSize

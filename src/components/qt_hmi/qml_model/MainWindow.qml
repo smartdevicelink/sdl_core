@@ -150,7 +150,7 @@ Rectangle {
             }
         }
 
-        WarningInfo { }
+        WarningInfo { id: warningInfo }
 
         VRPopUp {
             id: vrPopUp
@@ -171,6 +171,11 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             visible: false
+        }
+
+        VehicleInfoPopUp {
+            id: viPopUp
+            anchors.centerIn: parent
         }
 
         InteractionPopup {
@@ -205,6 +210,12 @@ Rectangle {
             id: alertWindow
             objectName: "AlertWindow"
             anchors.fill: parent
+            visible: false
+        }
+
+        VRHelpPopup {
+            id: vrHelpPopup
+            anchors.centerIn: parent
             visible: false
         }
     }
@@ -288,6 +299,7 @@ Rectangle {
         onPlayTone: {
             beep.play()
         }
+
     }
 
     Component.onCompleted: {

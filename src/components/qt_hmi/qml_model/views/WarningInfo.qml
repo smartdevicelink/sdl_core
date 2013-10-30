@@ -64,6 +64,7 @@ Rectangle {
         height: 1/2 * parent.height
         width: parent.width
         verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
 
         text: "This application is intended to be used as a demonstrative aid only, "
@@ -74,6 +75,10 @@ Rectangle {
         color: "white"
         font.pixelSize: 25
         font.bold: true
+    }
+
+    function showOkButton() {
+        okButtonAnimation.start()
     }
 
     Item {
@@ -88,15 +93,14 @@ Rectangle {
         {
             id: okButtonAnimation
             // Decrease this value while debugging
-            PauseAnimation { duration: 6*Constants.animationDuration }
+            PauseAnimation { duration: Constants.warningScreenDuration }
             NumberAnimation {
                 target: ok
-                duration:  Constants.warningDuration
+                duration:  Constants.animationDuration
                 property: "opacity"
                 from: 0; to: 1;
             }
         }
-        Component.onCompleted: { okButtonAnimation.start() }
 
         Image {
             id: okButton

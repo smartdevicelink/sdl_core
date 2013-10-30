@@ -53,6 +53,7 @@ LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
+LIBXML2_DEV="libxml2-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
 APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
@@ -145,6 +146,10 @@ echo $OK
 
 echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
+echo $OK
+
+echo "Installing libxml2"
+apt-install ${LIBXML2_DEV}
 echo $OK
 
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup

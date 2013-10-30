@@ -40,7 +40,7 @@ import "../controls"
 
 PopUp {
     property var async
-    property int position: 0
+    property int position: 1
 
     function showSlider(){
         console.debug("enter")
@@ -50,10 +50,11 @@ PopUp {
         dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
         if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) {
-            footerText.text = "";
+            footerText.text = ""
         } else {
             footerText.text = dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
         }
+        position = dataContainer.uiSlider.position
         show()
         timer.start()
         console.debug("exit")
@@ -69,8 +70,8 @@ PopUp {
         switch(reason) {
         case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendReply(async, {__retCode:Common.Result.ABORTED, sliderPosition:position})
-            break;
+            DBus.sendReply(async, {__retCode: Common.Result.ABORTED, sliderPosition: position})
+            break
         case Common.Result.SUCCESS:
             console.debug("send position", position)
             dataContainer.uiSlider.position = position
@@ -79,7 +80,7 @@ PopUp {
         default:
             break
         }
-        position = 0;
+        position = 1
         console.debug("exit")
     }
 
@@ -134,7 +135,7 @@ PopUp {
 
                 onVisibleChanged: {
                         var tickWidth = borderRectangle.width / dataContainer.uiSlider.numTicks
-                        rectangle.width = dataContainer.uiSlider.position * tickWidth;
+                        rectangle.width = dataContainer.uiSlider.position * tickWidth
                 }
             }
 
@@ -159,7 +160,7 @@ PopUp {
                     if(mouseX > 0 && mouseX < borderRectangle.width) {
                         var tickWidth = borderRectangle.width / dataContainer.uiSlider.numTicks
                         position = Math.ceil(mouseX / tickWidth)
-                        rectangle.width = position * tickWidth;
+                        rectangle.width = position * tickWidth
                     }
 
                     if(dataContainer.uiSlider.footer.length > 1){
