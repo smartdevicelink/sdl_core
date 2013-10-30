@@ -226,10 +226,14 @@ Item {
         dataContainer.uiSlider.position = position
         dataContainer.uiSlider.timeout = timeout
 
-        sliderPopup.showSlider()
-        sliderPopup.async = new Async.AsyncCall();
-        console.debug("exit")
-        return sliderPopup.async;
+        if (timeout !== 0) {
+            sliderPopup.showSlider()
+            sliderPopup.async = new Async.AsyncCall();
+            console.debug("exit")
+            return sliderPopup.async;
+        } else {
+            return { sliderPosition: position }
+        }
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
