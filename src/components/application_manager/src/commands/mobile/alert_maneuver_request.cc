@@ -43,7 +43,7 @@ namespace commands {
 
 AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
  : CommandRequestImpl(message),
-   navi_result_(mobile_apis::Result::INVALID_ENUM) {
+   result_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 AlertManeuverRequest::~AlertManeuverRequest() {
@@ -79,7 +79,7 @@ void AlertManeuverRequest::Run() {
     }
     if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
       LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      navi_result_ = processing_result;
+      result_ = processing_result;
     }
   }
 
@@ -91,8 +91,8 @@ void AlertManeuverRequest::Run() {
         (*message_)[strings::msg_params][strings::soft_buttons];
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, msg_params,
-                   true);
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params,
+                 true);
 
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -108,6 +108,33 @@ void AlertManeuverRequest::Run() {
 
       msg_params[strings::app_id] = app->app_id();
       CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
+    }
+  }
+}
+
+void AlertManeuverRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ShowRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_AlertManeuver: {
+      LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
+
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      if (mobile_apis::Result::INVALID_ENUM != result_) {
+        result_code = result_;
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
     }
   }
 }

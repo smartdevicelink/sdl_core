@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -46,11 +46,9 @@ NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
 void NaviAlertManeuverResponse::Run() {
   LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
 
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::AlertManeuverID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

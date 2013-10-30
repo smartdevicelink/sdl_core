@@ -64,8 +64,15 @@ class AlertManeuverRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
  private:
-  mobile_apis::Result::eType  navi_result_;
+  mobile_apis::Result::eType  result_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };
