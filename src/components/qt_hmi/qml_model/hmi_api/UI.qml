@@ -63,7 +63,8 @@ Item {
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock],
-                    "picture": fieldSubstrings[Common.TextFieldName.picture]
+                    "picture": fieldSubstrings[Common.TextFieldName.picture],
+                    "softButtons": softButtons
                   }
             }
         )

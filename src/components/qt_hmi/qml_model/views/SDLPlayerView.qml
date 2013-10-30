@@ -45,5 +45,48 @@ GeneralView {
         playerName: "SDL music"
         playerType: "SDL"
         anchors.fill: parent
+
+        buttons: [
+            LongOvalButton {
+                text: dataContainer.currentApplication.appName
+                pixelSize: Constants.fontSize
+                dest: "./views/MusicSourceView.qml"
+            },
+
+            LongOvalButton {
+                id: longOvalButton
+                text: "SDL Menu"
+                pixelSize: Constants.fontSize
+                dest: "./views/ApplicationListView.qml"
+            },
+
+            LongOvalButton {
+                text: "Options"
+                pixelSize: Constants.fontSize
+                dest: "./views/SDLPlayerOptionsListView.qml"
+            },
+
+            LongOvalButton {
+                text: "Browse"
+                pixelSize: Constants.fontSize
+            },
+
+            ListView {
+                width: model.count * longOvalButton.width + (model.count - 1) * flickRow.spacing
+                height: longOvalButton.height
+                model: dataContainer.currentApplication.softButtons
+                orientation: ListView.Horizontal
+                interactive: false
+                spacing: 20
+
+                delegate: LongOvalButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: model.text
+                    onClicked: {
+                        contentLoader.go("./views/SDLPlayerView.qml", model.appId)
+                    }
+                }
+            }
+        ]
     }
 }

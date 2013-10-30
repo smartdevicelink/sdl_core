@@ -48,8 +48,8 @@ Item {
         onAppUnregistered: {
             if (dataContainer.applicationContext &&
                     (dataContainer.currentApplication.appId === appId)) {
-                contentLoader.reset();
                 contentLoader.go("views/ApplicationListView.qml");
+                contentLoader.reset();
             }
         }
     }

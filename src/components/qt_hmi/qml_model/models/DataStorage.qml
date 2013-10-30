@@ -101,6 +101,7 @@ QtObject {
                 currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
+                currentApplication.softButtons = application.softButtons
                 // This place is for adding new properties
             }
         }
@@ -128,7 +129,8 @@ QtObject {
             turnList: [],
             turnListSoftButtons: [],
             mediaClock: app.mediaClock,
-            languageTTSVR: Common.Language.EN_US
+            languageTTSVR: Common.Language.EN_US,
+            softButtons: []
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");

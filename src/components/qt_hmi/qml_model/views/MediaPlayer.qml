@@ -52,6 +52,8 @@ Item {
     // Holds players state(song name, play/pause state, track number etc). For all players except SDL.
     property PlayerState playerState;
 
+    property alias buttons: flickRow.content
+
     Item {
         // top 3/4 screen
         id: upperContent
@@ -74,53 +76,6 @@ Item {
                                                                 : (width - longOvalButton.width * 2)
                 snapTo: longOvalButton.width + spacing
                 elementWidth: longOvalButton.width
-
-                LongOvalButton {
-                    text: playerName
-                    pixelSize: Constants.fontSize
-                    dest: "./views/MusicSourceView.qml"
-                }
-
-                LongOvalButton {
-                    id: longOvalButton
-                    text: "SDL Menu"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/ApplicationListView.qml"
-
-                    visible: mediaPlayerView.playerType === "SDL"
-                    enabled: mediaPlayerView.playerType === "SDL"
-                }
-
-                LongOvalButton {
-                    text: "Options"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/SDLPlayerOptionsListView.qml"
-
-                    visible: mediaPlayerView.playerType === "SDL"
-                    enabled: mediaPlayerView.playerType === "SDL"
-                }
-
-                LongOvalButton {
-                    text: "Browse"
-                    pixelSize: Constants.fontSize
-                }
-
-                ListView {
-                    width: model.count * longOvalButton.width + (model.count - 1)* flickRow.spacing
-                    height: longOvalButton.height
-                    model: dataContainer.applicationList
-                    orientation: ListView.Horizontal
-                    interactive: false
-                    spacing: flickRow.spacing
-
-                    delegate: LongOvalButton {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: model.appName
-                        onClicked: {
-                            contentLoader.go("./views/SDLPlayerView.qml", model.appId)
-                        }
-                    }
-                }
             }
         }
 
