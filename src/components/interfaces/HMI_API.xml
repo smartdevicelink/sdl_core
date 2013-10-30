@@ -2246,9 +2246,21 @@
   </function>
   <function name="ClosePopUp" messagetype="request">
     <description>Initiated by SDL to close currently active pop-up on HMI.</description>
+    <param name="methodName" type="String" mandatory="true">
+      <description>Method to be closed</description>
+    </param>
   </function>
   <function name="ClosePopUp" messagetype="response">
     <description>Provides the result of operation.</description>
+  </function>
+  <function name="OnResetTimeout" messagetype="notification">
+    <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Id of application that invoked notifcation.</description>
+    </param>
+    <param name="methodName" type="String" mandatory="true">
+      <description>Currently used method name on which was triggered action</description>
+    </param>
   </function>
 </interface>
 
