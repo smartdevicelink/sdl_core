@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.ford.avarsdl.util.Const;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -155,12 +156,33 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onProxyClosed(String info, Exception e) {
-        Log.i(TAG, "Info: " + info, e);
+        Log.i(TAG, "Proxy Closed. Info: " + info, e);
+
+        final SyncExceptionCause cause =
+                ((SyncException) e).getSyncExceptionCause();
+        if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
+                (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
+                (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
+            resetProxy();
+        }
+    }
+
+    public void resetProxy() {
+        try {
+            mSyncProxy.resetProxy();
+        } catch (SyncException e) {
+            e.printStackTrace();
+            //something goes wrong, & the proxy returns as null, stop the service.
+            //do not want a running service with a null proxy
+            if (mSyncProxy == null){
+                stopSelf();
+            }
+        }
     }
 
     @Override
     public void onError(String info, Exception e) {
-        Log.i(TAG, "Error: " + info, e);
+        Log.i(TAG, "Proxy Error: " + info, e);
     }
 
     @Override
