@@ -78,7 +78,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     private static final String TAG = SDLService.class.getSimpleName();
     private static final String APPID = "42";
     private static final String APPNAME = "MFTGuide";
-    private SyncProxyALM mSyncProxy;
+    private static SyncProxyALM mSyncProxy;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -102,6 +102,10 @@ public class SDLService extends Service implements IProxyListenerALM {
         Log.d(TAG, "onBind unsupported");
         // binding is not supported
         return null;
+    }
+
+    public static SyncProxyALM getProxyInstance() {
+        return mSyncProxy;
     }
 
     private void startProxy() {

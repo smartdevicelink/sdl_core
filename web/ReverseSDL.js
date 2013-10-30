@@ -3,13 +3,13 @@
  *
  *
  * @category	RPC component
- * @filesource	common/Interfaces/ReverseSDL.json
+ * @filesource	web/ReverseSDL.json
  * @version	1.0
  *
  * @author	Sergei Polishchuk
  *
  */
-ReverseSDL = {
+RevSDL = {
     methods: {
         /**
          * Sends a request for access to the management of HMI, through SDL interface

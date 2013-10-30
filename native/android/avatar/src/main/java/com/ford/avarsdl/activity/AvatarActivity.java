@@ -54,6 +54,7 @@ import com.ford.avarsdl.exception.ExtensionFileException;
 import com.ford.avarsdl.exception.MediaPlayerException;
 import com.ford.avarsdl.jsoncontroller.JSONBackendController;
 import com.ford.avarsdl.jsoncontroller.JSONRateController;
+import com.ford.avarsdl.jsoncontroller.JSONRevSDLController;
 import com.ford.avarsdl.jsoncontroller.JSONVideoController;
 import com.ford.avarsdl.jsonserver.JSONServer;
 import com.ford.avarsdl.media.AvatarOnPreparedListener;
@@ -65,6 +66,9 @@ import com.ford.avarsdl.util.ExtStorageUtils;
 import com.ford.avarsdl.util.MessageConst;
 import com.ford.avarsdl.util.Utils;
 import com.ford.avarsdl.util.WebViewUtils;
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.rpc.GiveControl;
 
 /**
  * Title: AvatarActivity.java<br>
@@ -73,7 +77,9 @@ import com.ford.avarsdl.util.WebViewUtils;
  * 
  * @author vsaenko/Eugene Sagan
  */
-public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
+public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
+        JSONRevSDLController.Delegate {
+    private int correlationID = 1;
 
 	// for monkey testing
 	// adb shell monkey -p com.ford.avarsdl -v 100
@@ -353,6 +359,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 	private JSONBackendController mBEController;
 	private JSONVideoController mVideoController;
 	private JSONRateController mRateController;
+	private JSONRevSDLController mRevSDLController;
 
 	// for video time visualization
 	private Timer mVideoTimer;// timer to send notifications about current video
@@ -809,6 +816,20 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 			}
 		}
 
+        // FIXME oh no, don't make me do this!
+		logMsg("create RevSDL controller");
+		mRevSDLController = new JSONRevSDLController();
+		mRevSDLController.register(30);
+		// wait for a while
+		while (!mRevSDLController.isRegistered()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+        mRevSDLController.setDelegate(this);
+
 	}
 
 	private void prepareMainView() {
@@ -1118,4 +1139,23 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback {
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 	}
 
+    private int nextCorrelationID() {
+        return ++correlationID;
+    }
+
+    @Override
+    public void onSDLAccessRequested(JSONRevSDLController controller) {
+        SyncProxyALM proxy = SDLService.getProxyInstance();
+        if (proxy != null) {
+            GiveControl msg = new GiveControl();
+            msg.setTimeout(10000);
+            msg.setCorrelationID(nextCorrelationID());
+
+            try {
+                proxy.sendRPCRequest(msg);
+            } catch (SyncException e) {
+                Log.e(TAG, "Can't send message", e);
+            }
+        }
+    }
 }
