@@ -82,6 +82,11 @@ FFW.RPCObserver = Em.Object
             if (request && request.method) {
                 var parsedMethod = request.method.split(/[.]/), validateFunc, result;
 
+                if (request.params && request.params.appID >= 0 && !SDL.SDLController.getApplicationModel(request.params.appID)) {
+                    Em.Logger.error('No application registered with current appID!');
+                    return false;
+                }
+
                 if (SDL.RPCController[parsedMethod[0]][parsedMethod[1]]) {
                     validateFunc = SDL.RPCController[parsedMethod[0]][parsedMethod[1]];
                     result = validateFunc(request.params);
