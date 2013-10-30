@@ -1,6 +1,6 @@
 /**
- * @file policies_draft_test.h
- * @brief Policy table draft test header file.
+ * @file policy_draft_test.cc
+ * @brief Policy table draft test source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,9 +32,6 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef TEST_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICIES_DRAFT_TEST_H_
-#define TEST_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICIES_DRAFT_TEST_H_
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -56,5 +53,3 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
-
-#endif  // TEST_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICIES_DRAFT_TEST_H_

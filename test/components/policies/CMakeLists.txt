@@ -7,7 +7,6 @@ include_directories (
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/thirdPartyLibs/jsoncpp/include/
   ../../../test/components/
-  ../../../test/components/policies/include/
   ${CMAKE_BINARY_DIR}
 )
 
@@ -21,12 +20,12 @@ set (LIBRARIES
 )
 
 set (SOURCES
-  ./src/policies_draft_test.cc
+  ./policies_draft_test.cc
 )
 
 add_library("test_policies_test" ${SOURCES})
 
-create_test("test_policies_draft_test" "./src/policies_draft_test.cc" "${LIBRARIES}")
+create_test("test_policies_draft_test" "./policies_draft_test.cc" "${LIBRARIES}")
 
 
 
