@@ -40,7 +40,7 @@ import "../controls"
 
 PopUp {
     property var async
-    property int position: 0
+    property int position: 1
 
     function showSlider(){
         console.debug("enter")
@@ -79,7 +79,7 @@ PopUp {
         default:
             break
         }
-        position = 0
+        position = 1
         console.debug("exit")
     }
 
