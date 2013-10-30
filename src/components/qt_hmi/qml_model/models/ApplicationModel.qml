@@ -15,6 +15,8 @@ QtObject {
     property string playPauseState
     property ApplicationData hmiUIText: ApplicationData {
     }
+    property MediaClockModel mediaClock: MediaClockModel {
+    }
 
     property string helpPrompt
     property string timeoutPrompt

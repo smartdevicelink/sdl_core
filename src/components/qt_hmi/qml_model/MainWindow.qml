@@ -44,6 +44,7 @@ import "./models"
 import "./popups"
 import "hmi_api/Common.js" as Common
 import "./models/Constants.js" as Constants
+import "models/Internal.js" as Internal
 
 Rectangle {
     width: 1600
@@ -152,13 +153,6 @@ Rectangle {
 
         WarningInfo { id: warningInfo }
 
-        AlertWindow {
-            id: alertWindow
-            objectName: "AlertWindow"
-            anchors.fill: parent
-            visible: false
-        }
-
         VRPopUp {
             id: vrPopUp
             visible: false
@@ -193,10 +187,6 @@ Rectangle {
             visible: false
         }
 
-        InteractionModel {
-            id: interactionModel
-        }
-
         SliderPopup {
             id: sliderPopup
             anchors.horizontalCenter: parent.horizontalCenter
@@ -215,6 +205,13 @@ Rectangle {
             id: performAudioPassThruPopup
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
+
+        AlertWindow {
+            id: alertWindow
+            objectName: "AlertWindow"
+            anchors.fill: parent
             visible: false
         }
     }
@@ -265,15 +262,15 @@ Rectangle {
         onAppRegistered: {
             dataContainer.addApplication(
             {
-                 appName: application.appName,
-                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
-                 icon: application.icon,
-                 deviceName: application.deviceName,
-                 appId: application.appId,
-                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
-                 isMediaApplication: application.isMediaApplication,
-                 appType: application.appType,
-                 hmiUIText: {
+                appName: application.appName,
+                ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                icon: application.icon,
+                deviceName: application.deviceName,
+                appId: application.appId,
+                hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                isMediaApplication: application.isMediaApplication,
+                appType: application.appType,
+                hmiUIText: {
                     "mainField1": "The Dog Days Are Over",
                     "mainField2": "Florence and the Machine",
                     "mainField3": "Track 13/16",
@@ -281,7 +278,13 @@ Rectangle {
                     "statusBar": "",
                     "mediaClock": "02:36",
                     "picture": "../res/album_art.png"
-                 }
+                },
+                mediaClock: {
+                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                    "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
+                    "magic": 0,
+                    "total": 0
+                }
              });
         }
 

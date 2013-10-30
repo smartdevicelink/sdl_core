@@ -111,6 +111,7 @@ Item {
             width: 10
             height: parent.height
             Text {
+                anchors.horizontalCenter: parent.horizontalCenter
                 text: clock.date.getSeconds() % 2 ? ":" : ""
                 color: Constants.primaryColor
                 font.pixelSize: Constants.fontSize;

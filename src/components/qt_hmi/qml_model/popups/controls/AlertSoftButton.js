@@ -1,6 +1,6 @@
 /**
- * @file ApplicationData.qml
- * @brief Model for Application.
+ * @file AlertSoftButton.js
+ * @brief AlertSoftButton's constants
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,13 +31,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import QtQuick 2.0
+.pragma library
 
-QtObject {
-    property string mainField1
-    property string mainField2
-    property string mainField3
-    property string mainField4
-    property string statusBar
-    property string picture
+var Action = {
+	doNothing      : 0,
+        closeOnClicked : 1,
+        keepOnClicked  : 2,
+        onRelease      : 4,
+        closeOnRelease : 5,
+        keepOnRelease  : 6,
 }

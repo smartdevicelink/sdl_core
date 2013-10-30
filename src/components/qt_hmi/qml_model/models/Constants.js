@@ -70,7 +70,7 @@ var popUpBorderColor = "white"
 var fontSize = 20
 
 // Title font size
-var tittleFontSize = 45
+var titleFontSize = 45
 
 // Power on/off button font size
 var powerButtonFornSize = 25
@@ -106,6 +106,9 @@ var iconButtonSize = 30
 // Size icon for item list
 var iconItemListSize = 40
 
+// Spacing between icon and item in list
+var iconItemListSpacing = 20
+
 // Height item list
 var itemListHeight = 60
 
@@ -120,6 +123,12 @@ var ttsSpeakTime = 2000
 
 // font size fo TTS popup
 var ttsFontSize = 12
+
+// Maximal number of submenus
+var maximumSubmenus = 1000
+
+// Maximal number of commands in submenu or root menu
+var maximumCommandsPerSubmenu = 1000
 
 // padding for popup view
 var popUpPadding = 20
@@ -150,6 +159,7 @@ var popupHeigth = 500
 
 // Width for combobox
 var comboboxWidth = 300
+
 // -------------------------
 var scrollableMessageTextColor = "white"
 var scrollableMessageScrollBarColor = "gray"

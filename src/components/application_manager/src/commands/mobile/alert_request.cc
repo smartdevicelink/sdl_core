@@ -58,7 +58,7 @@ AlertRequest::~AlertRequest() {
 bool AlertRequest::Init() {
 
   /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
+     If omitted a standard value of 5000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::duration].asUInt();

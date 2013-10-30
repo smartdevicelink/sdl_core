@@ -35,6 +35,7 @@
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 import "Internal.js" as Internal
+import "Constants.js" as Constants
 
 QtObject {
 
@@ -69,38 +70,36 @@ QtObject {
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
-                currentApplication.appName = applicationList.get(i).appName
-                currentApplication.appType = applicationList.get(i).appType
-                currentApplication.playPauseState = applicationList.get(i).playPauseState
-                currentApplication.options = applicationList.get(i).options
+                var application = applicationList.get(i)
+                currentApplication.appName = application.appName
+                currentApplication.appType = application.appType
+                currentApplication.playPauseState = application.playPauseState
+                currentApplication.options = application.options
 
-                if (applicationList.get(i).hmiUIText.mainField1) {
-                    currentApplication.hmiUIText.mainField1 = applicationList.get(i).hmiUIText.mainField1
+                if (application.hmiUIText.mainField1) {
+                    currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
                 }
-                if (applicationList.get(i).hmiUIText.mainField2) {
-                    currentApplication.hmiUIText.mainField2 = applicationList.get(i).hmiUIText.mainField2
+                if (application.hmiUIText.mainField2) {
+                    currentApplication.hmiUIText.mainField2 = application.hmiUIText.mainField2
                 }
-                if (applicationList.get(i).hmiUIText.mainField3) {
-                    currentApplication.hmiUIText.mainField3 = applicationList.get(i).hmiUIText.mainField3
+                if (application.hmiUIText.mainField3) {
+                    currentApplication.hmiUIText.mainField3 = application.hmiUIText.mainField3
                 }
-                if (applicationList.get(i).hmiUIText.mainField4) {
-                    currentApplication.hmiUIText.mainField4 = applicationList.get(i).hmiUIText.mainField4
+                if (application.hmiUIText.mainField4) {
+                    currentApplication.hmiUIText.mainField4 = application.hmiUIText.mainField4
                 }
-                if (applicationList.get(i).hmiUIText.statusBar) {
-                    currentApplication.hmiUIText.statusBar = applicationList.get(i).hmiUIText.statusBar
+                if (application.hmiUIText.statusBar) {
+                    currentApplication.hmiUIText.statusBar = application.hmiUIText.statusBar
                 }
-                if (applicationList.get(i).hmiUIText.mediaClock) {
-                    currentApplication.hmiUIText.mediaClock = applicationList.get(i).hmiUIText.mediaClock
+                if (application.hmiUIText.picture) {
+                    currentApplication.hmiUIText.picture = application.hmiUIText.picture
                 }
-                if (applicationList.get(i).hmiUIText.picture) {
-                    currentApplication.hmiUIText.picture = applicationList.get(i).hmiUIText.picture
-                }
-                currentApplication.deviceName = applicationList.get(i).deviceName
-                currentApplication.isMediaApplication = applicationList.get(i).isMediaApplication
-                currentApplication.turnList = applicationList.get(i).turnList
-                currentApplication.turnListSoftButtons =
-                        applicationList.get(i).turnListSoftButtons
-                currentApplication.languageTTSVR = applicationList.get(i).languageTTSVR
+                currentApplication.deviceName = application.deviceName
+                currentApplication.isMediaApplication = application.isMediaApplication
+                currentApplication.turnList = application.turnList
+                currentApplication.turnListSoftButtons = application.turnListSoftButtons
+                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
+                currentApplication.languageTTSVR = application.languageTTSVR
                 // This place is for adding new properties
             }
         }
@@ -111,8 +110,7 @@ QtObject {
 
     function addApplication(app) {
         console.log("Enter addApplication function");
-        applicationList.append(
-        {
+        applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
             icon: app.icon,
@@ -128,6 +126,7 @@ QtObject {
             options: [],
             turnList: [],
             turnListSoftButtons: [],
+            mediaClock: app.mediaClock,
             languageTTSVR: Common.Language.EN_US
             // This place is for adding new properties
         })
@@ -257,7 +256,7 @@ QtObject {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
-        console.debug("UI::addCommand(" +
+        console.debug("enter: " +
                       cmdID +
                       ", " +
                       (menuParams ?
@@ -266,23 +265,31 @@ QtObject {
                       (cmdIcon ?
                           "{" + cmdIcon.value + ", " + cmdIcon.imageType + "}" : cmdIcon) +
                       ", " +
-                      appID +
-                      ")")
+                      appID
+        )
         if ((menuParams !== undefined) && (menuParams.parentID !== undefined)) {
             var parentNotFound = true
             for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
                 var option = getApplication(appID).options.get(optionIndex)
                 if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuParams.parentID)) {
-                    var count = option.subMenu.count
-                    var index = count
-                    if (menuParams.position !== undefined) {
-                        if (menuParams.position < count) {
+                    parentNotFound = false
+                    var count = option.subMenu.count - 1 // decremented because of "back" item
+                    if (count < Constants.maximumCommandsPerSubmenu) {
+                        var index
+                        if ((menuParams.position !== undefined) && (menuParams.position < count)) {
                             index = menuParams.position
                         }
+                        else {
+                            index = count
+                        }
+                        ++index // incremented because of "back" item with index 0
+//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
                     }
-//                  option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                    option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon}) // actually we do not need subMenu[] for node
-                    parentNotFound = false
+                    else {
+                        console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")
+                        throw Common.Result.REJECTED
+                    }
                     break
                 }
             }
@@ -292,20 +299,26 @@ QtObject {
         }
         else {
             count = getApplication(appID).options.count
-            index = count
-            if (menuParams.position !== undefined) {
-                if (menuParams.position < count) {
+            if (count < Constants.maximumCommandsPerSubmenu) {
+                if ((menuParams.position !== undefined) && (menuParams.position < count)) {
                     index = menuParams.position
                 }
+                else {
+                    index = count
+                }
+                var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
+                getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
             }
-            var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
-            getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon, "subMenu": []})
+            else {
+                console.log("addCommand(): too many commands in root menu, rejecting")
+                throw Common.Result.REJECTED
+            }
         }
-        console.debug("UI::addCommand(): exit")
+        console.debug("exit")
     }
 
     function deleteCommand (cmdID, appID) {
-        console.debug("UI::deleteCommand(" + cmdID + ", " + appID + ")")
+        console.debug("enter: " + cmdID + ", " + appID)
         for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
             var option = getApplication(appID).options.get(optionIndex)
             if (option.type === Internal.MenuItemType.MI_NODE) {
@@ -324,7 +337,8 @@ QtObject {
                             subMenu.remove(subOptionIndex)
                         }
                         else {
-                            console.log("UI::deleteCommand(): cannot remove item from current submenu")
+                            console.log("UI::deleteCommand(): cannot remove item from current submenu, rejecting")
+                            throw Common.Result.REJECTED
                         }
                         break
                     }
@@ -334,35 +348,46 @@ QtObject {
                 }
             }
         }
-        console.debug("UI::deleteCommand(): exit")
+        console.debug("exit")
     }
 
     function addSubMenu (menuID, menuParams, appID) {
-        console.debug("addSubMenu(" + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID + ")")
+        console.debug("enter: " + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID)
         var count = getApplication(appID).options.count
-        var index = count
-        if (menuParams.position !== undefined) {
-            if (menuParams.position < count) {
+        if (count < Constants.maximumSubmenus) {
+            var index
+            if ((menuParams.position !== undefined) && (menuParams.position < count)) {
                 index = menuParams.position
             }
-        }
-        getApplication(appID).options.insert(index, {
-            "id": menuID,
-            "name": menuParams.menuName,
-            "type": Internal.MenuItemType.MI_SUBMENU,
-            "icon": undefined,
-            "subMenu": [{
-                "name": "..",
-                "type": Internal.MenuItemType.MI_PARENT,
+            else {
+                index = count
+            }
+            getApplication(appID).options.insert(index, {
+                "id": menuID,
+                "name": menuParams.menuName,
+                "type": Internal.MenuItemType.MI_SUBMENU,
                 "icon": undefined,
-                "subMenu": getApplication(appID).options
-            }]
-        })
-        console.debug("addSubMenu(): exit")
+                "subMenu": [{
+                    "id": -1,
+                    "name": menuParams.menuName,
+                    "type": Internal.MenuItemType.MI_PARENT,
+                    "icon": {
+                        "imageType": Common.ImageType.DYNAMIC,
+                        "value": "../res/nav/turnArrow.png"
+                    },
+                    "subMenu": getApplication(appID).options
+                }]
+            })
+        }
+        else {
+            console.log("addSubMenu(): too many submenus, rejecting")
+            throw Common.Result.REJECTED
+        }
+        console.debug("exit")
     }
 
     function deleteSubMenu (menuID, appID) {
-        console.debug("deleteSubMenu(" + menuID + ", " + appID + ")")
+        console.debug("enter: " + menuID + ", " + appID)
         for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
             var option = getApplication(appID).options.get(optionIndex)
             if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuID)) {
@@ -370,18 +395,22 @@ QtObject {
                     getApplication(appID).options.remove(optionIndex)
                 }
                 else {
-                    console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                    console.log("UI::deleteSubMenu(): cannot remove current submenu, rejecting")
+                    throw Common.Result.REJECTED
                 }
                 break
             }
         }
-        console.debug("deleteSubMenu(): exit")
+        console.debug("exit")
     }
 
     property NavigationModel navigationModel: NavigationModel { }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
+
+    property InteractionModel interactionModel: InteractionModel {
+    }
 
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {

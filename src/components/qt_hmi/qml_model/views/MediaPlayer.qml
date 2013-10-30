@@ -185,56 +185,11 @@ Item {
             }
         }
 
-        Item {
-            // bottom part
-            id: bot
+        MediaClockView {
             anchors.left: parent.left
             anchors.bottom: parent. bottom
             width: parent.width
             height: parent.height * 1/4
-
-            Text {
-                id: time
-                anchors.left: parent.left
-                anchors.leftMargin: 1/10 * parent.width
-                anchors.verticalCenter: parent.verticalCenter
-                color: "white"
-                text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaClock
-                                                             : "02:36" //TODO {Aleshin}: get track time for all players except SDL
-                font.pixelSize: 18
-            }
-
-            Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                height: parent.height
-                width: 2/3 * parent.width
-
-                Rectangle {
-                   id: firstRect
-                   anchors.verticalCenter: parent.verticalCenter
-                   height: 2
-                   width: 1/3 * parent.width
-                   color: "white"
-                }
-
-                Rectangle {
-                   id: secondRect
-                   anchors.verticalCenter: parent.verticalCenter
-                   height: 2
-                   width: 2/3 * parent.width
-                   color: Constants.primaryColor
-                }
-            }
-            Text {
-                anchors.right: parent.right
-                anchors.rightMargin: 1/10 * parent.width
-                anchors.verticalCenter: parent.verticalCenter
-                color: Constants.primaryColor
-                text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaClock
-                                                             : "04:23" //TODO {Aleshin}: get track time for all players except SDL
-                font.pixelSize: 18
-            }
         }
     }
 

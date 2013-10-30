@@ -1,6 +1,5 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
-find_package(LibXml2 REQUIRED)
 
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
@@ -31,7 +30,6 @@ include_directories (
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
-  ${LIBXML2_INCLUDE_DIR}
 )
 
 set(LIBRARIES
@@ -50,4 +48,7 @@ add_library("MediaManager" ${SOURCES} )
 target_link_libraries ("MediaManager" Utils)
 target_link_libraries ("MediaManager" log4cxx)
 target_link_libraries ("MediaManager" pulse-simple)
+target_link_libraries ("MediaManager" pulse)
+target_link_libraries ("MediaManager" gobject-2.0)
+target_link_libraries ("MediaManager" glib-2.0)
 target_link_libraries ("MediaManager" ${LIBRARIES})
