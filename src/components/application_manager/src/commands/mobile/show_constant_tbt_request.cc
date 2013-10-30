@@ -43,7 +43,8 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ : CommandRequestImpl(message),
+   result_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -65,9 +66,15 @@ void ShowConstantTBTRequest::Run() {
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
-    SendResponse(false, processing_result);
-    return;
+    if (mobile_apis::Result::INVALID_DATA == processing_result) {
+      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+      SendResponse(false, processing_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+      result_ = processing_result;
+    }
   }
 
   mobile_apis::Result::eType verification_result =
@@ -137,9 +144,38 @@ void ShowConstantTBTRequest::Run() {
   }
 
   app->set_tbt_show_command(msg_params);
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, msg_params,
-                   true, 1);
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
+                   true);
 }
+
+
+void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
+      LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      if (mobile_apis::Result::INVALID_ENUM != result_) {
+        result_code = result_;
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
+}
+
 }  // namespace commands
 
 }  // namespace application_manager

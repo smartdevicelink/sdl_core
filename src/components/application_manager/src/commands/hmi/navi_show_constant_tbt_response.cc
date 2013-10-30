@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -46,11 +47,9 @@ NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
 void NaviShowConstantTBTResponse::Run() {
   LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
 
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::ShowConstantTBTID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
