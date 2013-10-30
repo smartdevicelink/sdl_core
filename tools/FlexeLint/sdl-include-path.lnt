@@ -1,5 +1,0 @@
---i../../src/components/protocol_handler/include/
---i../../src/components/utils/include/
---i../../src/components/transport_manager/include/
---i../../src/components/connection_handler/include/
---i../../src/components/AppMgr/include/
