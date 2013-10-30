@@ -242,6 +242,7 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
 
 bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
                                       smart_objects::SmartObject& obj) {
+  LOG4CXX_INFO(logger_, "ProcessMethodReturn");
   dbus_uint32_t reply_serial = dbus_message_get_reply_serial(msg);
   std::pair<uint, MessageId> ids = PopMessageId(reply_serial);
   if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
@@ -256,9 +257,10 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
   obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  const ListArgs args = schema_->getListArgs(ids.second,
+  ListArgs args = schema_->getListArgs(ids.second,
                                              hmi_apis::messageType::response);
-  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
+  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS], obj[sos::S_PARAMS]);
+
   dbus_message_unref(msg);
   return ret;
 }
@@ -511,6 +513,35 @@ bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
   return true;
 }
 
+bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
+                               smart_objects::SmartObject& args,
+                               smart_objects::SmartObject& s_params) {
+  LOG4CXX_INFO(logger_, "GetArguments 2");
+  DBusMessageIter iter;
+  dbus_message_iter_init(msg, &iter);
+
+  dbus_int32_t retCode_val;
+  int type = dbus_message_iter_get_arg_type(&iter);
+  if (type != DBUS_TYPE_INT32) {
+	  LOG4CXX_INFO(logger_, "GetArguments 2: first argument is not int32");
+  }
+  dbus_message_iter_get_basic(&iter, &retCode_val);
+  smart_objects::SmartObject retCode(retCode_val);
+  s_params[sos::kCode] = retCode;
+  dbus_message_iter_next(&iter);
+
+  size_t size = rules.size();
+  for (size_t i = 0; i < size; ++i) {
+    if (!GetOneArgument(&iter, rules[i], args)) {
+	  LOG4CXX_INFO(logger_, "GetArguments 2 failed");
+      return false;
+    }
+    dbus_message_iter_next(&iter);
+  }
+  LOG4CXX_INFO(logger_, "GetArguments 2 ok");
+  return true;
+}
+
 const DBusSchema& DBusAdapter::get_schema() const {
   return *schema_;
 }
@@ -540,6 +571,7 @@ bool DBusAdapter::GetValue(
       if (type == DBUS_TYPE_ARRAY) {
         return GetArrayValue(
             iter,
+            // FIXME (dchmerev@luxoft.com): not portable, danger cast.
             reinterpret_cast<const ford_message_descriptions::ArrayDescription*>(rules),
             param);
       } else {

@@ -297,10 +297,10 @@ Item {
                     label: "Vehicle info"
                     toggleMode: true
                     onPressed: {
-                        viPopUp.show()
+                        viPopUp.show();
                     }
                     onUnpressed: {
-                        viPopUp.hide()
+                        viPopUp.hide();
                     }
                 }
 

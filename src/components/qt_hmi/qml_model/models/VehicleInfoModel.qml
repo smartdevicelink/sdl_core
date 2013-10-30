@@ -17,7 +17,7 @@ QtObject {
     property real externalTemperature: 40.0
     property string vin: '52-452-52-752'
     property int odometer: 0
-    property int prndl: Common.PRNDL.SIXTH
+    property int prndl: Common.PRNDL.FIFTH
 
     property var myKey: {
         "e911Override": Common.VehicleDataStatus.VDS_NO_DATA_EXISTS
@@ -89,5 +89,9 @@ QtObject {
         'altitude': 7,
         'heading': 173,
         'speed': 2
+    }
+    property var ecuDIDData: {
+        'data1': 'ECU 1 Test Data',
+        'data2': 'ECU 2 Test Data'
     }
 }

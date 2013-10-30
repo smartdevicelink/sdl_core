@@ -36,6 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -43,6 +44,7 @@ import "./models"
 import "./popups"
 import "hmi_api/Common.js" as Common
 import "./models/Constants.js" as Constants
+import "models/Internal.js" as Internal
 
 Rectangle {
     width: 1600
@@ -149,7 +151,7 @@ Rectangle {
             }
         }
 
-        WarningInfo { }
+        WarningInfo { id: warningInfo }
 
         VRPopUp {
             id: vrPopUp
@@ -172,11 +174,9 @@ Rectangle {
             visible: false
         }
 
-        VIPopUp {
+        VehicleInfoPopUp {
             id: viPopUp
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.fill: parent
+            anchors.centerIn: parent
         }
 
         InteractionPopup {
@@ -184,10 +184,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             visible: false
-        }
-
-        InteractionModel {
-            id: interactionModel
         }
 
         SliderPopup {
@@ -217,7 +213,6 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
-
     }
 
     Item {
@@ -266,15 +261,15 @@ Rectangle {
         onAppRegistered: {
             dataContainer.addApplication(
             {
-                 appName: application.appName,
-                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
-                 icon: application.icon,
-                 deviceName: application.deviceName,
-                 appId: application.appId,
-                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
-                 isMediaApplication: application.isMediaApplication,
-                 appType: application.appType,
-                 hmiUIText: {
+                appName: application.appName,
+                ngnMediaScreenAppName: application.ngnMediaScreenAppName,
+                icon: application.icon,
+                deviceName: application.deviceName,
+                appId: application.appId,
+                hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
+                isMediaApplication: application.isMediaApplication,
+                appType: application.appType,
+                hmiUIText: {
                     "mainField1": "The Dog Days Are Over",
                     "mainField2": "Florence and the Machine",
                     "mainField3": "Track 13/16",
@@ -282,7 +277,13 @@ Rectangle {
                     "statusBar": "",
                     "mediaClock": "02:36",
                     "picture": "../res/album_art.png"
-                 }
+                },
+                mediaClock: {
+                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                    "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
+                    "magic": 0,
+                    "total": 0
+                }
              });
         }
 

@@ -1,6 +1,10 @@
 /**
  * @file VehicleInfo.qml
+<<<<<<< HEAD
  * @brief Container for information about vehicle.
+=======
+ * @brief Vehicle information interface realisation.
+>>>>>>> qtHMI/qtHMI_dev
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,8 +37,7 @@
  */
 
 import QtQuick 2.0
-
-import "../hmi_api/Common.js" as Common
+import "Common.js" as Common
 
 Item {
     function isReady () {
@@ -57,11 +60,10 @@ Item {
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                             wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
-        //TODO {ALeshin}: Refactoring of this function
+        //TODO {ALeshin}: Refactor this function
         throw Common.Result.UNSUPPORTED_REQUEST
 
         console.debug("enter")
-
         console.debug("exit");
         return {
                 gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
@@ -86,5 +88,39 @@ Item {
                 steeringWheelAngle: steeringWheelAngle ? dataContainer.vehicleInfoModel.steeringWheelAngle : undefined,
                 myKey: myKey ? dataContainer.vehicleInfoModel.myKey : undefined
         }
+    }
+
+    function getDTCs(ecuName, dtcMask, appID) {
+        var ecuHeader = 2
+        var dtc = []
+
+        for (var i = 0; i < 3; i++) {
+            dtc.push("line" + i)
+        }
+        return {ecuHeader: ecuHeader, dtc: dtc}
+    }
+
+    function readDID(ecuName, didLocation, appID) {
+        console.debug("Enter")
+        //TODO{ALeshin}: refactoring of this function, when we'll have Vehicle Info module
+        var didResult = []
+
+        for (var i = 0; i < didLocation.length; i++) {
+            if (i < 10) {
+                didResult[i] = {}
+                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_SUCCESS
+                didResult[i].didLocation = didLocation[i]
+                didResult[i].data = '0'
+            }
+            else {
+                didResult[i] = {}
+                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_DATA_NOT_AVAILABLE
+                didResult[i].didLocation = didLocation[i]
+                didResult[i].data = '0'
+            }
+            console.debug("Exit")
+            return {didResult: didResult}
+        }
+        return {ecuHeader: ecuHeader, dtc: dtc}
     }
 }

@@ -35,3 +35,65 @@ var MenuItemType = {
     MI_SUBMENU: 1,
     MI_PARENT: 2
 }
+
+function activePageChoose(flickElement, pages) {
+    if (flickElement.contentX <= 0) {
+        return 0
+    }
+    else if ( (flickElement.contentWidth - flickElement.contentX) < flickElement.width) {
+        return pages -1
+    }
+    else {
+        if ( (flickElement.contentX % flickElement.width) >= (1/6 * flickElement.width)) {
+            return Math.ceil(flickElement.contentX / flickElement.width)
+        }
+        else if ( (flickElement.contentX % flickElement.width) > 0) {
+            return Math.floor(flickElement.contentX / flickElement.width)
+        }
+    }
+}
+
+var MediaClockUpdateMode = {
+    MCU_COUNTUP: 0,
+    MCU_COUNTDOWN: 1,
+}
+
+var MediaClockRunningMode = {
+    MCR_RUNNING: 0,
+    MCR_STOPPED: 1
+}
+
+function pad (string, length, lead) {
+    if (!lead) {
+        lead = '0'
+    }
+    var paddedString = "" + string
+    while (paddedString.length < length) {
+        paddedString = lead + paddedString
+    }
+    return paddedString
+}
+
+function hmsTime (hours, minutes, seconds) {
+    return 60 * (60 * hours + minutes) + seconds
+}
+
+function hmsTimeToString (hmsTime) {
+    var _time = hmsTime
+    var seconds = _time % 60
+    _time -= seconds
+    _time /= 60
+    var minutes = _time % 60
+    _time -= minutes
+    _time /= 60
+    var hours = _time
+    var string = ""
+    if (hours > 0) {
+        string += hours
+        string += ":"
+    }
+    string += pad(minutes, 2)
+    string += ":"
+    string += pad(seconds, 2)
+    return string
+}

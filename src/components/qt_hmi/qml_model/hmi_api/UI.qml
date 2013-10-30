@@ -1,10 +1,11 @@
 import QtQuick 2.0
 import "Common.js" as Common
 import "Async.js" as Async
+import "../models/Internal.js" as Internal
 
 Item {
     function filter (strings, fields) {
-        console.debug("UI::filter(" + strings + ", " + fields + ")")
+        console.debug("enter")
 // substrings for each allowed field
         var fieldSubstrings = {}
 // this cycle concatenates allowed lines sorting them by field
@@ -22,7 +23,7 @@ Item {
                 }
             }
         }
-        console.debug("UI::filter(): exit")
+        console.debug("exit")
         return fieldSubstrings
     }
 
@@ -42,7 +43,7 @@ Item {
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
-        console.debug("UI::show(" + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID + ")")
+        console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
 // with this array we grab only the lines we need
         var showFields = [
             Common.TextFieldName.mainField1,
@@ -85,7 +86,7 @@ Item {
         else {
             dataContainer.hmiUITextAlignment = Text.AlignHCenter
         }
-        console.debug("UI::show(): exit")
+        console.debug("exit")
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
@@ -105,10 +106,78 @@ Item {
     }
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
-        return interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        console.debug("enter")
+        var async = dataContainer.interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        console.debug("exit")
+        return async
     }
 
     function setMediaClockTimer (startTime, updateMode, appID) {
+        console.debug("enter")
+        var date = new Date()
+        var secondsSinceEpoch = date.getTime() / 1000
+        var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+        var newUpdateMode
+        var newRunningMode
+        var newMagic
+        var newTotal
+        switch (updateMode) {
+            case Common.ClockUpdateMode.COUNTUP:
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newMagic = secondsSinceEpoch - hmsTime
+                newTotal = 0
+                break
+            case Common.ClockUpdateMode.COUNTDOWN:
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTDOWN
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newMagic = secondsSinceEpoch + hmsTime
+                newTotal = hmsTime
+                break
+            case Common.ClockUpdateMode.PAUSE:
+                var mediaClockMagic = dataContainer.getApplication(appID).mediaClock.magic
+                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                switch (newUpdateMode) {
+                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                        newMagic = secondsSinceEpoch - mediaClockMagic
+                        break
+                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                        newMagic = mediaClockMagic - secondsSinceEpoch
+                        break
+                }
+                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                newTotal = dataContainer.getApplication(appID).mediaClock.total
+                break
+            case Common.ClockUpdateMode.RESUME:
+                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+                var mediaClockTime = dataContainer.getApplication(appID).mediaClock.magic
+                switch (newUpdateMode) {
+                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                        newMagic = secondsSinceEpoch - mediaClockTime
+                        break
+                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                        newMagic = secondsSinceEpoch + mediaClockTime
+                        break
+                }
+                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+                newTotal = dataContainer.getApplication(appID).mediaClock.total
+                break
+            case Common.ClockUpdateMode.CLEAR:
+                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                newMagic = 0
+                newTotal = 0
+                break
+        }
+        dataContainer.setApplicationProperties(appID, {
+            "mediaClock": {
+                "updateMode": newUpdateMode,
+                "runningMode": newRunningMode,
+                "magic": newMagic,
+                "total": newTotal
+            }
+        })
+        console.debug("exit")
     }
 
     function setGlobalProperties (vrHelpTitle, vrHelp, appID) {
@@ -171,19 +240,13 @@ Item {
             throw Common.Result.ABORTED
         }
 
-        if(messageText !== undefined) {
-            dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
-        }
+        dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
+        dataContainer.scrollableMessageModel.softButtons.clear();
         if (softButtons !== undefined) {
-            dataContainer.scrollableMessageModel.softButtons.clear();
             softButtons.forEach(fillSoftButtons, dataContainer.scrollableMessageModel.softButtons);
         }
-        if(timeout !== undefined) {
-            dataContainer.scrollableMessageModel.timeout = timeout
-        }
-        if(appID !== undefined) {
-            dataContainer.scrollableMessageModel.appId = appID
-        }
+        dataContainer.scrollableMessageModel.timeout = timeout
+        dataContainer.scrollableMessageModel.appId = appID
         dataContainer.scrollableMessageModel.async = new Async.AsyncCall()
         contentLoader.go("./views/ScrollableMessageView.qml")
         console.debug("scrollableMessage exit")

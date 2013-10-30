@@ -1,6 +1,6 @@
 /**
- * @file ApplicationData.qml
- * @brief Model for Application.
+ * @file MediaClockView.qml
+ * @brief Media clock view
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,13 +31,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import QtQuick 2.0
 
-QtObject {
-    property string mainField1
-    property string mainField2
-    property string mainField3
-    property string mainField4
-    property string statusBar
-    property string picture
+import QtQuick 2.0
+import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
+
+Item {
+    Text {
+        id: time
+        anchors.left: parent.left
+        width: 1/10 * parent.width
+        anchors.verticalCenter: parent.verticalCenter
+        horizontalAlignment: Text.AlignRight
+        color: "white"
+        text: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
+                                                     : "02:36" //TODO {Aleshin}: get track time for all players except SDL
+        font.pixelSize: 18
+    }
+
+    Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
+        width: 2/3 * parent.width
+
+        Rectangle {
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: dataContainer.currentApplication.mediaClock.progress * parent.width
+           color: "white"
+        }
+
+        Rectangle {
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: (1 - dataContainer.currentApplication.mediaClock.progress) * parent.width
+           color: Constants.primaryColor
+        }
+    }
 }

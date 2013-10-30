@@ -58,31 +58,54 @@ GeneralView {
             model: dataContainer.currentApplication.currentSubMenu
 
             delegate: Row {
+                spacing: Constants.iconItemListSpacing
                 Icon {
                     id: image
                     source: model.icon
-                    visible: source !== undefined
+                    width: Constants.iconItemListSize
+                    height: Constants.iconItemListSize
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            console.debug("enter")
+                            if (model.icon.value) {
+                                switch (type) {
+                                    case Internal.MenuItemType.MI_NODE:
+                                        sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                        break;
+                                    case Internal.MenuItemType.MI_SUBMENU:
+                                    case Internal.MenuItemType.MI_PARENT:
+                                        dataContainer.currentApplication.currentSubMenu = subMenu
+                                        break;
+                                }
+                            }
+                            console.debug("exit")
+                        }
+                    }
                 }
 
                 Text {
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
-                    color: Constants.primaryColor
+                    color: (type === Internal.MenuItemType.MI_PARENT) ?
+                               Constants.inactiveButtonTextColor :
+                               Constants.primaryColor
                     font.pixelSize: 40
 
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick()")
+                            console.debug("enter")
                             switch (type) {
                                 case Internal.MenuItemType.MI_NODE:
-                                    sdlUI.onCommand(id, dataContainer.currentApplication.appId)
+                                    sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
                                     break;
                                 case Internal.MenuItemType.MI_SUBMENU:
                                 case Internal.MenuItemType.MI_PARENT:
                                     dataContainer.currentApplication.currentSubMenu = subMenu
                                     break;
                             }
-                            console.debug("sdlPlayerOptionsListView::delegate::Text::MouseArea::onClick(): exit")
+                            console.debug("exit")
                         }
                     }
                 }
