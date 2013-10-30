@@ -204,8 +204,8 @@ Item {
         }
     }
 
-    function changeRegistration (language) {
-        dataContainer.changeRegistrationUI(language)
+    function changeRegistration (language, appID) {
+        dataContainer.changeRegistrationUI(language, appID)
     }
 
     function setAppIcon (syncFileName, appID) {

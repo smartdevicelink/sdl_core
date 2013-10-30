@@ -247,7 +247,19 @@ Item {
                 }
 
                 Text {
-                    text: ""
+                    id: uiLanguageLabel
+                    text: { for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) { return s } } }
+                    color: "white"
+                    Connections {
+                        target: dataContainer
+                        onCurrentApplicationChanged: {
+                            for (var s in Common.Language) {
+                                if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) {
+                                    uiLanguageLabel.text = s;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Column
@@ -258,7 +270,19 @@ Item {
                 }
 
                 Text {
-                    text: ""
+                    id: ttsLanguageLabel
+                    text: "0"//{ for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) { return s } } }
+                    color: "white"
+                    Connections {
+                        target: dataContainer
+                        onCurrentApplicationChanged: {
+                            for (var s in Common.Language) {
+                                if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) {
+                                    ttsLanguageLabel.text = s;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

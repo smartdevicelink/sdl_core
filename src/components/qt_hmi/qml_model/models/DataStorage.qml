@@ -100,6 +100,7 @@ QtObject {
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
                 currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 currentApplication.languageTTSVR = application.languageTTSVR
+                currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
             }
         }
@@ -243,9 +244,9 @@ QtObject {
         console.log("dataContainer reset exit");
     }
 
-    function changeRegistrationUI (language) {
+    function changeRegistrationUI (language, appID) {
         console.log("dataContainer changeRegistrarionUI enter");
-        hmiUILanguage = language
+        setApplicationProperties(appID, { hmiDisplayLanguageDesired: language });
         console.log("dataContainer changeRegistrarionUI exit");
     }
 
