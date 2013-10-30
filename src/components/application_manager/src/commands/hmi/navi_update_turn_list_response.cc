@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -46,11 +47,9 @@ NaviUpdateTurnListResponse::~NaviUpdateTurnListResponse() {
 void NaviUpdateTurnListResponse::Run() {
   LOG4CXX_INFO(logger_, "NaviUpdateTurnListResponse::Run");
 
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::UpdateTurnListID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
