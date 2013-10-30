@@ -1,6 +1,5 @@
 // html report
-env-html.lnt
-// +html
+// env-html.lnt
 
 // misra rules
 // au-misra-cpp.lnt
