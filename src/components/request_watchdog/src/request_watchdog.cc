@@ -166,6 +166,34 @@ void RequestWatchdog::removeRequest(int connection_key,
   requestsMapMutex_.unlock();
 }
 
+void RequestWatchdog::updateRequestTimeout(int connection_key,
+                                           int correlation_id,
+                                           int new_timeout_value) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  requestsMapMutex_.lock();
+
+  for (std::map<RequestInfo*, TimevalStruct>::iterator it =
+         requests_.begin();
+       requests_.end() != it;
+       ++it) {
+    if (it->first->connectionID_ == connection_key
+        && it->first->correlationID_ == correlation_id) {
+      LOG4CXX_INFO(logger_, "Update request's expiration timeout "
+                   << "\n ConnectionID : " << it->first->connectionID_
+                   << "\n CorrelationID : " << it->first->correlationID_
+                   << "\n FunctionID : " << it->first->functionID_
+                   << "\n CustomTimeOut : " << it->first->customTimeout_
+                   << "\n");
+      it->first->customTimeout_ = new_timeout_value;
+      it->first->delayed_delete_ = false;
+      break;
+    }
+  }
+
+  requestsMapMutex_.unlock();
+}
+
 void RequestWatchdog::removeAllRequests() {
   LOG4CXX_TRACE_ENTER(logger_);
 
