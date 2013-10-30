@@ -37,6 +37,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_chaining.h"
@@ -84,11 +85,6 @@ namespace application_manager {
  *@brief Typedef for shared pointer
  */
 typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
-
-/**
- *@brief Typedef for shared pointer HMI notification
- */
-typedef utils::SharedPtr<CommandNotificationImpl> NotificationPtr;
 
 /**
  *@brief Map representing hmi request
@@ -403,6 +399,20 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 int first_session_key,
                                 connection_handler::ServiceType type);
 
+    /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void addNotification(const CommandSharedPtr& ptr);
+
+    /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void removeNotification(const CommandSharedPtr& ptr);
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -445,20 +455,6 @@ class ApplicationManagerImpl : public ApplicationManager,
         unsigned int connection_key);
 
     /**
-     * @ Add notification to collection
-     *
-     * @param ptr Reference to shared pointer that point on hmi notification
-     */
-    void addNotification(const NotificationPtr& ptr);
-
-    /**
-     * @ Add notification to collection
-     *
-     * @param ptr Reference to shared pointer that point on hmi notification
-     */
-    void removeNotification(const NotificationPtr& ptr);
-
-    /**
      * @brief Map of connection keys and associated applications
      */
     std::map<int, Application*> applications_;
@@ -471,7 +467,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Set of HMI notifications with timeout.
      */
-    std::set<NotificationPtr> notification_list_;
+    std::list<CommandSharedPtr> notification_list_;
 
     MessageChain message_chaining_;
     bool audio_pass_thru_flag_;

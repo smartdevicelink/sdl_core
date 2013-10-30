@@ -2246,7 +2246,7 @@
   </function>
   <function name="ClosePopUp" messagetype="request">
     <description>Initiated by SDL to close currently active pop-up on HMI.</description>
-    <param name="methodName" type="String" mandatory="true">
+    <param name="methodName" type="String" mandatory="false">
       <description>Method to be closed</description>
     </param>
   </function>

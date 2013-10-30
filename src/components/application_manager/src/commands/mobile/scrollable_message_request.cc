@@ -45,6 +45,8 @@ namespace commands {
 ScrollabelMessageRequest::ScrollabelMessageRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
+
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
 ScrollabelMessageRequest::~ScrollabelMessageRequest() {
@@ -103,6 +105,22 @@ void ScrollabelMessageRequest::Run() {
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, msg_params, true,
                    1);
+}
+
+void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::on_event");
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      // reset timeout
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
 }
 
 }  // namespace commands

@@ -69,18 +69,23 @@ void OnSyncPDataNotification::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].kryExist(Timeout)
-    timer_.start()
+  const char* timeout = mobile_notification::syncp_timeout;
+  if ((*message_)[strings::msg_params].keyExists(timeout)) {
+    ApplicationManagerImpl::instance()->addNotification(this);
+    timer_.start((*message_)[strings::msg_params][timeout].asInt());
+  } else {
+    SendPData();
+  }
 }
 
-void OnSyncPDataNotification::onTimer() const {
+void OnSyncPDataNotification::onTimer() {
   LOG4CXX_INFO(logger_, "OnSyncPDataNotification::onTimer");
 
-
+  SendPData();
 }
 
-void OnSyncPDataNotification::SendPData(const Application* app) {
-  LOG4CXX_INFO(logger_, "OnSyncPDataNotification::onTimer");
+void OnSyncPDataNotification::SendPData() {
+  LOG4CXX_INFO(logger_, "OnSyncPDataNotification::SendPData");
 
   const std::string fileName =
       (*message_)[strings::params][hmi_notification::file_name].asString();
@@ -91,6 +96,7 @@ void OnSyncPDataNotification::SendPData(const Application* app) {
   (*message_)[strings::params][strings::data] = string_pdata;
 
   SendResponse(true);
+  ApplicationManagerImpl::instance()->removeNotification(this);
 }
 
 }  // namespace commands

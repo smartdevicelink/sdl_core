@@ -39,6 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 /**
  * @brief OnUIResetTimeoutNotification command class
  **/
@@ -64,6 +66,8 @@ class OnUIResetTimeoutNotification : public NotificationFromHMI {
  private:
   DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
 };
+
+}  // namespace hmi
 
 }  // namespace commands
 

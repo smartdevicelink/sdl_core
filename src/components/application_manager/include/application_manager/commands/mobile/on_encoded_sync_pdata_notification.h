@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_ENCODED_SYNC_PDATA_NOTIFICATION_H_
 
 #include "application_manager/commands/command_response_impl.h"
+#include "utils/timer_thread.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -66,13 +67,20 @@ class OnEncodedSyncPDataNotification : public CommandResponseImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Timer callback function
+   */
+  void onTimer();
+
  private:
   /*
    * @brief Sends sync pdata notification to mobile device
-   *
-   * @param app Application to receive notification
    */
-  void SendEncodedPData(const Application* app);
+  void SendEncodedPData();
+
+  // members
+  timer::TimerThread<OnEncodedSyncPDataNotification> timer_;
+
   DISALLOW_COPY_AND_ASSIGN(OnEncodedSyncPDataNotification);
 };
 

@@ -46,7 +46,8 @@ namespace commands {
 
 OnEncodedSyncPDataNotification::OnEncodedSyncPDataNotification(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+ : CommandResponseImpl(message),
+   timer_(this, &OnEncodedSyncPDataNotification::onTimer) {
 }
 
 OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {
@@ -68,16 +69,34 @@ void OnEncodedSyncPDataNotification::Run() {
     return;
   }
 
+  const char* timeout = mobile_notification::syncp_timeout;
+  if ((*message_)[strings::msg_params].keyExists(timeout)) {
+    ApplicationManagerImpl::instance()->addNotification(this);
+    timer_.start((*message_)[strings::msg_params][timeout].asInt());
+  } else {
+    SendEncodedPData();
+  }
+}
+
+void OnEncodedSyncPDataNotification::onTimer() {
+  LOG4CXX_INFO(logger_, "OnEncodedSyncPDataNotification::onTimer");
+
+  SendEncodedPData();
+}
+
+void OnEncodedSyncPDataNotification::SendEncodedPData() {
+  const std::string fileName =
+      (*message_)[strings::params][hmi_notification::file_name].asString();
+
   std::vector<unsigned char> pData;
-
   file_system::ReadBinaryFile(fileName, pData);
-
   const std::string string_pdata = base64_decode(
       std::string(pData.begin(), pData.end()));
 
   (*message_)[strings::params][strings::data] = string_pdata;
 
   SendResponse(true);
+  ApplicationManagerImpl::instance()->removeNotification(this);
 }
 
 }  // namespace commands

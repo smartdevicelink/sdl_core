@@ -71,15 +71,13 @@ class OnSyncPDataNotification : public CommandResponseImpl {
    * @brief Timer callback function
    *
    */
-  void onTimer() const;
+  void onTimer();
 
  private:
   /*
    * @brief Sends sync pdata notification to mobile device
-   *
-   * @param app Application to receive notification
    */
-  void SendPData(const Application* app);
+  void SendPData();
 
   // members
   timer::TimerThread<OnSyncPDataNotification> timer_;

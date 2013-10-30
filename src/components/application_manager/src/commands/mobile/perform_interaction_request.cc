@@ -60,7 +60,7 @@ PerformInteractionRequest::PerformInteractionRequest(
 PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
-void PerformInteractionRequest::onTimer() const{
+void PerformInteractionRequest::onTimer() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimer");
 }
 

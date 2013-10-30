@@ -50,14 +50,9 @@ OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
 void OnUIResetTimeoutNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUIResetTimeoutNotification::Run");
 
-  event_engine::Event event(hmi_apis::FunctionID::);
+  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*message_);
   event.raise();
-
-  //prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-  mobile_apis::FunctionID::OnTouchEventID;
-  SendNotificationToMobile(message_);
 }
 
 }  // namespace hmi

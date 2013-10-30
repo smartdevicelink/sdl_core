@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_LANGUAGE_CHANGE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_LANGUAGE_CHANGE_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -40,21 +40,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnUIResetTimeoutNotification command class
+ * @brief OnUILanguageChangeNotification command class
  **/
-class OnUIResetTimeoutNotification : public NotificationFromHMI {
+class OnUILanguageChangeNotification : public NotificationFromHMI {
  public:
   /**
-   * @brief OnUIResetTimeoutNotification class constructor
+   * @brief OnUILanguageChangeNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUIResetTimeoutNotification(const MessageSharedPtr& message);
+  explicit OnUILanguageChangeNotification(const MessageSharedPtr& message);
 
   /**
-   * @brief OnUIResetTimeoutNotification class destructor
+   * @brief OnUILanguageChangeNotification class destructor
    **/
-  virtual ~OnUIResetTimeoutNotification();
+  virtual ~OnUILanguageChangeNotification();
 
   /**
    * @brief Execute command
@@ -62,11 +62,11 @@ class OnUIResetTimeoutNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnUILanguageChangeNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_LANGUAGE_CHANGE_NOTIFICATION_H_

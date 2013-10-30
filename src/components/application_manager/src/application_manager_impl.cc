@@ -36,6 +36,7 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_chaining.h"
 #include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
@@ -167,7 +168,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   }
 
   message_chaining_.clear();
-  notification_list_.clear();
 
   if (media_manager_) {
     delete media_manager_;
@@ -1491,13 +1491,13 @@ bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
   return result;
 }
 
-void ApplicationManagerImpl::addNotification(const NotificationPtr& ptr) {
-  notification_list_.insert(ptr);
+void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {
+  notification_list_.push_back(ptr);
 }
 
-void ApplicationManagerImpl::removeNotification(const NotificationPtr& ptr) {
-  std::set<NotificationPtr>::iterator it = notification_list_.begin();
-  for (; applications_.end() != it; +it) {
+void ApplicationManagerImpl::removeNotification(const CommandSharedPtr& ptr) {
+  std::list<CommandSharedPtr>::iterator it = notification_list_.begin();
+  for (; notification_list_.end() != it; ++it) {
     if (*it == ptr) {
       notification_list_.erase(it);
       break;

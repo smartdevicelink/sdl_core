@@ -204,6 +204,7 @@ const char system_action[] = "systemAction";
 
 namespace mobile_notification {
 const char state[] = "state";
+const char syncp_timeout[] = "Timeout";
 }  // namespace mobile_notification
 
 namespace hmi_request {

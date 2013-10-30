@@ -165,6 +165,7 @@
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
+#include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
@@ -718,6 +719,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case  hmi_apis::FunctionID::UI_OnTouchEvent: {
       command.reset(new commands::hmi::OnUITouchEventNotification(message));
+      break;
+    }
+    case  hmi_apis::FunctionID::UI_OnResetTimeout: {
+      command.reset(new commands::hmi::OnUIResetTimeoutNotification(message));
       break;
     }
     case  hmi_apis::FunctionID::Navigation_StartStream: {

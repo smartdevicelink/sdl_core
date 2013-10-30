@@ -94,7 +94,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @brief Timer callback function
    *
    */
-  void onTimer() const;
+  void onTimer();
 
  private:
   /*

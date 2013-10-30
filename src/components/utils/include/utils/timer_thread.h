@@ -70,7 +70,7 @@ class TimerThread {
      * @param callee A class that use timer
      * @param arg    CallBackFunction which will be called on timeout
      */
-    TimerThread(const T* callee , void (T::*f)() const);
+    TimerThread(T* callee , void (T::*f)());
 
     /*
      * @brief Destructor
@@ -144,8 +144,8 @@ class TimerThread {
         DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
     };
 
-    void (T::*callback_)() const;
-    const T*                                           callee_;
+    void (T::*callback_)();
+    T*                                                 callee_;
     TimerDelegate*                                     delegate_;
     threads::Thread*                                   thread_;
     mutable bool                                       is_running_;
@@ -154,7 +154,7 @@ class TimerThread {
 };
 
 template <class T>
-TimerThread<T>::TimerThread(const T* callee, void (T::*f)() const)
+TimerThread<T>::TimerThread(T* callee, void (T::*f)())
   : callback_(f),
     callee_(callee),
     delegate_(NULL),
