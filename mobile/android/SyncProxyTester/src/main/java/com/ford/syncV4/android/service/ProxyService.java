@@ -87,7 +87,7 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -272,7 +272,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
                 syncMsgVersion.setMinorVersion(2);
-                Vector<AppType> appTypes = createAppTypeVector(isNaviApp);
+                Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
                 String appID = null;
                 BaseTransportConfig config = null;
                 switch (transportType) {
@@ -298,8 +298,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         appName,
                         /*ngn media app*/null,
                         /*vr synonyms*/null,
-                        /*is media app*/isMediaApp,
-                        appTypes,
+                        /*is media app*/isMediaApp, appHMITypes,
                         syncMsgVersion,
                         /*language desired*/lang,
                         /*HMI Display Language Desired*/hmiLang,
@@ -322,10 +321,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		else Log.i(TAG, "ProxyService.startProxy() returning");
 	}
 
-    private Vector<AppType> createAppTypeVector(boolean naviApp) {
+    private Vector<AppHMIType> createAppTypeVector(boolean naviApp) {
         if (naviApp){
-            Vector<AppType> vector = new Vector<AppType>();
-            vector.add(AppType.NAVIGATION);
+            Vector<AppHMIType> vector = new Vector<AppHMIType>();
+            vector.add(AppHMIType.NAVIGATION);
             return vector;
         }
         return null;
@@ -1321,9 +1320,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onOnTouchEvent(OnTouchEvent notification) {
         final  OnTouchEvent event = notification;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "OnTouchEvent Received = "+ notification.toString();
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+        else Log.i(TAG, "" + notification);
+
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
 

@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.util.DebugTool;
 
@@ -151,22 +151,22 @@ public class RegisterAppInterface extends RPCRequest {
         	parameters.remove(Names.hmiDisplayLanguageDesired);
         }
     }
-    public Vector<AppType> getAppType() {
-        if (parameters.get(Names.appType) instanceof Vector<?>) {
-	    	Vector<?> list = (Vector<?>)parameters.get(Names.appType);
+    public Vector<AppHMIType> getAppType() {
+        if (parameters.get(Names.appHMIType) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.appHMIType);
 	        if (list != null && list.size() > 0) {
 	            Object obj = list.get(0);
-	            if (obj instanceof AppType) {
-	                return (Vector<AppType>) list;
+	            if (obj instanceof AppHMIType) {
+	                return (Vector<AppHMIType>) list;
 	            } else if (obj instanceof String) {
-	                Vector<AppType> newList = new Vector<AppType>();
+	                Vector<AppHMIType> newList = new Vector<AppHMIType>();
 	                for (Object hashObj : list) {
 	                    String strFormat = (String)hashObj;
-	                    AppType toAdd = null;
+	                    AppHMIType toAdd = null;
 	                    try {
-	                        toAdd = AppType.valueForString(strFormat);
+	                        toAdd = AppHMIType.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appType, e);	                    }
+	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
 	                    }
@@ -177,11 +177,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
         return null;
     }
-    public void setAppType(Vector<AppType> appType) {
-        if (appType != null) {
-            parameters.put(Names.appType, appType);
+    public void setAppType(Vector<AppHMIType> appHMIType) {
+        if (appHMIType != null) {
+            parameters.put(Names.appHMIType, appHMIType);
         } else {
-        	parameters.remove(Names.appType);
+        	parameters.remove(Names.appHMIType);
         }
     }
     public String getAppID() {

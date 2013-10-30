@@ -30,10 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_perform_interaction_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -50,74 +47,9 @@ UIPerformInteractionResponse::~UIPerformInteractionResponse() {
 
 void UIPerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "UIPerformInteractionResponse::Run");
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-      ->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  /* store received response code for to check it
-   * in corresponding Mobile response
-   */
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-
-  msg_chain->set_ui_response_result(code);
-
-  const int connection_key = msg_chain->connection_key();
-  Application* app = ApplicationManagerImpl::instance()->application(
-      connection_key);
-
-  if (NULL == app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  if (app->is_perform_interaction_active()) {
-    const PerformChoiceSetMap& choice_set_map = app
-        ->performinteraction_choice_set_map();
-
-    if (mobile_apis::InteractionMode::MANUAL_ONLY
-        != app->perform_interaction_mode()) {
-      PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-      for (; choice_set_map.end() != it; ++it) {
-        const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-            strings::choice_set);
-
-        for (size_t j = 0; j < choice_set.length(); ++j) {
-          smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-              smart_objects::SmartType_Map);
-
-          msg_params[strings::app_id] = app->app_id();
-          msg_params[strings::cmd_id] = choice_set.getElement(j).getElement(
-              strings::choice_id);
-
-          CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
-        }
-      }
-    }
-    app->set_perform_interaction_mode(-1);
-    app->DeletePerformInteractionChoiceSetMap();
-    app->set_perform_interaction_active(0);
-  }
-
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    (*message_)[strings::msg_params][strings::trigger_source] =
-        mobile_apis::TriggerSource::TS_MENU;
-  }
-
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::PerformInteractionID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

@@ -63,7 +63,11 @@ void SpeakRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  msg_params = (*message_)[strings::msg_params];
+  for (int i = 0;
+      i < (*message_)[strings::msg_params][strings::tts_chunks].length(); ++i) {
+    msg_params[strings::tts_chunks][i][strings::text] =
+        (*message_)[strings::msg_params][strings::tts_chunks][i][strings::text];
+  }
   msg_params[strings::app_id] = app->app_id();
 
   CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true, 1);

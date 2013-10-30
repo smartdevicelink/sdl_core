@@ -50,7 +50,7 @@ public class Names {
 	public static final String displayLayout = "displayLayout";
 	public static final String ttsName = "ttsName";
 	public static final String hmiDisplayLanguageDesired = "hmiDisplayLanguageDesired";
-	public static final String appType = "appHMIType";
+	public static final String appHMIType = "appHMIType";
 	public static final String appID = "appID";
 	public static final String vrHelpTitle = "vrHelpTitle";
 	public static final String graphic = "graphic";
@@ -430,7 +430,7 @@ public class Names {
     public static final String OnKeyboardInput = "OnKeyboardInput";
     public static final String manualTextEntry = "manualTextEntry";
     public static final String keyboardLayout = "keyboardLayout";
-    public static final String sendDynamicEntry = "sendDynamicEntry";
+
     public static final String limitedCharacterList = "limitedCharacterList";
     public static final String autoCompleteText = "autoCompleteText";
     public static final String menuTitle = "menuTitle";

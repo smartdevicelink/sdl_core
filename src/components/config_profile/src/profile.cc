@@ -134,6 +134,14 @@ bool Profile::is_redecoding_enabled() const {
   return is_redecoding_enabled_;
 }
 
+const std::string&  Profile::video_server_type() const {
+  return consumer_type_;
+}
+
+const std::string& Profile::named_pipe_path() const {
+  return named_pipe_path_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
@@ -189,6 +197,22 @@ void Profile::UpdateValues() {
       is_redecoding_enabled_ = true;
     }
     LOG4CXX_INFO(logger_, "Set RedecodingEnabled to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "VideoStreamConsumer", value))
+      && ('\0' != *value)) {
+    consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << consumer_type_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedPipePath", value))
+      && ('\0' != *value)) {
+    named_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_pipe_path_);
   }
 
   *value = '\0';

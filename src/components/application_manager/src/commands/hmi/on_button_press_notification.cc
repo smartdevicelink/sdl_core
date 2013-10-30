@@ -34,6 +34,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -50,10 +52,11 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
-
+  event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);
+  event.set_smart_object(*message_);
+  event.raise();
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnButtonPressID;
-
   SendNotificationToMobile(message_);
 }
 

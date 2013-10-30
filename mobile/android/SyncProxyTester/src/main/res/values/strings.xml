@@ -77,7 +77,7 @@
     <string name="selectprotocol_hmiLang">HMI language:</string>
     <string name="selectprotocol_wifi">WiFi</string>
     <string name="selectprotocol_bluetooth">Bluetooth</string>
-    <string name="selectprotocol_usb">USB (VERY EXPERIMENTAL!)</string>
+    <string name="selectprotocol_usb">USB</string>
     <string name="selectprotocol_ipAddress">IP address:</string>
     <string name="selectprotocol_ipAddressDefault">10.10.0.1</string>
     <string name="selectprotocol_tcpPort">Port:</string>
@@ -94,14 +94,17 @@
     <string name="createinteractionchoiceset_choice1VRDefault">Command one,1st command</string>
 
     <string name="createinteractionchoiceset_choice1ImageValue">turn_left.png</string>
+    <string name="createinteractionchoiceset_choice1ImageValueSecondary">turn_left_secondary.png</string>
     <string name="createinteractionchoiceset_choice2">Choice 2</string>
     <string name="createinteractionchoiceset_choice2Default">2nd item</string>
     <string name="createinteractionchoiceset_choice2VRDefault">Command two,2nd command</string>
     <string name="createinteractionchoiceset_choice2ImageValue">turn_right.png</string>
+    <string name="createinteractionchoiceset_choice2ImageValueSecondary">turn_right_secondary.png</string>
     <string name="createinteractionchoiceset_choice3">Choice 3</string>
     <string name="createinteractionchoiceset_choice3Default">3rd item</string>
     <string name="createinteractionchoiceset_choice3VRDefault">Command three,third command</string>
     <string name="createinteractionchoiceset_choice3ImageValue">turn_forward.png</string>
+    <string name="createinteractionchoiceset_choice3ImageValueSecondary">turn_forward_secondary.png</string>
     <string name="showconstanttbt_navText1">Navigation Text 1</string>
     <string name="showconstanttbt_navText1Default">Navigation Text 1</string>
     <string name="showconstanttbt_navText2">Navigation Text 2</string>
@@ -177,8 +180,6 @@
     <string name="keyboardproperties_useLanguage">Language</string>
     <string name="keyboardproperties_useKbdLayout">Keyboard Layout</string>
     <string name="keyboardproperties_useKeypressMode">Keypress Mode</string>
-    <string name="keyboardproperties_useSendDynamicEntry">Use</string>
-    <string name="keyboardproperties_sendDynamicEntry">Send Dynamic Entry</string>
     <string name="keyboardproperties_useLimitedCharacterList">Limited Character List (comma-separated)</string>
     <string name="keyboardproperties_limitedCharacterListDefault">a,b,c,d,e,f</string>
     <string name="keyboardproperties_useAutoCompleteText">Autocomplete Text</string>
@@ -196,5 +197,27 @@
     <string name="alert_durationDefault">5000</string>
     <string name="alert_usePlayTone">Play Tone</string>
     <string name="alert_useProgressIndicator">Progress Indicator</string>
+    <string name="keyboard_properties">KeyboardProperties</string>
+    <string name="vr_help_items">VR help items</string>
+    <string name="vr_help_title">VR help title</string>
+    <string name="timeout_promt">Timeout prompt</string>
+    <string name="hello_promt">Help prompt</string>
+
+    <string name="registerappinterface_useSyncMsgVersion">SyncMsgVersion (major, minor)</string>
+    <string name="registerappinterface_syncMsgVersionMajor">2</string>
+    <string name="registerappinterface_syncMsgVersionMinor">2</string>
+    <string name="registerappinterface_useAppName">App Name</string>
+    <string name="registerappinterface_useTTSName">TTS Name (comma-separated)</string>
+    <string name="registerappinterface_ttsNameDefault">TTS Name 1,Tester</string>
+    <string name="registerappinterface_useNgnAppName">Ngn Media Screen App Name</string>
+    <string name="registerappinterface_ngnAppNameDefault">SPT</string>
+    <string name="registerappinterface_useVRSynonyms">VR Synonyms (comma-separated)</string>
+    <string name="registerappinterface_vrSynonymsDefault">SPT,Tester</string>
+    <string name="registerappinterface_isMediaApp">Media Application</string>
+    <string name="registerappinterface_useDesiredLang">Desired Language</string>
+    <string name="registerappinterface_useHMIDesiredLang">HMI Display Desired Language</string>
+    <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
+    <string name="registerappinterface_useAppID">App ID</string>
+    <string name="registerappinterface_appIDDefault">8675309</string>
 
 </resources>

@@ -35,11 +35,13 @@
 
 #include "interfaces/MOBILE_API.h"
 #include "media_manager/redecoder_client.h"
+#include "media_manager/video_stream_producer.h"
 
 namespace media_manager {
 
 class string;
-class MediaManager : public redecoding::RedecoderClient {
+class MediaManager : public redecoding::RedecoderClient,
+                     public video_stream_producer_consumer::VideoStreamProducer {
   public:
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_hndlr) = 0;
@@ -59,6 +61,8 @@ class MediaManager : public redecoding::RedecoderClient {
                                           mobile_apis::BitsPerSample::eType,
                                           unsigned int session_key, unsigned int correlation_id) = 0;
     virtual void stopMicrophoneRecording() = 0;
+    virtual void startVideoStreaming() = 0;
+    virtual void stopVideoStreaming() = 0;
 
     virtual ~MediaManager() {
     }
