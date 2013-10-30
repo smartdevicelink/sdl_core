@@ -7,3 +7,4 @@
 --i"/usr/include/i386-linux-gnu"
 --i"/usr/include"
 --i"/usr/include/gstreamer-1.0"
+--i"/usr/include/glib-2.0"
