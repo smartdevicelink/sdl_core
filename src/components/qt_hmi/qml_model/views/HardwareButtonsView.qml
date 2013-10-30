@@ -293,8 +293,17 @@ Item {
         {
             Column {
                 PushButton {
+                    id: vehicleInfo
                     label: "Vehicle info"
+                    toggleMode: true
+                    onPressed: {
+                        viPopUp.show();
+                    }
+                    onUnpressed: {
+                        viPopUp.hide();
+                    }
                 }
+
 
                 Item {
                     height: 1

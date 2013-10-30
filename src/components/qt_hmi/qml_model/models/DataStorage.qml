@@ -407,6 +407,7 @@ QtObject {
     }
 
     property NavigationModel navigationModel: NavigationModel { }
+    property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
 

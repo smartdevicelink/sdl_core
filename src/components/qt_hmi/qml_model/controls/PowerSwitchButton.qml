@@ -60,6 +60,7 @@ Rectangle {
             if (parent.state === "Turn OFF") {
                 contentLoader.reset()
                 mainScreen.visible = true
+                warningInfo.showOkButton()
             }
         }
     }

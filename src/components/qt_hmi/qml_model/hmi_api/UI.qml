@@ -244,10 +244,14 @@ Item {
         dataContainer.uiSlider.position = position
         dataContainer.uiSlider.timeout = timeout
 
-        sliderPopup.showSlider()
-        sliderPopup.async = new Async.AsyncCall();
-        console.debug("exit")
-        return sliderPopup.async;
+        if (timeout !== 0) {
+            sliderPopup.showSlider()
+            sliderPopup.async = new Async.AsyncCall();
+            console.debug("exit")
+            return sliderPopup.async;
+        } else {
+            return { sliderPosition: position }
+        }
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
@@ -258,19 +262,13 @@ Item {
             throw Common.Result.ABORTED
         }
 
-        if(messageText !== undefined) {
-            dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
-        }
+        dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
+        dataContainer.scrollableMessageModel.softButtons.clear();
         if (softButtons !== undefined) {
-            dataContainer.scrollableMessageModel.softButtons.clear();
             softButtons.forEach(fillSoftButtons, dataContainer.scrollableMessageModel.softButtons);
         }
-        if(timeout !== undefined) {
-            dataContainer.scrollableMessageModel.timeout = timeout
-        }
-        if(appID !== undefined) {
-            dataContainer.scrollableMessageModel.appId = appID
-        }
+        dataContainer.scrollableMessageModel.timeout = timeout
+        dataContainer.scrollableMessageModel.appId = appID
         dataContainer.scrollableMessageModel.async = new Async.AsyncCall()
         contentLoader.go("./views/ScrollableMessageView.qml")
         console.debug("scrollableMessage exit")

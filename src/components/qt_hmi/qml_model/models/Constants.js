@@ -92,7 +92,7 @@ var mainScreenMiHeight = 600
 var animationDuration = 500
 
 // Duration of appearence of "OK" button at warning screen view, when HMI starts.
-var warningDuration = 500
+var warningScreenDuration = 1000
 
 // Width for long oval button
 var longOvalButtonWidth = 163

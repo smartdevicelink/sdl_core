@@ -36,7 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -151,7 +151,7 @@ Rectangle {
             }
         }
 
-        WarningInfo { }
+        WarningInfo { id: warningInfo }
 
         VRPopUp {
             id: vrPopUp
@@ -172,6 +172,11 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             visible: false
+        }
+
+        VehicleInfoPopUp {
+            id: viPopUp
+            anchors.centerIn: parent
         }
 
         InteractionPopup {
@@ -295,6 +300,7 @@ Rectangle {
         onPlayTone: {
             beep.play()
         }
+
     }
 
     Component.onCompleted: {
