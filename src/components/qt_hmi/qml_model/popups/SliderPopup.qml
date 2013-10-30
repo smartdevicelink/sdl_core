@@ -54,6 +54,7 @@ PopUp {
         } else {
             footerText.text = dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
         }
+        position = dataContainer.uiSlider.position
         show()
         timer.start()
         console.debug("exit")
