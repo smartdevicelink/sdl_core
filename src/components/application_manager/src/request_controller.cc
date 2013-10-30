@@ -104,6 +104,16 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   list_mutex_.unlock();
 }
 
+void RequestController::updateRequestTimeout(unsigned int connection_key,
+                                             unsigned int mobile_correlation_id,
+                                             unsigned int new_timeout) {
+  LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
+
+  watchdog_->updateRequestTimeout(connection_key,
+                                  mobile_correlation_id,
+                                  new_timeout);
+}
+
 void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
   LOG4CXX_INFO(logger_, "RequestController::onTimeoutExpired()");
 

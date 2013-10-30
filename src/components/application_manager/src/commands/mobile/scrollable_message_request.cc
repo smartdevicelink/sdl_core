@@ -113,7 +113,9 @@ void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      // reset timeout
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+          correlation_id(),
+          default_timeout());
       break;
     }
     default: {

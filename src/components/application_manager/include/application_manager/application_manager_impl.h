@@ -413,6 +413,17 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void removeNotification(const CommandSharedPtr& ptr);
 
+    /**
+     * @ Updates request timeout
+     *
+     * @param connection_key Connection key of application
+     * @param mobile_correlation_id Correlation ID of the mobile request
+     * @param new_timeout_value New timeout to be set
+     */
+    void updateRequestTimeout(unsigned int connection_key,
+                              unsigned int mobile_correlation_id,
+                              unsigned int new_timeout_value);
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);

@@ -1505,4 +1505,11 @@ void ApplicationManagerImpl::removeNotification(const CommandSharedPtr& ptr) {
   }
 }
 
+void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
+    unsigned int mobile_correlation_id,
+    unsigned int new_timeout_value) {
+  request_ctrl.updateRequestTimeout(connection_key, mobile_correlation_id,
+                                    new_timeout_value);
+}
+
 }  // namespace application_manager

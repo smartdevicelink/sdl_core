@@ -84,6 +84,17 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    */
   void terminateRequest(unsigned int mobile_correlation_id);
 
+  /**
+   * @ Updates request timeout
+   *
+   * @param connection_key Connection key of application
+   * @param mobile_correlation_id Correlation ID of the mobile request
+   * @param new_timeout_value New timeout to be set
+   */
+  void updateRequestTimeout(unsigned int connection_key,
+                            unsigned int mobile_correlation_id,
+                            unsigned int new_timeout);
+
   /*
    * @brief Notify subscriber that expired entry should be removed
    * using Watchdog::removeRequest(int connection_key, int correlation_id)
