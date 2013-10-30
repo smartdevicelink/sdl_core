@@ -87,8 +87,38 @@ Item {
     }
 
     function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
-        dataContainer.globalProperties.helpPrompt = helpPrompt
-        dataContainer.globalProperties.timeoutPrompt = timeoutPrompt
+        console.debug("enter: " + helpPrompt + ", " + timeoutPrompt + ", " + appID)
+        var newHelpPropmt
+        if (helpPrompt) {
+            newHelpPropmt = ""
+            for (var i = 0; i < helpPrompt.length; ++i) {
+                if (i > 0) {
+                    newHelpPropmt += ", "
+                }
+                newHelpPropmt += helpPrompt[i].text
+            }
+        }
+        else {
+            newHelpPropmt = dataContainer.globalProperties.helpPrompt
+        }
+        var newTimeoutPrompt
+        if (timeoutPrompt) {
+            newTimeoutPrompt = ""
+            for (i = 0; i < timeoutPrompt.length; ++i) {
+                if (i > 0) {
+                    newTimeoutPrompt += ", "
+                }
+                newTimeoutPrompt += timeoutPrompt[i].text
+            }
+        }
+        else {
+            newTimeoutPrompt = dataContainer.globalProperties.timeoutPrompt
+        }
+        dataContainer.globalProperties = {
+            "helpPrompt": newHelpPropmt,
+            "timeoutPrompt": newTimeoutPrompt
+        }
+        console.debug("exit")
     }
 }
 

@@ -63,7 +63,7 @@ QtObject {
     function setCurrentApplication(appId) {
         console.log("Enter setCurrentApplication function");
         var oldApplicationContext = applicationContext;
-        if (dataContainer.currentApplication.appId !== appId) {
+        if (currentApplication.appId !== appId) {
             applicationContext = false;
         }
 
@@ -405,6 +405,23 @@ QtObject {
             }
         }
         console.debug("exit")
+    }
+
+    function setVrHelp (vrHelp) {
+        this.vrHelp.clear()
+        var index
+        for (var i = 0; i < vrHelp.length; ++i) {
+            index = 0
+// sort by simple inserts
+            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
+                ++index
+            }
+            this.vrHelp.insert(index, {
+                                            "text": vrHelp[i].text,
+                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
+                                            "position": vrHelp[i].position
+                                        })
+        }
     }
 
     property NavigationModel navigationModel: NavigationModel { }

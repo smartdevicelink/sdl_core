@@ -180,26 +180,21 @@ Item {
         console.debug("exit")
     }
 
-    function setGlobalProperties (vrHelpTitle, vrHelp, appID) {
+    function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {
+        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + menuTitle + ", " + menuIcon + ", " + keyboardProperties + ", " + appID)
+        if (vrHelpTitle) {
+            vrHelpPopup.title = vrHelpTitle
+        }
+        dataContainer.setVrHelp(vrHelp)
+        console.debug("exit")
     }
 
     function showVrHelp (vrHelpTitle, vrHelp, appID) {
         console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + appID)
-        vrHelpPopup.title = vrHelpTitle ? vrHelpTitle : "VR HELP"
-        dataContainer.vrHelp.clear()
-        var index
-        for (var i = 0; i < vrHelp.length; ++i) {
-            index = 0
-// sort by simple inserts
-            while ((index < dataContainer.vrHelp.count) && (dataContainer.vrHelp.get(index).position < vrHelp[i].position)) {
-                ++index
-            }
-            dataContainer.vrHelp.insert(index, {
-                                            "text": vrHelp[i].text,
-                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
-                                            "position": vrHelp[i].position
-                                        })
+        if (vrHelpTitle) {
+            vrHelpPopup.title = vrHelpTitle
         }
+        dataContainer.setVrHelp(vrHelp)
         vrHelpPopup.activate()
         console.debug("exit")
     }

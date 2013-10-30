@@ -44,6 +44,7 @@ PopUp {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
+        text: "VR HELP" // default title
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
     }
