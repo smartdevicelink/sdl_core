@@ -118,9 +118,8 @@ Item {
                 didResult[i].didLocation = didLocation[i]
                 didResult[i].data = '0'
             }
-            console.debug("Exit")
-            return {didResult: didResult}
         }
-        return {ecuHeader: ecuHeader, dtc: dtc}
+        console.debug("Exit")
+        return {didResult: didResult}
     }
 }
