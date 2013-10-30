@@ -88,6 +88,14 @@ class PolicyManager {
      * @brief Store policy table to filesystem
      */
     void StorePolicyTable();
+    
+  protected:
+    /**
+     * @brief Get PolicyTable pointer (for testing purposes)
+     *
+     * @return PolicyTable* ptr.
+     **/
+    PolicyTable* getPolicyTable() const;
 
   private:
     /**

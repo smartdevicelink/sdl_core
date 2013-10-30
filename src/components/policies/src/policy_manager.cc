@@ -92,3 +92,10 @@ void policies_ns::PolicyManager::StorePolicyTable() {
     }
   }
 }
+
+//---------------------------------------------------------------
+
+policies_ns::PolicyTable*
+  policies_ns::PolicyManager::getPolicyTable() const {
+    return policy_table_;
+}
