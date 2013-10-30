@@ -56,7 +56,7 @@ PipeVideoServer::~PipeVideoServer() {
 bool PipeVideoServer::start() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  if((mkfifo(named_pipe_path_.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
+  if ((mkfifo(named_pipe_path_.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
       && (errno != EEXIST)) {
     LOG4CXX_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
     return false;
@@ -64,7 +64,7 @@ bool PipeVideoServer::start() {
 
   LOG4CXX_TRACE(logger_, "Pipe was successfully created");
 
-  if(pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0)) {
+  if (pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0)) {
     LOG4CXX_ERROR(logger_, "Cannot open pipe for writing " << named_pipe_path_);
     return false;
   }
@@ -86,9 +86,9 @@ void PipeVideoServer::sendMsg(const protocol_handler::RawMessagePtr& message) {
 
   ssize_t ret = write(pipe_fd_, message.get()->data(), message.get()->data_size());
 
-  if(ret == -1) {
+  if (ret == -1) {
     LOG4CXX_ERROR(logger_, "Failed writing data to pipe " << named_pipe_path_);
-  } else if(ret != message.get()->data_size()) {
+  } else if (ret != message.get()->data_size()) {
     LOG4CXX_WARN(logger_, "Couldn't write all the data to pipe " << named_pipe_path_);
   }
 

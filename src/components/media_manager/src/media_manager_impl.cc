@@ -57,17 +57,14 @@ MediaManagerImpl* MediaManagerImpl::getMediaManager() {
 MediaManagerImpl::MediaManagerImpl()
 // Six hex-pairs + five underscores + '\n'
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
-    kH264FileName("h264file.mp4"),
     protocol_handler_(NULL),
     redecoder_(NULL),
-    is_stream_running_(false),
-    app_connection_key(0),
-    video_server_() {
+    video_server_(NULL),
+    senderThread_(NULL),
+    recorderThread_(NULL) {
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
-
-
   if (NULL  != video_server_) {
     delete video_server_;
     video_server_ = NULL;
@@ -76,11 +73,6 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (NULL != redecoder_) {
     delete redecoder_;
     redecoder_ = NULL;
-  }
-
-  if (NULL != server_) {
-    delete server_;
-    server_ = NULL;
   }
 
   protocol_handler_ = NULL;
@@ -95,8 +87,7 @@ void MediaManagerImpl::SetProtocolHandler(
 
 void MediaManagerImpl::addA2DPSource(const std::string& device) {
   if (sources_.find(device) == sources_.end()) {
-    sources_.insert(std::pair<std::string, threads::Thread*>(
-                      device, NULL));
+    sources_.insert(std::pair<std::string, threads::Thread*>(device, NULL));
   }
 }
 
@@ -256,11 +247,15 @@ void MediaManagerImpl::stopMicrophoneRecording() {
 
 
 void MediaManagerImpl::startVideoStreaming() {
-  video_server_->start();
+  if (video_server_) {
+    video_server_->start();
+  }
 }
 
 void MediaManagerImpl::stopVideoStreaming() {
-  video_server_->stop();
+  if (video_server_) {
+    video_server_->stop();
+  }
 }
 
 void MediaManagerImpl::OnMessageReceived(
@@ -276,13 +271,11 @@ void MediaManagerImpl::OnMessageReceived(
   if (message->is_fully_binary()) {
 
     video_server_->sendMsg(message);
-    if (false == is_stream_running_) {
-      is_stream_running_ = true;
-    }
 
     // TODO(DK): only temporary
     static int messsages_for_session = 0;
     ++messsages_for_session;
+    int app_connection_key = 0;
     LOG4CXX_INFO(logger_, "Handling map streaming message. This is "
                  << messsages_for_session << "th message for " << app_connection_key);
 
