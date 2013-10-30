@@ -271,7 +271,7 @@ Item {
 
                 Text {
                     id: ttsLanguageLabel
-                    text: "0"//{ for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) { return s } } }
+                    text: { for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) { return s } } }
                     color: "white"
                     Connections {
                         target: dataContainer
