@@ -21,14 +21,14 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         super(streamListener, is, rpcSessionID);
     }
 
-    public synchronized void start() throws IOException {
+    public void start() throws IOException {
         if (t == null) {
             t = new Thread(this);
             t.start();
         }
     }
 
-    public synchronized void stop() {
+    public void stop() {
         try {
             if (is != null) {
                 is.close();

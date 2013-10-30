@@ -62,21 +62,7 @@ void PerformInteractionResponse::Run() {
       return;
     }
   }
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  if (!IsPendingResponseExist()) {
-    const int code = (*message_)[strings::params][hmi_response::code].asInt();
-
-    if (hmi_apis::Common_Result::SUCCESS == code) {
-      // hmi_apis::Common_Result::ABORTED == code
-      SendResponse(true, mobile_apis::Result::SUCCESS);
-    } else {
-      // TODO(DK): Some logic
-      SendResponse(false);
-    }
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

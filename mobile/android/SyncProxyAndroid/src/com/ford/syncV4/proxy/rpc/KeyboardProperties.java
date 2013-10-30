@@ -103,22 +103,6 @@ public class KeyboardProperties extends RPCStruct {
         }
     }
 
-    public Boolean getSendDynamicEntry() {
-        final Object obj = store.get(Names.sendDynamicEntry);
-        if (obj instanceof Boolean) {
-            return (Boolean) obj;
-        }
-        return null;
-    }
-
-    public void setSendDynamicEntry(Boolean sendDynamicEntry) {
-        if (sendDynamicEntry != null) {
-            store.put(Names.sendDynamicEntry, sendDynamicEntry);
-        } else {
-            store.remove(Names.sendDynamicEntry);
-        }
-    }
-
     public Vector<String> getLimitedCharacterList() {
         final Object listObj = store.get(Names.limitedCharacterList);
         if (listObj instanceof Vector<?>) {

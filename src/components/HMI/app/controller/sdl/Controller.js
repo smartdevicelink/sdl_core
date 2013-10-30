@@ -183,10 +183,16 @@ SDL.SDLController = Em.Object
             switch (element.groupName) {
             case "AlertPopUp": {
                 clearTimeout(SDL.AlertPopUp.timer);
+                SDL.AlertPopUp.timer = setTimeout(function() {
+                    SDL.AlertPopUp.deactivate();
+                }, SDL.AlertPopUp.timeout);
                 break;
             }
             case "ScrollableMessage": {
                 clearTimeout(SDL.ScrollableMessage.timer);
+                SDL.ScrollableMessage.timer = setTimeout(function() {
+                    SDL.ScrollableMessage.deactivate();
+                }, SDL.ScrollableMessage.timeout);
                 break;
             }
             }
@@ -429,14 +435,13 @@ SDL.SDLController = Em.Object
 
                 var str = SDL.SDLModel.keyboardInputValue;
 
-                if (SDL.SDLAppController.model.globalProperties.keypressMode) {
-                    switch (SDL.SDLAppController.model.globalProperties.keypressMode) {
+                if (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
+                    switch (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
                         case 'SINGLE_KEYPRESS':{
                             FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ));
                             break;
                         }
                         case 'QUEUE_KEYPRESS':{
-                            //FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue);
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
