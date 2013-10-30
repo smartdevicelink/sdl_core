@@ -50,7 +50,7 @@ PopUp {
 
     ListView {
         anchors.top: title.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: closeButton.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
@@ -71,6 +71,16 @@ PopUp {
                 font.pixelSize: Constants.fontSize
             }
         }
+    }
+
+    OvalButton {
+        id: closeButton
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: Constants.popupMargin
+        width: Constants.longOvalButtonWidth
+        text: "Close"
+        onClicked: deactivate()
     }
 
     property alias title: title.text
