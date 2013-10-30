@@ -219,12 +219,9 @@ void PerformInteractionRequest::onTimeOut() const {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
   Application* app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key]);
-  if (NULL == app) {
-      LOG4CXX_ERROR(logger_, "Application is not registered");
-      SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-      return;
-    }
-  app->set_perform_interaction_active(0);
+  if (app) {
+    app->set_perform_interaction_active(0);
+  }
   CommandRequestImpl::onTimeOut();
 }
 
@@ -270,6 +267,7 @@ void PerformInteractionRequest::ProcessVRNotification(
           mobile_apis::FunctionID::PerformInteractionID;
       smart_objects::SmartObject msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
+      msg_params[strings::choice_id] = cmd_id;
       msg_params[strings::trigger_source] =
         mobile_apis::TriggerSource::TS_VR;
       SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
