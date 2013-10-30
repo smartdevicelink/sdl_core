@@ -82,8 +82,7 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
             for (var i = 0; i < length; i++) {
                 this.get('tbtTurnListList.list.childViews').pushObject(SDL.Label.create({
                         icon        : turnListArray[i].turnIcon ? turnListArray[i].turnIcon.value : "",
-                        content     : turnListArray[i].navigationText.fieldText,
-                        templateName: turnListArray[i].turnIcon ? 'icon' : 'text',
+                        content     : turnListArray[i].navigationText ? turnListArray[i].navigationText.fieldText : "",
                         classNames  : 'list-item'
                     }));
             }
