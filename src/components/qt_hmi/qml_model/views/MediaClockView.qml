@@ -1,6 +1,6 @@
 /**
- * @file VehicleInfo.qml
- * @brief Vehicle information interface realisation.
+ * @file MediaClockView.qml
+ * @brief Media clock view
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,57 +33,40 @@
  */
 
 import QtQuick 2.0
-import "Common.js" as Common
+import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 Item {
-    function isReady () {
-        return {
-            available: dataContainer.hmiVehicleInfoAvailable
-        }
+    Text {
+        id: time
+        anchors.left: parent.left
+        width: 1/10 * parent.width
+        anchors.verticalCenter: parent.verticalCenter
+        horizontalAlignment: Text.AlignRight
+        color: "white"
+        text: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
+                                                     : "02:36" //TODO {Aleshin}: get track time for all players except SDL
+        font.pixelSize: 18
     }
 
-    function getVehicleType() {
-        return {
-            "vehicleType": {
-                "make": "Ford",
-                "model": "Fiesta",
-                "modelYear": "2013",
-                "trim": "SE"
-                }
+    Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
+        width: 2/3 * parent.width
+
+        Rectangle {
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: dataContainer.currentApplication.mediaClock.progress * parent.width
+           color: "white"
         }
-    }
 
-    function getDTCs(ecuName, dtcMask, appID) {
-        var ecuHeader = 2
-        var dtc = []
-
-        for (var i = 0; i < 3; i++) {
-            dtc.push("line" + i)
+        Rectangle {
+           anchors.verticalCenter: parent.verticalCenter
+           height: 2
+           width: (1 - dataContainer.currentApplication.mediaClock.progress) * parent.width
+           color: Constants.primaryColor
         }
-        return {ecuHeader: ecuHeader, dtc: dtc}
-    }
-
-    function readDID(ecuName, didLocation, appID) {
-        console.debug("Enter")
-        //TODO{ALeshin}: refactoring of this function, when we'll have Vehicle Info module
-        var didResult = []
-
-        for (var i = 0; i < didLocation.length; i++) {
-            if (i < 10) {
-                didResult[i] = {}
-                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_SUCCESS
-                didResult[i].didLocation = didLocation[i]
-                didResult[i].data = '0'
-            }
-            else {
-                didResult[i] = {}
-                didResult[i].resultCode = Common.VehicleDataResultCode.VDRC_DATA_NOT_AVAILABLE
-                didResult[i].didLocation = didLocation[i]
-                didResult[i].data = '0'
-            }
-            console.debug("Exit")
-            return {didResult: didResult}
-        }
-        return {ecuHeader: ecuHeader, dtc: dtc}
     }
 }

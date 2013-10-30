@@ -165,6 +165,12 @@ class FordXmlParser:
         for param_el in request_el.findall('param'):
             arg_el = self.create_arg_element(result, param_el, interface)
             arg_el.set('direction', 'in')
+
+        arg_el = ElementTree.SubElement(result, 'arg')
+        arg_el.set('name', 'retCode')
+        arg_el.set('type', 'i')
+        arg_el.set('direction', 'out')
+        
         for param_el in response_el.findall('param'):
             arg_el = self.create_arg_element(result, param_el, interface)
             arg_el.set('direction', 'out')

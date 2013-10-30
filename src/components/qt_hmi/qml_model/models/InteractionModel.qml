@@ -43,7 +43,7 @@ QtObject {
     property var async
 
     function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
-        console.debug("InteractionModel::performInteraction()")
+        console.debug("enter")
         this.initialText = initialText.fieldText
         choice.clear()
         for (var i = 0; i < choiceSet.length; ++i) {
@@ -52,7 +52,7 @@ QtObject {
         this.timeout = timeout
         interactionPopup.activate()
         async = new Async.AsyncCall()
-        console.debug("InteractionModel::performInteraction(): exit")
+        console.debug("exit")
         return async
     }
 }

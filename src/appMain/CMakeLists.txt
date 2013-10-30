@@ -1,5 +1,3 @@
-find_package(LibXml2)
-
 IF (${WEB_HMI})
 set (BROKER_LIBRARIES
   MessageBrokerClient
@@ -49,7 +47,6 @@ add_definitions(${GLIB2_CFLAGS})
 include_directories (
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
-  ${LIBXML2_INCLUDE_DIR}
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/

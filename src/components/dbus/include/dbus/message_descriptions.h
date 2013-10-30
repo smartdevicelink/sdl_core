@@ -43,7 +43,7 @@ enum ParameterType {Integer, Boolean, Float, String, Struct, Enum, Array};
 struct ParameterDescription {
   const char* name;
   const ParameterType type;
-  const bool obligatory;
+  const bool obligatory; // TODO (dchmerev@luxoft.com): rename to 'mandatory' as in HMI API description
 };
 
 struct ArrayDescription {
