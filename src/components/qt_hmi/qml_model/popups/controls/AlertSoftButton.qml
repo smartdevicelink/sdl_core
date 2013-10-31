@@ -67,9 +67,9 @@ OvalButton {
 
     onReleased: {
         sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID)
-        if (actionOnRelease == SoftButton.Action.closeOnRelease) {
+        if (actionOnRelease === SoftButton.Action.closeOnRelease) {
             alertWindow.complete();
-        } else if (actionOnRelease == SoftButton.Action.keepOnRelease) {
+        } else if (actionOnRelease === SoftButton.Action.keepOnRelease) {
             alertWindow.restart();
         }
     }
@@ -78,9 +78,9 @@ OvalButton {
         sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                      Common.ButtonPressMode.SHORT,
                                  button.softButtonID);
-        if (actionOnRelease == SoftButton.Action.closeOnClicked) {
+        if (actionOnRelease === SoftButton.Action.closeOnClicked) {
             alertWindow.complete();
-        } else if (actionOnRelease == SoftButton.Action.keepOnClicked) {
+        } else if (actionOnRelease === SoftButton.Action.keepOnClicked) {
             alertWindow.restart();
         }
     }

@@ -75,6 +75,7 @@ QtObject {
                 currentApplication.appType = application.appType
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
+                currentApplication.softButtons = application.softButtons
 
                 if (application.hmiUIText.mainField1) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
@@ -101,7 +102,6 @@ QtObject {
                 currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
-                currentApplication.softButtons = application.softButtons
                 // This place is for adding new properties
             }
         }

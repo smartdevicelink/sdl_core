@@ -63,11 +63,16 @@ Item {
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock],
-                    "picture": fieldSubstrings[Common.TextFieldName.picture],
-                    "softButtons": softButtons
+                    "picture": fieldSubstrings[Common.TextFieldName.picture]
                   }
             }
         )
+        dataContainer.getApplication(appID).softButtons.clear()
+        for (var i = 0; i < softButtons.length; ++i) {
+            console.log("SHOW: APPEND SOFTBUTTONS");
+            dataContainer.getApplication(appID).softButtons.append(softButtons[i]);
+        }
+
         if (alignment !== undefined) {
             switch (alignment) {
                 case Common.TextAlignment.LEFT_ALIGNED:

@@ -66,13 +66,8 @@ GeneralView {
                 dest: "./views/SDLPlayerOptionsListView.qml"
             },
 
-            LongOvalButton {
-                text: "Browse"
-                pixelSize: Constants.fontSize
-            },
-
             ListView {
-                width: model.count * longOvalButton.width + (model.count - 1) * flickRow.spacing
+                width: model.count * longOvalButton.width + (model.count - 1) * 20
                 height: longOvalButton.height
                 model: dataContainer.currentApplication.softButtons
                 orientation: ListView.Horizontal
