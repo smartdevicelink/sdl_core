@@ -112,8 +112,15 @@ Item {
         return async
     }
 
-    function setMediaClockTimer (startTime, updateMode, appID) {
-        console.debug("enter")
+    function setMediaClockTimer (startTime, endTime, updateMode, appID) {
+        console.debug("enter: {" +
+                          startTime.hours + ", " +
+                          startTime.minutes + ", " +
+                          startTime.seconds +
+                      "}, " +
+                      endTime + ", " +
+                      updateMode + ", " +
+                      appID)
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
         var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)

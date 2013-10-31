@@ -97,3 +97,25 @@ function hmsTimeToString (hmsTime) {
     string += pad(seconds, 2)
     return string
 }
+
+function mediaClockUpdateModeToString (mediaClockUpdateMode) {
+    switch (mediaClockUpdateMode) {
+        case MediaClockUpdateMode.MCU_COUNTUP:
+            return "Internal.MediaClockUpdateMode.MCU_COUNTUP"
+        case MediaClockUpdateMode.MCU_COUNTDOWN:
+            return "Internal.MediaClockUpdateMode.MCU_COUNTDOWN"
+        default:
+            return ""
+    }
+}
+
+function mediaClockRunningModeToString (mediaClockRunningMode) {
+    switch (mediaClockRunningMode) {
+        case MediaClockRunningMode.MCR_RUNNING:
+            return "Internal.MediaClockRunningMode.MCR_RUNNING"
+        case MediaClockRunningMode.MCR_STOPPED:
+            return "Internal.MediaClockRunningMode.MCR_STOPPED"
+        default:
+            return ""
+    }
+}
