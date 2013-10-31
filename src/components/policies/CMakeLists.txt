@@ -3,6 +3,8 @@ include_directories (
   ../application_manager/include/
   ../utils/include/
   ../smart_objects/include/
+  ../formatters/include/
+  ../../thirdPartyLibs/jsoncpp/include/
 )
 
 set (SOURCES
@@ -11,4 +13,6 @@ set (SOURCES
     ./src/policy_table.cc
 )
 
+
 add_library("policies" ${SOURCES})
+target_link_libraries ("policies" formatters jsoncpp)

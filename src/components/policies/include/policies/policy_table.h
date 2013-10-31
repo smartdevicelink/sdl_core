@@ -46,6 +46,7 @@ namespace PTValidationResult {
 enum eType {
   VALIDATION_OK = 0,
   VALIDATION_FAILED_NO_SCHEMA,
+  VALIDATION_FAILED_BAD_JSON,
   VALIDATION_FAILED
 };
 }
@@ -116,6 +117,11 @@ class PolicyTable {
      * @brief is schema set
      */
     bool is_schema_set_;
+    
+    /**
+     * @brief is Policy Table valid
+     **/
+    PTValidationResult::eType is_PT_valid_;
 
     /**
      * @brief Schema to verify policy table

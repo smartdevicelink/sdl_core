@@ -3,12 +3,12 @@
         "module_config":{
             "endpoints":{
                 "0x07":{
-                   "default":[
+                   "default":#
                         "http://applinkqa.trafficmanager.net/api/policies"
                    ]
                 }
             }
-        },
+        }
         "functional_groupings":{
             "Base-4":{
                 "rpcs":{
