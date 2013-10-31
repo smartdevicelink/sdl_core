@@ -7,6 +7,7 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/thirdPartyLibs/jsoncpp/include/
+  ../../../src/thirdPartyLibs/MessageBroker/src/
   ../../../test/components/
   ${CMAKE_BINARY_DIR}
 )
@@ -21,6 +22,7 @@ set (LIBRARIES
     policies
     Utils
     ConfigProfile
+    MessageBroker
 )
 
 set (SOURCES

@@ -34,6 +34,7 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "lib_messagebroker/md5.h"
 #include "policies/policy_manager.h"
 #include "policies/policy_table.h"
 #include "policies/policy_configuration.h"
@@ -82,36 +83,54 @@ namespace policies_draft_test {
 	      policy_manager.getPolicyTable()->Validate());
   }
   
-  TEST(policies_test, test_policies_json_validate_test) {
+  TEST(policies_test, test_policies_read_store_compare_test) {
     pn::PolicyConfiguration policy_config;
     policy_config.setPTFileName("SDLPolicyTable_basic.json");
     PolicyManagerTest policy_manager(policy_config);
-    
-    //TODO: set schema
-    
-    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
-      policy_manager.getPolicyTable()->Validate());
-    
-    so_ns::SmartObject initial_obj(
-      policy_manager.getPolicyTable()->AsSmartObject());
+        
+    std::string initial_json(policy_manager.getPolicyTable()->AsString());
     
     policy_config.setPTFileName("Stored.json");
     policy_manager.StorePolicyTable();
     
     PolicyManagerTest policy_manager2(policy_config);
+           
+    std::string stored_json(policy_manager2.getPolicyTable()->AsString());
     
-    //TODO: set schema
-    
-    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
-      policy_manager2.getPolicyTable()->Validate());
-    
-    so_ns::SmartObject stored_obj(
-      policy_manager2.getPolicyTable()->AsSmartObject());
-      
-    //TODO: compare smart objects.
-    
-    //TODO: implement files comapre???
+    ASSERT_EQ(md5(initial_json), md5(stored_json));
   }
+  
+  
+//   TEST(policies_test, test_policies_json_validate_test) {
+//     pn::PolicyConfiguration policy_config;
+//     policy_config.setPTFileName("SDLPolicyTable_basic.json");
+//     PolicyManagerTest policy_manager(policy_config);
+//     
+//     //TODO: set schema
+//     
+//     ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
+//       policy_manager.getPolicyTable()->Validate());
+//     
+//     so_ns::SmartObject initial_obj(
+//       policy_manager.getPolicyTable()->AsSmartObject());
+//     
+//     policy_config.setPTFileName("Stored.json");
+//     policy_manager.StorePolicyTable();
+//     
+//     PolicyManagerTest policy_manager2(policy_config);
+//     
+//     //TODO: set schema
+//     
+//     ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
+//       policy_manager2.getPolicyTable()->Validate());
+//     
+//     so_ns::SmartObject stored_obj(
+//       policy_manager2.getPolicyTable()->AsSmartObject());
+//       
+//     //TODO: compare smart objects.
+//     
+//     //TODO: implement files comapre???
+//   }
   
   
 } // namespace policies_draft_test
