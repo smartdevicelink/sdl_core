@@ -67,7 +67,7 @@ GeneralView {
             },
 
             ListView {
-                width: model.count * longOvalButton.width + (model.count - 1) * 20
+                width: model ? model.count * longOvalButton.width + (model.count - 1) * 20 : 0
                 height: longOvalButton.height
                 model: dataContainer.currentApplication.softButtons
                 orientation: ListView.Horizontal

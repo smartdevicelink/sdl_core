@@ -67,11 +67,9 @@ Item {
                   }
             }
         )
-        dataContainer.getApplication(appID).softButtons.clear()
-        for (var i = 0; i < softButtons.length; ++i) {
-            console.log("SHOW: APPEND SOFTBUTTONS");
-            dataContainer.getApplication(appID).softButtons.append(softButtons[i]);
-        }
+        var app = dataContainer.getApplication(appID);
+        app.softButtons.clear()
+        softButtons.forEach(function(x) { app.softButtons.append(x); });
 
         if (alignment !== undefined) {
             switch (alignment) {

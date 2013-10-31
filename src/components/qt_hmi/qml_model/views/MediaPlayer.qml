@@ -52,7 +52,8 @@ Item {
     // Holds players state(song name, play/pause state, track number etc). For all players except SDL.
     property PlayerState playerState;
 
-    property alias buttons: flickRow.content
+    property alias buttons: buttonsRow.content
+    property alias buttonsSpacing: buttonsRow.spacing
 
     Item {
         // top 3/4 screen
@@ -70,10 +71,12 @@ Item {
             height: parent.height * 1/4
 
             PagedFlickable {
-                id: flickRow
+                id: buttonsRow
                 width: parent.width
-                spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
-                                                                : (width - longOvalButton.width * 2)
+                //spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
+                                                                //: (width - longOvalButton.width * 2)
+                spacing: 20
+
                 snapTo: longOvalButton.width + spacing
                 elementWidth: longOvalButton.width
             }
