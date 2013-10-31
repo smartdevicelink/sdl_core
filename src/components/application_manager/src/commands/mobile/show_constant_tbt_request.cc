@@ -81,11 +81,15 @@ void ShowConstantTBTRequest::Run() {
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
+      result_ = verification_result;
+    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

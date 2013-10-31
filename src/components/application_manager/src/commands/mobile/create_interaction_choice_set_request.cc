@@ -68,12 +68,17 @@ void CreateInteractionChoiceSetRequest::Run() {
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
+  mobile_apis::Result::eType  result_ = mobile_apis::Result::SUCCESS;
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
+      result_ = verification_result;
+    }
   }
 
   const int choise_set_id =
@@ -86,19 +91,18 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  if ((false == CheckChoiceSetMenuNames())
-      || (false == CheckChoiceSetVRSynonyms())) {
+  if ((false == CheckChoiceSetMenuNames()) ||
+      (false == CheckChoiceSetVRSynonyms())) {
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
-  const int choice_set_id =
-      (*message_)[strings::msg_params]
-                  [strings::interaction_choice_set_id].asInt();
+  const int choice_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
 
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
 
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+  SendResponse(true, result_);
 }
 
 bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
