@@ -97,6 +97,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
   MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
   MessageBrokerController::subscribeTo("UI.OnTouchEvent");
+  MessageBrokerController::subscribeTo("UI.OnResetTimeout");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");
