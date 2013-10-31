@@ -62,6 +62,17 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params = (*message_)[strings::msg_params];
+
+  // TODO(DK): Missing mandatory param
+  if (!msg_params.keyExists(strings::soft_buttons)) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    return;
+  }
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -91,10 +102,6 @@ void ShowConstantTBTRequest::Run() {
       result_ = verification_result;
     }
   }
-
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
 
   msg_params[strings::app_id] = app->app_id();
 

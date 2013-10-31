@@ -76,7 +76,8 @@ void RegisterAppInterfaceRequest::Run() {
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
         correlation_id(),
         default_timeout());
-    timer_->StartWait(1);
+    // TODO(DK): Timer
+    sleep(1);
   }
 
   Application* application_impl = ApplicationManagerImpl::instance()
