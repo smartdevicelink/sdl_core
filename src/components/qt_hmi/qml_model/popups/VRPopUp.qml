@@ -87,7 +87,7 @@ PopUp {
         }
         Rectangle {
             id: scrollbar
-            visible: true
+            visible: listCommands.height < listCommands.contentHeight
             anchors.right: listCommands.right
             y: listCommands.visibleArea.yPosition * listCommands.height
             width: Constants.scrollBarWidth
