@@ -128,7 +128,7 @@ namespace NsSmartDeviceLink
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
-        private:
+        protected:
             /**
              * @brief Constructor.
              *
