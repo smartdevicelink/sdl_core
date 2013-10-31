@@ -73,6 +73,9 @@ void RegisterAppInterfaceRequest::Run() {
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
+    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+        correlation_id(),
+        default_timeout());
     timer_->StartWait(1);
   }
 
