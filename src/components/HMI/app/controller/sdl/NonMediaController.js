@@ -102,16 +102,14 @@ SDL.NonMediaController = Em.Object.create( {
             if (SDL.States.info.nonMedia.active) {
 
                 SDL.SDLAppController.model.set('active', false);
-                var index = SDL.SDLModel.registeredApps
-                    .indexOf(SDL.SDLModel.registeredApps.filterProperty('appID',
-                        appID)[0]);
-                SDL.SDLModel.registeredApps.replace(index, 1);
 
                 SDL.States.goToStates('info.apps');
-
-                SDL.InfoController.set('activeState', 'info.apps');
             }
+
+            SDL.InfoController.set('activeState', 'info.apps');
+
             this.set('currentAppId', 0);
         }
+        SDL.SDLModel.get('registeredApps').removeObjects(SDL.SDLModel.get('registeredApps').filterProperty('appID', appID));
     }
 });

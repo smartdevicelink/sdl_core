@@ -42,9 +42,10 @@ Item {
         }
     }
 
-    function showConstantTBT(navigationTexts, turnIcon, distanceToManeuver,
+    function showConstantTBT(navigationTexts, turnIcon, nextTurnIcon, distanceToManeuver,
                              distanceToManeuverScale, maneuverComplete,
                              softButtons, appID) {
+        console.debug("enter")
         navigationTexts.forEach(fillTexts);
         if (turnIcon !== undefined) {
             dataContainer.navigationModel.icon = turnIcon;
@@ -59,7 +60,8 @@ Item {
             softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.softButtons);
         }
         dataContainer.navigationModel.appId = appID;
-        contentLoader.go("./views/TurnByTurnView.qml");
+        contentLoader.go("./views/TurnByTurnView.qml");        
+        console.debug("exit")
     }
 
     function alertManeuver(softButtons) {

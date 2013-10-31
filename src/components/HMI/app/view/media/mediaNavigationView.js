@@ -53,7 +53,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     actionUp:function(event){
 
 
-        if (event.originalEvent.type == 'touchstart') {
+        if (event.originalEvent.type == 'touchend') {
             SDL.SDLModel.onTouchEvent(event);
         }
     },
@@ -61,7 +61,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     actionDown:function(event){
 
 
-        if (event.originalEvent.type == 'touchend') {
+        if (event.originalEvent.type == 'touchstart') {
             SDL.SDLModel.onTouchEvent(event);
         }
     },

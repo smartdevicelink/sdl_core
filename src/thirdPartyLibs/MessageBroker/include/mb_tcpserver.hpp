@@ -15,8 +15,8 @@
 #include "CSender.hpp"
 #include "websocket_handler.hpp"
 
-#define RECV_BUFFER_LENGTH 2200
-#define MAX_RECV_DATA 2048
+#define RECV_BUFFER_LENGTH 4097
+#define MAX_RECV_DATA 4096
 
 /**
  * \namespace NsMessageBroker

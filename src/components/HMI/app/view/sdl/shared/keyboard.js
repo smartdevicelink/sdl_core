@@ -199,7 +199,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         if (SDL.SDLAppController.model && list){
 
             for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
-                if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) >= 0) {
+                if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) < 0) {
                     this.buttonsAreaQWERTY._childViews[i].set('disabled', true);
                     this.buttonsAreaQWERTZ._childViews[i].set('disabled', true);
                     this.buttonsAreaAZERTY._childViews[i].set('disabled', true);

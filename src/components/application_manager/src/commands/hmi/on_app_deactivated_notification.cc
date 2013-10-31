@@ -54,9 +54,7 @@ void OnAppDeactivatedNotification::Run() {
   Application* app = ApplicationManagerImpl::instance()->active_application();
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "Memory allocation in OnAppDeactivatedNotification::Run failed!");
+    LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
     return;
   }
 

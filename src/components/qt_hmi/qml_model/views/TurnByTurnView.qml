@@ -143,7 +143,7 @@ GeneralView {
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
                     width: parent.width - turnIcon.width - spacing
-                    spacing: (height - text1.height - text2.height - text3.height) / 2
+                    spacing: (height - text1.height - text2.height - text3.height - text4.height) / 3
 
                     Text {
                         id: text1
@@ -153,12 +153,17 @@ GeneralView {
                     }
 
                     Text {
-                        // TODO(KKolodiy): make 2 columns for this text, and change font
                         id: text2
-                        text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver + "Total datance: " + dataContainer.navigationModel.totalDistance
+                        text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver
                         color: Constants.primaryColor
                         font.pixelSize: Constants.fontSize
+                    }
 
+                    Text {
+                        id: text4
+                        text: "Total datance: " + dataContainer.navigationModel.totalDistance
+                        color: Constants.primaryColor
+                        font.pixelSize: Constants.fontSize
                     }
 
                     Text {
@@ -177,7 +182,6 @@ GeneralView {
                 width: parent.width
                 height: 1/4 * parent.height
             }
-
         }
 
         Item {

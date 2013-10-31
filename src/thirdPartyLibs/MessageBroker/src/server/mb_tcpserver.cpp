@@ -62,7 +62,7 @@ namespace NsMessageBroker
    bool TcpServer::Recv(int fd)
    {
       ssize_t nb = -1;
-      char buf[RECV_BUFFER_LENGTH];
+      char buf[RECV_BUFFER_LENGTH] = {'\0'};
 
       nb = recv(fd, buf, MAX_RECV_DATA, 0);
       DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
@@ -71,7 +71,10 @@ namespace NsMessageBroker
          if (isWebSocket(fd))
          {
             mWebSocketHandler.parseWebSocketData(buf, (unsigned int&)nb);
-            assert(nb < RECV_BUFFER_LENGTH);
+            //assert(nb < RECV_BUFFER_LENGTH);
+            if (nb > RECV_BUFFER_LENGTH) {
+              nb = MAX_RECV_DATA;
+            }
          }
          std::string msg = std::string(buf, nb);
          DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));

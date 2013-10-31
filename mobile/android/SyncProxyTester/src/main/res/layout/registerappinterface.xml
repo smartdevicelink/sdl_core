@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/registerappinterface_Root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:minWidth="300dp"
+            android:orientation="vertical"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip">
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useSyncMsgVersion"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useSyncMsgVersion"/>
+
+        <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:orientation="horizontal">
+
+            <EditText
+                    android:id="@+id/registerappinterface_syncMsgVersionMajor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:freezesText="true"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:text="@string/registerappinterface_syncMsgVersionMajor"/>
+
+            <EditText
+                    android:id="@+id/registerappinterface_syncMsgVersionMinor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:freezesText="true"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:text="@string/registerappinterface_syncMsgVersionMinor"/>
+
+        </LinearLayout>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useAppName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useAppName"/>
+
+        <EditText
+                android:id="@+id/registerappinterface_appName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:freezesText="true"
+                android:inputType="textCapWords"
+                android:maxLength="100"
+                android:text="@string/tester_app_name"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useTTSName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useTTSName"/>
+
+        <EditText
+                android:id="@+id/registerappinterface_ttsName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapWords"
+                android:text="@string/registerappinterface_ttsNameDefault"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useNgnAppName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useNgnAppName"/>
+
+        <EditText
+                android:id="@+id/registerappinterface_ngnAppName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapWords"
+                android:text="@string/registerappinterface_ngnAppNameDefault"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useVRSynonyms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useVRSynonyms"/>
+
+        <EditText
+                android:id="@+id/registerappinterface_vrSynonyms"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/registerappinterface_vrSynonymsDefault"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_isMediaApp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_isMediaApp"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useDesiredLang"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useDesiredLang"/>
+
+        <Spinner
+                android:id="@+id/registerappinterface_desiredLangSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useHMIDesiredLang"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useHMIDesiredLang"/>
+
+        <Spinner
+                android:id="@+id/registerappinterface_hmiDesiredLangSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useAppHMITypes"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useAppHMITypes"/>
+
+        <com.ford.syncV4.android.activity.MultiSpinner
+                android:id="@+id/registerappinterface_appHMITypeSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <CheckBox
+                android:id="@+id/registerappinterface_useAppID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/registerappinterface_useAppID"/>
+
+        <EditText
+                android:id="@+id/registerappinterface_appID"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:inputType="textCapSentences"
+                android:text="@string/registerappinterface_appIDDefault"/>
+
+    </LinearLayout>
+
+</ScrollView>

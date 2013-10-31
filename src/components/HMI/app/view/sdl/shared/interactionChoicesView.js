@@ -91,6 +91,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
         timer: null,
 
+        timeout: null,
+
         search: false,
 
         list: false,
@@ -101,6 +103,20 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          * Identifier of current request
          */
         performInteractionRequestID: null,
+
+        /**
+         * Method updates popup timer when data changes through keyboard
+         */
+        timerUpdate: function (){
+            if (this.timeout) {
+                clearTimeout(this.timer);
+                var self = this;
+                this.timer = setTimeout(function () {
+
+                    self.deactivate("TIMED_OUT");
+                }, this.timeout);
+            }
+        }.observes('this.input.value'),
 
         /**
          * Activate window and set caption text
@@ -235,6 +251,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
             this.input.set('value', null);
             this.set('captionText.content', 'Interaction Choices');
+            this.set('timeout', null);
             this.listOfChoices.items = [];
             this.listOfChoices.list.refresh();
             var length = this.get('naviChoises.childViews').length;
@@ -252,6 +269,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         preformChoices: function (data, performInteractionRequestID, timeout) {
 
             this.set('performInteractionRequestID', performInteractionRequestID);
+
+            this.set('timeout', timeout);
 
             if (data) {
 
@@ -293,7 +312,9 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         preformChoicesNavigation: function (data, performInteractionRequestID, timeout) {
 
-             this.set('performInteractionRequestID', performInteractionRequestID);
+            this.set('performInteractionRequestID', performInteractionRequestID);
+
+            this.set('timeout', timeout);
 
             if (data) {
 

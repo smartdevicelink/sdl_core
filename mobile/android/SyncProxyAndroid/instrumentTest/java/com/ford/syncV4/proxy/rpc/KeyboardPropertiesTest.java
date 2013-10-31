@@ -19,7 +19,6 @@ public class KeyboardPropertiesTest extends TestCase {
     private static final String LANGUAGE = "language";
     private static final String KEYBOARD_LAYOUT = "keyboardLayout";
     private static final String KEYPRESS_MODE = "keypressMode";
-    private static final String SEND_DYNAMIC_ENTRY = "sendDynamicEntry";
     private static final String LIMITED_CHARACTER_LIST = "limitedCharacterList";
     private static final String AUTO_COMPLETE_TEXT = "autoCompleteText";
     private static final String KEYPRESS_MODE_DEFAULT = "RESEND_CURRENT_ENTRY";
@@ -41,19 +40,17 @@ public class KeyboardPropertiesTest extends TestCase {
         msg.setLanguage(lang);
         msg.setKeyboardLayout(kbdLayout);
         msg.setKeypressMode(keypressMode);
-        msg.setSendDynamicEntry(sendDynamicEntry);
+
         msg.setLimitedCharacterList(charList);
         msg.setAutoCompleteText(autoCompleteText);
 
         JSONObject jsonObject = msg.serializeJSON();
-        assertEquals(6, jsonObject.length());
+        assertEquals(5, jsonObject.length());
         assertEquals(lang.toString(), jsonObject.getString(LANGUAGE));
         assertEquals(kbdLayout.toString(),
                 jsonObject.getString(KEYBOARD_LAYOUT));
         assertEquals(keypressMode.toString(),
                 jsonObject.getString(KEYPRESS_MODE));
-        assertEquals(sendDynamicEntry,
-                jsonObject.getBoolean(SEND_DYNAMIC_ENTRY));
         assertTrue(jsonObject.has(LIMITED_CHARACTER_LIST));
         assertEquals(autoCompleteText,
                 jsonObject.getString(AUTO_COMPLETE_TEXT));
@@ -68,7 +65,7 @@ public class KeyboardPropertiesTest extends TestCase {
         assertNull(msg.getKeyboardLayout());
         assertEquals("Incorrect default message", KEYPRESS_MODE_DEFAULT,
                 msg.getKeypressMode().toString());
-        assertNull(msg.getSendDynamicEntry());
+
         assertNull(msg.getLimitedCharacterList());
         assertNull(msg.getAutoCompleteText());
     }
@@ -217,53 +214,6 @@ public class KeyboardPropertiesTest extends TestCase {
         assertNotNull(msg);
         assertEquals("Incorrect default message", KEYPRESS_MODE_DEFAULT,
                 msg.getKeypressMode().toString());
-    }
-
-    public void testSendDynamicEntryAPI() {
-        KeyboardProperties msg = new KeyboardProperties();
-
-        final Boolean sendDynamicEntry = true;
-        msg.setSendDynamicEntry(sendDynamicEntry);
-
-        assertEquals(sendDynamicEntry, msg.getSendDynamicEntry());
-    }
-
-    public void testRemoveSendDynamicEntry() {
-        KeyboardProperties msg = new KeyboardProperties();
-        msg.setSendDynamicEntry(true);
-        msg.setSendDynamicEntry(null);
-        assertNull(msg.getSendDynamicEntry());
-    }
-
-    public void testGetSendDynamicEntry() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        final Boolean sendDynamicEntry = false;
-        jsonObject.put(SEND_DYNAMIC_ENTRY, sendDynamicEntry);
-
-        KeyboardProperties msg = new KeyboardProperties(
-                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
-        assertNotNull(msg);
-        assertEquals(sendDynamicEntry, msg.getSendDynamicEntry());
-    }
-
-    public void testGetSendDynamicEntryFromString() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(SEND_DYNAMIC_ENTRY, "true");
-
-        KeyboardProperties msg = new KeyboardProperties(
-                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
-        assertNotNull(msg);
-        assertNull(msg.getSendDynamicEntry());
-    }
-
-    public void testGetSendDynamicEntryIncorrect() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(SEND_DYNAMIC_ENTRY, 42);
-
-        KeyboardProperties msg = new KeyboardProperties(
-                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
-        assertNotNull(msg);
-        assertNull(msg.getSendDynamicEntry());
     }
 
     public void testLimitedCharacterListAPI() {

@@ -40,7 +40,8 @@ set (SOURCES
     ./src/media_manager_impl.cc
     ./src/from_mic_to_file_recorder_thread.cc
     ./src/a2dp_source_player_thread.cc
-    ./src/video_server.cc
+    ./src/socket_video_server.cc
+    ./src/pipe_video_server.cc
     ./src/audio_stream_sender_thread.cc
 )
 

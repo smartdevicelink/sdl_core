@@ -82,17 +82,14 @@ void OnVRCommandNotification::Run() {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
-
-  event_engine::Event event(hmi_apis::FunctionID::VR_OnCommand);
-  event.set_smart_object(*message_);
-  event.raise();
-
   /* check if perform interaction is active
    * if it is active we should sent to HMI DeleteCommand request
    * and PerformInterActionResponse to mobile
    */
-  if (0 != app->is_perform_interaction_active()
-      && PerformInteractionHandling(app)) {
+  if (0 != app->is_perform_interaction_active()) {
+    event_engine::Event event(hmi_apis::FunctionID::VR_OnCommand);
+    event.set_smart_object(*message_);
+    event.raise();
   } else {
     (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnCommandID;
@@ -101,94 +98,6 @@ void OnVRCommandNotification::Run() {
       mobile_apis::TriggerSource::TS_VR;
     SendNotificationToMobile(message_);
   }
-}
-
-bool OnVRCommandNotification::PerformInteractionHandling(
-  Application* const app) {
-  LOG4CXX_INFO(logger_, "OnVRCommandNotification::PerformInteractionHandling");
-  int cmd_id = (*message_)[strings::msg_params][strings::cmd_id].asInt();
-
-  const PerformChoiceSetMap& choice_set_map = app
-      ->performinteraction_choice_set_map();
-  bool choice_id_chosen = false;
-
-  LOG4CXX_INFO(logger_, "If command was choice id");
-
-  for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-       choice_set_map.end() != it; ++it) {
-    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-          strings::choice_set);
-
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      if (cmd_id
-          == choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
-        choice_id_chosen = true;
-        break;
-      }
-    }
-  }
-
-  if (choice_id_chosen) {
-    LOG4CXX_INFO(logger_, "Command was choice id!");
-
-    // send response
-    smart_objects::SmartObject* p_i_response_so =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (!p_i_response_so) {
-      LOG4CXX_ERROR(
-        logger_,
-        "Failed to allocate memory for perform interaction response.");
-    }
-    smart_objects::SmartObject& p_i_response = *p_i_response_so;
-    p_i_response[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::PerformInteractionID;
-    p_i_response[strings::params][strings::message_type] =
-      mobile_apis::messageType::response;
-    p_i_response[strings::params][strings::connection_key] = app->app_id();
-    p_i_response[strings::params][strings::correlation_id] = app
-        ->is_perform_interaction_active();
-    app->set_perform_interaction_active(0);
-    p_i_response[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-    p_i_response[strings::msg_params][strings::choice_id] = cmd_id;
-    p_i_response[strings::msg_params][strings::trigger_source] =
-      mobile_apis::TriggerSource::TS_VR;
-    ApplicationManagerImpl::instance()->ManageMobileCommand(p_i_response_so);
-
-    MessageChaining* chain =
-      ApplicationManagerImpl::instance()->GetMessageChain(
-        app->perform_interaction_ui_corrid());
-    if (chain) {
-      unsigned int mobile_cor_id = chain->correlation_id();
-      ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        app->perform_interaction_ui_corrid(), mobile_cor_id);
-      app->set_perform_interaction_ui_corrid(0);
-    }
-
-    for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-         choice_set_map.end() != it; ++it) {
-      const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-            strings::choice_set);
-
-      for (size_t j = 0; j < choice_set.length(); ++j) {
-        smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
-        msg_params[strings::app_id] = app->app_id();
-        msg_params[strings::cmd_id] = choice_set.getElement(j).getElement(
-                                        strings::choice_id);
-
-        CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
-      }
-    }
-
-    app->DeletePerformInteractionChoiceSetMap();
-
-    CreateHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map));
-    app->set_perform_interaction_mode(-1);
-  }
-
-  return choice_id_chosen;
 }
 
 }  // namespace commands

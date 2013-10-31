@@ -248,7 +248,6 @@ Item {
 
                 Text {
                     id: uiLanguageLabel
-                    text: { for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) { return s } } }
                     color: "white"
                     Connections {
                         target: dataContainer
@@ -271,7 +270,6 @@ Item {
 
                 Text {
                     id: ttsLanguageLabel
-                    text: { for (var s in Common.Language) { if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) { return s } } }
                     color: "white"
                     Connections {
                         target: dataContainer

@@ -26,35 +26,34 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-public class SyncConnection implements IProtocolListener, ITransportListener , IStreamListener{
+public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener {
 
-	SyncTransport _transport = null;
-	AbstractProtocol _protocol = null;
-	ISyncConnectionListener _connectionListener = null;
+    SyncTransport _transport = null;
+    AbstractProtocol _protocol = null;
+    ISyncConnectionListener _connectionListener = null;
     AbstractPacketizer mPacketizer = null;
+    // Thread safety locks
+    Object TRANSPORT_REFERENCE_LOCK = new Object();
+    Object PROTOCOL_REFERENCE_LOCK = new Object();
 
-	// Thread safety locks
-	Object TRANSPORT_REFERENCE_LOCK = new Object();
-	Object PROTOCOL_REFERENCE_LOCK = new Object();
-	
-	/**
-	 * Constructor.
-	 * 
-	 * @param listener Sync connection listener.
-	 * @param transportConfig Transport configuration for this connection.
-	 */
-	public SyncConnection(ISyncConnectionListener listener, BaseTransportConfig transportConfig) {
-		_connectionListener = listener;
-		
-		// Initialize the transport
-		synchronized(TRANSPORT_REFERENCE_LOCK) {
-			// Ensure transport is null
-			if (_transport != null) {
-				if (_transport.getIsConnected()) {
-					_transport.disconnect();
-				}
-				_transport = null;
-			}
+    /**
+     * Constructor.
+     *
+     * @param listener        Sync connection listener.
+     * @param transportConfig Transport configuration for this connection.
+     */
+    public SyncConnection(ISyncConnectionListener listener, BaseTransportConfig transportConfig) {
+        _connectionListener = listener;
+
+        // Initialize the transport
+        synchronized (TRANSPORT_REFERENCE_LOCK) {
+            // Ensure transport is null
+            if (_transport != null) {
+                if (_transport.getIsConnected()) {
+                    _transport.disconnect();
+                }
+                _transport = null;
+            }
 
             switch (transportConfig.getTransportType()) {
                 case BLUETOOTH:
@@ -72,48 +71,48 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
                     break;
             }
         }
-		
-		// Initialize the protocol
-		synchronized(PROTOCOL_REFERENCE_LOCK) {
-			// Ensure protocol is null
-			if (_protocol != null) {
-				_protocol = null;
-			}
-			
-			_protocol = new WiProProtocol(this);
-		}
-	}
-	
-	public AbstractProtocol getWiProProtocol(){
-		return _protocol;
-	}
+
+        // Initialize the protocol
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            // Ensure protocol is null
+            if (_protocol != null) {
+                _protocol = null;
+            }
+
+            _protocol = new WiProProtocol(this);
+        }
+    }
+
+    public AbstractProtocol getWiProProtocol() {
+        return _protocol;
+    }
 
     public void stopTransportReading() {
         if (_transport != null) {
             _transport.stopReading();
         }
     }
-	
-	public void closeConnection(byte rpcSessionID) {
-		synchronized(PROTOCOL_REFERENCE_LOCK) {
-			if (_protocol != null) {
-				// If transport is still connected, sent EndProtocolSessionMessage
-				if (_transport != null && _transport.getIsConnected()) {
-					_protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
-				}
-				_protocol = null;
-			} // end-if
-		}
-		
-		synchronized (TRANSPORT_REFERENCE_LOCK) {
+
+    public void closeConnection(byte rpcSessionID) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                // If transport is still connected, sent EndProtocolSessionMessage
+                if (_transport != null && _transport.getIsConnected()) {
+                    _protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
+                }
+                _protocol = null;
+            } // end-if
+        }
+
+        synchronized (TRANSPORT_REFERENCE_LOCK) {
             stopH264();
 
-			if (_transport != null) {
-				_transport.disconnect();
-			}
-			_transport = null;
-		}
-	}
+            if (_transport != null) {
+                _transport.disconnect();
+            }
+            _transport = null;
+        }
+    }
 
     public void closeMobileNavSession(byte mobileNavSessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
@@ -140,30 +139,30 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
     }
 
     public void stopH264() {
-        if ( mPacketizer != null){
+        if (mPacketizer != null) {
             mPacketizer.stop();
         }
     }
-	
-	public void startTransport() throws SyncException {
-		_transport.openConnection();
-	}
-	
-	public Boolean getIsConnected() {
-		
-		// If _transport is null, then it can't be connected
-		if (_transport == null) {
-			return false;
-		}
-		
-		return _transport.getIsConnected();
-	}
-	
-	public void sendMessage(ProtocolMessage msg) {
-        if (msg != null && _protocol != null){
-		    _protocol.SendMessage(msg);
+
+    public void startTransport() throws SyncException {
+        _transport.openConnection();
+    }
+
+    public Boolean getIsConnected() {
+
+        // If _transport is null, then it can't be connected
+        if (_transport == null) {
+            return false;
         }
-	}
+
+        return _transport.getIsConnected();
+    }
+
+    public void sendMessage(ProtocolMessage msg) {
+        if (msg != null && _protocol != null) {
+            _protocol.SendMessage(msg);
+        }
+    }
 
     public void startMobileNavSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
@@ -172,77 +171,77 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
             }
         }
     }
-	
-	@Override
-	public void onTransportBytesReceived(byte[] receivedBytes,
-			int receivedBytesLength) {
-		// Send bytes to protocol to be interpreted 
-		synchronized(PROTOCOL_REFERENCE_LOCK) {
-			if (_protocol != null) {
-				_protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
-			}
-		}
-	}
 
-	@Override
-	public void onTransportConnected() {
-		synchronized(PROTOCOL_REFERENCE_LOCK){
-			if(_protocol != null){
-				_protocol.StartProtocolSession(SessionType.RPC);
-			}
-		}
-	}
+    @Override
+    public void onTransportBytesReceived(byte[] receivedBytes,
+                                         int receivedBytesLength) {
+        // Send bytes to protocol to be interpreted
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
+            }
+        }
+    }
 
-	@Override
-	public void onTransportDisconnected(String info) {
-		// Pass directly to connection listener
-		_connectionListener.onTransportDisconnected(info);
-	}
+    @Override
+    public void onTransportConnected() {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.StartProtocolSession(SessionType.RPC);
+            }
+        }
+    }
 
-	@Override
-	public void onTransportError(String info, Exception e) {
-		// Pass directly to connection listener
-		_connectionListener.onTransportError(info, e);
-	}
+    @Override
+    public void onTransportDisconnected(String info) {
+        // Pass directly to connection listener
+        _connectionListener.onTransportDisconnected(info);
+    }
 
-	@Override
-	public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
-			int length) {
-		// Protocol has packaged bytes to send, pass to transport for transmission 
-		synchronized(TRANSPORT_REFERENCE_LOCK) {
-			if (_transport != null) {
-				_transport.sendBytes(msgBytes, offset, length);
-			}
-		}
-	}
+    @Override
+    public void onTransportError(String info, Exception e) {
+        // Pass directly to connection listener
+        _connectionListener.onTransportError(info, e);
+    }
 
-	@Override
-	public void onProtocolMessageReceived(ProtocolMessage msg) {
-		_connectionListener.onProtocolMessageReceived(msg);
-	}
+    @Override
+    public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
+                                             int length) {
+        // Protocol has packaged bytes to send, pass to transport for transmission
+        synchronized (TRANSPORT_REFERENCE_LOCK) {
+            if (_transport != null) {
+                _transport.sendBytes(msgBytes, offset, length);
+            }
+        }
+    }
 
-	@Override
-	public void onProtocolSessionStarted(SessionType sessionType,
-			byte sessionID, byte version, String correlationID) {
-		_connectionListener.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
-	}
+    @Override
+    public void onProtocolMessageReceived(ProtocolMessage msg) {
+        _connectionListener.onProtocolMessageReceived(msg);
+    }
 
-	@Override
-	public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
-			String correlationID) {
-		_connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
-	}
+    @Override
+    public void onProtocolSessionStarted(SessionType sessionType,
+                                         byte sessionID, byte version, String correlationID) {
+        _connectionListener.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+    }
 
-	@Override
-	public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-			int pastDue_ms) {
-		// Not implemented on SYNC
-	}
+    @Override
+    public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
+                                       String correlationID) {
+        _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
+    }
 
-	@Override
-	public void onProtocolError(String info, Exception e) {
-		_connectionListener.onProtocolError(info, e);
-	}
+    @Override
+    public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
+                                           int pastDue_ms) {
+        // Not implemented on SYNC
+    }
+
+    @Override
+    public void onProtocolError(String info, Exception e) {
+        _connectionListener.onProtocolError(info, e);
+    }
 
     @Override
     public void onProtocolAppUnregistered() {
@@ -255,20 +254,19 @@ public class SyncConnection implements IProtocolListener, ITransportListener , I
         _connectionListener.onMobileNavAckReceived(frameReceivedNumber);
     }
 
-	/**
-	 * Gets type of transport currently used by this connection.
-	 * 
-	 * @return One of TransportType enumeration values.
-	 * 
-	 * @see TransportType
-	 */
-	public TransportType getCurrentTransportType() {
-		return _transport.getTransportType();
-	}
+    /**
+     * Gets type of transport currently used by this connection.
+     *
+     * @return One of TransportType enumeration values.
+     * @see TransportType
+     */
+    public TransportType getCurrentTransportType() {
+        return _transport.getTransportType();
+    }
 
     @Override
     public void sendH264(ProtocolMessage pm) {
-        if ( pm != null){
+        if (pm != null) {
             sendMessage(pm);
         }
     }

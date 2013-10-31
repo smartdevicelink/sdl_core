@@ -45,7 +45,12 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 mediaClock   : '<mediaClock>',
                 trackIcon    : 'images/sdl/audio_icon.jpg',
                 customPresets: [
-                    '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>'
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>'
                 ],
                 alignment    : "text-align:center"
             }));

@@ -69,6 +69,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
     timer: null,
 
+    timeout: null,
+
     progressIndicator: false,
 
     /**
@@ -233,6 +235,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
         }
         
         this.set('active', true);
+        this.set('timeout', message.duration);
         SDL.SDLController.onSystemContextChange();
 
         clearTimeout(this.timer);

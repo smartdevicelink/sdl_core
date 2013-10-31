@@ -15,27 +15,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="Help prompt" />
+        android:text="@string/hello_promt" />
 
     <CheckBox
         android:id="@+id/resetglobalproperties_choiceTimeoutPrompt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="Timeout prompt" />
+        android:text="@string/timeout_promt" />
 
     <CheckBox
         android:id="@+id/resetglobalproperties_choiceVRHelpTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="VR help title" />
+        android:text="@string/vr_help_title" />
 
     <CheckBox
         android:id="@+id/resetglobalproperties_choiceVRHelpItems"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="VR help items" />
+        android:text="@string/vr_help_items" />
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceKeyboardProperties"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/keyboard_properties" />
 
 </LinearLayout>

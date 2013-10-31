@@ -66,26 +66,6 @@
                 android:layout_weight="1"/>
     </LinearLayout>
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-        <CheckBox
-                android:id="@+id/keyboardproperties_useSendDynamicEntry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:checked="true"
-                android:text="@string/keyboardproperties_useSendDynamicEntry"/>
-
-        <CheckBox
-                android:id="@+id/keyboardproperties_sendDynamicEntry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:checked="true"
-                android:text="@string/keyboardproperties_sendDynamicEntry"/>
-    </LinearLayout>
 
     <CheckBox
             android:id="@+id/keyboardproperties_useLimitedCharacterList"

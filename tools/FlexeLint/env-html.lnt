@@ -1,0 +1,39 @@
+/* Date Stamp */ -d"_lint_env_html_lnt=env-html.lnt modified 17-Oct-2007"
+/* To document usage use: -message( "Using " _lint_env_html_lnt ) */
+// ---------------------------------------------------------------------
+// This file is provided by Gimpel Software (www.gimpel.com) for use with
+// its products PC-lint and FlexeLint.
+//
+// Redistribution and use of this file, with or without modification, is
+// permitted provided that any such redistribution retains this notice.
+// ---------------------------------------------------------------------
+
+/*  env-html.lnt
+    The following options cause the output of PC-lint/Flexelint to
+    assume the format of an HTML file.  The formats chosen can be
+    customized as needed.
+ */
+
+-width(0)   // don't insert line breaks (unlimited output width).
+            // let the browser split lines at the right location
+-html( head(env-html.js) )
+        // turn on html escapes; the normal output is bracketed with
+        //      <html> [env-html.js] <body> ... </body> </html>
+        // where [env-html.js] means the contents of file env-html.js
+
+// In the following we specify a message format wherein
+// the line number (%l) is displayed in monospace (<tt>)
+// and set off from the file name by non-breaking spaces (&nbsp;)
+// A color change is introduced by typeFont("%t"), a function
+// written in JavaScript and placed in the head by env-html.js
+// The colored portion includes only "%t %n:" but could easily
+// be extended to include the entire line.
+// For verbosity output the -format_verbosity option is employed which
+// simply wraps the verbosity message %m is a green font.
+
+-"format=%(%f <tt>&nbsp;%l&nbsp; </tt> %) <script>typeFont(\q%t\q)</script> %t %n:</font>&nbsp; %m"
+-"format_specific=\nDuring Specific Walk:\n%{ %f <tt>&nbsp;%l&nbsp; %i</tt>\n%}"
+-"format_verbosity=<font color=\qgreen\q>%m</font>"
+-e830 -e831         // these are used for automatic source positioning
+                    // which are presumably not needed for html output
+

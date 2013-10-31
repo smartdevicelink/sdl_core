@@ -140,6 +140,16 @@ class Profile {
       */
     const unsigned int space_available() const;
 
+    /**
+      * @brief Returns the video server type
+      */
+    const std::string& video_server_type() const;
+
+    /**
+      * @brief Returns the video server type
+      */
+    const std::string& named_pipe_path() const;
+
     // Members section
 
   protected:
@@ -205,6 +215,8 @@ class Profile {
     unsigned int                    default_timeout_;
     std::string                     vr_help_title_;
     unsigned int                    space_available_;
+    std::string                     consumer_type_;
+    std::string                     named_pipe_path_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

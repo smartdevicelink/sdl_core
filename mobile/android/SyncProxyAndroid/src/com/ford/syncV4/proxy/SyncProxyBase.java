@@ -105,7 +105,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.VehicleType;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -216,7 +216,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private Boolean _isMediaApp = null;
 	private Language _syncLanguageDesired = null;
 	private Language _hmiDisplayLanguageDesired = null;
-	private Vector<AppType> _appType = null;
+	private Vector<AppHMIType> _appHMIType = null;
 	private String _appID = null;
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
@@ -526,7 +526,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	 * @param syncMsgVersion Version of Sync Message.
 	 * @param languageDesired Desired language.
 	 * @param hmiDisplayLanguageDesired Desired language for HMI.
-	 * @param appType Type of application.
+	 * @param appHMIType Type of application.
 	 * @param appID Application identifier.
 	 * @param autoActivateID Auto activation identifier.
 	 * @param callbackToUIThread Flag that indicates that this proxy should send callback to UI thread or not.
@@ -536,7 +536,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
 			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
-			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID,
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
 			String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig)
 			throws SyncException {
 
@@ -558,7 +558,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_vrSynonyms = vrSynonyms;
 		_syncLanguageDesired = languageDesired;
 		_hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-		_appType = appType;
+		_appHMIType = appHMIType;
 		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
 		_transportConfig = transportConfig;
@@ -722,7 +722,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	 * @param syncMsgVersion Version of Sync Message.
 	 * @param languageDesired Desired language.
 	 * @param hmiDisplayLanguageDesired Desired language for HMI.
-	 * @param appType Type of application.
+	 * @param appHMIType Type of application.
 	 * @param appID Application identifier.
 	 * @param autoActivateID Auto activation identifier.
 	 * @param callbackToUIThread Flag that indicates that this proxy should send callback to UI thread or not.
@@ -734,7 +734,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
 			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
-			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID,
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
 			String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
 			BaseTransportConfig transportConfig)
 			throws SyncException {
@@ -760,7 +760,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_vrSynonyms = vrSynonyms;
 		_syncLanguageDesired = languageDesired;
 		_hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-		_appType = appType;
+		_appHMIType = appHMIType;
 		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
 		_transportConfig = transportConfig;
@@ -2707,8 +2707,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						_vrSynonyms,
 						_isMediaApp,
 						_syncLanguageDesired,
-						_hmiDisplayLanguageDesired,
-						_appType,
+						_hmiDisplayLanguageDesired, _appHMIType,
 						_appID,
 						_autoActivateIdDesired,
 						REGISTER_APP_INTERFACE_CORRELATION_ID);
@@ -3252,13 +3251,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected void registerAppInterfacePrivate(
 			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
-			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType,
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
 			String appID, String autoActivateID, Integer correlationID)
 			throws SyncException {
 
 		final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
 				syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-				languageDesired, hmiDisplayLanguageDesired, appType, appID, correlationID);
+				languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID);
 
 		sendRPCRequestPrivate(msg);
 

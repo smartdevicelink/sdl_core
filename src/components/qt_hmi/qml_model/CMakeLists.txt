@@ -33,5 +33,22 @@ cmake_minimum_required(VERSION 2.8.9)
 set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
+set(codegen ${codegen_dir}/make_qml_dbus_qml.py)
+set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
-add_custom_target(qml_auto ALL COMMAND python ${codegen_dir}/make_qml_dbus_qml.py --infile ${interfaces_dir}/HMI_API.xml --outdir ${CMAKE_CURRENT_SOURCE_DIR}/hmi_api)
+set(api_xml ${interfaces_dir}/HMI_API.xml)
+set(proxy_dir ${CMAKE_CURRENT_SOURCE_DIR}/hmi_api)
+add_custom_target(qml_auto ALL
+  COMMAND python ${codegen} --infile ${api_xml} --outdir ${proxy_dir}
+  DEPENDS ${api_xml} ${codegen} ${parser}
+  COMMENT "Generating files:
+    ${proxy_dir}/BasicCommunicationProxy.qml
+    ${proxy_dir}/ButtonsProxy.qml
+    ${proxy_dir}/NavigationProxy.qml
+    ${proxy_dir}/TTSProxy.qml
+    ${proxy_dir}/UIProxy.qml
+    ${proxy_dir}/VehicleInfoProxy.qml
+    ${proxy_dir}/VRProxy.qml
+    from:
+    ${api_xml} ..."
+)

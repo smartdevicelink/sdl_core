@@ -1006,7 +1006,8 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     }
     case connection_handler::ServiceType::kNaviSession: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
-      // TODO(PK): add some intelligent logic
+      application_manager::MessageHelper::SendNaviStopStream(session_key);
+      media_manager_->stopVideoStreaming();
       break;
     }
     default:

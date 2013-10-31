@@ -62,6 +62,7 @@ CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 QT5_RUNFILE_DST="/tmp/qt5"
 INSTALL_ALL=false
+QT_HMI=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev "
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
@@ -91,11 +92,16 @@ while test $# -gt 0; do
                         echo "options:"
                         echo "-h, --help                show brief help"
                         echo "-a, --all                 all mandatory and optional packages will be install"
+                        echo "-q                        install additional packages for Qt HMI"
 			
                         exit 0
                         ;;
                 -a)
 			INSTALL_ALL=true
+			shift
+                        ;;
+                -q)
+			QT_HMI=true
 			shift
                         ;;
         esac
@@ -187,31 +193,21 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
-if $INSTALL_ALL; then
-	echo " "	
-	echo "Installing optional packages..."
-	echo " "
-
-	echo "Detecting machine architecture"
-	uname_result=`uname -i`
-	
-	if [ ${uname_result} = "i386" ]; then
-		echo "x86 machine detected"
-		ARCH="i386"
-	elif [ ${uname_result} = "x86_64" ]; then
-		echo "x64 machine detected"
-		ARCH="x64"
-	else
-		echo "unknown architecture - exit"
-		exit
-	fi
-	echo
+if $QT_HMI; then
+	echo "Checking out CMake packages, please be patient"
+	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+	echo $OK
 
 	if [ ${ARCH} = "i386" ]; then
 		CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
 	elif [ ${ARCH} = "x64" ]; then
 		CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 	fi
+
+	echo "Installing CMake build system"
+	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	echo $OK
 
 	if [ ${ARCH} = "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
@@ -220,20 +216,6 @@ if $INSTALL_ALL; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
-
-	echo "Installing Subversion"
-	apt-install ${SUBVERSION}
-	echo $OK	
-
-	echo "Checking out CMake packages, please be patient"
-	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
-	echo $OK
-
-	echo "Installing CMake build system"
-	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
-	echo $OK
-
 	echo "Checking whether Qt5 with QML support is installed"
 	qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
@@ -257,8 +239,21 @@ if $INSTALL_ALL; then
 		chmod +x ${QT5_RUNFILE_BIN}
 		sudo ${QT5_RUNFILE_BIN}
 		echo $OK
-
 	fi
+	
+	echo "Installing OpenGL development files"
+	apt-install ${OPENGL_DEV}
+	echo $OK
+fi
+
+if $INSTALL_ALL; then
+	echo " "	
+	echo "Installing optional packages..."
+	echo " "
+
+	echo "Installing Subversion"
+	apt-install ${SUBVERSION}
+	echo $OK	
 
 	echo "Installing Doxygen"
 	apt-install ${DOXYGEN}
@@ -284,7 +279,5 @@ if $INSTALL_ALL; then
 	sudo /etc/init.d/icecast2 start
 	echo $OK
 
-	echo "Installing OpenGL development files"
-	apt-install ${OPENGL_DEV}
-	echo $OK
 fi
+echo "Environment configuration successfully done!"

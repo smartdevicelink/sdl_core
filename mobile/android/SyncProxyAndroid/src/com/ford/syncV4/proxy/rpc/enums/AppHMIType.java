@@ -1,6 +1,6 @@
 package com.ford.syncV4.proxy.rpc.enums;
 
-public enum AppType {
+public enum AppHMIType {
     DEFAULT,
     COMMUNICATION,
     MEDIA,
@@ -12,7 +12,7 @@ public enum AppType {
     TESTING,
     SYSTEM;
 
-    public static AppType valueForString(String value) {
+    public static AppHMIType valueForString(String value) {
         return valueOf(value);
     }
 }
