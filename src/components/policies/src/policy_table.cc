@@ -34,17 +34,24 @@
 
 #include "policies/policy_table.h"
 #include "smart_objects/always_true_schema_item.h"
+#include "formatters/generic_json_formatter.h"
 
 namespace policies_ns = NsSmartDeviceLink::policies;
 namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace formatters_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 //---------------------------------------------------------------------------
 
 policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string)
   : is_schema_set_(false)
+  , is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
   , schema_(so_ns::CSmartSchema(so_ns::CAlwaysTrueSchemaItem::create()))
   , pt_smart_object_()
   , pt_default_smart_object_() {
+     if (false == formatters_ns::GenericJsonFormatter::FromString(
+	  policy_table_string, pt_smart_object_)) {
+       is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
+     }
 }
 
 //---------------------------------------------------------------------------
@@ -61,7 +68,11 @@ so_ns::SmartObject& policies_ns::PolicyTable::AsSmartObject() {
 //---------------------------------------------------------------------------
 
 const std::string policies_ns::PolicyTable::AsString() {
-  return std::string();
+  std::string ret_val;
+  if (PTValidationResult::VALIDATION_OK == is_PT_valid_) {
+    formatters_ns::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
+  }
+  return ret_val;
 }
 
 //---------------------------------------------------------------------------
@@ -69,12 +80,29 @@ const std::string policies_ns::PolicyTable::AsString() {
 void policies_ns::PolicyTable::SetSchema(
     NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema) {
   schema_ = schema;
+  is_schema_set_ = true;
 }
 
 //---------------------------------------------------------------------------
 
 policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
-  return PTValidationResult::VALIDATION_FAILED;
+  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_PT_valid_) {
+    return is_PT_valid_;
+  }
+  
+  if (false == is_schema_set_) {
+    is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_NO_SCHEMA;
+    return is_PT_valid_;  
+  }
+  
+  if (so_ns::Errors::OK == schema_.validate(pt_smart_object_)) {
+    is_PT_valid_ = PTValidationResult::VALIDATION_OK;
+    return is_PT_valid_;
+  } 
+  
+  is_PT_valid_ = PTValidationResult::VALIDATION_FAILED;
+    
+  return is_PT_valid_;
 }
 
 //---------------------------------------------------------------------------
