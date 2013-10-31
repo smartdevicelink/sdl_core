@@ -89,6 +89,13 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
+  if (!CheckTurnListArray()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
@@ -138,6 +145,25 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
+}
+
+bool UpdateTurnListRequest::CheckTurnListArray() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::turn_list)) {
+    return false;
+  }
+  int length = (*message_)[strings::msg_params][strings::turn_list].length();
+  if (0 == length) {
+    return false;
+  }
+  for (int i = 0; i < length; ++i) {
+    if (!((*message_)[strings::msg_params][strings::turn_list][i].
+        keyExists(hmi_request::navi_text)) &&
+        !((*message_)[strings::msg_params][strings::turn_list][i].
+        keyExists(strings::turn_icon))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace commands
