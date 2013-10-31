@@ -154,6 +154,9 @@ var sliderBarFillColor = "white"
 // Width for popup view
 var popupWidth = 700
 
+// Width for alert window
+var alertWidth = 360
+
 // Height for popup view
 var popupHeigth = 500
 

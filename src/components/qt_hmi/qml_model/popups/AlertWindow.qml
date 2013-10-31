@@ -37,6 +37,7 @@ import QtQuick.Window 2.0
 import "../controls"
 import "controls"
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
 Rectangle {
     color: "transparent"
@@ -70,14 +71,17 @@ Rectangle {
             }
 
             Row {
+                width: Constants.alertWidth
                 spacing: 20
 
                 Image {
+                    id: alertLogo
                     source: "../res/warning.png"
                 }
 
                 Text {
                     id: alert
+                    width: parent.width - alertLogo.width - parent.spacing
                     clip: true
                     color: "white"
                     font.pointSize: 16
@@ -92,7 +96,7 @@ Rectangle {
 
             Column {
                 Item {
-                    width: 360
+                    width: Constants.alertWidth
                     height: alertButton1.visible ? alertButton1.height : 0
 
                     AlertSoftButton {
@@ -100,30 +104,30 @@ Rectangle {
                         button: softButtons && softButtons.length > 0 ? softButtons[0] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton2.visible ? alertButton2.left : parent.right
-                        width: 180
+                        width: Constants.alertWidth / 2
                     }
                     AlertSoftButton {
                         id: alertButton2
                         button: softButtons && softButtons.length > 1 ? softButtons[1] : undefined
                         anchors.right: parent.right
-                        width: 180
+                        width: Constants.alertWidth / 2
                     }
                 }
                 Item {
-                    width: 360
+                    width: Constants.alertWidth
                     height: alertButton3.visible ? childrenRect.height : 0
                     AlertSoftButton {
                         id: alertButton3
                         button: softButtons && softButtons.length > 2 ? softButtons[2] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton4.visible ? alertButton4.left : parent.right
-                        width: 180
+                        width: Constants.alertWidth / 2
                     }
                     AlertSoftButton {
                         id: alertButton4
                         button: softButtons && softButtons.length > 3 ? softButtons[3] : undefined
                         anchors.right: parent.right
-                        width: 180
+                        width: Constants.alertWidth / 2
                     }
                 }
             }
