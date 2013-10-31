@@ -7,7 +7,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
     /*
      *	access to basic RPC functionality
      */
-    client:		FFW.RPCClient.create({ componentName: "RevSDL" }),
+    client:		FFW.RPCClient.create({ componentName: "RevSDLClient" }),
 
     connect: function() {
         this.client.connect(this);
@@ -19,12 +19,12 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
     onRPCRegistered: function () {
         this._super();
-        Em.Logger.log("FFW.RevSDL.onRPCRegistered");
+        Em.Logger.log("FFW.RevSDLClient.onRPCRegistered");
     },
 
     onRPCUnregistered: function () {
         this._super();
-        Em.Logger.log("FFW.RevSDL.onRPCUnregistered");
+        Em.Logger.log("FFW.RevSDLClient.onRPCUnregistered");
     },
 
     /**
@@ -44,7 +44,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
      * handle RPC requests here
      */
     onRPCRequest: function(request) {
-        Em.Logger.log("FFW.RevSDL.onRPCRequest");
+        Em.Logger.log("FFW.RevSDLClient.onRPCRequest");
         this._super();
     },
 
@@ -53,7 +53,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
      * for Backend component full screen setting change should be handled here
      */
     onRPCNotification: function(notification) {
-        Em.Logger.log("FFW.RevSDL.onRPCNotification");
+        Em.Logger.log("FFW.RevSDLClient.onRPCNotification");
         this._super();
 
 //        if (notification.method == "RevSDL.SDLAccessRequest") {
@@ -74,6 +74,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
+            "id": 		this.sendSDLAccessRequestId,
             "method":	"RevSDL.sendSDLAccessRequest"
         };
         this.client.send(JSONMessage);

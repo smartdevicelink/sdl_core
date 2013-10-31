@@ -1,14 +1,14 @@
 /**
  * 
  */
-package com.ford.avatar.test.jsonparser;
+package com.ford.avarsdl.test.jsonparser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ford.sdlreverse.jsonparser.JSONParser;
-import com.ford.sdlreverse.util.Const;
-import com.ford.sdlreverse.util.RPCConst;
+import com.ford.avarsdl.jsonparser.JSONParser;
+import com.ford.avarsdl.util.Const;
+import com.ford.avarsdl.util.RPCConst;
 
 import android.test.AndroidTestCase;
 
@@ -185,7 +185,7 @@ public class JSONParserTest extends AndroidTestCase {
 		try {
 			JSONObject expected = new JSONObject("test:2");
 			mParser.putJSONObject(expected.toString());
-			JSONObject actual = new JSONObject(mParser.getJSONObjectAsString());
+			JSONObject actual = new JSONObject(mParser.getJSONObject());
 			assertEquals(expected, actual);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -205,7 +205,7 @@ public class JSONParserTest extends AndroidTestCase {
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
-		String actual = mParser.getJSONObjectAsString();
+		String actual = mParser.getJSONObject();
 		assertEquals(expected.toString(), actual);
 	}
 
@@ -216,7 +216,7 @@ public class JSONParserTest extends AndroidTestCase {
 	public void testPutEmptyJSONObject() {
 		mParser.putEmptyJSONObject();
 		String expected = new JSONObject().toString();
-		String actual = mParser.getJSONObjectAsString();
+		String actual = mParser.getJSONObject();
 		assertEquals(expected, actual);
 	}
 
@@ -230,7 +230,7 @@ public class JSONParserTest extends AndroidTestCase {
 		try {
 			expected = new JSONObject("test");
 			mParser.putJSONObject(expected);
-			String actual = mParser.getJSONObjectAsString();
+			String actual = mParser.getJSONObject();
 			assertEquals(expected.toString(), actual);
 		} catch (JSONException e) {
 			e.printStackTrace();

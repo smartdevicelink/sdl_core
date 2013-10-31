@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+
+    <string name="app_name">MFTG RSDL YEAH</string>
+
+    <!-- English settings -->
+    <string name="str_menu_quit">Quit</string>
+
+    <!-- Downloader -->
+    <string name="toast_download_complete">Download Complete.\nVideos are available to view.</string>
+
+    <string name="toast_index_not_found">Can\'t load main content. Please contact the developer.</string>
+
+    <!-- EULA -->
+    <string name="btn_agree_text">I Agree</string>
+    <string name="eula_text">
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        Download Complete.\nVideos are available to view.
+        </string>
+
+    <string name="selectprotocol_ipAddress">IP Address:</string>
+    <string name="selectprotocol_ipAddressDefault">10.10.0.1</string>
+    <string name="selectprotocol_tcpPort">TCP Port:</string>
+    <string name="selectprotocol_tcpPortDefault">12345</string>
+
+</resources>
