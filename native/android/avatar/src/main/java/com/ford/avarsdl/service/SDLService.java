@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.ford.avarsdl.activity.AvatarActivity;
 import com.ford.avarsdl.util.Const;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -81,6 +83,10 @@ public class SDLService extends Service implements IProxyListenerALM {
     private static final String APPNAME = "MFTGuide";
     private static SyncProxyALM mSyncProxy;
 
+    public static SyncProxyALM getProxyInstance() {
+        return mSyncProxy;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand " + intent + ", " + flags + ", " + startId);
@@ -103,10 +109,6 @@ public class SDLService extends Service implements IProxyListenerALM {
         Log.d(TAG, "onBind unsupported");
         // binding is not supported
         return null;
-    }
-
-    public static SyncProxyALM getProxyInstance() {
-        return mSyncProxy;
     }
 
     private void startProxy() {
@@ -149,14 +151,18 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnHMIStatus(OnHMIStatus notification) {
-        Log.i(TAG, "HMI Status " + notification.getHmiLevel() + ", " +
+        final String msg = "HMI Status " + notification.getHmiLevel() + ", " +
                 notification.getSystemContext() + ", first run " +
-                notification.getFirstRun());
+                notification.getFirstRun();
+        Log.i(TAG, msg);
+        notifyUI(msg);
     }
 
     @Override
     public void onProxyClosed(String info, Exception e) {
-        Log.i(TAG, "Proxy Closed. Info: " + info, e);
+        final String msg = "Proxy Closed. Info: " + info;
+        Log.i(TAG, msg, e);
+        notifyUI(msg);
 
         final SyncExceptionCause cause =
                 ((SyncException) e).getSyncExceptionCause();
@@ -167,6 +173,18 @@ public class SDLService extends Service implements IProxyListenerALM {
         }
     }
 
+    private void notifyUI(final String msg) {
+        final AvatarActivity activity = AvatarActivity.getInstance();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
     public void resetProxy() {
         try {
             mSyncProxy.resetProxy();
@@ -174,7 +192,7 @@ public class SDLService extends Service implements IProxyListenerALM {
             e.printStackTrace();
             //something goes wrong, & the proxy returns as null, stop the service.
             //do not want a running service with a null proxy
-            if (mSyncProxy == null){
+            if (mSyncProxy == null) {
                 stopSelf();
             }
         }
@@ -182,12 +200,16 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onError(String info, Exception e) {
-        Log.i(TAG, "Proxy Error: " + info, e);
+        final String msg = "Proxy Error: " + info;
+        Log.i(TAG, msg, e);
+        notifyUI(msg);
     }
 
     @Override
     public void onGenericResponse(GenericResponse response) {
-        Log.i(TAG, "Generic response " + response.getResultCode());
+        final String msg = "Generic response " + response.getResultCode();
+        Log.i(TAG, msg);
+        notifyUI(msg);
     }
 
     @Override
@@ -414,13 +436,19 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onGiveControlResponse(GiveControlResponse response) {
-        Log.i(TAG, "onGiveControlResponse success " + response.getSuccess() +
-                ", " + response.getResultCode() + ", " + response.getInfo());
+        final String msg =
+                "GiveControlResponse success " + response.getSuccess() +
+                        ", " + response.getResultCode() + ", " +
+                        response.getInfo();
+        Log.i(TAG, msg);
+        notifyUI(msg);
     }
 
     @Override
     public void onOnControlChanged(OnControlChanged notification) {
-        Log.i(TAG, "onOnControlChanged " + notification.getReason());
+        final String msg = "onControlChanged " + notification.getReason();
+        Log.i(TAG, msg);
+        notifyUI(msg);
     }
 
     @Override

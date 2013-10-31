@@ -80,6 +80,7 @@ import com.ford.syncV4.proxy.rpc.GiveControl;
 public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         JSONRevSDLController.Delegate {
     private int correlationID = 1;
+    private static AvatarActivity instance;
 
 	// for monkey testing
 	// adb shell monkey -p com.ford.avarsdl -v 100
@@ -90,10 +91,15 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 	public static Boolean ratePreferenceEnabled;
 
+    public static AvatarActivity getInstance() {
+        return instance;
+    }
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		logMsg("onCreate");
+        instance = this;
 
         // FIXME: the old code with new SDK crashes with
         // android.os.NetworkOnMainThreadException
@@ -718,6 +724,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     @Override
 	protected void onDestroy() {
         Log.d(TAG, "onDestroy");
+        instance = null;
 
         stopService(new Intent(this, SDLService.class));
 
