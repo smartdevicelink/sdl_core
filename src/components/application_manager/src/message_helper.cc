@@ -777,7 +777,9 @@ void MessageHelper::SendAddVRCommandToHMI(
     msg_params[strings::cmd_id] = cmd_id;
   }
   msg_params[strings::vr_commands] = vr_commands;
-  msg_params[strings::app_id] = app_id;
+  if (0 < app_id) {
+    msg_params[strings::app_id] = app_id;
+  }
   (*vr_command)[strings::msg_params] = msg_params;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
