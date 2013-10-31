@@ -69,7 +69,7 @@ so_ns::SmartObject& policies_ns::PolicyTable::AsSmartObject() {
 
 const std::string policies_ns::PolicyTable::AsString() {
   std::string ret_val;
-  if (PTValidationResult::VALIDATION_OK == is_PT_valid_) {
+  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON != is_PT_valid_) {
     formatters_ns::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
   }
   return ret_val;
