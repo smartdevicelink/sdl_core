@@ -66,6 +66,13 @@ class SliderRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(SliderRequest);
 };
