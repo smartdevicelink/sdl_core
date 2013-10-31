@@ -87,8 +87,26 @@ Item {
     }
 
     function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
-        dataContainer.globalProperties.helpPrompt = helpPrompt
-        dataContainer.globalProperties.timeoutPrompt = timeoutPrompt
+        console.debug("enter: " + helpPrompt + ", " + timeoutPrompt + ", " + appID)
+        var newHelpPropmt = helpPrompt ?
+                    helpPrompt.map(
+                        function (structure) {
+                            return structure.text
+                        }
+                     ).join(", ") :
+                    ""
+        var newTimeoutPrompt = timeoutPrompt ?
+                    timeoutPrompt.map(
+                        function (structure) {
+                            return structure.text
+                        }
+                     ).join(", ") :
+                    ""
+        dataContainer.globalProperties = {
+            "helpPrompt": newHelpPropmt,
+            "timeoutPrompt": newTimeoutPrompt
+        }
+        console.debug("exit")
     }
 }
 
