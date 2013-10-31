@@ -32,7 +32,7 @@
 
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 

@@ -186,6 +186,7 @@ void RequestWatchdog::updateRequestTimeout(int connection_key,
                    << "\n CustomTimeOut : " << it->first->customTimeout_
                    << "\n");
       it->first->customTimeout_ = new_timeout_value;
+      it->second = date_time::DateTime::getCurrentTime();
       it->first->delayed_delete_ = false;
       break;
     }
