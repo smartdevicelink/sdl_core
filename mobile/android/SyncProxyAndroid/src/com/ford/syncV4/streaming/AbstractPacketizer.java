@@ -22,7 +22,7 @@ abstract public class AbstractPacketizer {
 		_rpcSessionID = rpcSessionID;
 	}
 
-	public abstract void start() throws IOException;
+	public abstract  void start() throws IOException;
 
 	public abstract void stop();
 

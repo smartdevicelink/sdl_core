@@ -32,6 +32,7 @@
 
 #include <set>
 #include <string>
+#include <algorithm>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
@@ -1078,6 +1079,41 @@ void MessageHelper::SendNaviStartStream(
   ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
 }
 
+void MessageHelper::SendNaviStopStream(int connection_key) {
+  smart_objects::SmartObject* stop_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!stop_stream) {
+    return;
+  }
+
+  (*stop_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StopStream;
+  (*stop_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*stop_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*stop_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*stop_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // TODO(PV) : remove connectionhandler
+  unsigned int app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+      &app_id);
+
+  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+  msg_params[strings::app_id] = app_id;
+
+  (*stop_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
@@ -1118,6 +1154,12 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image, const Application* app) {
   const std::string& file_name = image[strings::value];
 
+  std::string str = file_name;
+  str.erase(remove(str.begin(), str.end(), ' '), str.end());
+  if (0 == str.size()) {
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
   std::string relative_file_path = app->name();
   relative_file_path += "/";
   relative_file_path += file_name;
@@ -1137,6 +1179,22 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   image[strings::value] = full_file_path;
 
   return mobile_apis::Result::SUCCESS;
+}
+
+bool MessageHelper::VerifySoftButtonText
+(smart_objects::SmartObject& soft_button) {
+  if (soft_button.keyExists(strings::text)) {
+    std::string text = soft_button[strings::text].asString();
+    text.erase(remove(text.begin(), text.end(), ' '), text.end());
+    text.erase(remove(text.begin(), text.end(), '\n'), text.end());
+    if (text.size()) {
+      return true;
+    } else {
+      soft_button.erase(strings::text);
+    }
+  }
+
+  return false;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -1184,13 +1242,13 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
-        if (!request_soft_buttons[i].keyExists(strings::text)) {
+        if (!VerifySoftButtonText(request_soft_buttons[i])) {
           continue;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = request_soft_buttons[i].keyExists(strings::text);
+        bool text_exist = VerifySoftButtonText(request_soft_buttons[i]);
 
         bool image_exist = false;
         if (image_supported) {
@@ -1206,12 +1264,12 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
+            request_soft_buttons[i].erase(strings::image);
             if (!text_exist) {
               return mobile_apis::Result::INVALID_DATA;
             }
             if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
                 verification_result) {
-              request_soft_buttons[i].erase(strings::image);
               return verification_result;
             }
           }

@@ -362,6 +362,7 @@
     <description>Indicates the source from where the command was triggered.</description>
     <element name="MENU" internal_name="TS_MENU" />
     <element name="VR" internal_name="TS_VR" />
+    <element name="KEYBOARD" internal_name="TS_KEYBOARD" />
   </enum>
 
   <enum name="HmiZoneCapabilities">
@@ -673,7 +674,7 @@
   </enum>
 
   <struct name="Image">
-    <param name="value" maxlength="65535" type="String">
+    <param name="value" minlength="0" maxlength="65535" type="String">
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
     </param>
     <param name="imageType" type="ImageType">
@@ -685,7 +686,7 @@
     <param name="type" type="SoftButtonType">
       <description>Describes, whether it is text, highlighted text, icon, or dynamic image. See softButtonType</description>
     </param>
-    <param name="text" maxlength="500" type="String" mandatory="false">
+    <param name="text" minlength="0" maxlength="500" type="String" mandatory="false">
       <description>Optional text to display (if defined as TEXT or BOTH)</description>
     </param>
     <param name="image" type="Image" mandatory="false">
@@ -758,6 +759,15 @@
     </element>
     <element name="VRHELPITEMS">
     	<description>The property array of vrHelp of setGlobalProperties</description>
+    </element>
+    <element name="MENUNAME" scope="partner">
+    	<description>The property in-app menu name of setGlobalProperties</description>
+    </element>     
+    <element name="MENUICON" scope="partner">
+    	<description>The property in-app menu icon of setGlobalProperties</description>
+    </element>
+    <element name="KEYBOARDPROPERTIES" scope="partner">
+      <description>The on-screen keyboard configuration of setGlobalProperties</description>
     </element>
   </enum>
 
@@ -1700,6 +1710,19 @@
     <element name="ENTRY_ABORTED" />    
   </enum>
 
+  <enum name="KeypressMode" scope="partner">
+    <description>Enumeration listing possible keyboard events.</description>
+    <element name="SINGLE_KEYPRESS">
+      <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
+    </element>
+    <element name="QUEUE_KEYPRESSES">
+      <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>    
+    </element>
+    <element name="RESEND_CURRENT_ENTRY">
+      <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
+    </element>
+  </enum>
+  
   <struct name="KeyboardProperties">
     <description>Configuration of on-screen keyboard (if available).</description>
 
@@ -1709,6 +1732,13 @@
 
     <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
       <description>Desired keyboard layout.</description>
+    </param> 
+
+    <param name="keypressMode" type="KeypressMode" mandatory="false" >
+      <description>
+      	Desired keypress mode.
+      	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+      </description>
     </param> 
     
     <param name="sendDynamicEntry" type="Boolean" mandatory="false">
@@ -2571,7 +2601,7 @@
   <function name="Show" functionID="ShowID" messagetype="request">
     <description>Updates the persistent display. Supported fields depend on display capabilities.</description>
 
-    <param name="mainField1" type="String" maxlength="500" mandatory="false">
+    <param name="mainField1" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	The text that should be displayed in a single or upper display line.
       	If this text is not set, the text of mainField1 stays unchanged.
@@ -2579,7 +2609,7 @@
       </description>
     </param>
 
-    <param name="mainField2" type="String" maxlength="500" mandatory="false">
+    <param name="mainField2" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	The text that should be displayed on the second display line.
       	If this text is not set, the text of mainField2 stays unchanged.
@@ -2587,7 +2617,7 @@
       </description>
     </param>
 
-    <param name="mainField3" type="String" maxlength="500" mandatory="false">
+    <param name="mainField3" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	The text that should be displayed on the second "page" first display line.
       	If this text is not set, the text of mainField3 stays unchanged.
@@ -2595,7 +2625,7 @@
       </description>
     </param>
 
-    <param name="mainField4" type="String" maxlength="500" mandatory="false">
+    <param name="mainField4" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	The text that should be displayed on the second "page" second display line.
       	If this text is not set, the text of mainField4 stays unchanged.
@@ -2610,18 +2640,18 @@
       </description>
     </param>
 
-    <param name="statusBar" type="String" maxlength="500" mandatory="false">
+    <param name="statusBar" type="String" maxlength="0" mandatory="false">
       <description>Requires investigation regarding the nav display capabilities. Potentially lower lowerStatusBar, upperStatusBar, titleBar, etc.</description>
     </param>
 
-    <param name="mediaClock" type="String" maxlength="500" mandatory="false">
+    <param name="mediaClock" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
       	If this text is set, any automatic media clock updates previously set with SetMediaClockTimer will be stopped.
       </description>
     </param>
 
-    <param name="mediaTrack" type="String" maxlength="500" mandatory="false">
+    <param name="mediaTrack" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
       	The text that should be displayed in the track field.
       	This field is only valid for media applications on NGN type ACMs.
@@ -3667,9 +3697,9 @@
     </param>
     <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="timeToDestination" type="String" maxlength="500" mandatory="false" scope="partner">
+    <param name="timeToDestination" type="String" minlength="0" maxlength="500" mandatory="false" scope="partner">
     </param>
-    <param name="totalDistance" type="String"  minlength="0" maxlength="500" mandatory="false">
+    <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="turnIcon" type="Image" mandatory="false">
     </param>

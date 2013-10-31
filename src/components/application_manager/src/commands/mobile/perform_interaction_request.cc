@@ -42,7 +42,6 @@
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -50,9 +49,12 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  timer_(this, &PerformInteractionRequest::onTimer) {
+  timer_(this, &PerformInteractionRequest::onTimer),
+  is_keyboard_trigger_source_(false),
+  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM){
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
+  subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -187,7 +189,23 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VR_OnCommand: {
-      LOG4CXX_INFO(logger_,"Received VR_OnCommand event");
+      LOG4CXX_INFO(logger_, "Received VR_OnCommand event");
+      ProcessVRNotification(event.smart_object());
+      break;
+    }
+    case hmi_apis::FunctionID::Buttons_OnButtonPress: {
+      LOG4CXX_INFO(logger_, "Recived Buttons_OnButtonPress");
+      is_keyboard_trigger_source_ = true;
+      break;
+    }
+    case hmi_apis::FunctionID::UI_PerformInteraction: {
+      LOG4CXX_INFO(logger_,"Received UI_PerformInteraction event");
+      if(is_keyboard_trigger_source_) {
+        trigger_source_ = mobile_apis::TriggerSource::TS_KEYBOARD;
+      } else {
+        trigger_source_ = mobile_apis::TriggerSource::TS_MENU;
+      }
+      ProcessPerformInteractionResponse(event.smart_object());
       break;
     }
     default: {
@@ -195,6 +213,138 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
+}
+
+void PerformInteractionRequest::onTimeOut() const {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
+  Application* app = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::params][strings::connection_key]);
+  if (app) {
+    app->set_perform_interaction_active(0);
+  }
+  CommandRequestImpl::onTimeOut();
+}
+
+void PerformInteractionRequest::ProcessVRNotification(
+    const smart_objects::SmartObject& message) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRNotification");
+  const unsigned int app_id = message[strings::msg_params][strings::app_id]
+                                .asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+  int cmd_id = message[strings::msg_params][strings::cmd_id].asInt();
+  const PerformChoiceSetMap& choice_set_map = app
+      ->performinteraction_choice_set_map();
+  bool choice_id_chosen = false;
+  LOG4CXX_INFO(logger_, "If command was choice id");
+  for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+         choice_set_map.end() != it; ++it) {
+      const smart_objects::SmartObject& choice_set = (*it->second).getElement(
+            strings::choice_set);
+
+      for (size_t j = 0; j < choice_set.length(); ++j) {
+        if (cmd_id
+            == choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
+          choice_id_chosen = true;
+          break;
+        }
+      }
+    }
+    if (choice_id_chosen) {
+      LOG4CXX_INFO(logger_, "Command was choice id!");
+      SendVrDeleteCommand (app);
+      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+                smart_objects::SmartType_Map);
+      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+      app->set_perform_interaction_mode(-1);
+      app->DeletePerformInteractionChoiceSetMap();
+      app->set_perform_interaction_active(0);
+
+      (*message_)[strings::params][strings::function_id] =
+          mobile_apis::FunctionID::PerformInteractionID;
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      msg_params[strings::choice_id] = cmd_id;
+      msg_params[strings::trigger_source] =
+        mobile_apis::TriggerSource::TS_VR;
+      SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
+
+    } else {
+      LOG4CXX_INFO(logger_, "Sending OnCommand notification");
+      smart_objects::SmartObject* notification_so =
+          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      if (!notification_so) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Failed to allocate memory for perform interaction response.");
+        return;
+      }
+      smart_objects::SmartObject& notification = *notification_so;
+      notification = message;
+      notification[strings::params][strings::function_id] =
+            mobile_apis::FunctionID::eType::OnCommandID;
+      notification[strings::msg_params][strings::trigger_source] =
+          mobile_apis::TriggerSource::TS_VR;
+      ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
+    }
+}
+
+void PerformInteractionRequest::SendVrDeleteCommand (Application* const app) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
+  const PerformChoiceSetMap& choice_set_map = app
+      ->performinteraction_choice_set_map();
+  PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+  for (; choice_set_map.end() != it; ++it) {
+    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
+        strings::choice_set);
+    for (size_t j = 0; j < choice_set.length(); ++j) {
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = app->app_id();
+      msg_params[strings::cmd_id] = choice_set.getElement(j).getElement(
+          strings::choice_id);
+      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
+    }
+  }
+}
+
+void PerformInteractionRequest::ProcessPerformInteractionResponse(
+    const smart_objects::SmartObject& message) {
+  LOG4CXX_INFO(logger_,
+               "PerformInteractionRequest::ProcessPerformInteractionResponse");
+  Application* app = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::params][strings::connection_key]);
+    if (NULL == app) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+    if (app->is_perform_interaction_active()) {
+      if (mobile_apis::InteractionMode::MANUAL_ONLY
+          != app->perform_interaction_mode()) {
+        SendVrDeleteCommand (app);
+      }
+      app->set_perform_interaction_mode(-1);
+      app->DeletePerformInteractionChoiceSetMap();
+      app->set_perform_interaction_active(0);
+    }
+    (*message_)[strings::params][strings::function_id] =
+            mobile_apis::FunctionID::PerformInteractionID;
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    msg_params = message[strings::msg_params];
+    bool result_code = false;
+    const hmi_apis::Common_Result::eType code =
+        static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+    if (hmi_apis::Common_Result::SUCCESS == code) {
+      msg_params[strings::trigger_source] = trigger_source_;
+      result_code = true;
+    }
+    SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
+                   NULL, &(msg_params));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
@@ -272,62 +422,19 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
       }
     }
   }
-
+  if((*message_)[strings::msg_params].
+        keyExists(hmi_request::interaction_layout)) {
+    msg_params[hmi_request::interaction_layout] =
+        (*message_)[strings::msg_params][hmi_request::interaction_layout].
+        asInt();
+  }
   CreateUIPerformInteraction(msg_params, app);
 }
 
 void PerformInteractionRequest::CreateUIPerformInteraction(
     const smart_objects::SmartObject& msg_params, Application* const app) {
-  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-  const unsigned int connection_key =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-
-  // get hmi correlation id for chaining further request from this object
-  const unsigned int hmi_correlation_id = ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
-  app->set_perform_interaction_ui_corrid(hmi_correlation_id);
-
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-  request[strings::params][strings::message_type] = MessageType::kRequest;
-  request[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::UI_PerformInteraction;
-  request[strings::params][strings::correlation_id] = hmi_correlation_id;
-  request[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
-  request[strings::params][strings::protocol_type] =
-      CommandImpl::hmi_protocol_type_;
-
-  request[strings::msg_params] = msg_params;
-  if((*message_)[strings::msg_params].
-      keyExists(hmi_request::interaction_layout)) {
-    request[strings::msg_params][hmi_request::interaction_layout] =
-        (*message_)[strings::msg_params][hmi_request::interaction_layout].
-        asInt();
-  }
-
-  msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
-      connection_key, correlation_id, hmi_correlation_id, msg_chaining_,
-      &(*message_));
-
-  if (!msg_chaining_) {
-    LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-  }
-
-  msg_chaining_->set_counter(1);
-
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-  }
+  SendHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
+                     &msg_params, true);
 }
 
 void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {

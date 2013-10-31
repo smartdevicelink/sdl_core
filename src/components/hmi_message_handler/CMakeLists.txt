@@ -5,6 +5,8 @@ include_directories (
   ../smart_objects/include/
   ../formatters/include/
   ../config_profile/include/
+  ../media_manager/include/
+  ../protocol_handler/include
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_SOURCE_DIR}/src/components/

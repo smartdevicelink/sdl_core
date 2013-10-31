@@ -11,7 +11,7 @@ import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
 import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.VehicleType;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
@@ -20,7 +20,6 @@ import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 
 public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
@@ -234,7 +233,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppType> appType,
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version) throws SyncException {
 		super(	listener, 
@@ -248,7 +247,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				syncMsgVersion,
 				languageDesired,
 				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
-				/*App Type*/appType,
+				/*App Type*/appHMIType,
 				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread,
@@ -503,7 +502,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppType> appType ,
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
 			BaseTransportConfig transportConfig) throws SyncException {
@@ -518,7 +517,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				syncMsgVersion,
 				languageDesired,
 				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
-				/*App Type*/appType,
+				/*App Type*/appHMIType,
 				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread,

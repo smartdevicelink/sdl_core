@@ -41,7 +41,8 @@
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "media_manager/media_manager.h"
-#include "media_manager/video_server.h"
+#include "media_manager/socket_video_server.h"
+#include "media_manager/pipe_video_server.h"
 #include "media_manager/from_mic_to_file_recorder_thread.h"
 #include "media_manager/a2dp_source_player_thread.h"
 #include "media_manager/audio_stream_sender_thread.h"
@@ -78,11 +79,15 @@ class MediaManagerImpl : public MediaManager,
                                           unsigned int session_key, unsigned int correlation_id);
     virtual void stopMicrophoneRecording();
 
+    virtual void startVideoStreaming();
+    virtual void stopVideoStreaming();
+
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
 
     virtual void onRedecoded(const protocol_handler::RawMessagePtr& message);
     virtual void setVideoRedecoder(redecoding::VideoRedecoder* redecoder);
+    virtual void setConsumer(video_stream_producer_consumer::VideoStreamConsumer* server);
 
     void onTimer() const;
 
@@ -92,23 +97,19 @@ class MediaManagerImpl : public MediaManager,
     MediaManagerImpl();
 
   private:
-    std::map<std::string, threads::Thread*> sources_;
-    threads::Thread*                        recorderThread_;
-    mutable bool                            is_stream_running_;
-    int                                     app_connection_key;
-    video_server::VideoServer               video_server_;
-    redecoding::VideoRedecoder*             redecoder_;
+    std::map<std::string, threads::Thread*>              sources_;
+    threads::Thread*                                     recorderThread_;
+    video_stream_producer_consumer::VideoStreamConsumer* video_server_;
+    redecoding::VideoRedecoder*                          redecoder_;
 
-    const int MAC_ADDRESS_LENGTH_;
-    static MediaManagerImpl* sInstance_;
-    static log4cxx::LoggerPtr logger_;
-    static const std::string sA2DPSourcePrefix_;
-    threads::Thread* senderThread_;
+    const int                                            MAC_ADDRESS_LENGTH_;
+    static MediaManagerImpl*                             sInstance_;
+    static log4cxx::LoggerPtr                            logger_;
+    static const std::string                             sA2DPSourcePrefix_;
+    threads::Thread*                                     senderThread_;
+    protocol_handler::ProtocolHandler*                   protocol_handler_;
 
     std::string sockAddr2SourceAddr(const sockaddr& device);
-
-    const std::string kH264FileName;
-    protocol_handler::ProtocolHandler* protocol_handler_;
 
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };

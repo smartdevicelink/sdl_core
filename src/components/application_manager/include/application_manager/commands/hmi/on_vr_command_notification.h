@@ -63,7 +63,6 @@ class OnVRCommandNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-  bool PerformInteractionHandling(Application* const app);
 
   DISALLOW_COPY_AND_ASSIGN(OnVRCommandNotification);
 };

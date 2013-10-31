@@ -40,16 +40,16 @@
 #include <unistd.h>
 #include <string.h>
 #include "config_profile/profile.h"
-#include "media_manager/video_server.h"
+#include "media_manager/socket_video_server.h"
 
 namespace media_manager {
 
-namespace video_server {
+namespace video_stream_producer_consumer {
 
-log4cxx::LoggerPtr VideoServer::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("VideoServer"));
+log4cxx::LoggerPtr SocketVideoServer::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("SocketVideoServer"));
 
-VideoServer::VideoServer()
+SocketVideoServer::SocketVideoServer()
   : port_(profile::Profile::instance()->navi_server_port()),
     ip_(profile::Profile::instance()->server_address()),
     socket_(0),
@@ -57,16 +57,13 @@ VideoServer::VideoServer()
     messages_(),
     delegate_(NULL),
     thread_(NULL) {
-
   delegate_ = new VideoStreamer(this);
   if (delegate_) {
-    thread_ = new threads::Thread("VideoServer", delegate_);
+    thread_ = new threads::Thread("SocketVideoServer", delegate_);
   }
-
-  start();
 }
 
-VideoServer::~VideoServer() {
+SocketVideoServer::~SocketVideoServer() {
   delete thread_;
   thread_ = NULL;
   if (socket_ != -1) {
@@ -74,8 +71,8 @@ VideoServer::~VideoServer() {
   }
 }
 
-bool VideoServer::start() {
-  LOG4CXX_INFO(logger_, "VideoServer::start");
+bool SocketVideoServer::start() {
+  LOG4CXX_INFO(logger_, "SocketVideoServer::start");
 
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (0 >= socket_) {
@@ -115,29 +112,44 @@ bool VideoServer::start() {
   return true;
 }
 
-void VideoServer::sendMsg(const protocol_handler::RawMessagePtr& message) {
-  LOG4CXX_INFO(logger_, "VideoServer::sendData");
+bool SocketVideoServer::stop() {
+  LOG4CXX_INFO(logger_, "VideoServer::stop");
+
+  if (delegate_ && thread_) {
+    thread_->stop();
+  }
+
+  if (socket_ != -1) {
+    ::close(socket_);
+  }
+
+  return true;
+}
+
+void SocketVideoServer::sendMsg(const protocol_handler::RawMessagePtr& message) {
+  LOG4CXX_INFO(logger_, "SocketVideoServer::sendData");
 
   if (is_ready_) {
     messages_.push(message);
   }
 }
 
-VideoServer::VideoStreamer::VideoStreamer(VideoServer* const server)
+SocketVideoServer::VideoStreamer::VideoStreamer(SocketVideoServer* const server)
   : server_(server),
     socket_fd_(0),
     is_first_loop_(true),
-    is_client_connected_(false) {
+    is_client_connected_(false),
+    stop_flag_(false) {
 }
 
-VideoServer::VideoStreamer::~VideoStreamer() {
+SocketVideoServer::VideoStreamer::~VideoStreamer() {
   stop();
 }
 
-void VideoServer::VideoStreamer::threadMain() {
+void SocketVideoServer::VideoStreamer::threadMain() {
   LOG4CXX_INFO(logger_, "VideoStreamer::threadMain");
 
-  while (1) {
+  while (!stop_flag_) {
 
     socket_fd_ = accept(server_->socket_, NULL, NULL);
 
@@ -163,16 +175,17 @@ void VideoServer::VideoStreamer::threadMain() {
   }
 }
 
-bool VideoServer::VideoStreamer::exitThreadMain() {
+bool SocketVideoServer::VideoStreamer::exitThreadMain() {
   LOG4CXX_INFO(logger_, "VideoStreamer::exitThreadMain");
-  is_client_connected_ = false;
+  stop_flag_ = true;
   stop();
   return true;
 }
 
-void VideoServer::VideoStreamer::stop() {
+void SocketVideoServer::VideoStreamer::stop() {
   LOG4CXX_INFO(logger_, "VideoStreamer::stop");
 
+  is_client_connected_ = false;
   if (!socket_fd_) {
     return;
   }
@@ -190,7 +203,7 @@ void VideoServer::VideoStreamer::stop() {
   socket_fd_ = -1;
 }
 
-bool VideoServer::VideoStreamer::is_ready() const {
+bool SocketVideoServer::VideoStreamer::is_ready() const {
   LOG4CXX_INFO(logger_, "VideoStreamer::is_ready");
 
   bool result = true;
@@ -215,9 +228,8 @@ bool VideoServer::VideoStreamer::is_ready() const {
   return result;
 }
 
-bool VideoServer::VideoStreamer::send(
+bool SocketVideoServer::VideoStreamer::send(
   const protocol_handler::RawMessagePtr& msg) {
-
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger_, " Socket is not ready");
     return false;
@@ -247,5 +259,5 @@ bool VideoServer::VideoStreamer::send(
   return true;
 }
 
-}  // namespace video_server
+}  // namespace video_stream_producer_consumer
 }  // namespace media_manager

@@ -349,8 +349,8 @@ SDL.SDLModel = Em.Object.create({
             info.id = i;
             info.point.xCoord = event.originalEvent.touches[i].pageX;
             info.point.yCoord = event.originalEvent.touches[i].pageY;
-            FFW.UI.onTouchEvent(event.originalEvent.type, touchLists, info);
         }
+        FFW.UI.onTouchEvent(type, touchLists, info);
     },
 
     /**
@@ -658,23 +658,23 @@ SDL.SDLModel = Em.Object.create({
         }
     },
 
-        /**
-         * SDL ShowKeyboard show method with incoming parameters of layout, language etc...
-         *
-         * @param {Object}
-         *            message Object with parameters come from SDLCore
-         */
-        uiShowKeyboard: function(element){
-            SDL.Keyboard.activate(element);
-        },
+    /**
+     * SDL ShowKeyboard show method with incoming parameters of layout, language etc...
+     *
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
+     */
+    uiShowKeyboard: function(element){
+        SDL.Keyboard.activate(element);
+    },
 
-        /**
-         * SDL UI AudioPassThru response handler show popup window
-         *
-         * @param {Object}
-         *            message Object with parameters come from SDLCore.
-         */
-        UIPerformAudioPassThru: function(message) {
+    /**
+     * SDL UI AudioPassThru response handler show popup window
+     *
+     * @param {Object}
+     *            message Object with parameters come from SDLCore.
+     */
+    UIPerformAudioPassThru: function(message) {
 
         this.set('AudioPassThruData', message);
         this.set('AudioPassThruState', true);
@@ -701,6 +701,11 @@ SDL.SDLModel = Em.Object.create({
      * @param {Number}
      */
     onPrompt: function (ttsChunks, id) {
+
+        if (SDL.TTSPopUp.active) {
+            FFW.TTS.sendError(SDL.SDLModel.resultCode["IN_USE"], id, "TTS.Speak", "TTS in progress. Rejected.");
+            return;
+        }
 
         var message = '';
         if (ttsChunks) {

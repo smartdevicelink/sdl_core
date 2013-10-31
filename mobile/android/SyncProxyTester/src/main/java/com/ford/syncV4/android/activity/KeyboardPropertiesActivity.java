@@ -99,11 +99,6 @@ public class KeyboardPropertiesActivity extends Activity {
                     keypressModeAdapter.getPosition(keypressMode));
         }
 
-        Boolean sendDEntryValue = kbdProperties.getSendDynamicEntry();
-        sendDEntryCheck.setChecked(sendDEntryValue != null);
-        if (sendDEntryValue != null) {
-            sendDEntry.setChecked(sendDEntryValue);
-        }
 
         Vector<String> charListValue = kbdProperties.getLimitedCharacterList();
         charListCheck.setChecked(charListValue != null);
@@ -144,10 +139,6 @@ public class KeyboardPropertiesActivity extends Activity {
                 R.id.keyboardproperties_useKeypressMode);
         keypressModeSpinner =
                 (Spinner) findViewById(R.id.keyboardproperties_keypressMode);
-        sendDEntryCheck = (CheckBox) findViewById(
-                R.id.keyboardproperties_useSendDynamicEntry);
-        sendDEntry = (CheckBox) findViewById(
-                R.id.keyboardproperties_sendDynamicEntry);
         charListCheck = (CheckBox) findViewById(
                 R.id.keyboardproperties_useLimitedCharacterList);
         charList = (EditText) findViewById(
@@ -201,11 +192,6 @@ public class KeyboardPropertiesActivity extends Activity {
             KeypressMode keypressMode = keypressModeAdapter
                     .getItem(keypressModeSpinner.getSelectedItemPosition());
             kbdProperties.setKeypressMode(keypressMode);
-        }
-
-        if (sendDEntryCheck.isChecked()) {
-            Boolean sendDEntryValue = sendDEntry.isChecked();
-            kbdProperties.setSendDynamicEntry(sendDEntryValue);
         }
 
         if (charListCheck.isChecked()) {

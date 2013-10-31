@@ -35,16 +35,19 @@ set(CMAKE_AUTOMOC ON)
 set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
+set(codegen ${codegen_dir}/make_qml_dbus_cpp.py)
+set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
+set(api_xml ${interfaces_dir}/HMI_API.xml)
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.cc ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.h
-  COMMAND python ${codegen_dir}/make_qml_dbus_cpp.py --infile ${interfaces_dir}/HMI_API.xml
-    --outdir ${CMAKE_CURRENT_SOURCE_DIR}
-  DEPENDS ${interfaces_dir}/HMI_API.xml  ${codegen_dir}/make_qml_dbus_cpp.py
-    ${codegen_dir}/ford_xml_parser.py
-  COMMENT "Generating files:\n   ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.cc\n
-  ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.h\nfrom:\n
-  ${interfaces_dir}/HMI_API.xml..."
+  COMMAND python ${codegen} --infile ${api_xml} --outdir ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS ${api_xml} ${codegen} ${parser}
+  COMMENT "Generating files:
+    ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/qml_dbus.h
+    from:
+    ${api_xml} ..."
 )
 
 set(SOURCES

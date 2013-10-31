@@ -112,7 +112,7 @@ var iconItemListSpacing = 20
 // Height item list
 var itemListHeight = 60
 
-// Spasing between item on views
+// Spacing between item on views
 var generalSpacing = 10
 
 // Width of scrollBar

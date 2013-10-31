@@ -44,7 +44,9 @@ log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
 void smartLogger(QtMsgType type, const QMessageLogContext &context,
                  const QString &msg)
 {
-    log4cxx::spi::LocationInfo location(context.file, context.function, context.line);
+    log4cxx::spi::LocationInfo location(context.file,
+                                        context.function ? context.function : "",
+                                        context.line);
     switch (type) {
     case QtDebugMsg:
         (*logger_).debug(msg.toStdString(), location);
