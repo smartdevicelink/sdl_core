@@ -34,15 +34,85 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "policies/policy_manager.h"
+#include "policies/policy_table.h"
+#include "policies/policy_configuration.h"
 
 namespace test {
 namespace components {
 namespace policies {
 namespace policies_draft_test {
   
-  TEST(policies_test, test_policies_draft_test) {
-    ASSERT_TRUE(true);
+  namespace pn = NsSmartDeviceLink::policies;
+  namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
+ 
+  class PolicyManagerTest: public pn::PolicyManager {
+  public:
+    PolicyManagerTest(const pn::PolicyConfiguration& policy_config):
+      PolicyManager(policy_config) {
+	Init();
+      }
+    pn::PolicyTable* getPolicyTable() {
+      return PolicyManager::getPolicyTable();
+    }
+  };
+ 
+  TEST(policies_test, test_policies_no_json_file_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("missing_file_for_sure.json");
+    PolicyManagerTest policy_manager(policy_config);
+    ASSERT_TRUE(0 == policy_manager.getPolicyTable());
   }
+
+  TEST(policies_test, test_policies_bad_json_file_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("bad.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON, 
+	      policy_manager.getPolicyTable()->Validate());
+  }
+  
+  TEST(policies_test, test_policies_no_schema_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("SDLPolicyTable_basic.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_NO_SCHEMA, 
+	      policy_manager.getPolicyTable()->Validate());
+  }
+  
+  TEST(policies_test, test_policies_json_validate_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("SDLPolicyTable_basic.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    //TODO: set schema
+    
+    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
+      policy_manager.getPolicyTable()->Validate());
+    
+    so_ns::SmartObject initial_obj(
+      policy_manager.getPolicyTable()->AsSmartObject());
+    
+    policy_config.setPTFileName("Stored.json");
+    policy_manager.StorePolicyTable();
+    
+    PolicyManagerTest policy_manager2(policy_config);
+    
+    //TODO: set schema
+    
+    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
+      policy_manager2.getPolicyTable()->Validate());
+    
+    so_ns::SmartObject stored_obj(
+      policy_manager2.getPolicyTable()->AsSmartObject());
+      
+    //TODO: compare smart objects.
+    
+    //TODO: implement files comapre???
+  }
+  
   
 } // namespace policies_draft_test
 } // namespace policies
@@ -50,6 +120,7 @@ namespace policies_draft_test {
 } // namespace test
 
 int main(int argc, char **argv) {
+    log4cxx::PropertyConfigurator::configure("log4cxx.properties");  
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
