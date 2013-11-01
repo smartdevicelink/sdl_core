@@ -728,8 +728,8 @@ SDL.SDLModel = Em.Object.create({
      * Prompt deactivation
      */
     TTSStopSpeaking: function () {
-
-        SDL.TTSPopUp.DeactivateTTS();
+        //true parameter makes send error response ABORTED
+        SDL.TTSPopUp.DeactivateTTS(true);
     },
 
     /**
