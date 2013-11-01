@@ -75,6 +75,7 @@ QtObject {
                 currentApplication.appType = application.appType
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
+                currentApplication.softButtons = application.softButtons
 
                 if (application.hmiUIText.mainField1) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
@@ -128,7 +129,8 @@ QtObject {
             turnList: [],
             turnListSoftButtons: [],
             mediaClock: app.mediaClock,
-            languageTTSVR: Common.Language.EN_US
+            languageTTSVR: Common.Language.EN_US,
+            softButtons: []
             // This place is for adding new properties
         })
         console.log("Exit addApplication function");
@@ -286,8 +288,7 @@ QtObject {
                             index = count
                         }
                         ++index // incremented because of "back" item with index 0
-//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
                     }
                     else {
                         console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")

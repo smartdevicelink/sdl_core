@@ -49,7 +49,7 @@ PopUp {
         color: Constants.primaryColor
     }
 
-    ListView {
+    ScrollableListView {
         anchors.top: title.bottom
         anchors.bottom: closeButton.top
         anchors.left: parent.left

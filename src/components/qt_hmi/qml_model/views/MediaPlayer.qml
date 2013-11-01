@@ -52,6 +52,9 @@ Item {
     // Holds players state(song name, play/pause state, track number etc). For all players except SDL.
     property PlayerState playerState;
 
+    property alias buttons: buttonsRow.content
+    property alias buttonsSpacing: buttonsRow.spacing
+
     Item {
         // top 3/4 screen
         id: upperContent
@@ -68,59 +71,12 @@ Item {
             height: parent.height * 1/4
 
             PagedFlickable {
-                id: flickRow
+                id: buttonsRow
                 width: parent.width
-                spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
-                                                                : (width - longOvalButton.width * 2)
+                spacing: Math.max(20, (width - (4 * elementWidth)) / 3)
+
                 snapTo: longOvalButton.width + spacing
                 elementWidth: longOvalButton.width
-
-                LongOvalButton {
-                    text: playerName
-                    pixelSize: Constants.fontSize
-                    dest: "./views/MusicSourceView.qml"
-                }
-
-                LongOvalButton {
-                    id: longOvalButton
-                    text: "SDL Menu"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/ApplicationListView.qml"
-
-                    visible: mediaPlayerView.playerType === "SDL"
-                    enabled: mediaPlayerView.playerType === "SDL"
-                }
-
-                LongOvalButton {
-                    text: "Options"
-                    pixelSize: Constants.fontSize
-                    dest: "./views/SDLPlayerOptionsListView.qml"
-
-                    visible: mediaPlayerView.playerType === "SDL"
-                    enabled: mediaPlayerView.playerType === "SDL"
-                }
-
-                LongOvalButton {
-                    text: "Browse"
-                    pixelSize: Constants.fontSize
-                }
-
-                ListView {
-                    width: model.count * longOvalButton.width + (model.count - 1)* flickRow.spacing
-                    height: longOvalButton.height
-                    model: dataContainer.applicationList
-                    orientation: ListView.Horizontal
-                    interactive: false
-                    spacing: flickRow.spacing
-
-                    delegate: LongOvalButton {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: model.appName
-                        onClicked: {
-                            contentLoader.go("./views/SDLPlayerView.qml", model.appId)
-                        }
-                    }
-                }
             }
         }
 

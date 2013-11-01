@@ -118,22 +118,23 @@ Rectangle {
                     viewTransitionStack = []
                 }
 
-                property string position
+                property string currentLocation
                 function go(path, appId) {
-                    console.debug(position, path)
-                    if (position !== path) {
+                    if (currentLocation !== path) {
                         viewTransitionStack.push(source.toString())
                         if (appId) {
                             dataContainer.setCurrentApplication(appId)
                         }
-                        position = path
+                        currentLocation = path
                         source = path
                     }
                 }
 
                 function back() {
-                    source = viewTransitionStack.pop()
-                    position = ""
+                    if (viewTransitionStack.length) {
+                        source = viewTransitionStack.pop()
+                    }
+                    currentLocation = ""
                 }
 
                 onStatusChanged: {

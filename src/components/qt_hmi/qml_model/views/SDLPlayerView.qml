@@ -40,10 +40,43 @@ import "../models/Constants.js" as Constants
 GeneralView {
     applicationContext: true
     MediaPlayer {
+        id: mediaPlayer
         onPlay: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         playerType: "SDL"
         anchors.fill: parent
+
+        buttons: [
+            LongOvalButton {
+                text: dataContainer.currentApplication.appName
+                pixelSize: Constants.fontSize
+                dest: "./views/MusicSourceView.qml"
+            },
+
+            LongOvalButton {
+                id: longOvalButton
+                text: "SDL Menu"
+                pixelSize: Constants.fontSize
+                dest: "./views/ApplicationListView.qml"
+            },
+
+            LongOvalButton {
+                text: "Options"
+                pixelSize: Constants.fontSize
+                dest: "./views/SDLPlayerOptionsListView.qml"
+            },
+
+            Repeater {
+                model: dataContainer.currentApplication.softButtons ?
+                           dataContainer.currentApplication.softButtons.count :
+                           0
+
+                delegate: SoftButton {
+                    appId: dataContainer.currentApplication.appId
+                    button: dataContainer.currentApplication.softButtons.get(index)
+                }
+            }
+        ]
     }
 }
