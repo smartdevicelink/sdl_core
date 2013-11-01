@@ -66,7 +66,11 @@ QtObject {
     }
 
     function restore (updateMode, runningMode, magic, total) {
-        console.debug("enter: " + updateMode + ", " + runningMode + ", " + magic + ", " + total)
+        console.debug("enter: " +
+                      Internal.mediaClockUpdateModeToString(updateMode) + ", " +
+                      Internal.mediaClockRunningModeToString(runningMode) + ", " +
+                      magic + ", " +
+                      total)
         timer.stop()
         var date = new Date()
         var secondsSinceEpoch = date.getTime() / 1000
@@ -99,6 +103,14 @@ QtObject {
                 break
             case Internal.MediaClockRunningMode.MCR_STOPPED:
                 hmsTime = magic
+                break
+        }
+        switch (updateMode) {
+            case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+                progress = 0
+                break
+            case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+                progress = hmsTime / total
                 break
         }
         console.debug("exit")

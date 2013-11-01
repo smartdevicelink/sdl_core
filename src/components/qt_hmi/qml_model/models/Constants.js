@@ -112,7 +112,7 @@ var iconItemListSpacing = 20
 // Height item list
 var itemListHeight = 60
 
-// Spasing between item on views
+// Spacing between item on views
 var generalSpacing = 10
 
 // Width of scrollBar
@@ -153,6 +153,9 @@ var sliderBarFillColor = "white"
 
 // Width for popup view
 var popupWidth = 700
+
+// Width for alert window
+var alertWidth = 360
 
 // Height for popup view
 var popupHeigth = 500

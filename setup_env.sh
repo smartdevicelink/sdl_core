@@ -240,6 +240,10 @@ if $QT_HMI; then
 		sudo ${QT5_RUNFILE_BIN}
 		echo $OK
 	fi
+	
+	echo "Installing OpenGL development files"
+	apt-install ${OPENGL_DEV}
+	echo $OK
 fi
 
 if $INSTALL_ALL; then
@@ -275,8 +279,5 @@ if $INSTALL_ALL; then
 	sudo /etc/init.d/icecast2 start
 	echo $OK
 
-	echo "Installing OpenGL development files"
-	apt-install ${OPENGL_DEV}
-	echo $OK
 fi
 echo "Environment configuration successfully done!"

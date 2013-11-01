@@ -63,7 +63,7 @@ QtObject {
     function setCurrentApplication(appId) {
         console.log("Enter setCurrentApplication function");
         var oldApplicationContext = applicationContext;
-        if (dataContainer.currentApplication.appId !== appId) {
+        if (currentApplication.appId !== appId) {
             applicationContext = false;
         }
 
@@ -288,8 +288,7 @@ QtObject {
                             index = count
                         }
                         ++index // incremented because of "back" item with index 0
-//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
                     }
                     else {
                         console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")
@@ -407,6 +406,23 @@ QtObject {
             }
         }
         console.debug("exit")
+    }
+
+    function setVrHelp (vrHelp) {
+        this.vrHelp.clear()
+        var index
+        for (var i = 0; i < vrHelp.length; ++i) {
+            index = 0
+// sort by simple inserts
+            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
+                ++index
+            }
+            this.vrHelp.insert(index, {
+                                            "text": vrHelp[i].text,
+                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
+                                            "position": vrHelp[i].position
+                                        })
+        }
     }
 
     property NavigationModel navigationModel: NavigationModel { }

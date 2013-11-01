@@ -66,33 +66,24 @@ PopUp {
         source: "../res/controlButtons/vrImage.png"
     }
 
-    ListView {
-        id: listCommands
-        anchors.bottomMargin: 15
-        anchors.rightMargin: 15
-        anchors.leftMargin: 15
+    ScrollableListView {
+        anchors.bottomMargin: Constants.popupMargin
+        anchors.rightMargin: Constants.popupMargin
+        anchors.leftMargin: Constants.popupMargin
         anchors.top: voice.bottom
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.topMargin: 0
-        clip: true
+
         model: dataContainer.vrCommands
+
         delegate: OvalButton {
             width: parent.width
             text: command
             onClicked: {
                 sdlVR.onCommand(cmdID, appID);
             }
-        }
-        Rectangle {
-            id: scrollbar
-            visible: true
-            anchors.right: listCommands.right
-            y: listCommands.visibleArea.yPosition * listCommands.height
-            width: Constants.scrollBarWidth
-            height: listCommands.visibleArea.heightRatio * listCommands.height
-            color: Constants.primaryColor
         }
     }
 

@@ -292,7 +292,7 @@ Item {
 
         Text {
             width: 200
-            text: "HELP_PROMPT:"
+            text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
             color: "white"
         }
         Item {
@@ -302,7 +302,7 @@ Item {
 
         Text {
             width: 200
-            text: "TIMEOUT_PROMPT:"
+            text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
             color: "white"
         }
 

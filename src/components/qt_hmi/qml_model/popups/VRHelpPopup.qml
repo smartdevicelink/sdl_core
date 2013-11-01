@@ -44,11 +44,12 @@ PopUp {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
+        text: "VR HELP" // default title
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
     }
 
-    ListView {
+    ScrollableListView {
         anchors.top: title.bottom
         anchors.bottom: closeButton.top
         anchors.left: parent.left
