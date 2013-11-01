@@ -38,7 +38,7 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
 
     classNameBindings:
         [
-            'SDL.States.media.mediaNavigation.active:inactive_state'
+            'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
         ],
 
     /** View components */

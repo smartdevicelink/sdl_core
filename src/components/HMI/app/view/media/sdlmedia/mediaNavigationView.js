@@ -35,7 +35,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     elementId: 'MediaNavigationView',
 
     classNameBindings: [
-        'SDL.States.media.mediaNavigation.active:active_state:inactive_state'
+        'SDL.States.media.sdlmedia.mediaNavigation.active:active_state:inactive_state'
     ],
 
     childViews: [

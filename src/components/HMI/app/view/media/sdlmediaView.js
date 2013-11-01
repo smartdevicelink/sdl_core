@@ -39,7 +39,8 @@ SDL.sdlView = Em.ContainerView
         elementId: 'sdl_view_container',
 
         classNameBindings: [
-            'this.activeState:active_state:inactive_state'
+            'this.activeState:active_state:inactive_state',
+            'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
         ],
 
         activeState: function(){
@@ -82,6 +83,10 @@ SDL.sdlView = Em.ContainerView
                 }.observes('SDL.SDLAppController.model.softButtons.@each'),
 
                 groupName: "MediaView",
+
+                classNameBindings: [
+                    'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
+                ],
 
                 content: Em.ContainerView.extend( {
 
