@@ -11,6 +11,7 @@ set (SOURCES
     ./src/policy_manager.cc
     ./src/policy_configuration.cc
     ./src/policy_table.cc
+    ./src/policy_table_schema.cc
 )
 
 
