@@ -67,6 +67,12 @@ class PolicyManager {
      * @param policy_config Policy configuration
      */
     explicit PolicyManager(const PolicyConfiguration& policy_config);
+    
+    /**
+     * @brief Destructor
+     *
+     **/
+    ~PolicyManager();
 
     /**
     * @brief Initialization method

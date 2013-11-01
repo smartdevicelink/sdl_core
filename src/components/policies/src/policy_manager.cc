@@ -52,6 +52,12 @@ policies_ns::PolicyManager::PolicyManager(
 
 //---------------------------------------------------------------
 
+policies_ns::PolicyManager::~PolicyManager() {
+  StorePolicyTable();
+}
+
+//---------------------------------------------------------------
+
 void policies_ns::PolicyManager::Init() {
   //TODO: Implement Preload PT load logic.
   std::string pt_string;
