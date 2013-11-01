@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "lib_messagebroker/md5.h"
+#include "utils/file_system.h"
 #include "policies/policy_manager.h"
 #include "policies/policy_table.h"
 #include "policies/policy_configuration.h"
@@ -57,35 +58,63 @@ namespace policies_draft_test {
       return PolicyManager::getPolicyTable();
     }
   };
+  
+  class Policies_test: public ::testing::Test {
+  protected:
+    virtual void SetUp() {
+      std::string buf;
+      if (true == file_system::ReadFile("SDLPolicyTable_basic.json", buf)) {
+	if (false == file_system::Write("PT4test.json", 
+	    std::vector<unsigned char>(buf.begin(), buf.end()))) {
+	  FAIL() << "Failed to write \"PT4test.json\" file.";
+	}
+      } else {
+	FAIL() << "Failed to read \"SDLPolicyTable_basic.json\" file.";
+      }
+    }
+  };
+  
  
-  TEST(policies_test, test_policies_no_json_file_test) {
+  TEST_F(Policies_test, test_policies_modify_write_verify_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("missing_file_for_sure.json");
-    PolicyManagerTest policy_manager(policy_config);
-    ASSERT_TRUE(0 == policy_manager.getPolicyTable());
+    policy_config.setPTFileName("PT4test.json");
+        
+    {
+      PolicyManagerTest initial_PT(policy_config);
+      so_ns::SmartObject& initial_obj(initial_PT.getPolicyTable()
+				    ->AsSmartObject());
+      ASSERT_TRUE(so_ns::SmartType_Null != initial_obj.getType());
+      
+      initial_obj["policy_table"]
+		  ["module_config"]
+		  ["endpoints"]
+		  ["0x07"]
+		  ["default"][0] = "ftp://127.0.0.1:1321";
+      
+      ASSERT_TRUE(initial_obj["policy_table"].erase("functional_groupings"));
+      ASSERT_FALSE(initial_obj["policy_table"].erase("functional_groupings"));
+    }
+    
+    {
+      PolicyManagerTest modified_PT(policy_config);
+      so_ns::SmartObject& modified_obj(modified_PT.getPolicyTable()
+					->AsSmartObject());
+      ASSERT_TRUE(so_ns::SmartType_Null != modified_obj.getType());
+      ASSERT_EQ(modified_obj["policy_table"]
+			     ["module_config"]
+			     ["endpoints"]
+			     ["0x07"]
+			     ["default"][0].asString(), 
+				"ftp://127.0.0.1:1321");
+      ASSERT_FALSE(modified_obj["policy_table"]
+		   .keyExists("functional_groupings"));
+    }
   }
 
-  TEST(policies_test, test_policies_bad_json_file_test) {
-    pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("bad.json");
-    PolicyManagerTest policy_manager(policy_config);
-    
-    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON, 
-	      policy_manager.getPolicyTable()->Validate());
-  }
   
-  TEST(policies_test, test_policies_no_schema_test) {
+  TEST_F(Policies_test, test_policies_read_write_compare_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("SDLPolicyTable_basic.json");
-    PolicyManagerTest policy_manager(policy_config);
-    
-    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_NO_SCHEMA, 
-	      policy_manager.getPolicyTable()->Validate());
-  }
-  
-  TEST(policies_test, test_policies_read_store_compare_test) {
-    pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("SDLPolicyTable_basic.json");
+    policy_config.setPTFileName("PT4test.json");
     
     std::string initial_json;
     std::string stored_json;
@@ -103,8 +132,34 @@ namespace policies_draft_test {
     ASSERT_EQ(md5(initial_json), md5(stored_json));
   }
   
+  TEST_F(Policies_test, test_policies_no_json_file_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("missing_file_for_sure.json");
+    PolicyManagerTest policy_manager(policy_config);
+    ASSERT_TRUE(0 == policy_manager.getPolicyTable());
+  }
+
+  TEST_F(Policies_test, test_policies_bad_json_file_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("bad.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON, 
+	      policy_manager.getPolicyTable()->Validate());
+  }
   
-//   TEST(policies_test, test_policies_json_validate_test) {
+  TEST_F(Policies_test, test_policies_no_schema_attached_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("PT4test.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_NO_SCHEMA, 
+	      policy_manager.getPolicyTable()->Validate());
+  }
+   
+  
+  
+//   TEST_F(Policies_test, test_policies_json_validate_test) {
 //     pn::PolicyConfiguration policy_config;
 //     policy_config.setPTFileName("SDLPolicyTable_basic.json");
 //     PolicyManagerTest policy_manager(policy_config);
