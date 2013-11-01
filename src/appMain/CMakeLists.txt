@@ -95,14 +95,14 @@ IF (${QT_HMI})
   )
   set(main_qml "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model/MainWindow.qml")
   set(plugins_dir "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model")
-  file(WRITE start_hmi.sh
+  file(WRITE start_hmi_tmp/start_hmi.sh
              "#!/bin/sh\n${qmlscene_binary} ${main_qml} -I ${plugins_dir}\n")
-  file(COPY start_hmi.sh
+  file(COPY start_hmi_tmp/start_hmi.sh
        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
             GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
        NO_SOURCE_PERMISSIONS)
-  file(REMOVE start_hmi.sh)
+  file(REMOVE_RECURSE start_hmi_tmp)
 ENDIF (${QT_HMI})
 
 IF (${WEB_HMI})
