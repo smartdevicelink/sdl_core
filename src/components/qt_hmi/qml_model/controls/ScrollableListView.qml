@@ -36,15 +36,14 @@ import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
 ListView {
-    id: listView
     clip: true
 
     Rectangle {
-        visible: listView.height < listView.contentHeight
-        anchors.right: listView.right
-        y: listView.visibleArea.yPosition * listView.height
+        visible: parent.height < parent.contentHeight
+        anchors.right: parent.right
+        y: parent.visibleArea.yPosition * parent.height
         width: Constants.scrollBarWidth
-        height: listView.visibleArea.heightRatio * listView.height
+        height: parent.visibleArea.heightRatio * parent.height
         color: Constants.primaryColor
     }
 }
