@@ -88,13 +88,15 @@ policies_ns::CheckPermissionResult::eType
 
 void policies_ns::PolicyManager::StorePolicyTable() {
   if (0 != policy_table_) {
-    const std::string pt_string = policy_table_->AsString();
-    const std::vector<unsigned char> char_vector_pdata(pt_string.begin(),
-                                                     pt_string.end());
-    if (false ==
-      file_system::Write(policy_config_.getPTFileName(), char_vector_pdata)) {
-      LOG4CXX_ERROR(logger_,
-        "Can't write policy table file " << policy_config_.getPTFileName());
+    if (so_ns::SmartType_Null != policy_table_->AsSmartObject().getType()) {
+      const std::string pt_string = policy_table_->AsString();
+      const std::vector<unsigned char> char_vector_pdata(pt_string.begin(),
+							  pt_string.end());
+      if (false == file_system::Write(policy_config_.getPTFileName(), 
+				      char_vector_pdata)) {
+	 LOG4CXX_ERROR(logger_, "Can't write policy table file " 
+		      << policy_config_.getPTFileName());
+      }
     }
   }
 }
