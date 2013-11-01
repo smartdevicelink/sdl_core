@@ -53,7 +53,7 @@ SDL.StatusNavigationView = Em.ContainerView.extend( {
      */
     actionUp: function(event) {
 
-        SDL.States.goToStates('navigation.baseNavigation');
+        SDL.States.goToStates('navigation');
     }
 
 });
