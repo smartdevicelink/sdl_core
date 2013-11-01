@@ -35,7 +35,6 @@
 import QtQuick 2.0
 import QtQuick.Window 2.0
 import "../controls"
-import "controls"
 import "../hmi_api/Common.js" as Common
 
 Rectangle {
@@ -95,35 +94,63 @@ Rectangle {
                     width: 360
                     height: alertButton1.visible ? alertButton1.height : 0
 
-                    AlertSoftButton {
+                    SoftButton {
                         id: alertButton1
                         button: softButtons && softButtons.length > 0 ? softButtons[0] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton2.visible ? alertButton2.left : parent.right
                         width: 180
+                        onPressed: { alertWindow.keep(); }
+                        onKeepContext: { alertWindow.restart(); }
+                        onDefaultAction: { alertWindow.complete(); }
+                        onStealFocus: {
+                            contentLoader.go("views/SDLPlayerView.qml", appId);
+                            alertWindow.complete();
+                        }
                     }
-                    AlertSoftButton {
+                    SoftButton {
                         id: alertButton2
                         button: softButtons && softButtons.length > 1 ? softButtons[1] : undefined
                         anchors.right: parent.right
                         width: 180
+                        onPressed: { alertWindow.keep(); }
+                        onKeepContext: { alertWindow.restart(); }
+                        onDefaultAction: { alertWindow.complete(); }
+                        onStealFocus: {
+                            contentLoader.go("views/SDLPlayerView.qml", appId);
+                            alertWindow.complete();
+                        }
                     }
                 }
                 Item {
                     width: 360
                     height: alertButton3.visible ? childrenRect.height : 0
-                    AlertSoftButton {
+                    SoftButton {
                         id: alertButton3
                         button: softButtons && softButtons.length > 2 ? softButtons[2] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton4.visible ? alertButton4.left : parent.right
                         width: 180
+                        onPressed: { alertWindow.keep(); }
+                        onKeepContext: { alertWindow.restart(); }
+                        onDefaultAction: { alertWindow.complete(); }
+                        onStealFocus: {
+                            contentLoader.go("views/SDLPlayerView.qml", appId);
+                            alertWindow.complete();
+                        }
                     }
-                    AlertSoftButton {
+                    SoftButton {
                         id: alertButton4
                         button: softButtons && softButtons.length > 3 ? softButtons[3] : undefined
                         anchors.right: parent.right
                         width: 180
+                        onPressed: { alertWindow.keep(); }
+                        onKeepContext: { alertWindow.restart(); }
+                        onDefaultAction: { alertWindow.complete(); }
+                        onStealFocus: {
+                            contentLoader.go("views/SDLPlayerView.qml", appId);
+                            alertWindow.complete();
+                        }
                     }
                 }
             }

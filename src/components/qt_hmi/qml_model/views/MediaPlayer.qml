@@ -75,7 +75,7 @@ Item {
                 width: parent.width
                 //spacing: (mediaPlayerView.playerType === "SDL") ? ((width - longOvalButton.width * 4) / 3)
                                                                 //: (width - longOvalButton.width * 2)
-                spacing: 20
+                spacing: Math.max(20, (width - (4 * elementWidth)) / 3)
 
                 snapTo: longOvalButton.width + spacing
                 elementWidth: longOvalButton.width

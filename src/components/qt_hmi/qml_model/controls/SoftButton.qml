@@ -1,5 +1,5 @@
 /**
- * @file AlertSoftButton.qml
+ * @file SoftButton.qml
  * @brief Soft button for alert window
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -32,64 +32,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
-import "../../controls"
-import "../../hmi_api/Common.js" as Common
-import "AlertSoftButton.js" as SoftButton
+import "../hmi_api/Common.js" as Common
 
 OvalButton {
     property var button
-
     visible: !!button
 
-    // 0 - do nothing
-    // 1 - close alert on button released
-    // 2 - keep alert on button released
-    // 3 - close alert on button clicked
-    // 4 - keep alert on button clicked
-    property int actionOnRelease: 0
+    signal defaultAction;
+    signal stealFocus;
+    signal keepContext;
 
+    // 0 - action on clicked
+    // 1 - action on released
+    property int doAction: 0
+
+    highlighted: button ? button.isHighlighted : false
     onPressed: {
-        alertWindow.keep();
-        switch (button.systemAction) {
-        case Common.SystemAction.DEFAULT_ACTION:
-            actionOnRelease = SoftButton.Action.closeOnClicked;
-            break;
-        case Common.SystemAction.STEAL_FOCUS:
-            contentLoader.go("views/SDLPlayerView.qml", appId);
-            actionOnRelease = SoftButton.Action.closeOnClicked;
-            break;
-        case Common.SystemAction.KEEP_CONTEXT:
-            actionOnRelease = SoftButton.Action.keepOnClicked;
-            break;
-        }
+        doAction = 0
         sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONDOWN, button.softButtonID)
     }
 
     onReleased: {
-        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID)
-        if (actionOnRelease === SoftButton.Action.closeOnRelease) {
-            alertWindow.complete();
-        } else if (actionOnRelease === SoftButton.Action.keepOnRelease) {
-            alertWindow.restart();
+        if (doAction === 1) {
+            switch (button.systemAction) {
+            case Common.SystemAction.DEFAULT_ACTION:
+                defaultAction();
+                break;
+            case Common.SystemAction.STEAL_FOCUS:
+                contentLoader.go("views/SDLPlayerView.qml", appId);
+                stealFocus();
+                break;
+            case Common.SystemAction.KEEP_CONTEXT:
+                keepContext();
+                break;
+            }
         }
+
+        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID)
     }
 
     onClicked: {
-        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                     Common.ButtonPressMode.SHORT,
-                                 button.softButtonID);
-        if (actionOnRelease === SoftButton.Action.closeOnClicked) {
-            alertWindow.complete();
-        } else if (actionOnRelease === SoftButton.Action.keepOnClicked) {
-            alertWindow.restart();
+        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.SHORT, button.softButtonID);
+        switch (button.systemAction) {
+        case Common.SystemAction.DEFAULT_ACTION:
+            defaultAction();
+            break;
+        case Common.SystemAction.STEAL_FOCUS:
+            contentLoader.go("views/SDLPlayerView.qml", appId);
+            stealFocus();
+            break;
+        case Common.SystemAction.KEEP_CONTEXT:
+            keepContext();
+            break;
         }
     }
 
     onPressAndHold: {
-        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                     Common.ButtonPressMode.LONG,
-                                 button.softButtonID);
-        actionOnRelease |= SoftButton.Action.onRelease; // action should be triggered on release
+        doAction = 1; // action should be triggered on release
+        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.LONG, button.softButtonID);
     }
 
     onButtonChanged: {
@@ -97,9 +97,5 @@ OvalButton {
             icon = button && button.type !== Common.SoftButtonType.SBT_TEXT ? button.image : undefined;
             text = button && button.type !== Common.SoftButtonType.SBT_IMAGE ? button.text : ""
         }
-    }
-
-    function buttonPressed(action, longpress, cmdId, appId) {
-
     }
 }

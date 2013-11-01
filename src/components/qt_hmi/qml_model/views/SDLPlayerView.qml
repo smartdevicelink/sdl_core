@@ -40,6 +40,7 @@ import "../models/Constants.js" as Constants
 GeneralView {
     applicationContext: true
     MediaPlayer {
+        id: mediaPlayer
         onPlay: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
@@ -66,20 +67,13 @@ GeneralView {
                 dest: "./views/SDLPlayerOptionsListView.qml"
             },
 
-            ListView {
-                width: model ? model.count * longOvalButton.width + (model.count - 1) * 20 : 0
-                height: longOvalButton.height
-                model: dataContainer.currentApplication.softButtons
-                orientation: ListView.Horizontal
-                interactive: false
-                spacing: 20
+            Repeater {
+                model: dataContainer.currentApplication.softButtons ?
+                           dataContainer.currentApplication.softButtons.count :
+                           0
 
-                delegate: LongOvalButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: model.text
-                    onClicked: {
-                        contentLoader.go("./views/SDLPlayerView.qml", model.appId)
-                    }
+                delegate: SoftButton {
+                    button: dataContainer.currentApplication.softButtons.get(index)
                 }
             }
         ]
