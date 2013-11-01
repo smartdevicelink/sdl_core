@@ -86,16 +86,19 @@ namespace policies_draft_test {
   TEST(policies_test, test_policies_read_store_compare_test) {
     pn::PolicyConfiguration policy_config;
     policy_config.setPTFileName("SDLPolicyTable_basic.json");
-    PolicyManagerTest policy_manager(policy_config);
-        
-    std::string initial_json(policy_manager.getPolicyTable()->AsString());
     
-    policy_config.setPTFileName("Stored.json");
-    policy_manager.StorePolicyTable();
+    std::string initial_json;
+    std::string stored_json;
     
-    PolicyManagerTest policy_manager2(policy_config);
-           
-    std::string stored_json(policy_manager2.getPolicyTable()->AsString());
+    {
+      PolicyManagerTest policy_manager(policy_config);
+      initial_json = policy_manager.getPolicyTable()->AsString();
+    }
+    
+    {
+      PolicyManagerTest policy_manager(policy_config);
+      stored_json = policy_manager.getPolicyTable()->AsString();
+    }
     
     ASSERT_EQ(md5(initial_json), md5(stored_json));
   }
