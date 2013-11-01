@@ -148,14 +148,14 @@ namespace policies_draft_test {
 	      policy_manager.getPolicyTable()->Validate());
   }
   
-  TEST_F(Policies_test, test_policies_no_schema_attached_test) {
-    pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("PT4test.json");
-    PolicyManagerTest policy_manager(policy_config);
-    
-    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_NO_SCHEMA, 
-	      policy_manager.getPolicyTable()->Validate());
-  }
+//   TEST_F(Policies_test, test_policies_no_schema_attached_test) {
+//     pn::PolicyConfiguration policy_config;
+//     policy_config.setPTFileName("PT4test.json");
+//     PolicyManagerTest policy_manager(policy_config);
+//     
+//     ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_NO_SCHEMA, 
+// 	      policy_manager.getPolicyTable()->Validate());
+//   }
    
   
   

@@ -45,7 +45,6 @@ namespace policies {
 namespace PTValidationResult {
 enum eType {
   VALIDATION_OK = 0,
-  VALIDATION_FAILED_NO_SCHEMA,
   VALIDATION_FAILED_BAD_JSON,
   VALIDATION_FAILED
 };
@@ -96,10 +95,6 @@ class PolicyTable {
     PTValidationResult::eType Validate();
 
   private:
-    /**
-     * @brief Create smart schema (non Ford-specific)
-     */
-    static NsSmartDeviceLink::NsSmartObjects::CSmartSchema createSchemaSDL();
 
     /**
      * @brief Creates smmart obejct by previously set schema.
@@ -112,11 +107,6 @@ class PolicyTable {
      * @return Policy table as smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject& CreateDefaultPT();
-
-    /**
-     * @brief is schema set
-     */
-    bool is_schema_set_;
     
     /**
      * @brief is Policy Table valid

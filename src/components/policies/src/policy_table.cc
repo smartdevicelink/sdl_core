@@ -35,6 +35,7 @@
 #include "policies/policy_table.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "formatters/generic_json_formatter.h"
+#include "policies/policy_table_schema.h"
 
 namespace policies_ns = NsSmartDeviceLink::policies;
 namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
@@ -43,9 +44,8 @@ namespace formatters_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 //---------------------------------------------------------------------------
 
 policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string)
-  : is_schema_set_(false)
-  , is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
-  , schema_(so_ns::CSmartSchema(so_ns::CAlwaysTrueSchemaItem::create()))
+  : is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
+  , schema_(policies_ns::PolicyTableSchema::CreateSchema())
   , pt_smart_object_()
   , pt_default_smart_object_() {
      if (false == formatters_ns::GenericJsonFormatter::FromString(
@@ -80,7 +80,6 @@ const std::string policies_ns::PolicyTable::AsString() {
 void policies_ns::PolicyTable::SetSchema(
     NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema) {
   schema_ = schema;
-  is_schema_set_ = true;
 }
 
 //---------------------------------------------------------------------------
@@ -88,11 +87,6 @@ void policies_ns::PolicyTable::SetSchema(
 policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_PT_valid_) {
     return is_PT_valid_;
-  }
-  
-  if (false == is_schema_set_) {
-    is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_NO_SCHEMA;
-    return is_PT_valid_;  
   }
   
   if (so_ns::Errors::OK == schema_.validate(pt_smart_object_)) {
@@ -106,13 +100,6 @@ policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
 }
 
 //---------------------------------------------------------------------------
-
-/*static*/
-so_ns::CSmartSchema policies_ns::PolicyTable::createSchemaSDL() {
-  return
-    so_ns::CSmartSchema(
-        so_ns::CAlwaysTrueSchemaItem::create());
-}
 
 so_ns::SmartObject& policies_ns::PolicyTable::CreateDefaultPT() {
   return pt_default_smart_object_;

@@ -53,12 +53,14 @@ using ::NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem;
 
 typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 
+//-----------------------------------------------------------------------------
 
 const std::string PolicyTableSchema::kStrPolicyTable("policy_table");
 const std::string PolicyTableSchema::kStrModuleConfig("module_config");
 const std::string PolicyTableSchema::kStrFunctionalGroupings("functional_groupings");
 const std::string PolicyTableSchema::kStrAppPolicies("app_policies");
 
+//-----------------------------------------------------------------------------
 
 CSmartSchema PolicyTableSchema::CreateSchema(void) {         
   
@@ -87,17 +89,23 @@ CSmartSchema PolicyTableSchema::CreateSchema(void) {
   return CSmartSchema(root_schema_item);
 }
 
+//-----------------------------------------------------------------------------
+
 SchemaItemPtr PolicyTableSchema::CreateModuleConfig(void) {
   
   // TODO: implement 
   return CAlwaysTrueSchemaItem::create();
 }
 
+//-----------------------------------------------------------------------------
+
 SchemaItemPtr PolicyTableSchema::CreateFunctionaGroupings(void) {
   
   // TODO: implement 
   return CAlwaysTrueSchemaItem::create();
 }
+
+//-----------------------------------------------------------------------------
 
 SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
   

@@ -16,4 +16,4 @@ set (SOURCES
 
 
 add_library("policies" ${SOURCES})
-target_link_libraries ("policies" formatters jsoncpp)
+target_link_libraries ("policies" formatters jsoncpp SmartObjects)
