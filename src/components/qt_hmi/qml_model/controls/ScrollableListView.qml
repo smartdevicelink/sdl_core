@@ -1,6 +1,6 @@
 /**
- * @file GeneralView.qml
- * @brief Base view class. Defines properties and behavior common for all views
+ * @file ScrollableListView.qml
+ * @brief ListView with scrollbar on the right
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,24 +33,17 @@
  */
 
 import QtQuick 2.0
-import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
-Item {
-    /// HMI context view is related to
-    property int systemContext: Common.SystemContext.SYSCTXT_MAIN
-    /// True if view is in application context
-    property bool applicationContext: false
-    /// View category for AppDeactivated notification (reason)
-    property int category: Common.DeactivateReason.GENERAL
+ListView {
+    clip: true
 
-    Connections {
-        target: sdlProxy
-        onAppUnregistered: {
-            if (dataContainer.applicationContext &&
-                    (dataContainer.currentApplication.appId === appId)) {
-                contentLoader.go("views/ApplicationListView.qml");
-                contentLoader.reset();
-            }
-        }
+    Rectangle {
+        visible: parent.height < parent.contentHeight
+        anchors.right: parent.right
+        y: parent.visibleArea.yPosition * parent.height
+        width: Constants.scrollBarWidth
+        height: parent.visibleArea.heightRatio * parent.height
+        color: Constants.primaryColor
     }
 }

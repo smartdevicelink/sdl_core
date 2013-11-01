@@ -67,6 +67,10 @@ Item {
                   }
             }
         )
+        var app = dataContainer.getApplication(appID);
+        app.softButtons.clear()
+        softButtons.forEach(function(x) { app.softButtons.append(x); });
+
         if (alignment !== undefined) {
             switch (alignment) {
                 case Common.TextAlignment.LEFT_ALIGNED:

@@ -53,7 +53,6 @@ Item
         width: parent.width
 
         onMovementEnded: {
-            console.log("PagedFlickabe onMovementEnded enter");
             var rest = contentX % snapTo
             var t = 0.25
             if (rest > parent.snapTo / 2) {
@@ -63,7 +62,6 @@ Item
             flickDeceleration = Math.abs(vel) / t
             flick(vel, 0)
             flickDeceleration = 1500
-            console.log("PagedFlickabe onMovementEnded exit");
         }
         Row {
             id: containerRow

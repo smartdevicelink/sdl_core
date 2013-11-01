@@ -1,6 +1,6 @@
 /**
- * @file AlertSoftButton.js
- * @brief AlertSoftButton's constants
+ * @file SoftButton.js
+ * @brief Soft button view constants
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -34,10 +34,6 @@
 .pragma library
 
 var Action = {
-	doNothing      : 0,
-        closeOnClicked : 1,
-        keepOnClicked  : 2,
-        onRelease      : 4,
-        closeOnRelease : 5,
-        keepOnRelease  : 6,
+    doOnClicked: 0,
+    doOnReleased: 1
 }

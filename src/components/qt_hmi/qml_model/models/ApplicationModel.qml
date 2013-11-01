@@ -25,6 +25,7 @@ QtObject {
 
     property ListModel currentSubMenu: options
     property ListModel turnList
+    property ListModel softButtons
     property ListModel turnListSoftButtons
     property int languageTTSVR
     // This place is for adding new properties
