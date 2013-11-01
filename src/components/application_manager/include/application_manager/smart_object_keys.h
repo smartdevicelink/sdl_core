@@ -227,7 +227,7 @@ const char interaction_layout[] = "interactionLayout";
 const char menu_title[] = "menuTitle";
 const char menu_icon[] = "menuIcon";
 const char keyboard_properties[] = "keyboardProperties";
-
+const char method_name[] = "methodName";
 }  // namespace hmi_request
 
 namespace hmi_response {

@@ -151,6 +151,7 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
   if (!(*message_)[strings::msg_params].keyExists(strings::turn_list)) {
     return false;
   }
+
   int length = (*message_)[strings::msg_params][strings::turn_list].length();
   if (0 == length) {
     return false;
