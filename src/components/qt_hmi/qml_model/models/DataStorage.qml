@@ -286,8 +286,7 @@ QtObject {
                             index = count
                         }
                         ++index // incremented because of "back" item with index 0
-//                      option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []}) // TODO (nvaganov@luxoft.com): I do not know why the program crashes here
-                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}}) // actually we do not need subMenu[] for node
+                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
                     }
                     else {
                         console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")
