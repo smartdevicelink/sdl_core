@@ -38,7 +38,10 @@ Item {
             return alertWindow.async;
         }
         else {
-            return { tryAgainTime: tryAgainTime }
+            return {
+                "__retCode": Common.Result.REJECTED,
+                "tryAgainTime": tryAgainTime
+            }
         }
     }
 
