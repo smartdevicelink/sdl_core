@@ -1,6 +1,6 @@
 /**
  * @file SoftButton.qml
- * @brief Soft button for alert window
+ * @brief Soft button view
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,27 +33,27 @@
  */
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "SoftButton.js" as SoftButton
 
 OvalButton {
     property var button
+    property int appId
     visible: !!button
 
     signal defaultAction;
     signal stealFocus;
     signal keepContext;
 
-    // 0 - action on clicked
-    // 1 - action on released
-    property int doAction: 0
+    property int actionOrder: SoftButton.Action.doOnClicked
 
     highlighted: button ? button.isHighlighted : false
     onPressed: {
-        doAction = 0
+        actionOrder = SoftButton.Action.doOnClicked
         sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONDOWN, button.softButtonID)
     }
 
     onReleased: {
-        if (doAction === 1) {
+        if (actionOrder === SoftButton.Action.doOnReleased) {
             switch (button.systemAction) {
             case Common.SystemAction.DEFAULT_ACTION:
                 defaultAction();
@@ -88,14 +88,12 @@ OvalButton {
     }
 
     onPressAndHold: {
-        doAction = 1; // action should be triggered on release
+        actionOrder = SoftButton.Action.doOnReleased; // action should be triggered on release
         sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.LONG, button.softButtonID);
     }
 
     onButtonChanged: {
-        if (button) {
-            icon = button && button.type !== Common.SoftButtonType.SBT_TEXT ? button.image : undefined;
-            text = button && button.type !== Common.SoftButtonType.SBT_IMAGE ? button.text : ""
-        }
+        icon = button && button.type !== Common.SoftButtonType.SBT_TEXT ? button.image : undefined;
+        text = button && button.type !== Common.SoftButtonType.SBT_IMAGE ? button.text : ""
     }
 }

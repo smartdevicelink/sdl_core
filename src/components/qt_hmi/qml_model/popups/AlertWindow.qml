@@ -38,6 +38,11 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 
 Rectangle {
+    id: alertWindow
+    property date lastAlertTime
+    property var softButtons
+    property int appId
+
     color: "transparent"
 
     property var async
@@ -96,6 +101,7 @@ Rectangle {
 
                     SoftButton {
                         id: alertButton1
+                        appId: alertWindow.appId
                         button: softButtons && softButtons.length > 0 ? softButtons[0] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton2.visible ? alertButton2.left : parent.right
@@ -110,6 +116,7 @@ Rectangle {
                     }
                     SoftButton {
                         id: alertButton2
+                        appId: alertWindow.appId
                         button: softButtons && softButtons.length > 1 ? softButtons[1] : undefined
                         anchors.right: parent.right
                         width: 180
@@ -127,6 +134,7 @@ Rectangle {
                     height: alertButton3.visible ? childrenRect.height : 0
                     SoftButton {
                         id: alertButton3
+                        appId: alertWindow.appId
                         button: softButtons && softButtons.length > 2 ? softButtons[2] : undefined
                         anchors.left: parent.left
                         anchors.right: alertButton4.visible ? alertButton4.left : parent.right
@@ -141,6 +149,7 @@ Rectangle {
                     }
                     SoftButton {
                         id: alertButton4
+                        appId: alertWindow.appId
                         button: softButtons && softButtons.length > 3 ? softButtons[3] : undefined
                         anchors.right: parent.right
                         width: 180
@@ -176,11 +185,7 @@ Rectangle {
         }
     }
 
-    property date lastAlertTime
-    property var softButtons
-    property int appId
-
-    function alert (alertStrings, duration, showIndicator, sButtons, appID) {
+    function alert (alertStrings, duration, showIndicator, sButtons, applicationId) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
@@ -191,8 +196,8 @@ Rectangle {
         }
         else {
             lastAlertTime = new Date();
-            appId = appID
-            rectangle.appNameString = dataContainer.getApplication(appID).appName;
+            appId = applicationId
+            rectangle.appNameString = dataContainer.getApplication(appId).appName;
             softButtons = sButtons;
             rectangle.alertString = alertStrings.join('\n');
             timer.interval = duration;

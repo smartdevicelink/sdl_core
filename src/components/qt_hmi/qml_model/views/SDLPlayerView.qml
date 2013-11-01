@@ -73,6 +73,7 @@ GeneralView {
                            0
 
                 delegate: SoftButton {
+                    appId: dataContainer.currentApplication.appId
                     button: dataContainer.currentApplication.softButtons.get(index)
                 }
             }
