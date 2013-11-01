@@ -37,7 +37,10 @@ set(codegen ${codegen_dir}/make_qml_dbus_qml.py)
 set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/HMI_API.xml)
-set(proxy_dir ${CMAKE_CURRENT_SOURCE_DIR}/hmi_api)
+set(proxy_dir ${CMAKE_CURRENT_BINARY_DIR}/hmi_api)
+set(qml_dirs hmi_api controls models popups res views)
+set(qml_files MainWindow.qml)
+
 add_custom_target(qml_auto ALL
   COMMAND python ${codegen} --infile ${api_xml} --outdir ${proxy_dir}
   DEPENDS ${api_xml} ${codegen} ${parser}
@@ -52,3 +55,19 @@ add_custom_target(qml_auto ALL
     from:
     ${api_xml} ..."
 )
+
+if(NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  foreach(qml_dir ${qml_dirs})
+    add_custom_target(qml_copy_${qml_dir} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/${qml_dir} ${CMAKE_CURRENT_BINARY_DIR}/${qml_dir}
+    COMMENT "Copying directory ${qml_dir}")
+  endforeach(qml_dir)
+
+  add_dependencies(qml_auto qml_copy_hmi_api)
+
+  foreach(qml_file ${qml_files})
+    add_custom_target(qml_copy_${qml_file} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/${qml_file} ${CMAKE_CURRENT_BINARY_DIR}/${qml_file}
+    COMMENT "Copying file ${qml_file}")
+  endforeach(qml_file)
+endif()

@@ -44,7 +44,7 @@ add_library(${target} SHARED ${SOURCES})
 
 qt5_use_modules(${target} Core Qml Quick)
 
-set(model_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../qml_model)
+set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model)
 set(destination ${model_dir}/com/ford/sdl/hmi/hw_buttons)
 
 install(TARGETS ${target}
