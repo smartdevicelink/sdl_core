@@ -228,6 +228,10 @@ const char menu_title[] = "menuTitle";
 const char menu_icon[] = "menuIcon";
 const char keyboard_properties[] = "keyboardProperties";
 const char method_name[] = "methodName";
+const char keyboard_layout[] = "keyboardLayout";
+const char send_dynamic_entry[] = "sendDynamicEntry";
+const char limited_character_list[] = "limitedCharacterList";
+const char auto_complete_text[] = "autoCompleteText";
 }  // namespace hmi_request
 
 namespace hmi_response {
