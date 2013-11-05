@@ -42,6 +42,8 @@ Item {
     width: Constants.popupWidth
     height: Constants.popupHeigth
 
+    MouseArea { anchors.fill: parent }
+
     Rectangle {
         width: parent.width - padding / 2
         height: parent.height - padding / 2
