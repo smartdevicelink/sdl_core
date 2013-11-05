@@ -96,7 +96,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    */
-  int Init(void);
+  virtual int Init();
 
   /**
    * @brief Start scanning for new devices.
@@ -220,11 +220,10 @@ class TransportManagerImpl : public TransportManager {
   virtual int Visibility(const bool& on_off) const;
 
   /**
-   * @brief Return Container that hold information about devices.
-   *
-   * @return Container that hold information about devices.
+   * @brief Updates total device list with info from specific transport adapter.
+   * @param ta Transport adapter
    */
-  std::vector<DeviceInfo> GetDeviceList();
+  void UpdateDeviceList(TransportAdapterSptr ta);
 
   /**
    * @brief Establish protocom handler.
@@ -479,6 +478,9 @@ class TransportManagerImpl : public TransportManager {
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapterSptr, TransportAdapterListenerImpl*> transport_adapter_listeners_;
 
+  typedef std::vector<std::pair<TransportAdapterSptr, DeviceInfo> > DeviceList;
+  DeviceList device_list_;
+
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);
@@ -497,9 +499,6 @@ class TransportManagerImpl : public TransportManager {
       ConnectionUID id, unsigned int frame_size, unsigned char** frame);
 
   void OnDeviceListUpdated(const TransportAdapterSptr& ta);
-
-  friend bool TransportAdapterListenerImpl::FindSharedPtr(
-      const TransportAdapter*, AdapterIterator&);
 };
 //class ;
 

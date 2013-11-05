@@ -116,6 +116,10 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
+  // It's important to initialise TM after setting up listener chain
+  // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  transport_manager_->Init();
+
   app_manager_->set_mobile_message_handler(mmh_);
   mmh_->AddMobileMessageListener(app_manager_);
   app_manager_->set_connection_handler(connection_handler_);

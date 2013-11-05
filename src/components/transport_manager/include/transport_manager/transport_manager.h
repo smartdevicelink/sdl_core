@@ -52,9 +52,15 @@ class TransportManager {
   /**
    * @brief Destructor.
    **/
-  virtual ~TransportManager(void) {}
+  virtual ~TransportManager() {}
 
   /**
+   * @brief Initialize transport manager.
+   * @return Error code.
+   */
+  virtual int Init() = 0;
+
+ /**
    * @brief Start scanning for new devices.
    *
    * @return Code error.
