@@ -35,36 +35,31 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
-import com.ford.sdl.hmi.hw_buttons 1.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../views"
 import "../models/Constants.js" as Constants
 
 Rectangle {
-    width: 500
-    height: parent.height + Constants.panelPadding
+    width: controlArea.width + controlArea.anchors.margins
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
     color: Constants.panelColor
 
-    signal buttonDown(string name)
-    signal buttonUp(string name)
-
-    function pressButton(name) {
-        buttonDown(name)
-    }
-
-    function longPressButton(name) {
-        console.log("long press " + name)
-    }
-
-    function releaseButton(name) {
-        buttonUp(name)
-    }
-
-    Column {
+    Item {
+        id: showArea
+        anchors.top: parent.top
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 50
+        anchors.right: parent.right
+        anchors.bottom: controlArea.top
+    }
+
+    Item {
+        id: controlArea
+        anchors.bottom: parent.bottom
+        anchors.margins: Constants.panelPadding
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: table.width
 
         ListModel {
             id: languagesList
@@ -78,14 +73,34 @@ Rectangle {
             }
         }
 
-        Row
-        {
-            spacing: 30
-            Column
-            {
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+
+            Text {
+                id: label
+                text: "Languages"
+                color: Constants.panelTextColor
+                anchors.bottom: table.top
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Grid {
+                id: table
+                spacing: 5
+                columns: 2
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: glProperties.top
+
                 Text {
-                    text: "UI Languages"
-                    color: "white"
+                    text: "HMI UI"
+                    color: Constants.panelTextColor
+                }
+
+                Text {
+                    text: "HMI TTS + VR"
+                    color: Constants.panelTextColor
                 }
 
                 ComboBox {
@@ -95,13 +110,6 @@ Rectangle {
                         dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
                         sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
                     }
-                }
-            }
-            Column
-            {
-                Text {
-                    text: "TTS + VR Languages"
-                    color: "white"
                 }
 
                 ComboBox {
@@ -113,22 +121,21 @@ Rectangle {
                         sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
                     }
                 }
-            }
-        }
 
-        Row
-        {
-            spacing: 20
-            Column
-            {
                 Text {
-                    text: "application UI Languages"
-                    color: "white"
+                    text: "Application UI"
+                    color: Constants.panelTextColor
+                }
+
+                Text {
+                    text: "Application TTS + VR"
+                    color: Constants.panelTextColor
                 }
 
                 Text {
                     id: uiLanguageLabel
-                    color: "white"
+                    color: Constants.panelTextColor
+                    text: " "
                     Connections {
                         target: dataContainer
                         onCurrentApplicationChanged: {
@@ -140,17 +147,11 @@ Rectangle {
                         }
                     }
                 }
-            }
-            Column
-            {
-                Text {
-                    text: "application TTS + VR Languages"
-                    color: "white"
-                }
 
                 Text {
                     id: ttsLanguageLabel
-                    color: "white"
+                    color: Constants.panelTextColor
+                    text: " "
                     Connections {
                         target: dataContainer
                         onCurrentApplicationChanged: {
@@ -162,38 +163,7 @@ Rectangle {
                         }
                     }
                 }
-            }
-        }
 
-        Item {
-            height: 20
-            width: 1
-        }
-
-        Text {
-            width: 200
-            text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
-            color: "white"
-        }
-        Item {
-            height: 20
-            width: 1
-        }
-
-        Text {
-            width: 200
-            text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
-            color: "white"
-        }
-
-        Item {
-            height: 20
-            width: 1
-        }
-
-        Row
-        {
-            Column {
                 PushButton {
                     id: vehicleInfo
                     label: "Vehicle info"
@@ -204,16 +174,6 @@ Rectangle {
                     onUnpressed: {
                         viPopUp.hide();
                     }
-                }
-
-
-                Item {
-                    height: 1
-                    width: 20
-                }
-
-                PushButton {
-                    label: "Send data"
                 }
 
                 PushButton {
@@ -228,11 +188,6 @@ Rectangle {
                     }
                 }
 
-                Item {
-                    height: 1
-                    width: 20
-                }
-
                 PushButton {
                     label: "Exit application"
                     onClicked: {
@@ -241,6 +196,7 @@ Rectangle {
                         }
                     }
                 }
+
                 PushButton {
                     id: exitAllAppsButton
                     label: "Exit all apps"
@@ -261,32 +217,60 @@ Rectangle {
                         }
                     }
                 }
-                Row {
-                    spacing: 20
-                    CheckBox {
-                        style: CheckBoxStyle {
-                            label: Text {
-                                color: "white"
-                                text: "Use URL"
-                            }
+
+                CheckBox {
+                    style: CheckBoxStyle {
+                        label: Text {
+                            color: Constants.panelTextColor
+                            text: "Use URL"
                         }
                     }
-                    CheckBox {
-                        style: CheckBoxStyle {
-                            label: Text {
-                                color: "white"
-                                text: "DD"
-                            }
+                }
+
+                CheckBox {
+                    style: CheckBoxStyle {
+                        label: Text {
+                            color: Constants.panelTextColor
+                            text: "DD"
                         }
-                        onClicked: {
-                            if (checked) {
-                                dataContainer.driverDistractionState =
-                                        Common.DriverDistractionState.DD_ON;
-                            } else {
-                                dataContainer.driverDistractionState =
-                                        Common.DriverDistractionState.DD_OFF;
-                            }
+                    }
+                    onClicked: {
+                        if (checked) {
+                            dataContainer.driverDistractionState =
+                                    Common.DriverDistractionState.DD_ON;
+                        } else {
+                            dataContainer.driverDistractionState =
+                                    Common.DriverDistractionState.DD_OFF;
                         }
+                    }
+                }
+            }
+
+            Rectangle {
+                id: glProperties
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: listGlobalProperties.height + Constants.panelPadding
+                border.color: Constants.panelTextColor
+                border.width: 1
+                color: Constants.panelColor
+                Column {
+                    id: listGlobalProperties
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: Constants.panelPadding / 4
+                    Text {
+                        text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
+                        color: Constants.panelTextColor
+                    }
+                    Text {
+                        text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
+                        color: Constants.panelTextColor
+                    }
+                    Text {
+                        text: "AUTOCOMPLETE_TEXT: " + dataContainer.globalProperties.autocompleteText
+                        color: Constants.panelTextColor
                     }
                 }
             }

@@ -47,7 +47,7 @@ import "./models/Constants.js" as Constants
 import "models/Internal.js" as Internal
 
 Rectangle {
-    width: 1600
+    width: 1280
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
     property int minWidth: Constants.mainScreenMinWidth

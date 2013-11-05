@@ -33,19 +33,37 @@
  */
 
 import QtQuick 2.0
+import com.ford.sdl.hmi.hw_buttons 1.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
 Rectangle {
-    height: row.height + Constants.panelPadding
-    width: parent.width + Constants.panelPadding
+    height: row.height + row.anchors.margins
+    anchors.left: parent.left
+    anchors.right: parent.right
     color: Constants.panelColor
+
+    signal buttonDown(string name)
+    signal buttonUp(string name)
+
+    function pressButton(name) {
+        buttonDown(name)
+    }
+
+    function longPressButton(name) {
+        console.log("long press " + name)
+    }
+
+    function releaseButton(name) {
+        buttonUp(name)
+    }
 
     Row {
         id: row
         spacing: Constants.panelPadding
         anchors.centerIn: parent
+        anchors.margins: Constants.panelPadding
 
         PowerSwitchButton {anchors.verticalCenter: parent.verticalCenter}
 
@@ -97,7 +115,7 @@ Rectangle {
                     Text {
                         text: (1 + index) % 10
                         font.pixelSize: 30
-                        color: "white"
+                        color: Constants.panelTextColor
                         anchors.centerIn: parent
                     }
 
