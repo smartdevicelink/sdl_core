@@ -155,57 +155,21 @@ Rectangle {
 
         WarningInfo { id: warningInfo }
 
-        VRPopUp {
-            id: vrPopUp
-            visible: false
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TTSPopUp {
-            id: ttsPopUp
-            anchors.top: parent.top
-            anchors.right: parent.right
-            visible: false
-        }
-
-        ExitAllApplicationsPopup {
-            id: exitAllApplicationsPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
-
-        VehicleInfoPopUp {
-            id: viPopUp
-            anchors.centerIn: parent
-        }
-
         InteractionPopup {
             id: interactionPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 
         SliderPopup {
             id: sliderPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
-
-        TBTClientStatePopUp {
-            id: tbtClientStatePopUp
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 
         PerformAudioPassThruPopup {
             id: performAudioPassThruPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 

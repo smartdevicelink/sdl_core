@@ -38,6 +38,7 @@ import QtQuick.Controls.Styles 1.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../views"
+import "../popups"
 import "../models/Constants.js" as Constants
 
 Rectangle {
@@ -51,7 +52,37 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: controlArea.top
+        height: parent.height - (controlArea.childrenRect.height + controlArea.anchors.margins)
+
+        VRPopUp {
+            id: vrPopUp
+            visible: false
+            anchors.fill: parent
+        }
+
+        TTSPopUp {
+            id: ttsPopUp
+            anchors.top: parent.top
+            anchors.right: parent.right
+            visible: false
+        }
+
+        ExitAllApplicationsPopup {
+            id: exitAllApplicationsPopup
+            anchors.fill: parent
+            visible: false
+        }
+
+        VehicleInfoPopUp {
+            id: viPopUp
+            anchors.fill: parent
+        }
+
+        TBTClientStatePopUp {
+            id: tbtClientStatePopUp
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -73,205 +104,197 @@ Rectangle {
             }
         }
 
-        Rectangle {
-            anchors.bottom: parent.bottom
+        Text {
+            id: label
+            text: "Languages"
+            color: Constants.panelTextColor
+            anchors.bottom: table.top
             anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
+        }
+
+        Grid {
+            id: table
+            spacing: 5
+            columns: 2
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: glProperties.top
 
             Text {
-                id: label
-                text: "Languages"
+                text: "HMI UI"
                 color: Constants.panelTextColor
-                anchors.bottom: table.top
-                anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            Grid {
-                id: table
-                spacing: 5
-                columns: 2
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: glProperties.top
+            Text {
+                text: "HMI TTS + VR"
+                color: Constants.panelTextColor
+            }
 
-                Text {
-                    text: "HMI UI"
-                    color: Constants.panelTextColor
+            ComboBox {
+                model: languagesList
+                onCurrentIndexChanged: {
+                    dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                    sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
                 }
+            }
 
-                Text {
-                    text: "HMI TTS + VR"
-                    color: Constants.panelTextColor
+            ComboBox {
+                model: languagesList
+                onCurrentIndexChanged: {
+                    dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                    sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+                    sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
                 }
+            }
 
-                ComboBox {
-                    model: languagesList
-                    width: 200
-                    onCurrentIndexChanged: {
-                        dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
-                        sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
-                    }
-                }
+            Text {
+                text: "Application UI"
+                color: Constants.panelTextColor
+            }
 
-                ComboBox {
-                    model: languagesList
-                    width: 180
-                    onCurrentIndexChanged: {
-                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
-                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-                    }
-                }
+            Text {
+                text: "Application TTS + VR"
+                color: Constants.panelTextColor
+            }
 
-                Text {
-                    text: "Application UI"
-                    color: Constants.panelTextColor
-                }
-
-                Text {
-                    text: "Application TTS + VR"
-                    color: Constants.panelTextColor
-                }
-
-                Text {
-                    id: uiLanguageLabel
-                    color: Constants.panelTextColor
-                    text: " "
-                    Connections {
-                        target: dataContainer
-                        onCurrentApplicationChanged: {
-                            for (var s in Common.Language) {
-                                if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) {
-                                    uiLanguageLabel.text = s;
-                                }
+            Text {
+                id: uiLanguageLabel
+                color: Constants.panelTextColor
+                text: " "
+                Connections {
+                    target: dataContainer
+                    onCurrentApplicationChanged: {
+                        for (var s in Common.Language) {
+                            if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) {
+                                uiLanguageLabel.text = s;
                             }
-                        }
-                    }
-                }
-
-                Text {
-                    id: ttsLanguageLabel
-                    color: Constants.panelTextColor
-                    text: " "
-                    Connections {
-                        target: dataContainer
-                        onCurrentApplicationChanged: {
-                            for (var s in Common.Language) {
-                                if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) {
-                                    ttsLanguageLabel.text = s;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                PushButton {
-                    id: vehicleInfo
-                    label: "Vehicle info"
-                    toggleMode: true
-                    onPressed: {
-                        viPopUp.show();
-                    }
-                    onUnpressed: {
-                        viPopUp.hide();
-                    }
-                }
-
-                PushButton {
-                    id: tbtClientState
-                    label: "TBT Client state"
-                    toggleMode: true
-                    onPressed: {
-                        tbtClientStatePopUp.show();
-                    }
-                    onUnpressed: {
-                        tbtClientStatePopUp.hide();
-                    }
-                }
-
-                PushButton {
-                    label: "Exit application"
-                    onClicked: {
-                        if (dataContainer.applicationContext) {
-                            sdlBasicCommunication.onExitApplication(dataContainer.currentApplication.appId)
-                        }
-                    }
-                }
-
-                PushButton {
-                    id: exitAllAppsButton
-                    label: "Exit all apps"
-                    toggleMode: true
-                    onPressed: {
-                        exitAllApplicationsPopup.show()
-
-                    }
-                    onUnpressed: {
-                        exitAllApplicationsPopup.hide()
-                    }
-                    Connections {
-                        target: exitAllApplicationsPopup
-                        onVisibleChanged: {
-                            if (!exitAllApplicationsPopup.visible) {
-                                exitAllAppsButton.state = "unpressed"
-                            }
-                        }
-                    }
-                }
-
-                CheckBox {
-                    style: CheckBoxStyle {
-                        label: Text {
-                            color: Constants.panelTextColor
-                            text: "Use URL"
-                        }
-                    }
-                }
-
-                CheckBox {
-                    style: CheckBoxStyle {
-                        label: Text {
-                            color: Constants.panelTextColor
-                            text: "DD"
-                        }
-                    }
-                    onClicked: {
-                        if (checked) {
-                            dataContainer.driverDistractionState =
-                                    Common.DriverDistractionState.DD_ON;
-                        } else {
-                            dataContainer.driverDistractionState =
-                                    Common.DriverDistractionState.DD_OFF;
                         }
                     }
                 }
             }
 
-            Rectangle {
-                id: glProperties
+            Text {
+                id: ttsLanguageLabel
+                color: Constants.panelTextColor
+                text: " "
+                Connections {
+                    target: dataContainer
+                    onCurrentApplicationChanged: {
+                        for (var s in Common.Language) {
+                            if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) {
+                                ttsLanguageLabel.text = s;
+                            }
+                        }
+                    }
+                }
+            }
+
+            PushButton {
+                id: vehicleInfo
+                label: "Vehicle info"
+                toggleMode: true
+                onPressed: {
+                    viPopUp.show();
+                }
+                onUnpressed: {
+                    viPopUp.hide();
+                }
+            }
+
+            PushButton {
+                id: tbtClientState
+                label: "TBT Client state"
+                toggleMode: true
+                onPressed: {
+                    tbtClientStatePopUp.show();
+                }
+                onUnpressed: {
+                    tbtClientStatePopUp.hide();
+                }
+            }
+
+            PushButton {
+                label: "Exit application"
+                onClicked: {
+                    if (dataContainer.applicationContext) {
+                        sdlBasicCommunication.onExitApplication(dataContainer.currentApplication.appId)
+                    }
+                }
+            }
+
+            PushButton {
+                id: exitAllAppsButton
+                label: "Exit all apps"
+                toggleMode: true
+                onPressed: {
+                    exitAllApplicationsPopup.show()
+
+                }
+                onUnpressed: {
+                    exitAllApplicationsPopup.hide()
+                }
+                Connections {
+                    target: exitAllApplicationsPopup
+                    onVisibleChanged: {
+                        if (!exitAllApplicationsPopup.visible) {
+                            exitAllAppsButton.state = "unpressed"
+                        }
+                    }
+                }
+            }
+
+            CheckBox {
+                style: CheckBoxStyle {
+                    label: Text {
+                        color: Constants.panelTextColor
+                        text: "Use URL"
+                    }
+                }
+            }
+
+            CheckBox {
+                style: CheckBoxStyle {
+                    label: Text {
+                        color: Constants.panelTextColor
+                        text: "DD"
+                    }
+                }
+                onClicked: {
+                    if (checked) {
+                        dataContainer.driverDistractionState =
+                                Common.DriverDistractionState.DD_ON;
+                    } else {
+                        dataContainer.driverDistractionState =
+                                Common.DriverDistractionState.DD_OFF;
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            id: glProperties
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: listGlobalProperties.height + Constants.panelPadding
+            border.color: Constants.panelTextColor
+            border.width: 1
+            color: Constants.panelColor
+            Column {
+                id: listGlobalProperties
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: listGlobalProperties.height + Constants.panelPadding
-                border.color: Constants.panelTextColor
-                border.width: 1
-                color: Constants.panelColor
-                Column {
-                    id: listGlobalProperties
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.margins: Constants.panelPadding / 4
-                    Text {
-                        text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
-                        color: Constants.panelTextColor
-                    }
-                    Text {
-                        text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
-                        color: Constants.panelTextColor
-                    }
-                    Text {
-                        text: "AUTOCOMPLETE_TEXT: " + dataContainer.globalProperties.autocompleteText
-                        color: Constants.panelTextColor
-                    }
+                anchors.margins: Constants.panelPadding / 4
+                Text {
+                    text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
+                    color: Constants.panelTextColor
+                }
+                Text {
+                    text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
+                    color: Constants.panelTextColor
+                }
+                Text {
+                    text: "AUTOCOMPLETE_TEXT: " + dataContainer.globalProperties.autocompleteText
+                    color: Constants.panelTextColor
                 }
             }
         }
