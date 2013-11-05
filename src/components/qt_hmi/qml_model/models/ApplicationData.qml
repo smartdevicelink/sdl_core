@@ -39,5 +39,6 @@ QtObject {
     property string mainField3
     property string mainField4
     property string statusBar
+    property string mediaTrack
     property string picture
 }

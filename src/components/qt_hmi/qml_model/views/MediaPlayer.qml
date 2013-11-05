@@ -134,7 +134,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     color: Constants.primaryColor
-                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField3
+                    text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaTrack
                                                                  : playerState.trackNumber
                     font.pixelSize: 20
                 }
