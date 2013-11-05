@@ -84,16 +84,17 @@ Rectangle {
         id: mainScreen
         anchors.top: parent. top
         anchors.left: parent.left
-        width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
-        // TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
-        height: (parent.height < minHeight) ? minHeight : parent.height
+        width: (parent.width - simulationScreen.width < minWidth) ?
+                   minWidth : parent.width - simulationScreen.width
+        height: (parent.height - hardwareScreen.height < minHeight) ?
+                    minHeight : parent.height - hardwareScreen.height
+        clip: true
         visible: false
-
 
         Item {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            height: parent.height * 0.25
+            height: parent.height * 0.10
             width: parent.width
             HeaderMenu {}
         }
@@ -223,12 +224,23 @@ Rectangle {
     }
 
     Item {
-        id: hwBtnScreen
-        anchors.verticalCenter: parent.verticalCenter
+        id: simulationScreen
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.left: mainScreen.right
-        width: parent.width * 0.38
-        height: (parent.height < minHeight) ? minHeight : parent.height
-        HardwareButtonsView {}
+        width: simulationPanel.width
+        clip: true
+        SimulationView { id: simulationPanel }
+    }
+
+    Item {
+        id: hardwareScreen
+        anchors.top: mainScreen.bottom
+        anchors.left: parent.left
+        anchors.right: simulationScreen.left
+        height: hardwarePanel.height
+        clip: true
+        HardwareButtonsView { id: hardwarePanel }
     }
 
     HMIProxy {

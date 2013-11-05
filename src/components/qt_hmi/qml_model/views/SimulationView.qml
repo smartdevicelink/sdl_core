@@ -1,0 +1,295 @@
+/**
+ * @file SimulationView.qml
+ * @brief Area of screen responsible for simulation actions
+ * Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import QtQuick 2.0
+import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
+import com.ford.sdl.hmi.hw_buttons 1.0
+import "../controls"
+import "../hmi_api/Common.js" as Common
+import "../views"
+import "../models/Constants.js" as Constants
+
+Rectangle {
+    width: 500
+    height: parent.height + Constants.panelPadding
+    color: Constants.panelColor
+
+    signal buttonDown(string name)
+    signal buttonUp(string name)
+
+    function pressButton(name) {
+        buttonDown(name)
+    }
+
+    function longPressButton(name) {
+        console.log("long press " + name)
+    }
+
+    function releaseButton(name) {
+        buttonUp(name)
+    }
+
+    Column {
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 50
+
+        ListModel {
+            id: languagesList
+
+            Component.onCompleted: {
+                for (var name in Common.Language) {
+                    if (settingsContainer.sdlLanguagesList.indexOf(Common.Language[name]) != -1) {
+                        append({name: name.replace('_', '-')});
+                    }
+                }
+            }
+        }
+
+        Row
+        {
+            spacing: 30
+            Column
+            {
+                Text {
+                    text: "UI Languages"
+                    color: "white"
+                }
+
+                ComboBox {
+                    model: languagesList
+                    width: 200
+                    onCurrentIndexChanged: {
+                        dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
+                    }
+                }
+            }
+            Column
+            {
+                Text {
+                    text: "TTS + VR Languages"
+                    color: "white"
+                }
+
+                ComboBox {
+                    model: languagesList
+                    width: 180
+                    onCurrentIndexChanged: {
+                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
+                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+                    }
+                }
+            }
+        }
+
+        Row
+        {
+            spacing: 20
+            Column
+            {
+                Text {
+                    text: "application UI Languages"
+                    color: "white"
+                }
+
+                Text {
+                    id: uiLanguageLabel
+                    color: "white"
+                    Connections {
+                        target: dataContainer
+                        onCurrentApplicationChanged: {
+                            for (var s in Common.Language) {
+                                if (Common.Language[s] === dataContainer.currentApplication.hmiDisplayLanguageDesired) {
+                                    uiLanguageLabel.text = s;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Column
+            {
+                Text {
+                    text: "application TTS + VR Languages"
+                    color: "white"
+                }
+
+                Text {
+                    id: ttsLanguageLabel
+                    color: "white"
+                    Connections {
+                        target: dataContainer
+                        onCurrentApplicationChanged: {
+                            for (var s in Common.Language) {
+                                if (Common.Language[s] === dataContainer.currentApplication.languageTTSVR) {
+                                    ttsLanguageLabel.text = s;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Item {
+            height: 20
+            width: 1
+        }
+
+        Text {
+            width: 200
+            text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
+            color: "white"
+        }
+        Item {
+            height: 20
+            width: 1
+        }
+
+        Text {
+            width: 200
+            text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
+            color: "white"
+        }
+
+        Item {
+            height: 20
+            width: 1
+        }
+
+        Row
+        {
+            Column {
+                PushButton {
+                    id: vehicleInfo
+                    label: "Vehicle info"
+                    toggleMode: true
+                    onPressed: {
+                        viPopUp.show();
+                    }
+                    onUnpressed: {
+                        viPopUp.hide();
+                    }
+                }
+
+
+                Item {
+                    height: 1
+                    width: 20
+                }
+
+                PushButton {
+                    label: "Send data"
+                }
+
+                PushButton {
+                    id: tbtClientState
+                    label: "TBT Client state"
+                    toggleMode: true
+                    onPressed: {
+                        tbtClientStatePopUp.show();
+                    }
+                    onUnpressed: {
+                        tbtClientStatePopUp.hide();
+                    }
+                }
+
+                Item {
+                    height: 1
+                    width: 20
+                }
+
+                PushButton {
+                    label: "Exit application"
+                    onClicked: {
+                        if (dataContainer.applicationContext) {
+                            sdlBasicCommunication.onExitApplication(dataContainer.currentApplication.appId)
+                        }
+                    }
+                }
+                PushButton {
+                    id: exitAllAppsButton
+                    label: "Exit all apps"
+                    toggleMode: true
+                    onPressed: {
+                        exitAllApplicationsPopup.show()
+
+                    }
+                    onUnpressed: {
+                        exitAllApplicationsPopup.hide()
+                    }
+                    Connections {
+                        target: exitAllApplicationsPopup
+                        onVisibleChanged: {
+                            if (!exitAllApplicationsPopup.visible) {
+                                exitAllAppsButton.state = "unpressed"
+                            }
+                        }
+                    }
+                }
+                Row {
+                    spacing: 20
+                    CheckBox {
+                        style: CheckBoxStyle {
+                            label: Text {
+                                color: "white"
+                                text: "Use URL"
+                            }
+                        }
+                    }
+                    CheckBox {
+                        style: CheckBoxStyle {
+                            label: Text {
+                                color: "white"
+                                text: "DD"
+                            }
+                        }
+                        onClicked: {
+                            if (checked) {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_ON;
+                            } else {
+                                dataContainer.driverDistractionState =
+                                        Common.DriverDistractionState.DD_OFF;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

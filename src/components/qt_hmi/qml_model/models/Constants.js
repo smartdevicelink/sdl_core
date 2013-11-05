@@ -62,6 +62,12 @@ var warningColor = "red"
 // Color for PopUp
 var popUpBorderColor = "white"
 
+// Color for hardware and simulation panels
+var panelColor = "#003"
+
+// Padding for hardware and simulation panels
+var panelPadding = 20
+
 //--------------------------------------------------------------------------------------
 
 // Other
