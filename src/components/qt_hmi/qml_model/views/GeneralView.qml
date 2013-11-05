@@ -42,15 +42,4 @@ Item {
     property bool applicationContext: false
     /// View category for AppDeactivated notification (reason)
     property int category: Common.DeactivateReason.GENERAL
-
-    Connections {
-        target: sdlProxy
-        onAppUnregistered: {
-            if (dataContainer.applicationContext &&
-                    (dataContainer.currentApplication.appId === appId)) {
-                contentLoader.go("views/ApplicationListView.qml");
-                contentLoader.reset();
-            }
-        }
-    }
 }

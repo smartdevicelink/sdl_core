@@ -40,4 +40,12 @@ QtObject {
     property string mainField4
     property string statusBar
     property string picture
+
+    function reset () {
+        mainField1 = ""
+        mainField2 = ""
+        mainField3 = ""
+        mainField4 = ""
+        statusBar = ""
+    }
 }

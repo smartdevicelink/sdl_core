@@ -29,4 +29,28 @@ QtObject {
     property ListModel turnListSoftButtons
     property int languageTTSVR
     // This place is for adding new properties
+
+    function reset () {
+        console.debug("enter")
+        appId = -1
+        appName = ""
+        ngnMediaScreenAppName = ""
+        appIcon = null
+        deviceName = ""
+        hmiDisplayLanguageDesired = -1
+        isMediaApplication = false
+        appType = undefined
+        playPauseState = ""
+        hmiUIText.reset()
+//      mediaClock = null
+        helpPrompt = ""
+        timeoutPrompt = ""
+        options = null
+        currentSubMenu = options
+        turnList = null
+        softButtons = null
+        turnListSoftButtons = null
+        languageTTSVR = -1
+        console.debug("exit")
+    }
 }

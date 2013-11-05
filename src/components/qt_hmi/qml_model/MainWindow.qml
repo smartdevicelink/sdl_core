@@ -296,6 +296,12 @@ Rectangle {
 
         onAppUnregistered: {
             dataContainer.removeApplication(appId);
+            if (dataContainer.applicationContext &&
+                    (dataContainer.currentApplication.appId === appId)) {
+                contentLoader.go("views/ApplicationListView.qml");
+                contentLoader.reset();
+                dataContainer.currentApplication.reset()
+            }
         }
 
         onPlayTone: {
