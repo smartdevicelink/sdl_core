@@ -93,7 +93,7 @@ Item {
                 id: image
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                source: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.picture //TODO {ALeshin}: get picture correctly
+                source: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.image //TODO {ALeshin}: get picture correctly
                                                                : playerState.albumImage
             }
 

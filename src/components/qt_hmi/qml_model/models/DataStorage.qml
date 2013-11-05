@@ -73,6 +73,7 @@ QtObject {
                 var application = applicationList.get(i)
                 currentApplication.appName = application.appName
                 currentApplication.appType = application.appType
+                currentApplication.appIcon.source = application.icon
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
@@ -92,8 +93,8 @@ QtObject {
                 if (application.hmiUIText.statusBar) {
                     currentApplication.hmiUIText.statusBar = application.hmiUIText.statusBar
                 }
-                if (application.hmiUIText.picture) {
-                    currentApplication.hmiUIText.picture = application.hmiUIText.picture
+                if (application.hmiUIText.image !== undefined) {
+                    currentApplication.hmiUIText.image = application.hmiUIText.image
                 }
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication

@@ -5,7 +5,8 @@ QtObject {
     property int appId
     property string appName
     property string ngnMediaScreenAppName
-    property Icon appIcon
+    property Icon appIcon: Icon {
+    }
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication

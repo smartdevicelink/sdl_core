@@ -66,8 +66,8 @@ Item {
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock],
-                    "picture": fieldSubstrings[Common.TextFieldName.picture]
-                  }
+                    "image": graphic ? graphic.value : undefined
+                }
             }
         )
         var app = dataContainer.getApplication(appID);
