@@ -134,7 +134,31 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
     return BAD_STATE;
   }
 
-  return server_connection_factory_->CreateConnection(device_id, app_handle);
+  pthread_mutex_lock(&connections_mutex_);
+  const bool already_exists = connections_.end()
+      != connections_.find(std::make_pair(device_id, app_handle));
+  if (!already_exists) {
+    ConnectionInfo& info = connections_[std::make_pair(device_id, app_handle)];
+    info.app_handle = app_handle;
+    info.device_id = device_id;
+    info.state = ConnectionInfo::NEW;
+  }
+  pthread_mutex_unlock(&connections_mutex_);
+  if (already_exists) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Connection for device " << device_id << ", channel " << app_handle << " already exists");
+    return ALREADY_EXISTS;
+  }
+
+  const TransportAdapter::Error err = server_connection_factory_
+      ->CreateConnection(device_id, app_handle);
+  if (TransportAdapter::OK != err) {
+    pthread_mutex_lock(&connections_mutex_);
+    connections_.erase(std::make_pair(device_id, app_handle));
+    pthread_mutex_unlock(&connections_mutex_);
+  }
+  return err;
 }
 
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
@@ -262,8 +286,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
     if (!device_found) {
       LOG4CXX_INFO(
           logger_,
-          "Adding new device " << device->unique_device_id() << " (\""
-              << device->name() << "\")");
+          "Adding new device " << device->unique_device_id() << " (\"" << device->name() << "\")");
     }
 
     new_devices[device->unique_device_id()] = device;
@@ -438,9 +461,8 @@ void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
 
 ApplicationList TransportAdapterImpl::GetApplicationList(
     const DeviceUID& device_id) const {
-  LOG4CXX_INFO(
-      logger_,
-      "ApplicationList TransportAdapterImpl::GetApplicationList enter");
+  LOG4CXX_INFO(logger_,
+               "ApplicationList TransportAdapterImpl::GetApplicationList enter");
   DeviceSptr device = FindDevice(device_id);
   if (device.valid()) {
     LOG4CXX_INFO(logger_, "device is valid");
