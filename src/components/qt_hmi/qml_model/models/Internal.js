@@ -102,11 +102,20 @@ function stringToHmsTime (hmsString) {
     console.debug("enter: \"" + hmsString + "\"")
     var substrings = hmsString.split(":")
     var seconds = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    if (seconds >= 60) {
+        console.log("incorrect field \"seconds\": " + seconds)
+        console.debug("exit")
+        return 0
+    }
     var minutes = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    if (minutes >= 60) {
+        console.log("incorrect field \"minutes\": " + minutes)
+        console.debug("exit")
+        return 0
+    }
     var hours = substrings.length > 0 ? parseInt(substrings.pop()) : 0
-    var time = hmsTime(hours, minutes, seconds)
-    console.debug("exit: " + time)
-    return time
+    console.debug("exit")
+    return hmsTime(hours, minutes, seconds)
 }
 
 function mediaClockUpdateModeToString (mediaClockUpdateMode) {
