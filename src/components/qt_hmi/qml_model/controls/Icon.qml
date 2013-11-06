@@ -58,4 +58,8 @@ Item {
             }
         }
     }
+
+    function reset () {
+        source = undefined
+    }
 }

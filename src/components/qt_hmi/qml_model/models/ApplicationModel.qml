@@ -36,7 +36,7 @@ QtObject {
         appId = -1
         appName = ""
         ngnMediaScreenAppName = ""
-        appIcon = null
+        appIcon.reset()
         deviceName = ""
         hmiDisplayLanguageDesired = -1
         isMediaApplication = false
@@ -46,7 +46,7 @@ QtObject {
 // no need to reset mediaClock
         helpPrompt = ""
         timeoutPrompt = ""
-        options = null
+        options.clear()
         currentSubMenu = options
         turnList = null
         softButtons = null
