@@ -52,11 +52,13 @@ namespace policies_draft_test {
   public:
     PolicyManagerTest(const pn::PolicyConfiguration& policy_config):
       PolicyManager(policy_config) {
-	Init();
+	init_result = Init();
       }
     pn::PolicyTable* getPolicyTable() {
       return PolicyManager::getPolicyTable();
     }
+  
+    pn::InitResult::eType init_result;
   };
   
   class Policies_test: public ::testing::Test {
@@ -132,20 +134,57 @@ namespace policies_draft_test {
     ASSERT_EQ(md5(initial_json), md5(stored_json));
   }
   
-  TEST_F(Policies_test, test_policies_no_json_file_test) {
+  TEST_F(Policies_test, test_policies_no_PT_no_Preload_files_test) {
     pn::PolicyConfiguration policy_config;
     policy_config.setPTFileName("missing_file_for_sure.json");
+    policy_config.setPreloadPTFileName("missing_too.json");
     PolicyManagerTest policy_manager(policy_config);
     ASSERT_TRUE(0 == policy_manager.getPolicyTable());
+    ASSERT_EQ(pn::InitResult::INIT_FAILED_PRELOAD_NO_FILE,
+	      policy_manager.init_result);
   }
 
-  TEST_F(Policies_test, test_policies_bad_json_file_test) {
+  TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
     pn::PolicyConfiguration policy_config;
     policy_config.setPTFileName("bad.json");
+    policy_config.setPreloadPTFileName("PT4test.json");
     PolicyManagerTest policy_manager(policy_config);
     
     ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON, 
 	      policy_manager.getPolicyTable()->Validate());
+    ASSERT_EQ(pn::InitResult::INIT_OK,
+	      policy_manager.init_result);
+  }
+  
+  TEST_F(Policies_test, test_policies_Preload_bad_json_file_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("missing_file.json");
+    policy_config.setPreloadPTFileName("bad.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON, 
+	      policy_manager.getPolicyTable()->Validate());
+    ASSERT_EQ(pn::InitResult::INIT_OK_PRELOAD,
+	      policy_manager.init_result);
+  }
+  
+    TEST_F(Policies_test, test_policies_reInit_test) {
+    pn::PolicyConfiguration policy_config;
+    policy_config.setPTFileName("PT4test.json");
+    policy_config.setPreloadPTFileName("bad.json");
+    PolicyManagerTest policy_manager(policy_config);
+    
+    ASSERT_EQ(pn::InitResult::INIT_OK,
+	      policy_manager.init_result);
+    
+    policy_config.setPTFileName("nofile");
+    policy_config.setPreloadPTFileName("nofile");
+    
+    policy_manager.Init();
+    
+    ASSERT_EQ(pn::InitResult::INIT_OK,
+	      policy_manager.init_result);
+    ASSERT_FALSE(0 == policy_manager.getPolicyTable());
   }
   
 //   TEST_F(Policies_test, test_policies_no_schema_attached_test) {
