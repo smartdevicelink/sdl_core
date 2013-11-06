@@ -76,6 +76,10 @@ QtObject {
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
+//                currentApplication.presetButtons = application.presetButtons
+//                        console.debug("setAPP " + currentApplication.customPresets)
+                currentApplication.customPresets = application.customPresets
+//                        console.debug("setAPP " + currentApplication.customPresets)
 
                 if (application.hmiUIText.mainField1) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
@@ -111,7 +115,8 @@ QtObject {
     }
 
     function addApplication(app) {
-        console.log("Enter addApplication function");
+        console.log("enter addApplication function");
+//        console.debug("addAPP " + app.customPresets)
         applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
@@ -123,6 +128,8 @@ QtObject {
             appType: app.appType,
             helpPrompt: "",
             timeoutPrompt: "",
+            customPresets: app.customPresets ? app.customPresets : [],
+ //           presetButtons: app.presetButtons ? app.presetButtons : [],
             playPauseState: 'Pause',
             hmiUIText: app.hmiUIText,
             options: [],
@@ -133,7 +140,9 @@ QtObject {
             softButtons: []
             // This place is for adding new properties
         })
-        console.log("Exit addApplication function");
+//        console.debug("addAPP " + app.customPresets)
+//        console.debug("addAPP " + getApplication(app.appId).customPresets);
+        console.log("exit addApplication function");
     }
 
     function setApplicationProperties(appId, props) {

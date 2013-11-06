@@ -279,7 +279,7 @@ Rectangle {
                 hmiUIText: {
                     "mainField1": "The Dog Days Are Over",
                     "mainField2": "Florence and the Machine",
-                    "mainField3": "Track 13/16",
+                    "mainField3": "",
                     "mainField4": "",
                     "statusBar": "",
                     "mediaClock": "02:36",

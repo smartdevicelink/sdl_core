@@ -10,6 +10,7 @@ QtObject {
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
     property var appType
+    property var presetButtons: []
 
     // media player
     property string playPauseState
@@ -27,6 +28,7 @@ QtObject {
     property ListModel turnList
     property ListModel softButtons
     property ListModel turnListSoftButtons
+    property ListModel customPresets
     property int languageTTSVR
     // This place is for adding new properties
 }
