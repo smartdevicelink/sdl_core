@@ -78,20 +78,23 @@ QtObject {
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
 
-                if (application.hmiUIText.mainField1) {
+                if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
                 }
-                if (application.hmiUIText.mainField2) {
+                if (application.hmiUIText.mainField2 !== undefined) {
                     currentApplication.hmiUIText.mainField2 = application.hmiUIText.mainField2
                 }
-                if (application.hmiUIText.mainField3) {
+                if (application.hmiUIText.mainField3 !== undefined) {
                     currentApplication.hmiUIText.mainField3 = application.hmiUIText.mainField3
                 }
-                if (application.hmiUIText.mainField4) {
+                if (application.hmiUIText.mainField4 !== undefined) {
                     currentApplication.hmiUIText.mainField4 = application.hmiUIText.mainField4
                 }
-                if (application.hmiUIText.statusBar) {
+                if (application.hmiUIText.statusBar !== undefined) {
                     currentApplication.hmiUIText.statusBar = application.hmiUIText.statusBar
+                }
+                if (application.hmiUIText.mediaTrack !== undefined) {
+                    currentApplication.hmiUIText.mediaTrack = application.hmiUIText.mediaTrack
                 }
                 if (application.hmiUIText.image !== undefined) {
                     currentApplication.hmiUIText.image = application.hmiUIText.image

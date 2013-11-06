@@ -62,6 +62,12 @@ var warningColor = "red"
 // Color for PopUp
 var popUpBorderColor = "white"
 
+// Color for hardware and simulation panels
+var panelColor = "#003"
+
+// Color for text in hardware and simulation panels
+var panelTextColor = "white"
+
 //--------------------------------------------------------------------------------------
 
 // Other
@@ -170,3 +176,6 @@ var scrollableMessageScrollBarWidth = 10
 
 // -------------------------
 var audioPassThruTextColor = "white"
+
+// Padding for hardware and simulation panels
+var panelPadding = 20

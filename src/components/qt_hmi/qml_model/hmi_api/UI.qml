@@ -54,7 +54,7 @@ Item {
             Common.TextFieldName.mainField3,
             Common.TextFieldName.mainField4,
             Common.TextFieldName.statusBar,
-            Common.TextFieldName.mediaClock
+            Common.TextFieldName.mediaTrack
         ]
         var fieldSubstrings = filter(showStrings, showFields)
         dataContainer.setApplicationProperties(
@@ -65,14 +65,17 @@ Item {
                     "mainField3": fieldSubstrings[Common.TextFieldName.mainField3],
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
-                    "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock],
+                    "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
                     "image": graphic ? graphic.value : undefined
                 }
             }
         )
-        var app = dataContainer.getApplication(appID);
-        app.softButtons.clear()
-        softButtons.forEach(function(x) { app.softButtons.append(x); });
+
+        if (softButtons) {
+            var app = dataContainer.getApplication(appID);
+            app.softButtons.clear()
+            softButtons.forEach(function(x) { app.softButtons.append(x); });
+        }
 
         if (alignment !== undefined) {
             switch (alignment) {
