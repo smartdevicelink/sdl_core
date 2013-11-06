@@ -114,8 +114,7 @@ void ResetGlobalPropertiesRequest::Run() {
         LOG4CXX_ERROR(
           logger_,
           "Unknown global property 0x%02X value"
-          << (*message_)[strings::msg_params][strings::properties][i]
-          .asInt());
+          << (*message_)[strings::msg_params][strings::properties][i].asInt());
         break;
       }
     }

@@ -1184,15 +1184,13 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
 
 bool MessageHelper::VerifySoftButtonText
 (smart_objects::SmartObject& soft_button) {
-  if (soft_button.keyExists(strings::text)) {
-    std::string text = soft_button[strings::text].asString();
-    text.erase(remove(text.begin(), text.end(), ' '), text.end());
-    text.erase(remove(text.begin(), text.end(), '\n'), text.end());
-    if (text.size()) {
-      return true;
-    } else {
-      soft_button.erase(strings::text);
-    }
+  std::string text = soft_button[strings::text].asString();
+  text.erase(remove(text.begin(), text.end(), ' '), text.end());
+  text.erase(remove(text.begin(), text.end(), '\n'), text.end());
+  if (text.size()) {
+    return true;
+  } else {
+    soft_button.erase(strings::text);
   }
 
   return false;
@@ -1243,13 +1241,21 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
+        if (!request_soft_buttons[i].keyExists(strings::text)) {
+          return mobile_apis::Result::INVALID_DATA;
+        }
+
         if (!VerifySoftButtonText(request_soft_buttons[i])) {
           continue;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+        bool text_exist = false;
+
+        if (request_soft_buttons[i].keyExists(strings::text)) {
+          text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+        }
 
         bool image_exist = false;
         if (image_supported) {
