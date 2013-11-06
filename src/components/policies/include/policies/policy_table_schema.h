@@ -74,6 +74,52 @@ class PolicyTableSchema {
      */
     static const std::string kStrAppPolicies;
     
+    /**
+     * @brief String constant for "endpoints" section.
+     */
+    static const std::string kStrEndpoints;
+    
+    /**
+     * @brief String constant for "default" section.
+     */
+    static const std::string kStrDefault;    
+    
+    /**
+     * @brief String constant for "user_consent_prompt" section.
+     */
+    static const std::string kStrUserConsentPrompt;    
+    
+    /**
+     * @brief String constant for "rpcs" section.
+     */
+    static const std::string kStrRpcs; 
+
+    /**
+     * @brief String constant for "hmi_levels" section.
+     */
+    static const std::string kStrHmiLevels; 
+    
+    /**
+     * @brief String constant for "parameters" section.
+     */
+    static const std::string kStrParameters; 
+    
+    /**
+     * @brief String constant for "groups" section.
+     */
+    static const std::string kStrGroups; 
+    
+    /**
+     * @brief String constant for "nicknames" section.
+     */
+    static const std::string kStrNicknames; 
+    
+    /**
+     * @brief String constant for "priority" section.
+     */
+    static const std::string kStrPriority; 
+    
+    
   private:
     
     /**
