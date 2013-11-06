@@ -39,7 +39,6 @@ import "../controls"
 import QtQuick.Controls 1.0
 
 PopUp {
-    anchors.margins: Constants.margin
     //TODO{ALeshin}: Redraw this window as ListView or Column, when we'll get requirements
     Column {
         anchors.fill: parent
