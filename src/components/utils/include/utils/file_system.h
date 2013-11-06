@@ -148,6 +148,14 @@ bool ReadBinaryFile(const std::string& name,
 
 bool ReadFile(const std::string& name, std::string& result);
 
+/**
+  * @brief Convert special symbols in system path to percent-encoded
+  *
+  * @param name path to file
+  * @return returns converted path.
+*/
+const std::string ConvertPathForURL(const std::string& path);
+
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
