@@ -57,7 +57,6 @@ GeneralView {
             height: 1/4 * parent.height
 
             PagedFlickable {
-                //anchors.centerIn: parent
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
                 elementWidth: Constants.longOvalButtonWidth
