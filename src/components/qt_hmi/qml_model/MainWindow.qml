@@ -47,7 +47,7 @@ import "./models/Constants.js" as Constants
 import "models/Internal.js" as Internal
 
 Rectangle {
-    width: 1600
+    width: 1280
     height: 768
     property string startQml: "./views/AMPlayerView.qml"
     property int minWidth: Constants.mainScreenMinWidth
@@ -84,16 +84,17 @@ Rectangle {
         id: mainScreen
         anchors.top: parent. top
         anchors.left: parent.left
-        width: (parent.width * 0.62 < minWidth) ? minWidth : (parent.width * 0.62)
-        // TODO {ALeshin}: Screen width shouldn't be static, remove 62% width and 38% width
-        height: (parent.height < minHeight) ? minHeight : parent.height
+        width: (parent.width - simulationScreen.width < minWidth) ?
+                   minWidth : parent.width - simulationScreen.width
+        height: (parent.height - hardwareScreen.height < minHeight) ?
+                    minHeight : parent.height - hardwareScreen.height
+        clip: true
         visible: false
-
 
         Item {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            height: parent.height * 0.25
+            height: parent.height * 0.10
             width: parent.width
             HeaderMenu {}
         }
@@ -154,57 +155,21 @@ Rectangle {
 
         WarningInfo { id: warningInfo }
 
-        VRPopUp {
-            id: vrPopUp
-            visible: false
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TTSPopUp {
-            id: ttsPopUp
-            anchors.top: parent.top
-            anchors.right: parent.right
-            visible: false
-        }
-
-        ExitAllApplicationsPopup {
-            id: exitAllApplicationsPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
-
-        VehicleInfoPopUp {
-            id: viPopUp
-            anchors.centerIn: parent
-        }
-
         InteractionPopup {
             id: interactionPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 
         SliderPopup {
             id: sliderPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
-
-        TBTClientStatePopUp {
-            id: tbtClientStatePopUp
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 
         PerformAudioPassThruPopup {
             id: performAudioPassThruPopup
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             visible: false
         }
 
@@ -223,12 +188,31 @@ Rectangle {
     }
 
     Item {
-        id: hwBtnScreen
-        anchors.verticalCenter: parent.verticalCenter
+        id: simulationScreen
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.left: mainScreen.right
-        width: parent.width * 0.38
-        height: (parent.height < minHeight) ? minHeight : parent.height
-        HardwareButtonsView {}
+        width: simulationPanel.width
+        clip: true
+        SimulationView {
+            id: simulationPanel
+
+            VRPopUp {
+                id: vrPopUp
+                visible: false
+                anchors.fill: parent
+            }
+        }
+    }
+
+    Item {
+        id: hardwareScreen
+        anchors.top: mainScreen.bottom
+        anchors.left: parent.left
+        anchors.right: simulationScreen.left
+        height: hardwarePanel.height
+        clip: true
+        HardwareButtonsView { id: hardwarePanel }
     }
 
     HMIProxy {
