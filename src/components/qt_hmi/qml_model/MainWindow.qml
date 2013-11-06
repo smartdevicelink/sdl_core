@@ -194,7 +194,15 @@ Rectangle {
         anchors.left: mainScreen.right
         width: simulationPanel.width
         clip: true
-        SimulationView { id: simulationPanel }
+        SimulationView {
+            id: simulationPanel
+
+            VRPopUp {
+                id: vrPopUp
+                visible: false
+                anchors.fill: parent
+            }
+        }
     }
 
     Item {

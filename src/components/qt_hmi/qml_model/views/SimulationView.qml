@@ -54,12 +54,6 @@ Rectangle {
         anchors.right: parent.right
         height: parent.height - (controlArea.childrenRect.height + controlArea.anchors.margins)
 
-        VRPopUp {
-            id: vrPopUp
-            visible: false
-            anchors.fill: parent
-        }
-
         TTSPopUp {
             id: ttsPopUp
             anchors.top: parent.top
@@ -117,7 +111,7 @@ Rectangle {
             spacing: 5
             columns: 2
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: glProperties.top
+            anchors.bottom: globalProperties.top
 
             Text {
                 text: "HMI UI"
@@ -271,7 +265,7 @@ Rectangle {
         }
 
         Rectangle {
-            id: glProperties
+            id: globalProperties
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom

@@ -71,6 +71,7 @@ Rectangle {
             name: "vr"
             anchors.verticalCenter: parent.verticalCenter
             onReleased: {
+                console.debug("Clicked VR button");
                 if (!dataContainer.activeVR) {
                     vrPopUp.activate();
                 } else {
