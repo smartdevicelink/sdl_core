@@ -220,6 +220,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
         is_vr_help_item_ = true;
         SendUIShowVRHelpRequest(app);
       } else if (app) {
+        is_vr_help_item_ = true;
         MessageHelper::SendShowVrHelpToHMI(app);
       }
       break;
@@ -236,15 +237,12 @@ void PerformInteractionRequest::onTimeOut() {
   Application* app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key]);
   if (app) {
-    // TODO(DT): clarify the sending ClosePopUP message
-//    smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-//                    smart_objects::SmartType_Map);
-//    if (is_vr_help_item_) {
-//      c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
-//    } else {
-//      c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-//    }
-//    SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+    if(is_vr_help_item_) {
+      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
+      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+    }
     SendVrDeleteCommand(app);
     app->set_perform_interaction_active(0);
     app->set_perform_interaction_mode(-1);
@@ -283,20 +281,11 @@ void PerformInteractionRequest::ProcessVRNotification(
     }
     if (choice_id_chosen) {
       LOG4CXX_INFO(logger_, "Command was choice id!");
-      // TODO(DT): clarify the sending ClosePopUP message
-//      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-//          smart_objects::SmartType_Map);
-//      if (is_vr_help_item_) {
-//        c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
-//      } else {
-//        c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-//      }
-//      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      SendVrDeleteCommand (app);
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
       c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
       SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+      SendVrDeleteCommand (app);
       app->set_perform_interaction_mode(-1);
       app->DeletePerformInteractionChoiceSetMap();
       app->set_perform_interaction_active(0);
@@ -360,6 +349,12 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       return;
     }
     if (app->is_perform_interaction_active()) {
+      if(is_vr_help_item_) {
+        smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+        c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
+        SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+      }
       if (mobile_apis::InteractionMode::MANUAL_ONLY
           != app->perform_interaction_mode()) {
         SendVrDeleteCommand (app);

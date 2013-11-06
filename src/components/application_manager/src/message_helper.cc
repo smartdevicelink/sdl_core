@@ -1306,7 +1306,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 bool MessageHelper::VerifyApplicationName(
   smart_objects::SmartObject& msg_params) {
   for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-    const std::string& tts_name = msg_params[strings::tts_name][i].asString();
+    const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
     if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
         ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
       printf("Invalid characters in tts name.\n");
