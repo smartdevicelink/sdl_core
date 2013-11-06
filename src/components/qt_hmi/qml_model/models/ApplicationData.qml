@@ -42,10 +42,12 @@ QtObject {
     property string picture
 
     function reset () {
+        console.debug("enter")
         mainField1 = ""
         mainField2 = ""
         mainField3 = ""
         mainField4 = ""
         statusBar = ""
+        console.debug("exit")
     }
 }

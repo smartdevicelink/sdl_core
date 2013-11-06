@@ -42,7 +42,7 @@ QtObject {
         appType = undefined
         playPauseState = ""
         hmiUIText.reset()
-//      mediaClock = null
+// no need to reset mediaClock
         helpPrompt = ""
         timeoutPrompt = ""
         options = null

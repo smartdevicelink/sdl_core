@@ -295,6 +295,7 @@ Rectangle {
         }
 
         onAppUnregistered: {
+            console.debug("enter")
             dataContainer.removeApplication(appId);
             if (dataContainer.applicationContext &&
                     (dataContainer.currentApplication.appId === appId)) {
@@ -302,6 +303,7 @@ Rectangle {
                 contentLoader.reset();
                 dataContainer.currentApplication.reset()
             }
+            console.debug("exit")
         }
 
         onPlayTone: {
