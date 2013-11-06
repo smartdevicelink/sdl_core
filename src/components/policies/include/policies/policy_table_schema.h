@@ -35,25 +35,24 @@
 #ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_TABLE_SCHEMA_H_
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_TABLE_SCHEMA_H_
 
+#include <string>
+
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/schema_item.h"
 #include "utils/shared_ptr.h"
 
-#include <string>
 
 namespace NsSmartDeviceLink {
 namespace policies {
-    
+
 class PolicyTableSchema {
   public:
-    
     /**
      * @brief Creates schema for Policy Table
      */
     static NsSmartDeviceLink::NsSmartObjects::CSmartSchema CreateSchema(void);
-    
-    
-    // TODO: might need to move these constants to the more appropriate place
+
+    // TODO(_): might need to move these constants to the more appropriate place
     /**
      * @brief String constant for "policy_table" section.
      */
@@ -68,87 +67,83 @@ class PolicyTableSchema {
      * @brief String constant for "functional_groupings" section.
      */
     static const std::string kStrFunctionalGroupings;
-    
+
     /**
      * @brief String constant for "app_policies" section.
      */
     static const std::string kStrAppPolicies;
-    
+
     /**
      * @brief String constant for "endpoints" section.
      */
     static const std::string kStrEndpoints;
-    
+
     /**
      * @brief String constant for "default" section.
      */
-    static const std::string kStrDefault;    
-    
+    static const std::string kStrDefault;
+
     /**
      * @brief String constant for "user_consent_prompt" section.
      */
-    static const std::string kStrUserConsentPrompt;    
-    
+    static const std::string kStrUserConsentPrompt;
+
     /**
      * @brief String constant for "rpcs" section.
      */
-    static const std::string kStrRpcs; 
+    static const std::string kStrRpcs;
 
     /**
      * @brief String constant for "hmi_levels" section.
      */
-    static const std::string kStrHmiLevels; 
-    
+    static const std::string kStrHmiLevels;
+
     /**
      * @brief String constant for "parameters" section.
      */
-    static const std::string kStrParameters; 
-    
+    static const std::string kStrParameters;
+
     /**
      * @brief String constant for "groups" section.
      */
-    static const std::string kStrGroups; 
-    
+    static const std::string kStrGroups;
+
     /**
      * @brief String constant for "nicknames" section.
      */
-    static const std::string kStrNicknames; 
-    
+    static const std::string kStrNicknames;
+
     /**
      * @brief String constant for "priority" section.
      */
-    static const std::string kStrPriority; 
-    
-    
+    static const std::string kStrPriority;
+
   private:
-    
     /**
      * @brief Hidden constructor to prevent missuse
      */
     PolicyTableSchema(void);
-    
+
     /**
      * @brief Creates "module_config" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> 
+    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateModuleConfig(void);
 
     /**
      * @brief Creates "functional_groupings" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> 
+    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateFunctionaGroupings(void);
 
     /**
      * @brief Creates "app_policies" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> 
+    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateAppPolicies(void);
-    
-    
-};   
-    
-}  // namespace NsSmartDeviceLink
-}  // namespace policies
+};
 
-#endif // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_TABLE_SCHEMA_H_
+}  // namespace policies
+}  // namespace NsSmartDeviceLink
+
+#endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_TABLE_SCHEMA_H_
