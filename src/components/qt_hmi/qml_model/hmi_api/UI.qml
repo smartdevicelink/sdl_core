@@ -54,6 +54,7 @@ Item {
             Common.TextFieldName.mainField3,
             Common.TextFieldName.mainField4,
             Common.TextFieldName.statusBar,
+            Common.TextFieldName.mediaClock,
             Common.TextFieldName.mediaTrack
         ]
         var fieldSubstrings = filter(showStrings, showFields)
@@ -67,7 +68,14 @@ Item {
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
                     "image": graphic ? graphic.value : undefined
-                }
+                },
+                "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined ? {
+                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                    "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
+                    "magic": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
+                    "total": 0
+                } :
+                undefined
             }
         )
 

@@ -209,7 +209,7 @@ Rectangle {
             timer.start();
             show();
 
-            progressIndicator.visible = showIndicator
+            progressIndicator.visible = !!showIndicator
             progressIndicator.width = alertContent.width
             console.log("ProgressIndicator.width:", progressIndicator.width)
             animation.start()

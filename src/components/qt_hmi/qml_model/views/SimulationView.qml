@@ -54,13 +54,6 @@ Rectangle {
         anchors.right: parent.right
         height: parent.height - (controlArea.childrenRect.height + controlArea.anchors.margins)
 
-        TTSPopUp {
-            id: ttsPopUp
-            anchors.top: parent.top
-            anchors.right: parent.right
-            visible: false
-        }
-
         ExitAllApplicationsPopup {
             id: exitAllApplicationsPopup
             anchors.fill: parent
