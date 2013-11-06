@@ -69,7 +69,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * @return Shared pointer to a new schema item.
       **/
-    static utils::SharedPtr<ObjectOptionalSchemaItem> Create(
+    static utils::SharedPtr<ObjectOptionalSchemaItem> create(
           const std::map<std::string, CObjectSchemaItem::SMember> & members);
 
      /**
@@ -79,7 +79,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * @return NsSmartObjects::Errors::eType
       **/
-    virtual Errors::eType Validate(const SmartObject & object);
+    virtual Errors::eType validate(const SmartObject & object);
 
   private:
     /**

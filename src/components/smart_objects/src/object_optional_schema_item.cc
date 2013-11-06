@@ -45,7 +45,7 @@ const char* so_ns::ObjectOptionalSchemaItem::sOptionalGenericFieldName1
 //----------------------------------------------------------------------------
 
 utils::SharedPtr<so_ns::ObjectOptionalSchemaItem>
-  so_ns::ObjectOptionalSchemaItem::Create(
+  so_ns::ObjectOptionalSchemaItem::create(
     const std::map<std::string,
     so_ns::CObjectSchemaItem::SMember> & members) {
   return new ObjectOptionalSchemaItem(members);
@@ -53,7 +53,7 @@ utils::SharedPtr<so_ns::ObjectOptionalSchemaItem>
 
 //----------------------------------------------------------------------------
 
-so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::Validate(
+so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
     const so_ns::SmartObject & object) {
   so_ns::Errors::eType result = so_ns::Errors::ERROR;
 

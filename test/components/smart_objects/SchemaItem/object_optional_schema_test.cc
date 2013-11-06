@@ -28,11 +28,12 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "utils/shared_ptr.h"
-
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/schema_item.h"
@@ -46,20 +47,17 @@
 #include "smart_objects/number_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 #include "formatters/generic_json_formatter.h"
-#include "formatters/generic_json_formatter.h"
-
-#include <string>
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
+
+using namespace NsSmartDeviceLink::NsSmartObjects;  // NOLINT
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;  // NOLINT
 
 namespace test {
 namespace components {
 namespace SmartObjects {
 namespace SchemaItem {
-
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace TestType {
 enum eType {
@@ -75,11 +73,10 @@ enum eType {
   GENERIC_ERROR,
   DISALLOWED
 };
-}
+}  // namespace TestType
 
 class ObjectSchemaItemTest : public ::testing::Test {
-protected:
-
+  protected:
   //Create SmartObjectSchema for test object
   utils::SharedPtr<ISchemaItem> initObjectSchemaItem(void) {
     std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
@@ -134,7 +131,7 @@ protected:
   
   //------------------------------------------------------------------------
   
-  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItem(void) {
+  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItem(bool isOtptionalMandatory = false) {
     
     utils::SharedPtr<ISchemaItem> priority_item = 
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
@@ -155,14 +152,61 @@ protected:
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // non mandatory optional parameter
     app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] = 
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), false);
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
     
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
     policy_table_map["app_policies"] = 
       CObjectSchemaItem::SMember(
-        ObjectOptionalSchemaItem::Create(app_policies_map), true);
+        ObjectOptionalSchemaItem::create(app_policies_map), true);
+      
+    std::map<std::string, CObjectSchemaItem::SMember> root_map;
+    root_map["policy_table"] =
+    CObjectSchemaItem::SMember(
+        CObjectSchemaItem::create(policy_table_map), true);
     
-    return CObjectSchemaItem::create(policy_table_map);
+    return CObjectSchemaItem::create(root_map);
+  }
+
+  //------------------------------------------------------------------------
+  
+  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItemAlongWithStaticMember(bool isOtptionalMandatory = false) {
+
+    utils::SharedPtr<ISchemaItem> priority_item =
+      CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
+                                TSchemaItemParameter<size_t>(100),
+                                TSchemaItemParameter<std::string>("NONE"));
+
+    utils::SharedPtr<ISchemaItem> groups_item =
+      CArraySchemaItem::create(CStringSchemaItem::create());
+
+    utils::SharedPtr<ISchemaItem> nicknames_item =
+      CArraySchemaItem::create(CStringSchemaItem::create());
+
+    std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
+    std::map<std::string, CObjectSchemaItem::SMember> default_map;
+    app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
+    app_id_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
+    app_id_map["nicknames"] = CObjectSchemaItem::SMember(nicknames_item, true);
+    default_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
+    default_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
+    // optional parameter
+    app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
+    app_policies_map["default"] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
+    policy_table_map["app_policies"] =
+      CObjectSchemaItem::SMember(
+        ObjectOptionalSchemaItem::create(app_policies_map), true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> root_map;
+    root_map["policy_table"] =
+    CObjectSchemaItem::SMember(
+        CObjectSchemaItem::create(policy_table_map), true);
+
+    return CObjectSchemaItem::create(root_map);
   }
 };
 
@@ -297,6 +341,127 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
     formatters::GenericJsonFormatter::FromString(json_str, object);
   
   ASSERT_EQ(true, fromstring_result);
+  
+  utils::SharedPtr<ISchemaItem> schema1 = initObjectOptonalSchemaItem(false);
+  int resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+
+  utils::SharedPtr<ISchemaItem> schema2 = initObjectOptonalSchemaItem(true);
+  resultType = schema2->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+
+  // store priority value
+  std::string priority =
+      object["policy_table"]["app_policies"]["789"]["priority"];
+  // set empty string. Validation should pass successfuly.
+  object["policy_table"]["app_policies"]["789"]["priority"] = "";
+  resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+  resultType = schema2->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+  // restore priority value
+  object["policy_table"]["app_policies"]["789"]["priority"] = priority;
+
+  // remove non-mandatory (for schema1) section "789"
+  object["policy_table"]["app_policies"].erase("789");
+  resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);  
+}
+
+TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation) {
+  std::string json_str(
+  "{\n"
+    "  \"policy_table\":{\n"
+    "    \"app_policies\": {\n"
+    "        \"789\":{\n"
+    "            \"priority\":\"NORMAL\",\n"
+    "            \"groups\":[\n"
+    "               \"Notifications\",\n"
+    "               \"Base-4\"\n"
+    "            ],\n"
+    "            \"nicknames\":[\n"
+    "               \"Music App\"\n"
+    "            ]\n"
+    "        }\n"
+    "    }\n"
+    "}\n"
+  "}");
+
+  smartobj::SmartObject object;
+  bool fromstring_result =
+    formatters::GenericJsonFormatter::FromString(json_str, object);
+
+  ASSERT_EQ(true, fromstring_result);
+
+  utils::SharedPtr<ISchemaItem> schema1 = initObjectOptonalSchemaItem(false);
+  utils::SharedPtr<ISchemaItem> schema2 = initObjectOptonalSchemaItem(true);
+
+  /////////////////////////////////////////////
+  // Below tests with failed validation.
+  /////////////////////////////////////////////
+
+  // Schema is created in initObjectOptonalSchemaItemAlongWithStaticMember()
+  // that describes another object (object from TEST_F(test_object_with_optional_and_static_param))
+  utils::SharedPtr<ISchemaItem> schema_item_another_object =
+    initObjectOptonalSchemaItemAlongWithStaticMember();
+  int resultType = schema_item_another_object->validate(object);
+  // mising mandatory parameter policy_table|app_policies|default
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, resultType);
+
+  // set value of type int. Schema expects string value.
+  object["policy_table"]["app_policies"]["789"]["priority"] = 25;
+  resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+
+  // Remove optional parameter.
+  // Set optional parameter as mandatory in schema.
+  object["policy_table"]["app_policies"].erase("789");
+  utils::SharedPtr<ISchemaItem> schema_optional_mandatory =
+    initObjectOptonalSchemaItem(true);
+  resultType = schema_optional_mandatory->validate(object);
+  EXPECT_EQ(Errors::MISSING_MANDATORY_UNTITLED_PARAMETER, resultType);
+}
+
+TEST_F(ObjectSchemaItemTest, test_object_with_optional_and_static_param) {
+  std::string json_str(
+  "{\n"
+    "  \"policy_table\":{\n"
+    "    \"app_policies\": {\n"
+    "        \"789\":{\n"
+    "            \"priority\":\"NORMAL\",\n"
+    "            \"groups\":[\n"
+    "               \"Notifications\",\n"
+    "               \"Base-4\"\n"
+    "            ],\n"
+    "            \"nicknames\":[\n"
+    "               \"Music App\"\n"
+    "            ]\n"
+    "        },\n"
+    "       \"default\":{\n"
+    "            \"priority\":\"NONE\",\n"
+    "            \"groups\":[\n"
+    "               \"Base-4\"\n"
+    "            ]\n"
+    "        }\n"
+    "    }\n"
+    "}\n"
+  "}");
+
+  smartobj::SmartObject object;
+  bool fromstring_result =
+    formatters::GenericJsonFormatter::FromString(json_str, object);
+
+  ASSERT_EQ(true, fromstring_result);
+
+  utils::SharedPtr<ISchemaItem> schema1 =
+    initObjectOptonalSchemaItemAlongWithStaticMember(false);
+  int resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+
+  utils::SharedPtr<ISchemaItem> schema2 =
+    initObjectOptonalSchemaItemAlongWithStaticMember(true);
+  resultType = schema2->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
 }
 
 }
