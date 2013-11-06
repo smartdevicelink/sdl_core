@@ -107,13 +107,13 @@ GeneralView {
                     id: image
                     height: parent.height
                     width: height
-                    source: dataContainer.currentApplication.hmiUIText.picture
+                    source: dataContainer.currentApplication.hmiUIText.image
                 }
 
                 Column {
                     height: parent.height
                     width: parent.width - image.width - parent.spacing
-                    spacing: (height - 4 * text1.height) / 3
+                    spacing: Constants.margin
 
                     Text {
                         id: text1
@@ -130,24 +130,6 @@ GeneralView {
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: dataContainer.hmiUITextAlignment
                         text: dataContainer.currentApplication.hmiUIText.mainField2
-                        font.pixelSize: Constants.fontSize
-                        color: Constants.primaryColor
-                    }
-
-                    Text {
-                        width: parent.width
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: dataContainer.hmiUITextAlignment
-                        text: dataContainer.currentApplication.hmiUIText.mainField3
-                        font.pixelSize: Constants.fontSize
-                        color: Constants.primaryColor
-                    }
-
-                    Text {
-                        width: parent.width
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: dataContainer.hmiUITextAlignment
-                        text: dataContainer.currentApplication.hmiUIText.mainField4
                         font.pixelSize: Constants.fontSize
                         color: Constants.primaryColor
                     }
