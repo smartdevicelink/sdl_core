@@ -92,7 +92,7 @@ while test $# -gt 0; do
                         echo " "
                         echo "options:"
                         echo "-h, --help                show brief help"
-                        echo "-a, --all                 all mandatory and optional packages will be install"
+                        echo "-a, --all                 all mandatory and optional packages will be installed"
                         echo "-q                        install additional packages for Qt HMI"
 			
                         exit 0
@@ -194,7 +194,7 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
-if $QT_HMI; then
+if $QT_HMI || $INSTALL_ALL; then
 	echo "Installing Subversion"
 	apt-install ${SUBVERSION}
 	echo $OK
