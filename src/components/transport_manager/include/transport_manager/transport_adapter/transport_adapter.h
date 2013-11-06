@@ -69,7 +69,7 @@ class TransportAdapter {
     OK,
     FAIL,
     NOT_SUPPORTED,
-    ALREADY_EXIST,
+    ALREADY_EXISTS,
     BAD_STATE,
     BAD_PARAM
   };

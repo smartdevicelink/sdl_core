@@ -91,6 +91,7 @@ void UsbDeviceScanner::OnDeviceLeft(libusb_device* device) {
     logger_,
     "libusb device left (bus number " << static_cast<int>(libusb_get_bus_number(device)) << ", address " << static_cast<int>(libusb_get_device_address(device)) << ")");
 
+  bool list_changed = false;
   pthread_mutex_lock(&device_descriptions_mutex_);
   for (DeviceDescriptions::iterator it = device_descriptions_.begin();
        it != device_descriptions_.end();) {
@@ -98,11 +99,14 @@ void UsbDeviceScanner::OnDeviceLeft(libusb_device* device) {
     if (libusb_get_bus_number(device) == description.bus_number
         && libusb_get_device_address(device) == description.address) {
       it = device_descriptions_.erase(it);
+      list_changed = true;
     } else {
       ++it;
     }
   }
   pthread_mutex_unlock(&device_descriptions_mutex_);
+  if (list_changed)
+    UpdateList();
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
