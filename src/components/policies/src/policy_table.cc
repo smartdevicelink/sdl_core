@@ -43,8 +43,10 @@ namespace formatters_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 //---------------------------------------------------------------------------
 
-policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string)
+policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string,
+				       PTType::eType pt_type)
   : is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
+  , pt_type_(pt_type)
   , schema_(policies_ns::PolicyTableSchema::CreateSchema())
   , pt_smart_object_()
   , pt_default_smart_object_() {
@@ -85,6 +87,7 @@ void policies_ns::PolicyTable::SetSchema(
 //---------------------------------------------------------------------------
 
 policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
+  //TODO: distinct between PT and Preload PolicyTable types (use pt_type_)
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_PT_valid_) {
     return is_PT_valid_;
   }

@@ -48,7 +48,14 @@ enum eType {
   VALIDATION_FAILED_BAD_JSON,
   VALIDATION_FAILED
 };
-}
+} // namespace PTValidationResult
+
+namespace PTType {
+enum eType {
+  TYPE_PT = 0,
+  TYPE_PRELOAD
+};
+} // namespace PTType
 
 class PolicyTable {
   public:
@@ -56,8 +63,10 @@ class PolicyTable {
      * @brief Constructor
      * 
      * @param policy_table_string String containing policy table 
+     * @param pt_type PolicyTable type (PT or Preload)
      **/
-    explicit PolicyTable(const std::string policy_table_string);
+    explicit PolicyTable(const std::string policy_table_string,
+			 PTType::eType pt_type);
 
     /**
      * @brief Destructor
@@ -112,6 +121,11 @@ class PolicyTable {
      * @brief is Policy Table valid
      **/
     PTValidationResult::eType is_PT_valid_;
+    
+    /**
+     * @brief PolicyTable type
+     **/
+    PTType::eType pt_type_;
 
     /**
      * @brief Schema to verify policy table

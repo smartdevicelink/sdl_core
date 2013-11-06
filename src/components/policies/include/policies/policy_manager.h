@@ -57,6 +57,26 @@ enum eType {
 }  // namespace CheckPermissionResult
 
 /**
+ * @brief Init() result enumeration
+ **/
+namespace InitResult {
+enum eType {
+  /**
+   * @brief PT file loaded successfully
+   **/
+  INIT_OK = 0,
+  /**
+   * @brief PT file missing, Preload file used
+   **/
+  INIT_OK_PRELOAD,
+  /**
+   * @brief PT file missing, Preload file missing
+   **/
+  INIT_FAILED_PRELOAD_NO_FILE
+};
+} // namespace InitResult
+
+/**
  * @brief Interface class of policy manager.
  */
 class PolicyManager {
@@ -77,7 +97,7 @@ class PolicyManager {
     /**
     * @brief Initialization method
     */
-    void Init();
+    InitResult::eType Init();
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.
