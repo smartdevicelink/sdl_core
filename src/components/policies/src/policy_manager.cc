@@ -58,22 +58,38 @@ policies_ns::PolicyManager::~PolicyManager() {
 
 //---------------------------------------------------------------
 
-void policies_ns::PolicyManager::Init() {
-  //TODO: Implement Preload PT load logic.
+policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
+  //TODO: Provide some mechanism for recovery (from Preload???) 
+  //	  if PT file corrupted (e.g. bad json)
+   
+  InitResult::eType init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
+  
   std::string pt_string;
   if (0 == policy_table_) {
     if (true == file_system::ReadFile(policy_config_.getPTFileName(),
                                     pt_string)) {
-      policy_table_ = new policies_ns::PolicyTable(pt_string);
+      policy_table_ = new policies_ns::PolicyTable(pt_string, 
+						 policies_ns::PTType::TYPE_PT);
+      init_result = InitResult::INIT_OK;
     } else {
-      LOG4CXX_ERROR(logger_,
+      LOG4CXX_WARN(logger_,
       "Can't read policy table file " << policy_config_.getPTFileName());
+      if (true == file_system::ReadFile(policy_config_.getPreloadPTFileName(),
+                                    pt_string)) {
+	policy_table_ = new policies_ns::PolicyTable(pt_string, 
+					policies_ns::PTType::TYPE_PRELOAD);
+	init_result = InitResult::INIT_OK_PRELOAD;
+      } else {
+	init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
+	LOG4CXX_ERROR(logger_, "Can't read Preload policy table file " 
+		      << policy_config_.getPreloadPTFileName());
+      }
     }
   } else {
-    LOG4CXX_WARN(logger_,
-    "Policy table is already created.");
-
+    init_result = InitResult::INIT_OK;
+    LOG4CXX_WARN(logger_, "Policy table is already created.");
   }
+  return init_result;
 }
 
 //---------------------------------------------------------------
