@@ -202,6 +202,13 @@ Rectangle {
                 visible: false
                 anchors.fill: parent
             }
+
+            TTSPopUp {
+                id: ttsPopUp
+                anchors.top: parent.top
+                anchors.right: parent.right
+                visible: false
+            }
         }
     }
 
