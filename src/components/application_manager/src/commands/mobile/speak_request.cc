@@ -46,13 +46,14 @@ SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
 }
 
 SpeakRequest::~SpeakRequest() {
+
 }
 
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
 
   Application* app = application_manager::ApplicationManagerImpl::instance()
-      ->application((*message_)[strings::params][strings::connection_key]);
+      ->application(connection_key());
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -69,8 +70,46 @@ void SpeakRequest::Run() {
         (*message_)[strings::msg_params][strings::tts_chunks][i][strings::text];
   }
   msg_params[strings::app_id] = app->app_id();
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+}
 
-  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, true, 1);
+void SpeakRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SpeakRequest::on_event");
+  switch (event.id()) {
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      ProcessTTSSpeakResponse(event.smart_object());
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
+}
+
+void SpeakRequest::ProcessTTSSpeakResponse(
+    const smart_objects::SmartObject& message) {
+  LOG4CXX_INFO(logger_, "SpeakRequest::ProcessTTSSpeakResponse");
+  Application* application = ApplicationManagerImpl::instance()->application(
+      connection_key());
+
+  if (NULL == application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  bool result_code = false;
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS == code) {
+    result_code = true;
+  }
+  (*message_)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::SpeakID;
+  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
+               NULL, &(message[strings::msg_params]));
 }
 
 }  // namespace commands
