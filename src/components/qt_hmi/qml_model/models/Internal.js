@@ -98,6 +98,17 @@ function hmsTimeToString (hmsTime) {
     return string
 }
 
+function stringToHmsTime (hmsString) {
+    console.debug("enter: \"" + hmsString + "\"")
+    var substrings = hmsString.split(":")
+    var seconds = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    var minutes = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    var hours = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    var time = hmsTime(hours, minutes, seconds)
+    console.debug("exit: " + time)
+    return time
+}
+
 function mediaClockUpdateModeToString (mediaClockUpdateMode) {
     switch (mediaClockUpdateMode) {
         case MediaClockUpdateMode.MCU_COUNTUP:

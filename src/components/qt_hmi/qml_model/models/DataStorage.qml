@@ -144,7 +144,9 @@ QtObject {
         console.log("Enter setApplicationProperties function");
         var app = getApplication(appId)
         for (var p in props) {
-            app[p] = props[p];
+            if (props[p] !== undefined) {
+                app[p] = props[p]
+            }
         }
         if (currentApplication.appId === appId) {
             setCurrentApplication(appId); // copy new values to current application
