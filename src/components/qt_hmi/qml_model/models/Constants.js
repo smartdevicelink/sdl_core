@@ -38,11 +38,17 @@
 // Main color of HMI model(now it ~lightblue). Buttons, text, icons of this color.
 var primaryColor = "#1d81d5"
 
+// Color of pressed buttons, text, icons etc.
+var primaryColorPressed = "#8ec0ea"
+
 // Secondary color of HMI model, backgroud of this color.
 var secondaryColor = "black"
 
 // Color of text at buttonts that are inactive (at phone keyboard, when no any contact started with current letter).
 var inactiveButtonTextColor = "grey"
+
+// Color of text at buttonts that are inactive but nevertheless pressed (at phone keyboard, when no any contact started with current letter).
+var inactiveButtonTextColorPressed = "lightgrey"
 
 // Color of text at contact list screen view (Name, number and number type).
 var contactTextColor = "lightblue"

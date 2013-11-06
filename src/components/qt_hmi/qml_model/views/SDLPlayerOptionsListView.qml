@@ -84,28 +84,28 @@ GeneralView {
                     }
                 }
 
-                Text {
+                ClickableText {
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
-                    color: (type === Internal.MenuItemType.MI_PARENT) ?
-                               Constants.inactiveButtonTextColor :
-                               Constants.primaryColor
+                    defaultColor: type === Internal.MenuItemType.MI_PARENT ?
+                                      Constants.inactiveButtonTextColor :
+                                      Constants.primaryColor
+                    pressedColor: type === Internal.MenuItemType.MI_PARENT ?
+                                      Constants.inactiveButtonTextColorPressed :
+                                      Constants.primaryColorPressed
                     font.pixelSize: 40
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            console.debug("enter")
-                            switch (type) {
-                                case Internal.MenuItemType.MI_NODE:
-                                    sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
-                                    break;
-                                case Internal.MenuItemType.MI_SUBMENU:
-                                case Internal.MenuItemType.MI_PARENT:
-                                    dataContainer.currentApplication.currentSubMenu = subMenu
-                                    break;
-                            }
-                            console.debug("exit")
+                    onClicked: {
+                        console.debug("enter")
+                        switch (type) {
+                            case Internal.MenuItemType.MI_NODE:
+                                sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                break;
+                            case Internal.MenuItemType.MI_SUBMENU:
+                            case Internal.MenuItemType.MI_PARENT:
+                                dataContainer.currentApplication.currentSubMenu = subMenu
+                                break;
                         }
+                        console.debug("exit")
                     }
                 }
             }
