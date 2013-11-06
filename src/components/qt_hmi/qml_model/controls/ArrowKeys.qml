@@ -1,6 +1,6 @@
 /**
- * @file GeneralView.qml
- * @brief Base view class. Defines properties and behavior common for all views
+ * @file ArrowKeys.qml
+ * @brief Keys with arrow for cursor movement.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,10 +36,32 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 Item {
-    /// HMI context view is related to
-    property int systemContext: Common.SystemContext.SYSCTXT_MAIN
-    /// True if view is in application context
-    property bool applicationContext: false
-    /// View category for AppDeactivated notification (reason)
-    property int category: Common.DeactivateReason.GENERAL
+    width: buttonOk.width
+    height: buttonOk.height
+
+    HardwareButton {
+        id: arrowUp
+        buttonId: Common.ButtonName.TUNEUP
+        name: "Up"
+    }
+    HardwareButton {
+        id: arrowDown
+        buttonId: Common.ButtonName.TUNEDOWN
+        name: "Down"
+    }
+    HardwareButton {
+        id: arrowLeft
+        buttonId: Common.ButtonName.SEEKLEFT
+        name: "Left"
+    }
+    HardwareButton {
+        id: arrowRight
+        buttonId: Common.ButtonName.SEEKRIGHT
+        name: "Right"
+    }
+    HardwareButton {
+        id: buttonOk
+        buttonId: Common.ButtonName.OK
+        name: "Ok"
+    }
 }

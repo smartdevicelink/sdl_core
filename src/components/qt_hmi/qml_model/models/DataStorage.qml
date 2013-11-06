@@ -73,6 +73,7 @@ QtObject {
                 var application = applicationList.get(i)
                 currentApplication.appName = application.appName
                 currentApplication.appType = application.appType
+                currentApplication.appIcon.source = application.icon
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
@@ -81,23 +82,26 @@ QtObject {
                 currentApplication.customPresets = application.customPresets
 //                        console.debug("setAPP " + currentApplication.customPresets)
 
-                if (application.hmiUIText.mainField1) {
+                if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
                 }
-                if (application.hmiUIText.mainField2) {
+                if (application.hmiUIText.mainField2 !== undefined) {
                     currentApplication.hmiUIText.mainField2 = application.hmiUIText.mainField2
                 }
-                if (application.hmiUIText.mainField3) {
+                if (application.hmiUIText.mainField3 !== undefined) {
                     currentApplication.hmiUIText.mainField3 = application.hmiUIText.mainField3
                 }
-                if (application.hmiUIText.mainField4) {
+                if (application.hmiUIText.mainField4 !== undefined) {
                     currentApplication.hmiUIText.mainField4 = application.hmiUIText.mainField4
                 }
-                if (application.hmiUIText.statusBar) {
+                if (application.hmiUIText.statusBar !== undefined) {
                     currentApplication.hmiUIText.statusBar = application.hmiUIText.statusBar
                 }
-                if (application.hmiUIText.picture) {
-                    currentApplication.hmiUIText.picture = application.hmiUIText.picture
+                if (application.hmiUIText.mediaTrack !== undefined) {
+                    currentApplication.hmiUIText.mediaTrack = application.hmiUIText.mediaTrack
+                }
+                if (application.hmiUIText.image !== undefined) {
+                    currentApplication.hmiUIText.image = application.hmiUIText.image
                 }
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
@@ -350,8 +354,8 @@ QtObject {
                             subMenu.remove(subOptionIndex)
                         }
                         else {
-                            console.log("UI::deleteCommand(): cannot remove item from current submenu, rejecting")
-                            throw Common.Result.REJECTED
+                            console.log("UI::deleteCommand(): cannot remove item from current submenu")
+                            throw Common.Result.IN_USE
                         }
                         break
                     }
@@ -408,8 +412,8 @@ QtObject {
                     getApplication(appID).options.remove(optionIndex)
                 }
                 else {
-                    console.log("UI::deleteSubMenu(): cannot remove current submenu, rejecting")
-                    throw Common.Result.REJECTED
+                    console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                    throw Common.Result.IN_USE
                 }
                 break
             }

@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 
 QtObject {
@@ -39,5 +40,18 @@ QtObject {
     property string mainField3
     property string mainField4
     property string statusBar
-    property string picture
+    property string mediaTrack
+    property string image
+
+    function reset () {
+        console.debug("enter")
+        mainField1 = ""
+        mainField2 = ""
+        mainField3 = ""
+        mainField4 = ""
+        statusBar = ""
+        mediaTrack = ""
+        image = ""
+        console.debug("exit")
+    }
 }

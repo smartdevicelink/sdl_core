@@ -5,7 +5,8 @@ QtObject {
     property int appId
     property string appName
     property string ngnMediaScreenAppName
-    property Icon appIcon
+    property Icon appIcon: Icon {
+    }
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
@@ -31,4 +32,28 @@ QtObject {
     property ListModel customPresets
     property int languageTTSVR
     // This place is for adding new properties
+
+    function reset () {
+        console.debug("enter")
+        appId = -1
+        appName = ""
+        ngnMediaScreenAppName = ""
+        appIcon.reset()
+        deviceName = ""
+        hmiDisplayLanguageDesired = -1
+        isMediaApplication = false
+        appType = undefined
+        playPauseState = ""
+        hmiUIText.reset()
+// no need to reset mediaClock
+        helpPrompt = ""
+        timeoutPrompt = ""
+        options.clear()
+        currentSubMenu = options
+        turnList = null
+        softButtons = null
+        turnListSoftButtons = null
+        languageTTSVR = -1
+        console.debug("exit")
+    }
 }
