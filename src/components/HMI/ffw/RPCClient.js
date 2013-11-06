@@ -131,7 +131,7 @@ FFW.RPCClient = Em.Object
             var jsonObj = JSON.parse(evt.data);
 
             // handle component registration
-            if (jsonObj.id == this.registerRequestId) {
+            if (jsonObj.id == this.registerRequestId && jsonObj.method == null && typeof jsonObj.result == 'number') {
                 if (jsonObj.error == null) {
                     this.requestId = this.idStart = jsonObj.result;
                     this.observer.onRPCRegistered();
