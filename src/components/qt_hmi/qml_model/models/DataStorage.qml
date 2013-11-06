@@ -347,8 +347,8 @@ QtObject {
                             subMenu.remove(subOptionIndex)
                         }
                         else {
-                            console.log("UI::deleteCommand(): cannot remove item from current submenu, rejecting")
-                            throw Common.Result.REJECTED
+                            console.log("UI::deleteCommand(): cannot remove item from current submenu")
+                            throw Common.Result.IN_USE
                         }
                         break
                     }
@@ -405,8 +405,8 @@ QtObject {
                     getApplication(appID).options.remove(optionIndex)
                 }
                 else {
-                    console.log("UI::deleteSubMenu(): cannot remove current submenu, rejecting")
-                    throw Common.Result.REJECTED
+                    console.log("UI::deleteSubMenu(): cannot remove current submenu")
+                    throw Common.Result.IN_USE
                 }
                 break
             }

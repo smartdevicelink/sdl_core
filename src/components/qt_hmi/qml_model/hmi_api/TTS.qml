@@ -43,24 +43,23 @@ Item {
 
     function speak(ttsChunks, appID) {
         // appID unused
-        console.log('enter function speak');
+        console.debug('enter:', ttsChunks, appID);
         if (ttsPopUp.async) {
-            console.log('function speak send abort');
+            console.log('speak send abort');
             throw Common.Result.ABORTED;
         }
 
-        var message = "";
-        for (var i = 0; i < ttsChunks.length; ++i)
-            message += ttsChunks[i].text + "\n";
+        var message = ttsChunks.map(function(str) { return str.text }).join('\n');
         ttsPopUp.activate(message);
         ttsPopUp.async = new Async.AsyncCall();
-        console.log('exit function speak');
+        console.debug('exit');
         return ttsPopUp.async;
     }
 
     function stopSpeaking() {
-        console.debug("Stop speaking");
+        console.debug("enter");
         ttsPopUp.deactivate();
+        console.debug("exit");
     }
 
     function getLanguage() {
