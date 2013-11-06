@@ -1,6 +1,6 @@
 /**
- * @file ApplicationData.qml
- * @brief Model for Application.
+ * @file ArrowKeys.qml
+ * @brief Keys with arrow for cursor movement.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,25 +33,35 @@
  */
 
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
-QtObject {
-    property string mainField1
-    property string mainField2
-    property string mainField3
-    property string mainField4
-    property string statusBar
-    property string mediaTrack
-    property string image
+Item {
+    width: buttonOk.width
+    height: buttonOk.height
 
-    function reset () {
-        console.debug("enter")
-        mainField1 = ""
-        mainField2 = ""
-        mainField3 = ""
-        mainField4 = ""
-        statusBar = ""
-        mediaTrack = ""
-        image = ""
-        console.debug("exit")
+    HardwareButton {
+        id: arrowUp
+        buttonId: Common.ButtonName.TUNEUP
+        name: "Up"
+    }
+    HardwareButton {
+        id: arrowDown
+        buttonId: Common.ButtonName.TUNEDOWN
+        name: "Down"
+    }
+    HardwareButton {
+        id: arrowLeft
+        buttonId: Common.ButtonName.SEEKLEFT
+        name: "Left"
+    }
+    HardwareButton {
+        id: arrowRight
+        buttonId: Common.ButtonName.SEEKRIGHT
+        name: "Right"
+    }
+    HardwareButton {
+        id: buttonOk
+        buttonId: Common.ButtonName.OK
+        name: "Ok"
     }
 }
