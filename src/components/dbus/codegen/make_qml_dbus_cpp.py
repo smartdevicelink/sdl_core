@@ -263,7 +263,7 @@ class Impl(FordXmlParser):
             return 'double'
         elif param.struct:
             return param.fulltype[0] + '_' + param.fulltype[1]
-        return "xxx(%s,%s)" % (param.type, param.struct)
+        return "xxx"
 
 
     def from_variant_func_name(self, param, interface):

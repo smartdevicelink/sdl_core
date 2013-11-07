@@ -101,7 +101,6 @@ class FordXmlParser:
             param_desc.fulltype = param_type
             if param_type in self.enums: param_desc.enum = True
             elif param_type in self.structs: param_desc.struct = True
-	    else: raise error("AAAAAAAAAAAAAAAAA: " + param_type)
         return param_desc
 
 
