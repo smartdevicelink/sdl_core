@@ -82,7 +82,7 @@ var titleFontSize = 45
 var powerButtonFornSize = 25
 
 // Offset from the edges of the screen.
-var margin = 30
+var margin = 20
 
 // Offset from the edges of the popup
 var popupMargin = 15

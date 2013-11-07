@@ -100,18 +100,23 @@ Rectangle {
         }
 
         Item {
-            anchors.leftMargin: Constants.margin
-            anchors.rightMargin: Constants.margin
-            anchors.bottomMargin: Constants.margin
-            anchors.fill: parent
+            height: parent.height * 0.90
+            width: parent.width
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
 
             Loader {
                 id: contentLoader
+                height: parent.height - Constants.margin
+                width: parent.width - 2 * Constants.margin
                 asynchronous: true
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
-                height: parent.height * 0.75
-                width: parent.width
+                anchors.leftMargin: Constants.margin
+                anchors.rightMargin: Constants.margin
+                anchors.bottomMargin: Constants.margin
+
+
                 source:startQml
                 property var viewTransitionStack : []
 

@@ -11,6 +11,7 @@ GeneralView {
             height: 1/4 * parent.height
 
             PagedFlickable {
+                anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
                 snapTo: 200 + spacing
                 spacing: (width - 600) / 2

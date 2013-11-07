@@ -38,27 +38,27 @@ import "../models/Constants.js" as Constants
 
 Item {
     id: headerMenu
-    anchors.fill: parent
-    anchors.leftMargin: Constants.margin
-    anchors.rightMargin: Constants.margin
-    anchors.topMargin: Constants.margin
+    anchors.centerIn: parent
+    width: parent.width
+    height: parent.height
 
     Text {        
+        anchors.leftMargin: Constants.margin
+        anchors.topMargin: Constants.margin
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: Constants.margin
-        anchors.leftMargin: Constants.margin
         color: Constants.primaryColor
         font.pixelSize: Constants.fontSize
         text: "75°"
     }
 
     Item {
-        width: childrenRect.width
+        width: menuText.width
         height: parent.height
-        anchors.horizontalCenter: headerMenu.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
         anchors.topMargin: Constants.margin
+        anchors.horizontalCenter: headerMenu.horizontalCenter
+        anchors.bottom: headerMenu.bottom
+
         Text {
             anchors.horizontalCenter: menuText.horizontalCenter
             anchors.bottom: parent.verticalCenter
@@ -88,8 +88,8 @@ Item {
         height: childrenRect.height
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.topMargin: Constants.margin
         anchors.rightMargin: Constants.margin
+        anchors.topMargin: Constants.margin
         property date date: { new Date(); }
 
         Timer {

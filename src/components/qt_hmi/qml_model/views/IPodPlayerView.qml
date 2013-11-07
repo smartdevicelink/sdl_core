@@ -33,13 +33,29 @@
  */
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
+import "../controls"
 
 GeneralView {
     category: Common.DeactivateReason.AUDIO
     MediaPlayer {
+        id: ipodPlayer
         playerName: "iPod"
         anchors.fill: parent
-
         playerState: dataContainer.ipodPlayerState
+
+        buttons: [
+            OvalButton {
+                text: ipodPlayer.playerName
+                onReleased: contentLoader.go("./views/MusicSourceView.qml")
+                fontSize: Constants.fontSize
+            },
+
+            OvalButton {
+
+                text: "Browse"
+                fontSize: Constants.fontSize
+            }
+        ]
     }
 }

@@ -100,7 +100,7 @@ GeneralView {
 
             Row {
                 width: parent.width
-                height: 3/5 * parent.height// - deviceName.height - statusBar.height
+                height: 3/5 * parent.height
                 spacing: Constants.margin
 
                 Image {
