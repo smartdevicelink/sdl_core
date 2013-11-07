@@ -129,12 +129,12 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   LOG4CXX_INFO(logger_, "Convert handle to id " << device_id);
 
-  transport_adapter::TransportAdapterSptr da = device_to_adapter_map_[device_id];
-  if (!da.valid()) {
+  transport_adapter::TransportAdapterSptr ta = device_to_adapter_map_[device_id];
+  if (!ta.valid()) {
     LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
     return E_INVALID_HANDLE;
   }
-  transport_adapter::DeviceList dl = da->GetDeviceList();
+  transport_adapter::DeviceList dl = ta->GetDeviceList();
   transport_adapter::DeviceList::iterator it = std::find(dl.begin(), dl.end(),
                                                          device_id);
   if (it == dl.end()) {
@@ -144,18 +144,28 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
     return E_INVALID_HANDLE;
   }
 
-  ApplicationList app_list = da->GetApplicationList(device_id);
+  ApplicationList app_list = ta->GetApplicationList(device_id);
   LOG4CXX_INFO(logger_, "app_list.size() = " << app_list.size());
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end();
       ++it) {
-    if (NULL != GetConnection(device_id, *it)) {
-      LOG4CXX_ERROR(logger_, "Connect application failed E_CONNECTION_EXISTS");
-      return E_CONNECTION_EXISTS;
-    } else {
-      LOG4CXX_ERROR(logger_, "attempt to Connect device");
-      if (transport_adapter::TransportAdapter::OK
-          != da->Connect(device_id, *it)) {
-        LOG4CXX_ERROR(logger_, "Connect application failed E_INTERNAL_ERROR");
+    const ApplicationHandle& app_handle = *it;
+    LOG4CXX_INFO(
+        logger_,
+        "Attempt to connect device " << device_id << ", channel " << app_handle);
+    const TransportAdapter::Error ta_error = ta->Connect(device_id, app_handle);
+    switch (ta_error) {
+      case TransportAdapter::ALREADY_EXISTS: {
+        LOG4CXX_INFO(logger_, "Already connected");
+        break;
+      }
+      case TransportAdapter::OK: {
+        LOG4CXX_INFO(logger_, "OK");
+        break;
+      }
+      default: {
+        LOG4CXX_ERROR(
+            logger_,
+            "Connect to device " << device_id << ", channel " << app_handle << " failed with error " << ta_error);
         return E_INTERNAL_ERROR;
       }
     }
