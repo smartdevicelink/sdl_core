@@ -42,9 +42,9 @@ namespace application_manager {
 namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      timer_(NULL) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message),
+    timer_(NULL) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
@@ -67,9 +67,9 @@ bool RegisterAppInterfaceRequest::Init() {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(
-      logger_,
-      "RegisterAppInterfaceRequest::Run "
-          << (*message_)[strings::params][strings::connection_key].asInt());
+    logger_,
+    "RegisterAppInterfaceRequest::Run "
+    << (*message_)[strings::params][strings::connection_key].asInt());
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
@@ -81,33 +81,33 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   Application* application_impl = ApplicationManagerImpl::instance()
-      ->RegisterApplication(message_);
+                                  ->RegisterApplication(message_);
 
   if (!application_impl) {
     LOG4CXX_ERROR_EXT(
-        logger_,
-        "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) << "  hasn't been registered!");
+      logger_,
+      "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) << "  hasn't been registered!");
   } else {
     application_impl->set_mobile_app_id(
-        (*message_)[strings::msg_params][strings::app_id]);
+      (*message_)[strings::msg_params][strings::app_id]);
 
     application_impl->set_is_media_application(
-        (*message_)[strings::msg_params][strings::is_media_application]);
+      (*message_)[strings::msg_params][strings::is_media_application]);
 
     if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
       application_impl->set_vr_synonyms(
-          (*message_)[strings::msg_params][strings::vr_synonyms]);
+        (*message_)[strings::msg_params][strings::vr_synonyms]);
     }
 
     if ((*message_)[strings::msg_params].keyExists(
-        strings::ngn_media_screen_app_name)) {
+          strings::ngn_media_screen_app_name)) {
       application_impl->set_ngn_media_screen_name(
-          (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
+        (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
     }
 
     if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
       application_impl->set_tts_name(
-          (*message_)[strings::msg_params][strings::tts_name]);
+        (*message_)[strings::msg_params][strings::tts_name]);
     }
 
     if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
@@ -134,10 +134,10 @@ void RegisterAppInterfaceRequest::Run() {
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    const Application& application_impl) {
+  const Application& application_impl) {
   mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+    smart_objects::SmartType_Map);
 
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -149,9 +149,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      application_impl.version().max_supported_api_version;
+    APIVersion::kAPIV2;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      application_impl.version().min_supported_api_version;
+    APIVersion::kAPIV2;
 
   response_params[strings::language] = app_manager->active_vr_language();
   response_params[strings::hmi_display_language] = app_manager
@@ -160,32 +160,32 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
       != app_manager->active_vr_language()
       || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
-          .asInt() != app_manager->active_ui_language()) {
+      .asInt() != app_manager->active_ui_language()) {
     LOG4CXX_WARN_EXT(
-        logger_,
-        "Wrong language on registering application " << application_impl.name());
+      logger_,
+      "Wrong language on registering application " << application_impl.name());
     LOG4CXX_ERROR_EXT(
-        logger_,
-        "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
+      logger_,
+      "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     smart_objects::SmartObject& display_caps =
-        response_params[hmi_response::display_capabilities];
+      response_params[hmi_response::display_capabilities];
 
     display_caps[hmi_response::display_type] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::display_type);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::display_type);
     display_caps[hmi_response::text_fields] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::text_fields);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::text_fields);
     display_caps[hmi_response::media_clock_formats] = app_manager
         ->display_capabilities()->getElement(hmi_response::media_clock_formats);
     if (app_manager->display_capabilities()->getElement(
-        hmi_response::image_capabilities).length() > 0) {
+          hmi_response::image_capabilities).length() > 0) {
       display_caps[hmi_response::graphic_supported] = true;
     } else {
       display_caps[hmi_response::graphic_supported] = false;

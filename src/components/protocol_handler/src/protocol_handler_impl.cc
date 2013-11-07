@@ -136,7 +136,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   unsigned char service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  ProtocolPacket packet(protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+  ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
                         service_type, FRAME_DATA_START_SESSION_ACK,
                         session_id, 0, hash_code);
 
