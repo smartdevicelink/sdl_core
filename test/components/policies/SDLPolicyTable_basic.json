@@ -332,6 +332,7 @@
                 ]
             },
             "123456":{
+                "priority":"NORMAL",
                 "groups":[
                     "Location-1",
                     "Navigation-1",
