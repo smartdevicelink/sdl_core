@@ -100,6 +100,9 @@ var animationDuration = 500
 // Duration of appearence of "OK" button at warning screen view, when HMI starts.
 var warningScreenDuration = 1000
 
+// Timer to check how long preset button is pressed.
+var presetButtonTimer = 400
+
 // Width for long oval button
 var longOvalButtonWidth = 163
 

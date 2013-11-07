@@ -166,7 +166,7 @@ GeneralView {
 
             Timer {
                 id: timer
-                interval: 400
+                interval: Constants.presetButtonTimer
                 repeat: false
                 triggeredOnStart: false
             }

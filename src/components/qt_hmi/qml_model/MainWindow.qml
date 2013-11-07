@@ -49,7 +49,7 @@ import "models/Internal.js" as Internal
 Rectangle {
     width: 1280
     height: 768
-    property string startQml: "./views/AMPlayerView.qml"
+    property string startQml: "./views/ApplicationListView.qml"
     property int minWidth: Constants.mainScreenMinWidth
     property int minHeight: Constants.mainScreenMiHeight
     color: Constants.secondaryColor
