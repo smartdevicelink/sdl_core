@@ -77,6 +77,19 @@ const std::string PolicyTableSchema::kStrParameters("parameters");
 const std::string PolicyTableSchema::kStrGroups("groups");
 const std::string PolicyTableSchema::kStrNicknames("nicknames");
 const std::string PolicyTableSchema::kStrPriority("priority");
+
+//-----------------------------------------------------------------------------
+
+CSmartSchema PolicyTableSchema::Create(void) {
+  PolicyTableSchema *pt_schema = new PolicyTableSchema();
+
+  CSmartSchema schema = pt_schema->CreateSchema();
+
+  delete pt_schema;
+
+  return schema;
+}
+
 //-----------------------------------------------------------------------------
 
 CSmartSchema PolicyTableSchema::CreateSchema(void) {
@@ -158,9 +171,9 @@ SchemaItemPtr PolicyTableSchema::CreateFunctionaGroupings(void) {
 
 //-----------------------------------------------------------------------------
 
-SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
+SchemaItemPtr PolicyTableSchema::CreateAppId(void) {
   std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
-  
+
   app_id_map[kStrGroups] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
   app_id_map[kStrNicknames] = CObjectSchemaItem::SMember(
@@ -168,6 +181,12 @@ SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
   app_id_map[kStrPriority] = CObjectSchemaItem::SMember(
     CStringSchemaItem::create(), true);
 
+  return CObjectSchemaItem::create(app_id_map);
+}
+
+//-----------------------------------------------------------------------------
+
+SchemaItemPtr PolicyTableSchema::CreateAppPoliciesDefault(void) {
   std::map<std::string, CObjectSchemaItem::SMember> default_map;
 
   default_map[kStrPriority] = CObjectSchemaItem::SMember(
@@ -175,12 +194,18 @@ SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
   default_map[kStrGroups] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
 
+  return CObjectSchemaItem::create(default_map);
+}
+
+//-----------------------------------------------------------------------------
+
+SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
   std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
 
   app_policies_map[kStrDefault] =
-    CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
+    CObjectSchemaItem::SMember(CreateAppPoliciesDefault(), true);
   app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
-    CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), false);
+    CObjectSchemaItem::SMember(CreateAppId(), true);
 
   return ObjectOptionalSchemaItem::create(app_policies_map);
 }

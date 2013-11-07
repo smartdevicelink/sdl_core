@@ -47,7 +47,7 @@ policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string,
 				       PTType::eType pt_type)
   : is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
-  , schema_(policies_ns::PolicyTableSchema::CreateSchema())
+  , schema_(policies_ns::PolicyTableSchema::Create())
   , pt_smart_object_()
   , pt_default_smart_object_() {
      if (false == formatters_ns::GenericJsonFormatter::FromString(

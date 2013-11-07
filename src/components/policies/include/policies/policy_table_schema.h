@@ -47,10 +47,12 @@ namespace policies {
 
 class PolicyTableSchema {
   public:
+
     /**
      * @brief Creates schema for Policy Table
      */
-    static NsSmartDeviceLink::NsSmartObjects::CSmartSchema CreateSchema(void);
+    static NsSmartDeviceLink::NsSmartObjects::CSmartSchema Create(void);
+
 
     // TODO(_): might need to move these constants to the more appropriate place
     /**
@@ -118,29 +120,51 @@ class PolicyTableSchema {
      */
     static const std::string kStrPriority;
 
-  private:
+  protected:
     /**
-     * @brief Hidden constructor to prevent missuse
+     * @brief Hidden constructor to prevent missuse. Only called from inside.
      */
-    PolicyTableSchema(void);
+    PolicyTableSchema(void) {};
+
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~PolicyTableSchema(void) {};
+    
+    /**
+     * @brief Creates schema for Policy Table
+     */
+    virtual NsSmartDeviceLink::NsSmartObjects::CSmartSchema CreateSchema(void);
 
     /**
      * @brief Creates "module_config" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateModuleConfig(void);
 
     /**
      * @brief Creates "functional_groupings" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateFunctionaGroupings(void);
 
     /**
      * @brief Creates "app_policies" schema item
      */
-    static utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateAppPolicies(void);
+
+    /**
+     * @brief Creates "<app_id>" schema item
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreateAppId(void);
+
+    /**
+     * @brief Creates "default" schema item of "app_policies"
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreateAppPoliciesDefault(void);
 };
 
 }  // namespace policies
