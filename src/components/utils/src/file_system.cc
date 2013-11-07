@@ -290,3 +290,36 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
   result = ss.str();
   return true;
 }
+
+const std::string file_system::ConvertPathForURL(const std::string& path) {
+  std::string::const_iterator it_path = path.begin();
+  std::string::const_iterator it_path_end = path.end();
+
+  const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
+  std::string::const_iterator it_sym = reserved_symbols.begin();
+  std::string::const_iterator it_sym_end = reserved_symbols.end();
+
+  std::string converted_path;
+  while(it_path != it_path_end) {
+
+    it_sym = reserved_symbols.begin();
+    for (; it_sym != it_sym_end; ++it_sym) {
+
+      if (*it_path == *it_sym) {
+        char c = *it_path;
+        int value = static_cast<int>(c);
+        std::stringstream ss;
+        ss << std::hex << value;
+        std::string percent_value = "%" + ss.str();
+        converted_path += percent_value;
+        ++it_path;
+        continue;
+      }
+   }
+
+    converted_path += *it_path;
+    ++it_path;
+  }
+
+  return converted_path;
+}

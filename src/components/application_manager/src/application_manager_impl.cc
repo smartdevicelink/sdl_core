@@ -866,6 +866,10 @@ void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::TTS_GetSupportedLanguages));
     ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetCapabilities));
+    ManageHMICommand(get_capabilities);
   }
 }
 

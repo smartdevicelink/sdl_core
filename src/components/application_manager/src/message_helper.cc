@@ -45,74 +45,36 @@
 
 namespace application_manager {
 
-const VehicleData MessageHelper::vehicle_data_ = { {
-    strings::gps,
-    VehicleDataType::GPS
-  }, { strings::speed, VehicleDataType::SPEED }, {
-    strings::rpm, VehicleDataType::RPM
-  }, {
-    strings::fuel_level,
-    VehicleDataType::FUELLEVEL
-  }, {
-    strings::fuel_level_state,
-    VehicleDataType::FUELLEVEL_STATE
-  }, {
-    strings::instant_fuel_consumption,
-    VehicleDataType::FUELCONSUMPTION
-  }, {
-    strings::external_temp,
-    VehicleDataType::EXTERNTEMP
-  }, { strings::vin, VehicleDataType::VIN }, {
-    strings::prndl, VehicleDataType::PRNDL
-  }, {
-    strings::tire_pressure,
-    VehicleDataType::TIREPRESSURE
-  }, {
-    strings::odometer,
-    VehicleDataType::ODOMETER
-  }, {
-    strings::belt_status,
-    VehicleDataType::BELTSTATUS
-  }, {
-    strings::body_information,
-    VehicleDataType::BODYINFO
-  }, {
-    strings::device_status,
-    VehicleDataType::DEVICESTATUS
-  }, {
-    strings::e_call_info,
-    VehicleDataType::ECALLINFO
-  }, {
-    strings::airbag_status,
-    VehicleDataType::AIRBAGSTATUS
-  }, {
-    strings::emergency_event,
-    VehicleDataType::EMERGENCYEVENT
-  }, {
-    strings::cluster_mode_status,
-    VehicleDataType::CLUSTERMODESTATUS
-  }, {
-    strings::my_key,
-    VehicleDataType::MYKEY
-  }, {
-    strings::driver_braking,
-    VehicleDataType::BRAKING
-  }, {
-    strings::wiper_status,
-    VehicleDataType::WIPERSTATUS
-  }, {
-    strings::head_lamp_status,
-    VehicleDataType::HEADLAMPSTATUS
-  },
+const VehicleData MessageHelper::vehicle_data_ =
+{ {strings::gps, VehicleDataType::GPS},
+  {strings::speed, VehicleDataType::SPEED },
+  {strings::rpm, VehicleDataType::RPM},
+  {strings::fuel_level, VehicleDataType::FUELLEVEL},
+  {strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE},
+  {strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION},
+  {strings::external_temp, VehicleDataType::EXTERNTEMP},
+  {strings::vin, VehicleDataType::VIN },
+  {strings::prndl, VehicleDataType::PRNDL},
+  {strings::tire_pressure, VehicleDataType::TIREPRESSURE},
+  {strings::odometer, VehicleDataType::ODOMETER},
+  {strings::belt_status, VehicleDataType::BELTSTATUS},
+  {strings::body_information, VehicleDataType::BODYINFO},
+  {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::e_call_info, VehicleDataType::ECALLINFO},
+  {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
+  {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
+  {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
+  {strings::my_key, VehicleDataType::MYKEY},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},
    */
-  { strings::engine_torque, VehicleDataType::ENGINETORQUE }, {
-    strings::acc_pedal_pos, VehicleDataType::ACCPEDAL
-  }, {
-    strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL
-  },
+  {strings::engine_torque, VehicleDataType::ENGINETORQUE },
+  {strings::acc_pedal_pos, VehicleDataType::ACCPEDAL},
+  {strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL},
 };
 
 void MessageHelper::SendHMIStatusNotification(

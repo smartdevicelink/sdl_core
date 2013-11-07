@@ -29,28 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_speak_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/tts_get_capabilities_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message)
+TTSGetCapabilitiesResponse::TTSGetCapabilitiesResponse(
+    const MessageSharedPtr& message)
     : ResponseFromHMI(message) {
 }
 
-TTSSpeakResponse::~TTSSpeakResponse() {
+TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {
 }
 
-void TTSSpeakResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSSpeakResponse::Run");
+void TTSGetCapabilitiesResponse::Run() {
+  LOG4CXX_INFO(logger_, "TTSGetCapabilitiesResponse::Run");
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
-  event.set_smart_object(*message_);
-  event.raise();
+  ApplicationManagerImpl::instance()->set_speech_capabilities(
+   (*message_)[strings::msg_params][hmi_response::capabilities]);
 }
 
 }  // namespace commands

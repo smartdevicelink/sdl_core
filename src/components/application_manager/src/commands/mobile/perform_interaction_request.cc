@@ -214,7 +214,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       int mode =
           (*message_)[strings::msg_params][strings::interaction_mode].asInt();
       Application* app = ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::params][strings::connection_key]);
+          connection_key());
       if (app && (InteractionMode::BOTH == mode
           || InteractionMode::VR_ONLY == mode)) {
         is_vr_help_item_ = true;
