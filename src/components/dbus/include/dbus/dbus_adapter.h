@@ -252,7 +252,7 @@ class DBusAdapter {
   /**
    * \brief sets optional value for argument.
    * Optional param is struct bool, value
-   * \param msg DBus message
+   * \param iter DBus message iter
    * \param rules description for argument
    * \param param value of optional argument
    * \return true if success
@@ -264,18 +264,23 @@ class DBusAdapter {
 
   /**
    * \brief gets arguments from message
-   * \param msg DBus message
+   * \param iter DBus message iter
+   * \param code response code (output)
+   * \param message response message (output)
+   * \return true if success
+   */
+  bool GetHeader(DBusMessageIter* iter, int *code, std::string *message);
+
+  /**
+   * \brief gets arguments from message with header
+   * \param iter DBus message iter
    * \param rules list of rules for arguments
    * \param args map of arguments
    * \return true if success
    */
-  bool GetArguments(DBusMessage* msg, const ListArgs& rules,
+  bool GetArguments(DBusMessageIter* iter, const ListArgs& rules,
                     smart_objects::SmartObject& args);
 
-
-  bool GetArguments(DBusMessage* msg, const ListArgs& rules,
-                    smart_objects::SmartObject& args,
-                    smart_objects::SmartObject& s_args);
   /**
    * \brief gets one argument from message
    * \param iter DBus message iter
