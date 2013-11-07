@@ -59,30 +59,30 @@ policies_ns::PolicyManager::~PolicyManager() {
 //---------------------------------------------------------------
 
 policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
-  //TODO: Provide some mechanism for recovery (from Preload???) 
-  //	  if PT file corrupted (e.g. bad json)
-   
+  // TODO(anyone): Provide some mechanism for recovery (from Preload???)
+  // if PT file corrupted (e.g. bad json)
+
   InitResult::eType init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
-  
+
   std::string pt_string;
   if (0 == policy_table_) {
     if (true == file_system::ReadFile(policy_config_.getPTFileName(),
                                     pt_string)) {
-      policy_table_ = new policies_ns::PolicyTable(pt_string, 
-						 policies_ns::PTType::TYPE_PT);
+      policy_table_ = new policies_ns::PolicyTable(pt_string,
+              policies_ns::PTType::TYPE_PT);
       init_result = InitResult::INIT_OK;
     } else {
       LOG4CXX_WARN(logger_,
       "Can't read policy table file " << policy_config_.getPTFileName());
       if (true == file_system::ReadFile(policy_config_.getPreloadPTFileName(),
                                     pt_string)) {
-	policy_table_ = new policies_ns::PolicyTable(pt_string, 
-					policies_ns::PTType::TYPE_PRELOAD);
-	init_result = InitResult::INIT_OK_PRELOAD;
+        policy_table_ = new policies_ns::PolicyTable(
+            pt_string, policies_ns::PTType::TYPE_PRELOAD);
+        init_result = InitResult::INIT_OK_PRELOAD;
       } else {
-	init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
-	LOG4CXX_ERROR(logger_, "Can't read Preload policy table file " 
-		      << policy_config_.getPreloadPTFileName());
+      init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
+      LOG4CXX_ERROR(logger_, "Can't read Preload policy table file "
+          << policy_config_.getPreloadPTFileName());
       }
     }
   } else {
@@ -97,7 +97,7 @@ policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
 policies_ns::CheckPermissionResult::eType
   policies_ns::PolicyManager::checkPermission(
     uint32_t app_id, const so_ns::SmartObject& rpc) {
-  return policies_ns::CheckPermissionResult::PERMISSION_OK;
+  return policies_ns::CheckPermissionResult::PERMISSION_OK_ALLOWED;
 }
 
 //---------------------------------------------------------------
@@ -106,12 +106,12 @@ void policies_ns::PolicyManager::StorePolicyTable() {
   if (0 != policy_table_) {
     if (so_ns::SmartType_Null != policy_table_->AsSmartObject().getType()) {
       const std::string pt_string = policy_table_->AsString();
-      const std::vector<unsigned char> char_vector_pdata(pt_string.begin(),
-							  pt_string.end());
-      if (false == file_system::Write(policy_config_.getPTFileName(), 
-				      char_vector_pdata)) {
-	 LOG4CXX_ERROR(logger_, "Can't write policy table file " 
-		      << policy_config_.getPTFileName());
+      const std::vector<unsigned char> char_vector_pdata(
+          pt_string.begin(), pt_string.end());
+      if (false == file_system::Write(
+        policy_config_.getPTFileName(), char_vector_pdata)) {
+          LOG4CXX_ERROR(logger_, "Can't write policy table file "
+            << policy_config_.getPTFileName());
       }
     }
   }

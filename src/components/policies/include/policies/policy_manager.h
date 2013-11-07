@@ -49,10 +49,28 @@ namespace policies {
  **/
 namespace CheckPermissionResult {
 enum eType {
-  PERMISSION_OK = 0,
+  /**
+   * @brief RPC is allowed.
+   */
+  PERMISSION_OK_ALLOWED = 0,
+  /**
+   * @brief Verification of Policy Table failed.
+   *
+   * Policy Table as smart object has failed in verification against schema.
+   */
   PERMISSION_NOK_PT_VERIFICATION_FAILED,
-  PERMISSION_NOK_APPID_NOT_PERMITTED,
-  PERMISSION_NOK_RPC_NOT_PERMITTED
+  /**
+   * @brief RPC is allowed by the PT(backend), but disallowed by the user.
+   */
+  PERMISSION_NOK_USER_DISALLOWED,
+  /**
+   * @brief RPC  is not allowed by the PT(backend).
+   */
+  PERMISSION_NOK_DISALLOWED,
+  /**
+   * @brief RPC is allowed by PT(backend), but user has not been prompted yet.
+   */
+  PERMISSION_NOK_PENDING_USER_CONSENT
 };
 }  // namespace CheckPermissionResult
 
@@ -74,7 +92,7 @@ enum eType {
    **/
   INIT_FAILED_PRELOAD_NO_FILE
 };
-} // namespace InitResult
+}  // namespace InitResult
 
 /**
  * @brief Interface class of policy manager.
@@ -87,7 +105,7 @@ class PolicyManager {
      * @param policy_config Policy configuration
      */
     explicit PolicyManager(const PolicyConfiguration& policy_config);
-    
+
     /**
      * @brief Destructor
      *
@@ -114,7 +132,7 @@ class PolicyManager {
      * @brief Store policy table to filesystem
      */
     void StorePolicyTable();
-    
+
   protected:
     /**
      * @brief Get PolicyTable pointer (for testing purposes)
