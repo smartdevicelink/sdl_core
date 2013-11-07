@@ -1,3 +1,6 @@
+[CW45]
++ Add the ability to stream MP4 or raw H264 data over MobileNavi.
+
 [CW43]
 + Fixed main thread blocking
 + Add RegisterAppInterface dialog.
