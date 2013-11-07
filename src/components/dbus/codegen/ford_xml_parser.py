@@ -43,8 +43,6 @@ from collections import OrderedDict
 node_name = '/com/ford/hmi'
 
 class ParamDesc:
-    struct = False
-    array = False
     pass
 
 class FordXmlParser:
