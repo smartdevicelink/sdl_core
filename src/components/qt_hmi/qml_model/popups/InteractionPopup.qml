@@ -79,8 +79,7 @@ PopUp {
 
     function activate () {
         console.debug("enter")
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+        dataContainer.popups++
         timer.interval = dataContainer.interactionModel.timeout
         timer.start()
         show()
@@ -89,7 +88,7 @@ PopUp {
 
     function deactivate () {
         console.debug("enter")
-        dataContainer.systemContext = dataContainer.systemSavedContext
+        dataContainer.popups--
         hide()
         console.debug("exit")
     }

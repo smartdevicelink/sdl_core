@@ -217,15 +217,14 @@ Rectangle {
     }
 
     function show () {
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_ALERT
+        dataContainer.activeAlert = true
         dataContainer.applicationSavedContext = dataContainer.applicationContext
         visible = true
     }
 
     function complete (reason) {
         timer.stop()
-        dataContainer.systemContext = dataContainer.systemSavedContext
+        dataContainer.activeAlert = false
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
         DBus.sendReply(async, {"__retCode": reason})

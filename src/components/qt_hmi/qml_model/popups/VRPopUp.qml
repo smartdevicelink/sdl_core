@@ -89,15 +89,12 @@ PopUp {
 
     function activate() {
         dataContainer.activeVR = true;
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_VRSESSION
         sdlVR.started();
         show();
     }
 
     function complete(reason) {
         dataContainer.activeVR = false;
-        dataContainer.systemContext = dataContainer.systemSavedContext
         sdlVR.stopped();
         hide();
     }

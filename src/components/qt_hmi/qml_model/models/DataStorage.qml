@@ -445,4 +445,32 @@ QtObject {
     }
     property bool activeTTS: false
     property var activePopup
+    property int popups: 0
+
+    property bool activeAlert: false
+
+    onActiveVRChanged: setSystemContext()
+    onActiveAlertChanged: setSystemContext()
+    onPopupsChanged: setSystemContext()
+
+    function setSystemContext () {
+        console.debug("enter")
+        if (activeVR) {
+            systemContext = Common.SystemContext.SYSCTXT_VRSESSION
+        }
+        else {
+            if (activeAlert) {
+                systemContext = Common.SystemContext.SYSCTXT_ALERT
+            }
+            else {
+                if (popups > 0) {
+                    systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+                }
+                else {
+                    systemContext = Common.SystemContext.SYSCTXT_MAIN // TODO (nvaganov@luxoft.com) MENU
+                }
+            }
+        }
+        console.debug("exit")
+    }
 }
