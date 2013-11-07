@@ -12,6 +12,7 @@ public class FileStreamingLogic {
     private StaticFileReader staticFileReader;
     private OutputStream outputStream;
     private MobileNavPreviewFragment context;
+    private Integer fileResID;
 
     public FileStreamingLogic(MobileNavPreviewFragment mobileNavPreviewFragment) {
         context = mobileNavPreviewFragment;
@@ -25,6 +26,14 @@ public class FileStreamingLogic {
         this.outputStream = stream;
     }
 
+    public Integer getFileResID() {
+        return fileResID;
+    }
+
+    public void setFileResID(Integer fileResID) {
+        this.fileResID = fileResID;
+    }
+
     public void cancelStreaming() {
         if (staticFileReader != null) {
             staticFileReader.cancel(true);
@@ -35,7 +44,7 @@ public class FileStreamingLogic {
         if (staticFileReader == null || staticFileReader.getStatus() == AsyncTask.Status.FINISHED){
             createStaticFileReader();
         }
-        staticFileReader.execute(R.raw.faq_welcome_orientation);
+        staticFileReader.execute(fileResID);
     }
 
     public void createStaticFileReader() {
