@@ -48,9 +48,7 @@ namespace transport_adapter {
 
 bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
-  if (app_handle > std::numeric_limits<uint8_t>::max())
-    return false;
-  if (app_handle < 0)
+  if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max())
     return false;
   const uint8_t channel = static_cast<uint8_t>(app_handle);
   RfcommChannelVector::const_iterator it = std::find(rfcomm_channels_.begin(),

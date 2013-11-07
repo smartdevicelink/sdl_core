@@ -154,12 +154,12 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
         "Attempt to connect device " << device_id << ", channel " << app_handle);
     const TransportAdapter::Error ta_error = ta->Connect(device_id, app_handle);
     switch (ta_error) {
-      case TransportAdapter::ALREADY_EXISTS: {
-        LOG4CXX_INFO(logger_, "Already connected");
-        break;
-      }
       case TransportAdapter::OK: {
         LOG4CXX_INFO(logger_, "OK");
+        break;
+      }
+      case TransportAdapter::ALREADY_EXISTS: {
+        LOG4CXX_INFO(logger_, "Already connected");
         break;
       }
       default: {
