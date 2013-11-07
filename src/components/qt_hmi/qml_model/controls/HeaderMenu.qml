@@ -38,9 +38,7 @@ import "../models/Constants.js" as Constants
 
 Item {
     id: headerMenu
-    anchors.centerIn: parent
-    width: parent.width
-    height: parent.height
+    anchors.fill: parent
 
     Text {        
         anchors.leftMargin: Constants.margin
