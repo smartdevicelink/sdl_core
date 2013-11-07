@@ -73,8 +73,8 @@
     <string name="selectprotocol_media">Media</string>
     <string name="selectprotocol_appName">App name:</string>
     <string name="selectprotocol_appNameDefault">SyncProxyTester</string>
-    <string name="selectprotocol_staticFile">Static File (MP4)</string>
-    <string name="selectprotocol_camera">Camera (H264)</string>
+    <string name="selectprotocol_sourceMP4">MP4</string>
+    <string name="selectprotocol_sourceH264">H264</string>
     <string name="selectprotocol_lang">Language:</string>
     <string name="selectprotocol_hmiLang">HMI language:</string>
     <string name="selectprotocol_wifi">WiFi</string>

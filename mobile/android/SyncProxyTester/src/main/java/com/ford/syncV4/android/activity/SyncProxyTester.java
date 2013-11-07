@@ -478,7 +478,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         final CheckBox mediaCheckBox = (CheckBox) view
                 .findViewById(R.id.selectprotocol_checkMedia);
-        final CheckBox naviCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMobileNavi);
+        final CheckBox naviCheckBox = (CheckBox) view.findViewById(
+                R.id.selectprotocol_checkMobileNavi);
         final RadioGroup videoSourceGroup = (RadioGroup) view
                 .findViewById(R.id.selectprotocol_radioGroupVideoSource);
         final EditText appNameEditText = (EditText) view
@@ -568,9 +569,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
         transportGroup.check(groupCheck);
 
-        videoSourceGroup.check(videoSource == Const.KEY_VIDEOSOURCE_STATICFILE ?
-                R.id.selectprotocol_radioStaticFile :
-                R.id.selectprotocol_radioCamera);
+        videoSourceGroup.check(videoSource == Const.KEY_VIDEOSOURCE_MP4 ?
+                R.id.selectprotocol_radioSourceMP4 :
+                R.id.selectprotocol_radioSourceH264);
 
         new AlertDialog.Builder(context)
                 .setTitle("Please select protocol properties")
@@ -580,9 +581,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     public void onClick(DialogInterface dialog, int which) {
                         boolean isMedia = mediaCheckBox.isChecked();
                         boolean isNavi = naviCheckBox.isChecked();
-                        int videoSource = (videoSourceGroup.getCheckedRadioButtonId() == R.id.selectprotocol_radioStaticFile ?
-                            Const.KEY_VIDEOSOURCE_STATICFILE :
-                            Const.KEY_VIDEOSOURCE_CAMERA);
+                        int videoSource = (videoSourceGroup.getCheckedRadioButtonId() == R.id.selectprotocol_radioSourceMP4 ?
+                            Const.KEY_VIDEOSOURCE_MP4 :
+                            Const.KEY_VIDEOSOURCE_H264);
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem())
                                 .name();
@@ -611,7 +612,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 .edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
-                                .putInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE, videoSource)
+                                .putInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE,
+                                        videoSource)
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)

@@ -1,6 +1,5 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -109,11 +108,11 @@ public class MobileNavPreviewFragment extends Fragment{
 
         int videoResID = 0;
         switch (videoSource) {
-            case Const.KEY_VIDEOSOURCE_STATICFILE:
+            case Const.KEY_VIDEOSOURCE_MP4:
                 videoResID = R.raw.faq_welcome_orientation;
                 break;
 
-            case Const.KEY_VIDEOSOURCE_CAMERA:
+            case Const.KEY_VIDEOSOURCE_H264:
                 videoResID = R.raw.faq_welcome_orientation_rawh264;
                 break;
 

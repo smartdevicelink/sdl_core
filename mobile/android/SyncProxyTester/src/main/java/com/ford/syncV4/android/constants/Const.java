@@ -17,13 +17,14 @@ public class Const {
 	public static final String PREFS_KEY_AUTOSETAPPICON = "autoSetAppIcon";
 	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
 
-    public static final int KEY_VIDEOSOURCE_STATICFILE = 0;
-    public static final int KEY_VIDEOSOURCE_CAMERA = 1;
+    public static final int KEY_VIDEOSOURCE_MP4 = 0;
+    public static final int KEY_VIDEOSOURCE_H264 = 1;
 
 	// Default values
 	public static final boolean PREFS_DEFAULT_ISMEDIAAPP = true;
     public static final boolean PREFS_DEFAULT_ISNAVIAPP = true;
-    public static final int PREFS_DEFAULT_NAVI_VIDEOSOURCE = KEY_VIDEOSOURCE_STATICFILE;
+    public static final int PREFS_DEFAULT_NAVI_VIDEOSOURCE =
+            KEY_VIDEOSOURCE_MP4;
 	public static final String PREFS_DEFAULT_APPNAME = FlavorConst.PREFS_DEFAULT_APPNAME;
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
