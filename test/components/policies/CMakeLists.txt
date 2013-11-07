@@ -1,3 +1,6 @@
+# policy table schema tests
+add_subdirectory(schema)
+
 include_directories (
   ../../../src/components/policies/include
   ../../../src/components/smart_objects/include
@@ -25,16 +28,8 @@ set (LIBRARIES
     MessageBroker
 )
 
-set (SOURCES
-  ./policies_draft_test.cc
-)
-
-add_library("test_policies_test" ${SOURCES})
-
 create_test("test_policies_draft_test" "./policies_draft_test.cc" "${LIBRARIES}")
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SDLPolicyTable_basic.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bad.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-
