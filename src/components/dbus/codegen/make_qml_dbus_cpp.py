@@ -41,7 +41,7 @@ import os.path
 from sys import argv
 from xml.etree import ElementTree
 from copy import copy
-from ford_xml_parser import FordXmlParser
+from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
 def defaultValue(param):
@@ -262,7 +262,7 @@ class Impl(FordXmlParser):
         elif param.type == 'Float':
             return 'double'
         elif param.struct:
-            return param.fulltype[0] + '_' + param.fulltype[1]
+            return "_".join(param.fulltype)
         return "xxx"
 
 
@@ -293,33 +293,16 @@ class Impl(FordXmlParser):
 
 
     def make_method_signature(self, request, response, interface, add_classname):
-        in_params = request.findall('param')
-        out_params = response.findall('param')
-        ret_type = 'int'
-        retstr = ret_type + ' '
-        if add_classname:
-            retstr = retstr + interface + 'Adaptor::'
-        retstr = retstr + request.get('name') + '('
-        in_params_num = len(in_params)
-        for i in range(0, in_params_num):
-            param_desc = self.make_param_desc(in_params[i], interface)
-            param_type = self.qt_param_type(param_desc)
-            retstr = retstr + param_type + ' ' + param_desc.name + '_in'
-            if i <> in_params_num - 1: retstr = retstr + ", "
-        if in_params_num > 0:
-            retstr += ", "
-        retstr += "const QDBusMessage& message"
-        out_params_num = len(out_params)
-        if out_params_num > 0:
-            retstr = retstr + ", "
-            for i in range(0, out_params_num):
-                param_desc = self.make_param_desc(out_params[i], interface)
-                param_type = self.qt_param_type(param_desc)
-                retstr = retstr + param_type + '& ' + param_desc.name + '_out'
-                if i <> out_params_num - 1: retstr = retstr + ", "
+        in_params = [self.make_param_desc(x, interface) for x in request.findall('param')]
+        out_params = [self.make_param_desc(x, interface) for x in response.findall('param')]
 
-        retstr = retstr + ')'
-        return retstr
+        return "int {0}{1} ({2}{3}const QDBusMessage& message, QString& userMessage_out{4}{5})".format(
+                                        interface + "Adaptor::" if add_classname else "",
+                                        request.get('name'),
+                                        ", ".join(map(lambda x: "const {0}& {1}_in".format(self.qt_param_type(x), x.name), in_params)),
+                                        ", " if in_params else "",
+                                        ", " if out_params else "",
+                                        ", ".join(map(lambda x: "{0}& {1}_out".format(self.qt_param_type(x), x.name), out_params)))
 
 
     def make_signal_signature(self, signal, interface, add_void):
@@ -433,6 +416,10 @@ class Impl(FordXmlParser):
                 out.write("GetArgFromMap(map, \"__retCode\", retCode_out);\n")
                 out.write("QVariant retCode_arg = QVariant::fromValue(retCode_out);\n")
                 out.write("message << retCode_arg;\n")
+                out.write("QString userMessage_out;\n")
+                out.write("GetArgFromMap(map, \"__message\", userMessage_out);\n")
+                out.write("QVariant userMessage_arg = QVariant::fromValue(userMessage_out);\n")
+                out.write("message << userMessage_arg;\n")
                 for p in out_params:
                     param_name = p.name
                     param_type = self.qt_param_type(p)
@@ -449,8 +436,8 @@ class Impl(FordXmlParser):
             out.write("{0} {{\n".format(self.make_method_signature(request, response, iface_name, True)))
             with CodeBlock(out) as out:
                 out.write("LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
-                out.write('int ret = 0;\n')
-                return_statement = 'return ret'
+                out.write("int ret = 0;\n")
+                return_statement = "return ret;\n"
                 out.write("QVariantMap in_arg;\n");
                 out.write("QVariant out_arg_v;\n");
                 for param in in_params:
@@ -458,9 +445,7 @@ class Impl(FordXmlParser):
                     out.write("PutArgToMap(in_arg, \"" + param.name + "\", " + param.name + "_in);\n")
                 out.write("LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
                 method_name = request.get('name')[:1].lower() + request.get('name')[1:]
-                out.write("if (!QMetaObject::invokeMethod(api_, \"" + method_name + "\",")
-                out.write("Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), ")
-                out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n")
+                out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name))
                 with CodeBlock(out) as out:
                     out.write("RaiseDbusError(this, InvalidData);\n")
                     out.write("LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
@@ -474,7 +459,7 @@ class Impl(FordXmlParser):
                 out.write("};\n")
 
                 out.write("int err;\n")
-                out.write("""if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
+                out.write("""if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); return ret; }\n""")
 
                 out.write("int async_uid;\n")
                 out.write("if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
@@ -487,9 +472,10 @@ class Impl(FordXmlParser):
 
                 for param in out_params:
                     param_name = param.name
-                    out.write('if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); " + return_statement + "; }\n")
+                    out.write('if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); return ret; }\n")
 
                 out.write("GetArgFromMap(out_arg, \"__retCode\", ret);\n")
+                out.write("GetArgFromMap(out_arg, \"__message\", userMessage_out);\n")
                 out.write("LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
                 out.write("LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
                 out.write("return ret;\n")
