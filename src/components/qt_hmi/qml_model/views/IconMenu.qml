@@ -72,6 +72,25 @@ GeneralView{
 
                             MouseArea {
                                 anchors.fill: parent
+
+                                onPressed: {
+                                    console.debug("enter")
+                                    parent.scale = 1.1
+                                    console.debug("exit")
+                                }
+
+                                onReleased: {
+                                    console.debug("enter")
+                                    parent.scale = 1
+                                    console.debug("exit")
+                                }
+
+                                onCanceled: {
+                                    console.debug("enter")
+                                    parent.scale = 1
+                                    console.debug("exit")
+                                }
+
                                 onClicked: {
                                     if(menuView.listModel.get(index).qml !== "") {
                                         contentLoader.go(menuView.listModel.get(index).qml)
@@ -114,6 +133,25 @@ GeneralView{
                             anchors.centerIn: parent
                             MouseArea {
                                 anchors.fill: parent
+
+                                onPressed: {
+                                    console.debug("enter")
+                                    parent.scale = 1.1
+                                    console.debug("exit")
+                                }
+
+                                onReleased: {
+                                    console.debug("enter")
+                                    parent.scale = 1
+                                    console.debug("exit")
+                                }
+
+                                onCanceled: {
+                                    console.debug("enter")
+                                    parent.scale = 1
+                                    console.debug("exit")
+                                }
+
                                 onClicked: {
                                     if(menuView.listModel.get(index).qml !== "") {
                                         contentLoader.go(menuView.listModel.get(index+ menuView.countOfUpperRowItems).qml)
