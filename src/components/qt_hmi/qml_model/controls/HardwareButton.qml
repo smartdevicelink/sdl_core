@@ -24,7 +24,7 @@ MaskedContainer {
     }
     Timer {
         id: timer
-        interval: 400
+        interval: 2000
         repeat: false
         triggeredOnStart: false
     }

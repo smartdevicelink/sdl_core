@@ -43,8 +43,9 @@ from collections import OrderedDict
 node_name = '/com/ford/hmi'
 
 class ParamDesc:
+    struct = False
+    array = False
     pass
-
 
 class FordXmlParser:
     def __init__(self, in_el_tree, interface_path=None):
@@ -52,7 +53,6 @@ class FordXmlParser:
         self.el_tree = in_el_tree
         self.find_enums()
         self.find_structs()
-
 
     def find_enums(self):
         self.enums = dict()
@@ -67,6 +67,9 @@ class FordXmlParser:
         param_desc = ParamDesc()
         param_desc.name = param_el.get('name')
         param_desc.type = param_el.get('type')
+        param_desc.enum = False
+        param_desc.struct = False
+        param_desc.fulltype = param_desc.type
         if param_el.get('mandatory') == 'false':
             param_desc.mandatory = False
         else:
@@ -75,11 +78,20 @@ class FordXmlParser:
             param_desc.array = True
         else:
             param_desc.array = False
+        param_desc.minValue = param_el.get('minvalue') if param_el.get('minvalue') else 0
+        param_desc.maxValue = param_el.get('maxvalue')
+        param_desc.minLength = param_el.get('minlength') if param_el.get('minlength') else 0
+        param_desc.maxLength = param_el.get('maxlength')
+        param_desc.minSize = param_el.get('minsize')
+        param_desc.maxSize = param_el.get('maxsize')
+
+	param_desc.restricted = param_desc.minValue != None or \
+	                        param_desc.maxValue != None or \
+			        param_desc.minLength > 0 or \
+			        param_desc.maxLength > 0
+	param_desc.restrictedArray = param_desc.array and (param_desc.minSize > 0 or param_desc.maxSize > 0)
         if iface is None:
             return param_desc
-        param_desc.enum = False
-        param_desc.struct = False
-        param_desc.fulltype = param_desc.type
         if param_desc.type not in ['Integer', 'String', 'Boolean', 'Float']:
             param_type = param_desc.type.split('.')
             if len(param_type) > 1:
@@ -98,17 +110,15 @@ class FordXmlParser:
             interface_name = interface_el.get('name')
             for struct_el in interface_el.findall('struct'):
                 struct_name = struct_el.get('name')
-                self.structs[(interface_name, struct_name)] = True
+                self.structs[(interface_name, struct_name)] = []
 
         for interface_el in self.el_tree.findall('interface'):
             interface_name = interface_el.get('name')
             for struct_el in interface_el.findall('struct'):
                 struct_name = struct_el.get('name')
-                struct = list()
                 for param_el in struct_el.findall('param'):
                     param_desc = self.make_param_desc(param_el, interface_name)
-                    struct.append(param_desc)
-                self.structs[(interface_name, struct_name)] = struct
+                    self.structs[(interface_name, struct_name)].append(param_desc)
 
 
     def convert_struct_to_dbus(self, param_type):
