@@ -41,8 +41,7 @@ GeneralView {
         anchors.fill: parent
 
         Item {
-            // 3/4 top screen
-            height: parent.height * 3/4
+            height: parent.height
             width: parent.width
             anchors.top: parent.top
             anchors.left: parent.left
@@ -91,6 +90,5 @@ GeneralView {
                 }
             }
         }
-        // bottom 1\4 of screen doesnt use now
     }
 }

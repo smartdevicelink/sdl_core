@@ -114,13 +114,12 @@ Item {
         )
 
         var app = dataContainer.getApplication(appID);
-        if (softButtons) {
-            app.softButtons.clear()
+        app.softButtons.clear()
+        if (softButtons) {            
             softButtons.forEach(function(x) { app.softButtons.append(x); });
         }
-
+        app.customPresets.clear()
         if (customPresets) {
-            app.customPresets.clear()
             customPresets.forEach( function(x) { app.customPresets.append( {text: x} ); } )
         }
 
