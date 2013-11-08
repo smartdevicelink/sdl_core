@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Column {
@@ -44,7 +45,7 @@ GeneralView {
             height: parent.height / 2
             width: parent.width
 
-            ListView {
+            ScrollableListView {
                 id: applicationListView
                 anchors.fill: parent
                 model: dataContainer.applicationList
@@ -55,12 +56,17 @@ GeneralView {
 
                 delegate: Row {
                     width: parent.width
-                    height: appName.height
-                    Image { id: sdlIcon; source: icon }
+                    height: Math.max(appName.height, appIcon.height)
+                    Image {
+                        id: appIcon
+                        source: icon
+                        height: Constants.appListIconSize
+                        width: height
+                    }
                     Text  {
                         text: appName
-                        color: "#1d81d5"
-                        font.pixelSize: 40
+                        color: Constants.primaryColor
+                        font.pixelSize: Constants.appListFontSize
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea {
                           anchors.fill: parent
