@@ -66,25 +66,34 @@ GeneralView {
 
                     MouseArea {
                         anchors.fill: parent
+                        enabled: model.icon.value !== undefined
+
                         onClicked: {
                             console.debug("enter")
-                            if (model.icon.value) {
-                                switch (type) {
-                                    case Internal.MenuItemType.MI_NODE:
-                                        sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
-                                        break;
-                                    case Internal.MenuItemType.MI_SUBMENU:
-                                    case Internal.MenuItemType.MI_PARENT:
-                                        dataContainer.currentApplication.currentSubMenu = subMenu
-                                        break;
-                                }
+                            switch (type) {
+                                case Internal.MenuItemType.MI_NODE:
+                                    sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                    break;
+                                case Internal.MenuItemType.MI_SUBMENU:
+                                case Internal.MenuItemType.MI_PARENT:
+                                    dataContainer.currentApplication.currentSubMenu = subMenu
+                                    break;
                             }
+                            console.debug("exit")
+                        }
+
+                        Component.onCompleted: {
+                            console.debug("enter")
+                            onPressed.connect(text.press)
+                            onReleased.connect(text.release)
+                            onCanceled.connect(text.release)
                             console.debug("exit")
                         }
                     }
                 }
 
                 ClickableText {
+                    id: text
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
                     defaultColor: type === Internal.MenuItemType.MI_PARENT ?
                                       Constants.inactiveButtonTextColor :

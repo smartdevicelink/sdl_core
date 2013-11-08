@@ -35,27 +35,43 @@
 import QtQuick 2.0
 
 Text {
-    id: text
-
     property string defaultColor
     property string pressedColor
+    signal pressed ()
+    signal released ()
+    signal canceled ()
     signal clicked ()
 
     color: defaultColor
 
     MouseArea {
         anchors.fill: parent
+
         onPressed: {
-            text.color = pressedColor
+            press()
+            parent.pressed()
         }
+
         onReleased: {
-            text.color = defaultColor
+            release()
+            parent.released()
         }
+
         onCanceled: {
-            text.color = defaultColor
+            release()
+            parent.canceled()
         }
+
         onClicked: {
-            text.clicked()
+            parent.clicked()
         }
+    }
+
+    function press () {
+        color = pressedColor
+    }
+
+    function release () {
+        color = defaultColor
     }
 }
