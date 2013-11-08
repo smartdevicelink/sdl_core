@@ -50,6 +50,8 @@ Item {
     }
 
     function changeRegistration(language, appID) {
+        console.debug("enter:", language, appID);
         dataContainer.changeRegistrationTTSVR(language, appID);
+        console.debug("exit");
     }
 }
