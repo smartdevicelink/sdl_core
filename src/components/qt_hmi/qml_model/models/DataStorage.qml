@@ -264,7 +264,7 @@ QtObject {
 
     function changeRegistrationTTSVR(language, appID) {
         console.log("dataContainer changeRegistrationTTSVR enter");
-        setApplicationProperties(appID, { TTSVRLanguage: language });
+        setApplicationProperties(appID, { languageTTSVR: language });
         console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
