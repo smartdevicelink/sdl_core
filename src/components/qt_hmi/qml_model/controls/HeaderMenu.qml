@@ -86,7 +86,7 @@ Item {
         ClickableText {
             id: menuText
             anchors.top: parent.verticalCenter
-            text: "MENU";            
+            text: "MENU";
             defaultColor: Constants.primaryColor
             pressedColor: Constants.primaryColorPressed
             font.pixelSize: Constants.fontSize
