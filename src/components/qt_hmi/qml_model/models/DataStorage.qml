@@ -457,18 +457,14 @@ QtObject {
         if (activeVR) {
             systemContext = Common.SystemContext.SYSCTXT_VRSESSION
         }
+        else if (activeAlert) {
+            systemContext = Common.SystemContext.SYSCTXT_ALERT
+        }
+        else if (popups > 0) {
+            systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+        }
         else {
-            if (activeAlert) {
-                systemContext = Common.SystemContext.SYSCTXT_ALERT
-            }
-            else {
-                if (popups > 0) {
-                    systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
-                }
-                else {
-                    systemContext = contentLoader.item.systemContext
-                }
-            }
+            systemContext = contentLoader.item.systemContext
         }
         console.debug("exit")
     }
