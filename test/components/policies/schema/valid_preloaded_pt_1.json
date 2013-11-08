@@ -330,28 +330,6 @@
                 "groups":[
                     "Base-4"
                 ]
-            },
-            "123456":{
-                "priority":"NORMAL",
-                "groups":[
-                    "Location-1",
-                    "Navigation-1",
-                    "Base-4"
-                ],
-                "nicknames":[
-                    "SDLTester",
-                    "SyncProxytester"
-                ]
-            },
-            "789":{
-                "priority":"NORMAL",
-                "groups":[
-                    "Notifications",
-                    "Base-4"
-                ],
-                "nicknames":[
-                    "Music App"
-                ]
             }
         }
     }

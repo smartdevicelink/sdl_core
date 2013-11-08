@@ -60,6 +60,12 @@ class PreloadedPTSchema : public PolicyTableSchema {
     virtual ~PreloadedPTSchema(void) {};
 
     /**
+     * @brief Creates "<app_id>" schema item
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreateAppId(void);
+
+    /**
      * @brief Creates "app_policies" schema item
      */
     virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
