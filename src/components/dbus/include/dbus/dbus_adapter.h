@@ -206,7 +206,7 @@ class DBusAdapter {
 
   /**
    * \brief Sets one argument to message
-   * \param msg DBus message
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param value of argument
    * \return true if success
@@ -218,7 +218,7 @@ class DBusAdapter {
 
   /**
    * \brief sets value for argument
-   * \param msg DBus message
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param value of argument
    * \return true if success
@@ -229,7 +229,7 @@ class DBusAdapter {
 
   /**
    * \brief sets value for every element of argument
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param array values of argument
    * \return true if success
@@ -252,7 +252,7 @@ class DBusAdapter {
   /**
    * \brief sets optional value for argument.
    * Optional param is struct bool, value
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param value of optional argument
    * \return true if success
@@ -264,7 +264,7 @@ class DBusAdapter {
 
   /**
    * \brief gets arguments from message
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param code response code (output)
    * \param message response message (output)
    * \return true if success
@@ -273,7 +273,7 @@ class DBusAdapter {
 
   /**
    * \brief gets arguments from message with header
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules list of rules for arguments
    * \param args map of arguments
    * \return true if success
@@ -283,7 +283,7 @@ class DBusAdapter {
 
   /**
    * \brief gets one argument from message
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param args map of arguments
    * \return true if success
@@ -295,7 +295,7 @@ class DBusAdapter {
 
   /**
    * \brief gets value for argument
-   * \param msg DBus message
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param value of argument
    * \return true if success
@@ -306,7 +306,7 @@ class DBusAdapter {
 
   /**
    * \brief gets value for every element of argument
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param array values of argument
    * \return true if success
@@ -317,7 +317,7 @@ class DBusAdapter {
 
   /**
    * \brief gets struct value for argument
-   * \param iter DBus message iter
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param structure
    * \return true if success
@@ -329,7 +329,7 @@ class DBusAdapter {
   /**
    * \brief gets optional value for argument.
    * Optional param is struct bool, value
-   * \param msg DBus message
+   * \param iter DBus message iterator
    * \param rules description for argument
    * \param param value of optional argument
    * \return true if success
