@@ -465,7 +465,7 @@ QtObject {
         else if (popups > 0) {
             systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         }
-        else {
+        else if (contentLoader.item !== null) {
             systemContext = contentLoader.item.systemContext
         }
         console.debug("exit")
