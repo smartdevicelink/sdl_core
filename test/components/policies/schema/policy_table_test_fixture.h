@@ -1,6 +1,6 @@
 /**
- * @file preloaded_pt_schema_test.cc
- * @brief Policy table preloaded schema test source file.
+ * @file policy_table_test_fixture.h
+ * @brief Policy table test helper class.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,13 +32,17 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+#define TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+
+#include <string>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "utils/logger.h"
-
-#include "policies/preloaded_pt_schema.h"
-
-#include "policies/schema/policy_table_test_fixture.h"
+#include "policies/policy_table_schema.h"
+#include "utils/file_system.h"
+#include "formatters/generic_json_formatter.h"
+#include "smart_objects/smart_schema.h"
 
 namespace test {
 namespace components {
@@ -46,42 +50,27 @@ namespace policies {
 namespace policy_table_schema_test {
 
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
-using ::NsSmartDeviceLink::policies::PreloadedPTSchema;
-using ::NsSmartDeviceLink::NsSmartObjects::CSmartSchema;
+using ::NsSmartDeviceLink::NsJSONHandler::Formatters::GenericJsonFormatter;
 
-namespace Errors = NsSmartDeviceLink::NsSmartObjects::Errors;
+class SchemaTest: public ::testing::Test {
+ protected:
+    void GetPolicyTable(const std::string &file_path, SmartObject &pt) {
+      std::string pt_string;
 
-TEST_F(SchemaTest, test_preloaded_pt_schema_valid_1) {
-  SmartObject pt_object;
-
-  GetPolicyTable("valid_preloaded_pt_1.json", pt_object);
-
-  CSmartSchema schema = PreloadedPTSchema::Create();
-
-  Errors::eType result = schema.validate(pt_object);
-
-  ASSERT_EQ(Errors::OK, result);
-}
-
-TEST_F(SchemaTest, test_preloaded_pt_schema_valid_2) {
-  SmartObject pt_object;
-
-  GetPolicyTable("valid_preloaded_pt_2.json", pt_object);
-
-  CSmartSchema schema = PreloadedPTSchema::Create();
-
-  Errors::eType result = schema.validate(pt_object);
-
-  ASSERT_EQ(Errors::OK, result);
-}
-
+      if (true == file_system::ReadFile(file_path, pt_string)) {
+        if (false == GenericJsonFormatter::FromString(pt_string, pt)) {
+          FAIL() << "Failed to make a smart object";
+        }
+      } else {
+        FAIL() << "Failed to read a file";
+      }
+    }
+};
 
 }  // namespace policy_table_schema_test
 }  // namespace policies
 }  // namespace components
 }  // namespace test
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleMock(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif  // TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+

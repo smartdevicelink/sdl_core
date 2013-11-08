@@ -52,19 +52,24 @@ class PreloadedPTSchema : public PolicyTableSchema {
     /**
      * @brief Hidden constructor to prevent missuse. Only called from inside.
      */
-    PreloadedPTSchema(void) {};
+    PreloadedPTSchema(void) {}
 
     /**
      * @brief Virtual destructor.
      */
-    virtual ~PreloadedPTSchema(void) {};
+    virtual ~PreloadedPTSchema(void) {}
+
+    /**
+     * @brief Creates "<app_id>" schema item
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreateAppId(void);
 
     /**
      * @brief Creates "app_policies" schema item
      */
     virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateAppPolicies(void);
-
 };
 
 }  // namespace policies

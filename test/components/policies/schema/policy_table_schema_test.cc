@@ -37,15 +37,32 @@
 #include "utils/logger.h"
 
 #include "policies/policy_table_schema.h"
+#include "smart_objects/smart_schema.h"
+
+#include "policies/schema/policy_table_test_fixture.h"
 
 namespace test {
 namespace components {
 namespace policies {
 namespace policy_table_schema_test {
 
-TEST(schema_test, test_policy_table_schema) {
-  // TODO(_): implement test
-  ASSERT_TRUE(false);
+using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
+using ::NsSmartDeviceLink::policies::PolicyTableSchema;
+using ::NsSmartDeviceLink::NsSmartObjects::CSmartSchema;
+
+namespace Errors = NsSmartDeviceLink::NsSmartObjects::Errors;
+
+
+TEST_F(SchemaTest, test_policy_table_schema) {
+  SmartObject pt_object;
+
+  GetPolicyTable("valid_policy_table.json", pt_object);
+
+  CSmartSchema schema = PolicyTableSchema::Create();
+
+  Errors::eType result = schema.validate(pt_object);
+
+  ASSERT_EQ(Errors::OK, result);
 }
 
 }  // namespace policy_table_schema_test

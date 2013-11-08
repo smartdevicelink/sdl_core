@@ -52,6 +52,10 @@ using ::NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::CSmartSchema;
 using ::NsSmartDeviceLink::NsSmartObjects::ISchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::ObjectOptionalSchemaItem;
+using ::NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem;
+using ::NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem;
+
+typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 
 //-----------------------------------------------------------------------------
 
@@ -67,7 +71,22 @@ CSmartSchema PreloadedPTSchema::Create(void) {
 
 //-----------------------------------------------------------------------------
 
-utils::SharedPtr<ISchemaItem> PolicyTableSchema::CreateAppPolicies(void) {
+SchemaItemPtr PreloadedPTSchema::CreateAppId(void) {
+  std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
+
+  app_id_map[kStrGroups] = CObjectSchemaItem::SMember(
+    CArraySchemaItem::create(CStringSchemaItem::create()), true);
+  app_id_map[kStrNicknames] = CObjectSchemaItem::SMember(
+    CArraySchemaItem::create(CStringSchemaItem::create()), false);
+  app_id_map[kStrPriority] = CObjectSchemaItem::SMember(
+    CStringSchemaItem::create(), true);
+
+  return CObjectSchemaItem::create(app_id_map);
+}
+
+//-----------------------------------------------------------------------------
+
+SchemaItemPtr PreloadedPTSchema::CreateAppPolicies(void) {
   std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
 
   app_policies_map[kStrDefault] =
