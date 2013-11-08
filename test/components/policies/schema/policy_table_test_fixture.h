@@ -32,9 +32,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+#define TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+
+#include <string>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
 #include "policies/policy_table_schema.h"
 #include "utils/file_system.h"
 #include "formatters/generic_json_formatter.h"
@@ -49,22 +53,24 @@ using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
 using ::NsSmartDeviceLink::NsJSONHandler::Formatters::GenericJsonFormatter;
 
 class SchemaTest: public ::testing::Test {
-protected:
+ protected:
+    void GetPolicyTable(const std::string &file_path, SmartObject &pt) {
+      std::string pt_string;
 
-  void GetPolicyTable(const std::string &file_path, SmartObject &pt) {
-    std::string pt_string;
-
-    if (true == file_system::ReadFile(file_path, pt_string)) {
-      if (false == GenericJsonFormatter::FromString(pt_string, pt)) {
-        FAIL() << "Failed to make a smart object";
+      if (true == file_system::ReadFile(file_path, pt_string)) {
+        if (false == GenericJsonFormatter::FromString(pt_string, pt)) {
+          FAIL() << "Failed to make a smart object";
+        }
+      } else {
+        FAIL() << "Failed to read a file";
       }
-    } else {
-      FAIL() << "Failed to read a file";
     }
-  }
 };
 
 }  // namespace policy_table_schema_test
 }  // namespace policies
 }  // namespace components
 }  // namespace test
+
+#endif  // TEST_COMPONENTS_POLICIES_SCHEMA_POLICY_TABLE_TEST_FIXTURE_H_
+

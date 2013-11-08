@@ -47,7 +47,6 @@ namespace policies {
 
 class PolicyTableSchema {
   public:
-
     /**
      * @brief Creates schema for Policy Table
      */
@@ -124,13 +123,13 @@ class PolicyTableSchema {
     /**
      * @brief Hidden constructor to prevent missuse. Only called from inside.
      */
-    PolicyTableSchema(void) {};
+    PolicyTableSchema(void) {}
 
     /**
      * @brief Virtual destructor.
      */
-    virtual ~PolicyTableSchema(void) {};
-    
+    virtual ~PolicyTableSchema(void) {}
+
     /**
      * @brief Creates schema for Policy Table
      */
