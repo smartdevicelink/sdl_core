@@ -82,7 +82,7 @@ PopUp {
             width: parent.width
             text: command
             onClicked: {
-                sdlVR.onCommand(cmdID, appID);
+                sdlVR.onCommand(cmdID, appID === 0 ? undefined : appID);
             }
         }
     }

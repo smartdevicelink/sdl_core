@@ -14,8 +14,8 @@ Item {
             dataContainer.vrCommands.append({
                                                cmdID: cmdID,
                                                command: vrCommands[i],
-                                               appID: appID
-                                           })
+                                               appID: appID === undefined ? 0 : appID,
+                                           });
         }
     }
 
