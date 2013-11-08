@@ -532,7 +532,7 @@ bool DBusAdapter::GetHeader(DBusMessageIter* iter, int* code,
     LOG4CXX_ERROR(logger_, "DBus: Unknown format of header");
     return false;
   }
-  LOG4CXX_DEBUG(logger_, "DBus: Code of response " << code);
+  LOG4CXX_DEBUG(logger_, "DBus: Code of response " << *code);
   dbus_message_iter_get_basic(iter, &intValue);
   *code = intValue;
 
@@ -547,7 +547,7 @@ bool DBusAdapter::GetHeader(DBusMessageIter* iter, int* code,
   const char* stringValue;
   dbus_message_iter_get_basic(iter, &stringValue);
   *message = stringValue;
-  LOG4CXX_DEBUG(logger_, "DBus: message of response " << message);
+  LOG4CXX_DEBUG(logger_, "DBus: message of response " << *message);
 
   dbus_message_iter_next(iter);
   return true;
