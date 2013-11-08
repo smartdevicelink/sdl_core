@@ -55,7 +55,6 @@ GeneralView {
             console.debug("send error")
             DBus.sendError(dataContainer.scrollableMessageModel.async, Common.Result.ABORTED)
             console.debug("exit")
-            return
         } else {
             console.debug("send ok")
             DBus.sendReply(dataContainer.scrollableMessageModel.async, {})
@@ -151,6 +150,11 @@ GeneralView {
                             sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
                                                      Common.ButtonPressMode.SHORT,
                                                      buttonId);
+                            switch (action) {
+                            case Common.SystemAction.KEEP_CONTEXT: timer.restart(); break;
+                            case Common.SystemAction.STEAL_FOCUS: break;
+                            case Common.SystemAction.DEFAULT_ACTION: complete(true); break;
+                            }
                         }
                         onPressAndHold: {
                             console.debug("scrollableMessageView.onPressAndHold");
@@ -158,10 +162,7 @@ GeneralView {
                                                      Common.ButtonPressMode.LONG,
                                                      buttonId);
                         }
-
-                        // TODO(KKolodiy): System action doesn't work in WebHMI
                     }
-
                 }
             }
         }
@@ -215,7 +216,7 @@ GeneralView {
                 anchors.centerIn: parent
                 onClicked: {
                     console.debug("enter")
-                    scrollableMessageView.complete(true)
+                    complete(true)
                     console.debug("exit")
                 }
             }
