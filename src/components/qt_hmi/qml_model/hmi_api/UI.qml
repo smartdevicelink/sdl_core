@@ -220,7 +220,7 @@ Item {
             vrHelpPopup.title = vrHelpTitle
         }
         dataContainer.setVrHelp(vrHelp)
-        vrHelpPopup.activate()
+        vrHelpPopup.show()
         console.debug("exit")
     }
 

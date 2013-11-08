@@ -48,7 +48,7 @@ GeneralView {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false
 
-        dataContainer.systemContext = dataContainer.systemSavedContext
+        dataContainer.popups--
         dataContainer.applicationContext = dataContainer.applicationSavedContext
 
         if(abort) {
@@ -72,8 +72,7 @@ GeneralView {
             if (status == Component.Ready) {
                 console.debug("enter")
                 console.debug("timeout in timer", timer.interval)
-                dataContainer.systemSavedContext = dataContainer.systemContext
-                dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+                dataContainer.popups++
                 dataContainer.applicationSavedContext = dataContainer.applicationContext
                 dataContainer.scrollableMessageModel.running = true
                 timer.start()

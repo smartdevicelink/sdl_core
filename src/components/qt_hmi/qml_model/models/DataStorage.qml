@@ -169,7 +169,6 @@ QtObject {
     property int hmiContext
     property bool applicationContext: false
 
-    property int systemSavedContext
     property bool applicationSavedContext
 
     property string route_text: ""
@@ -467,7 +466,7 @@ QtObject {
                     systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
                 }
                 else {
-                    systemContext = Common.SystemContext.SYSCTXT_MAIN // TODO (nvaganov@luxoft.com) MENU
+                    systemContext = contentLoader.item.systemContext
                 }
             }
         }
