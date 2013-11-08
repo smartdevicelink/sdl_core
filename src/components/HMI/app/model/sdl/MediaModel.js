@@ -89,7 +89,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                         "softButtonID" : 1
                     },
                     {
-                        "text" : "Options",
+                        "text" : "Custom button",
                         "isHighlighted" : false,
                         "softButtonID" : 2
                     },

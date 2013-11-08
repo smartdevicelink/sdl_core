@@ -29,29 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+
+#include "application_manager/commands/hmi/tts_get_capabilities_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
+TTSGetCapabilitiesRequest::TTSGetCapabilitiesRequest(
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
-NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
+TTSGetCapabilitiesRequest::~TTSGetCapabilitiesRequest() {
 }
 
-void NaviShowConstantTBTResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
+void TTSGetCapabilitiesRequest::Run() {
+  LOG4CXX_INFO(logger_, "TTSGetCapabilitiesRequest::Run");
 
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
-  event.set_smart_object(*message_);
-  event.raise();
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

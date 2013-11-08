@@ -29,7 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
+
+#include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
@@ -37,21 +38,26 @@ namespace application_manager {
 
 namespace commands {
 
-NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
+namespace hmi {
+
+OnUIResetTimeoutNotification::OnUIResetTimeoutNotification(
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
-NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
+OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
 }
 
-void NaviShowConstantTBTResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
+void OnUIResetTimeoutNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnUIResetTimeoutNotification::Run");
 
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
+  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*message_);
   event.raise();
 }
 
+}  // namespace hmi
+
 }  // namespace commands
 
 }  // namespace application_manager
+

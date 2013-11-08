@@ -61,7 +61,21 @@ class SpeakRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
  private:
+  /*
+   * @brief Sends Speak response to mobile side
+   *
+   * @param message which should send to mobile side
+   *
+   */
+  void ProcessTTSSpeakResponse(const smart_objects::SmartObject& message);
   DISALLOW_COPY_AND_ASSIGN(SpeakRequest);
 };
 

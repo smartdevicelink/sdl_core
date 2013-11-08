@@ -35,7 +35,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     elementId: 'baseNavigation',
 
     classNameBindings: [
-        'SDL.States.media.mediaNavigation.baseNavigation.active:active_state:inactive_state'
+        'SDL.States.media.sdlmedia.mediaNavigation.baseNavigation.active:active_state:inactive_state'
     ],
 
     childViews: [
@@ -44,7 +44,8 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         'mainField3',
         'mainField4',
         'mainField5',
-        'mainField6'
+        'mainField6',
+        'optionsBtn'
     ],
 
     mainField1: null,
@@ -156,6 +157,13 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         classNames: 'mainField6 mainField',
 
         contentBinding: 'parentView.mainField6'
+    }),
+
+    optionsBtn: SDL.Button.extend({
+        classNames: 'naviOptionsBtn',
+        text : "Options",
+        action: 'openCommandsList',
+        target: 'SDL.SDLAppController'
     })
 
 });

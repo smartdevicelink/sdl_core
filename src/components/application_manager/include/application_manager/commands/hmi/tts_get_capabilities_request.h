@@ -29,29 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_CAPABILITIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_CAPABILITIES_REQUEST_H_
+
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+/**
+ * @brief TTSGetCapabilitiesRequest command class
+ **/
+class TTSGetCapabilitiesRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief TTSGetCapabilitiesRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit TTSGetCapabilitiesRequest(const MessageSharedPtr& message);
 
-NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
-}
+  /**
+   * @brief TTSGetCapabilitiesRequest class destructor
+   **/
+  virtual ~TTSGetCapabilitiesRequest();
 
-void NaviShowConstantTBTResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
-  event.set_smart_object(*message_);
-  event.raise();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TTSGetCapabilitiesRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_GET_CAPABILITIES_REQUEST_H_

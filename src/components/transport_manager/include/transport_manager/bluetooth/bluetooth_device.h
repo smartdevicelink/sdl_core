@@ -44,7 +44,6 @@
 #include <bluetooth/rfcomm.h>
 
 #include <vector>
-#include <map>
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/device.h"
@@ -56,11 +55,6 @@ namespace transport_adapter {
  * @brief Type definition for vector that holds uint8_t variables.
  */
 typedef std::vector<uint8_t> RfcommChannelVector;
-
-/**
- * @brief Type definition for map that holds pair <Handle of application, RF value>.
- */
-typedef std::map<ApplicationHandle, uint8_t> RfcommChannels;
 
 /**
  * @brief Information about device that use bluetooth transport.
@@ -125,9 +119,7 @@ class BluetoothDevice : public Device {
   /**
    * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
    **/
-  RfcommChannels rfcomm_channels_;
-
-  ApplicationHandle next_application_handle_;
+  RfcommChannelVector rfcomm_channels_;
 };
 
 }  // namespace transport_adapter

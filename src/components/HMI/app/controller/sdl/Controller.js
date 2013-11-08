@@ -144,6 +144,14 @@ SDL.SDLController = Em.Object
                 }
             }
         },
+
+        /**
+         * SDL notification call function
+         * to notify that SDL Core should reset timeout for some method
+         */
+        onResetTimeout: function (appID, methodName) {
+            FFW.UI.onResetTimeout(appID, methodName);
+        },
         /**
          * Action to show Voice Recognition PopUp
          */

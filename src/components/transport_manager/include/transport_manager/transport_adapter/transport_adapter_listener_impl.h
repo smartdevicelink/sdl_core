@@ -82,9 +82,10 @@ class TransportAdapterListenerImpl :
    * @brief Constructor.
    *
    * @param tm Pointer to the transport manager implementation class.
+   * @param ta Pointer to the transport adapter associated with listener.
    */
-  explicit TransportAdapterListenerImpl(
-      transport_manager::TransportManagerImpl *tm);
+  TransportAdapterListenerImpl(
+      transport_manager::TransportManagerImpl *tm, TransportAdapterSptr ta);
 
   /**
    * @brief Dectructor.
@@ -278,24 +279,13 @@ class TransportAdapterListenerImpl :
       const transport_adapter::TransportAdapter* transport_adapter,
       const DeviceUID& device, const ApplicationHandle& app_id);
 
-  /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available.
-   *
-   * @param transport_adapter Pointer to the device adapter.
-   * @param it Iterator to container(vector) that holds smart pointers to the device adapters.
-   *
-   * @return true - smart pointer to the device adapter in the container.
-   * false - smart pointer to the device adapter not in the container.
-   */
-  inline bool FindSharedPtr(const TransportAdapter* transport_adapter,
-                            AdapterIterator &it);
-
  private:
   /**
    * \brief For logging.
    */
   static log4cxx::LoggerPtr logger_;
   TransportManagerImpl *transport_manager_impl_;
+  TransportAdapterSptr transport_adapter_;
 
 };
 }  // namespace transport_manager

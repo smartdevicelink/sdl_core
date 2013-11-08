@@ -583,6 +583,27 @@ FFW.UI = FFW.RPCObserver.create({
     },
 
     /**
+     * Notification method to send touch event data to SDLCore
+     *
+     * @param {Number} appID
+     * @param {String} methodName
+     */
+    onResetTimeout: function (appID, methodName) {
+
+        Em.Logger.log("FFW.UI.OnResetTimeout");
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "UI.OnResetTimeout",
+            "params": {
+                "methodName": methodName,
+                "appID": appID
+            }
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
      * send notification when command was triggered
      *
      * @param {Number}

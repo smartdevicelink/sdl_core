@@ -53,16 +53,27 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
+  Application* active_app = ApplicationManagerImpl::instance()
+  ->active_application();
+  if (NULL == active_app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
   const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
                               .asUInt();
 
   // Check if this is one of standart VR commands (i.e. "Help")
   unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
   if (cmd_id > max_cmd_id) {
-    if (max_cmd_id + 1 == cmd_id) {
-      Application* active_app = ApplicationManagerImpl::instance()
-                                ->active_application();
+    if (max_cmd_id + 1 == cmd_id &&
+        0 == active_app->is_perform_interaction_active()) {
       MessageHelper::SendShowVrHelpToHMI(active_app);
+    } else if (max_cmd_id + 1 == cmd_id &&
+        0 != active_app->is_perform_interaction_active()) {
+      event_engine::Event event(hmi_apis::FunctionID::UI_ShowVrHelp);
+      event.set_smart_object(*message_);
+      event.raise();
     } else {
       Application* app = ApplicationManagerImpl::instance()->application(
                            cmd_id - max_cmd_id);
@@ -73,15 +84,14 @@ void OnVRCommandNotification::Run() {
     }
     return;
   }
-
   const unsigned int app_id = (*message_)[strings::msg_params][strings::app_id]
-                              .asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
-
-  if (NULL == app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
+                                  .asUInt();
+  Application* app = ApplicationManagerImpl::instance()
+    ->application(app_id);
+    if (NULL == app) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
   /* check if perform interaction is active
    * if it is active we should sent to HMI DeleteCommand request
    * and PerformInterActionResponse to mobile

@@ -29,29 +29,48 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+namespace hmi {
 
-NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
-}
+/**
+ * @brief OnUIResetTimeoutNotification command class
+ **/
+class OnUIResetTimeoutNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnUIResetTimeoutNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnUIResetTimeoutNotification(const MessageSharedPtr& message);
 
-void NaviShowConstantTBTResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviShowConstantTBTResponse::Run");
+  /**
+   * @brief OnUIResetTimeoutNotification class destructor
+   **/
+  virtual ~OnUIResetTimeoutNotification();
 
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
-  event.set_smart_object(*message_);
-  event.raise();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
+};
+
+}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_

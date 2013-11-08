@@ -36,6 +36,7 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_chaining.h"
 #include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
@@ -353,7 +354,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     message[strings::msg_params][strings::sync_msg_version]
     [strings::minor_version].asInt();
 
-  if (min_version < APIVersion::kAPIV2) {
+  /*if (min_version < APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -363,14 +364,14 @@ Application* ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     delete application;
     return NULL;
-  }
+  }*/
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int max_version =
     message[strings::msg_params][strings::sync_msg_version]
     [strings::major_version].asInt();
 
-  if (max_version > APIVersion::kAPIV2) {
+  /*if (max_version > APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -380,7 +381,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     delete application;
     return NULL;
-  }
+  }*/
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
@@ -865,6 +866,10 @@ void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::TTS_GetSupportedLanguages));
     ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetCapabilities));
+    ManageHMICommand(get_capabilities);
   }
 }
 
@@ -1501,6 +1506,27 @@ bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
                "HMICapabilities::IsHMICapabilitiesInitialized() " << result);
 
   return result;
+}
+
+void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {
+  notification_list_.push_back(ptr);
+}
+
+void ApplicationManagerImpl::removeNotification(const CommandSharedPtr& ptr) {
+  std::list<CommandSharedPtr>::iterator it = notification_list_.begin();
+  for (; notification_list_.end() != it; ++it) {
+    if (*it == ptr) {
+      notification_list_.erase(it);
+      break;
+    }
+  }
+}
+
+void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
+    unsigned int mobile_correlation_id,
+    unsigned int new_timeout_value) {
+  request_ctrl.updateRequestTimeout(connection_key, mobile_correlation_id,
+                                    new_timeout_value);
 }
 
 }  // namespace application_manager

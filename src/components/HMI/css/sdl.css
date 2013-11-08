@@ -720,6 +720,20 @@
 	overflow: hidden;
 }
 
+#baseNavigation .naviOptionsBtn{
+    border: 1px solid #393939;
+    border-radius: 3px;
+    height: 42px;
+    line-height: 42px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    top: 283px;
+    right: 6px;
+    width: 105px;
+    position: absolute;
+}
+
 #AlertManeuverPopUp .closeButton {
 	width: 170px;
 	top: 180px;
