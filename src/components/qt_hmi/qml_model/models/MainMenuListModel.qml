@@ -54,6 +54,12 @@ ListModel
     }
 
     ListElement {
+        name: "Preferences"
+        icon: "../res/gear.png"
+        qml: ""
+    }
+
+    ListElement {
         name: "Apps"
         icon: "../res/apps.png"
         qml: "./views/ApplicationListView.qml"
@@ -69,11 +75,5 @@ ListModel
         name: "Car"
         icon: "../res/car.png"
         qml: "./views/CarMenuGridView.qml"
-    }
-
-    ListElement {
-        name: "Preferences"
-        icon: "../res/gear.png"
-        qml: ""
     }
 }
