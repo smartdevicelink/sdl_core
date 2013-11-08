@@ -81,8 +81,18 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
+
+  // members
   sync_primitives::SynchronisationPrimitives synchronisation_;
   sync_primitives::Timer* timer_;
+
+  /*
+   * @brief Checks Current application name with ttsNames and
+   * vrSynonyms of already registered applications
+   *
+   * return TRUE if Application name unique, otherwise FALSE
+  */
+  bool checkAppName();
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
