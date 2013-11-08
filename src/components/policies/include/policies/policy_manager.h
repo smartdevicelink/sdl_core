@@ -35,11 +35,13 @@
 #ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
 
+#include "interfaces/MOBILE_API.h"
 #include "policies/policy_configuration.h"
 #include "policies/policy_table.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 #include "utils/logger.h"
+
 
 namespace NsSmartDeviceLink {
 namespace policies {
@@ -122,11 +124,13 @@ class PolicyManager {
      *
      * @param app_id  Application identifier
      * @param rpc     Remote procedure call
+     * @param status  HMI level status
      *
      * @return result of check permission
      */
     CheckPermissionResult::eType checkPermission(uint32_t app_id,
-        const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc);
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
+        mobile_apis::HMILevel::eType status);
 
     /**
      * @brief Store policy table to filesystem

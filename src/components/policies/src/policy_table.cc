@@ -43,17 +43,20 @@ namespace formatters_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 //---------------------------------------------------------------------------
 
-policies_ns::PolicyTable::PolicyTable(const std::string policy_table_string,
-				       PTType::eType pt_type)
+policies_ns::PolicyTable::PolicyTable(
+    const std::string policy_table_string, PTType::eType pt_type)
   : is_PT_valid_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
   , schema_(policies_ns::PolicyTableSchema::Create())
   , pt_smart_object_()
   , pt_default_smart_object_() {
-     if (false == formatters_ns::GenericJsonFormatter::FromString(
-	  policy_table_string, pt_smart_object_)) {
-       is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
-     }
+
+  if (false == formatters_ns::GenericJsonFormatter::FromString(
+      policy_table_string, pt_smart_object_)) {
+    is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
+  } else {
+    
+  } 
 }
 
 //---------------------------------------------------------------------------
@@ -79,27 +82,26 @@ const std::string policies_ns::PolicyTable::AsString() {
 
 //---------------------------------------------------------------------------
 
-void policies_ns::PolicyTable::SetSchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema) {
-  schema_ = schema;
-}
-
-//---------------------------------------------------------------------------
-
 policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
   //TODO: distinct between PT and Preload PolicyTable types (use pt_type_)
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_PT_valid_) {
     return is_PT_valid_;
   }
-  
+
   if (so_ns::Errors::OK == schema_.validate(pt_smart_object_)) {
     is_PT_valid_ = PTValidationResult::VALIDATION_OK;
     return is_PT_valid_;
   } 
-  
+
   is_PT_valid_ = PTValidationResult::VALIDATION_FAILED;
-    
   return is_PT_valid_;
+}
+
+//---------------------------------------------------------------------------
+
+bool policies_ns::PolicyTable::IsPTPreload() {
+  // evaluate 'preloaded_pt' in 'module_config'
+  return false;
 }
 
 //---------------------------------------------------------------------------

@@ -7,9 +7,9 @@
                         "http://applinkqa.trafficmanager.net/api/policies"
                    ]
                 }
-            }
-        },
-        "preloaded_pt":"true",
+            },
+            "preloaded_pt":"true",
+        },        
         "functional_groupings":{
             "Base-4":{ //FIELD IS OPTIONAL
                 "rpcs":{

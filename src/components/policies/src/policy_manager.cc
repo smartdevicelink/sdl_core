@@ -45,7 +45,7 @@ log4cxx::LoggerPtr policies_ns::PolicyManager::logger_ = log4cxx::LoggerPtr(
 //---------------------------------------------------------------
 
 policies_ns::PolicyManager::PolicyManager(
-  const PolicyConfiguration& policy_config)
+    const PolicyConfiguration& policy_config)
   : policy_config_(policy_config)
   , policy_table_(0) {
 }
@@ -54,6 +54,10 @@ policies_ns::PolicyManager::PolicyManager(
 
 policies_ns::PolicyManager::~PolicyManager() {
   StorePolicyTable();
+  if (0 != policy_table_) {
+    delete policy_table_;
+    policy_table_ = 0;
+  }
 }
 
 //---------------------------------------------------------------
@@ -72,17 +76,17 @@ policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
               policies_ns::PTType::TYPE_PT);
       init_result = InitResult::INIT_OK;
     } else {
-      LOG4CXX_WARN(logger_,
-      "Can't read policy table file " << policy_config_.getPTFileName());
-      if (true == file_system::ReadFile(policy_config_.getPreloadPTFileName(),
-                                    pt_string)) {
+      LOG4CXX_WARN(logger_, "Can't read policy table file "
+          << policy_config_.getPTFileName());
+      if (true == file_system::ReadFile(
+          policy_config_.getPreloadPTFileName(), pt_string)) {
         policy_table_ = new policies_ns::PolicyTable(
             pt_string, policies_ns::PTType::TYPE_PRELOAD);
         init_result = InitResult::INIT_OK_PRELOAD;
       } else {
-      init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
-      LOG4CXX_ERROR(logger_, "Can't read Preload policy table file "
-          << policy_config_.getPreloadPTFileName());
+        init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
+        LOG4CXX_ERROR(logger_, "Can't read Preload policy table file "
+            << policy_config_.getPreloadPTFileName());
       }
     }
   } else {
@@ -96,8 +100,18 @@ policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
 
 policies_ns::CheckPermissionResult::eType
   policies_ns::PolicyManager::checkPermission(
-    uint32_t app_id, const so_ns::SmartObject& rpc) {
-  return policies_ns::CheckPermissionResult::PERMISSION_OK_ALLOWED;
+    uint32_t app_id, const so_ns::SmartObject& rpc,
+    mobile_apis::HMILevel::eType status) {
+
+  PolicyTable* policy_table = getPolicyTable();
+  if (0 != policy_table
+      && PTValidationResult::VALIDATION_OK == policy_table->Validate()) {
+     so_ns::SmartObject pt_object = policy_table->AsSmartObject();
+  } else {
+    return CheckPermissionResult::PERMISSION_NOK_PT_VERIFICATION_FAILED;
+  }
+  
+  return CheckPermissionResult::PERMISSION_OK_ALLOWED;
 }
 
 //---------------------------------------------------------------
@@ -109,8 +123,8 @@ void policies_ns::PolicyManager::StorePolicyTable() {
       const std::vector<unsigned char> char_vector_pdata(
           pt_string.begin(), pt_string.end());
       if (false == file_system::Write(
-        policy_config_.getPTFileName(), char_vector_pdata)) {
-          LOG4CXX_ERROR(logger_, "Can't write policy table file "
+          policy_config_.getPTFileName(), char_vector_pdata)) {
+        LOG4CXX_ERROR(logger_, "Can't write policy table file "
             << policy_config_.getPTFileName());
       }
     }

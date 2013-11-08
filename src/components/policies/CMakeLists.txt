@@ -5,6 +5,7 @@ include_directories (
   ../smart_objects/include/
   ../formatters/include/
   ../../thirdPartyLibs/jsoncpp/include/
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES

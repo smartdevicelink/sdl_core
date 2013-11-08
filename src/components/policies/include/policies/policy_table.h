@@ -88,13 +88,6 @@ class PolicyTable {
     const std::string AsString();
 
     /**
-     * @brief  Set schema for policy table
-     * 
-     * @param schema Smart schema to set
-     */
-    void SetSchema(NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema);
-
-    /**
     * @brief Validate policy table.
     *
     * Validates policy table against smart schema which should be set before.
@@ -102,6 +95,13 @@ class PolicyTable {
     * @return validation result as enum
     **/
     PTValidationResult::eType Validate();
+
+    /**
+    * @brief Tells wether Policy Table is Preload
+    *
+    * @return whether Policy Table Preload
+    */
+    bool IsPTPreload();
 
   private:
 
