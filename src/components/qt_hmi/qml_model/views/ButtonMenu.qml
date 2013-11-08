@@ -148,6 +148,7 @@ GeneralView {
         space: 10
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+        anchors.topMargin: Constants.margin
 
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
         activePage: Internal.activePageChoose(flicker, pager.pages)

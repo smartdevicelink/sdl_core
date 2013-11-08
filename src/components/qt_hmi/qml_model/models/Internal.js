@@ -63,6 +63,14 @@ var MediaClockRunningMode = {
     MCR_STOPPED: 1
 }
 
+function getArrayForPresetRow() {
+    var array = []
+    for (var i = 0; i < dataContainer.currentApplication.customPresets.count; i++) {
+        array.push(dataContainer.currentApplication.customPresets.get(i).text)
+    }
+    return array
+}
+
 function pad (string, length, lead) {
     if (!lead) {
         lead = '0'

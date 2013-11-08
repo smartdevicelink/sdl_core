@@ -76,6 +76,9 @@ void ResetGlobalPropertiesRequest::Run() {
   bool timeout_promt = false;
   bool vr_help_title = false;
   bool vr_help_items = false;
+  bool menu_name = false;
+  bool menu_icon = false;
+  bool is_key_board_properties = false;
 
   for (size_t i = 0; i < obj_length; ++i) {
     switch ((*message_)[strings::msg_params][strings::properties][i].asInt()) {
@@ -95,12 +98,23 @@ void ResetGlobalPropertiesRequest::Run() {
         vr_help_items = ResetVrHelpItems(app);
         break;
       }
+      case mobile_apis::GlobalProperty::MENUNAME: {
+        menu_name = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUICON: {
+        menu_icon = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
+        is_key_board_properties = true;
+        break;
+      }
       default: {
         LOG4CXX_ERROR(
           logger_,
           "Unknown global property 0x%02X value"
-          << (*message_)[strings::msg_params][strings::properties][i]
-          .asInt());
+          << (*message_)[strings::msg_params][strings::properties][i].asInt());
         break;
       }
     }
@@ -109,7 +123,8 @@ void ResetGlobalPropertiesRequest::Run() {
   app->set_reset_global_properties_active(true);
 
   unsigned int chaining_counter = 0;
-  if (vr_help_title || vr_help_items) {
+  if (vr_help_title || vr_help_items || menu_name || menu_icon
+      || is_key_board_properties) {
     ++chaining_counter;
   }
 
@@ -117,15 +132,40 @@ void ResetGlobalPropertiesRequest::Run() {
     ++chaining_counter;
   }
 
-  if (vr_help_title || vr_help_items) {
+  if (vr_help_title || vr_help_items || menu_name || menu_icon
+      || is_key_board_properties) {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
-    smart_objects::SmartObject* vr_help = MessageHelper::CreateAppVrHelp(app);
-    if (!vr_help) {
-      return;
+    if (vr_help_title || vr_help_items) {
+      smart_objects::SmartObject* vr_help = MessageHelper::CreateAppVrHelp(app);
+      if (!vr_help) {
+        return;
+      }
+      msg_params = *vr_help;
     }
-    msg_params = *vr_help;
+    if (menu_name) {
+      msg_params[hmi_request::menu_title] = "";
+    }
+    //TODO(DT): clarify the sending parameter menuIcon
+    //if (menu_icon) {
+    //}
+    if (is_key_board_properties) {
+      smart_objects::SmartObject key_board_properties = smart_objects::
+          SmartObject(smart_objects::SmartType_Map);
+      key_board_properties[strings::language] = hmi_apis::
+          Common_Language::EN_US;
+      key_board_properties[hmi_request::keyboard_layout] = hmi_apis::
+          Common_KeyboardLayout::QWERTY;
+      key_board_properties[hmi_request::send_dynamic_entry] = false;
+      smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(
+              smart_objects::SmartType_Array);
+      limited_character_list[0] = "";
+      key_board_properties[hmi_request::limited_character_list] =
+          limited_character_list;
+      key_board_properties[hmi_request::auto_complete_text] = "";
+      msg_params[hmi_request::keyboard_properties] = key_board_properties;
+    }
 
     msg_params[strings::app_id] = app->app_id();
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,

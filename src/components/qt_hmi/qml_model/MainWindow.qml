@@ -49,7 +49,7 @@ import "models/Internal.js" as Internal
 Rectangle {
     width: 1280
     height: 768
-    property string startQml: "./views/AMPlayerView.qml"
+    property string startQml: "./views/ApplicationListView.qml"
     property int minWidth: Constants.mainScreenMinWidth
     property int minHeight: Constants.mainScreenMiHeight
     color: Constants.secondaryColor
@@ -100,18 +100,23 @@ Rectangle {
         }
 
         Item {
-            anchors.leftMargin: Constants.margin
-            anchors.rightMargin: Constants.margin
-            anchors.bottomMargin: Constants.margin
-            anchors.fill: parent
+            height: parent.height * 0.90
+            width: parent.width
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
 
             Loader {
                 id: contentLoader
+                height: parent.height - Constants.margin
+                width: parent.width - 2 * Constants.margin
                 asynchronous: true
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
-                height: parent.height * 0.75
-                width: parent.width
+                anchors.leftMargin: Constants.margin
+                anchors.rightMargin: Constants.margin
+                anchors.bottomMargin: Constants.margin
+
+
                 source:startQml
                 property var viewTransitionStack : []
 
@@ -266,8 +271,7 @@ Rectangle {
                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                 isMediaApplication: application.isMediaApplication,
                 appType: application.appType,
-                hmiUIText: {
-                },
+                hmiUIText: { },
                 mediaClock: {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                     "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,

@@ -46,7 +46,8 @@ namespace commands {
 
 OnSyncPDataNotification::OnSyncPDataNotification(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+ : CommandResponseImpl(message),
+   timer_(this, &OnSyncPDataNotification::onTimer) {
 }
 
 OnSyncPDataNotification::~OnSyncPDataNotification() {
@@ -63,20 +64,39 @@ void OnSyncPDataNotification::Run() {
     (*message_)[strings::msg_params][strings::result_code] =
         mobile_apis::Result::FILE_NOT_FOUND;
 
-    SendResponse(false);
     LOG4CXX_ERROR(logger_, "File not found");
+    SendResponse(false);
     return;
   }
 
+  const char* timeout = mobile_notification::syncp_timeout;
+  if ((*message_)[strings::msg_params].keyExists(timeout)) {
+    ApplicationManagerImpl::instance()->addNotification(this);
+    timer_.start((*message_)[strings::msg_params][timeout].asInt());
+  } else {
+    SendPData();
+  }
+}
+
+void OnSyncPDataNotification::onTimer() {
+  LOG4CXX_INFO(logger_, "OnSyncPDataNotification::onTimer");
+
+  SendPData();
+}
+
+void OnSyncPDataNotification::SendPData() {
+  LOG4CXX_INFO(logger_, "OnSyncPDataNotification::SendPData");
+
+  const std::string fileName =
+      (*message_)[strings::params][hmi_notification::file_name].asString();
+
   std::vector<unsigned char> pData;
-
   file_system::ReadBinaryFile(fileName, pData);
-
   const std::string string_pdata = std::string(pData.begin(), pData.end());
-
   (*message_)[strings::params][strings::data] = string_pdata;
 
   SendResponse(true);
+  ApplicationManagerImpl::instance()->removeNotification(this);
 }
 
 }  // namespace commands

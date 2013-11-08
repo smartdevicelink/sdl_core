@@ -99,12 +99,15 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
     },
 
     dataChange: function(){
-        var self = this;
+        if (this.timeout){
+            var self = this;
 
-        clearTimeout(this.timer);
-        this.timer = setTimeout(function () {
-            self.deactivate(true);
-        }, this.timeout);
+            clearTimeout(this.timer);
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.Slider");
+            this.timer = setTimeout(function () {
+                self.deactivate(true);
+            }, this.timeout);
+        }
     }.observes('this.adjustControl.sliderValue.value'),
 
     adjustControl: Em.ContainerView.extend( {

@@ -63,7 +63,7 @@ bool CommandRequestImpl::CleanUp() {
 void CommandRequestImpl::Run() {
 }
 
-void CommandRequestImpl::onTimeOut() const {
+void CommandRequestImpl::onTimeOut() {
   LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
   smart_objects::SmartObject* response =

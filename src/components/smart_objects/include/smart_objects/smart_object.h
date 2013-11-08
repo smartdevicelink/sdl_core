@@ -474,6 +474,13 @@ class SmartObject {
   SmartBinary asBinary() const;
 
   /**
+   * @brief Returns current object converted to array
+   *
+   * @return SmartArray
+   **/
+  SmartArray* asArray() const;
+
+  /**
    * @brief Assignment operator for type: binary
    *
    * @param  NewValue New object value

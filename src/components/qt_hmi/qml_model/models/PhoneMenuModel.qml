@@ -51,13 +51,13 @@ ListModel
         qml: ""
     }
     ListElement {
-        name: "texts"
-        icon: "../res/phone/texts.png"
+        name: "DND"
+        icon: "../res/phone/dnd_off.png"
         qml: ""
     }
     ListElement {
-        name: "DND"
-        icon: "../res/phone/dnd_off.png"
+        name: "texts"
+        icon: "../res/phone/texts.png"
         qml: ""
     }
     ListElement {

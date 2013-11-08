@@ -66,7 +66,7 @@ class CommandRequestImpl : public CommandImpl,
    * has exceed it's limit
    *
    */
-  virtual void onTimeOut() const;
+  virtual void onTimeOut();
 
   /**
    * @brief Default EvenObserver's pure virtual method implementation

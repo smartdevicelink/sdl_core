@@ -51,12 +51,6 @@ void TTSSpeakResponse::Run() {
   event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*message_);
   event.raise();
-
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SpeakID;
-
-  //TODO(VS): Should be removed after we will shift to Event engine usage completely
-  SendResponseToMobile(message_);
 }
 
 }  // namespace commands

@@ -83,7 +83,9 @@ void SetIconRequest::Run() {
   msg_params[strings::sync_file_name] = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  msg_params[strings::sync_file_name][strings::value] = full_file_path;
+  const std::string full_file_path_for_hmi = file_system::ConvertPathForURL(full_file_path);
+
+  msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi;
 
   msg_params[strings::sync_file_name][strings::image_type] = ImageType::DYNAMIC;
 

@@ -8,3 +8,4 @@
 --i"/usr/include"
 --i"/usr/include/gstreamer-1.0"
 --i"/usr/include/glib-2.0"
+--i"/usr/lib/i386-linux-gnu/glib-2.0/include"

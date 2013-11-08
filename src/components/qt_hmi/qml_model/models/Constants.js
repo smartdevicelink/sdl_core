@@ -82,7 +82,7 @@ var titleFontSize = 45
 var powerButtonFornSize = 25
 
 // Offset from the edges of the screen.
-var margin = 30
+var margin = 20
 
 // Offset from the edges of the popup
 var popupMargin = 15
@@ -99,6 +99,9 @@ var animationDuration = 500
 
 // Duration of appearence of "OK" button at warning screen view, when HMI starts.
 var warningScreenDuration = 1000
+
+// Timer to check how long preset button is pressed.
+var presetButtonTimer = 400
 
 // Width for long oval button
 var longOvalButtonWidth = 163

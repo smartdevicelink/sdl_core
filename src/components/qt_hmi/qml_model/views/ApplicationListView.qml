@@ -11,21 +11,11 @@ GeneralView {
             height: 1/4 * parent.height
 
             PagedFlickable {
+                anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
                 snapTo: 200 + spacing
                 spacing: (width - 600) / 2
-                LongOvalButton {
-                    width: 200
-                    text: "Vehicle Health Report"
-                }
-                LongOvalButton {
-                    width: 200
-                    text: "911 Assist"
-                }
-                LongOvalButton {
-                    width: 200
-                    text: "Install applications/Up"
-                }
+
                 LongOvalButton {
                     width: 200
                     text: "Find New Apps"
@@ -34,6 +24,18 @@ GeneralView {
                     width: 200
                     text: "Change device"
                     dest: "./views/ChangeDeviceView.qml"
+                }
+                LongOvalButton {
+                    width: 200
+                    text: "911 Assist"
+                }
+                LongOvalButton {
+                    width: 200
+                    text: "Vehicle Health Report"
+                }
+                LongOvalButton {
+                    width: 200
+                    text: "Install applications/Up"
                 }
             }
         }

@@ -41,13 +41,23 @@ import os.path
 from sys import argv
 from xml.etree import ElementTree
 from copy import copy
-from ford_xml_parser import FordXmlParser
+from ford_xml_parser import FordXmlParser, ParamDesc
+from code_formatter import CodeBlock
+
+def defaultValue(param):
+    if param.type == "Integer":
+        return "0"
+    elif param.type == "Float":
+        return "0.0"
+    elif param.type == "Boolean":
+        return "false"
+    elif param.enum:
+        return "0"
 
 class Impl(FordXmlParser):
     def make_dbus_type_declarations(self, out):
         for struct in self.structs.items():
             self.write_struct_declaration(struct, out)
-
 
     def make_dbus_metatype_declarations(self, out):
         for struct in self.structs.items():
@@ -55,20 +65,18 @@ class Impl(FordXmlParser):
 
 
     def write_struct_declaration(self, ((iface, name), params), out):
-        struct_name = iface + '_' + name
-        out.write("struct " + struct_name + " {\n")
-        for param in params:
-            out.write("  " + self.qt_param_type(param) + " " + param.name + ";\n")
-        out.write("  %s()" % struct_name)
-        firstParam = True
-        for param in params:
-            if param.type == "Boolean":
-                if firstParam:
-                    firstParam = False
-                    out.write("    : %s(false)" % param.name)
-                else:
-                    out.write(",\n    %s(false)" % param.name)
-        out.write(" { }\n")
+        struct_name = "{0}_{1}".format(iface, name)
+        out.write("struct {0} {{\n".format(struct_name))
+        with CodeBlock(out) as out:
+            for param in params:
+                out.write("{0} {1};\n".format(self.qt_param_type(param), param.name))
+            out.write("{0}()\n".format(struct_name))
+            initializersList = map(lambda x: "{0}({1})".format(x.name, defaultValue(x)), [p for p in params if p.type != "String" and not p.struct and not p.array])
+            if initializersList:
+                out.write(": " + ",\n    ".join(initializersList))
+
+            out.write("{ }\n")
+
         out.write("};\n")
         out.write('QDBusArgument& operator << (QDBusArgument&, const ' + struct_name + "&);\n")
         out.write('const QDBusArgument& operator >> (const QDBusArgument&, ' + struct_name + "&);\n")
@@ -91,86 +99,160 @@ class Impl(FordXmlParser):
     def make_dbus_type_definitions(self, out):
         for struct in self.structs.items():
             self.write_struct_definition(struct, out)
+            self.write_validation_func(struct, out)
 
     def write_struct_definition(self, ((iface, name), params), out):
         struct_name = iface + '_' + name
+        
         out.write('QDBusArgument& operator << (QDBusArgument& arg, const ' + struct_name + "& v) {\n")
-        out.write("  arg.beginStructure();\n")
-        for param in params:
-            out.write("  arg << v." + param.name + ";\n")
-        out.write("  arg.endStructure();\n")
-        out.write("  return arg;\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("arg.beginStructure();\n")
+            for param in params:
+                out.write("arg << v.{0};\n".format(param.name))
+            out.write("arg.endStructure();\n")
+            out.write("return arg;\n")
+        out.write("}\n\n")
 
         out.write('const QDBusArgument& operator >> (const QDBusArgument& arg, ' + struct_name + "& v) {\n")
-        out.write("  arg.beginStructure();\n")
-        for param in params:
-            out.write("  arg >> v." + param.name + ";\n")
-        out.write("  arg.endStructure();\n")
-        out.write("  return arg;\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("arg.beginStructure();\n")
+            for param in params:
+                out.write("arg >> v.{0};\n".format(param.name))
+            out.write("arg.endStructure();\n")
+            out.write("return arg;\n")
+        out.write("}\n\n")
+
         out.write('QVariant ValueToVariant(const ' + struct_name + "& v) {\n")
-        out.write("  QVariantMap map;\n")
-        for param in params:
-            out.write("  PutArgToMap(map, \"" + param.name + "\", v." + param.name + ");\n")
-        out.write("  return QVariant::fromValue(map);\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("QVariantMap map;\n")
+            for param in params:
+                out.write("""PutArgToMap(map, "{0}", v.{0});\n""".format(param.name))
+            out.write("return QVariant::fromValue(map);\n")
+        out.write("}\n\n")
+
         out.write('QVariant ValueToVariant(const QList<' + struct_name + ">& v) {\n")
-        out.write("  QList<QVariant> ret;\n")
-        out.write("  for (QList<" + struct_name + ">::const_iterator i = v.begin(); i != v.end(); ++i) ret.append(ValueToVariant(*i));\n");
-        out.write("  return QVariant::fromValue(ret);\n");
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("QList<QVariant> ret;\n")
+            out.write("for (QList<{0}>::const_iterator i = v.begin(); i != v.end(); ++i)\n".format(struct_name))
+            with CodeBlock(out) as out:
+                out.write("ret.append(ValueToVariant(*i));\n")
+            out.write("return QVariant::fromValue(ret);\n")
+        out.write("}\n\n")
+
         out.write('void PutArgToMap(QVariantMap& map, const char* name, const ' + struct_name + "& v) {\n")
-        out.write("  map.insert(name, ValueToVariant(v));\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("map.insert(name, ValueToVariant(v));\n")
+        out.write("}\n\n")
+
         out.write('bool VariantToValue(const QVariant& variant, ' + struct_name + "& v) {\n")
-        out.write("  if (variant.type() != QVariant::Map) {\n")
-        out.write("    LOG4CXX_ERROR(logger_, \"Input argument isn't map\");\n")
-        out.write("    return false;\n  }\n")
-        out.write("  QVariantMap map = variant.toMap();\n")
-        for param in params:
-            out.write("  if (!GetArgFromMap(map, \"" + param.name + "\", v." + param.name + ")) return false;\n")
-        out.write("  return true;\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("if (variant.type() != QVariant::Map) {\n")
+            with CodeBlock(out) as out:
+                out.write("""LOG4CXX_ERROR(logger_, "Input argument isn't a map");\n""")
+                out.write("return false;\n")
+            out.write("}\n")
+            out.write("QVariantMap map = variant.toMap();\n")
+            for param in params:
+                out.write("if (!GetArgFromMap(map, \"" + param.name + "\", v." + param.name + ")) return false;\n")
+            out.write("return true;\n")
+        out.write("}\n\n")
+
         out.write('bool VariantToValue(const QVariant& variant, QList<' + struct_name + ">& v) {\n")
-        out.write("  if (variant.type() != QVariant::List) {\n")
-        out.write("    LOG4CXX_ERROR(logger_, \"Input argument isn't list\");\n")
-        out.write("    return false;\n  }\n")
-        out.write("  QList<QVariant> list = variant.toList();\n")
-        out.write("  for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {\n");
-        out.write("    " + struct_name + " s;\n");
-        out.write("    if (!VariantToValue(*i, s)) return false;\n");
-        out.write("    v.append(s);\n");
-        out.write("  }\n")
-        out.write("  return true;\n")
-        out.write("}\n")
+        with CodeBlock(out) as out:
+            out.write("if (variant.type() != QVariant::List) {\n")
+            with CodeBlock(out) as out:
+                out.write("""LOG4CXX_ERROR(logger_, "Input argument isn't a list");\n""")
+                out.write("return false;\n")
+            out.write("}\n")
+            out.write("QList<QVariant> list = variant.toList();\n")
+            out.write("for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {\n");
+            with CodeBlock(out) as out:
+                out.write(struct_name + " s;\n");
+                out.write("if (!VariantToValue(*i, s)) return false;\n");
+                out.write("v.append(s);\n");
+            out.write("}\n")
+            out.write("return true;\n")
+        out.write("}\n\n")
+
         out.write('bool GetArgFromMap(const QVariantMap& map, const char* name, ' + struct_name + "& v) {\n")
-        out.write("  QVariantMap::const_iterator it = map.find(name);\n")
-        out.write("  if (map.end() == it) {\n")
-        out.write("    LOG4CXX_WARN(logger_, \"Argument '\" << name << \"' not found\");\n")
-        out.write("    return false;\n  }\n")
-        out.write("  if (it->type() != QVariant::Map) {\n")
-        out.write("    LOG4CXX_ERROR(logger_, \"Argument '\" << name << \"' isn't map\");\n")
-        out.write("    return false;\n  }\n")
-        out.write("  const QVariantMap& inmap = it->toMap();\n")
-        for param in params:
-            out.write("  if (!GetArgFromMap(inmap, \"" + param.name + "\", v." + param.name + ")) return false;\n")
-        out.write("  return true;\n")
-        out.write("}\n")
-        out.write("\n")
-            
+        with CodeBlock(out) as out:
+            out.write("QVariantMap::const_iterator it = map.find(name);\n")
+            out.write("if (map.end() == it) {\n")
+            with CodeBlock(out) as out:
+                out.write("""LOG4CXX_WARN(logger_, "Argument '" << name << "' not found");\n""")
+                out.write("return false;\n")
+            out.write("}\n")
+            out.write("if (it->type() != QVariant::Map) {\n")
+            with CodeBlock(out) as out:
+                out.write("""LOG4CXX_ERROR(logger_, "Argument '" << name << "' isn't a map");\n""")
+                out.write("return false;\n")
+            out.write("}\n")
+            out.write("const QVariantMap& inmap = it->toMap();\n")
+            for param in params:
+                out.write("if (!GetArgFromMap(inmap, \"" + param.name + "\", v." + param.name + ")) return false;\n")
+            out.write("return true;\n")
+        out.write("}\n\n")
+
+    def write_param_validation(self, param, param_name, fail_statement, out, level=0):
+        if not param.mandatory and (param.restricted or param.restrictedArray or (param.struct and any(map(lambda x: x.restricted, self.structs[param.fulltype])))):
+            out.write("if (%s.presence) {\n" % param_name)
+            param_copy = copy(param)
+            param_copy.mandatory = True
+            with CodeBlock(out) as out:
+                self.write_param_validation(param_copy, param_name + ".val", fail_statement, out, level+1)
+            out.write("}\n")
+        elif param.array:
+            if param.minSize > 0:
+                out.write("if ({0}.count() < {1}) {{ {2}; }}\n".format(param_name, param.minSize, fail_statement))
+            if param.maxSize != None:
+                out.write("if ({0}.count() > {1}) {{ {2}; }}\n".format(param_name, param.maxSize, fail_statement))
+            if param.restricted:
+                out.write('for ({0}::const_iterator it_{2} = {1}.begin(); it_{2} != {1}.end(); ++it_{2}) {{\n'.format(self.qt_param_type(param), param_name, level))
+                with CodeBlock(out) as out:
+                    param_copy = copy(param)
+                    param_copy.array = False
+                    self.write_param_validation(param_copy, "(*it_{0})".format(level), fail_statement, out, level+1)
+                out.write("}\n")
+        elif param.struct:
+            for p in self.structs[param.fulltype]:
+                self.write_param_validation(p, "{0}.{1}".format(param_name, p.name), fail_statement, out, level+1)
+        elif param.type == "Integer" or param.type == "Float":
+            conditions = []
+            if (param.minValue != None):
+                conditions.append("(%s < %s)" % (param_name, param.minValue))
+            if (param.maxValue != None):
+                conditions.append("(%s > %s)" % (param_name, param.maxValue))
+            if conditions:
+                out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
+        elif param.type == "String":
+            conditions = []
+            if (param.minLength > 0):
+                conditions.append("(%s.size() < %s)" % (param_name, param.minLength))
+            if (param.maxLength > 0):
+                conditions.append("(%s.size() > %s)" % (param_name, param.maxLength))
+            if conditions:
+                out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
+
+    def write_validation_func(self, ((iface, name), params), out):
+        struct_name = iface + '_' + name
+        out.write("inline bool sanityCheck(const %s& s) {\n" % struct_name)
+        with CodeBlock(out) as out:
+            for param in params:
+                self.write_param_validation(param, "s." + param.name, "return false", out)
+            out.write("return true;\n")
+        out.write("}\n\n");
 
     def qt_param_type(self, param):
         if not param.mandatory:
             param_copy = copy(param)
             param_copy.mandatory = True
-            return "OptionalArgument<" + self.qt_param_type(param_copy) + "> "
+            return "OptionalArgument< " + self.qt_param_type(param_copy) + " >"
         if param.array:
             param_copy = copy(param)
             param_copy.array = False
             if param.type == 'String':
-                return "QStringList "
-            return "QList<" + self.qt_param_type(param_copy) + "> "
+                return "QStringList"
+            return "QList< " + self.qt_param_type(param_copy) + " >"
         if param.type == 'Integer' or param.enum:
             return 'int'
         elif param.type == 'String':
@@ -180,8 +262,8 @@ class Impl(FordXmlParser):
         elif param.type == 'Float':
             return 'double'
         elif param.struct:
-            return param.fulltype[0] + '_' + param.fulltype[1]
-        return 'xxx'
+            return "_".join(param.fulltype)
+        return "xxx"
 
 
     def from_variant_func_name(self, param, interface):
@@ -211,33 +293,16 @@ class Impl(FordXmlParser):
 
 
     def make_method_signature(self, request, response, interface, add_classname):
-        in_params = request.findall('param')
-        out_params = response.findall('param')
-        ret_type = 'int'
-        retstr = ret_type + ' '
-        if add_classname:
-            retstr = retstr + interface + 'Adaptor::'
-        retstr = retstr + request.get('name') + '('
-        in_params_num = len(in_params)
-        for i in range(0, in_params_num):
-            param_desc = self.make_param_desc(in_params[i], interface)
-            param_type = self.qt_param_type(param_desc)
-            retstr = retstr + param_type + ' ' + param_desc.name + '_in'
-            if i <> in_params_num - 1: retstr = retstr + ", "
-        if in_params_num > 0:
-            retstr += ", "
-        retstr += "const QDBusMessage& message"
-        out_params_num = len(out_params)
-        if out_params_num > 0:
-            retstr = retstr + ", "
-            for i in range(0, out_params_num):
-                param_desc = self.make_param_desc(out_params[i], interface)
-                param_type = self.qt_param_type(param_desc)
-                retstr = retstr + param_type + '& ' + param_desc.name + '_out'
-                if i <> out_params_num - 1: retstr = retstr + ", "
+        in_params = [self.make_param_desc(x, interface) for x in request.findall('param')]
+        out_params = [self.make_param_desc(x, interface) for x in response.findall('param')]
 
-        retstr = retstr + ')'
-        return retstr
+        return "int {0}{1} ({2}{3}const QDBusMessage& message, QString& userMessage_out{4}{5})".format(
+                                        interface + "Adaptor::" if add_classname else "",
+                                        request.get('name'),
+                                        ", ".join(map(lambda x: "const {0}& {1}_in".format(self.qt_param_type(x), x.name), in_params)),
+                                        ", " if in_params else "",
+                                        ", " if out_params else "",
+                                        ", ".join(map(lambda x: "{0}& {1}_out".format(self.qt_param_type(x), x.name), out_params)))
 
 
     def make_signal_signature(self, signal, interface, add_void):
@@ -323,91 +388,97 @@ class Impl(FordXmlParser):
         out.write("  QQuickItem* api_;\n")
         out.write("};\n\n");
 
-
     def write_adaptor_definition(self, interface_el, notifications, request_responses, out):
         iface_name = interface_el.get('name')
         classname = iface_name + 'Adaptor'
-        out.write(classname + '::' + classname + "(QObject* parent) : QDBusAbstractAdaptor(parent) {}\n")
-        out.write('void ' + classname + "::SetApi(QQuickItem* api) {\n")
-        out.write("  api_ = api;\n")
-        for n in notifications:
-            signame = n.get('name')
-            signame = signame[:1].lower() + signame[1:]
-            slotname = n.get('name') + '_qml'
-            sig_signature = self.make_qml_signal_signature(n, iface_name, signame, True)
-            slot_signature = self.make_qml_signal_signature(n, iface_name, slotname, True)
-            out.write("  connect(api_, SIGNAL(" + sig_signature + "), this, SLOT(" + slot_signature + "));\n")
-        out.write("  LOG4CXX_TRACE(logger_, \"CONNECT SIGNALS: \" << __PRETTY_FUNCTION__ );\n")
-        out.write("}\n\n")
-        for (request,response) in request_responses:
-            in_params = request.findall('param')
-            out_params = response.findall('param')
+        out.write("{0}::{0}(QObject* parent) : QDBusAbstractAdaptor(parent) {{}}\n".format(classname))
 
-            out.write("bool fill%s%sReply(QDBusMessage& message, const QVariantMap& map)\n" % (classname, request.get('name')))
-            out.write("{\n")
-            out.write("  int retCode_out = 0;\n")
-            out.write("  GetArgFromMap(map, \"__retCode\", retCode_out);\n")
-            out.write("  QVariant retCode_arg = QVariant::fromValue(retCode_out);\n")
-            out.write("  message << retCode_arg;\n")
-            for out_p in out_params:
-                param_name = out_p.get('name')
-                param_desc = self.make_param_desc(out_p, iface_name)
-                param_type = self.qt_param_type(param_desc)
-                out.write("  %s %s_out;\n" % (param_type, param_name))
-                out.write('  if (!GetArgFromMap(map, \"' + param_name + '\", ' + param_name + "_out)) { return false; }\n")
-                out.write("  QVariant %s_arg;\n" % param_name)
-                out.write("  %s_arg.setValue(%s_out);" % (param_name, param_name))
-                out.write("  message << %s_arg;\n" % param_name)
-                out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(map));\n")
-            out.write("  LOG4CXX_TRACE(logger_, \"REPLY ASYNC: \" << __PRETTY_FUNCTION__ );\n")
-            out.write("  return true;\n")
+        out.write("void {0}::SetApi(QQuickItem* api) {{\n".format(classname))
+        with CodeBlock(out) as out:
+            out.write("api_ = api;\n")
+            for n in notifications:
+                signame = n.get('name')
+                signame = signame[:1].lower() + signame[1:]
+                slotname = n.get('name') + '_qml'
+                sig_signature = self.make_qml_signal_signature(n, iface_name, signame, True)
+                slot_signature = self.make_qml_signal_signature(n, iface_name, slotname, True)
+                out.write("connect(api_, SIGNAL(" + sig_signature + "), this, SLOT(" + slot_signature + "));\n")
+            out.write("LOG4CXX_TRACE(logger_, \"CONNECT SIGNALS: \" << __PRETTY_FUNCTION__ );\n")
+        out.write("}\n\n")
+
+        for (request,response) in request_responses:
+            in_params = [ self.make_param_desc(x, iface_name) for x in request.findall('param') ]
+            out_params = [ self.make_param_desc(x, iface_name) for x in response.findall('param') ]
+
+            out.write("bool fill{0}{1}Reply(QDBusMessage& message, const QVariantMap& map) {{\n".format(classname, request.get('name')))
+            with CodeBlock(out) as out:
+                out.write("int retCode_out = 0;\n")
+                out.write("GetArgFromMap(map, \"__retCode\", retCode_out);\n")
+                out.write("QVariant retCode_arg = QVariant::fromValue(retCode_out);\n")
+                out.write("message << retCode_arg;\n")
+                out.write("QString userMessage_out;\n")
+                out.write("GetArgFromMap(map, \"__message\", userMessage_out);\n")
+                out.write("QVariant userMessage_arg = QVariant::fromValue(userMessage_out);\n")
+                out.write("message << userMessage_arg;\n")
+                for p in out_params:
+                    param_name = p.name
+                    param_type = self.qt_param_type(p)
+                    out.write("%s %s_out;\n" % (param_type, p.name))
+                    out.write("""if (!GetArgFromMap(map, "{0}", {0}_out)) {{ return false; }}\n """.format(p.name))
+                    out.write("QVariant {0}_arg;\n".format(p.name))
+                    out.write("{0}_arg.setValue({0}_out);".format(p.name))
+                    out.write("message << {0}_arg;\n".format(p.name))
+                    out.write("LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(map));\n")
+                out.write("LOG4CXX_TRACE(logger_, \"REPLY ASYNC: \" << __PRETTY_FUNCTION__ );\n")
+                out.write("return true;\n")
             out.write("}\n\n")
             
-            signature = self.make_method_signature(request, response, iface_name, True)
-            out.write(signature + " {\n")
-            out.write("  LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
+            out.write("{0} {{\n".format(self.make_method_signature(request, response, iface_name, True)))
+            with CodeBlock(out) as out:
+                out.write("LOG4CXX_TRACE(logger_, \"ENTER: \" << __PRETTY_FUNCTION__ );\n")
+                out.write("int ret = 0;\n")
+                return_statement = "return ret;\n"
+                out.write("QVariantMap in_arg;\n");
+                out.write("QVariant out_arg_v;\n");
+                for param in in_params:
+                    self.write_param_validation(param, param.name + "_in", "RaiseDbusError(this, InvalidData); return ret", out)
+                    out.write("PutArgToMap(in_arg, \"" + param.name + "\", " + param.name + "_in);\n")
+                out.write("LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
+                method_name = request.get('name')[:1].lower() + request.get('name')[1:]
+                out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name))
+                with CodeBlock(out) as out:
+                    out.write("RaiseDbusError(this, InvalidData);\n")
+                    out.write("LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
+                    out.write("return ret;\n")
+                out.write("}\n")
 
-            out.write('  int ret = 0;\n')
-            return_statement = 'return ret'
+                out.write("QVariantMap out_arg;\n")
+                out.write("if (out_arg_v.type() == QVariant::Map) {\n")
+                with CodeBlock(out) as out:
+                    out.write("out_arg = out_arg_v.toMap();\n")
+                out.write("};\n")
 
-            out.write("  QVariantMap in_arg;\n");
-            out.write("  QVariant out_arg_v;\n");
-            for param in in_params:
-                param_name = param.get('name')
-                out.write("  PutArgToMap(in_arg, \"" + param_name + "\", " + param_name + "_in);\n")
-            out.write("  LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
-            method_name = request.get('name')[:1].lower() + request.get('name')[1:]
-            out.write("  if (!QMetaObject::invokeMethod(api_, \"" + method_name + "\",")
-            out.write("Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), ")
-            out.write("Q_ARG(QVariant, QVariant(in_arg)))) {\n    RaiseDbusError(this, InvalidData);\n")
-            out.write("    LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
-            out.write(return_statement + ";\n  }\n")
+                out.write("int err;\n")
+                out.write("""if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); return ret; }\n""")
 
-            out.write("  QVariantMap out_arg;\n")
-            out.write("  if (out_arg_v.type() == QVariant::Map) {\n")
-            out.write("    out_arg = out_arg_v.toMap();\n")
-            out.write("  };\n")
+                out.write("int async_uid;\n")
+                out.write("if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
+                with CodeBlock(out) as out:
+                    out.write("message.setDelayedReply(true);\n")
+                    out.write("dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
+                    out.write("LOG4CXX_TRACE(logger_, \"EXIT ASYNC: \" << __PRETTY_FUNCTION__ );\n")
+                    out.write("return ret;\n");
+                out.write("}\n\n")
 
-            out.write("  int err;\n")
-            out.write("""  if (GetArgFromMap(out_arg, "__errno", err)) { RaiseDbusError(this, err); %s; }\n""" % (return_statement))
+                for param in out_params:
+                    param_name = param.name
+                    out.write('if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); return ret; }\n")
 
-            out.write("  int async_uid;\n")
-            out.write("  if (GetArgFromMap(out_arg, \"__async_uid\", async_uid)) {\n")
-            out.write("      message.setDelayedReply(true);\n")
-            out.write("      dbusController->addMessage(message, &fill%s%sReply, async_uid);\n" % (classname, request.get('name')))
-            out.write("  LOG4CXX_TRACE(logger_, \"EXIT ASYNC: \" << __PRETTY_FUNCTION__ );\n")
-            out.write("      " + return_statement + ";\n");
-            out.write("  }\n")
-
-            for param in out_params:
-                param_name = param.get('name')
-                param_desc = self.make_param_desc(param, iface_name)
-                out.write('  if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); " + return_statement + "; }\n")
-
-            out.write("  GetArgFromMap(out_arg, \"__retCode\", ret);\n")
-            out.write("  LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
-            out.write("  LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
-            out.write("  return ret;\n")
+                out.write("GetArgFromMap(out_arg, \"__retCode\", ret);\n")
+                out.write("GetArgFromMap(out_arg, \"__message\", userMessage_out);\n")
+                out.write("LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(out_arg));\n")
+                out.write("LOG4CXX_TRACE(logger_, \"EXIT: \" << __PRETTY_FUNCTION__ );\n")
+                out.write("return ret;\n")
             out.write("}\n\n")
 
         for n in notifications:

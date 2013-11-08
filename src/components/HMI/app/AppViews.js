@@ -42,6 +42,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.InfoView,
         SDL.PhoneView,
         SDL.ClimateView,
+        SDL.NavigationView,
         SDL.SettingsView,
         SDL.TurnByTurnView,
         SDL.TBTTurnList,

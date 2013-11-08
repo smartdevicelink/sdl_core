@@ -50,6 +50,9 @@ class Watchdog {
     virtual void addRequest(RequestInfo* requestInfo) = 0;
     virtual void removeRequest(int connection_key,
                                int correlation_id) = 0;
+    virtual void updateRequestTimeout(int connection_key,
+                                      int correlation_id,
+                                      int new_timeout_value) = 0;
     virtual void removeAllRequests() = 0;
 
     virtual int getRegesteredRequestsNumber() = 0;

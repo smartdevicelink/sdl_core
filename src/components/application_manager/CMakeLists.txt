@@ -205,6 +205,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_speak_response.cc
 ./src/commands/hmi/tts_set_global_properties_request.cc
 ./src/commands/hmi/tts_set_global_properties_response.cc
+./src/commands/hmi/tts_get_capabilities_request.cc
+./src/commands/hmi/tts_get_capabilities_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
@@ -289,6 +291,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
+./src/commands/hmi/on_ui_reset_timeout_notification.cc
 ./src/commands/hmi/navi_start_stream_request.cc
 ./src/commands/hmi/navi_start_stream_response.cc
 ./src/commands/hmi/navi_stop_stream_request.cc
