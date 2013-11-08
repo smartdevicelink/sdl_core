@@ -53,10 +53,9 @@ GeneralView {
             },
 
             OvalButton {
-
                 text: "Browse"
                 fontSize: Constants.fontSize
             }
         ]
-	}
+    }
 }
