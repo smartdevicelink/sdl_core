@@ -48,23 +48,19 @@ GeneralView {
         anchors.fill: parent
 
         buttons: [
-            LongOvalButton {
+            OvalButton {
                 text: dataContainer.currentApplication.appName
-                pixelSize: Constants.fontSize
-                dest: "./views/MusicSourceView.qml"
+                onReleased: { contentLoader.go("./views/MusicSourceView.qml") }
             },
 
-            LongOvalButton {
-                id: longOvalButton
+            OvalButton {
                 text: "SDL Menu"
-                pixelSize: Constants.fontSize
-                dest: "./views/ApplicationListView.qml"
+                onReleased: { contentLoader.go("./views/ApplicationListView.qml") }
             },
 
-            LongOvalButton {
+            OvalButton {
                 text: "Options"
-                pixelSize: Constants.fontSize
-                dest: "./views/SDLPlayerOptionsListView.qml"
+                onReleased: { ("./views/SDLPlayerOptionsListView.qml") }
             },
 
             Repeater {

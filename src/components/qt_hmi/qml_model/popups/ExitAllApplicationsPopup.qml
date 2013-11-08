@@ -63,7 +63,7 @@ PopUp {
                 }
             }
         }
-        LongOvalButton {
+        OvalButton {
             text: "Exit"
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {

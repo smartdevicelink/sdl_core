@@ -62,17 +62,17 @@ Item {
             width: parent.width
             height: parent.height * 1/4
 
-            LongOvalButton {
+            OvalButton {
                 text: radioName
-                pixelSize: Constants.fontSize
-                dest: "./views/MusicSourceView.qml"
+                onReleased: contentLoader.go("./views/MusicSourceView.qml")
+                fontSize: Constants.fontSize
             }
 
-            LongOvalButton {
+            OvalButton {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 text: "Tune"
-                pixelSize: Constants.fontSize
+                fontSize: Constants.fontSize
             }
         }
 

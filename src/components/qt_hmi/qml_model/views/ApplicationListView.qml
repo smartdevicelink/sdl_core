@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
+import "../models/Constants.js" as Constants
 
 GeneralView {
     Column {
@@ -13,28 +14,28 @@ GeneralView {
             PagedFlickable {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
-                snapTo: 200 + spacing
-                spacing: (width - 600) / 2
+                elementWidth: Constants.ovalButtonWidth
+                snapTo: elementWidth + spacing
+                spacing: (width - 4 * elementWidth) / 3
 
-                LongOvalButton {
-                    width: 200
+                OvalButton {
                     text: "Find New Apps"
                 }
-                LongOvalButton {
-                    width: 200
+
+                OvalButton {
                     text: "Change device"
-                    dest: "./views/ChangeDeviceView.qml"
+                    onReleased: contentLoader.go("./views/ChangeDeviceView.qml")
                 }
-                LongOvalButton {
-                    width: 200
+
+                OvalButton {
                     text: "911 Assist"
                 }
-                LongOvalButton {
-                    width: 200
+
+                OvalButton {
                     text: "Vehicle Health Report"
                 }
-                LongOvalButton {
-                    width: 200
+
+                OvalButton {
                     text: "Install applications/Up"
                 }
             }
@@ -80,7 +81,7 @@ GeneralView {
             width: parent.width
             height: 1/4 * parent.height
 
-            BackButton { anchors.centerIn: parent}
+            BackButton { anchors.centerIn: parent }
         }
     }
 }

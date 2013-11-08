@@ -117,7 +117,7 @@ GeneralView {
 
     OvalButton {
         id: back
-        width: Constants.longOvalButtonWidth
+        width: Constants.ovalButtonWidth
         text: "Back"
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
