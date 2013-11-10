@@ -33,6 +33,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "policies/policy_manager.h"
+#include "policies/policy_table_schema.h"
+#include "policies/permissions_calculator.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "utils/file_system.h"
 
@@ -98,20 +100,26 @@ policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
 
 //---------------------------------------------------------------
 
-policies_ns::CheckPermissionResult::eType
+policies_ns::CheckPermissionResult
   policies_ns::PolicyManager::checkPermission(
     uint32_t app_id, const so_ns::SmartObject& rpc,
-    mobile_apis::HMILevel::eType status) {
+    mobile_apis::HMILevel::eType hmi_status) {
 
+  CheckPermissionResult result =
+    {PermissionResult::PERMISSION_NOK_DISALLOWED, Priority::PRIORITY_NONE};
   PolicyTable* policy_table = getPolicyTable();
+
   if (0 != policy_table
       && PTValidationResult::VALIDATION_OK == policy_table->Validate()) {
-     so_ns::SmartObject pt_object = policy_table->AsSmartObject();
+    so_ns::SmartObject pt_object = policy_table->AsSmartObject();
+
+    result.result =  policies_ns::PermissionsCalculator::CalcPermissions(pt_object, app_id, rpc, hmi_status);
+    result.priority = policies_ns::PermissionsCalculator::GetPriority(pt_object, app_id);
   } else {
-    return CheckPermissionResult::PERMISSION_NOK_PT_VERIFICATION_FAILED;
+    result.result = PermissionResult::PERMISSION_NOK_PT_VERIFICATION_FAILED;
   }
-  
-  return CheckPermissionResult::PERMISSION_OK_ALLOWED;
+
+  return result;
 }
 
 //---------------------------------------------------------------
@@ -135,5 +143,6 @@ void policies_ns::PolicyManager::StorePolicyTable() {
 
 policies_ns::PolicyTable*
   policies_ns::PolicyManager::getPolicyTable() const {
+
     return policy_table_;
 }

@@ -127,6 +127,13 @@ namespace NsSmartDeviceLink
              */
             static bool stringToEnum(const std::string& str, EnumType &value);
 
+            /**
+             * @brief Get string representation of enumeration elements.
+             *
+             * @return Map of enum element to its string representation.
+             **/
+            static const std::map<EnumType, std::string> & getEnumElementsStringRepresentation(void);
+
         private:
 
             /**
@@ -157,13 +164,6 @@ namespace NsSmartDeviceLink
              * @return Not implemented.
              **/
             TEnumSchemaItem & operator =(const TEnumSchemaItem<EnumType> & Other);
-
-            /**
-             * @brief Get string representation of enumeration elements.
-             *
-             * @return Map of enum element to its string representation.
-             **/
-            static const std::map<EnumType, std::string> & getEnumElementsStringRepresentation(void);
 
             /**
              * @brief Set of allowed enumeration elements.

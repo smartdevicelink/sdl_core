@@ -49,7 +49,7 @@ namespace policies {
  /**
  * @brief enumeration of result for asking permissions by application
  **/
-namespace CheckPermissionResult {
+namespace PermissionResult {
 enum eType {
   /**
    * @brief RPC is allowed.
@@ -76,6 +76,32 @@ enum eType {
 };
 }  // namespace CheckPermissionResult
 
+namespace Priority {
+enum eType {
+  /**
+   * @brief NONE
+   */
+  PRIORITY_NONE = 0,
+  /**
+   * @brief NORMAL
+   */
+  PRIORITY_NORMAL,
+  /**
+   * @brief COMMUNICATION
+   */
+  PRIORITY_COMMUNICATION,
+  /**
+   * @brief NAVIGATION
+   */
+  PRIORITY_NAVIGATION,
+  /**
+   * @brief EMERGENCY
+   */
+  PRIORITY_EMERGENCY
+};
+}  // Priority
+
+
 /**
  * @brief Init() result enumeration
  **/
@@ -95,6 +121,11 @@ enum eType {
   INIT_FAILED_PRELOAD_NO_FILE
 };
 }  // namespace InitResult
+
+struct CheckPermissionResult {
+      PermissionResult::eType result;
+      Priority::eType priority;
+};
 
 /**
  * @brief Interface class of policy manager.
@@ -124,13 +155,13 @@ class PolicyManager {
      *
      * @param app_id  Application identifier
      * @param rpc     Remote procedure call
-     * @param status  HMI level status
+     * @param hmi_status  HMI level status
      *
      * @return result of check permission
      */
-    CheckPermissionResult::eType checkPermission(uint32_t app_id,
+    CheckPermissionResult checkPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
-        mobile_apis::HMILevel::eType status);
+        const mobile_apis::HMILevel::eType hmi_status);
 
     /**
      * @brief Store policy table to filesystem
@@ -146,6 +177,18 @@ class PolicyManager {
     PolicyTable* getPolicyTable() const;
 
   private:
+
+    /**
+     * @brief get ptiority for app_id
+     *
+     * @param pt_object Policy Table as smart object
+     * @param app_id Application Id
+     *
+     * @return priority for app_id
+     */
+    Priority::eType getPriority(const NsSmartObjects::SmartObject& pt_object,
+                                const uint32_t app_id);
+
     /**
      * @brief Policy configuration
      */

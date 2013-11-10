@@ -14,6 +14,7 @@ set (SOURCES
     ./src/policy_table.cc
     ./src/policy_table_schema.cc
     ./src/preloaded_pt_schema.cc
+    ./src/permissions_calculator.cc
 )
 
 

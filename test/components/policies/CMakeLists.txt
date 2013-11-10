@@ -27,6 +27,7 @@ set (LIBRARIES
     Utils
     ConfigProfile
     MessageBroker
+    MOBILE_API
 )
 
 create_test("test_policies_draft_test" "./policies_draft_test.cc" "${LIBRARIES}")
