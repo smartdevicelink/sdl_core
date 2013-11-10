@@ -30,6 +30,7 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   MediaManager
+  MediaManagerNew
   Libusb-1.0.16
 )
 

@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 
 #include "utils/macro.h"
+#include "utils/shared_ptr.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -144,6 +145,8 @@ class RawMessage {
 
     DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
+
+typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
 }  // namespace protocol_handler
 
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_

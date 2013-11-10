@@ -36,14 +36,13 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
 #include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
 
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
+
 class ProtocolObserver;
 
 /**

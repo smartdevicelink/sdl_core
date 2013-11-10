@@ -116,6 +116,8 @@ class SharedPtr {
 
     bool operator ==(const SharedPtr<ObjectType>& Other) const;
 
+    bool operator< (const SharedPtr<ObjectType>& other) const;
+
     /**
      * @brief Assignment operator.
      *
@@ -230,6 +232,12 @@ template<typename ObjectType>
 inline bool utils::SharedPtr<ObjectType>::operator ==(
   const SharedPtr<ObjectType>& Other) const {
   return (mObject == Other.mObject);
+}
+
+template<typename ObjectType>
+inline bool utils::SharedPtr<ObjectType>::operator< (
+  const SharedPtr<ObjectType>& other) const {
+  return (mObject < other.mObject);
 }
 
 template<typename ObjectType>

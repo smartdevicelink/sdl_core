@@ -416,7 +416,8 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
 
 int ConnectionHandlerImpl::GetDataOnDeviceID(
   DeviceHandle device_handle, std::string* device_name,
-  std::list<unsigned int>* applications_list) {
+  std::list<unsigned int>* applications_list,
+  std::string* mac_address = NULL) {
   DCHECK(device_name);
   DCHECK(applications_list);
 

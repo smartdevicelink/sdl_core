@@ -1,0 +1,267 @@
+/**
+* Copyright (c) 2013, Ford Motor Company
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following
+* disclaimer in the documentation and/or other materials provided with the
+* distribution.
+*
+* Neither the name of the Ford Motor Company nor the names of its contributors
+* may be used to endorse or promote products derived from this software
+* without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include <pulse/simple.h>
+#include <pulse/error.h>
+#include <string.h>
+#include <utility>
+#include "utils/threads/thread.h"
+#include "media_manager/a2dp_source_player_adapter.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/synchronisation_primitives.h"
+
+namespace media_manager {
+
+log4cxx::LoggerPtr A2DPSourcePlayerAdapter::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("A2DPSourcePlayerAdapter"));
+
+class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDelegate {
+  public:
+    explicit A2DPSourcePlayerThread(const std::string& device);
+
+    void threadMain();
+
+    bool exitThreadMain();
+
+  private:
+    static log4cxx::LoggerPtr logger_;
+
+    // The Sample format to use
+    static const pa_sample_spec sSampleFormat_;
+
+    const int BUFSIZE_;
+    pa_simple* s_in, *s_out;
+    std::string device_;
+    bool shouldBeStoped_;
+    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+
+    void freeStreams();
+
+    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
+};
+
+A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter()
+  : current_application_(0) {
+}
+
+A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
+  for (std::map<int, threads::Thread*>::iterator it = sources_.begin();
+       sources_.end() != it;
+       ++it) {
+    if (NULL != it->second) {
+      if (it->second->is_running()) {
+        it->second->stop();
+      }
+      delete(it->second);
+    }
+  }
+  sources_.clear();
+}
+
+void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
+  LOG4CXX_INFO(logger_, "Starting a2dp playing music for "
+               << application_key << " application.");
+  if (application_key != current_application_) {
+    current_application_ = application_key;
+
+    std::map<int, threads::Thread*>::iterator it =
+      sources_.find(application_key);
+    if (sources_.end() != it) {
+      if (NULL != it->second && !it->second->is_running()) {
+        it->second->start();
+      } else {
+        current_application_ = 0;
+      }
+    } else {
+      threads::Thread* new_activity = new threads::Thread(
+        "itoa(application_key)",
+        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(""));
+      if (NULL != new_activity) {
+        sources_.insert(std::pair<int, threads::Thread*>(
+                          application_key, new_activity));
+
+        new_activity->start();
+      } else {
+        current_application_ = 0;
+      }
+    }
+  }
+}
+
+void A2DPSourcePlayerAdapter::StopActivity(int application_key) {
+  LOG4CXX_INFO(logger_, "Stopping 2dp playing for "
+               << application_key << " application.");
+  if (application_key != current_application_) {
+    return;
+  }
+  std::map<int, threads::Thread*>::iterator it =
+    sources_.find(application_key);
+  if (sources_.end() != it) {
+    LOG4CXX_DEBUG(logger_, "Source exists.");
+    if (NULL != it->second) {
+      LOG4CXX_DEBUG(logger_, "Sources thread was allocated");
+      if ((*it).second->is_running()) {
+        // Sources thread was started - stop it
+        LOG4CXX_DEBUG(logger_, "Sources thread was started - stop it");
+        (*it).second->stop();
+      }
+    }
+    current_application_ = 0;
+  }
+}
+
+bool A2DPSourcePlayerAdapter::is_app_performing_activity(int application_key) {
+  return (application_key == current_application_);
+}
+
+log4cxx::LoggerPtr A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("A2DPSourcePlayerThread"));
+
+const pa_sample_spec A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::
+sSampleFormat_ = {
+  /*format*/    PA_SAMPLE_S16LE,
+  /*rate*/      44100,
+  /*channels*/  2
+};
+
+A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
+  const std::string& device)
+  : threads::ThreadDelegate(),
+    device_(device),
+    BUFSIZE_(32) {
+  stopFlagMutex_.init();
+}
+
+void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
+  LOG4CXX_INFO(logger_, "Free streams in A2DPSourcePlayerThread.");
+  if (s_in) {
+    pa_simple_free(s_in);
+  }
+
+  if (s_out) {
+    pa_simple_free(s_out);
+  }
+}
+
+bool A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::exitThreadMain() {
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = true;
+  stopFlagMutex_.unlock();
+  return true;
+}
+
+void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
+  LOG4CXX_INFO(logger_, "Main thread of A2DPSourcePlayerThread.");
+
+  stopFlagMutex_.lock();
+  shouldBeStoped_ = false;
+  stopFlagMutex_.unlock();
+
+  int error;
+
+  const char* a2dpSource = device_.c_str();
+
+  LOG4CXX_DEBUG(logger_, device_);
+
+  LOG4CXX_DEBUG(logger_, "Creating streams");
+
+  /* Create a new playback stream */
+  if (!(s_out = pa_simple_new(NULL, "AudioManager", PA_STREAM_PLAYBACK, NULL,
+                              "playback", &sSampleFormat_, NULL, NULL, &error))) {
+    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
+    freeStreams();
+    return;
+  }
+
+  if (!(s_in = pa_simple_new(NULL, "AudioManager", PA_STREAM_RECORD, a2dpSource,
+                             "record", &sSampleFormat_, NULL, NULL, &error))) {
+    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
+    freeStreams();
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Entering main loop");
+
+  for (;;) {
+    uint8_t buf[BUFSIZE_];
+    ssize_t r;
+
+    pa_usec_t latency;
+
+    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t) - 1) {
+      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
+                    << pa_strerror(error));
+      break;
+    }
+
+    // LOG4CXX_INFO(logger_, "In: " << static_cast<float>(latency));
+
+    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t) - 1) {
+      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
+                    << pa_strerror(error));
+      break;
+    }
+
+    // LOG4CXX_INFO(logger_, "Out: " << static_cast<float>(latency));
+
+    if (pa_simple_read(s_in, buf, sizeof(buf), &error) < 0) {
+      LOG4CXX_ERROR(logger_, "read() failed: " << strerror(error));
+      break;
+    }
+
+    /* ... and play it */
+    if (pa_simple_write(s_out, buf, sizeof(buf), &error) < 0) {
+      LOG4CXX_ERROR(logger_, "pa_simple_write() failed: "
+                    << pa_strerror(error));
+      break;
+    }
+
+    stopFlagMutex_.lock();
+    bool shouldBeStoped = shouldBeStoped;
+    stopFlagMutex_.unlock();
+
+    if (shouldBeStoped) {
+      break;
+    }
+  }
+
+  /* Make sure that every single sample was played */
+  if (pa_simple_drain(s_out, &error) < 0) {
+    LOG4CXX_ERROR(logger_, "pa_simple_drain() failed: " << pa_strerror(error));
+    freeStreams();
+    return;
+  }
+
+  freeStreams();
+}
+
+}  // namespace media_manager
