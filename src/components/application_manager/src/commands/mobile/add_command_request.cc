@@ -108,6 +108,7 @@ void AddCommandRequest::Run() {
   if (((*message_)[strings::msg_params].keyExists(strings::vr_commands))
       && ((*message_)[strings::msg_params]
                       [strings::vr_commands].length() > 0)) {
+
     if (!CheckCommandVRSynonym(app)) {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
@@ -117,7 +118,6 @@ void AddCommandRequest::Run() {
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
-
     ++chaining_counter;
   }
 
@@ -137,9 +137,9 @@ void AddCommandRequest::Run() {
 
     msg_params[strings::app_id] = app->app_id();
 
-    if (((*message_)[strings::msg_params][strings::cmd_icon].keyExists(
-        strings::value))
-        && (0 < (*message_)[strings::msg_params][strings::cmd_icon]
+    if (    ((*message_)[strings::msg_params].keyExists(strings::cmd_icon))
+        &&  ((*message_)[strings::msg_params][strings::cmd_icon].keyExists(strings::value))
+        &&  (0 < (*message_)[strings::msg_params][strings::cmd_icon]
                                                  [strings::value].length())) {
       msg_params[strings::cmd_icon] =
           (*message_)[strings::msg_params][strings::cmd_icon];
@@ -171,6 +171,11 @@ bool AddCommandRequest::CheckCommandName(const Application* app) {
   CommandsMap::const_iterator i = commands.begin();
 
   for (; commands.end() != i; ++i) {
+
+    if(!(*i->second).keyExists(strings::menu_params)) {
+      continue;
+    }
+
     if ((*i->second)[strings::menu_params][strings::menu_name].asString()
         == (*message_)[strings::msg_params][strings::menu_params]
                                             [strings::menu_name].asString()) {
@@ -191,6 +196,11 @@ bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
+
+    if(!(*it->second).keyExists(strings::vr_commands)) {
+      continue;
+    }
+
     for (size_t i = 0; i < (*it->second)[strings::vr_commands].length(); ++i) {
       for (size_t j = 0;
           j < (*message_)[strings::msg_params][strings::vr_commands].length();
