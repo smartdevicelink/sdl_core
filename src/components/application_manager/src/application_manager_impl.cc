@@ -354,7 +354,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     message[strings::msg_params][strings::sync_msg_version]
     [strings::minor_version].asInt();
 
-  if (min_version < APIVersion::kAPIV2) {
+  /*if (min_version < APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -364,14 +364,14 @@ Application* ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     delete application;
     return NULL;
-  }
+  }*/
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
   int max_version =
     message[strings::msg_params][strings::sync_msg_version]
     [strings::major_version].asInt();
 
-  if (max_version > APIVersion::kAPIV2) {
+  /*if (max_version > APIVersion::kAPIV2) {
     LOG4CXX_ERROR(logger_, "UNSUPPORTED_VERSION");
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -381,7 +381,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     delete application;
     return NULL;
-  }
+  }*/
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
@@ -866,6 +866,10 @@ void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::TTS_GetSupportedLanguages));
     ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetCapabilities));
+    ManageHMICommand(get_capabilities);
   }
 }
 

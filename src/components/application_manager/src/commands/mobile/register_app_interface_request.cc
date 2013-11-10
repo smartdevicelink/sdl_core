@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -42,9 +43,9 @@ namespace application_manager {
 namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      timer_(NULL) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message),
+    timer_(NULL) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
@@ -66,78 +67,77 @@ bool RegisterAppInterfaceRequest::Init() {
 }
 
 void RegisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(
-      logger_,
-      "RegisterAppInterfaceRequest::Run "
-          << (*message_)[strings::params][strings::connection_key].asInt());
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "<< connection_key());
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
-    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-        correlation_id(),
-        default_timeout());
-    // TODO(DK): Timer
     sleep(1);
+    // TODO(DK): timer_->StartWait(1);
+    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                             correlation_id(),
+                                                             default_timeout());
   }
 
-  Application* application_impl = ApplicationManagerImpl::instance()
-      ->RegisterApplication(message_);
+  if (!checkAppName()) {
+    LOG4CXX_ERROR_EXT(logger_, "DUPLICATE_NAME");
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
 
-  if (!application_impl) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) << "  hasn't been registered!");
+  Application* app =
+      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "Application " <<
+                      msg_params[strings::app_name].asString() <<
+                      "  hasn't been registered!");
   } else {
-    application_impl->set_mobile_app_id(
-        (*message_)[strings::msg_params][strings::app_id]);
+    app->set_mobile_app_id(msg_params[strings::app_id]);
+    app->set_is_media_application(msg_params[strings::is_media_application]);
 
-    application_impl->set_is_media_application(
-        (*message_)[strings::msg_params][strings::is_media_application]);
-
-    if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
-      application_impl->set_vr_synonyms(
-          (*message_)[strings::msg_params][strings::vr_synonyms]);
+    if (msg_params.keyExists(strings::vr_synonyms)) {
+      app->set_vr_synonyms(msg_params[strings::vr_synonyms]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(
-        strings::ngn_media_screen_app_name)) {
-      application_impl->set_ngn_media_screen_name(
-          (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
+    if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
+      app->set_ngn_media_screen_name(
+          msg_params[strings::ngn_media_screen_app_name]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-      application_impl->set_tts_name(
-          (*message_)[strings::msg_params][strings::tts_name]);
+    if (msg_params.keyExists(strings::tts_name)) {
+      app->set_tts_name(msg_params[strings::tts_name]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
-      application_impl->set_app_types(
-        (*message_)[strings::msg_params][strings::app_hmi_type]);
+    if (msg_params.keyExists(strings::app_hmi_type)) {
+      app->set_app_types(msg_params[strings::app_hmi_type]);
 
       // check if app is NAVI
-      const int is_navi_type = 4;
-      smart_objects::SmartObject app_type =
-        (*message_)[strings::msg_params].getElement(strings::app_hmi_type);
+      const int is_navi_type = mobile_apis::AppHMIType::NAVIGATION;
+      const smart_objects::SmartObject& app_type =
+          msg_params.getElement(strings::app_hmi_type);
 
       for (size_t i = 0; i < app_type.length(); ++i) {
-        if (is_navi_type == app_type[i].asInt()) {
-          application_impl->set_allowed_support_navigation(true);
+        if (is_navi_type == app_type.getElement(i).asInt()) {
+          app->set_allowed_support_navigation(true);
         }
       }
     }
 
-    SendRegisterAppInterfaceResponseToMobile(*application_impl);
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
-    MessageHelper::SendHMIStatusNotification(*application_impl);
-    MessageHelper::SendVrCommandsOnRegisterAppToHMI(application_impl);
+    SendRegisterAppInterfaceResponseToMobile(*app);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+    MessageHelper::SendHMIStatusNotification(*app);
+    MessageHelper::SendVrCommandsOnRegisterAppToHMI(app);
   }
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    const Application& application_impl) {
+  const Application& application_impl) {
   mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+    smart_objects::SmartType_Map);
 
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -149,9 +149,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      application_impl.version().max_supported_api_version;
+    APIVersion::kAPIV2;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      application_impl.version().min_supported_api_version;
+    APIVersion::kAPIV2;
 
   response_params[strings::language] = app_manager->active_vr_language();
   response_params[strings::hmi_display_language] = app_manager
@@ -160,32 +160,32 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
       != app_manager->active_vr_language()
       || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
-          .asInt() != app_manager->active_ui_language()) {
+      .asInt() != app_manager->active_ui_language()) {
     LOG4CXX_WARN_EXT(
-        logger_,
-        "Wrong language on registering application " << application_impl.name());
+      logger_,
+      "Wrong language on registering application " << application_impl.name());
     LOG4CXX_ERROR_EXT(
-        logger_,
-        "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
+      logger_,
+      "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     smart_objects::SmartObject& display_caps =
-        response_params[hmi_response::display_capabilities];
+      response_params[hmi_response::display_capabilities];
 
     display_caps[hmi_response::display_type] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::display_type);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::display_type);
     display_caps[hmi_response::text_fields] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::text_fields);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::text_fields);
     display_caps[hmi_response::media_clock_formats] = app_manager
         ->display_capabilities()->getElement(hmi_response::media_clock_formats);
     if (app_manager->display_capabilities()->getElement(
-        hmi_response::image_capabilities).length() > 0) {
+          hmi_response::image_capabilities).length() > 0) {
       display_caps[hmi_response::graphic_supported] = true;
     } else {
       display_caps[hmi_response::graphic_supported] = false;
@@ -224,6 +224,48 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   SendResponse(true, result, "", params);
+}
+
+bool RegisterAppInterfaceRequest::checkAppName() {
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::checkAppName ");
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+
+  const std::set<Application*>& applications = app_manager->applications();
+  std::set<Application*>::iterator it = applications.begin();
+
+  for (; applications.end() != it; ++it) {
+    // check TTS strings
+    const smart_objects::SmartObject* ttsName_param = (*it)->tts_name();
+    if (ttsName_param) {
+      for (size_t i = 0; i < ttsName_param->length(); ++i) {
+        if (0 == strcmp(msg_params[strings::app_name].asString().c_str(),
+            ttsName_param->getElement(i)[strings::text].asString().c_str())) {
+          LOG4CXX_INFO(logger_, "App name equal to ttName "<<
+                       ttsName_param->getElement(i).asString());
+          return false;
+        }
+      }
+    }
+
+    // check vrSynonyms strings
+    const smart_objects::SmartObject* vrSynonyms_param = (*it)->vr_synonyms();
+    if (vrSynonyms_param) {
+      for (size_t i = 0; i < vrSynonyms_param->length(); ++i) {
+        if (0 == strcmp(msg_params[strings::app_name].asString().c_str(),
+                        vrSynonyms_param->getElement(i).asString().c_str())) {
+          LOG4CXX_INFO(logger_, "App name equal to VR synonym " <<
+                       vrSynonyms_param->getElement(i).asString());
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 }  // namespace commands

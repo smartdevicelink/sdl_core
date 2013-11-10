@@ -45,25 +45,17 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
 
     actionMove:function(event){
 
-        if (event.originalEvent.type == 'touchmove') {
-            SDL.SDLModel.onTouchEvent(event);
-        }
+        SDL.SDLModel.onTouchEvent(event);
     },
 
     actionUp:function(event){
 
-
-        if (event.originalEvent.type == 'touchend') {
-            SDL.SDLModel.onTouchEvent(event);
-        }
+        SDL.SDLModel.onTouchEvent(event);
     },
 
     actionDown:function(event){
 
-
-        if (event.originalEvent.type == 'touchstart') {
-            SDL.SDLModel.onTouchEvent(event);
-        }
+        SDL.SDLModel.onTouchEvent(event);
     },
 
     videoView: Ember.View.extend({

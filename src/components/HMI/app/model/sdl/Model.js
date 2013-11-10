@@ -324,13 +324,14 @@ SDL.SDLModel = Em.Object.create({
     onTouchEvent: function(event){
 
         var type = "",
-            touches = event.originalEvent.touches.length,
-            changedTouches = event.originalEvent.touches.length,
+            touches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
+            changedTouches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
             touchLists = {"touches": touches, "changedTouches": changedTouches},
             info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
 
         switch (event.originalEvent.type) {
             case "touchstart": {
+                FLAGS.TOUCH_EVENT_STARTED = true;
                 type = "TOUCHSTART";
                 break;
             }
@@ -342,15 +343,35 @@ SDL.SDLModel = Em.Object.create({
                 type = "TOUCHEND";
                 break;
             }
+            case "mousedown": {
+                FLAGS.TOUCH_EVENT_STARTED = true;
+                type = "TOUCHSTART";
+                break;
+            }
+            case "mousemove": {
+                type = "TOUCHMOVE";
+                break;
+            }
+            case "mouseup": {
+                type = "TOUCHEND";
+                break;
+            }
         }
 
-        for(var i = 0; i < touches; i++){
+        if (FLAGS.TOUCH_EVENT_STARTED) {
 
-            info.id = i;
-            info.point.xCoord = event.originalEvent.touches[i].pageX;
-            info.point.yCoord = event.originalEvent.touches[i].pageY;
+            for(var i = 0; i < touches; i++){
+
+                info.id = i;
+                info.point.xCoord = event.originalEvent.touches ? event.originalEvent.touches[i].pageX : event.originalEvent.pageX;
+                info.point.yCoord = event.originalEvent.touches ? event.originalEvent.touches[i].pageY : event.originalEvent.pageY;
+            }
+            FFW.UI.onTouchEvent(type, touchLists, info);
         }
-        FFW.UI.onTouchEvent(type, touchLists, info);
+
+        if (type == "TOUCHEND") {
+            FLAGS.TOUCH_EVENT_STARTED = false;
+        }
     },
 
     /**

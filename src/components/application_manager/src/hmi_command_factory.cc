@@ -125,6 +125,8 @@
 #include "application_manager/commands/hmi/tts_speak_response.h"
 #include "application_manager/commands/hmi/tts_set_global_properties_request.h"
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
+#include "application_manager/commands/hmi/tts_get_capabilities_request.h"
+#include "application_manager/commands/hmi/tts_get_capabilities_response.h"
 #include "application_manager/commands/hmi/vi_is_ready_request.h"
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
@@ -493,6 +495,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::TTSSetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::TTSSetGlobalPropertiesRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_GetCapabilities: {
+      if (is_response) {
+        command.reset(new commands::TTSGetCapabilitiesResponse(message));
+      } else {
+        command.reset(new commands::TTSGetCapabilitiesRequest(message));
       }
       break;
     }
