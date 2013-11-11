@@ -37,6 +37,7 @@ import "../controls"
 import "../models"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 Item {
     id: mediaPlayerView
@@ -56,58 +57,66 @@ Item {
     property alias buttonsSpacing: buttonsRow.spacing
 
     Item {
-        // top 3/4 screen
-        id: upperContent
-        height: parent.height * 3/4
+        // row of oval buttons
+        id: ovalButtonsRow
         width: parent.width
-        anchors.top: parent.top
+        height: 1/5 * parent.height
         anchors.left: parent.left
+        anchors.top: parent.top
 
-        Item {
-            id: top
-            anchors.top: parent.top
-            anchors.left: parent.left
+        PagedFlickable {
+            id: buttonsRow
             width: parent.width
-            height: parent.height * 1/4
+            spacing: (mediaPlayerView.playerType === "SDL") ? ((width - 4 * elementWidth) / 3)
+                                                            : (width - 2 * elementWidth)
+            anchors.verticalCenter: parent.verticalCenter
+            snapTo: Constants.ovalButtonWidth + spacing
+            elementWidth: Constants.ovalButtonWidth
+        }
+    }
 
-            PagedFlickable {
-                id: buttonsRow
-                width: parent.width
-                spacing: Math.max(20, (width - (4 * elementWidth)) / 3)
+    Item {
+        id: spacingBetweenItems
+        width: parent.width
+        height: 1/10 * parent.height
+        anchors.left: parent.left
+        anchors.top: ovalButtonsRow.bottom
 
-                snapTo: longOvalButton.width + spacing
-                elementWidth: longOvalButton.width
+        Behavior on height {
+            NumberAnimation {
+                duration : Constants.animationDuration
             }
         }
+    }
 
-        Item {
-            // mid part for picture, information about song, album
-            id: mid
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.right: parent.right
+    Column {
+        // Picture + text information + media clock
+        id: mediaContent
+        width: parent.width
+        height: 2/5 * parent.height
+        anchors.left: parent.left
+        anchors.top: spacingBetweenItems.bottom
+
+        Row {
+            // picture + text info
             width: parent.width
-            height: parent.height * 2/4
+            height: 3/4 * parent.height
+            spacing: Constants.margin
 
             Image {
                 id: image
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: height
                 source: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.image //TODO {ALeshin}: get picture correctly
                                                                : playerState.albumImage
             }
 
-            Item {
-                id: space
-                anchors.left: image.right
-                width: 20
-            }
-
             Column {
-                anchors.left: space.right
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: parent.height / 5
+                // text info
+                id: textInfo
+                height: parent.height
+                width: parent.width - image.width - parent.spacing
+                spacing: (height - textInfo.height) / 2
 
                 Text {
                     anchors.left: parent.left
@@ -116,7 +125,7 @@ Item {
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
                                                                  : playerState.trackName
-                    font.pixelSize: 45
+                    font.pixelSize: Constants.titleFontSize
                     font.bold: true
                 }
 
@@ -127,90 +136,176 @@ Item {
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField2
                                                                  : playerState.albumName
-                    font.pixelSize: 25
+                    font.pixelSize: Constants.fontSize
                 }
 
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaTrack
                                                                  : playerState.trackNumber
-                    font.pixelSize: 20
+                    font.pixelSize: Constants.fontSize
                 }
             }
         }
 
         MediaClockView {
-            anchors.left: parent.left
-            anchors.bottom: parent. bottom
             width: parent.width
             height: parent.height * 1/4
         }
     }
 
     Item {
-        //bottom 1/4 screen
-        id: lowerContent
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
+        id: spacingBetweenItems2
         width: parent.width
-        height: 1/4 * parent.height
+        height: 1/10 * parent.height
+        anchors.left: parent.left
+        anchors.top: mediaContent.bottom
 
-        Row {
-            id: mediaControl
-
-            anchors.centerIn: parent
-            Image {
-                id: prevButton
-                anchors.verticalCenter: parent.verticalCenter
-                source: "../res/buttons/player_prev_btn.png"
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: {
-                        prevButton.source = "../res/buttons/player_prev_pressed_btn.png"
-                    }
-                    onReleased: {
-                        prevButton.source = "../res/buttons/player_prev_btn.png"
-                    }
-                }
+        Behavior on height {
+            NumberAnimation {
+                duration : Constants.animationDuration
             }
-
-            PlayPauseButton {
-                anchors.verticalCenter: parent.verticalCenter
-                state: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.playPauseState : playerState.playPauseState
-                onClicked: {
-                    (state == 'Play') ? play() : pause();
-                    var newState = state === "Play" ? "Pause" : "Play";
-                    (mediaPlayerView.playerType === "SDL") ? dataContainer.setApplicationProperties(dataContainer.currentApplication.appId, { playPauseState: newState } )
-                                                           : playerState.playPauseState = newState
-                }
-            }
-
-            Image {
-                id: nextButton
-                anchors.verticalCenter: parent.verticalCenter
-                source: "../res/buttons/player_next_btn.png"
-                MouseArea {
-                    anchors.fill: parent
-                    onPressed: {
-                        nextButton.source = "../res/buttons/player_next_pressed_btn.png"
-                    }
-                    onReleased: {
-                        nextButton.source = "../res/buttons/player_next_btn.png"
-                    }
-                }
-            }
-        }
-
-        Text {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: mediaControl.bottom
-            anchors.bottom: parent.bottom
-            text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.statusBar
-                                                         : ""
-            color: Constants.primaryColor
         }
     }
+
+    Row {
+        // Rewind, play, pause, forward buttons
+        id: playPauseRewindForward
+        width: parent.width
+        height: 1/5 * parent.height
+        anchors.left: parent.left
+        anchors.leftMargin: (width - playPauseButton.width - prevButton.width - nextButton.width) / 2
+        anchors.top: spacingBetweenItems2.bottom
+
+        Image {
+            id: prevButton
+            anchors.verticalCenter: parent.verticalCenter
+            source: "../res/buttons/player_prev_btn.png"
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    prevButton.source = "../res/buttons/player_prev_pressed_btn.png"
+                }
+                onReleased: {
+                    prevButton.source = "../res/buttons/player_prev_btn.png"
+                }
+            }
+        }
+
+        PlayPauseButton {
+            id: playPauseButton
+            anchors.verticalCenter: parent.verticalCenter
+            state: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.playPauseState : playerState.playPauseState
+            onClicked: {
+                (state == 'Play') ? play() : pause();
+                var newState = state === "Play" ? "Pause" : "Play";
+                (mediaPlayerView.playerType === "SDL") ? dataContainer.setApplicationProperties(dataContainer.currentApplication.appId, { playPauseState: newState } )
+                                                       : playerState.playPauseState = newState
+            }
+        }
+
+        Image {
+            id: nextButton
+            anchors.verticalCenter: parent.verticalCenter
+            source: "../res/buttons/player_next_btn.png"
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    nextButton.source = "../res/buttons/player_next_pressed_btn.png"
+                }
+                onReleased: {
+                    nextButton.source = "../res/buttons/player_next_btn.png"
+                }
+            }
+        }
+    }
+
+    Item {
+        id: presetButtons
+        width: parent.width
+        height: 1/5 * parent.height
+        anchors.top: playPauseRewindForward.bottom
+        anchors.left: parent.left
+
+        PresetRow {
+            id: presetsRow
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
+            width: parent.width
+            property bool clickProcessed
+
+            Timer {
+                id: timer
+                interval: Constants.presetButtonTimer
+                repeat: false
+                triggeredOnStart: false
+            }
+
+            onPresetButtonPressed: {
+                timer.start()
+                clickProcessed  = false
+                sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONDOWN, undefined)
+            }
+
+            onPresetButtonReleased: {
+                sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
+                timer.stop()
+                if (!clickProcessed) {
+                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
+                }
+            }
+
+            Connections {
+                target: timer
+                onTriggered: {
+                    if(!clickProcessed) {
+                        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
+                        clickProcessed = true
+                    }
+                }
+            }
+        }
+    }
+
+    states: [
+        State {
+            name: 'presetButtonsON'
+            when: (dataContainer.currentApplication.customPresets.count > 0) && (mediaPlayerView.playerType === "SDL")
+            PropertyChanges {
+                target: spacingBetweenItems
+                height: 1
+            }
+            PropertyChanges {
+                target: spacingBetweenItems2
+                height: 1
+            }
+            PropertyChanges {
+                target: presetButtons
+                visible: true
+                enabled: true
+            }
+        },
+
+        State {
+            name: 'presetButtonsOFF'
+            when: (dataContainer.currentApplication.customPresets.count === 0) || (mediaPlayerView.playerType !== "SDL")
+            PropertyChanges {
+                target: spacingBetweenItems
+                height: 1/10 * mediaPlayerView.height
+            }
+            PropertyChanges {
+                target: spacingBetweenItems2
+                height: 1/10 * mediaPlayerView.height
+            }
+            PropertyChanges {
+                target: presetButtons
+                visible: false
+                enabled: false
+            }
+        }
+    ]
 }

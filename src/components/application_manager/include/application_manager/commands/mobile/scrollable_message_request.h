@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SCROLLABLE_MESSAGE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -47,12 +48,12 @@ namespace commands {
 class ScrollabelMessageRequest : public CommandRequestImpl {
  public:
   /**
-   * \brief ScrollabeMessageRequest class constructor
+   * @brief ScrollabeMessageRequest class constructor
    **/
   explicit ScrollabelMessageRequest(const MessageSharedPtr& message);
 
   /**
-   * \brief SliderCommand class destructor
+   * @brief SliderCommand class destructor
    **/
   virtual ~ScrollabelMessageRequest();
 
@@ -66,8 +67,18 @@ class ScrollabelMessageRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
 
  private:
+
+  // members
+  mobile_apis::Result::eType  result_;
+
   DISALLOW_COPY_AND_ASSIGN(ScrollabelMessageRequest);
 };
 

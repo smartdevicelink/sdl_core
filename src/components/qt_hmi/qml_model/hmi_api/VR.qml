@@ -14,8 +14,8 @@ Item {
             dataContainer.vrCommands.append({
                                                cmdID: cmdID,
                                                command: vrCommands[i],
-                                               appID: appID
-                                           })
+                                               appID: appID === undefined ? 0 : appID,
+                                           });
         }
     }
 
@@ -50,6 +50,8 @@ Item {
     }
 
     function changeRegistration(language, appID) {
+        console.debug("enter:", language, appID);
         dataContainer.changeRegistrationTTSVR(language, appID);
+        console.debug("exit");
     }
 }

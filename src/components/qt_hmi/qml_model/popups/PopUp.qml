@@ -39,6 +39,8 @@ Item {
     default property alias content: content.children
     property int padding: Constants.popUpPadding
 
+    visible: false
+
     width: Constants.popupWidth
     height: Constants.popupHeigth
 
@@ -68,10 +70,20 @@ Item {
     }
 
     function show() {
-        visible = true;
+        console.debug("enter")
+        if (!visible) { // must not increment counter if show() called for visible popup
+            visible = true;
+            dataContainer.popups++
+        }
+        console.debug("exit")
     }
 
     function hide() {
-        visible = false;
+        console.debug("enter")
+        if (visible) { // must not decrement counter if hide() called for invisible popup
+            visible = false;
+            dataContainer.popups--
+        }
+        console.debug("exit")
     }
 }

@@ -77,6 +77,7 @@ QtObject {
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
+                currentApplication.customPresets = application.customPresets
 
                 if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
@@ -115,7 +116,7 @@ QtObject {
     }
 
     function addApplication(app) {
-        console.log("Enter addApplication function");
+        console.log("enter addApplication function");
         applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
@@ -127,6 +128,7 @@ QtObject {
             appType: app.appType,
             helpPrompt: "",
             timeoutPrompt: "",
+            customPresets: app.customPresets ? app.customPresets : [],
             playPauseState: 'Pause',
             hmiUIText: app.hmiUIText,
             options: [],
@@ -137,14 +139,16 @@ QtObject {
             softButtons: []
             // This place is for adding new properties
         })
-        console.log("Exit addApplication function");
+        console.log("exit addApplication function");
     }
 
     function setApplicationProperties(appId, props) {
         console.log("Enter setApplicationProperties function");
         var app = getApplication(appId)
         for (var p in props) {
-            app[p] = props[p];
+            if (props[p] !== undefined) {
+                app[p] = props[p]
+            }
         }
         if (currentApplication.appId === appId) {
             setCurrentApplication(appId); // copy new values to current application
@@ -167,7 +171,6 @@ QtObject {
     property int hmiContext
     property bool applicationContext: false
 
-    property int systemSavedContext
     property bool applicationSavedContext
 
     property string route_text: ""
@@ -260,7 +263,7 @@ QtObject {
 
     function changeRegistrationTTSVR(language, appID) {
         console.log("dataContainer changeRegistrationTTSVR enter");
-        setApplicationProperties(appID, { TTSVRLanguage: language });
+        setApplicationProperties(appID, { languageTTSVR: language });
         console.log("dataContainer changeRegistrationTTSVR exit");
     }
 
@@ -443,4 +446,28 @@ QtObject {
     }
     property bool activeTTS: false
     property var activePopup
+    property int popups: 0
+
+    property bool activeAlert: false
+
+    onActiveVRChanged: setSystemContext()
+    onActiveAlertChanged: setSystemContext()
+    onPopupsChanged: setSystemContext()
+
+    function setSystemContext () {
+        console.debug("enter")
+        if (activeVR) {
+            systemContext = Common.SystemContext.SYSCTXT_VRSESSION
+        }
+        else if (activeAlert) {
+            systemContext = Common.SystemContext.SYSCTXT_ALERT
+        }
+        else if (popups > 0) {
+            systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+        }
+        else if (contentLoader.item !== null) {
+            systemContext = contentLoader.item.systemContext
+        }
+        console.debug("exit")
+    }
 }

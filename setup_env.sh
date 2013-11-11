@@ -47,6 +47,7 @@ fi
 echo
 
 SUBVERSION="subversion"
+GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
@@ -91,7 +92,7 @@ while test $# -gt 0; do
                         echo " "
                         echo "options:"
                         echo "-h, --help                show brief help"
-                        echo "-a, --all                 all mandatory and optional packages will be install"
+                        echo "-a, --all                 all mandatory and optional packages will be installed"
                         echo "-q                        install additional packages for Qt HMI"
 			
                         exit 0
@@ -193,7 +194,11 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
-if $QT_HMI; then
+if $QT_HMI || $INSTALL_ALL; then
+	echo "Installing Subversion"
+	apt-install ${SUBVERSION}
+	echo $OK
+
 	echo "Checking out CMake packages, please be patient"
 	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
 	echo $OK
@@ -204,9 +209,13 @@ if $QT_HMI; then
 		CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 	fi
 
+	echo "Installing gdebi"
+	apt-install ${GDEBI}
+	echo $OK
+
 	echo "Installing CMake build system"
-	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-	sudo dpkg -i ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 	echo $OK
 
 	if [ ${ARCH} = "i386" ]; then
@@ -250,10 +259,6 @@ if $INSTALL_ALL; then
 	echo " "	
 	echo "Installing optional packages..."
 	echo " "
-
-	echo "Installing Subversion"
-	apt-install ${SUBVERSION}
-	echo $OK	
 
 	echo "Installing Doxygen"
 	apt-install ${DOXYGEN}

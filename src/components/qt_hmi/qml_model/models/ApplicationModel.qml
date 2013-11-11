@@ -28,6 +28,7 @@ QtObject {
     property ListModel turnList
     property ListModel softButtons
     property ListModel turnListSoftButtons
+    property ListModel customPresets
     property int languageTTSVR
     // This place is for adding new properties
 
@@ -51,6 +52,7 @@ QtObject {
         turnList = null
         softButtons = null
         turnListSoftButtons = null
+        customPresets = null
         languageTTSVR = -1
         console.debug("exit")
     }

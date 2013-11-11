@@ -41,6 +41,8 @@ Item {
     property variant presets: []
     property int selectedIndex: 0
     signal presetSelected    
+    signal presetButtonPressed()
+    signal presetButtonReleased()
 
     Image {
         id: circleButton
@@ -65,6 +67,14 @@ Item {
                         source: presetRow.selectedIndex === index ? "../res/buttons/preset_pressed_btn.png" : "../res/buttons/preset_btn.png"
                         MouseArea {
                             anchors.fill: parent
+                            onPressed: {
+                                presetRow.selectedIndex = index;
+                                presetButtonPressed()
+                            }
+                            onReleased: {
+                                presetRow.selectedIndex = index;
+                                presetButtonReleased()
+                            }
                             onClicked: {
                                 presetRow.selectedIndex = index
                             }

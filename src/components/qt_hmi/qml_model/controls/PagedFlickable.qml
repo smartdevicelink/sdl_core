@@ -51,6 +51,7 @@ Item
         contentWidth: containerRow.width
         height: containerRow.height
         width: parent.width
+        interactive: contentWidth > width
 
         onMovementEnded: {
             var rest = contentX % snapTo

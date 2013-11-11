@@ -94,7 +94,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @brief Timer callback function
    *
    */
-  void onTimer() const;
+  void onTimer();
 
  private:
   /*
@@ -102,7 +102,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * has exceed it's limit
    *
    */
-    virtual void onTimeOut() const;
+    virtual void onTimeOut();
 
   /*
    * @brief Function will be called when VR_OnCommand event
@@ -203,6 +203,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   bool is_keyboard_trigger_source_;
   mobile_apis::TriggerSource::eType trigger_source_;
+  bool is_vr_help_item_;
 };
 
 }  // namespace commands

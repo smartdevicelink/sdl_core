@@ -62,7 +62,7 @@ PopUp {
             onClicked: {
                 timer.stop()
                 DBus.sendReply(dataContainer.interactionModel.async, {"choiceID": id})
-                deactivate()
+                hide()
             }
         }
     }
@@ -72,25 +72,16 @@ PopUp {
             id: timer
             onTriggered: {
                 DBus.sendError(dataContainer.interactionModel.async, Common.Result.TIMED_OUT)
-                deactivate()
+                hide()
             }
         }
     }
 
     function activate () {
         console.debug("enter")
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         timer.interval = dataContainer.interactionModel.timeout
         timer.start()
         show()
-        console.debug("exit")
-    }
-
-    function deactivate () {
-        console.debug("enter")
-        dataContainer.systemContext = dataContainer.systemSavedContext
-        hide()
         console.debug("exit")
     }
 }

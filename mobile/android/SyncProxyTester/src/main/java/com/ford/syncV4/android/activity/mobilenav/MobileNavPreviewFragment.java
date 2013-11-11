@@ -1,6 +1,6 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
-import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,10 +12,13 @@ import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.android.constants.Const;
 
 import java.io.OutputStream;
 
 public class MobileNavPreviewFragment extends Fragment{
+    private static final String TAG =
+            MobileNavPreviewFragment.class.getSimpleName();
     private CheckBoxState mobileNavSessionCheckBoxState;
     private Button dataStreamingButton;
     private FileStreamingLogic fileStreamingLogic;
@@ -98,6 +101,27 @@ public class MobileNavPreviewFragment extends Fragment{
     }
 
     private void startFileStreaming() {
+        SharedPreferences prefs =
+                context.getSharedPreferences(Const.PREFS_NAME, 0);
+        int videoSource = prefs.getInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE,
+                Const.PREFS_DEFAULT_NAVI_VIDEOSOURCE);
+
+        int videoResID = 0;
+        switch (videoSource) {
+            case Const.KEY_VIDEOSOURCE_MP4:
+                videoResID = R.raw.faq_welcome_orientation;
+                break;
+
+            case Const.KEY_VIDEOSOURCE_H264:
+                videoResID = R.raw.faq_welcome_orientation_rawh264;
+                break;
+
+            default:
+                Log.e(TAG, "Unknown video source " + videoSource);
+                break;
+        }
+
+        fileStreamingLogic.setFileResID(videoResID);
         fileStreamingLogic.startFileStreaming();
     }
 

@@ -63,5 +63,6 @@ Item {
         id: buttonOk
         buttonId: Common.ButtonName.OK
         name: "Ok"
+        longPressAvailable: false
     }
 }

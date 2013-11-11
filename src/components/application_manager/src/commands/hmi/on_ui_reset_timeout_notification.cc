@@ -1,6 +1,4 @@
 /**
- * @file LongOvalButton.qml
- * @brief Parent class for long oval buttons.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,55 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import QtQuick 2.0
-import "../models/Constants.js" as Constants
+#include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
+namespace application_manager {
 
-Image {
-    id: longOvalButton
-    source: "../res/buttons/long_oval_btn.png"
-    property alias text: btnText.text
-    property alias pixelSize: btnText.font.pixelSize
-    property string  dest: ""
-    property bool isPressed: false
+namespace commands {
 
-    signal clicked
-    Connections {
-        target: mouseArea
-        onClicked: {
-            clicked()
-        }
-    }
+namespace hmi {
 
-    Text {
-        anchors.centerIn: parent
-        id: btnText
-        color: Constants.primaryColor
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        onPressed: {
-            source = "../res/buttons/long_oval_pressed_btn.png"
-            btnText.color = Constants.secondaryColor
-            isPressed = true
-        }
-        onReleased: {
-            source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constants.primaryColor
-            isPressed = false
-        }
-        onCanceled: {
-            source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constants.primaryColor
-            isPressed = false
-        }
-
-        onClicked: {
-            if(dest !== ""){
-                contentLoader.go(dest)
-            }
-        }
-    }
+OnUIResetTimeoutNotification::OnUIResetTimeoutNotification(
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
+
+OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
+}
+
+void OnUIResetTimeoutNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnUIResetTimeoutNotification::Run");
+
+  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
+  event.set_smart_object(*message_);
+  event.raise();
+}
+
+}  // namespace hmi
+
+}  // namespace commands
+
+}  // namespace application_manager
+

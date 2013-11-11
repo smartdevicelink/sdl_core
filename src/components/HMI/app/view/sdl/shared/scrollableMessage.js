@@ -134,10 +134,11 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
          */
         click: function(){
 
-            var self = this;
+            var self = this._parentView;
 
-            clearTimeout(this.timer);
-            this.timer = setTimeout(function () {
+            clearTimeout(this._parentView.timer);
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.ScrollableMessage");
+            this._parentView.timer = setTimeout(function () {
                 self.deactivate();
             }, this._parentView.timeout);
         }

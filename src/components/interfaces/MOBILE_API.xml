@@ -2640,7 +2640,7 @@
       </description>
     </param>
 
-    <param name="statusBar" type="String" maxlength="0" mandatory="false">
+    <param name="statusBar" type="String" maxlength="500" mandatory="false">
       <description>Requires investigation regarding the nav display capabilities. Potentially lower lowerStatusBar, upperStatusBar, titleBar, etc.</description>
     </param>
 

@@ -250,16 +250,34 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
     return false;
   }
 
-  obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
-  obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
-  obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
-  obj[sos::S_PARAMS][sos::kCode] = hmi_apis::Common_Result::SUCCESS;
   obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
   ListArgs args = schema_->getListArgs(ids.second,
                                              hmi_apis::messageType::response);
-  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS], obj[sos::S_PARAMS]);
+  DBusMessageIter iter;
+  dbus_message_iter_init(msg, &iter);
+  int code;
+  std::string message;
+  smart_objects::SmartObject description(smart_objects::SmartType_Map);
+  bool ret = GetHeader(&iter, &code, &message)
+      && GetArguments(&iter, args, description);
+
+  if (ret) {
+    obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
+    obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
+    obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
+    obj[sos::S_PARAMS][sos::kCode] = code;
+    obj[sos::S_PARAMS][sos::kMessage] = message;
+  }
+
+  if (code != hmi_apis::Common_Result::SUCCESS) {
+    MessageName name = schema_->getMessageName(ids.second);
+    description["method"] = name.first + "." + name.second;
+    obj[sos::S_PARAMS]["data"] = description;
+  } else {
+    obj[sos::S_MSG_PARAMS] = description;
+  }
 
   dbus_message_unref(msg);
   return ret;
@@ -284,7 +302,10 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
     smart_objects::SmartObject description(smart_objects::SmartType_Map);
     description[rule.name] = smart_objects::SmartObject(
         smart_objects::SmartType_String);
-    ret = GetArguments(msg, args, description);
+
+    DBusMessageIter iter;
+    dbus_message_iter_init(msg, &iter);
+    ret = GetArguments(&iter, args, description);
     MessageName method = schema_->getMessageName(ids.second);
 
     obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
@@ -327,7 +348,10 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg,
 
   const ListArgs args = schema_->getListArgs(
       name, hmi_apis::messageType::notification);
-  bool ret = GetArguments(msg, args, obj[sos::S_MSG_PARAMS]);
+
+  DBusMessageIter iter;
+  dbus_message_iter_init(msg, &iter);
+  bool ret = GetArguments(&iter, args, obj[sos::S_MSG_PARAMS]);
   dbus_message_unref(msg);
   return ret;
 }
@@ -499,46 +523,47 @@ bool DBusAdapter::SetStructValue(
   return true;
 }
 
-bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
-                               smart_objects::SmartObject& args) {
-  DBusMessageIter iter;
-  dbus_message_iter_init(msg, &iter);
-  size_t size = rules.size();
-  for (size_t i = 0; i < size; ++i) {
-    if (!GetOneArgument(&iter, rules[i], args)) {
-      return false;
-    }
-    dbus_message_iter_next(&iter);
+bool DBusAdapter::GetHeader(DBusMessageIter* iter, int* code,
+                            std::string* message) {
+  // Get code of response
+  dbus_int32_t intValue;
+  int type = dbus_message_iter_get_arg_type(iter);
+  if (type != DBUS_TYPE_INT32) {
+    LOG4CXX_ERROR(logger_, "DBus: Unknown format of header");
+    return false;
   }
+  LOG4CXX_DEBUG(logger_, "DBus: Code of response " << *code);
+  dbus_message_iter_get_basic(iter, &intValue);
+  *code = intValue;
+
+  dbus_message_iter_next(iter);
+
+  // Get message of response
+  type = dbus_message_iter_get_arg_type(iter);
+  if (type != DBUS_TYPE_STRING) {
+    LOG4CXX_ERROR(logger_, "DBus: Unknown format of header");
+    return false;
+  }
+  const char* stringValue;
+  dbus_message_iter_get_basic(iter, &stringValue);
+  *message = stringValue;
+  LOG4CXX_DEBUG(logger_, "DBus: message of response " << *message);
+
+  dbus_message_iter_next(iter);
   return true;
 }
 
-bool DBusAdapter::GetArguments(DBusMessage* msg, const ListArgs& rules,
-                               smart_objects::SmartObject& args,
-                               smart_objects::SmartObject& s_params) {
-  LOG4CXX_INFO(logger_, "GetArguments 2");
-  DBusMessageIter iter;
-  dbus_message_iter_init(msg, &iter);
-
-  dbus_int32_t retCode_val;
-  int type = dbus_message_iter_get_arg_type(&iter);
-  if (type != DBUS_TYPE_INT32) {
-	  LOG4CXX_INFO(logger_, "GetArguments 2: first argument is not int32");
-  }
-  dbus_message_iter_get_basic(&iter, &retCode_val);
-  smart_objects::SmartObject retCode(retCode_val);
-  s_params[sos::kCode] = retCode;
-  dbus_message_iter_next(&iter);
+bool DBusAdapter::GetArguments(DBusMessageIter* iter, const ListArgs& rules,
+                               smart_objects::SmartObject& args) {
+  LOG4CXX_TRACE(logger_, "GetArguments");
 
   size_t size = rules.size();
   for (size_t i = 0; i < size; ++i) {
-    if (!GetOneArgument(&iter, rules[i], args)) {
-	  LOG4CXX_INFO(logger_, "GetArguments 2 failed");
+    if (!GetOneArgument(iter, rules[i], args)) {
       return false;
     }
-    dbus_message_iter_next(&iter);
+    dbus_message_iter_next(iter);
   }
-  LOG4CXX_INFO(logger_, "GetArguments 2 ok");
   return true;
 }
 

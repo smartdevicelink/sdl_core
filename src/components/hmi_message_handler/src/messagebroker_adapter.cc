@@ -97,6 +97,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
   MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
   MessageBrokerController::subscribeTo("UI.OnTouchEvent");
+  MessageBrokerController::subscribeTo("UI.OnResetTimeout");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");
@@ -111,7 +112,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
-  MessageBrokerController::subscribeTo("UI.OnTBTClientState");
+  MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 

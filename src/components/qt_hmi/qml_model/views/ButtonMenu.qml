@@ -69,12 +69,11 @@ GeneralView {
                         height: flicker.height / 2
                         opacity: 0
 
-                        LongOvalButton {
-                            id: button
+                        OvalButton {
                             text: menuView.listModel.get(index).title
-                            pixelSize: Constants.fontSize
-                            dest: menuView.listModel.get(index).qml
+                            onReleased: contentLoader.go(menuView.listModel.get(index).qml)
                             anchors.centerIn: parent
+                            fontSize: Constants.fontSize
                         }
 
                         SequentialAnimation {
@@ -106,13 +105,13 @@ GeneralView {
                         height: flicker.height / 2
                         opacity: 0
 
-                        LongOvalButton {
-                            id: buttonLowerRow
+                        OvalButton {
                             text: menuView.listModel.get(index + menuView.countOfUpperRowItems).title
-                            pixelSize: Constants.fontSize
-                            dest: menuView.listModel.get(index + menuView.countOfUpperRowItems).qml
+                            onReleased: contentLoader.go(menuView.listModel.get(index + menuView.countOfUpperRowItems).qml)
                             anchors.centerIn: parent
+                            fontSize: Constants.fontSize
                         }
+
                         SequentialAnimation {
                             id: lowRowAnimation
                             PauseAnimation {duration: 300 + index * 100 }
@@ -148,6 +147,7 @@ GeneralView {
         space: 10
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+        anchors.topMargin: Constants.margin
 
         pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
         activePage: Internal.activePageChoose(flicker, pager.pages)

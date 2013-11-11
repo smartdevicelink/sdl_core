@@ -37,6 +37,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_chaining.h"
@@ -76,6 +77,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace threads {
 class Thread;
 }
+class CommandNotificationImpl;
 
 namespace application_manager {
 
@@ -397,6 +399,31 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 int first_session_key,
                                 connection_handler::ServiceType type);
 
+    /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void addNotification(const CommandSharedPtr& ptr);
+
+    /**
+     * @ Add notification to collection
+     *
+     * @param ptr Reference to shared pointer that point on hmi notification
+     */
+    void removeNotification(const CommandSharedPtr& ptr);
+
+    /**
+     * @ Updates request timeout
+     *
+     * @param connection_key Connection key of application
+     * @param mobile_correlation_id Correlation ID of the mobile request
+     * @param new_timeout_value New timeout to be set
+     */
+    void updateRequestTimeout(unsigned int connection_key,
+                              unsigned int mobile_correlation_id,
+                              unsigned int new_timeout_value);
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -442,10 +469,17 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Map of connection keys and associated applications
      */
     std::map<int, Application*> applications_;
+
     /**
      * @brief List of applications
      */
     std::set<Application*> application_list_;
+
+    /**
+     * @brief Set of HMI notifications with timeout.
+     */
+    std::list<CommandSharedPtr> notification_list_;
+
     MessageChain message_chaining_;
     bool audio_pass_thru_flag_;
     bool is_distracting_driver_;

@@ -63,6 +63,14 @@ var MediaClockRunningMode = {
     MCR_STOPPED: 1
 }
 
+function getArrayForPresetRow() {
+    var array = []
+    for (var i = 0; i < dataContainer.currentApplication.customPresets.count; i++) {
+        array.push(dataContainer.currentApplication.customPresets.get(i).text)
+    }
+    return array
+}
+
 function pad (string, length, lead) {
     if (!lead) {
         lead = '0'
@@ -96,6 +104,26 @@ function hmsTimeToString (hmsTime) {
     string += ":"
     string += pad(seconds, 2)
     return string
+}
+
+function stringToHmsTime (hmsString) {
+    console.debug("enter: \"" + hmsString + "\"")
+    var substrings = hmsString.split(":")
+    var seconds = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    if (seconds >= 60) {
+        console.log("incorrect field \"seconds\": " + seconds)
+        console.debug("exit")
+        return 0
+    }
+    var minutes = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    if (minutes >= 60) {
+        console.log("incorrect field \"minutes\": " + minutes)
+        console.debug("exit")
+        return 0
+    }
+    var hours = substrings.length > 0 ? parseInt(substrings.pop()) : 0
+    console.debug("exit")
+    return hmsTime(hours, minutes, seconds)
 }
 
 function mediaClockUpdateModeToString (mediaClockUpdateMode) {

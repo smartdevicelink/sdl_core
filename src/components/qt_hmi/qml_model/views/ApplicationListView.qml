@@ -46,29 +46,31 @@ GeneralView {
             height: 1/4 * parent.height
 
             PagedFlickable {
+                anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
-                snapTo: 200 + spacing
-                spacing: (width - 600) / 2
-                LongOvalButton {
-                    width: 200
-                    text: "Vehicle Health Report"
-                }
-                LongOvalButton {
-                    width: 200
-                    text: "911 Assist"
-                }
-                LongOvalButton {
-                    width: 200
-                    text: "Install applications/Up"
-                }
-                LongOvalButton {
-                    width: 200
+                elementWidth: Constants.ovalButtonWidth
+                snapTo: elementWidth + spacing
+                spacing: (width - 4 * elementWidth) / 3
+
+                OvalButton {
                     text: "Find New Apps"
                 }
-                LongOvalButton {
-                    width: 200
+
+                OvalButton {
                     text: "Change device"
-                    dest: "./views/ChangeDeviceView.qml"
+                    onReleased: contentLoader.go("./views/ChangeDeviceView.qml")
+                }
+
+                OvalButton {
+                    text: "911 Assist"
+                }
+
+                OvalButton {
+                    text: "Vehicle Health Report"
+                }
+
+                OvalButton {
+                    text: "Install applications/Up"
                 }
             }
         }
@@ -77,25 +79,29 @@ GeneralView {
             height: parent.height / 2
             width: parent.width
 
-            ListView {
+            ScrollableListView {
                 id: applicationListView
                 anchors.fill: parent
                 model: dataContainer.applicationList
 
-                anchors.horizontalCenter: parent.horizontalCenter
-                width:parent.width
-                height:parent.height
-
-                delegate: Row {
+                delegate: Item {
                     width: parent.width
-                    height: appName.height
-                    Image { id: sdlIcon; source: icon }
+                    height: Math.max(applicationName.height, appIcon.height)
+                    Image {
+                        id: appIcon
+                        source: icon
+                        height: Constants.appListIconSize
+                        width: height
+                    }
                     ClickableText {
+                        id: applicationName
                         text: appName
                         defaultColor: Constants.primaryColor
                         pressedColor: Constants.primaryColorPressed
-                        font.pixelSize: Constants.titleFontSize
+                        font.pixelSize: Constants.appListFontSize
                         anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: appIcon.right
+                        anchors.leftMargin: Constants.margin
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
                             dataContainer.currentApplication.isMediaApplication ? contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
@@ -111,7 +117,7 @@ GeneralView {
             width: parent.width
             height: 1/4 * parent.height
 
-            BackButton { anchors.centerIn: parent}
+            BackButton { anchors.centerIn: parent }
         }
     }
 }
