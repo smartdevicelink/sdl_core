@@ -188,3 +188,8 @@ var appListFontSize = 40
 
 // Size icon for list of applications
 var appListIconSize = 100
+
+//soft button highlighting values
+var softButtonHue = 0.9
+var softButtonSaturation = 0.0
+var softButtonLightness = 0.1
