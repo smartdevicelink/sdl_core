@@ -56,76 +56,55 @@ Item {
     property bool dynamic: false
 
 
-    Image {
-        id: left
-        width: 31
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.top: parent.top
-        source: "../res/buttons/oval_btn_left.png"
+    Item {
+        id: buttonBorderImage
         visible: false
-    }
-    HueSaturation {
-        id: hueLeft
-        anchors.fill: left
-        source: left
-        hue: main.highlighted ? Constants.softButtonHue : 0
-        saturation: main.highlighted ? Constants.softButtonSaturation : 0
-        lightness: main.highlighted ? Constants.softButtonLightness : 0
-    }
+        anchors.fill: parent
+        Image {
+            id: left
+            width: 31
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.top: parent.top
+            source: "../res/buttons/oval_btn_left.png"
+        }
 
-    Image {
-        id: right
-        width: 31
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        source: "../res/buttons/oval_btn_right.png"
-        visible: false
-    }
-    HueSaturation {
-        anchors.fill: right
-        source: right
-        hue: main.highlighted ? Constants.softButtonHue : 0
-        saturation: main.highlighted ? Constants.softButtonSaturation : 0
-        lightness: main.highlighted ? Constants.softButtonLightness : 0
-    }
+        Image {
+            id: right
+            width: 31
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            source: "../res/buttons/oval_btn_right.png"
+        }
 
-    Image {
-        id: top
-        height: 10
-        anchors.right: parent.right
-        anchors.rightMargin: 31
-        anchors.left: parent.left
-        anchors.leftMargin: 31
-        anchors.top: parent.top
-        fillMode: Image.TileHorizontally
-        source: "../res/buttons/oval_btn_top.png"
-        visible: false
-    }
-    HueSaturation {
-        anchors.fill: top
-        source: top
-        hue: main.highlighted ? Constants.softButtonHue : 0
-        saturation: main.highlighted ? Constants.softButtonSaturation : 0
-        lightness: main.highlighted ? Constants.softButtonLightness : 0
-    }
+        Image {
+            id: top
+            height: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 31
+            anchors.left: parent.left
+            anchors.leftMargin: 31
+            anchors.top: parent.top
+            fillMode: Image.TileHorizontally
+            source: "../res/buttons/oval_btn_top.png"
+        }
 
-    Image {
-        id: bottom
-        height: 11
-        anchors.right: parent.right
-        anchors.rightMargin: 31
-        anchors.left: parent.left
-        anchors.leftMargin: 31
-        anchors.bottom: parent.bottom
-        fillMode: Image.TileHorizontally
-        source: "../res/buttons/oval_btn_bottom.png"
-        visible: false
+        Image {
+            id: bottom
+            height: 11
+            anchors.right: parent.right
+            anchors.rightMargin: 31
+            anchors.left: parent.left
+            anchors.leftMargin: 31
+            anchors.bottom: parent.bottom
+            fillMode: Image.TileHorizontally
+            source: "../res/buttons/oval_btn_bottom.png"
+        }
     }
     HueSaturation {
-        anchors.fill: bottom
-        source: bottom
+        anchors.fill: buttonBorderImage
+        source: buttonBorderImage
         hue: main.highlighted ? Constants.softButtonHue : 0
         saturation: main.highlighted ? Constants.softButtonSaturation : 0
         lightness: main.highlighted ? Constants.softButtonLightness : 0
@@ -134,9 +113,6 @@ Item {
     Rectangle {
         id: background
         color: Constants.transparentColor
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
         anchors.fill: parent
         anchors.rightMargin: 31
         anchors.leftMargin: 31
@@ -182,12 +158,7 @@ Item {
 
     Item {
         id: field
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 13
-        anchors.top: parent.top
-        anchors.topMargin: 12
-        anchors.left: left.right
-        anchors.right: right.left
+        anchors.fill: background
 
         Icon {
             id: image
@@ -199,8 +170,7 @@ Item {
         Text {
             id: label
             color: Constants.primaryColor
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.centerIn: parent
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: Constants.ovalButtonFontSize
