@@ -185,3 +185,6 @@ var audioPassThruTextColor = "white"
 
 // Padding for hardware and simulation panels
 var panelPadding = 20
+
+// Scale for pressed icon in menu
+var pressedIconScale = 1.1

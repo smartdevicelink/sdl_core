@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 import "../controls"
 import "../models/Constants.js" as Constants
@@ -66,35 +67,13 @@ GeneralView{
                         height: flicker.height / 2
                         opacity: 0
 
-                        Image {
+                        ClickableImage {
                             source: menuView.listModel.get(index).icon
                             anchors.centerIn: parent
 
-                            MouseArea {
-                                anchors.fill: parent
-
-                                onPressed: {
-                                    console.debug("enter")
-                                    parent.scale = 1.1
-                                    console.debug("exit")
-                                }
-
-                                onReleased: {
-                                    console.debug("enter")
-                                    parent.scale = 1
-                                    console.debug("exit")
-                                }
-
-                                onCanceled: {
-                                    console.debug("enter")
-                                    parent.scale = 1
-                                    console.debug("exit")
-                                }
-
-                                onClicked: {
-                                    if(menuView.listModel.get(index).qml !== "") {
-                                        contentLoader.go(menuView.listModel.get(index).qml)
-                                    }
+                            onClicked: {
+                                if(menuView.listModel.get(index).qml !== "") {
+                                    contentLoader.go(menuView.listModel.get(index).qml)
                                 }
                             }
                         }
@@ -128,34 +107,13 @@ GeneralView{
                         height: flicker.height / 2
                         opacity: 0
 
-                        Image {
+                        ClickableImage {
                             source: menuView.listModel.get(index + menuView.countOfUpperRowItems).icon
                             anchors.centerIn: parent
-                            MouseArea {
-                                anchors.fill: parent
 
-                                onPressed: {
-                                    console.debug("enter")
-                                    parent.scale = 1.1
-                                    console.debug("exit")
-                                }
-
-                                onReleased: {
-                                    console.debug("enter")
-                                    parent.scale = 1
-                                    console.debug("exit")
-                                }
-
-                                onCanceled: {
-                                    console.debug("enter")
-                                    parent.scale = 1
-                                    console.debug("exit")
-                                }
-
-                                onClicked: {
-                                    if(menuView.listModel.get(index).qml !== "") {
-                                        contentLoader.go(menuView.listModel.get(index+ menuView.countOfUpperRowItems).qml)
-                                    }
+                            onClicked: {
+                                if(menuView.listModel.get(index).qml !== "") {
+                                    contentLoader.go(menuView.listModel.get(index+ menuView.countOfUpperRowItems).qml)
                                 }
                             }
                         }
