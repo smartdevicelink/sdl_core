@@ -57,6 +57,14 @@ Item {
         }
     }
 
+    function getGpsData(appID) {
+        return {gps: dataContainer.vehicleInfoModel.gps}
+    }
+
+    function getSpeed(appID) {
+        return {speed: dataContainer.vehicleInfoModel.speed}
+    }
+
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
                             wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {

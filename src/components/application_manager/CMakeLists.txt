@@ -253,8 +253,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
 ./src/commands/hmi/vi_read_did_response.cc
-./src/commands/hmi/vi_get_vehicle_data_request.cc
-./src/commands/hmi/vi_get_vehicle_data_response.cc
 ./src/commands/hmi/vi_get_dtcs_request.cc
 ./src/commands/hmi/vi_get_dtcs_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
@@ -297,6 +295,63 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_stop_stream_request.cc
 ./src/commands/hmi/navi_stop_stream_response.cc
 )
+
+set (HMI_COMMANDS_SOURCES_WEBHMI
+./src/commands/hmi/vi_get_vehicle_data_request.cc
+./src/commands/hmi/vi_get_vehicle_data_response.cc
+)
+
+set (HMI_COMMANDS_SOURCES_QTHMI
+./src/commands/hmi/vi_get_gps_data_request.cc
+./src/commands/hmi/vi_get_gps_data_response.cc
+./src/commands/hmi/vi_get_speed_request.cc
+./src/commands/hmi/vi_get_speed_response.cc
+./src/commands/hmi/vi_get_rpm_request.cc
+./src/commands/hmi/vi_get_rpm_response.cc
+./src/commands/hmi/vi_get_fuel_level_request.cc
+./src/commands/hmi/vi_get_fuel_level_response.cc
+./src/commands/hmi/vi_get_fuel_level_state_request.cc
+./src/commands/hmi/vi_get_fuel_level_state_response.cc
+./src/commands/hmi/vi_get_instant_fuel_consumption_request.cc
+./src/commands/hmi/vi_get_instant_fuel_consumption_response.cc
+./src/commands/hmi/vi_get_external_temperature_request.cc
+./src/commands/hmi/vi_get_external_temperature_response.cc
+./src/commands/hmi/vi_get_vin_request.cc
+./src/commands/hmi/vi_get_vin_response.cc
+./src/commands/hmi/vi_get_prndl_request.cc
+./src/commands/hmi/vi_get_prndl_response.cc
+./src/commands/hmi/vi_get_tire_pressure_request.cc
+./src/commands/hmi/vi_get_tire_pressure_response.cc
+./src/commands/hmi/vi_get_odometer_request.cc
+./src/commands/hmi/vi_get_odometer_response.cc
+./src/commands/hmi/vi_get_belt_status_request.cc
+./src/commands/hmi/vi_get_belt_status_response.cc
+./src/commands/hmi/vi_get_body_information_request.cc
+./src/commands/hmi/vi_get_body_information_response.cc
+./src/commands/hmi/vi_get_device_status_request.cc
+./src/commands/hmi/vi_get_device_status_response.cc
+./src/commands/hmi/vi_get_driver_braking_request.cc
+./src/commands/hmi/vi_get_driver_braking_response.cc
+./src/commands/hmi/vi_get_wiper_status_request.cc
+./src/commands/hmi/vi_get_wiper_status_response.cc
+./src/commands/hmi/vi_get_head_lamp_status_request.cc
+./src/commands/hmi/vi_get_head_lamp_status_response.cc
+./src/commands/hmi/vi_get_engine_torque_request.cc
+./src/commands/hmi/vi_get_engine_torque_response.cc
+./src/commands/hmi/vi_get_acc_pedal_position_request.cc
+./src/commands/hmi/vi_get_acc_pedal_position_response.cc
+./src/commands/hmi/vi_get_steering_wheel_angle_request.cc
+./src/commands/hmi/vi_get_steering_wheel_angle_response.cc
+./src/commands/hmi/vi_get_my_key_request.cc
+./src/commands/hmi/vi_get_my_key_response.cc
+)
+
+if (${WEB_HMI})
+    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_WEBHMI})
+endif (${WEB_HMI})
+if (${QT_HMI})
+    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_QTHMI})
+endif (${QT_HMI})
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
 target_link_libraries ("ApplicationManager" log4cxx)
