@@ -79,7 +79,7 @@ PopUp {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: Constants.popupMargin
-        width: Constants.longOvalButtonWidth
+        width: Constants.ovalButtonWidth
         text: "Close"
         onClicked: hide()
     }

@@ -75,6 +75,9 @@ var panelTextColor = "white"
 // Font size for most of text in HMI model.
 var fontSize = 20
 
+// Font size for text inside oval buttons.
+var ovalButtonFontSize = 15
+
 // Title font size
 var titleFontSize = 45
 
@@ -104,10 +107,10 @@ var warningScreenDuration = 1000
 var presetButtonTimer = 400
 
 // Width for long oval button
-var longOvalButtonWidth = 163
+var ovalButtonWidth = 163
 
 // Height for oval button
-var ovalButtonHeight = 63
+var ovalButtonHeight = 65
 
 // Size icon for buttons
 var iconButtonSize = 30

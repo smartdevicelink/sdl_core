@@ -42,7 +42,7 @@ import "../models/Constants.js" as Constants
 
 Item {
     id: main
-    width: dynamic ? field.width + 2 * left.width : Constants.longOvalButtonWidth
+    width: dynamic ? field.width + 2 * left.width : Constants.ovalButtonWidth
     height: Constants.ovalButtonHeight
 
     signal clicked;
@@ -60,11 +60,8 @@ Item {
         id: left
         width: 31
         anchors.left: parent.left
-        anchors.leftMargin: 0
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
         anchors.top: parent.top
-        anchors.topMargin: 0
         source: "../res/buttons/oval_btn_left.png"
         visible: false
     }
@@ -81,11 +78,8 @@ Item {
         id: right
         width: 31
         anchors.top: parent.top
-        anchors.topMargin: 0
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
         anchors.right: parent.right
-        anchors.rightMargin: 0
         source: "../res/buttons/oval_btn_right.png"
         visible: false
     }
@@ -105,7 +99,6 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 31
         anchors.top: parent.top
-        anchors.topMargin: 0
         fillMode: Image.TileHorizontally
         source: "../res/buttons/oval_btn_top.png"
         visible: false
@@ -126,8 +119,7 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 31
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        fillMode: Image.TileVertically
+        fillMode: Image.TileHorizontally
         source: "../res/buttons/oval_btn_bottom.png"
         visible: false
     }
@@ -211,7 +203,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 16
+            font.pixelSize: Constants.ovalButtonFontSize
             visible: false
         }
         HueSaturation {
