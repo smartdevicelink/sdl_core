@@ -94,7 +94,7 @@ GeneralView {
                         text: appName
                         defaultColor: Constants.primaryColor
                         pressedColor: Constants.primaryColorPressed
-                        font.pixelSize: 40
+                        font.pixelSize: Constants.titleFontSize
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
