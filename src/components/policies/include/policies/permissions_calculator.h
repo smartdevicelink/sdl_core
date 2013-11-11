@@ -87,7 +87,7 @@ class PermissionsCalculator {
      *          functional groups where RPC is found.
      *          Returned value must be freed by the caller.
      */
-    static PermissionResult::eType FindRPCsByGroups(
+    static PermissionResult::eType CalcPermissionsByGroups(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
         const std::vector<std::string> rpc_groups,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,

@@ -88,7 +88,7 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
   }
 
   if (rpc_groups.size() > 0) {
-    return FindRPCsByGroups(pt_object, rpc_groups, rpc, hmi_status);
+    return CalcPermissionsByGroups(pt_object, rpc_groups, rpc, hmi_status);
   }
 
   return PermissionResult::PERMISSION_NOK_DISALLOWED;
@@ -106,7 +106,7 @@ Priority::eType PermissionsCalculator::GetPriority(
 //----------------------------------------------------------------------------
 
 PermissionResult::eType
-  PermissionsCalculator::FindRPCsByGroups(
+  PermissionsCalculator::CalcPermissionsByGroups(
     const so_ns::SmartObject& pt_object,
     const std::vector<std::string> rpc_groups,
     const so_ns::SmartObject& rpc,
