@@ -101,8 +101,6 @@ Item {
             // picture + text info
             width: parent.width
             height: 3/4 * parent.height
-  //          anchors.left: parent.left
-   //         anchors.top: parent.top
             spacing: Constants.margin
 
             Image {
@@ -154,8 +152,6 @@ Item {
         }
 
         MediaClockView {
- //           anchors.left: parent.left
-  //          anchors.bottom: parent. bottom
             width: parent.width
             height: parent.height * 1/4
         }
@@ -239,7 +235,6 @@ Item {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
-                // (dataContainer.currentApplication.customPresets.count > 0) ? Internal.getArrayForPresetRow() : []
             width: parent.width
             property bool clickProcessed
 

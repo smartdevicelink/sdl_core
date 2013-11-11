@@ -78,7 +78,6 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 31
         anchors.top: parent.top
-        anchors.topMargin: 0
         fillMode: Image.TileHorizontally
         source: "../res/buttons/oval_btn_top.png"
     }
@@ -91,8 +90,7 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 31
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        fillMode: Image.TileVertically
+        fillMode: Image.TileHorizontally
         source: "../res/buttons/oval_btn_bottom.png"
     }
 
