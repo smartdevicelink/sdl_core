@@ -116,7 +116,7 @@ QtObject {
     }
 
     function addApplication(app) {
-        console.log("enter addApplication function");
+        console.log("enter")
         applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
@@ -139,7 +139,12 @@ QtObject {
             softButtons: []
             // This place is for adding new properties
         })
-        console.log("exit addApplication function");
+
+        if (app.isMediaApplication) {
+            musicSourceModel.insert(0, {"title": app.appName, "icon": "../res/buttons/long_oval_btn.png", "qml": ""})
+        }
+
+        console.log("exit")
     }
 
     function setApplicationProperties(appId, props) {
@@ -159,11 +164,19 @@ QtObject {
     function removeApplication(appId) {
         console.log("Enter removeApplication function");
         for (var i = 0; i < applicationList.count; i++) {
-            if (applicationList.get(i).appId === appId) {
+            var application = applicationList.get(i)
+            if (application.appId === appId) {
+                for (var j = 0; j < musicSourceModel.count; ++j) {
+                    if (musicSourceModel.get(j).title === application.appName) {
+                        musicSourceModel.remove(j)
+                        break
+                    }
+                }
                 applicationList.remove(i);
                 break;
             }
         }
+
         console.log("Exit removeApplication function");
     }
     property int systemContext
@@ -469,5 +482,7 @@ QtObject {
             systemContext = contentLoader.item.systemContext
         }
         console.debug("exit")
+    }
+    property MusicSourceModel musicSourceModel: MusicSourceModel {
     }
 }
