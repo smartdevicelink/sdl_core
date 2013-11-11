@@ -487,8 +487,6 @@ SDL.SDLController = Em.Object
 
             SDL.States.goToStates('info.devicelist');
             SDL.SDLModel.set('deviceSearchProgress', true);
-
-            FFW.BasicCommunication.OnStartDeviceDiscovery();
         },
         /**
          * Send notification if device was choosed
