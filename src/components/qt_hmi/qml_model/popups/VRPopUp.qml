@@ -82,22 +82,19 @@ PopUp {
             width: parent.width
             text: command
             onClicked: {
-                sdlVR.onCommand(cmdID, appID);
+                sdlVR.onCommand(cmdID, appID === 0 ? undefined : appID);
             }
         }
     }
 
     function activate() {
         dataContainer.activeVR = true;
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_VRSESSION
         sdlVR.started();
         show();
     }
 
     function complete(reason) {
         dataContainer.activeVR = false;
-        dataContainer.systemContext = dataContainer.systemSavedContext
         sdlVR.stopped();
         hide();
     }

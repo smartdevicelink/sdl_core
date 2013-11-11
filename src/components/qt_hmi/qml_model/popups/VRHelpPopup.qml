@@ -81,23 +81,8 @@ PopUp {
         anchors.margins: Constants.popupMargin
         width: Constants.ovalButtonWidth
         text: "Close"
-        onClicked: deactivate()
+        onClicked: hide()
     }
 
     property alias title: title.text
-
-    function activate () {
-        console.debug("enter")
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
-        show()
-        console.debug("exit")
-    }
-
-    function deactivate () {
-        console.debug("enter")
-        dataContainer.systemContext = dataContainer.systemSavedContext
-        hide()
-        console.debug("exit")
-    }
 }

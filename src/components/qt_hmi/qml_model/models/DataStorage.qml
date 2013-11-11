@@ -171,7 +171,6 @@ QtObject {
     property int hmiContext
     property bool applicationContext: false
 
-    property int systemSavedContext
     property bool applicationSavedContext
 
     property string route_text: ""
@@ -447,4 +446,28 @@ QtObject {
     }
     property bool activeTTS: false
     property var activePopup
+    property int popups: 0
+
+    property bool activeAlert: false
+
+    onActiveVRChanged: setSystemContext()
+    onActiveAlertChanged: setSystemContext()
+    onPopupsChanged: setSystemContext()
+
+    function setSystemContext () {
+        console.debug("enter")
+        if (activeVR) {
+            systemContext = Common.SystemContext.SYSCTXT_VRSESSION
+        }
+        else if (activeAlert) {
+            systemContext = Common.SystemContext.SYSCTXT_ALERT
+        }
+        else if (popups > 0) {
+            systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+        }
+        else if (contentLoader.item !== null) {
+            systemContext = contentLoader.item.systemContext
+        }
+        console.debug("exit")
+    }
 }

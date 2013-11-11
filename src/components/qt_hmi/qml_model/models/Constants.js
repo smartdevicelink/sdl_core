@@ -185,3 +185,9 @@ var audioPassThruTextColor = "white"
 
 // Padding for hardware and simulation panels
 var panelPadding = 20
+
+// Font size for list of applications
+var appListFontSize = 40
+
+// Size icon for list of applications
+var appListIconSize = 100

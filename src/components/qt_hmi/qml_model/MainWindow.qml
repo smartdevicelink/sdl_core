@@ -145,14 +145,13 @@ Rectangle {
 
                 onStatusChanged: {
                     if (status == Component.Ready) {
-                        if (dataContainer.systemContext !== Common.SystemContext.SYSCTXT_ALERT) {
-                            dataContainer.systemContext = item.systemContext
+                        if (!dataContainer.activeAlert) {
                             dataContainer.applicationContext = item.applicationContext
                         }
                         else {
-                            dataContainer.systemSavedContext = item.systemContext
                             dataContainer.applicationSavedContext = item.applicationContext
                         }
+                        dataContainer.setSystemContext()
                     }
                 }
             }
