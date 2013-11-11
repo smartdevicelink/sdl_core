@@ -78,11 +78,12 @@ void OnSystemContextNotification::Run() {
           mobile_api::AudioStreamingState::NOT_AUDIBLE);
     }
     ApplicationManagerImpl::instance()->set_vr_session_started(true);
-  } else if (mobile_api::SystemContext::SYSCTXT_ALERT == system_context) {
+  } else if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context &&
+      app->is_media_application()) {
+    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
+  } else if (!(app->is_media_application())) {
     app->set_audio_streaming_state(
         mobile_api::AudioStreamingState::NOT_AUDIBLE);
-  } else if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context) {
-    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
   } else {
     // TODO(DK): check system context MENU HMI_OBSCURED
   }
