@@ -55,7 +55,7 @@ UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {

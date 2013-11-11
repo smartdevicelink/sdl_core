@@ -86,7 +86,7 @@ void PerformInteractionRequest::Run() {
   //timer_.start(2);
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -235,7 +235,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
   Application* app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key]);
+        (*message_)[strings::params][strings::connection_key].asUInt());
   if (app) {
     if(is_vr_help_item_) {
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
@@ -343,7 +343,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
   Application* app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key]);
+        (*message_)[strings::params][strings::connection_key].asUInt());
     if (NULL == app) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;

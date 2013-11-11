@@ -128,6 +128,8 @@ namespace NsSmartDeviceLink
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
+            virtual ~CObjectSchemaItem() {}
+
         private:
             /**
              * @brief Constructor.

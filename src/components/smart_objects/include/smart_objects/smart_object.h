@@ -186,7 +186,7 @@ class SmartObject {
    * @return int Value of the object converted to int type or invalid_int_value if
    *         conversion is not possible
    **/
-  operator int() const;
+  //operator int() const;
 
   /**
    * @brief Returns current object converted to int
@@ -225,7 +225,7 @@ class SmartObject {
    * @return unsigned int Value of the object converted to int type or invalid_int_value if
    *         conversion is not possible
    **/
-  operator unsigned int(void) const;
+  //operator unsigned int(void) const;
 
   /**
    * @brief Returns current object converted to unsigned int int
@@ -269,7 +269,7 @@ class SmartObject {
    * @return double Value of the object converted to double type or invalid_double_value if
    *         conversion is not possible
    **/
-  operator double() const;
+  //operator double() const;
 
   /**
    * @brief Returns current object converted to double
@@ -312,7 +312,7 @@ class SmartObject {
    * @return bool Value of the object converted to bool type or invalid_bool_value if
    *         conversion is not possible
    **/
-  operator bool() const;
+  //operator bool() const;
 
   /**
    * @brief Returns current object converted to bool
@@ -355,7 +355,7 @@ class SmartObject {
    * @return char Value of the object converted to bool type or invalid_char_value if
    *         conversion is not possible
    **/
-  operator char() const;
+  // operator char() const;
 
   /**
    * @brief Returns current object converted to char
@@ -405,7 +405,7 @@ class SmartObject {
    * @return std::string Value of the object converted to bool type or invalid_string_value if
    *         conversion is not possible
    **/
-  operator std::string(void) const;
+  // operator std::string(void) const;
 
   /**
    * @brief Returns current object converted to string
@@ -464,7 +464,7 @@ class SmartObject {
    * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
    *         conversion is not possible
    **/
-  operator SmartBinary(void) const;
+  // operator SmartBinary(void) const;
 
   /**
    * @brief Returns current object converted to binary

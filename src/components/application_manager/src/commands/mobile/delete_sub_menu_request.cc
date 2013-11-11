@@ -51,7 +51,7 @@ void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

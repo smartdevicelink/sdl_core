@@ -51,7 +51,7 @@ void AddSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "AddSubMenuRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

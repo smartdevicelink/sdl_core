@@ -55,7 +55,7 @@ ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
 void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -64,10 +64,10 @@ void ResetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  const int correlation_id =
-      (*message_)[strings::params][strings::correlation_id];
-  const int connection_key =
-      (*message_)[strings::params][strings::connection_key];
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
+  const unsigned int connection_key =
+      (*message_)[strings::params][strings::connection_key].asUInt();
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
                       .length();

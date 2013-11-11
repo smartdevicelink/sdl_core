@@ -61,7 +61,7 @@ const int Formatters::CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 const std::string Formatters::CFormatterJsonSDLRPCv1::getMessageType(
         const SmartObjects::SmartObject& obj)
 {
-    return obj.getElement(str::S_PARAMS).getElement(str::S_MESSAGE_TYPE);
+    return obj.getElement(str::S_PARAMS).getElement(str::S_MESSAGE_TYPE).asString();
 }
 
 // ----------------------------------------------------------------------------
@@ -131,7 +131,7 @@ Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
                                     = meta_formatter_error_code::kErrorOk;
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject tmp_object;
-    
+
   if (false == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
       result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
       return result_code;
@@ -154,8 +154,8 @@ Formatters::CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
   }
   if (false == is_root_object_created_by_schema) {
     result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
-  }  
-    
+  }
+
   CFormatterJsonSDLRPCv1::toString(tmp_object, outStr);
 
   return result_code;

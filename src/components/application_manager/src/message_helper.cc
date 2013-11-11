@@ -1115,7 +1115,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image, const Application* app) {
-  const std::string& file_name = image[strings::value];
+  const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
   str.erase(remove(str.begin(), str.end(), ' '), str.end());

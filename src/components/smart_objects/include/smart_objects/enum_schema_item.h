@@ -127,6 +127,8 @@ namespace NsSmartDeviceLink
              */
             static bool stringToEnum(const std::string& str, EnumType &value);
 
+            virtual ~TEnumSchemaItem() {}
+
         private:
 
             /**
@@ -192,7 +194,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
 
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
-        if (mAllowedElements.end() != mAllowedElements.find(static_cast<EnumType>((int)Object)))
+        if (mAllowedElements.end() != mAllowedElements.find(static_cast<EnumType>(Object.asInt())))
         {
             result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
         }
@@ -229,7 +231,7 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(N
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_String == Object.getType())
     {
-        std::string stringValue = Object;
+        std::string stringValue = Object.asString();
         const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
 
         for (typename std::map<EnumType, std::string>::const_iterator i = elementsStringRepresentation.begin(); i != elementsStringRepresentation.end(); ++i)
@@ -248,7 +250,7 @@ void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema
 {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
     {
-        int integerValue = Object;
+        int integerValue = Object.asInt();
         const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
         typename std::map<EnumType, std::string>::const_iterator i = elementsStringRepresentation.find(static_cast<EnumType>(integerValue));
 
@@ -265,7 +267,7 @@ void smart_objects_ns::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
     smart_objects_ns::SmartObject& result_object) {
 
   if (smart_objects_ns::SmartType_Integer == pattern_object.getType()) {
-    result_object = static_cast<int>(pattern_object);
+    result_object = pattern_object;  // TODO(AK): Check this...
   } else {
     bool result = setDefaultValue(result_object);
     if (false ==result) {

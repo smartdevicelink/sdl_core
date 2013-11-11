@@ -97,17 +97,17 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJson
     }
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean
       == obj.getType()) {
-    item = static_cast<bool>(obj);
+    item = obj.asBool();
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer
       == obj.getType()) {
-    item = static_cast<int>(obj);
+    item = obj.asInt();
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double
       == obj.getType()) {
-    item = static_cast<double>(obj);
+    item = obj.asDouble();
   } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Null
       == obj.getType()) {
     item = Json::nullValue;
   } else {
-    item = static_cast<std::string>(obj);
+    item = obj.asString();
   }
 }

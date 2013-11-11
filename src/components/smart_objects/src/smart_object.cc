@@ -153,12 +153,13 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(int InitialValue)
   set_value_integer(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator int() const {
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator int() const {
   return convert_int();
-}
+}*/
 
 int NsSmartDeviceLink::NsSmartObjects::SmartObject::asInt() const {
-  return static_cast<int>(*this);
+  // return static_cast<int>(*this);
+  return convert_int();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -224,12 +225,15 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
   set_value_unsigned_int(InitialValue);
 }
 
+/*
 NsSmartDeviceLink::NsSmartObjects::SmartObject::operator unsigned int(void) const {
   return convert_unsigned_int();
 }
+*/
 
 unsigned int NsSmartDeviceLink::NsSmartObjects::SmartObject::asUInt() const {
-  return static_cast<unsigned int>(*this);
+  //return static_cast<unsigned int>(*this);
+  return convert_unsigned_int();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -289,12 +293,13 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
   set_value_double(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator double() const {
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator double() const {
   return convert_double();
-}
+}*/
 
 double NsSmartDeviceLink::NsSmartObjects::SmartObject::asDouble() const {
-  return static_cast<double>(*this);
+  // return static_cast<double>(*this);
+  return convert_double();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -352,12 +357,13 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(bool InitialValue)
   set_value_bool(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator bool() const {
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator bool() const {
   return convert_bool();
-}
+}*/
 
 bool NsSmartDeviceLink::NsSmartObjects::SmartObject::asBool() const {
-  return static_cast<bool>(*this);
+  // return static_cast<bool>(*this);
+  return convert_bool();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -413,12 +419,13 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(char InitialValue)
   set_value_char(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator char() const {
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator char() const {
   return convert_char();
-}
+}*/
 
 char NsSmartDeviceLink::NsSmartObjects::SmartObject::asChar() const {
-  return static_cast<char>(*this);
+  // return static_cast<char>(*this);
+  return convert_char();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -473,13 +480,14 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
   set_value_string(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator std::string(
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator std::string(
     void) const {
   return convert_string();
-}
+}*/
 
 std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::asString() const {
-  return (std::string) (*this);
+  //return (std::string) (*this);
+  return convert_string();
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -587,10 +595,10 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
   set_value_binary(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator
+/*NsSmartDeviceLink::NsSmartObjects::SmartObject::operator
 NsSmartDeviceLink::NsSmartObjects::SmartBinary(void) const {
   return convert_binary();
-}
+}*/
 
 NsSmartDeviceLink::NsSmartObjects::SmartBinary
 NsSmartDeviceLink::NsSmartObjects::SmartObject::asBinary() const {
