@@ -40,6 +40,7 @@ GeneralView {
     id: menuView
     property ListModel listModel
     property int countOfUpperRowItems: Math.ceil(listModel.count / 2)
+    property int countOfLowerRowItems: Math.floor(listModel.count / 2)
     property int animationDuration: 300
 
     // top 3/4 of screen with flick menu
@@ -71,7 +72,7 @@ GeneralView {
 
                         OvalButton {
                             text: menuView.listModel.get(index).title
-                            onReleased: contentLoader.go(menuView.listModel.get(index).qml)
+                            onReleased: contentLoader.go(menuView.listModel.get(index).qml, menuView.listModel.get(index).appId)
                             anchors.centerIn: parent
                             fontSize: Constants.fontSize
                         }
@@ -98,7 +99,7 @@ GeneralView {
                 anchors.bottom: parent.bottom
 
                 Repeater {
-                    model: menuView.countOfUpperRowItems
+                    model: menuView.countOfLowerRowItems
                     delegate: Item {
                         id: item2
                         width: flicker.width / 3
@@ -107,7 +108,7 @@ GeneralView {
 
                         OvalButton {
                             text: menuView.listModel.get(index + menuView.countOfUpperRowItems).title
-                            onReleased: contentLoader.go(menuView.listModel.get(index + menuView.countOfUpperRowItems).qml)
+                            onReleased: contentLoader.go(menuView.listModel.get(index + menuView.countOfUpperRowItems).qml, menuView.listModel.get(index).appId)
                             anchors.centerIn: parent
                             fontSize: Constants.fontSize
                         }

@@ -141,7 +141,12 @@ QtObject {
         })
 
         if (app.isMediaApplication) {
-            musicSourceModel.insert(0, {"title": app.appName, "icon": "../res/buttons/long_oval_btn.png", "qml": ""})
+            musicSourceModel.insert(0, {
+                "title": app.appName,
+                "icon": "../res/buttons/long_oval_btn.png",
+                "qml": "views/SDLPlayerView.qml",
+                "appId": app.appId
+            })
         }
 
         console.log("exit")
@@ -162,12 +167,12 @@ QtObject {
     }
 
     function removeApplication(appId) {
-        console.log("Enter removeApplication function");
+        console.log("enter");
         for (var i = 0; i < applicationList.count; i++) {
-            var application = applicationList.get(i)
-            if (application.appId === appId) {
+            if (applicationList.get(i).appId === appId) {
                 for (var j = 0; j < musicSourceModel.count; ++j) {
-                    if (musicSourceModel.get(j).title === application.appName) {
+                    if (musicSourceModel.get(j).appId === appId) {
+                        console.debug("j = " + j)
                         musicSourceModel.remove(j)
                         break
                     }
@@ -177,7 +182,7 @@ QtObject {
             }
         }
 
-        console.log("Exit removeApplication function");
+        console.log("exit");
     }
     property int systemContext
 
