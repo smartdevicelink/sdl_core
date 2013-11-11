@@ -389,11 +389,11 @@ Item {
     function fillSoftButtons(element, index, array) {
         this.append({
                         type: element.type,
-                        name: element.text,
+                        text: element.text,
                         image: element.image,
                         isHighlighted: element.isHighlighted,
-                        buttonId: element.softButtonID,
-                        action: element.systemAction
+                        softButtonID: element.softButtonID,
+                        systemAction: element.systemAction
                     });
     }
 
