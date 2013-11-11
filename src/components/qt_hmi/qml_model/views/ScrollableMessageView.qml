@@ -54,8 +54,6 @@ GeneralView {
         if(abort) {
             console.debug("send error")
             DBus.sendError(dataContainer.scrollableMessageModel.async, Common.Result.ABORTED)
-            console.debug("exit")
-            return
         } else {
             console.debug("send ok")
             DBus.sendReply(dataContainer.scrollableMessageModel.async, {})
@@ -126,42 +124,12 @@ GeneralView {
                     interactive: false
                     model: dataContainer.scrollableMessageModel.softButtons
 
-                    delegate: OvalButton {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: fakeButton.width
-                        height: fakeButton.height
-                        text: model.name
-                        icon: (model.type !== Common.SoftButtonType.SBT_TEXT) ? model.image : undefined
-                        fontSize: Constants.fontSize
-                        highlighted: model.isHighlighted
-                        onPressed: {
-                            console.debug("scrollableMessageView.onPressed");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONDOWN,
-                                                     buttonId);
-                        }
-                        onReleased: {
-                            console.debug("scrollableMessageView.onRreleased");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONUP,
-                                                     buttonId);
-                        }
-                        onClicked: {
-                            console.debug("scrollableMessageView.onClicked");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.SHORT,
-                                                     buttonId);
-                        }
-                        onPressAndHold: {
-                            console.debug("scrollableMessageView.onPressAndHold");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.LONG,
-                                                     buttonId);
-                        }
-
-                        // TODO(KKolodiy): System action doesn't work in WebHMI
+                    delegate: SoftButton {
+                        appId: dataContainer.currentApplication.appId
+                        button: model
+                        onKeepContext: timer.restart()
+                        onDefaultAction: scrollableMessageView.complete(true)
                     }
-
                 }
             }
         }
@@ -211,11 +179,12 @@ GeneralView {
             anchors.left: parent.left
             width: parent.width
             height: 1/4 * parent.height
-            BackButton {
+            OvalButton {
+                text: "Back"
                 anchors.centerIn: parent
                 onClicked: {
                     console.debug("enter")
-                    scrollableMessageView.complete(true)
+                    complete(true)
                     console.debug("exit")
                 }
             }
