@@ -33,10 +33,13 @@
  */
 
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import "../models/Constants.js" as Constants
 
 // Don't change constants. It break button
 // TODO (dchmerev@luxoft.com): make this comment more clear
+// todo (ykazakov): eliminate this problem and remove all such comments
+
 Item {
     id: main
     width: dynamic ? field.width + 2 * left.width : Constants.ovalButtonWidth
@@ -52,61 +55,83 @@ Item {
     property bool highlighted: false
     property bool dynamic: false
 
-    Image {
-        id: left
-        width: 31
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.top: parent.top
-        source: "../res/buttons/oval_btn_left.png"
-    }
 
-    Image {
-        id: right
-        width: 31
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        source: "../res/buttons/oval_btn_right.png"
-    }
+    Item {
+        id: buttonBorderImage
+        visible: false
+        anchors.fill: parent
+        Image {
+            id: left
+            width: 31
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.top: parent.top
+            source: "../res/buttons/oval_btn_left.png"
+        }
 
-    Image {
-        id: top
-        height: 10
-        anchors.right: parent.right
-        anchors.rightMargin: 31
-        anchors.left: parent.left
-        anchors.leftMargin: 31
-        anchors.top: parent.top
-        fillMode: Image.TileHorizontally
-        source: "../res/buttons/oval_btn_top.png"
-    }
+        Image {
+            id: right
+            width: 31
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            source: "../res/buttons/oval_btn_right.png"
+        }
 
-    Image {
-        id: bottom
-        height: 11
-        anchors.right: parent.right
-        anchors.rightMargin: 31
-        anchors.left: parent.left
-        anchors.leftMargin: 31
-        anchors.bottom: parent.bottom
-        fillMode: Image.TileHorizontally
-        source: "../res/buttons/oval_btn_bottom.png"
+        Image {
+            id: top
+            height: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 31
+            anchors.left: parent.left
+            anchors.leftMargin: 31
+            anchors.top: parent.top
+            fillMode: Image.TileHorizontally
+            source: "../res/buttons/oval_btn_top.png"
+        }
+
+        Image {
+            id: bottom
+            height: 11
+            anchors.right: parent.right
+            anchors.rightMargin: 31
+            anchors.left: parent.left
+            anchors.leftMargin: 31
+            anchors.bottom: parent.bottom
+            fillMode: Image.TileHorizontally
+            source: "../res/buttons/oval_btn_bottom.png"
+        }
+    }
+    HueSaturation {
+        anchors.fill: buttonBorderImage
+        source: buttonBorderImage
+        hue: main.highlighted ? Constants.softButtonHue : 0
+        saturation: main.highlighted ? Constants.softButtonSaturation : 0
+        lightness: main.highlighted ? Constants.softButtonLightness : 0
     }
 
     Rectangle {
         id: background
         color: Constants.transparentColor
+        anchors.fill: parent
         anchors.rightMargin: 31
         anchors.leftMargin: 31
         anchors.bottomMargin: 10
         anchors.topMargin: 10
-        anchors.fill: parent
+        visible: false
+
+    }
+    HueSaturation {
+        anchors.fill: background
+        source: background
+        cached: true
+        hue: main.highlighted ? Constants.softButtonHue : 0
+        saturation: main.highlighted ? Constants.softButtonSaturation : 0
+        lightness: main.highlighted ? Constants.softButtonLightness : 0
     }
 
     MouseArea {
         id: mousearea
-        z: 100
         anchors.rightMargin: 15
         anchors.leftMargin: 15
         anchors.bottomMargin: 11
@@ -131,14 +156,9 @@ Item {
         }
     }
 
-    Row {
+    Item {
         id: field
-        spacing: 10
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 13
-        anchors.top: parent.top
-        anchors.topMargin: 12
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.fill: background
 
         Icon {
             id: image
@@ -149,15 +169,23 @@ Item {
         }
         Text {
             id: label
-            color: parent.parent.highlighted ? "yellow" : Constants.primaryColor
-            anchors.verticalCenter: parent.verticalCenter
-            z: 50
+            color: Constants.primaryColor
+            anchors.centerIn: parent
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: Constants.ovalButtonFontSize
-            visible: text !== ""
+            visible: false
+        }
+        HueSaturation {
+            anchors.fill: label
+            source: label
+            hue: main.highlighted ? Constants.softButtonHue : 0
+            saturation: main.highlighted ? Constants.softButtonSaturation : 0
+            lightness: main.highlighted ? Constants.softButtonLightness : 0
+            visible: label.text !== ""
         }
     }
+
 
     states: [
         State {
@@ -179,7 +207,7 @@ Item {
 
             PropertyChanges {
                 target: label
-                color: main.highlighted ? "yellow" : Constants.secondaryColor
+                color: Constants.secondaryColor
             }
         }
     ]
