@@ -54,7 +54,37 @@ Item {
     property alias icon: image.source
     property bool highlighted: false
     property bool dynamic: false
+    property bool disabled: false
 
+    function hue() {
+        var ret = 0;
+        if (disabled) {
+            ret = Constants.disabledButtonHue;
+        } else if (highlighted) {
+            ret = Constants.highlightedButtonHue;
+        }
+        return ret;
+    }
+
+    function saturation() {
+        var ret = 0;
+        if (disabled) {
+            ret = Constants.disabledButtonSaturation;
+        } else if (highlighted) {
+            ret = Constants.highlightedButtonSaturation;
+        }
+        return ret;
+    }
+
+    function lightness() {
+        var ret = 0;
+        if (disabled) {
+            ret = Constants.disabledButtonLightness;
+        } else if (highlighted) {
+            ret = Constants.highlightedButtonLightness;
+        }
+        return ret;
+    }
 
     Item {
         id: buttonBorderImage
@@ -105,9 +135,9 @@ Item {
     HueSaturation {
         anchors.fill: buttonBorderImage
         source: buttonBorderImage
-        hue: main.highlighted ? Constants.softButtonHue : 0
-        saturation: main.highlighted ? Constants.softButtonSaturation : 0
-        lightness: main.highlighted ? Constants.softButtonLightness : 0
+        hue: main.hue()
+        saturation: main.saturation()
+        lightness: main.lightness()
     }
 
     Rectangle {
@@ -125,9 +155,9 @@ Item {
         anchors.fill: background
         source: background
         cached: true
-        hue: main.highlighted ? Constants.softButtonHue : 0
-        saturation: main.highlighted ? Constants.softButtonSaturation : 0
-        lightness: main.highlighted ? Constants.softButtonLightness : 0
+        hue: main.hue()
+        saturation: main.saturation()
+        lightness: main.lightness()
     }
 
     MouseArea {
@@ -137,6 +167,7 @@ Item {
         anchors.bottomMargin: 11
         anchors.topMargin: 10
         anchors.fill: parent
+        enabled: !parent.disabled
         onPressed: {
             parent.state = "pressed";
             parent.pressed();
@@ -179,9 +210,9 @@ Item {
         HueSaturation {
             anchors.fill: label
             source: label
-            hue: main.highlighted ? Constants.softButtonHue : 0
-            saturation: main.highlighted ? Constants.softButtonSaturation : 0
-            lightness: main.highlighted ? Constants.softButtonLightness : 0
+            hue: main.hue()
+            saturation: main.saturation()
+            lightness: main.lightness()
             visible: label.text !== ""
         }
     }
