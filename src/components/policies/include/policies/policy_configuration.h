@@ -58,7 +58,7 @@ class PolicyConfiguration {
     * @param pt_file_path File path
     */
     void setPTFileName(std::string pt_file_path);
-    
+
     /**
      * @brief set file path (with name) for preload policy table
      *
@@ -72,7 +72,7 @@ class PolicyConfiguration {
      * @return File path
      */
     std::string getPTFileName() const;
-    
+
     /**
      * @brief Get file path of preload policy table
      *
@@ -85,7 +85,7 @@ class PolicyConfiguration {
      * @brief policy table file name
      */
     std::string pt_fname_;
-    
+
     /**
      * @brief Preload policy table file name
      **/
