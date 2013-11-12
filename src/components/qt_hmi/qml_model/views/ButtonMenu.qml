@@ -39,8 +39,6 @@ import "../models/Internal.js" as Internal
 GeneralView {
     id: menuView
     property ListModel listModel
-    property int countOfUpperRowItems: Math.ceil(listModel.count / 2)
-    property int countOfLowerRowItems: Math.floor(listModel.count / 2)
     property int animationDuration: 300
 
     // top 3/4 of screen with flick menu
@@ -58,12 +56,14 @@ GeneralView {
             height: parent.height
             anchors.centerIn: parent
 
-            Row {
+            Grid {
                 id: upperRow
                 anchors.top: parent.top
-
+                anchors.bottom: parent.bottom
+                rows: Constants.rowsCountMenu
+                columns: Math.ceil(listModel.count / 2)
                 Repeater {
-                    model: menuView.countOfUpperRowItems
+                    model: menuView.listModel
                     delegate: Item {
                         id: item
                         width: flicker.width / 3
@@ -93,42 +93,6 @@ GeneralView {
                     }
                 }
             }
-
-            Row {
-                id: lowerRow
-                anchors.bottom: parent.bottom
-
-                Repeater {
-                    model: menuView.countOfLowerRowItems
-                    delegate: Item {
-                        id: item2
-                        width: flicker.width / 3
-                        height: flicker.height / 2
-                        opacity: 0
-
-                        OvalButton {
-                            text: menuView.listModel.get(index + menuView.countOfUpperRowItems).title
-                            onReleased: contentLoader.go(menuView.listModel.get(index + menuView.countOfUpperRowItems).qml, menuView.listModel.get(index).appId)
-                            anchors.centerIn: parent
-                            fontSize: Constants.fontSize
-                        }
-
-                        SequentialAnimation {
-                            id: lowRowAnimation
-                            PauseAnimation {duration: 300 + index * 100 }
-                            NumberAnimation {
-                                target: item2
-                                duration:  Constants.animationDuration
-                                property: "opacity"
-                                from: 0; to: 1;
-                            }
-                        }
-                        Component.onCompleted: {
-                            lowRowAnimation.start()
-                        }
-                    }
-                }
-            }
         }
 
         property int snapTo: width / 3
@@ -150,7 +114,7 @@ GeneralView {
         anchors.top: parent.top
         anchors.topMargin: Constants.margin
 
-        pages: Math.ceil(menuView.countOfUpperRowItems / itemsInRowOnScreen) // 3 items in a row on 1 screen
+        pages: Math.ceil(upperRow.columns / itemsInRowOnScreen) // 3 items in a row on 1 screen
         activePage: Internal.activePageChoose(flicker, pager.pages)
     }
 

@@ -191,3 +191,6 @@ var appListFontSize = 40
 
 // Size icon for list of applications
 var appListIconSize = 100
+
+// Count of rows for menu
+var rowsCountMenu = 2
