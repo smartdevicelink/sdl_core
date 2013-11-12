@@ -1,6 +1,6 @@
 /**
  * @file ApplicationListView.qml
- * @brief View for list of applications
+ * @brief Application list view
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
 import "../controls"
 import "../models"
@@ -92,24 +93,19 @@ GeneralView {
                         height: Constants.appListIconSize
                         width: height
                     }
-                    Text  {
+                    ClickableText {
                         id: applicationName
                         text: appName
-                        color: Constants.primaryColor
+                        defaultColor: Constants.primaryColor
+                        pressedColor: Constants.primaryColorPressed
                         font.pixelSize: Constants.appListFontSize
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: appIcon.right
                         anchors.leftMargin: Constants.margin
-                    }
-                    MouseArea {
-                      anchors.fill: parent
-                      onClicked: {
-                          dataContainer.setCurrentApplication(appId)
-                          dataContainer.currentApplication.isMediaApplication
-                                  ? contentLoader.go("./views/SDLPlayerView.qml",
-                                                     dataContainer.currentApplication.appId)
-                                  : contentLoader.go("./views/SDLNonMediaView.qml",
-                                                     dataContainer.currentApplication.appId)
+                        onClicked: {
+                            dataContainer.setCurrentApplication(appId)
+                            dataContainer.currentApplication.isMediaApplication ? contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
+                                                                                : contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
                         }
                     }
                 }

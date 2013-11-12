@@ -55,29 +55,53 @@ Item {
         height: parent.height
         anchors.topMargin: Constants.margin
         anchors.horizontalCenter: headerMenu.horizontalCenter
-        anchors.bottom: headerMenu.bottom
+        signal clicked ()
 
-        Text {
+        ClickableText {
+            id: menuLogo
             anchors.horizontalCenter: menuText.horizontalCenter
             anchors.bottom: parent.verticalCenter
             text: "≡"
-            color: Constants.primaryColor
+            defaultColor: Constants.primaryColor
+            pressedColor: Constants.primaryColorPressed
             font.pixelSize: Constants.fontSize
+
+            onClicked: {
+                parent.clicked()
+            }
+
+            Component.onCompleted: {
+                console.debug("enter")
+                onPressed.connect(menuText.press)
+                onReleased.connect(menuText.release)
+                onCanceled.connect(menuText.release)
+                console.debug("exit")
+            }
         }
 
-        Text {
+        ClickableText {
             id: menuText
             anchors.top: parent.verticalCenter
-            text: "MENU";            
-            color: Constants.primaryColor
+            text: "MENU";
+            defaultColor: Constants.primaryColor
+            pressedColor: Constants.primaryColorPressed
             font.pixelSize: Constants.fontSize
+
+            onClicked: {
+                parent.clicked()
+            }
+
+            Component.onCompleted: {
+                console.debug("enter")
+                onPressed.connect(menuLogo.press)
+                onReleased.connect(menuLogo.release)
+                onCanceled.connect(menuLogo.release)
+                console.debug("exit")
+            }
         }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                contentLoader.go("./views/MainMenuView.qml")
-            }
+        onClicked: {
+            contentLoader.go("./views/MainMenuView.qml")
         }
     }
 

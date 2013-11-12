@@ -269,14 +269,13 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
     obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
     obj[sos::S_PARAMS][sos::kCode] = code;
     obj[sos::S_PARAMS][sos::kMessage] = message;
-  }
-
-  if (code != hmi_apis::Common_Result::SUCCESS) {
-    MessageName name = schema_->getMessageName(ids.second);
-    description["method"] = name.first + "." + name.second;
-    obj[sos::S_PARAMS]["data"] = description;
-  } else {
-    obj[sos::S_MSG_PARAMS] = description;
+    if (code != hmi_apis::Common_Result::SUCCESS) {
+      MessageName name = schema_->getMessageName(ids.second);
+      description["method"] = name.first + "." + name.second;
+      obj[sos::S_PARAMS]["data"] = description;
+    } else {
+      obj[sos::S_MSG_PARAMS] = description;
+    }
   }
 
   dbus_message_unref(msg);
