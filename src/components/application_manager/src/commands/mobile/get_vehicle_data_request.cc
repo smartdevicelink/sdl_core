@@ -222,7 +222,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           != static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
-      LOG4CXX_INFO(logger_, "status become " << status);
+      LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status ", so response status become " << status);
     }
   }
 
@@ -235,8 +235,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
     }
     LOG4CXX_INFO(
-        logger_,
-        "all complete " << (status == mobile_apis::Result::SUCCESS) << " " << status);
+        logger_, "All HMI requests are complete");
     SendResponse(status == mobile_apis::Result::SUCCESS, status, NULL,
                  &response_params);
   }
