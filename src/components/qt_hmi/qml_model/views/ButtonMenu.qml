@@ -60,7 +60,7 @@ GeneralView {
                 id: upperRow
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                rows: Constants.rowsCountMenu
+                rows: Constants.menuRowCount
                 columns: Math.ceil(listModel.count / 2)
                 Repeater {
                     model: menuView.listModel
