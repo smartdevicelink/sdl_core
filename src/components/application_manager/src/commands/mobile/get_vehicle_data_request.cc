@@ -222,7 +222,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           != static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
-      LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status ", so response status become " << status);
+      LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status << ", so response status become " << status);
     }
   }
 
