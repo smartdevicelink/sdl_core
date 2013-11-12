@@ -72,7 +72,7 @@ enum eType {
    */
   PERMISSION_NOK_PENDING_USER_CONSENT
 };
-}  // namespace CheckPermissionResult
+}  // namespace PermissionResult
 
 namespace Priority {
 enum eType {
@@ -97,7 +97,7 @@ enum eType {
    */
   PRIORITY_EMERGENCY
 };
-}  // Priority
+}  // namespace Priority
 
 
 /**
@@ -134,7 +134,7 @@ class PolicyManager {
      * @brief Destructor
      *
      **/
-    virtual ~PolicyManager() {};
+    virtual ~PolicyManager() {}
 
     /**
     * @brief Initialization method

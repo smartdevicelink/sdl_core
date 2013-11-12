@@ -98,7 +98,6 @@ class PolicyManagerImpl : public PolicyManager {
     PolicyTable* getPolicyTable() const;
 
   private:
-
     /**
      * @brief get ptiority for app_id
      *

@@ -41,6 +41,8 @@
 namespace policies_ns = NsSmartDeviceLink::policies;
 namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
+using ::policies_ns::PermissionsCalculator;
+
 log4cxx::LoggerPtr policies_ns::PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
 
@@ -114,8 +116,12 @@ policies_ns::CheckPermissionResult
       && PTValidationResult::VALIDATION_OK == policy_table->Validate()) {
     so_ns::SmartObject pt_object = policy_table->AsSmartObject();
 
-    result.result =  policies_ns::PermissionsCalculator::CalcPermissions(pt_object, app_id, rpc, hmi_status);
-    result.priority = policies_ns::PermissionsCalculator::GetPriority(pt_object, app_id);
+    result.result =  PermissionsCalculator::CalcPermissions(pt_object,
+                                                            app_id,
+                                                            rpc,
+                                                            hmi_status);
+
+    result.priority = PermissionsCalculator::GetPriority(pt_object, app_id);
   } else {
     result.result = PermissionResult::PERMISSION_NOK_PT_VERIFICATION_FAILED;
   }
@@ -144,6 +150,5 @@ void policies_ns::PolicyManagerImpl::StorePolicyTable() {
 
 policies_ns::PolicyTable*
   policies_ns::PolicyManagerImpl::getPolicyTable() const {
-
     return policy_table_;
 }
