@@ -58,12 +58,140 @@ Item {
     }
 
     function getGpsData(appID) {
-        return {gps: dataContainer.vehicleInfoModel.gps}
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.gps) {
+            console.debug("exit")
+            return { gps: dataContainer.vehicleInfoModel.gps }
+        }
+        else {
+            console.debug("exit")
+            return { __retCode: Common.Result.DATA_NOT_AVAILABLE }
+        }
     }
 
     function getSpeed(appID) {
-        return {speed: dataContainer.vehicleInfoModel.speed}
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.speed) {
+            console.debug("exit")
+            return { speed: dataContainer.vehicleInfoModel.speed }
+        }
+        else {
+            console.debug("exit")
+            throw Common.Result.DATA_NOT_AVAILABLE
+        }
     }
+
+    function getRpm(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.rpm) {
+            console.debug("exit")
+            return { rpm: dataContainer.vehicleInfoModel.rpm }
+        }
+
+    }
+
+    function getFuelLevel(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.fuelLevel) {
+            console.debug("exit")
+            return { fuelLevel: dataContainer.vehicleInfoModel.fuelLevel }
+        }
+
+    }
+
+    function getFuelLevelState(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.fuelLevel_State) {
+            console.debug("exit")
+            return { fuelLevel_State: dataContainer.vehicleInfoModel.fuelLevel_State }
+        }
+
+    }
+
+    function getInstantFuelConsumption(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.instantFuelConsumption) {
+            console.debug("exit")
+            return { instantFuelConsumption: dataContainer.vehicleInfoModel.instantFuelConsumption }
+        }
+
+    }
+
+    function getExternalTemperature(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.externalTemperature) {
+            console.debug("exit")
+            return { externalTemperature: dataContainer.vehicleInfoModel.externalTemperature }
+        }
+
+    }
+
+    function getVin(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.vin) {
+            console.debug("exit")
+            return { vin: dataContainer.vehicleInfoModel.vin }
+        }
+
+    }
+
+    function getPrndl(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.prndl) {
+            console.debug("exit")
+            return { prndl: dataContainer.vehicleInfoModel.prndl }
+        }
+
+    }
+
+    function getTirePressure(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.tirePressure) {
+            console.debug("exit")
+            return { tirePressure: dataContainer.vehicleInfoModel.tirePressure }
+        }
+
+    }
+
+    function getOdometer(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.odometer) {
+            console.debug("exit")
+            return { odometer: dataContainer.vehicleInfoModel.odometer }
+        }
+
+    }
+
+    function getBeltStatus(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.beltStatus) {
+            console.debug("exit")
+            return { beltStatus: dataContainer.vehicleInfoModel.beltStatus }
+        }
+
+    }
+
+    function getBodyInformation(appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel.bodyInformation) {
+            console.debug("exit")
+            return { bodyInformation: dataContainer.vehicleInfoModel.bodyInformation }
+        }
+
+    }
+
+    function (appID) {
+        console.debug("enter")
+        if (dataContainer.vehicleInfoModel) {
+            console.debug("exit")
+            return { : dataContainer.vehicleInfoModel. }
+        }
+
+    }
+
+
+
+
 
     function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
                             vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
