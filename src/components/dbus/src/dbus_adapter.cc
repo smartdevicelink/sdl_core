@@ -254,7 +254,7 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
       smart_objects::SmartType_Map);
 
   ListArgs args = schema_->getListArgs(ids.second,
-                                             hmi_apis::messageType::response);
+                                       hmi_apis::messageType::response);
   DBusMessageIter iter;
   dbus_message_iter_init(msg, &iter);
   int code;
@@ -313,6 +313,7 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
     obj[sos::S_PARAMS][sos::kCode] = description[rule.name].asInt();
     obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
+    obj[sos::S_PARAMS]["data"]["method"] = method.first + "." + method.second;
 
     LOG4CXX_WARN(
         logger_,
