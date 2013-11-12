@@ -90,7 +90,9 @@ PopUp {
         Timer {
             id: timer
             interval: dataContainer.uiSlider.timeout
+            triggeredOnStart:true
             onTriggered: {
+                console.debug("triggered")
                 complete(Common.Result.SUCCESS)
             }
         }
@@ -184,14 +186,5 @@ PopUp {
                 complete(Common.Result.ABORTED)
             }
         }
-    }
-
-    function testAppName(){
-        return appNameText.text
-    }
-
-    function testSliderValueSuccess(){
-        complete(Common.Result.SUCCESS)
-        return dataContainer.uiSlider.position
     }
 }

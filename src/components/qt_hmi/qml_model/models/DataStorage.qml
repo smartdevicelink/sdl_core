@@ -442,7 +442,7 @@ QtObject {
 
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {
-        sdlUI.onDriverDistraction(driverDistractionState);
+        sdlUIProxy.onDriverDistraction(driverDistractionState);
     }
     property bool activeTTS: false
     property var activePopup
