@@ -143,7 +143,6 @@ QtObject {
         if (app.isMediaApplication) {
             musicSourceModel.insert(0, {
                 "title": app.appName,
-                "icon": "../res/buttons/long_oval_btn.png",
                 "qml": "views/SDLPlayerView.qml",
                 "appId": app.appId
             })
@@ -168,31 +167,26 @@ QtObject {
 
     function removeApplication(appId) {
         console.log("enter");
+        for (var j = 0; j < musicSourceModel.count; ++j) {
+            if (musicSourceModel.get(j).appId === appId) {
+                musicSourceModel.remove(j);
+                break;
+            }
+        }
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
-                for (var j = 0; j < musicSourceModel.count; ++j) {
-                    if (musicSourceModel.get(j).appId === appId) {
-                        console.debug("j = " + j)
-                        musicSourceModel.remove(j)
-                        break
-                    }
-                }
                 applicationList.remove(i);
                 break;
             }
         }
-
         console.log("exit");
     }
-    property int systemContext
 
+    property int systemContext
     property int hmiContext
     property bool applicationContext: false
-
     property bool applicationSavedContext
-
-    property string route_text: ""
-
+    property string routeText: ""
     property PlayerState cdPlayerState: PlayerState {
         playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
@@ -269,7 +263,7 @@ QtObject {
 
     function reset () {
         console.log("dataContainer reset enter");
-        route_text = ""
+        routeText = ""
         console.log("dataContainer reset exit");
     }
 
