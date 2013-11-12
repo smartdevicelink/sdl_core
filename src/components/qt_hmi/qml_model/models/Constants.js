@@ -205,3 +205,6 @@ var appListIconSize = 100
 var softButtonHue = 0.9
 var softButtonSaturation = 0.0
 var softButtonLightness = 0.1
+
+// Count of rows for menu
+var menuRowCount = 2

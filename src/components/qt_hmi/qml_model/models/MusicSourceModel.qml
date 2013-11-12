@@ -37,42 +37,42 @@ ListModel
 {
     ListElement {
         title: "FM"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/FMPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "AM"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/AMPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "BT Audio"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/BTPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "Sirius"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/SiriusPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "CD"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/CDPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "iPod"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/IPodPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "USB"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/UsbPlayerView.qml"
+        appId: 0
     }
     ListElement {
         title: "LineIn"
-        icon: "../res/buttons/long_oval_btn.png"
         qml: "./views/LineInPlayerView.qml"
+        appId: 0
     }
 }
