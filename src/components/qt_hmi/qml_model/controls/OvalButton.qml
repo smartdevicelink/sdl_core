@@ -54,6 +54,7 @@ Item {
     property alias icon: image.source
     property bool highlighted: false
     property bool dynamic: false
+    property bool disabled: false
 
 
     Item {
@@ -137,6 +138,7 @@ Item {
         anchors.bottomMargin: 11
         anchors.topMargin: 10
         anchors.fill: parent
+        enabled: !parent.disabled
         onPressed: {
             parent.state = "pressed";
             parent.pressed();
