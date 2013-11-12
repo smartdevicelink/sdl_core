@@ -36,7 +36,7 @@
 #include "gmock/gmock.h"
 #include "lib_messagebroker/md5.h"
 #include "utils/file_system.h"
-#include "policies/policy_manager.h"
+#include "policies/policy_manager_impl.h"
 #include "policies/policy_table.h"
 #include "policies/policy_configuration.h"
 
@@ -48,14 +48,18 @@ namespace policies_draft_test {
   namespace pn = NsSmartDeviceLink::policies;
   namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
-  class PolicyManagerTest: public pn::PolicyManager {
+  class PolicyManagerTest: public pn::PolicyManagerImpl {
   public:
     explicit PolicyManagerTest(const pn::PolicyConfiguration& policy_config):
-      PolicyManager(policy_config) {
+      PolicyManagerImpl(policy_config) {
         init_result = Init();
       }
     pn::PolicyTable* getPolicyTable() {
-      return PolicyManager::getPolicyTable();
+      return PolicyManagerImpl::getPolicyTable();
+    }
+
+    void StorePolicyTable() {
+      PolicyManagerImpl::StorePolicyTable();
     }
 
     pn::InitResult::eType init_result;

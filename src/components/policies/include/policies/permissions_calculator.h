@@ -39,6 +39,7 @@
 #include <string>
 #include "policies/policy_manager.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 
 namespace NsSmartDeviceLink {
 namespace policies {

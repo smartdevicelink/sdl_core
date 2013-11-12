@@ -1,6 +1,6 @@
 /**
- * @file policy_manager.h
- * @brief Policy Manager header file.
+ * @file policy_manager_impl.h
+ * @brief Policy Manager implementation header file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,114 +32,44 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_IMPL_H_
 
+#include "policies/policy_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policies/policy_configuration.h"
+#include "policies/policy_table.h"
 #include "smart_objects/smart_object.h"
-
+#include "smart_objects/smart_schema.h"
+#include "utils/logger.h"
 
 
 namespace NsSmartDeviceLink {
 namespace policies {
 
- /**
- * @brief enumeration of result for asking permissions by application
- **/
-namespace PermissionResult {
-enum eType {
-  /**
-   * @brief RPC is allowed.
-   */
-  PERMISSION_OK_ALLOWED = 0,
-  /**
-   * @brief Verification of Policy Table failed.
-   *
-   * Policy Table as smart object has failed in verification against schema.
-   */
-  PERMISSION_NOK_PT_VERIFICATION_FAILED,
-  /**
-   * @brief RPC is allowed by the PT(backend), but disallowed by the user.
-   */
-  PERMISSION_NOK_USER_DISALLOWED,
-  /**
-   * @brief RPC  is not allowed by the PT(backend).
-   */
-  PERMISSION_NOK_DISALLOWED,
-  /**
-   * @brief RPC is allowed by PT(backend), but user has not been prompted yet.
-   */
-  PERMISSION_NOK_PENDING_USER_CONSENT
-};
-}  // namespace CheckPermissionResult
-
-namespace Priority {
-enum eType {
-  /**
-   * @brief NONE
-   */
-  PRIORITY_NONE = 0,
-  /**
-   * @brief NORMAL
-   */
-  PRIORITY_NORMAL,
-  /**
-   * @brief COMMUNICATION
-   */
-  PRIORITY_COMMUNICATION,
-  /**
-   * @brief NAVIGATION
-   */
-  PRIORITY_NAVIGATION,
-  /**
-   * @brief EMERGENCY
-   */
-  PRIORITY_EMERGENCY
-};
-}  // Priority
-
 
 /**
- * @brief Init() result enumeration
- **/
-namespace InitResult {
-enum eType {
-  /**
-   * @brief PT file loaded successfully
-   **/
-  INIT_OK = 0,
-  /**
-   * @brief PT file missing, Preload file used
-   **/
-  INIT_OK_PRELOAD,
-  /**
-   * @brief PT file missing, Preload file missing
-   **/
-  INIT_FAILED_PRELOAD_NO_FILE
-};
-}  // namespace InitResult
-
-struct CheckPermissionResult {
-      PermissionResult::eType result;
-      Priority::eType priority;
-};
-
-/**
- * @brief Interface class of policy manager.
+ * @brief Interface implementation class of Policy Manager.
  */
-class PolicyManager {
+class PolicyManagerImpl : public PolicyManager {
   public:
+    /**
+     * @brief Constructor
+     *
+     * @param policy_config Policy configuration
+     */
+    explicit PolicyManagerImpl(const PolicyConfiguration& policy_config);
+
     /**
      * @brief Destructor
      *
      **/
-    virtual ~PolicyManager() {};
+    virtual ~PolicyManagerImpl(void);
 
     /**
     * @brief Initialization method
     */
-    virtual InitResult::eType Init() = 0;
+    virtual InitResult::eType Init(void);
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.
@@ -152,11 +82,52 @@ class PolicyManager {
      */
     virtual CheckPermissionResult checkPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
-        const mobile_apis::HMILevel::eType hmi_status) = 0;
+        const mobile_apis::HMILevel::eType hmi_status);
+
+  protected:
+    /**
+     * @brief Store policy table to filesystem
+     */
+    void StorePolicyTable();
+
+    /**
+     * @brief Get PolicyTable pointer (for testing purposes)
+     *
+     * @return PolicyTable* ptr.
+     **/
+    PolicyTable* getPolicyTable() const;
+
+  private:
+
+    /**
+     * @brief get ptiority for app_id
+     *
+     * @param pt_object Policy Table as smart object
+     * @param app_id Application Id
+     *
+     * @return priority for app_id
+     */
+    Priority::eType getPriority(const NsSmartObjects::SmartObject& pt_object,
+                                const uint32_t app_id);
+
+    /**
+     * @brief Policy configuration
+     */
+    const PolicyConfiguration& policy_config_;
+
+    /**
+     * @brief Policy table
+     */
+    PolicyTable* policy_table_;
+
+    /**
+     * @brief Logger
+     */
+    static log4cxx::LoggerPtr logger_;
 };
 
 }  // namespace policies
 }  // namespace NsSmartDeviceLink
 
 
-#endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_IMPL_H_

@@ -1,6 +1,6 @@
 /**
- * @file policy_manager.cc
- * @brief Policy manager source file.
+ * @file policy_manager_impl.cc
+ * @brief Policy Manager implementation source file.
  */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
@@ -32,7 +32,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "policies/policy_manager.h"
+#include "policies/policy_manager_impl.h"
 #include "policies/policy_table_schema.h"
 #include "policies/permissions_calculator.h"
 #include "smart_objects/always_true_schema_item.h"
@@ -41,20 +41,21 @@
 namespace policies_ns = NsSmartDeviceLink::policies;
 namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
-log4cxx::LoggerPtr policies_ns::PolicyManager::logger_ = log4cxx::LoggerPtr(
+log4cxx::LoggerPtr policies_ns::PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
 
 //---------------------------------------------------------------
 
-policies_ns::PolicyManager::PolicyManager(
+policies_ns::PolicyManagerImpl::PolicyManagerImpl(
     const PolicyConfiguration& policy_config)
-  : policy_config_(policy_config)
+  : PolicyManager()
+  , policy_config_(policy_config)
   , policy_table_(0) {
 }
 
 //---------------------------------------------------------------
 
-policies_ns::PolicyManager::~PolicyManager() {
+policies_ns::PolicyManagerImpl::~PolicyManagerImpl() {
   StorePolicyTable();
   if (0 != policy_table_) {
     delete policy_table_;
@@ -64,7 +65,7 @@ policies_ns::PolicyManager::~PolicyManager() {
 
 //---------------------------------------------------------------
 
-policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
+policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
   // TODO(anyone): Provide some mechanism for recovery (from Preload???)
   // if PT file corrupted (e.g. bad json)
 
@@ -101,7 +102,7 @@ policies_ns::InitResult::eType policies_ns::PolicyManager::Init() {
 //---------------------------------------------------------------
 
 policies_ns::CheckPermissionResult
-  policies_ns::PolicyManager::checkPermission(
+  policies_ns::PolicyManagerImpl::checkPermission(
     uint32_t app_id, const so_ns::SmartObject& rpc,
     mobile_apis::HMILevel::eType hmi_status) {
 
@@ -124,7 +125,7 @@ policies_ns::CheckPermissionResult
 
 //---------------------------------------------------------------
 
-void policies_ns::PolicyManager::StorePolicyTable() {
+void policies_ns::PolicyManagerImpl::StorePolicyTable() {
   if (0 != policy_table_) {
     if (so_ns::SmartType_Null != policy_table_->AsSmartObject().getType()) {
       const std::string pt_string = policy_table_->AsString();
@@ -142,7 +143,7 @@ void policies_ns::PolicyManager::StorePolicyTable() {
 //---------------------------------------------------------------
 
 policies_ns::PolicyTable*
-  policies_ns::PolicyManager::getPolicyTable() const {
+  policies_ns::PolicyManagerImpl::getPolicyTable() const {
 
     return policy_table_;
 }
