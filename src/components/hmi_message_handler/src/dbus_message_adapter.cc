@@ -114,7 +114,27 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("UI", "OnLanguageChange");
   DBusMessageController::SubscribeTo("VR", "OnLanguageChange");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
-  DBusMessageController::SubscribeTo("VehicleInfo", "OnVehicleData");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnGpsData");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnSpeed");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnRpm");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnFuelLevel");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnFuelLevelState");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnInstantFuelConsumption");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnExternalTemperature");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnVin");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnPrndl");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnTirePressure");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnOdometer");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnBeltStatus");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnBodyInformation");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnDeviceStatus");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnDriverBraking");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnWiperStatus");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnHeadLampStatus");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnEngineTorque");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnAccPedalPosition");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnSteeringWheelAngle");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnMyKey");
   DBusMessageController::SubscribeTo("Navigation", "OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }

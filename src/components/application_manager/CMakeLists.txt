@@ -285,7 +285,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
 ./src/commands/hmi/on_show_notification.cc
-./src/commands/hmi/on_vi_vehicle_data_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
@@ -299,6 +298,7 @@ set (HMI_COMMANDS_SOURCES
 set (HMI_COMMANDS_SOURCES_WEBHMI
 ./src/commands/hmi/vi_get_vehicle_data_request.cc
 ./src/commands/hmi/vi_get_vehicle_data_response.cc
+./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_QTHMI
@@ -344,6 +344,27 @@ set (HMI_COMMANDS_SOURCES_QTHMI
 ./src/commands/hmi/vi_get_steering_wheel_angle_response.cc
 ./src/commands/hmi/vi_get_my_key_request.cc
 ./src/commands/hmi/vi_get_my_key_response.cc
+./src/commands/hmi/on_vi_gps_data_notification.cc
+./src/commands/hmi/on_vi_speed_notification.cc
+./src/commands/hmi/on_vi_rpm_notification.cc
+./src/commands/hmi/on_vi_fuel_level_notification.cc
+./src/commands/hmi/on_vi_fuel_level_state_notification.cc
+./src/commands/hmi/on_vi_instant_fuel_consumption_notification.cc
+./src/commands/hmi/on_vi_external_temperature_notification.cc
+./src/commands/hmi/on_vi_vin_notification.cc
+./src/commands/hmi/on_vi_prndl_notification.cc
+./src/commands/hmi/on_vi_tire_pressure_notification.cc
+./src/commands/hmi/on_vi_odometer_notification.cc
+./src/commands/hmi/on_vi_belt_status_notification.cc
+./src/commands/hmi/on_vi_body_information_notification.cc
+./src/commands/hmi/on_vi_device_status_notification.cc
+./src/commands/hmi/on_vi_driver_braking_notification.cc
+./src/commands/hmi/on_vi_wiper_status_notification.cc
+./src/commands/hmi/on_vi_head_lamp_status_notification.cc
+./src/commands/hmi/on_vi_engine_torque_notification.cc
+./src/commands/hmi/on_vi_acc_pedal_position_notification.cc
+./src/commands/hmi/on_vi_steering_wheel_angle_notification.cc
+./src/commands/hmi/on_vi_my_key_notification.cc
 )
 
 if (${WEB_HMI})
