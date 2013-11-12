@@ -186,4 +186,12 @@ PopUp {
         }
     }
 
+    function testAppName(){
+        return appNameText.text
+    }
+
+    function testSliderValueSuccess(){
+        complete(Common.Result.SUCCESS)
+        return dataContainer.uiSlider.position
+    }
 }

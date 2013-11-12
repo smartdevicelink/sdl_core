@@ -308,4 +308,12 @@ Rectangle {
 
         sdlBasicCommunication.onReady()
     }
+
+    function test_getSlider(){
+        return sliderPopup
+    }
+
+    function test_getDataStorage(){
+        return dataContainer
+    }
 }
