@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 QtObject {
+    id: vehicleInfo
     property real speed: 80.1        
     property int rpm: 5000
     property real fuelLevel: 0.2
@@ -128,25 +129,25 @@ QtObject {
         'data2': 'ECU 2 Test Data'
     }
 
-    onSpeedChanged: {  }
-    onRpmChanged: {  }
-    onFuelLevelChanged: {  }
-    onFuelLevel_StateChanged:  {  }
-    onInstantFuelConsumptionChanged: {  }
-    onDriverBrakingChanged: {  }
-    onWiperStatusChanged: {  }
-    onEngineTorqueChanged: {  }
-    onAccPedalPositionChanged: {  }
-    onSteeringWheelAngleChanged: {  }
-    onExternalTemperatureChanged: {  }
-    onVinChanged: {  }
-    onOdometerChanged: {  }
-    onPrndlChanged: {  }
-    onMyKeyChanged: {  }
-    onHeadLampStatusChanged: {  }
-    onDeviceStatusChanged: {  }
-    onBodyInformationChanged: {  }
-    onBeltStatusChanged: {  }
-    onTirePressureChanged: {  }
-    onGpsChanged: {  }
+    onSpeedChanged: { sdlVehicleInfo.onSpeed(vehicleInfo.speed) }
+    onRpmChanged: { sdlVehicleInfo.onRpm(vehicleInfo.rpm) }
+    onFuelLevelChanged: { sdlVehicleInfo.onFuelLevel(vehicleInfo.fuelLevel) }
+    onFuelLevel_StateChanged:  { sdlVehicleInfo.onFuelLevelState(vehicleInfo.fuelLevel_State) }
+    onInstantFuelConsumptionChanged: { sdlVehicleInfo.onInstantFuelConsumption(vehicleInfo.instantFuelConsumption) }
+    onDriverBrakingChanged: { sdlVehicleInfo.onDriverBraking(vehicleInfo.driverBraking) }
+    onWiperStatusChanged: { sdlVehicleInfo.onWiperStatus(vehicleInfo.wiperStatus) }
+    onEngineTorqueChanged: { sdlVehicleInfo.onEngineTorque(vehicleInfo.engineTorque) }
+    onAccPedalPositionChanged: { sdlVehicleInfo.onAccPedalPosition(vehicleInfo.accPedalPosition) }
+    onSteeringWheelAngleChanged: { sdlVehicleInfo.onSteeringWheelAngle(vehicleInfo.steeringWheelAngle) }
+    onExternalTemperatureChanged: { sdlVehicleInfo.onExternalTemperature(vehicleInfo.externalTemperature) }
+    onVinChanged: { sdlVehicleInfo.onVin(vehicleInfo.vin) }
+    onOdometerChanged: { sdlVehicleInfo.onOdometer(vehicleInfo.odometer) }
+    onPrndlChanged: { if (dataContainer.vehicleInfoModel.prndl !== -1) {sdlVehicleInfo.onPrndl(vehicleInfo.prndl)} }
+    onMyKeyChanged: { sdlVehicleInfo.onMyKey(vehicleInfo.myKey) }
+    onHeadLampStatusChanged: { sdlVehicleInfo.onHeadLampStatus(vehicleInfo.headLampStatus) }
+    onDeviceStatusChanged: { sdlVehicleInfo.onDeviceStatus(vehicleInfo.deviceStatus) }
+    onBodyInformationChanged: { sdlVehicleInfo.onBodyInformation(vehicleInfo.bodyInformation) }
+    onBeltStatusChanged: { sdlVehicleInfo.onBeltStatus(vehicleInfo.beltStatus) }
+    onTirePressureChanged: { sdlVehicleInfo.onTirePressure(vehicleInfo.tirePressure) }
+    onGpsChanged: { sdlVehicleInfo.onGpsData(vehicleInfo.gps) }
 }
