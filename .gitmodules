@@ -1,3 +1,4 @@
 [submodule "sdl"]
 	path = sdl
-	url = git@adc.luxoft.com:ford
+    url = git@adc.luxoft.com:ford
+    branch = feature/revsdl
