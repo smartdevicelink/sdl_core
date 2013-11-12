@@ -1,10 +1,6 @@
 /**
  * @file VehicleInfo.qml
-<<<<<<< HEAD
- * @brief Container for information about vehicle.
-=======
  * @brief Vehicle information interface realisation.
->>>>>>> qtHMI/qtHMI_dev
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -59,171 +55,131 @@ Item {
 
     function getGpsData(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.gps) {
-            console.debug("exit")
-            return { gps: dataContainer.vehicleInfoModel.gps }
-        }
-        else {
-            console.debug("exit")
-            return { __retCode: Common.Result.DATA_NOT_AVAILABLE }
-        }
+        console.debug("exit")
+        return { gps: dataContainer.vehicleInfoModel.gps }
     }
 
     function getSpeed(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.speed) {
-            console.debug("exit")
-            return { speed: dataContainer.vehicleInfoModel.speed }
-        }
-        else {
-            console.debug("exit")
-            throw Common.Result.DATA_NOT_AVAILABLE
-        }
+        console.debug("exit")
+        return { speed: dataContainer.vehicleInfoModel.speed }
     }
 
     function getRpm(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.rpm) {
-            console.debug("exit")
-            return { rpm: dataContainer.vehicleInfoModel.rpm }
+        console.debug("exit")
+        return {
+            rpm: dataContainer.vehicleInfoModel.rpm,
+            __retCode: Common.Result.DATA_NOT_AVAILABLE
         }
-
     }
 
     function getFuelLevel(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.fuelLevel) {
-            console.debug("exit")
-            return { fuelLevel: dataContainer.vehicleInfoModel.fuelLevel }
-        }
-
+        console.debug("exit")
+        return { fuelLevel: dataContainer.vehicleInfoModel.fuelLevel }
     }
 
     function getFuelLevelState(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.fuelLevel_State) {
-            console.debug("exit")
-            return { fuelLevel_State: dataContainer.vehicleInfoModel.fuelLevel_State }
-        }
-
+        console.debug("exit")
+        return { fuelLevel_State: dataContainer.vehicleInfoModel.fuelLevel_State }
     }
 
     function getInstantFuelConsumption(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.instantFuelConsumption) {
-            console.debug("exit")
-            return { instantFuelConsumption: dataContainer.vehicleInfoModel.instantFuelConsumption }
-        }
-
+        console.debug("exit")
+        return { instantFuelConsumption: dataContainer.vehicleInfoModel.instantFuelConsumption }
     }
 
     function getExternalTemperature(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.externalTemperature) {
-            console.debug("exit")
-            return { externalTemperature: dataContainer.vehicleInfoModel.externalTemperature }
-        }
-
+        console.debug("exit")
+        return { externalTemperature: dataContainer.vehicleInfoModel.externalTemperature }
     }
 
     function getVin(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.vin) {
-            console.debug("exit")
-            return { vin: dataContainer.vehicleInfoModel.vin }
-        }
-
+        console.debug("exit")
+        return { vin: dataContainer.vehicleInfoModel.vin }
     }
 
     function getPrndl(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.prndl) {
-            console.debug("exit")
-            return { prndl: dataContainer.vehicleInfoModel.prndl }
-        }
-
+        console.debug("exit")
+        return { prndl: dataContainer.vehicleInfoModel.prndl }
     }
 
     function getTirePressure(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.tirePressure) {
-            console.debug("exit")
-            return { tirePressure: dataContainer.vehicleInfoModel.tirePressure }
-        }
-
+        console.debug("exit")
+        return { tirePressure: dataContainer.vehicleInfoModel.tirePressure }
     }
 
     function getOdometer(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.odometer) {
-            console.debug("exit")
-            return { odometer: dataContainer.vehicleInfoModel.odometer }
-        }
-
+        console.debug("exit")
+        return { odometer: dataContainer.vehicleInfoModel.odometer }
     }
 
     function getBeltStatus(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.beltStatus) {
-            console.debug("exit")
-            return { beltStatus: dataContainer.vehicleInfoModel.beltStatus }
-        }
-
+        console.debug("exit")
+        return { beltStatus: dataContainer.vehicleInfoModel.beltStatus }
     }
 
     function getBodyInformation(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel.bodyInformation) {
-            console.debug("exit")
-            return { bodyInformation: dataContainer.vehicleInfoModel.bodyInformation }
-        }
-
+        console.debug("exit")
+        return { bodyInformation: dataContainer.vehicleInfoModel.bodyInformation }
     }
 
-    function (appID) {
+    function getDeviceStatus(appID) {
         console.debug("enter")
-        if (dataContainer.vehicleInfoModel) {
-            console.debug("exit")
-            return { : dataContainer.vehicleInfoModel. }
-        }
-
+        console.debug("exit")
+        return { deviceStatus: dataContainer.vehicleInfoModel.deviceStatus }
     }
 
-
-
-
-
-    function getVehicleData(gps, speed, rpm, fuelLevel, fuelLevel_State, instantFuelConsumption, externalTemperature,
-                            vin, prndl, tirePressure, odometer, beltStatus, bodyInformation, deviceStatus, driverBraking,
-                            wiperStatus, headLampStatus, engineTorque, accPedalPosition, steeringWheelAngle, myKey, appID) {
-        //TODO {ALeshin}: Refactor this function
-        throw Common.Result.UNSUPPORTED_REQUEST
-
+    function getDriverBraking(appID) {
         console.debug("enter")
-        console.debug("exit");
-        return {
-                gps: gps ? dataContainer.vehicleInfoModel.gps : undefined,
-                speed: speed ? dataContainer.vehicleInfoModel.speed : undefined,
-                rpm: rpm ? dataContainer.vehicleInfoModel.rpm : undefined,
-                fuelLevel: fuelLevel ? dataContainer.vehicleInfoModel.fuelLevel : undefined,
-                fuelLevel_State: fuelLevel_State ? dataContainer.vehicleInfoModel.fuelLevel_State : undefined,
-                instantFuelConsumption: instantFuelConsumption ? dataContainer.vehicleInfoModel.instantFuelConsumption : undefined,
-                externalTemperature: externalTemperature ? dataContainer.vehicleInfoModel.externalTemperature : undefined,
-                vin: vin ? dataContainer.vehicleInfoModel.vin : undefined,
-                prndl: prndl ? dataContainer.vehicleInfoModel.prndl : undefined,
-                tirePressure: tirePressure ? dataContainer.vehicleInfoModel.tirePressure : undefined,
-                odometer: odometer ? dataContainer.vehicleInfoModel.odometer : undefined,
-                beltStatus: beltStatus ? dataContainer.vehicleInfoModel.beltStatus : undefined,
-                bodyInformation: bodyInformation ? dataContainer.vehicleInfoModel.bodyInformation : undefined,
-                deviceStatus: deviceStatus ? dataContainer.vehicleInfoModel.deviceStatus : undefined,
-                driverBraking: driverBraking ? dataContainer.vehicleInfoModel.driverBraking : undefined,
-                wiperStatus: wiperStatus ? dataContainer.vehicleInfoModel.wiperStatus : undefined,
-                headLampStatus: headLampStatus ? dataContainer.vehicleInfoModel.headLampStatus : undefined,
-                engineTorque: engineTorque ? dataContainer.vehicleInfoModel.engineTorque : undefined,
-                accPedalPosition: accPedalPosition ? dataContainer.vehicleInfoModel.accPedalPosition : undefined,
-                steeringWheelAngle: steeringWheelAngle ? dataContainer.vehicleInfoModel.steeringWheelAngle : undefined,
-                myKey: myKey ? dataContainer.vehicleInfoModel.myKey : undefined
-        }
+        console.debug("exit")
+        return { driverBraking: dataContainer.vehicleInfoModel.driverBraking }
+    }
+
+    function getWiperStatus(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { wiperStatus: dataContainer.vehicleInfoModel.wiperStatus }
+    }
+
+    function getHeadLampStatus(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { headLampStatus: dataContainer.vehicleInfoModel.headLampStatus }
+    }
+
+    function getEngineTorque(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { engineTorque: dataContainer.vehicleInfoModel.engineTorque }
+    }
+
+    function getAccPedalPosition(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { accPedalPosition: dataContainer.vehicleInfoModel.accPedalPosition }
+    }
+
+    function getSteeringWheelAngle(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { steeringWheelAngle: dataContainer.vehicleInfoModel.steeringWheelAngle }
+    }
+
+    function getMyKey(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { myKey: dataContainer.vehicleInfoModel.myKey }
     }
 
     function getDTCs(ecuName, dtcMask, appID) {
