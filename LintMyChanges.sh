@@ -5,10 +5,8 @@ set -e
 MACHINE_TYPE=`uname -m`
 
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-	echo x64
 	FLINT_BINARY=flint_x64
 else
-	echo x86
 	FLINT_BINARY=flint_x86
 fi
 
