@@ -7,7 +7,7 @@ QtObject {
     property real speed: 80.1
     property int rpm: 5000
     property real fuelLevel: 0.2
-    property int fuelLevel_State: Common.ComponentVolumeStatus.CVS_UNKNOWN
+    property int fuelLevel_State: Common.ComponentVolumeStatus.CVS_LOW
     property real instantFuelConsumption: 2.2
     property int driverBraking: Common.VehicleDataEventStatus.VDES_NO_EVENT
     property int wiperStatus: Common.WiperStatus.OFF
@@ -16,7 +16,7 @@ QtObject {
     property real steeringWheelAngle: 1.2
     property real externalTemperature: 40.0
     property string vin: '52-452-52-752'
-    property int odometer: 0
+    property int odometer: 2
     property int prndl: Common.PRNDL.FIFTH
 
     property var myKey: {
@@ -24,7 +24,8 @@ QtObject {
     }
     property var headLampStatus: {
         "lowBeamsOn": false,
-        "highBeamsOn": false
+        "highBeamsOn": false,
+        "ambientLightSensorStatus": Common.AmbientLightStatus.TWILIGHT_1
     }
     property var deviceStatus: {
         'voiceRecOn': false,
@@ -62,13 +63,13 @@ QtObject {
         'middleRow1BuckleBelted': Common.VehicleDataEventStatus.VDES_NO_EVENT,
     }
     property var tirePressure: {
-        'pressureTelltale': Common.WarningLightStatus.WLS_OFF,
-        'leftFront': Common.ComponentVolumeStatus.CVS_UNKNOWN,
-        'rightFront': Common.ComponentVolumeStatus.CVS_UNKNOWN,
-        'leftRear': Common.ComponentVolumeStatus.CVS_UNKNOWN,
-        'rightRear': Common.ComponentVolumeStatus.CVS_UNKNOWN,
-        'innerLeftRear': Common.ComponentVolumeStatus.CVS_UNKNOWN,
-        'innerRightRear': Common.ComponentVolumeStatus.CVS_UNKNOWN
+        'pressureTelltale': Common.WarningLightStatus.WLS_ON,
+        'leftFront': { status: Common.ComponentVolumeStatus.CVS_NORMAL},
+        'rightFront': { status:  Common.ComponentVolumeStatus.CVS_UNKNOWN },
+        'leftRear': { status: Common.ComponentVolumeStatus.CVS_NORMAL },
+        'rightRear': { status: Common.ComponentVolumeStatus.CVS_UNKNOWN },
+        'innerLeftRear': { status: Common.ComponentVolumeStatus.CVS_UNKNOWN },
+        'innerRightRear': { status: Common.ComponentVolumeStatus.CVS_UNKNOWN }
     }
     property var gps: {
         'longitudeDegrees': 423293,

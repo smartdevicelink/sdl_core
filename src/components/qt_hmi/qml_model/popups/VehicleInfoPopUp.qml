@@ -72,9 +72,10 @@ PopUp {
                 id: comboBox
                 model: prndlList
                 onCurrentIndexChanged: {
+                    console.debug("index change")
                     dataContainer.vehicleInfoModel.prndl = currentIndex
                 }
-                Component.onCompleted: {comboBox.currentIndex = dataContainer.vehicleInfoModel.prndl}
+                Component.onCompleted: {console.debug("completed"); comboBox.currentIndex = dataContainer.vehicleInfoModel.prndl}
                 ListModel {
                     id: prndlList
                     Component.onCompleted: {
