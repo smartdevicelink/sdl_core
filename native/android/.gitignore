@@ -10,3 +10,5 @@ out
 # Android: properties local to every dev
 local.properties
 
+# Android: auto generated library
+avatar/src/main/libs/armeabi
