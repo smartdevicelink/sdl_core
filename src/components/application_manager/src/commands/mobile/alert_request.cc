@@ -49,7 +49,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
   ui_alert_result_(mobile_apis::Result::INVALID_ENUM),
   is_tts_speak_send_(false),
   is_tts_speak_received_(false) {
-
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
 AlertRequest::~AlertRequest() {
@@ -134,6 +134,13 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+        correlation_id(),
+      default_timeout());
+      break;
+    }
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
 
