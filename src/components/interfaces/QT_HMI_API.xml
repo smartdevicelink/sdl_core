@@ -2649,127 +2649,127 @@
   </function>
 
   <function name="OnGpsData" messagetype="notification">
-    <param name="gps" type="Common.GPSData" mandatory="false">
+    <param name="gps" type="Common.GPSData" mandatory="true">
       <description>See GPSData</description>
     </param>
   </function>
 
   <function name="OnSpeed" messagetype="notification">
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="false">
+    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="true">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
   </function>
 
   <function name="OnRpm" messagetype="notification">
-    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
+    <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="true">
       <description>The number of revolutions per minute of the engine</description>
     </param>
   </function>
 
   <function name="OnFuelLevel" messagetype="notification">
-    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
+    <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="true">
       <description>The fuel level in the tank (percentage)</description>
     </param>
   </function>
 
   <function name="OnFuelLevelState" messagetype="notification">
-    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
+    <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="true">
       <description>The fuel level state</description>
     </param>
   </function>
 
   <function name="OnInstantFuelConsumption" messagetype="notification">
-    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
+    <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="true">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
   </function>
 
   <function name="OnExternalTemperature" messagetype="notification">
-    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
+    <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="true">
       <description>The external temperature in degrees celsius</description>
     </param>
   </function>
 
   <function name="OnVin" messagetype="notification">
-    <param name="vin" type="String" maxlength="17" mandatory="false">
+    <param name="vin" type="String" maxlength="17" mandatory="true">
       <description>Vehicle identification number.</description>
     </param>
   </function>
 
   <function name="OnPrndl" messagetype="notification">
-    <param name="prndl" type="Common.PRNDL" mandatory="false">
+    <param name="prndl" type="Common.PRNDL" mandatory="true">
       <description>See PRNDL</description>
     </param>
   </function>
 
   <function name="OnTirePressure" messagetype="notification">
-    <param name="tirePressure" type="Common.TireStatus" mandatory="false">
+    <param name="tirePressure" type="Common.TireStatus" mandatory="true">
       <description>See TireStatus</description>
     </param>
   </function>
 
   <function name="OnOdometer" messagetype="notification">
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="false">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="true">
       <description>Odometer in km</description>
     </param>
   </function>
 
   <function name="OnBeltStatus" messagetype="notification">
-    <param name="beltStatus" type="Common.BeltStatus" mandatory="false">
+    <param name="beltStatus" type="Common.BeltStatus" mandatory="true">
       <description>The status of the seat belts</description>
     </param>
   </function>
 
   <function name="OnBodyInformation" messagetype="notification">
-    <param name="bodyInformation" type="Common.BodyInformation" mandatory="false">
+    <param name="bodyInformation" type="Common.BodyInformation" mandatory="true">
       <description>The body information including power modes</description>
     </param>
   </function>
 
   <function name="OnDeviceStatus" messagetype="notification">
-    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="false">
+    <param name="deviceStatus" type="Common.DeviceStatus" mandatory="true">
       <description>The device status including signal and battery strength</description>
     </param>
   </function>
 
   <function name="OnDriverBraking" messagetype="notification">
-    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
+    <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="true">
       <description>The status of the brake pedal</description>
     </param>
   </function>
 
   <function name="OnWiperStatus" messagetype="notification">
-    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="true">
       <description>The status of the wipers</description>
     </param>
   </function>
 
   <function name="OnHeadLampStatus" messagetype="notification">
-    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="true">
       <description>Status of the head lamps</description>
     </param>
   </function>
 
   <function name="OnEngineTorque" messagetype="notification">
-    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="true">
       <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
   </function>
 
   <function name="OnAccPedalPosition" messagetype="notification">
-    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="true">
       <description>Accelerator pedal position (percentage depressed)</description>
     </param>
   </function>
 
   <function name="OnSteeringWheelAngle" messagetype="notification">
-    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
   </function>
 
   <function name="OnMyKey" messagetype="notification">
-    <param name="myKey" type="Common.MyKey" mandatory="false">
+    <param name="myKey" type="Common.MyKey" mandatory="true">
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
