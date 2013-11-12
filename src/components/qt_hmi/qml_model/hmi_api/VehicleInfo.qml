@@ -106,6 +106,13 @@ Item {
 
     function getPrndl(appID) {
         console.debug("enter")
+        if (dataContainer.vehicleInfoModel.prndl === -1) { // Test value, to check response
+            console.debug("exit")
+            return {
+                prndl: dataContainer.vehicleInfoModel.prndl,
+                __retCode: Common.Result.DATA_NOT_AVAILABLE
+            }
+        }
         console.debug("exit")
         return { prndl: dataContainer.vehicleInfoModel.prndl }
     }

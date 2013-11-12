@@ -4,7 +4,7 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 QtObject {
-    property real speed: 80.1
+    property real speed: 80.1        
     property int rpm: 5000
     property real fuelLevel: 0.2
     property int fuelLevel_State: Common.ComponentVolumeStatus.CVS_LOW
@@ -95,4 +95,26 @@ QtObject {
         'data1': 'ECU 1 Test Data',
         'data2': 'ECU 2 Test Data'
     }
+
+    onSpeedChanged: {  }
+    onRpmChanged: {  }
+    onFuelLevelChanged: {  }
+    onFuelLevel_StateChanged:  {  }
+    onInstantFuelConsumptionChanged: {  }
+    onDriverBrakingChanged: {  }
+    onWiperStatusChanged: {  }
+    onEngineTorqueChanged: {  }
+    onAccPedalPositionChanged: {  }
+    onSteeringWheelAngleChanged: {  }
+    onExternalTemperatureChanged: {  }
+    onVinChanged: {  }
+    onOdometerChanged: {  }
+    onPrndlChanged: {  }
+    onMyKeyChanged: {  }
+    onHeadLampStatusChanged: {  }
+    onDeviceStatusChanged: {  }
+    onBodyInformationChanged: {  }
+    onBeltStatusChanged: {  }
+    onTirePressureChanged: {  }
+    onGpsChanged: {  }
 }
