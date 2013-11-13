@@ -102,7 +102,7 @@ CSmartSchema PolicyTableSchema::CreateSchema(void) {
     true);
 
   policy_table_member_map[kStrFunctionalGroupings] =
-    CObjectSchemaItem::SMember(CreateFunctionaGroupings(), true);
+    CObjectSchemaItem::SMember(CreateFunctionalGroupings(), true);
 
   policy_table_member_map[kStrAppPolicies] = CObjectSchemaItem::SMember(
     CreateAppPolicies(),
@@ -139,7 +139,7 @@ SchemaItemPtr PolicyTableSchema::CreateModuleConfig(void) {
 
 //-----------------------------------------------------------------------------
 
-SchemaItemPtr PolicyTableSchema::CreateFunctionaGroupings(void) {
+SchemaItemPtr PolicyTableSchema::CreateFunctionalGroupings(void) {
   std::map<std::string, CObjectSchemaItem::SMember> rpc_map;
 
   rpc_map[kStrHmiLevels] = CObjectSchemaItem::SMember(

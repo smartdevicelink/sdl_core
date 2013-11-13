@@ -145,7 +145,7 @@ class PolicyTableSchema {
      * @brief Creates "functional_groupings" schema item
      */
     virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
-      CreateFunctionaGroupings(void);
+      CreateFunctionalGroupings(void);
 
     /**
      * @brief Creates "app_policies" schema item
