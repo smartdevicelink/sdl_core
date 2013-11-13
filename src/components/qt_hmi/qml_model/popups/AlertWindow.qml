@@ -110,7 +110,8 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.right: alertButton2.visible ? alertButton2.left : parent.right
                         width: Constants.alertWidth / 2
-                        onPressed: { alertWindow.keep(); }
+                        onPressed: { alertWindow.keep = true; }
+                        onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
                         onStealFocus: {
@@ -124,7 +125,8 @@ Rectangle {
                         button: softButtons && softButtons.length > 1 ? softButtons[1] : undefined
                         anchors.right: parent.right
                         width: Constants.alertWidth / 2
-                        onPressed: { alertWindow.keep(); }
+                        onPressed: { alertWindow.keep = true; }
+                        onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
                         onStealFocus: {
@@ -143,7 +145,8 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.right: alertButton4.visible ? alertButton4.left : parent.right
                         width: Constants.alertWidth / 2
-                        onPressed: { alertWindow.keep(); }
+                        onPressed: { alertWindow.keep = true; }
+                        onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
                         onStealFocus: {
@@ -157,7 +160,8 @@ Rectangle {
                         button: softButtons && softButtons.length > 3 ? softButtons[3] : undefined
                         anchors.right: parent.right
                         width: Constants.alertWidth / 2
-                        onPressed: { alertWindow.keep(); }
+                        onPressed: { alertWindow.keep = true; }
+                        onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
                         onStealFocus: {
@@ -224,10 +228,17 @@ Rectangle {
 
     function complete (reason) {
         timer.stop()
+        DBus.sendReply(async, {"__retCode": reason})
+
+        if (!keep) {
+            hide()
+        }
+    }
+
+    function hide() {
         dataContainer.activeAlert = false
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
-        DBus.sendReply(async, {"__retCode": reason})
     }
 
     function restart() {
@@ -235,7 +246,11 @@ Rectangle {
         timer.restart();
     }
 
-    function keep() {
-        timer.stop();
+    property bool keep: false
+
+    onKeepChanged: {
+        if (visible && !keep && !timer.running) {
+            hide()
+        }
     }
 }
