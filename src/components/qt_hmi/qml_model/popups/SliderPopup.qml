@@ -41,6 +41,8 @@ import "../controls"
 PopUp {
     property var async
     property int position: 1
+    property int resultCode: -1
+    signal onReady
 
     function showSlider(){
         console.debug("enter")
@@ -55,6 +57,7 @@ PopUp {
         position = dataContainer.uiSlider.position
         show()
         timer.start()
+        onReady()
         console.debug("exit")
     }
 
@@ -67,11 +70,13 @@ PopUp {
         switch(reason) {
         case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendReply(async, {__retCode: Common.Result.ABORTED,
+            resultCode = Common.Result.ABORTED
+            DBus.sendReply(async, {__retCode: resultCode,
                                sliderPosition: dataContainer.uiSlider.position})
             break
         case Common.Result.SUCCESS:
             console.debug("send position", position)
+            resultCode = Common.Result.SUCCESS
             dataContainer.uiSlider.position = position
             DBus.sendReply(async, {sliderPosition:position})
             break
@@ -141,6 +146,7 @@ PopUp {
 
 
             MouseArea{
+                id: mouseArea
                 anchors.fill: parent
                 onClicked: {
                     onPositionChanged(mouse)
@@ -179,6 +185,7 @@ PopUp {
         }
 
         OvalButton {
+            id: backButton
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Back"
             fontSize: Constants.fontSize
@@ -186,5 +193,18 @@ PopUp {
                 complete(Common.Result.ABORTED)
             }
         }
+    }
+
+    function getTimer() {
+        return timer
+    }
+    function getBackButton() {
+        return backButton
+    }
+    function getFooterText() {
+        return footerText
+    }
+    function getMouseArea() {
+        return mouseArea
     }
 }
