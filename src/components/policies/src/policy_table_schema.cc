@@ -81,13 +81,9 @@ const std::string PolicyTableSchema::kStrPriority("priority");
 //-----------------------------------------------------------------------------
 
 CSmartSchema PolicyTableSchema::Create(void) {
-  PolicyTableSchema *pt_schema = new PolicyTableSchema();
+  static PolicyTableSchema schema;
 
-  CSmartSchema schema = pt_schema->CreateSchema();
-
-  delete pt_schema;
-
-  return schema;
+  return schema.CreateSchema();
 }
 
 //-----------------------------------------------------------------------------

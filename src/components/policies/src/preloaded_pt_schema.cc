@@ -60,13 +60,9 @@ typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 //-----------------------------------------------------------------------------
 
 CSmartSchema PreloadedPTSchema::Create(void) {
-  PreloadedPTSchema *pt_schema = new PreloadedPTSchema();
-
-  CSmartSchema schema = pt_schema->CreateSchema();
-
-  delete pt_schema;
-
-  return schema;
+  static PreloadedPTSchema schema;
+  
+  return schema.CreateSchema();
 }
 
 //-----------------------------------------------------------------------------
