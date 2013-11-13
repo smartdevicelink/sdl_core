@@ -1,6 +1,6 @@
 /**
- * @file LongOvalButton.qml
- * @brief Parent class for long oval buttons.
+ * @file ClickableText.qml
+ * @brief Clickable text item
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,54 +33,45 @@
  */
 
 import QtQuick 2.0
-import "../models/Constants.js" as Constants
 
+Text {
+    property string defaultColor
+    property string pressedColor
+    signal pressed ()
+    signal released ()
+    signal canceled ()
+    signal clicked ()
 
-Image {
-    id: longOvalButton
-    source: "../res/buttons/long_oval_btn.png"
-    property alias text: btnText.text
-    property alias pixelSize: btnText.font.pixelSize
-    property string  dest: ""
-    property bool isPressed: false
-
-    signal clicked
-    Connections {
-        target: mouseArea
-        onClicked: {
-            clicked()
-        }
-    }
-
-    Text {
-        anchors.centerIn: parent
-        id: btnText
-        color: Constants.primaryColor
-    }
+    color: defaultColor
 
     MouseArea {
-        id: mouseArea
         anchors.fill: parent
+
         onPressed: {
-            source = "../res/buttons/long_oval_pressed_btn.png"
-            btnText.color = Constants.secondaryColor
-            isPressed = true
+            press()
+            parent.pressed()
         }
+
         onReleased: {
-            source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constants.primaryColor
-            isPressed = false
+            release()
+            parent.released()
         }
+
         onCanceled: {
-            source = "../res/buttons/long_oval_btn.png"
-            btnText.color =  Constants.primaryColor
-            isPressed = false
+            release()
+            parent.canceled()
         }
 
         onClicked: {
-            if(dest !== ""){
-                contentLoader.go(dest)
-            }
+            parent.clicked()
         }
+    }
+
+    function press () {
+        color = pressedColor
+    }
+
+    function release () {
+        color = defaultColor
     }
 }

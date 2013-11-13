@@ -38,11 +38,17 @@
 // Main color of HMI model(now it ~lightblue). Buttons, text, icons of this color.
 var primaryColor = "#1d81d5"
 
+// Color of pressed buttons, text, icons etc.
+var primaryColorPressed = "#8ec0ea"
+
 // Secondary color of HMI model, backgroud of this color.
 var secondaryColor = "black"
 
 // Color of text at buttonts that are inactive (at phone keyboard, when no any contact started with current letter).
 var inactiveButtonTextColor = "grey"
+
+// Color of text at buttonts that are inactive but nevertheless pressed (at phone keyboard, when no any contact started with current letter).
+var inactiveButtonTextColorPressed = "lightgrey"
 
 // Color of text at contact list screen view (Name, number and number type).
 var contactTextColor = "lightblue"
@@ -75,6 +81,9 @@ var panelTextColor = "white"
 // Font size for most of text in HMI model.
 var fontSize = 20
 
+// Font size for text inside oval buttons.
+var ovalButtonFontSize = 15
+
 // Title font size
 var titleFontSize = 45
 
@@ -104,10 +113,10 @@ var warningScreenDuration = 1000
 var presetButtonTimer = 400
 
 // Width for long oval button
-var longOvalButtonWidth = 163
+var ovalButtonWidth = 163
 
 // Height for oval button
-var ovalButtonHeight = 63
+var ovalButtonHeight = 65
 
 // Size icon for buttons
 var iconButtonSize = 30
@@ -182,3 +191,25 @@ var audioPassThruTextColor = "white"
 
 // Padding for hardware and simulation panels
 var panelPadding = 20
+
+// Scale for pressed icon in menu
+var pressedIconScale = 1.1
+
+// Font size for list of applications
+var appListFontSize = 40
+
+// Size icon for list of applications
+var appListIconSize = 100
+
+// Count of rows for menu
+var menuRowCount = 2
+
+// Values of color effect for highlighted button
+var highlightedButtonHue = 0.9
+var highlightedButtonSaturation = 0.0
+var highlightedButtonLightness = 0.1
+
+// Values of color effect for disabled button
+var disabledButtonHue = 0.0
+var disabledButtonSaturation = -1.0
+var disabledButtonLightness = 0.1

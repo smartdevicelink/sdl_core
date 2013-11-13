@@ -59,7 +59,7 @@ GeneralView {
             PagedFlickable {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
-                elementWidth: Constants.longOvalButtonWidth
+                elementWidth: Constants.ovalButtonWidth
                 spacing: (width - 4 * elementWidth) / 3
                 snapTo: elementWidth + spacing
 

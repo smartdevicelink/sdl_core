@@ -63,7 +63,7 @@ Rectangle {
     Text {
         id: label
         color: "white"
-        text: "TextButton"
+        text: "PushButton"
         font.pixelSize: 18
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter

@@ -70,8 +70,8 @@ Item {
             spacing: (mediaPlayerView.playerType === "SDL") ? ((width - 4 * elementWidth) / 3)
                                                             : (width - 2 * elementWidth)
             anchors.verticalCenter: parent.verticalCenter
-            snapTo: Constants.longOvalButtonWidth + spacing
-            elementWidth: Constants.longOvalButtonWidth
+            snapTo: Constants.ovalButtonWidth + spacing
+            elementWidth: Constants.ovalButtonWidth
         }
     }
 
@@ -101,8 +101,6 @@ Item {
             // picture + text info
             width: parent.width
             height: 3/4 * parent.height
-            anchors.left: parent.left
-            anchors.top: parent.top
             spacing: Constants.margin
 
             Image {
@@ -154,8 +152,6 @@ Item {
         }
 
         MediaClockView {
-            anchors.left: parent.left
-            anchors.bottom: parent. bottom
             width: parent.width
             height: parent.height * 1/4
         }
@@ -238,7 +234,7 @@ Item {
             id: presetsRow
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            presets: Internal.getArrayForPresetRow()
+            presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
             width: parent.width
             property bool clickProcessed
 

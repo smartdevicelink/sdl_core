@@ -46,8 +46,6 @@ PopUp {
         console.debug("enter")
 
         dataContainer.uiSlider.running = true
-        dataContainer.systemSavedContext = dataContainer.systemContext
-        dataContainer.systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         dataContainer.applicationSavedContext = dataContainer.applicationContext
         if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) {
             footerText.text = ""
@@ -63,7 +61,6 @@ PopUp {
     function complete(reason){
         console.debug("enter reason = ", reason)
         timer.stop()
-        dataContainer.systemContext = dataContainer.systemSavedContext
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         dataContainer.uiSlider.running = false
         hide()

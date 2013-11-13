@@ -1,6 +1,6 @@
 /**
- * @file VRPopUp.qml
- * @brief Popup view for VR interface (list commands).
+ * @file ClickableImage.qml
+ * @brief Clickable image item
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -34,68 +34,33 @@
 
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
-import "../hmi_api/Common.js" as Common
-import "../views"
-import "../controls"
 
-PopUp {
-    Text {
-        id: title
-        height: 50
-        text: "Speak the command"
-        verticalAlignment: Text.AlignVCenter
-        anchors.right: voice.left
-        anchors.rightMargin: 10
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.left: parent.left
-        anchors.leftMargin: 15
-        font.pixelSize: 14
-        color: Constants.primaryColor
-    }
+Image {
+    signal pressed ()
+    signal released ()
+    signal canceled ()
+    signal clicked()
 
-    Image {
-        id: voice
-        x: 591
-        width: 50
-        height: 50
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.right: parent.right
-        anchors.rightMargin: 15
-        source: "../res/controlButtons/vrImage.png"
-    }
+    MouseArea {
+        anchors.fill: parent
 
-    ScrollableListView {
-        anchors.bottomMargin: Constants.popupMargin
-        anchors.rightMargin: Constants.popupMargin
-        anchors.leftMargin: Constants.popupMargin
-        anchors.top: voice.bottom
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.topMargin: 0
-
-        model: dataContainer.vrCommands
-
-        delegate: OvalButton {
-            width: parent.width
-            text: command
-            onClicked: {
-                sdlVR.onCommand(cmdID, appID === 0 ? undefined : appID);
-            }
+        onPressed: {
+            parent.scale = Constants.pressedIconScale
+            parent.pressed()
         }
-    }
 
-    function activate() {
-        dataContainer.activeVR = true;
-        sdlVR.started();
-        show();
-    }
+        onReleased: {
+            parent.scale = 1
+            parent.released()
+        }
 
-    function complete(reason) {
-        dataContainer.activeVR = false;
-        sdlVR.stopped();
-        hide();
+        onCanceled: {
+            parent.scale = 1
+            parent.canceled()
+        }
+
+        onClicked: {
+            parent.clicked()
+        }
     }
 }

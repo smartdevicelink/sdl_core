@@ -64,7 +64,7 @@ GeneralView {
 
                 OvalButton {
                     id: turnListButton
-                    width: Constants.longOvalButtonWidth
+                    width: Constants.ovalButtonWidth
                     anchors.verticalCenter: parent.verticalCenter
                     text: "TurnList"
                     fontSize: Constants.fontSize
