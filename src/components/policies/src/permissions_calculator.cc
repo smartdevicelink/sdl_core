@@ -45,9 +45,49 @@ namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
 
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
+using ::NsSmartDeviceLink::NsSmartObjects::SmartType;
 
 log4cxx::LoggerPtr PermissionsCalculator::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
+
+//----------------------------------------------------------------------------
+
+const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
+  const SmartObject& pt_object,
+  const uint32_t app_id) {
+
+  const uint8_t kBuffSize = 16;
+  char app_id_string[kBuffSize];
+  snprintf(app_id_string, kBuffSize, "%d", app_id);
+
+  const SmartObject& app_policies =
+      pt_object.getElement(PolicyTableSchema::kStrPolicyTable)
+               .getElement(PolicyTableSchema::kStrAppPolicies);
+
+  // look for <app_id> section within app_policies
+  if ((true == app_policies.keyExists(std::string(app_id_string)))) {
+
+    const SmartObject& pt_app_id =
+      app_policies.getElement(app_id_string);
+
+    if (SmartType::SmartType_Map == pt_app_id.getType()) {
+      return pt_app_id;
+    } else {
+       LOG4CXX_ERROR(logger_,
+        "Section app_policies|<app_id> neither exists nor is a map");
+    }  // look for default section within app_policies
+  } else if (SmartType::SmartType_Map ==
+      app_policies.getElement(PolicyTableSchema::kStrDefault).getType()) {
+
+    // returning "default" section of "app_policies"
+    return app_policies.getElement(PolicyTableSchema::kStrDefault);
+  } else {
+    LOG4CXX_ERROR(logger_,
+      "Section app_policies|default neither exists nor is a map");
+  }
+
+  return so_ns::invalid_object_value;
+}
 
 //----------------------------------------------------------------------------
 
@@ -57,36 +97,19 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
     const SmartObject& rpc,
     const mobile_apis::HMILevel::eType hmi_status) {
 
-  char app_id_string[16];
-  sprintf(app_id_string, "%d", app_id);  
-  std::vector<std::string> rpc_groups;
-  const SmartObject& app_policies_object =
-      pt_object.getElement(PolicyTableSchema::kStrPolicyTable)
-               .getElement(PolicyTableSchema::kStrAppPolicies);
 
-  // look for <app_id> section within app_policies
-  if ((true == app_policies_object.keyExists(std::string(app_id_string)))) {
-    if (so_ns::SmartType::SmartType_Array ==
-        app_policies_object.getElement(app_id_string)
-                          .getElement(PolicyTableSchema::kStrGroups).getType()) {
-      convertSmartArray2VectorStrings(
-          app_policies_object.getElement(app_id_string)
-                              .getElement(PolicyTableSchema::kStrGroups),
-          rpc_groups);
-    } else {
-       LOG4CXX_ERROR(logger_,
-        "Section app_policies|<app_id>|groups either not exists or not array");
-    }  // look for default section within app_policies
-  } else if (so_ns::SmartType::SmartType_Array ==
-      app_policies_object.getElement(PolicyTableSchema::kStrDefault)
-                          .getElement(PolicyTableSchema::kStrGroups).getType()) {
-    convertSmartArray2VectorStrings(
-        app_policies_object.getElement(PolicyTableSchema::kStrDefault)
-                            .getElement(PolicyTableSchema::kStrGroups),
-        rpc_groups);
+  std::vector<std::string> rpc_groups;
+  const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
+
+  const SmartObject& pt_groups =
+    pt_app_id.getElement(PolicyTableSchema::kStrGroups);
+
+  if (SmartType::SmartType_Array == pt_groups.getType()) {
+
+    convertSmartArray2VectorStrings(pt_groups, rpc_groups);
   } else {
     LOG4CXX_ERROR(logger_,
-      "Section app_policies|default|groups either not exists or not array");
+        "Section app_policies|<app_id>|groups either not exists or not array");
   }
 
   if (rpc_groups.size() > 0) {
@@ -148,14 +171,16 @@ PermissionResult::eType
             fgroup.getElement(PolicyTableSchema::kStrRpcs)
                   .getElement(function_id.asString())
                   .getElement(PolicyTableSchema::kStrHmiLevels);
-        for(uint16_t n = 0; n < hmi_levels.length(); n++) {
+        for (uint16_t n = 0; n < hmi_levels.length(); n++) {
           if (hmi_levels[n].getType() == so_ns::SmartType::SmartType_String) {
             if (hmi_status_string.compare(hmi_levels[n].asString()) == 0) {
               return PermissionResult::PERMISSION_OK_ALLOWED;
             }
           }
         }
-      } else continue;
+      } else {
+        continue;
+      }
     }
   }
 
@@ -168,13 +193,15 @@ void PermissionsCalculator::convertHMILevel2String(
     const mobile_apis::HMILevel::eType hmi_status,
     std::string& hmi_level_string) {
 
-  const std::map<mobile_apis::HMILevel::eType, std::string> elementsStringRepresentation =
-      so_ns::TEnumSchemaItem<mobile_apis::HMILevel::eType>::getEnumElementsStringRepresentation();
+  const std::map<mobile_apis::HMILevel::eType, std::string>
+    elementsStringRepresentation =
+      so_ns::TEnumSchemaItem<mobile_apis::HMILevel::eType>::
+        getEnumElementsStringRepresentation();
 
-  typename std::map<mobile_apis::HMILevel::eType, std::string>::const_iterator i = elementsStringRepresentation.find(hmi_status);
+  std::map<mobile_apis::HMILevel::eType, std::string>::const_iterator i =
+    elementsStringRepresentation.find(hmi_status);
 
-  if (i != elementsStringRepresentation.end())
-  {
+  if (i != elementsStringRepresentation.end()) {
       hmi_level_string = i->second;
   }
 }
@@ -186,7 +213,7 @@ void PermissionsCalculator::convertSmartArray2VectorStrings(
     std::vector<std::string>& v_strings) {
 
   if (object.getType() == so_ns::SmartType::SmartType_Array) {
-    for(uint32_t i = 0; i < object.length(); i++) {
+    for (uint32_t i = 0; i < object.length(); i++) {
       const SmartObject & item = object.getElement(i);
       if (item.getType() == so_ns::SmartType::SmartType_String) {
         v_strings.push_back(item.asString());

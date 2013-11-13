@@ -75,7 +75,6 @@ class PermissionsCalculator {
         const uint32_t app_id);
 
   private:
-
     /**
      * @brief Find all RPCs in groups listed under section functional_groupings
      *
@@ -95,13 +94,30 @@ class PermissionsCalculator {
         const mobile_apis::HMILevel::eType hmi_status);
 
     /**
+    * @brief Returns a smart object containing an <app_id> section of PolicyTable
+    *
+    * If app_id is not found in the "app_policies" the "default" section is
+    * returned.
+    * @param pt_object  Policy Table as a SmartObject
+    * @param app_id     Application ID
+    *
+    * @return SmartObject that contains either <app_id> or "default" section
+    *         of "app_policies".
+    */
+    static const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+      GetPolicyTableAppIdSection(
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
+        const uint32_t app_id);
+
+    /**
      * @brief Convert HMI level value (as number) to string
      *
      * @param hmi_status        HMI level status
      * @param hmi_level_string  String convert to
      */
-    static void convertHMILevel2String(const mobile_apis::HMILevel::eType hmi_status,
-                                      std::string& hmi_level_string);
+    static void convertHMILevel2String(
+        const mobile_apis::HMILevel::eType hmi_status,
+        std::string& hmi_level_string);
 
     /**
      * @breif Convert smart object to vecotr strings
@@ -118,7 +134,7 @@ class PermissionsCalculator {
     static log4cxx::LoggerPtr logger_;
 };
 
-}  // policies
-}  // NsSmartDeviceLink
+}  // namespace policies
+}  // namespace NsSmartDeviceLink
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_PERMISSIONS_CALCULATOR_H_
