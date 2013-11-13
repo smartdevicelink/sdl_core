@@ -382,8 +382,8 @@ MFT.eng = {
 	view_media_presets: 'Presets',
 	view_media_directTune: 'Direct Tune',
 	view_media_browse: 'Browse',
-	view_media_sendRequest: 'Send request',
-    view_media_accessGranted: 'Access granted',
+    view_media_grantAccess: 'Grant access',
+    view_media_cancelAccess: 'Cancel access',
 
 	view_media_moreInfo_title: 'Song Information',
 	view_media_moreInfo_title_cd: 'Track Information',

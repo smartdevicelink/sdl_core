@@ -782,13 +782,13 @@
 
 .rs-item {
     position: relative;
-    width: 135px;
+    width: 140px;
     height: 49px;
     cursor: pointer;
     border-bottom: 1px solid #333;
     font-size: 18px;
     line-height: 46px;
-    padding-left: 15px;
+    padding-left: 10px;
 }
 
 .rs-item.notpressed {

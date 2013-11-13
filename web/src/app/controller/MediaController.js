@@ -15,7 +15,7 @@ MFT.MediaController = Em.Object.create({
 	activeState: 'media.radio.am',
 
     /** Reverse SDL functionality **/
-    sdlAccessStatus: 0,
+    sdlAccessStatus: 'denied',
 	
 	/** Visibility of Home Media Status */
 	isHomeMediaStatusHidden: false,
@@ -1176,5 +1176,13 @@ MFT.MediaController = Em.Object.create({
 			MFT.VideoPlayerController.start('ent_HD_radio');			
 			return;
 		}
-	}
+	},
+
+    sendAccessRequest: function() {
+        if(MFT.MediaController.sdlAccessStatus == 'granted'){
+            FFW.RevSDL.sendCancelAccessRequest();
+        } else {
+            FFW.RevSDL.sendGrantAccessRequest();
+        }
+    }
 });

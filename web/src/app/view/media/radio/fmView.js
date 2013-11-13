@@ -254,19 +254,37 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
 
         sendRequestButton: MFT.Button.extend({
             elementId:	'media_fm_sendRequestButton',
-            templateName:	'text',
             classNames:			['rs-item'],
-            target:				'FFW.RevSDL',
-            action:				'sendSDLAccessRequest',
+            target:				'MFT.MediaController',
+            action:				'sendAccessRequest',
             onDown: false,
-            text: function() {
-                if (MFT.MediaController.sdlAccessStatus == 1) {
-                    return MFT.locale.label.view_media_accessGranted;
+            text: MFT.locale.label.view_media_grantAccess,
+            icon: 'images/media/passiv_horiz_led.png',
+            // Change Icon for HD State
+            onIconChange: function(){
+                if(MFT.MediaController.sdlAccessStatus == 'granted'){
+                    this.set('icon', 'images/media/active_horiz_led.png');
                 } else {
-                    return MFT.locale.label.view_media_sendRequest;
+                    this.set('icon', 'images/media/passiv_horiz_led.png');
                 }
-            }.property('MFT.MediaController.sdlAccessStatus')
+            }.observes('MFT.MediaController.sdlAccessStatus')
         })
+
+//        sendRequestButton: MFT.Button.extend({
+//            elementId:	'media_fm_sendRequestButton',
+//            classNames:			['rs-item'],
+//            target:				'MFT.MediaController',
+//            action:				'sendAccessRequest',
+//            onDown: false,
+//            templateName: 'text',
+//            text: function(){
+//                if(MFT.MediaController.sdlAccessStatus == 'granted'){
+//                    return MFT.locale.label.view_media_cancelAccess;
+//                } else {
+//                    return MFT.locale.label.view_media_grantAccess;
+//                }
+//            }.property('MFT.MediaController.sdlAccessStatus')
+//        })
     })
 
 });
