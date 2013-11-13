@@ -31,6 +31,7 @@
  */
 
 #include <climits>
+#include <string>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
@@ -1289,6 +1290,16 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       if (!hmi_so_factory().attachSchema(output)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
+      }
+      if (output.validate() != smart_objects::Errors::OK) {
+        LOG4CXX_WARN(
+            logger_,
+            "Incorrect parameter from HMI");
+        output.erase(strings::msg_params);
+        output[strings::params][hmi_response::code] =
+            hmi_apis::Common_Result::INVALID_DATA;
+        output[strings::msg_params][strings::info] =
+            std::string("Received invalid data on HMI response");
       }
       break;
     }
