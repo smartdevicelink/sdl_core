@@ -116,7 +116,7 @@ QtObject {
     }
 
     function addApplication(app) {
-        console.log("enter addApplication function");
+        console.log("enter")
         applicationList.append({
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
@@ -139,7 +139,16 @@ QtObject {
             softButtons: []
             // This place is for adding new properties
         })
-        console.log("exit addApplication function");
+
+        if (app.isMediaApplication) {
+            musicSourceModel.insert(0, {
+                "title": app.appName,
+                "qml": "views/SDLPlayerView.qml",
+                "appId": app.appId
+            })
+        }
+
+        console.log("exit")
     }
 
     function setApplicationProperties(appId, props) {
@@ -157,24 +166,27 @@ QtObject {
     }
 
     function removeApplication(appId) {
-        console.log("Enter removeApplication function");
+        console.log("enter");
+        for (var j = 0; j < musicSourceModel.count; ++j) {
+            if (musicSourceModel.get(j).appId === appId) {
+                musicSourceModel.remove(j);
+                break;
+            }
+        }
         for (var i = 0; i < applicationList.count; i++) {
             if (applicationList.get(i).appId === appId) {
                 applicationList.remove(i);
                 break;
             }
         }
-        console.log("Exit removeApplication function");
+        console.log("exit");
     }
-    property int systemContext
 
+    property int systemContext
     property int hmiContext
     property bool applicationContext: false
-
     property bool applicationSavedContext
-
-    property string route_text: ""
-
+    property string routeText: ""
     property PlayerState cdPlayerState: PlayerState {
         playPauseState: 'Pause'
         albumImage: "../res/album_art.png"
@@ -251,7 +263,7 @@ QtObject {
 
     function reset () {
         console.log("dataContainer reset enter");
-        route_text = ""
+        routeText = ""
         console.log("dataContainer reset exit");
     }
 
@@ -469,5 +481,7 @@ QtObject {
             systemContext = contentLoader.item.systemContext
         }
         console.debug("exit")
+    }
+    property MusicSourceModel musicSourceModel: MusicSourceModel {
     }
 }

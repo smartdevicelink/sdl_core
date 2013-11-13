@@ -56,7 +56,7 @@ GeneralView {
                 maximumLength: 30
                 color: Constants.primaryColor
                 font.pixelSize: Constants.fontSize
-                text: dataContainer.route_text
+                text: dataContainer.routeText
             }
 
             // Keyboard
@@ -76,7 +76,7 @@ GeneralView {
                             pixelSize: Constants.fontSize
 
                             onClicked: {
-                                dataContainer.route_text += upperRow.qWERTY.charAt(index)
+                                dataContainer.routeText += upperRow.qWERTY.charAt(index)
                             }
                         }
                     }
@@ -102,7 +102,7 @@ GeneralView {
                             pixelSize: Constants.fontSize
 
                             onClicked: {
-                                dataContainer.route_text += middleRow.aSDFGH.charAt(index)
+                                dataContainer.routeText += middleRow.aSDFGH.charAt(index)
                             }
                         }
                     }
@@ -120,7 +120,7 @@ GeneralView {
                         }
 
                         onClicked: {
-                            dataContainer.route_text = dataContainer.route_text.substring(0,dataContainer.route_text.length - 1)
+                            dataContainer.routeText = dataContainer.routeText.substring(0,dataContainer.routeText.length - 1)
                         }
                     }
                 }
@@ -145,7 +145,7 @@ GeneralView {
                             pixelSize: Constants.fontSize
 
                             onClicked: {
-                                dataContainer.route_text += lowerRow.zXCVBN.charAt(index)
+                                dataContainer.routeText += lowerRow.zXCVBN.charAt(index)
                             }
                         }
                     }
@@ -157,7 +157,7 @@ GeneralView {
                         pixelSize: 12
 
                         onClicked: {
-                            dataContainer.route_text = ""
+                            dataContainer.routeText = ""
                         }
                     }
                     //----------------
@@ -168,7 +168,7 @@ GeneralView {
                         pixelSize: 12
 
                         onClicked: {
-                            dataContainer.route_text += " "
+                            dataContainer.routeText += " "
                         }
                     }
                 }

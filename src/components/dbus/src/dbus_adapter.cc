@@ -254,7 +254,7 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
       smart_objects::SmartType_Map);
 
   ListArgs args = schema_->getListArgs(ids.second,
-                                             hmi_apis::messageType::response);
+                                       hmi_apis::messageType::response);
   DBusMessageIter iter;
   dbus_message_iter_init(msg, &iter);
   int code;
@@ -313,6 +313,7 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
     obj[sos::S_PARAMS][sos::kCode] = description[rule.name].asInt();
     obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
+    obj[sos::S_PARAMS]["data"]["method"] = method.first + "." + method.second;
 
     LOG4CXX_WARN(
         logger_,
@@ -390,7 +391,7 @@ bool DBusAdapter::SetValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
-  LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name);
+  LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name << " = " << param.asString());
   int type = 0;
   void* value = 0;
   dbus_int32_t integerValue = 0;
@@ -621,6 +622,7 @@ bool DBusAdapter::GetValue(
         dbus_message_iter_get_basic(iter, &integerValue);
         smart_objects::SmartObject value(integerValue);
         param = value;
+        LOG4CXX_DEBUG(logger_, "DBus: " << rules->name << " = " << integerValue);
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
         return false;
@@ -632,6 +634,7 @@ bool DBusAdapter::GetValue(
         dbus_message_iter_get_basic(iter, &floatValue);
         smart_objects::SmartObject value(floatValue);
         param = value;
+        LOG4CXX_DEBUG(logger_, "DBus: " << rules->name << " = " << floatValue);
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
         return false;
@@ -643,6 +646,7 @@ bool DBusAdapter::GetValue(
         dbus_message_iter_get_basic(iter, &booleanValue);
         smart_objects::SmartObject value(static_cast<bool>(booleanValue));
         param = value;
+        LOG4CXX_DEBUG(logger_, "DBus: " << rules->name << " = " << (booleanValue ? "true" : "false"));
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
         return false;
@@ -655,6 +659,7 @@ bool DBusAdapter::GetValue(
         std::string strValue = stringValue;
         smart_objects::SmartObject value(strValue);
         param = value;
+        LOG4CXX_DEBUG(logger_, "DBus: " << rules->name << " = \"" << strValue << "\"");
       } else {
         LOG4CXX_ERROR(logger_, "DBus: Not expected type of argument");
         return false;
