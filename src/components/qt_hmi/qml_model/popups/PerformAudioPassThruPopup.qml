@@ -38,7 +38,7 @@ import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 import "../controls"
 
-PopUp {
+ContextPopup {
     property var async
 
     function showAudioPassThru(){
