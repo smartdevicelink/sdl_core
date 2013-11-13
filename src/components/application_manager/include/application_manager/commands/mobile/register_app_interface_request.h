@@ -87,12 +87,12 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   sync_primitives::Timer* timer_;
 
   /*
-   * @brief Checks Current application name with ttsNames and
-   * vrSynonyms of already registered applications
+   * @brief Check new application parameters (name, tts, vr) for
+   * coincidence with already known parameters of registered applications
    *
-   * return TRUE if Application name unique, otherwise FALSE
+   * return TRUE if no coincidence of app. name, TTS and VR syn, otherwise FALSE
   */
-  bool checkAppName();
+  bool checkAppParams();
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };

@@ -37,6 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/so_helper.h"
 
 namespace application_manager {
 
@@ -78,7 +79,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (!checkAppName()) {
+  if (!checkAppParams()) {
     LOG4CXX_ERROR_EXT(logger_, "DUPLICATE_NAME");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
@@ -226,7 +227,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   SendResponse(true, result, "", params);
 }
 
-bool RegisterAppInterfaceRequest::checkAppName() {
+bool RegisterAppInterfaceRequest::checkAppParams() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::checkAppName ");
 
   const smart_objects::SmartObject& msg_params =
@@ -235,32 +236,51 @@ bool RegisterAppInterfaceRequest::checkAppName() {
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   const std::set<Application*>& applications = app_manager->applications();
-  std::set<Application*>::iterator it = applications.begin();
+  std::set<Application*>::const_iterator it = applications.begin();
 
   for (; applications.end() != it; ++it) {
-    // check TTS strings
-    const smart_objects::SmartObject* ttsName_param = (*it)->tts_name();
-    if (ttsName_param) {
-      for (size_t i = 0; i < ttsName_param->length(); ++i) {
-        if (0 == strcmp(msg_params[strings::app_name].asString().c_str(),
-            ttsName_param->getElement(i)[strings::text].asString().c_str())) {
-          LOG4CXX_INFO(logger_, "App name equal to ttName "<<
-                       ttsName_param->getElement(i).asString());
-          return false;
-        }
+
+    const std::string &curName = (*it)->name();
+    TTS curTTS((*it)->tts_name());
+    VR curVR((*it)->vr_synonyms());
+
+
+    // new appName checks
+    const std::string appName = msg_params[strings::app_name].asString();
+    if (    curName == appName
+        ||  checkCoincidence<std::string, TTS>(appName, curTTS)
+        ||  checkCoincidence<std::string, VR>(appName, curVR)
+        ) {
+
+      LOG4CXX_ERROR(logger_, "Application name is known already.");
+      return false;
+    }
+
+    // new tts checks
+    if ( msg_params.keyExists(strings::tts_name) )
+    {
+      TTS tts(&msg_params[strings::tts_name]);
+      if (    checkCoincidence<std::string, TTS>(curName, tts)
+          ||  checkCoincidence<TTS, TTS>(curTTS, tts)
+          ||  checkCoincidence<VR, TTS>(curVR, tts)
+          ) {
+
+        LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+        return false;
       }
     }
 
-    // check vrSynonyms strings
-    const smart_objects::SmartObject* vrSynonyms_param = (*it)->vr_synonyms();
-    if (vrSynonyms_param) {
-      for (size_t i = 0; i < vrSynonyms_param->length(); ++i) {
-        if (0 == strcmp(msg_params[strings::app_name].asString().c_str(),
-                        vrSynonyms_param->getElement(i).asString().c_str())) {
-          LOG4CXX_INFO(logger_, "App name equal to VR synonym " <<
-                       vrSynonyms_param->getElement(i).asString());
-          return false;
-        }
+    // new vr checks
+    if (msg_params.keyExists(strings::vr_synonyms))
+    {
+      VR vr(&msg_params[strings::vr_synonyms]);
+      if (    checkCoincidence<std::string, VR>(curName, vr)
+          ||  checkCoincidence<TTS, VR>(curTTS, vr)
+          ||  checkCoincidence<VR, VR>(curVR, vr)
+          ) {
+
+        LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+        return false;
       }
     }
   }
