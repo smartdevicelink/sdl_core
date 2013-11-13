@@ -38,7 +38,7 @@ Item {
     id: item
     opacity: 0
     SequentialAnimation {
-        id: upRowAnimation
+        id: animation
         PauseAnimation {duration: index * 100 }
         NumberAnimation {
             target: item
@@ -48,6 +48,6 @@ Item {
         }
     }
     Component.onCompleted: {
-        upRowAnimation.start()
+        animation.start()
     }
 }

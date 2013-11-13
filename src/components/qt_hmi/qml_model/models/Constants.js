@@ -210,7 +210,7 @@ var highlightedButtonLightness = 0.1
 var disabledButtonHue = 0.0
 var disabledButtonSaturation = -1.0
 var disabledButtonLightness = 0.1
-//soft button highlighting values
+
 // Count of rows for grid menu
 var menuRowCount = 2
 

@@ -56,8 +56,8 @@ Item {
                 fontSize: Constants.fontSize
             }
         }
-
     }
+
     Item {
         id: bottomPanel
         // 1/4 bottom screen
