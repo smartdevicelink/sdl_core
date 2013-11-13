@@ -150,6 +150,7 @@ SDL.SDLAppController = Em.Object.create({
             SDL.SDLModel.onDeactivateApp(SDL.States.nextState, this.model.appID);
         }
 
+        SDL.SDLAppController.onSubMenu('top');
     },
 
     /**
