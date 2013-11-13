@@ -1,6 +1,6 @@
 /**
- * @file MainMenuView.qml
- * @brief Main menu screen view.
+ * @file GridMenu.qml
+ * @brief Parent class for main menu.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,24 +31,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import QtQuick 2.0
-import "../models"
-import "../controls"
 
-GridMenu {
-    id: menu
-    model: MainMenuListModel { }
-    delegate: GridItem {
-        width: menu.width / menu.columnsOnPage
-        height: menu.height / menu.rows
-        ClickableImage {
+import QtQuick 2.0
+import "../controls"
+import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
+
+GeneralView {
+    id: main
+    property alias model: repeater.model
+    property alias delegate: repeater.delegate
+    property alias rows: grid.rows
+    property int columnsOnPage: Constants.menuColumnCount
+
+    Flickable {
+        id: flicker
+        anchors.fill: parent
+        contentWidth: grid.width
+        flickableDirection: Flickable.HorizontalFlick
+
+        Grid {
+            id: grid
             anchors.centerIn: parent
-            source: icon
-            onClicked: {
-                if(qml !== "") {
-                    contentLoader.go(qml)
-                }
+            rows: Constants.menuRowCount
+            columns: Math.ceil(model.count / rows)
+            flow: Grid.TopToBottom
+            Repeater {
+                id: repeater
             }
         }
+
+        property int snapTo: width / parent.columnsOnPage
+        onMovementEnded: {
+            var rest = flicker.contentX % snapTo
+            var time = 0.25
+            if (rest > flicker.snapTo / 2) { rest = rest - flicker.snapTo }
+            var vel = 2 * rest / time
+            flickDeceleration = Math.abs(vel) / time
+            flick(vel, 0)
+            flickDeceleration = 1500
+        }
+    }
+
+    Pager {
+        id: pager
+        space: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: Constants.margin
+
+        pages: Math.ceil(grid.columns / parent.columnsOnPage)
+        activePage: Internal.activePageChoose(flicker, pager.pages)
     }
 }

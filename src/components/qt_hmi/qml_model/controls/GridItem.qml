@@ -1,6 +1,6 @@
 /**
- * @file MainMenuView.qml
- * @brief Main menu screen view.
+ * @file GridItem.qml
+ * @brief Item with animation for GridMenu
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,23 +32,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
-import "../models"
-import "../controls"
+import "../models/Constants.js" as Constants
 
-GridMenu {
-    id: menu
-    model: MainMenuListModel { }
-    delegate: GridItem {
-        width: menu.width / menu.columnsOnPage
-        height: menu.height / menu.rows
-        ClickableImage {
-            anchors.centerIn: parent
-            source: icon
-            onClicked: {
-                if(qml !== "") {
-                    contentLoader.go(qml)
-                }
-            }
+Item {
+    id: item
+    opacity: 0
+    SequentialAnimation {
+        id: animation
+        PauseAnimation {duration: index * 100 }
+        NumberAnimation {
+            target: item
+            duration: Constants.animationDuration
+            property: "opacity"
+            from: 0; to: 1;
         }
+    }
+    Component.onCompleted: {
+        animation.start()
     }
 }
