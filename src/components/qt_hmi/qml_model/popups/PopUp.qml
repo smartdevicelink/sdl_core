@@ -70,12 +70,14 @@ Item {
     }
 
     function show() {
-        console.debug("show");
+        console.debug("enter");
         visible = true;
+        console.debug("exit");
     }
 
     function hide() {
-        console.debug("hide");
+        console.debug("enter");
         visible = false;
+        console.debug("exit");
     }
 }
