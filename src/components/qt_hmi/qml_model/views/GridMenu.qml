@@ -1,6 +1,6 @@
 /**
- * @file NavigationMenuView.qml
- * @brief Navigation menu screen view.
+ * @file GridMenu.qml
+ * @brief Parent class for main menu.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,42 +33,54 @@
  */
 
 import QtQuick 2.0
-import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
-Item {
-    anchors.fill: parent
-    GridMenu {
-        id: menu
-        model: NavigationMenuModel {}
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: bottomPanel.top
-        delegate: GridItem {
-            width: menu.width / menu.columnsOnPage
-            height: menu.height / menu.rows
-            OvalButton {
-                text: title
-                onReleased: contentLoader.go(qml, appId)
-                anchors.centerIn: parent
-                fontSize: Constants.fontSize
+GeneralView {
+    id: main
+    property alias model: repeater.model
+    property alias delegate: repeater.delegate
+    property alias rows: grid.rows
+    property int columnsOnPage: Constants.menuColumnCount
+
+    Flickable {
+        id: flicker
+        anchors.fill: parent
+        contentWidth: grid.width
+        flickableDirection: Flickable.HorizontalFlick
+
+        Grid {
+            id: grid
+            anchors.centerIn: parent
+            rows: Constants.menuRowCount
+            columns: Math.ceil(model.count / rows)
+            flow: Grid.TopToBottom
+            Repeater {
+                id: repeater
             }
         }
 
-    }
-    Item {
-        id: bottomPanel
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: 1/4 * parent.height
-
-        BackButton {
-            id: backButton
-            anchors.centerIn: parent
+        property int snapTo: width / parent.columnsOnPage
+        onMovementEnded: {
+            var rest = flicker.contentX % snapTo
+            var time = 0.25
+            if (rest > flicker.snapTo / 2) { rest = rest - flicker.snapTo }
+            var vel = 2 * rest / time
+            flickDeceleration = Math.abs(vel) / time
+            flick(vel, 0)
+            flickDeceleration = 1500
         }
+    }
+
+    Pager {
+        id: pager
+        space: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: Constants.margin
+
+        pages: Math.ceil(grid.columns / parent.columnsOnPage)
+        activePage: Internal.activePageChoose(flicker, pager.pages)
     }
 }
