@@ -1001,7 +1001,7 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
       std::map<int, Application*>::iterator it = applications_.find(
             first_session_key);
       if (it == applications_.end()) {
-        LOG4CXX_ERROR(logger_, "Trying to remove not existing session.");
+        LOG4CXX_INFO(logger_, "Application is already unregistered.");
         return;
       }
       MessageHelper::RemoveAppDataFromHMI(it->second);
