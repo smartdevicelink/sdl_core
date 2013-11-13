@@ -77,7 +77,8 @@ PopUp {
                     dataContainer.vehicleInfoModel.prndl = model.get(currentIndex).id
                 }
 
-                Component.onCompleted: {console.debug("completed");
+                Component.onCompleted: {
+                    console.debug("completed");
                     for (var i = 0; i < model.count; i++) {
                         if (model.get(i).id == dataContainer.vehicleInfoModel.prndl) {
                             comboBox.currentIndex = i;
@@ -90,9 +91,9 @@ PopUp {
                 ListModel {
                     id: prndlList
                     Component.onCompleted: {
-                        append({ id: -1, name: "<NO DATA (prndl)>"})
+                        append({ id: -1, name: "<NO DATA (prndl)>" })
                         for (var name in Common.PRNDL) {
-                            append({ id: Common.PRNDL[name], name: name});
+                            append({ id: Common.PRNDL[name], name: name });
                         }                        
                     }
                 }
