@@ -1,6 +1,6 @@
 /**
- * @file InteractionPopup.qml
- * @brief Interaction popup view.
+ * @file ContextPopup.qml
+ * @brief Popup view with system context.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,55 +33,23 @@
  */
 
 import QtQuick 2.0
-import "../controls"
-import "../hmi_api/Common.js" as Common
-import "../models/Constants.js" as Constants
 
-ContextPopup {
-    Text {
-        id: initialText
-        text: dataContainer.interactionModel.initialText
-        anchors.top: parent.top
-        anchors.topMargin: Constants.popupMargin
-        anchors.left: parent.left
-        anchors.leftMargin: Constants.popupMargin
-        font.pixelSize: Constants.fontSize
-        color: Constants.primaryColor
-    }
-
-    ListView {
-        anchors.top: initialText.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Constants.popupMargin
-        model: dataContainer.interactionModel.choice
-        delegate: OvalButton {
-            width: parent.width
-            text: name
-            onClicked: {
-                timer.stop()
-                DBus.sendReply(dataContainer.interactionModel.async, {"choiceID": id})
-                hide()
-            }
-        }
-    }
-
-    Item {
-        Timer {
-            id: timer
-            onTriggered: {
-                DBus.sendError(dataContainer.interactionModel.async, Common.Result.TIMED_OUT)
-                hide()
-            }
-        }
-    }
-
-    function activate () {
+PopUp {
+    function show() {
         console.debug("enter")
-        timer.interval = dataContainer.interactionModel.timeout
-        timer.start()
-        show()
+        if (!visible) { // must not increment counter if show() called for visible popup
+            visible = true;
+            dataContainer.popups++
+        }
+        console.debug("exit")
+    }
+
+    function hide() {
+        console.debug("enter")
+        if (visible) { // must not decrement counter if hide() called for invisible popup
+            visible = false;
+            dataContainer.popups--
+        }
         console.debug("exit")
     }
 }

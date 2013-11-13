@@ -70,20 +70,12 @@ Item {
     }
 
     function show() {
-        console.debug("enter")
-        if (!visible) { // must not increment counter if show() called for visible popup
-            visible = true;
-            dataContainer.popups++
-        }
-        console.debug("exit")
+        console.debug("show");
+        visible = true;
     }
 
     function hide() {
-        console.debug("enter")
-        if (visible) { // must not decrement counter if hide() called for invisible popup
-            visible = false;
-            dataContainer.popups--
-        }
-        console.debug("exit")
+        console.debug("hide");
+        visible = false;
     }
 }
