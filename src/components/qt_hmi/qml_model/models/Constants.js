@@ -201,9 +201,6 @@ var appListFontSize = 40
 // Size icon for list of applications
 var appListIconSize = 100
 
-// Count of rows for menu
-var menuRowCount = 2
-
 // Values of color effect for highlighted button
 var highlightedButtonHue = 0.9
 var highlightedButtonSaturation = 0.0
@@ -213,3 +210,9 @@ var highlightedButtonLightness = 0.1
 var disabledButtonHue = 0.0
 var disabledButtonSaturation = -1.0
 var disabledButtonLightness = 0.1
+
+// Count of rows for grid menu
+var menuRowCount = 2
+
+// Count of columns for grid menu
+var menuColumnCount = 3
