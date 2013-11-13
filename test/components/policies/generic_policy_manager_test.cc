@@ -67,13 +67,83 @@ TEST(policy_manager_generic_test, test_straight_forward) {
   SmartObject rpc;
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GenericResponse";
-
   CheckPermissionResult result =
-    policy_manager.checkPermission(123456,
+    policy_manager.checkPermission(123456,              // existing app
                                    rpc,
                                    mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Speak";
+  result = policy_manager.checkPermission(1,            // non existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_FULL);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
+  result = policy_manager.checkPermission(789,            // existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_BACKGROUND);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+}
+
+// ----------------------------------------------------------------------------
+
+TEST(policy_manager_generic_test, test_straight_forward_deny) {
+  PolicyConfiguration config;
+  config.setPTFileName("SDLPolicyTable_basic.json");
+
+  PolicyManagerImpl policy_manager(config);
+
+  InitResult::eType init_result = policy_manager.Init();
+  ASSERT_EQ(InitResult::INIT_OK, init_result);
+
+  SmartObject rpc;
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
+  CheckPermissionResult result =
+    policy_manager.checkPermission(123456,              // existing app
+                                   rpc,
+                                   mobile_apis::HMILevel::HMI_BACKGROUND);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
+  result = policy_manager.checkPermission(123456,              // existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_FULL);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GetVehicleData";
+  result = policy_manager.checkPermission(234234,          // non existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_FULL);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "UnknownRPC";
+  result = policy_manager.checkPermission(234234,          // non existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_FULL);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
+  ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+
+  rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "SubscribeVehicleData";
+  result = policy_manager.checkPermission(123456,              // existing app
+                                          rpc,
+                                          mobile_apis::HMILevel::HMI_NONE);
+
+  ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
   ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
 }
 
