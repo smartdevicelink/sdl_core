@@ -54,17 +54,14 @@ GeneralView {
         width: parent.width
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
 
-        ListView {
+        ScrollableListView {
             id: contactsListView
             anchors.fill: parent
-            anchors.centerIn: parent
-            width: parent.width
-            height: parent.height
             clip: true
-            model: ContactsListModel {}
-            spacing: 25
+            spacing: 1/2 * Constants.fontSize
+            model: ContactsListModel {  }
+
             section.property: "name"
             section.criteria: ViewSection.FirstCharacter
             section.delegate: Text {
@@ -74,29 +71,36 @@ GeneralView {
             }
 
             delegate: Item {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width
+                anchors.left: parent.left
+                width: parent.width - Constants.scrollBarWidth
                 height: typeText.height
 
                 Text  {
+                    id: contactName
+                    anchors.left: parent.left
                     text: name
+                    width: 0.40 * parent.width
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
-                    anchors.left: parent.left
+                    elide: Text.ElideRight
                 }
                 Text  {
                     id: phoneText
+                    anchors.left: contactName.right
+                    width: 0.30 * parent.width
                     text: phone
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
-                    anchors.left: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
                 }
                 Text  {
                     id: typeText
+                    anchors.right: parent.right
+                    width: 0.30 * parent.width
                     text: type
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
-                    anchors.right: parent.right
+                    horizontalAlignment: Text.AlignHCenter
                 }
             }
         }
@@ -109,6 +113,6 @@ GeneralView {
         width: parent.width
         height: 1/4 * parent.height
 
-        BackButton { anchors.centerIn: parent}
+        BackButton { anchors.centerIn: parent }
     }
 }
