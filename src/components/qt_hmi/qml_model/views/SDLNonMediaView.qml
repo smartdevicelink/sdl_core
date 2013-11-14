@@ -100,7 +100,7 @@ GeneralView {
 
             Row {
                 width: parent.width
-                height: 3/5 * parent.height
+                height: 4/5 * parent.height
                 spacing: Constants.margin
 
                 Image {
@@ -134,16 +134,6 @@ GeneralView {
                         color: Constants.primaryColor
                     }
                 }
-            }
-
-            Text {
-                id: statusBar
-                width: parent.width
-                height: 1/5 * parent.height
-                text: "Status Bar: " + dataContainer.currentApplication.hmiUIText.statusBar
-                color: Constants.primaryColor
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: Constants.fontSize
             }
         }
     }
@@ -195,5 +185,14 @@ GeneralView {
                 }
             }
         }
+    }
+
+    Text {
+        id: statusBar
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        text: dataContainer.currentApplication.hmiUIText.statusBar
+        color: Constants.primaryColor
+        font.pixelSize: Constants.statusBarFontSize
     }
 }

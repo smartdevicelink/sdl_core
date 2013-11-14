@@ -175,7 +175,7 @@ Item {
         // Rewind, play, pause, forward buttons
         id: playPauseRewindForward
         width: parent.width
-        height: 1/5 * parent.height
+        height: 1/5 * parent.height - statusBar.height
         anchors.left: parent.left
         anchors.leftMargin: (width - playPauseButton.width - prevButton.width - nextButton.width) / 2
         anchors.top: spacingBetweenItems2.bottom
@@ -232,7 +232,7 @@ Item {
 
         PresetRow {
             id: presetsRow
-            anchors.bottom: parent.bottom
+            anchors.top: parent.top
             anchors.left: parent.left
             presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
             width: parent.width
@@ -269,6 +269,17 @@ Item {
                 }
             }
         }
+    }
+
+    Text {
+        id: statusBar
+        z: 100
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        text: dataContainer.currentApplication.hmiUIText.statusBar
+        color: Constants.primaryColor
+        font.pixelSize: Constants.statusBarFontSize
+    //    opacity: 0
     }
 
     states: [

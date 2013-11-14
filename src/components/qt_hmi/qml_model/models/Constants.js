@@ -90,6 +90,9 @@ var titleFontSize = 45
 // Power on/off button font size
 var powerButtonFornSize = 25
 
+// Font size of status bar
+var statusBarFontSize = 15
+
 // Offset from the edges of the screen.
 var margin = 20
 
