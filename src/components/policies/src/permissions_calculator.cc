@@ -97,7 +97,6 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
     const SmartObject& rpc,
     const mobile_apis::HMILevel::eType hmi_status) {
 
-
   std::vector<std::string> rpc_groups;
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
 
@@ -122,9 +121,20 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
 //----------------------------------------------------------------------------
 
 Priority::eType PermissionsCalculator::GetPriority(
-    const so_ns::SmartObject& pt_object,
+    const SmartObject& pt_object,
     const uint32_t app_id) {
-  // TODO(anyone): to implement
+
+  const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
+
+  const SmartObject& priority =
+    pt_app_id.getElement(PolicyTableSchema::kStrPriority);
+
+  if (SmartType::SmartType_Integer == priority.getType()) {
+    return static_cast<Priority::eType>( priority.asInt() );
+  } else {
+    LOG4CXX_ERROR(logger_, "Section 'priority' is not an enum");
+  }
+
   return Priority::PRIORITY_NONE;
 }
 

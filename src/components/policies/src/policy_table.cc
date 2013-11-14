@@ -55,8 +55,10 @@ policies_ns::PolicyTable::PolicyTable(
       policy_table_string, pt_smart_object_)) {
     is_PT_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
   } else {
-    
-  } 
+    // By applying schema the enums converts from strings into ints
+    pt_smart_object_.setSchema(schema_);
+    schema_.applySchema(pt_smart_object_);
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -83,7 +85,7 @@ const std::string policies_ns::PolicyTable::AsString() {
 //---------------------------------------------------------------------------
 
 policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
-  //TODO: distinct between PT and Preload PolicyTable types (use pt_type_)
+  // TODO(_): distinct between PT and Preload PolicyTable types (use pt_type_)
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_PT_valid_) {
     return is_PT_valid_;
   }
@@ -91,7 +93,7 @@ policies_ns::PTValidationResult::eType policies_ns::PolicyTable::Validate() {
   if (so_ns::Errors::OK == schema_.validate(pt_smart_object_)) {
     is_PT_valid_ = PTValidationResult::VALIDATION_OK;
     return is_PT_valid_;
-  } 
+  }
 
   is_PT_valid_ = PTValidationResult::VALIDATION_FAILED;
   return is_PT_valid_;

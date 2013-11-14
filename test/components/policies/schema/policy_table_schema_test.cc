@@ -60,6 +60,8 @@ TEST_F(SchemaTest, test_policy_table_schema) {
 
   CSmartSchema schema = PolicyTableSchema::Create();
 
+  schema.applySchema(pt_object);
+
   Errors::eType result = schema.validate(pt_object);
 
   ASSERT_EQ(Errors::OK, result);

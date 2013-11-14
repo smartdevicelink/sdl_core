@@ -160,6 +160,12 @@ class PolicyTableSchema {
       CreateAppId(void);
 
     /**
+     * @brief Creates "priority" schema item for <app_id> and "default" sections
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreatePriority(void);
+
+    /**
      * @brief Creates "default" schema item of "app_policies"
      */
     virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>

@@ -37,11 +37,13 @@
 #include <map>
 #include <string>
 
+#include "policies/policy_manager.h"
 #include "smart_objects/object_schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/object_optional_schema_item.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/string_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/shared_ptr.h"
 
 
@@ -57,6 +59,8 @@ using ::NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::ObjectOptionalSchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::CArraySchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem;
+using ::NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem;
+using ::NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter;
 
 typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 
@@ -167,6 +171,23 @@ SchemaItemPtr PolicyTableSchema::CreateFunctionalGroupings(void) {
 
 //-----------------------------------------------------------------------------
 
+SchemaItemPtr PolicyTableSchema::CreatePriority(void) {
+  std::set<Priority::eType> allowed_priorities;
+
+  allowed_priorities.insert(Priority::PRIORITY_NONE);
+  allowed_priorities.insert(Priority::PRIORITY_NORMAL);
+  allowed_priorities.insert(Priority::PRIORITY_COMMUNICATION);
+  allowed_priorities.insert(Priority::PRIORITY_NAVIGATION);
+  allowed_priorities.insert(Priority::PRIORITY_EMERGENCY);
+
+  SchemaItemPtr priority =
+    TEnumSchemaItem<Priority::eType>::create(allowed_priorities);
+
+  return priority;
+}
+
+//-----------------------------------------------------------------------------
+
 SchemaItemPtr PolicyTableSchema::CreateAppId(void) {
   std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
 
@@ -175,7 +196,8 @@ SchemaItemPtr PolicyTableSchema::CreateAppId(void) {
   app_id_map[kStrNicknames] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
   app_id_map[kStrPriority] = CObjectSchemaItem::SMember(
-    CStringSchemaItem::create(), true);
+//  CreatePriority(), true);
+    CStringSchemaItem::create(), true);  // TODO(YS): switch to enums
 
   return CObjectSchemaItem::create(app_id_map);
 }
@@ -186,7 +208,8 @@ SchemaItemPtr PolicyTableSchema::CreateAppPoliciesDefault(void) {
   std::map<std::string, CObjectSchemaItem::SMember> default_map;
 
   default_map[kStrPriority] = CObjectSchemaItem::SMember(
-    CStringSchemaItem::create(), true);
+//  CreatePriority(), true);
+    CStringSchemaItem::create(), true);  // TODO(YS): switch to enums
   default_map[kStrGroups] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
 
@@ -207,4 +230,38 @@ SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
 }
 
 }  // namespace policies
+
+//-------------- String to value enum mapping ----------------
+
+namespace NsSmartObjects {
+
+template <>
+const std::map<policies::Priority::eType, std::string>&
+  TEnumSchemaItem<policies::Priority::eType>::
+    getEnumElementsStringRepresentation() {
+
+  static bool is_initialized = false;
+  static std::map<policies::Priority::eType, std::string>
+    enum_string_representation;
+
+  if (false == is_initialized) {
+    enum_string_representation.insert(
+      std::make_pair(policies::Priority::PRIORITY_NONE, "NONE"));
+    enum_string_representation.insert(
+      std::make_pair(policies::Priority::PRIORITY_NORMAL, "NORMAL"));
+    enum_string_representation.insert(
+      std::make_pair(policies::Priority::PRIORITY_COMMUNICATION,
+                     "COMMUNICATION"));
+    enum_string_representation.insert(
+      std::make_pair(policies::Priority::PRIORITY_NAVIGATION, "NAVIGATION"));
+    enum_string_representation.insert(
+      std::make_pair(policies::Priority::PRIORITY_EMERGENCY, "EMERGENCY"));
+
+    is_initialized = true;
+  }
+
+  return enum_string_representation;
+}
+
+}  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

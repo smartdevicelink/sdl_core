@@ -95,7 +95,11 @@ enum eType {
   /**
    * @brief EMERGENCY
    */
-  PRIORITY_EMERGENCY
+  PRIORITY_EMERGENCY,
+  /**
+   * @brief Mandatory item. Used for enum<->string convertion
+   */
+  INVALID_ENUM,
 };
 }  // namespace Priority
 

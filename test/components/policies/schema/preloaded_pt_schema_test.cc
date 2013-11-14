@@ -58,6 +58,8 @@ TEST_F(SchemaTest, test_preloaded_pt_schema_valid_1) {
 
   CSmartSchema schema = PreloadedPTSchema::Create();
 
+  schema.applySchema(pt_object);
+
   Errors::eType result = schema.validate(pt_object);
 
   ASSERT_EQ(Errors::OK, result);
@@ -69,6 +71,8 @@ TEST_F(SchemaTest, test_preloaded_pt_schema_valid_2) {
   GetPolicyTable("valid_preloaded_pt_2.json", pt_object);
 
   CSmartSchema schema = PreloadedPTSchema::Create();
+
+  schema.applySchema(pt_object);
 
   Errors::eType result = schema.validate(pt_object);
 
