@@ -34,6 +34,13 @@ FFW.RevSDL = FFW.RPCObserver.create({
      */
     onRPCResult: function(response) {
         this._super();
+
+        switch (response.id) {
+            case this.GrantAccessRequestId:
+                MFT.MediaController.set('sdlAccessStatus', response.result.success);
+                this.set('isFirstStart', response.result.isFirstStart);
+                break;
+        }
     },
 
     onRPCError: function(response) {
@@ -56,30 +63,33 @@ FFW.RevSDL = FFW.RPCObserver.create({
         Em.Logger.log("FFW.RevSDLClient.onRPCNotification");
         this._super();
 
-        if (notification.method == "RevSDL.onAccessChanged") {
-            MFT.MediaController.set('sdlAccessStatus', notification.status);
-        } else if (notification.method == "RevSDL.onRadioDetails") {
-            MFT.MediaController.setSDLDirectTuneStation(notification.params);
+        switch (notification.method) {
+            case "RevSDL.OnControlChanged":
+                MFT.MediaController.set('sdlAccessStatus', false);
+                break;
+            case "RevSDL.OnRadioDetails":
+                MFT.MediaController.setSDLDirectTuneStation(notification.params);
+                break;
         }
     },
 
     /*
      * identifiers for requests
      */
-    sendGrantAccessRequestId: -1,
-    sendCancelAccessRequestId: -1,
-    sendTuneRadioRequestId: -1,
+    GrantAccessRequestId: -1,
+    CancelAccessRequestId: -1,
+    TuneRadioRequestId: -1,
 
     /**
      * Sends a request for access to the management of HMI, through SDL interface
      **/
     sendGrantAccessRequest: function(){
-        this.sendGrantAccessRequestId = this.client.generateId();
+        this.GrantAccessRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "id": 		this.sendGrantAccessRequestId,
-            "method":	"RevSDL.sendGrantAccessRequest"
+            "id": 		this.GrantAccessRequestId,
+            "method":	"RevSDL.GrantAccess"
         };
         this.client.send(JSONMessage);
     },
@@ -88,12 +98,12 @@ FFW.RevSDL = FFW.RPCObserver.create({
      * Sends a request for access to the management of HMI, through SDL interface
      **/
     sendCancelAccessRequest: function(){
-        this.sendCancelAccessRequestId = this.client.generateId();
+        this.CancelAccessRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "id": 		this.sendCancelAccessRequestId,
-            "method":	"RevSDL.sendCancelAccessRequest"
+            "id": 		this.CancelAccessRequestId,
+            "method":	"RevSDL.CancelAccess"
         };
         this.client.send(JSONMessage);
     },
@@ -101,12 +111,12 @@ FFW.RevSDL = FFW.RPCObserver.create({
     sendTuneRadioRequest: function (data) {
         var frequency = data.frequency.split('.');
 
-        this.sendTuneRadioRequestId = this.client.generateId();
+        this.TuneRadioRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "id": 		this.sendTuneRadioRequestId,
-            "method":	"RevSDL.sendTuneRadioRequest",
+            "id": 		this.TuneRadioRequestId,
+            "method":	"RevSDL.TuneRadio",
             params: {
                 RadioStation: {
                     frequency: Number(frequency[0]),

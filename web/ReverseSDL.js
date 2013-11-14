@@ -14,21 +14,21 @@ RevSDL = {
         /**
          * Sends a request for access to the management of head unit, through SDL interface
          **/
-        sendGrantAccessRequest: {
+        GrantAccess: {
 
         },
 
         /**
          * Sends a request for cancel access to the management of head unit, through SDL interface
          **/
-        sendCancelAccessRequest: {
+        CancelAccess: {
 
         },
 
         /**
          * Sends a request to change specified parameter for radio on head unit, through SDL interface
          **/
-        sendTuneRadioRequest: {
+        TuneRadio: {
             parameters: {
                 RadioStation: {
                     frequency: "int",
@@ -40,18 +40,18 @@ RevSDL = {
     },
 
     notifications: {
-        onAccessChanged:{
+        OnControlChanged:{
             parameters:{
                 /**
-                 * SDL access status
-                 * 1. 'granted'
-                 * 2. 'denied'
+                 * SDL interrupt access status
+                 * 1. 'DRIVER_FOCUS'
+                 * 2. 'TIME_OUT'
                  */
-                status: "string"
+                reason: "string"
             }
         },
 
-        onRadioDetails: {
+        OnRadioDetails: {
             parameters: {
                 RadioStation: {
                     frequency: "int",

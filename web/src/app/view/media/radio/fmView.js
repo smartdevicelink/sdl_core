@@ -262,7 +262,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             icon: 'images/media/passiv_horiz_led.png',
             // Change Icon for HD State
             onIconChange: function(){
-                if(MFT.MediaController.sdlAccessStatus == 'granted'){
+                if(MFT.MediaController.sdlAccessStatus){
                     this.set('icon', 'images/media/active_horiz_led.png');
                 } else {
                     this.set('icon', 'images/media/passiv_horiz_led.png');
@@ -278,7 +278,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
 //            onDown: false,
 //            templateName: 'text',
 //            text: function(){
-//                if(MFT.MediaController.sdlAccessStatus == 'granted'){
+//                if(MFT.MediaController.sdlAccessStatus){
 //                    return MFT.locale.label.view_media_cancelAccess;
 //                } else {
 //                    return MFT.locale.label.view_media_grantAccess;

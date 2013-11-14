@@ -15,7 +15,7 @@ MFT.MediaController = Em.Object.create({
 	activeState: 'media.radio.am',
 
     /** Reverse SDL functionality **/
-    sdlAccessStatus: 'denied',
+    sdlAccessStatus: false,
 
 	/** Visibility of Home Media Status */
 	isHomeMediaStatusHidden: false,
@@ -1186,7 +1186,7 @@ MFT.MediaController = Em.Object.create({
 	},
 
     sendAccessRequest: function() {
-        if(MFT.MediaController.sdlAccessStatus == 'granted'){
+        if(MFT.MediaController.sdlAccessStatus){
             FFW.RevSDL.sendCancelAccessRequest();
         } else {
             FFW.RevSDL.sendGrantAccessRequest();
