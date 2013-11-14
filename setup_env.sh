@@ -21,7 +21,6 @@ ICECAST="icecast2"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 LIB_UDEV="libudev-dev"
-ICECAST="icecast2"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
@@ -35,11 +34,11 @@ FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 while test $# -gt 0; do
         case "$1" in
                 -h|--help)
-                        echo "$ setup_enc.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
+                        echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
                         echo "                 and running." 
                         echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
                         echo " "
-                        echo "$ setup_enc.sh [options]"
+                        echo "$ setup_env.sh [options]"
                         echo " "
                         echo "options:"
                         echo "-h, --help                show brief help"
@@ -159,18 +158,6 @@ if $INSTALL_ALL; then
 
 	echo "Installing Mscgen"
 	apt-install ${MSCGEN}
-	echo $OK
-
-	echo "Installing icecast..."
-	apt-install ${ICECAST}
-	echo $OK
-
-	echo "Configuring icecast..."
-	sudo sed -i 's/ENABLE=false/ENABLE=true/g' /etc/default/icecast2
-	echo $OK
-
-	echo "Starting icecast..."
-	sudo /etc/init.d/icecast2 start
 	echo $OK
 fi
 
