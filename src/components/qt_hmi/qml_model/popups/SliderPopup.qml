@@ -33,7 +33,6 @@
  */
 
 import QtQuick 2.0
-import QtTest 1.0
 import QtQuick.Controls 1.0
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
@@ -143,17 +142,10 @@ ContextPopup {
                 }
             }
 
-            SignalSpy{
-                id: spy
-                target: mouseArea
-                signalName: "clicked"
-            }
-
             MouseArea{
                 id: mouseArea
                 anchors.fill: parent
                 onClicked: {
-                    console.debug("qqqqqqq")
                     onPositionChanged(mouse)
                 }
 

@@ -95,7 +95,6 @@ Rectangle {
             // Decrease this value while debugging
             PauseAnimation { duration: Constants.warningScreenDuration }
             NumberAnimation {
-                id: qqq
                 target: ok
                 duration:  Constants.animationDuration
                 property: "opacity"
