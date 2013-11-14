@@ -12,6 +12,10 @@
 MFT.FmModel = Em.Object.create({
 	
 	band:		MFT.RangedValue.create({value:-1, activeBand:0}),
+
+    customDirectTuneStations: MFT.Playlist.create({
+        directTuneItems: {}
+    }),
 	
 	directTunestations: MFT.Playlist.create({
 		

@@ -56,10 +56,10 @@ FFW.RevSDL = FFW.RPCObserver.create({
         Em.Logger.log("FFW.RevSDLClient.onRPCNotification");
         this._super();
 
-        if (notification.method == "RevSDL.onAccessStatusChanged") {
+        if (notification.method == "RevSDL.onAccessChanged") {
             MFT.MediaController.set('sdlAccessStatus', notification.status);
-        } else if (notification.method == "RevSDL.onActiveStationChanged") {
-            MFT.MediaController.currentModuleData.set('selectedIndex', notification.selectedIndex)
+        } else if (notification.method == "RevSDL.onDirectTune") {
+            MFT.MediaController.setSDLDirectTuneStation(notification.params);
         }
     },
 

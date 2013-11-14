@@ -27,7 +27,7 @@ RevSDL = {
     },
 
     notifications: {
-        onAccessStatusChanged:{
+        onAccessChanged:{
             parameters:{
                 /**
                  * SDL access status
@@ -38,12 +38,18 @@ RevSDL = {
             }
         },
 
-        onActiveStationChanged: {
+        onDirectTune: {
             parameters: {
-                /**
-                 * Preset selected index
-                 */
-                selectedIndex: "int"
+                RadioStation: {
+                    frequency: "int",
+                    fraction: "int",
+                    HD: "int"
+                },
+                SongInfo: {
+                    name: "string",
+                    artist: "string",
+                    genre: "string"
+                }
             }
         }
     }
