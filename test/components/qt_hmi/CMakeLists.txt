@@ -49,8 +49,3 @@ set(target test_QtHMI)
 create_test("test_QtHMI" "${SOURCES}" "")
 qt5_use_modules(${target} Core Qml Quick QuickTest)
 
-add_custom_target(qml_copy ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/components/qt_hmi/qml_model ${CMAKE_CURRENT_SOURCE_DIR}/src
-    COMMENT "Copying directory qml_dir")
-
-
