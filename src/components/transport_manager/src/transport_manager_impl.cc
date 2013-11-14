@@ -59,6 +59,71 @@ namespace transport_manager {
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
 
+class TransportManagerImpl::IncomingDataHandler {
+ public:
+  IncomingDataHandler(TransportManagerImpl* tm_impl)
+      : connections_data_(),
+        tm_impl_(tm_impl) {
+  }
+
+  bool ProcessData(ConnectionUID connection_id, uint8_t* data,
+                   std::size_t size) {
+    LOG4CXX_TRACE(
+        logger_,
+        "Start of processing incoming data of size " << size << " for connection " << connection_id);
+    const uint32_t kBytesForSizeDetection = 8;
+    ConnectionsData::iterator it = connections_data_.find(connection_id);
+    if (connections_data_.end() == it) {
+      LOG4CXX_ERROR(logger_, "ProcessData requested for unknown connection");
+      return false;
+    }
+    std::vector<uint8_t>& connection_data = it->second;
+    connection_data.insert(connection_data.end(), data, data + size);
+
+    LOG4CXX_TRACE(
+        logger_,
+        "Total data size for connection " << connection_id << " is " << connection_data.size());
+    while (connection_data.size() >= kBytesForSizeDetection) {
+      const uint32_t packet_size = tm_impl_->protocol_handler_->GetPacketSize(
+          kBytesForSizeDetection, &connection_data[0]);
+      if (0 == packet_size) {
+        LOG4CXX_ERROR(logger_, "Failed to get packet size");
+        return false;
+      }
+      LOG4CXX_TRACE(logger_, "Packet size " << packet_size);
+      if (connection_data.size() >= packet_size) {
+        RawMessageSptr raw_message(
+            new protocol_handler::RawMessage(connection_id, 0,  // It's not up to TM to know protocol version
+                                             &connection_data[0], packet_size));
+        tm_impl_->RaiseEvent(&TransportManagerListener::OnTMMessageReceived,
+                             raw_message);
+        connection_data.erase(connection_data.begin(),
+                              connection_data.begin() + packet_size);
+        LOG4CXX_TRACE(
+            logger_,
+            "Packet created and passed, new data size for connection " << connection_id << " is " << connection_data.size());
+      } else {
+        LOG4CXX_TRACE(logger_, "Packet data is not available yet");
+        return true;
+      }
+    }
+    return true;
+  }
+
+  void AddConnection(ConnectionUID connection_id) {
+    connections_data_[connection_id];
+  }
+
+  void RemoveConnection(ConnectionUID connection_id) {
+    connections_data_.erase(connection_id);
+  }
+
+ private:
+  typedef std::map<ConnectionUID, std::vector<uint8_t> > ConnectionsData;
+  ConnectionsData connections_data_;
+  TransportManagerImpl* tm_impl_;
+};
+
 TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
     : message_queue_mutex_(),
       all_thread_active_(false),
@@ -68,6 +133,7 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
       is_initialized_(false),
       connection_id_counter_(0),
       config_(config),
+      incoming_data_handler_(new IncomingDataHandler(this)),
       protocol_handler_(NULL) {
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, nullptr);
@@ -541,6 +607,7 @@ void* TransportManagerImpl::EventListenerStartThread(void* data) {
 
 void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
+  incoming_data_handler_->AddConnection(c.id);
 }
 
 void TransportManagerImpl::RemoveConnection(int id) {
@@ -551,6 +618,7 @@ void TransportManagerImpl::RemoveConnection(int id) {
       break;
     }
   }
+  incoming_data_handler_->RemoveConnection(id);
 }
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
@@ -573,55 +641,6 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
   return NULL;
 }
 
-//YK: temp solution until B1.0 release - begin
-void TransportManagerImpl::AddDataToContainer(
-    ConnectionUID id,
-    std::map<ConnectionUID, std::pair<unsigned int, unsigned char*>>& container,
-    unsigned char* data, unsigned int data_size) {
-  unsigned int buff_size = container[id].first;
-  unsigned char* buff = container[id].second;
-  unsigned char* new_buff = new unsigned char[buff_size + data_size];
-  memcpy(new_buff, buff, buff_size);
-  memcpy(new_buff + buff_size, data, data_size);
-  delete[] buff;
-  container[id] = std::make_pair(buff_size + data_size, new_buff);
-
-}
-
-bool TransportManagerImpl::GetFrameSize(unsigned char* data,
-                                        unsigned int data_size,
-                                        unsigned int& frame_size) {
-  unsigned int magic_number = 2 * sizeof(uint32_t);
-  if (data_size < magic_number) {
-    return false;
-  }
-  frame_size = protocol_handler_->GetPacketSize(data_size, data);
-  return true;
-}
-bool TransportManagerImpl::GetFrame(
-    std::map<ConnectionUID, std::pair<unsigned int, unsigned char*>>& container,
-    ConnectionUID id, unsigned int frame_size, unsigned char** frame) {
-
-  unsigned int buff_size = container[id].first;
-  if (frame_size <= buff_size) {
-    unsigned char* buff = container[id].second;
-    *frame = new unsigned char[frame_size];
-    memcpy(*frame, buff, frame_size);
-    unsigned int new_buff_size = buff_size - frame_size;
-    if (0 != new_buff_size) {
-      unsigned char* new_buff = new unsigned char[new_buff_size];
-      memcpy(new_buff, buff + frame_size, new_buff_size);
-      container[id] = std::make_pair(new_buff_size, new_buff);
-    } else {
-      container.erase(id);
-    }
-    delete[] buff;
-    return true;
-  }
-  return false;
-}
-//YK: temp solution until B1.0 release - end
-
 void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
   const transport_adapter::DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_INFO(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
@@ -642,15 +661,6 @@ void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
 }
 
 void TransportManagerImpl::EventListenerThread(void) {
-  //YK: temp solution until B1.0 release - begin
-  bool frame_ready = true;
-  bool size_ready = false;
-  unsigned int frame_size = 0;
-  unsigned char* frame = nullptr;
-  bool is_new;
-  std::map<ConnectionUID, std::pair<unsigned int, unsigned char*>> data_container;
-  //YK: temp solution until B1.0 release - end
-
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (all_thread_active_) {
     pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
@@ -691,7 +701,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
-          connections_.push_back(
+          AddConnection(
               ConnectionInternal(ta, ++connection_id_counter_, device_id,
                                  app_handle));
           device_handle = converter_.UidToHandle(device_id);
@@ -777,99 +787,14 @@ void TransportManagerImpl::EventListenerThread(void) {
                 "Connection ('" << device_id << ", " << app_handle << ") not found");
             break;
           }
-          data->set_connection_key(connection->id);
-          //YK: temp solution until B1.0 release - begin
-          if (!size_ready) {
-            //get size only when last complete frame successfully sent to upper level
-            LOG4CXX_TRACE(
+          const bool ok = incoming_data_handler_->ProcessData(
+              connection->id, data->data(), data->data_size());
+          if (!ok) {
+            LOG4CXX_ERROR(
                 logger_,
-                "not size ready, adding to container, data_size:" << data->data_size() << ", container size:" << data_container[connection->id].first);
-            this->AddDataToContainer(connection->id, data_container,
-                                     data->data(), data->data_size());
-            /*if (!(size_ready = this->GetFrameSize(data->data(),
-             data->data_size(), frame_size))) {
-             LOG4CXX_TRACE(logger_, "cannot get frame size");
-             //save data for future use because there is not enough data in current mesage to get frame size
-             break;
-             }*/
-            if (!(size_ready = this->GetFrameSize(
-                data_container[connection->id].second,
-                data_container[connection->id].first, frame_size))) {
-              //save data for future use because there is not enough data in current mesage to get frame size
-              break;
-            }
-          } else {
-            //if current frame is not complete - accumulate data from each new message
-            LOG4CXX_TRACE(
-                logger_,
-                "size ready, adding to container, data size:" << data->data_size() << ", container size:" << data_container[connection->id].first);
-            this->AddDataToContainer(connection->id, data_container,
-                                     data->data(), data->data_size());
+                "Incoming data processing failed. Terminating connection.");
+            DisconnectForce(connection->id);
           }
-          if (0 == frame_size) {
-            LOG4CXX_ERROR(logger_,
-                          "Unexpected zero size frame. Terminating connection.");
-            this->DisconnectForce(connection->id);
-            size_ready = false;
-            frame_ready = false;
-          } else {
-            //get all completed frames from buffer until incomplete frame reached
-            LOG4CXX_TRACE(
-                logger_,
-                "getting frame from container of size:" << data_container[connection->id].first);
-            frame_ready = this->GetFrame(data_container, connection->id,
-                                         frame_size, &frame);
-            if (frame_ready) {
-              LOG4CXX_TRACE(
-                  logger_,
-                  "frame of size " << frame_size << " ready, new container size:" << data_container[connection->id].first);
-            } else {
-              LOG4CXX_TRACE(
-                  logger_,
-                  "frame not ready, new container size:" << data_container[connection->id].first);
-            }
-          }
-          while (frame_ready) {
-            RawMessageSptr tmp_msg(
-                new protocol_handler::RawMessage(data->connection_key(),
-                                                 data->protocol_version(),
-                                                 frame, frame_size));
-            RaiseEvent(&TransportManagerListener::OnTMMessageReceived, tmp_msg);
-            delete[] frame;
-            LOG4CXX_TRACE(
-                logger_,
-                "message of size " << frame_size << " created and passed");
-            size_ready = this->GetFrameSize(
-                data_container[connection->id].second,
-                data_container[connection->id].first, frame_size);
-            if (0 == frame_size) {
-              LOG4CXX_ERROR(
-                  logger_,
-                  "Unexpected zero size frame. Terminating connection.");
-              this->DisconnectForce(connection->id);
-              size_ready = false;
-            }
-            if (size_ready) {
-              LOG4CXX_TRACE(
-                  logger_,
-                  "(in loop) size ready, getting frame from container of size:" << data_container[connection->id].first);
-              frame_ready = this->GetFrame(data_container, connection->id,
-                                           frame_size, &frame);
-              if (frame_ready) {
-                LOG4CXX_TRACE(
-                    logger_,
-                    "(in loop) frame of size " << frame_size << " ready, new container size:" << data_container[connection->id].first);
-              } else {
-                LOG4CXX_TRACE(
-                    logger_,
-                    "(in loop) frame not ready, new container size:" << data_container[connection->id].first);
-              }
-            } else {
-              LOG4CXX_TRACE(logger_, "(in loop) not size ready");
-              frame_ready = false;
-            }
-          }
-          //YK: temp solution until B1.0 release - end
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {

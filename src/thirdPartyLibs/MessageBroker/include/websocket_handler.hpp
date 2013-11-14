@@ -135,7 +135,7 @@ namespace NsMessageBroker
       * \param b_size buffer size
       * \return -1 in case of issues, data length in case of success
       */
-      int prepareWebSocketDataHeader(char* Buffer, unsigned long b_size);
+      int prepareWebSocketDataHeader(unsigned char* Buffer, unsigned long b_size);
    private:
       /**
       * \brief SHA1 hash calculator.

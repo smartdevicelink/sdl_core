@@ -113,43 +113,45 @@ namespace NsMessageBroker
       return b_size;
    }
 
-   int CWebSocketHandler::prepareWebSocketDataHeader(char* Buffer, unsigned long b_size)
+   int CWebSocketHandler::prepareWebSocketDataHeader(unsigned char* Buffer, unsigned long b_size)
    {
-      unsigned long headerLength = 2;
+      unsigned int headerLength = 2;
       unsigned char payload;
-      if (b_size >= 65536)
+
+      memset(Buffer, 0, headerLength);
+      Buffer[0] = 0x81;    // 129
+
+      if (b_size <= 125)
       {
-         headerLength += 8;
-         payload = 127;
-      } else if(b_size >= 126)
+        payload = b_size;
+        Buffer[1] = b_size;      // string length
+      } else if (b_size >= 126 && b_size <= 65535)
       {
-         headerLength += 2;
-         payload = 126;
+        headerLength += 2;
+        payload = 126;
+        Buffer[1] = 0x7E;  // 126
       } else
       {
-         payload = b_size;
+        headerLength += 8;
+        payload = 127;
+        Buffer[1] = 0x7F;  // 127
       }
-      memset(Buffer, 0, headerLength);
-      Buffer[0] = (char)0x80 | 0x01;
-      Buffer[1] = (char)(Buffer[1] | (payload & 0x40) | (payload & 0x20) |
-                                     (payload & 0x10) | (payload & 0x08) |
-                                     (payload & 0x04) | (payload & 0x02) |
-                                     (payload & 0x01));
+
 
       if (payload == 126)
       {
-         Buffer[2] = (char)(b_size>>8);
-         Buffer[3] = (char)b_size;
+         Buffer[2] = (b_size>>8);
+         Buffer[3] = b_size;
       } else if (payload == 127)
       {
-         Buffer[9] = (char)(b_size);
-         Buffer[8] = (char)(b_size>=8);
-         Buffer[7] = (char)(b_size>=8);
-         Buffer[6] = (char)(b_size>=8);
-         Buffer[5] = (char)(b_size>=8);
-         Buffer[4] = (char)(b_size>=8);
-         Buffer[3] = (char)(b_size>=8);
-         Buffer[2] = (char)(b_size>=8);
+         Buffer[9] = (b_size       & 0xFF);
+         Buffer[8] = ((b_size>>8)  & 0xFF);
+         Buffer[7] = ((b_size>>16) & 0xFF);
+         Buffer[6] = ((b_size>>24) & 0xFF);
+         Buffer[5] = ((b_size>>32) & 0xFF);
+         Buffer[4] = ((b_size>>40) & 0xFF);
+         Buffer[3] = ((b_size>>48) & 0xFF);
+         Buffer[2] = ((b_size>>56) & 0xFF);
       }
       return headerLength;
 }

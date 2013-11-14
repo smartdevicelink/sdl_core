@@ -63,7 +63,7 @@ namespace log4cxx
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
-};
+}
 
 #define LOG4CXXLOGGER_HPP_
 

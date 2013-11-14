@@ -39,6 +39,7 @@
 #include <map>
 #include <list>
 #include <algorithm>
+#include <memory>
 
 #include "utils/logger.h"
 #include "protocol_handler/protocol_handler.h"//TODO(YK): temp solution until B1.0 release
@@ -480,6 +481,9 @@ class TransportManagerImpl : public TransportManager {
 
   typedef std::vector<std::pair<TransportAdapterSptr, DeviceInfo> > DeviceList;
   DeviceList device_list_;
+
+  class IncomingDataHandler;
+  std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
 
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);

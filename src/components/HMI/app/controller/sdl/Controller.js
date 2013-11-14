@@ -189,20 +189,22 @@ SDL.SDLController = Em.Object
         keepContextSoftButton: function(element) {
 
             switch (element.groupName) {
-            case "AlertPopUp": {
-                clearTimeout(SDL.AlertPopUp.timer);
-                SDL.AlertPopUp.timer = setTimeout(function() {
-                    SDL.AlertPopUp.deactivate();
-                }, SDL.AlertPopUp.timeout);
-                break;
-            }
-            case "ScrollableMessage": {
-                clearTimeout(SDL.ScrollableMessage.timer);
-                SDL.ScrollableMessage.timer = setTimeout(function() {
-                    SDL.ScrollableMessage.deactivate();
-                }, SDL.ScrollableMessage.timeout);
-                break;
-            }
+                case "AlertPopUp": {
+                    clearTimeout(SDL.AlertPopUp.timer);
+                    SDL.AlertPopUp.timer = setTimeout(function() {
+                        SDL.AlertPopUp.deactivate();
+                    }, SDL.AlertPopUp.timeout);
+                    this.onResetTimeout(element.appID, "UI.Alert");
+                    break;
+                }
+                case "ScrollableMessage": {
+                    clearTimeout(SDL.ScrollableMessage.timer);
+                    SDL.ScrollableMessage.timer = setTimeout(function() {
+                        SDL.ScrollableMessage.deactivate();
+                    }, SDL.ScrollableMessage.timeout);
+                    this.onResetTimeout(element.appID, "UI.ScrollableMessage");
+                    break;
+                }
             }
         },
         /**
@@ -485,8 +487,6 @@ SDL.SDLController = Em.Object
 
             SDL.States.goToStates('info.devicelist');
             SDL.SDLModel.set('deviceSearchProgress', true);
-
-            FFW.BasicCommunication.OnStartDeviceDiscovery();
         },
         /**
          * Send notification if device was choosed

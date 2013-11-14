@@ -81,8 +81,18 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
+
+  // members
   sync_primitives::SynchronisationPrimitives synchronisation_;
   sync_primitives::Timer* timer_;
+
+  /*
+   * @brief Check new application parameters (name, tts, vr) for
+   * coincidence with already known parameters of registered applications
+   *
+   * return TRUE if no coincidence of app. name, TTS and VR syn, otherwise FALSE
+  */
+  bool checkAppParams();
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };

@@ -162,10 +162,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
      */
     addSoftButtons: function(params, appID) {
 
-        var count = this.get('softbuttons.buttons.childViews').length - 1;
-        for(var i = count; i >= 0; i--){
-            this.get('softbuttons.buttons.childViews').removeObject(this.get('softbuttons.buttons.childViews')[0]);
-        }
+        this.softbuttons.buttons.removeAllChildren();
+        this.softbuttons.buttons.rerender();
 
         if(params){
 
@@ -209,9 +207,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
         this.set('alertRequestId', alertRequestId);
 
-        if (message.softButtons) {
-            this.addSoftButtons(message.softButtons, message.appID);
-        }
+        this.addSoftButtons(message.softButtons, message.appID);
 
         this.set('progressIndicator', message.progressIndicator);
 
