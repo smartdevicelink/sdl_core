@@ -1,5 +1,6 @@
 A few comments on test writting for QML Unit Testing
 
+- set TestCase inside Item - this allows to send Mouse and keyboard events to contorls
 - content of QML is reachable directly from tests. It is necessary to add getters into source QML file to handle internal items
 - test execution order is alfabetical. If you need manage this order use numbers in test function names
 - all functions that starts with "test_" prefix is treated as test case

@@ -70,12 +70,13 @@ Item {
     }
 
     function show() {
-        console.debug("enter")
+        console.debug("enter", visible)
         if (!visible) { // must not increment counter if show() called for visible popup
             visible = true;
+            console.debug("--->", visible)
             dataContainer.popups++
         }
-        console.debug("exit")
+        console.debug("exit", visible)
     }
 
     function hide() {
@@ -86,4 +87,5 @@ Item {
         }
         console.debug("exit")
     }
+
 }

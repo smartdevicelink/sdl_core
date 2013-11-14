@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import QtTest 1.0
 import QtQuick.Controls 1.0
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
@@ -128,8 +129,6 @@ PopUp {
             radius: Constants.sliderBarRadius
             color: "black"
 
-
-
             Rectangle {
                 id: rectangle
                 color: Constants.sliderBarFillColor
@@ -144,11 +143,17 @@ PopUp {
                 }
             }
 
+            SignalSpy{
+                id: spy
+                target: mouseArea
+                signalName: "clicked"
+            }
 
             MouseArea{
                 id: mouseArea
                 anchors.fill: parent
                 onClicked: {
+                    console.debug("qqqqqqq")
                     onPositionChanged(mouse)
                 }
 
@@ -204,7 +209,8 @@ PopUp {
     function getFooterText() {
         return footerText
     }
-    function getMouseArea() {
-        return mouseArea
+    function getBorderRectangle() {
+        return borderRectangle
     }
+    function getSpy() {return spy}
 }

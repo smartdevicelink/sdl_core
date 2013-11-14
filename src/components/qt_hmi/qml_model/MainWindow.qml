@@ -311,16 +311,27 @@ Rectangle {
         sdlBasicCommunication.onReady()
     }
 
-    function test_getSlider(){
+    /*
+      * Test Support Section
+      *
+      */
+    function getSlider(){
         return sliderPopup
     }
 
-    function test_getDataStorage(){
+    function getDataStorage(){
         return dataContainer
     }
 
-    function test_getUIProxy(){
+    function getUIProxy(){
         return sdlUIProxy
     }
+
+    function getMainScreen(){
+        return mainScreen
+    }
+    /*
+      * Test Support Section End
+      */
 
 }
