@@ -204,5 +204,4 @@ ContextPopup {
     function getBorderRectangle() {
         return borderRectangle
     }
-    function getSpy() {return spy}
 }
