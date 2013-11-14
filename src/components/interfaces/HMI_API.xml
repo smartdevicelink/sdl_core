@@ -2452,12 +2452,13 @@
   </function>
   <function name="ShowConstantTBT" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
-    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
+    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="5">
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA
-          totalDistance.
+          ETA	  
+          totalDistance
+	  timeToDestination.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
