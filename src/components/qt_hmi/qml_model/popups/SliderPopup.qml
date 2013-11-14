@@ -39,7 +39,7 @@ import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 import "../controls"
 
-PopUp {
+ContextPopup {
     property var async
     property int position: 1
     property int resultCode: -1

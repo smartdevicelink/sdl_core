@@ -37,7 +37,7 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 
-PopUp {
+ContextPopup {
     Text {
         id: initialText
         text: dataContainer.interactionModel.initialText

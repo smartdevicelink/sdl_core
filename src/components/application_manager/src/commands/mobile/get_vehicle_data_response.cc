@@ -49,8 +49,12 @@ GetVehicleDataResponse::~GetVehicleDataResponse() {
 void GetVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+#ifdef QT_HMI
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+#endif // #ifdef QT_HMI
 
+#ifdef WEB_HMI
+  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
@@ -70,6 +74,7 @@ void GetVehicleDataResponse::Run() {
       SendResponse(false);
     }
   }
+#endif #ifdef WEB_HMI
 }
 
 }  // namespace commands

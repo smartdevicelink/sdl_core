@@ -34,7 +34,41 @@
 
 import QtQuick 2.0
 import "../models"
+import "../controls"
+import "../models/Constants.js" as Constants
 
-ButtonMenu {
-    listModel: NavigationMenuModel {}
+Item {
+    anchors.fill: parent
+    GridMenu {
+        id: menu
+        model: NavigationMenuModel {}
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: bottomPanel.top
+        delegate: GridItem {
+            width: menu.width / menu.columnsOnPage
+            height: menu.height / menu.rows
+            OvalButton {
+                text: title
+                onReleased: contentLoader.go(qml, appId)
+                anchors.centerIn: parent
+                fontSize: Constants.fontSize
+            }
+        }
+    }
+
+    Item {
+        id: bottomPanel
+        // 1/4 bottom screen
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 1/4 * parent.height
+
+        BackButton {
+            id: backButton
+            anchors.centerIn: parent
+        }
+    }
 }

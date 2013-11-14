@@ -421,7 +421,8 @@
 	position: absolute;
 	left: 13px;
 	width: 470px;
-	height: 190px;
+    overflow: hidden;
+    height: 237px;
 }
 
 .track-info>.total {

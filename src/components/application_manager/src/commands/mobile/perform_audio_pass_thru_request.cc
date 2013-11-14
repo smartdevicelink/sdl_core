@@ -55,8 +55,8 @@ void PerformAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::Run");
 
   if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
-    LOG4CXX_ERROR_EXT(logger_, "TOO_MANY_PENDING_REQUESTS");
-    SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+    LOG4CXX_ERROR_EXT(logger_, "REJECTED");
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 

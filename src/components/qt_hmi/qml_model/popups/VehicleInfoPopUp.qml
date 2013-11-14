@@ -71,16 +71,30 @@ PopUp {
                 anchors.verticalCenter: parent.verticalCenter
                 id: comboBox
                 model: prndlList
+
                 onCurrentIndexChanged: {
-                    dataContainer.vehicleInfoModel.prndl = currentIndex
+                    console.debug("index change")
+                    dataContainer.vehicleInfoModel.prndl = model.get(currentIndex).id
                 }
-                Component.onCompleted: {comboBox.currentIndex = dataContainer.vehicleInfoModel.prndl}
+
+                Component.onCompleted: {
+                    console.debug("completed");
+                    for (var i = 0; i < model.count; i++) {
+                        if (model.get(i).id == dataContainer.vehicleInfoModel.prndl) {
+                            comboBox.currentIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                textRole: "name"
                 ListModel {
                     id: prndlList
                     Component.onCompleted: {
+                        append({ id: -1, name: "<NO DATA (prndl)>" })
                         for (var name in Common.PRNDL) {
-                                append({name: name});
-                        }
+                            append({ id: Common.PRNDL[name], name: name });
+                        }                        
                     }
                 }
             }

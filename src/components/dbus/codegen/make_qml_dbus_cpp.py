@@ -445,12 +445,25 @@ class Impl(FordXmlParser):
                     out.write("PutArgToMap(in_arg, \"" + param.name + "\", " + param.name + "_in);\n")
                 out.write("LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
                 method_name = request.get('name')[:1].lower() + request.get('name')[1:]
+
+                # XXX (dchmerev@luxoft.com): Can you smell the rot?
+                if method_name == 'endAudioPassThru':
+                    out.write("message.setDelayedReply(true);\n")
+                    out.write("QDBusMessage msg = message.createReply();\n")
+                    out.write("msg << 0;\n")
+                    out.write("msg << QString(\"\");\n")
+                    out.write("QDBusConnection::sessionBus().send(msg);\n")
+
                 out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name))
                 with CodeBlock(out) as out:
                     out.write("RaiseDbusError(this, InvalidData);\n")
                     out.write("LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
                     out.write("return ret;\n")
                 out.write("}\n")
+
+                # XXX (dchmerev@luxoft.com)
+                if method_name == 'endAudioPassThru':
+                    out.write("return ret;");
 
                 out.write("QVariantMap out_arg;\n")
                 out.write("if (out_arg_v.type() == QVariant::Map) {\n")

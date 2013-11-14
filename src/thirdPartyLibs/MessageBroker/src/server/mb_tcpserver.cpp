@@ -39,9 +39,10 @@ namespace NsMessageBroker
       std::string rep = data;
       if (isWebSocket(fd))
       {
-         char buf[10];
-         ssize_t headerlen = mWebSocketHandler.prepareWebSocketDataHeader((char*)buf, (unsigned long)rep.length());
-         std::string header = std::string(buf, headerlen);
+         unsigned char buf[10] = {'\0'};
+         ssize_t headerlen = mWebSocketHandler.prepareWebSocketDataHeader(
+                              (unsigned char*)buf, (unsigned long)rep.length());
+         std::string header = std::string((char*)buf, headerlen);
          rep = header + rep;
       }
       int bytesToSend = rep.length();
@@ -55,7 +56,7 @@ namespace NsMessageBroker
          }
          bytesToSend -= retVal;
          ptrBuffer += retVal;
-      }while(bytesToSend > 0); 
+      } while (bytesToSend > 0);
       return rep.length();
    }
 

@@ -33,8 +33,7 @@ FFW.RPCObserver = Em.Object
         onRPCRegistered: function() {
 
             // request necessary parameters from Backend
-            SDL.SDLController
-                .registeredComponentStatus(this.client.componentName);
+            SDL.SDLController.registeredComponentStatus(this.client.componentName);
         },
 
         onRPCUnregistered: function() {
@@ -82,7 +81,8 @@ FFW.RPCObserver = Em.Object
             if (request && request.method) {
                 var parsedMethod = request.method.split(/[.]/), validateFunc, result;
 
-                if (request.params && request.params.appID >= 0 && !SDL.SDLController.getApplicationModel(request.params.appID)) {
+                //if (request.params && "appID" in request.params && SDL.SDLModel.registeredApps.filterProperty('appID', request.params.appID).length > 0) {
+                if (request.params && request.params.appID >= 0 && !SDL.SDLModel.registeredApps.filterProperty('appID', request.params.appID)) {
                     Em.Logger.error('No application registered with current appID!');
                     return false;
                 }
