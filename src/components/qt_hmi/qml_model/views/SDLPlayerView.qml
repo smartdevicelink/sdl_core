@@ -60,7 +60,7 @@ GeneralView {
 
             OvalButton {
                 text: "Options"
-                onReleased: { ("./views/SDLPlayerOptionsListView.qml") }
+                onReleased: { contentLoader.go("./views/SDLPlayerOptionsListView.qml") }
             },
 
             Repeater {
