@@ -65,6 +65,33 @@ function apt-install() {
     set +x
 }
 
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
+
+if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
+	echo "Adding gstreamer to /etc/apt/sources.list"
+	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
+fi
+
+if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
+	echo "Adding gstreamer sources to /etc/apt/sources.list"
+	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
+fi
+
+echo "Register gstreamer repository PUBLIC KEY in system"
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C0B56813051D8B58
+gpg --export --armor C0B56813051D8B58 | sudo apt-key add -
+
+if $UPDATE_SOURCES; then
+	echo "Apdating repository..."
+	sudo apt-get update
+fi
+
+echo "Installing gstreamer..."
+apt-install ${GSTREAMER}
+echo $OK
+
 echo "Installng CMake build system"
 apt-install ${CMAKE_BUILD_SYSTEM}
 echo $OK
@@ -103,29 +130,6 @@ echo $OK
 
 echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
-echo $OK
-
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
-
-if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
-	echo "Adding gstreamer to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
-	UPDATE_SOURCES=true
-fi
-
-if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
-	echo "Adding gstreamer sources to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
-	UPDATE_SOURCES=true
-fi
-
-if $UPDATE_SOURCES; then
-	echo "Apdating repository..."
-	sudo apt-get update
-fi
-
-echo "Installing gstreamer..."
-apt-install ${GSTREAMER}
 echo $OK
 
 echo "Setting up USB permissions..."
