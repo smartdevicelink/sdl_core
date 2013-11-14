@@ -58,7 +58,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         if (notification.method == "RevSDL.onAccessChanged") {
             MFT.MediaController.set('sdlAccessStatus', notification.status);
-        } else if (notification.method == "RevSDL.onDirectTune") {
+        } else if (notification.method == "RevSDL.onRadioDetails") {
             MFT.MediaController.setSDLDirectTuneStation(notification.params);
         }
     },
@@ -66,17 +66,20 @@ FFW.RevSDL = FFW.RPCObserver.create({
     /*
      * identifiers for requests
      */
-    sendSDLAccessRequestId: -1,
+    sendGrantAccessRequestId: -1,
+    sendCancelAccessRequestId: -1,
+    sendTuneRadioRequestId: -1,
 
     /**
      * Sends a request for access to the management of HMI, through SDL interface
      **/
     sendGrantAccessRequest: function(){
-        this.sendSDLAccessRequestId = this.client.generateId();
+        this.sendGrantAccessRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "method":	"RevSDL.sendSDLAccessRequest"
+            "id": 		this.sendGrantAccessRequestId,
+            "method":	"RevSDL.sendGrantAccessRequest"
         };
         this.client.send(JSONMessage);
     },
@@ -85,13 +88,34 @@ FFW.RevSDL = FFW.RPCObserver.create({
      * Sends a request for access to the management of HMI, through SDL interface
      **/
     sendCancelAccessRequest: function(){
-        this.sendSDLAccessRequestId = this.client.generateId();
+        this.sendCancelAccessRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "id": 		this.sendSDLAccessRequestId,
-            "method":	"RevSDL.sendSDLAccessRequest"
+            "id": 		this.sendCancelAccessRequestId,
+            "method":	"RevSDL.sendCancelAccessRequest"
         };
         this.client.send(JSONMessage);
+    },
+
+    sendTuneRadioRequest: function (data) {
+        var frequency = data.frequency.split('.');
+
+        this.sendTuneRadioRequestId = this.client.generateId();
+
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		this.sendTuneRadioRequestId,
+            "method":	"RevSDL.sendTuneRadioRequest",
+            params: {
+                RadioStation: {
+                    frequency: Number(frequency[0]),
+                    fraction: Number(frequency[1]),
+                    HD: data.isHd
+                }
+            }
+        };
+        this.client.send(JSONMessage);
+
     }
 });

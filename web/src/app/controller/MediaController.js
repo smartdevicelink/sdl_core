@@ -857,6 +857,10 @@ MFT.MediaController = Em.Object.create({
 		/** newly selected preset station */
         this.currentDirectTuneData.set('selectedDirectTuneStation');
 		playlist.set('selectedIndex', index);
+
+        if (MFT.States.media.radio.fm.active) {
+            FFW.RevSDL.sendTuneRadioRequest(this.get('currentActiveData'));
+        }
 	},
 
 	/** Show Store Preset Message */
@@ -1019,6 +1023,10 @@ MFT.MediaController = Em.Object.create({
 		}
 		this.set('directTuneSelected', true);
 		this.set('directTune', [] );
+
+        if (MFT.States.media.radio.fm.active) {
+            FFW.RevSDL.sendTuneRadioRequest(this.get('currentActiveData'));
+        }
 	},
 
     setSDLDirectTuneStation: function(data) {

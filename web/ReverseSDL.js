@@ -12,17 +12,30 @@
 RevSDL = {
     methods: {
         /**
-         * Sends a request for access to the management of HMI, through SDL interface
+         * Sends a request for access to the management of head unit, through SDL interface
          **/
         sendGrantAccessRequest: {
 
         },
 
         /**
-         * Sends a request for cancel access to the management of HMI, through SDL interface
+         * Sends a request for cancel access to the management of head unit, through SDL interface
          **/
         sendCancelAccessRequest: {
 
+        },
+
+        /**
+         * Sends a request to change specified parameter for radio on head unit, through SDL interface
+         **/
+        sendTuneRadioRequest: {
+            parameters: {
+                RadioStation: {
+                    frequency: "int",
+                    fraction: "int",
+                    HD: "int"
+                }
+            }
         }
     },
 
@@ -38,7 +51,7 @@ RevSDL = {
             }
         },
 
-        onDirectTune: {
+        onRadioDetails: {
             parameters: {
                 RadioStation: {
                     frequency: "int",
