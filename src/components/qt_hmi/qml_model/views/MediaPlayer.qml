@@ -273,13 +273,11 @@ Item {
 
     Text {
         id: statusBar
-        z: 100
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         text: dataContainer.currentApplication.hmiUIText.statusBar
         color: Constants.primaryColor
         font.pixelSize: Constants.statusBarFontSize
-    //    opacity: 0
     }
 
     states: [
