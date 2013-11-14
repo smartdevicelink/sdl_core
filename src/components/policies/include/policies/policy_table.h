@@ -48,14 +48,14 @@ enum eType {
   VALIDATION_FAILED_BAD_JSON,
   VALIDATION_FAILED
 };
-} // namespace PTValidationResult
+}  // namespace PTValidationResult
 
 namespace PTType {
 enum eType {
   TYPE_PT = 0,
   TYPE_PRELOAD
 };
-} // namespace PTType
+}  // namespace PTType
 
 class PolicyTable {
   public:
@@ -66,7 +66,7 @@ class PolicyTable {
      * @param pt_type PolicyTable type (PT or Preload)
      **/
     explicit PolicyTable(const std::string policy_table_string,
-			 PTType::eType pt_type);
+                         PTType::eType pt_type);
 
     /**
      * @brief Destructor
@@ -104,9 +104,8 @@ class PolicyTable {
     bool IsPTPreload();
 
   private:
-
     /**
-     * @brief Creates smmart obejct by previously set schema.
+     * @brief Creates smart object by previously set schema.
      * 
      * Created object has fields which are required in Policy Table.
      * Created object doesn't have fields which are required only 
@@ -116,12 +115,12 @@ class PolicyTable {
      * @return Policy table as smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject& CreateDefaultPT();
-    
+
     /**
      * @brief is Policy Table valid
      **/
     PTValidationResult::eType is_PT_valid_;
-    
+
     /**
      * @brief PolicyTable type
      **/
@@ -133,12 +132,12 @@ class PolicyTable {
     NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema_;
 
     /**
-     * @brief policy table as smart obejct
+     * @brief policy table as smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject pt_smart_object_;
 
     /**
-     * @brief deafult policy table smart object
+     * @brief default policy table smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject pt_default_smart_object_;
 };

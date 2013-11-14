@@ -63,7 +63,7 @@ class PermissionsCalculator {
         const mobile_apis::HMILevel::eType hmi_status);
 
     /**
-    * @brief Get ptiority for app_id
+    * @brief Get priority for app_id
     *
     * @param pt_object Policy Table as smart object
     * @param app_id Application Id
@@ -120,7 +120,7 @@ class PermissionsCalculator {
         std::string& hmi_level_string);
 
     /**
-     * @breif Convert smart object to vecotr strings
+     * @breif Convert smart object to vector of strings
      *
      * @param object Smart object
      * @param v_strings Vector of strings

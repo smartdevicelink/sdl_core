@@ -1,5 +1,5 @@
 /**
- * @file TEnumSchemaItem.hpp
+ * @file enum_schema_item.h
  * @brief TEnumSchemaItem header file.
  */
 // Copyright (c) 2013, Ford Motor Company
@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
-#define __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
+#ifndef _SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_ENUM_SCHEMA_ITEM_H_
+#define _SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_ENUM_SCHEMA_ITEM_H_
 
 #include <map>
 #include <set>
@@ -302,4 +302,4 @@ bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::stringToEnum(
     return result;
 }
 
-#endif
+#endif  // _SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_ENUM_SCHEMA_ITEM_H_
