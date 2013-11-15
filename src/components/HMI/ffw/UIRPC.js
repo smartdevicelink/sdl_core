@@ -335,28 +335,39 @@ FFW.UI = FFW.RPCObserver.create({
                             "displayCapabilities": {
                                 "displayType": "GEN2_8_DMA",
                                 "textFields": [
-                                    "mainField1", "mainField2", "mainField1", "mainField2", "statusBar", "mediaClock", "mediaTrack", "alertText1", "alertText2", "alertText3", "scrollableMessageBody", "initialInteractionText", "navigationText1", "navigationText2", "ETA", "totalDistance", "navigationText", "audioPassThruDisplayText1", "audioPassThruDisplayText2", "sliderHeader", "sliderFooter", "notificationText"
-                                ],
-                                "imageFields": [
+                                    "mainField1",
+                                    "mainField2",
+                                    "mainField3",
+                                    "mainField4",
+                                    "statusBar",
+                                    "mediaClock",
+                                    "mediaTrack",
+                                    "alertText1",
+                                    "alertText2",
+                                    "alertText3",
+                                    "scrollableMessageBody",
+                                    "initialInteractionText",
+                                    "navigationText1",
+                                    "navigationText2",
+                                    "ETA",
+                                    "totalDistance",
+                                    "navigationText",
+                                    "audioPassThruDisplayText1",
+                                    "audioPassThruDisplayText2",
+                                    "sliderHeader",
+                                    "sliderFooter",
+                                    "notificationText",
+                                    "menuName",
+                                    "secondaryText",
+                                    "tertiaryText",
+                                    "timeToDestination",
+                                    "turnText"
                                 ],
                                 "mediaClockFormats": [
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],
                                 "graphicSupported": true,
-                                "imageCapabilities": ["DYNAMIC"],
-                                "templatesAvailable": '',
-                                "screenParams": {
-                                    "resolution": {
-                                        "resolutionWidth": 800,
-                                        "resolutionHeight": 480
-                                    },
-                                    "touchEventAvailable":{
-                                        "pressAvailable": true,
-                                        "multiTouchAvailable": true,
-                                        "doublePressAvailable": true
-                                    }
-                                },
-                                "numCustomPresetsAvailable": 6
+                                "imageCapabilities": ["DYNAMIC"]
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",

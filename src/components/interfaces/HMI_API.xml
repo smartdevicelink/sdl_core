@@ -1183,9 +1183,6 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
-  <param name="imageFields" type="Common.ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
-    <description>A set of all fields that support images. See ImageField</description>
-  </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
@@ -1193,15 +1190,6 @@
   </param>
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
-  </param>
-  <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true">
-    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
-  </param>
-  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
-    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
-  </param>
-  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
-    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
   </param>
 </struct>
 
@@ -1697,7 +1685,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
-      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
     </function>
