@@ -176,14 +176,13 @@ ContextPopup {
             font.pixelSize: Constants.fontSize * 2
         }
 
-        OvalButton {
+        BackButton {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Back"
-            fontSize: Constants.fontSize
             onClicked: {
+                console.debug("enter")
                 complete(Common.Result.ABORTED)
+                console.debug("exit")
             }
         }
     }
-
 }
