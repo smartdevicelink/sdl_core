@@ -1,4 +1,5 @@
 [CW46]
++ Reregister app when it has been disconnected due to language change.
 + SyncProxyAndroid SDK: add onAppUnregisteredAfterLanguageChange() callback to IProxyListenerBase to notify an app when it has been disconnected due to language change.
 
 [CW45]

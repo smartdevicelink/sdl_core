@@ -2713,6 +2713,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private void startRPCProtocolSession(byte sessionID, String correlationID) {
 		_rpcSessionID = sessionID;
 
+        restartRPCProtocolSession();
+    }
+
+    private void restartRPCProtocolSession() {
 		// Set Proxy Lifecyclek Available
 		if (_advancedLifecycleManagementEnabled) {
 
@@ -3625,4 +3629,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    /**
+     * Sets the desired SYNC and HMI display languages, and re-registers the
+     * application.
+     */
+    public void resetLanguagesDesired(Language syncLanguageDesired,
+                                      Language hmiDisplayLanguageDesired) {
+        this._syncLanguageDesired = syncLanguageDesired;
+        this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+
+        restartRPCProtocolSession();
+    }
 } // end-class

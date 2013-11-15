@@ -1363,7 +1363,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+        Log.i(TAG, "onAppUnregisteredAfterLanguageChange " + msg.toString());
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        final String message =
+                String.format("reregistering with languages %s/%s",
+                        msg.getLanguage(), msg.getHmiDisplayLanguage());
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, message);
 
+        _syncProxy.resetLanguagesDesired(msg.getLanguage(),
+                msg.getHmiDisplayLanguage());
     }
 
     @Override
