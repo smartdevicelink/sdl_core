@@ -105,7 +105,7 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
 
   if (SmartType::SmartType_Array == pt_groups.getType()) {
 
-    convertSmartArray2VectorStrings(pt_groups, rpc_groups);
+    ConvertSmartArray2VectorStrings(pt_groups, rpc_groups);
   } else {
     LOG4CXX_ERROR(logger_,
         "Section app_policies|<app_id>|groups either not exists or not array");
@@ -175,7 +175,7 @@ PermissionResult::eType
                 .keyExists(function_id.asString())) {
 
         std::string hmi_status_string;
-        convertHMILevel2String(hmi_status, hmi_status_string);
+        ConvertHMILevel2String(hmi_status, hmi_status_string);
 
         so_ns::SmartObject hmi_levels =
             fgroup.getElement(PolicyTableSchema::kStrRpcs)
@@ -199,7 +199,7 @@ PermissionResult::eType
 
 //----------------------------------------------------------------------------
 
-void PermissionsCalculator::convertHMILevel2String(
+void PermissionsCalculator::ConvertHMILevel2String(
     const mobile_apis::HMILevel::eType hmi_status,
     std::string& hmi_level_string) {
 
@@ -218,7 +218,7 @@ void PermissionsCalculator::convertHMILevel2String(
 
 //----------------------------------------------------------------------------
 
-void PermissionsCalculator::convertSmartArray2VectorStrings(
+void PermissionsCalculator::ConvertSmartArray2VectorStrings(
     const SmartObject& object,
     std::vector<std::string>& v_strings) {
 

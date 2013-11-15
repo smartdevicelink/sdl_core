@@ -53,7 +53,8 @@ class PolicyTableSchema {
     static NsSmartDeviceLink::NsSmartObjects::CSmartSchema Create(void);
 
 
-    // TODO(_): might need to move these constants to the more appropriate place
+    // TODO(YS): might need to move these constants to the more
+    // appropriate place
     /**
      * @brief String constant for "policy_table" section.
      */

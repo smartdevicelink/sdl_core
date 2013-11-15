@@ -115,7 +115,7 @@ class PermissionsCalculator {
      * @param hmi_status        HMI level status
      * @param hmi_level_string  String convert to
      */
-    static void convertHMILevel2String(
+    static void ConvertHMILevel2String(
         const mobile_apis::HMILevel::eType hmi_status,
         std::string& hmi_level_string);
 
@@ -125,7 +125,7 @@ class PermissionsCalculator {
      * @param object Smart object
      * @param v_strings Vector of strings
      */
-    static void convertSmartArray2VectorStrings(
+    static void ConvertSmartArray2VectorStrings(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
         std::vector<std::string>& v_strings);
     /**

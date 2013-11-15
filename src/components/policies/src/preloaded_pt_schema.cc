@@ -61,7 +61,7 @@ typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 
 CSmartSchema PreloadedPTSchema::Create(void) {
   static PreloadedPTSchema schema;
-  
+
   return schema.CreateSchema();
 }
 

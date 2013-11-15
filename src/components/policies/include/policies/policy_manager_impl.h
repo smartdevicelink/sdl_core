@@ -80,7 +80,7 @@ class PolicyManagerImpl : public PolicyManager {
      *
      * @return result of check permission
      */
-    virtual CheckPermissionResult checkPermission(uint32_t app_id,
+    virtual CheckPermissionResult CheckPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
         const mobile_apis::HMILevel::eType hmi_status);
 
@@ -95,20 +95,9 @@ class PolicyManagerImpl : public PolicyManager {
      *
      * @return PolicyTable* ptr.
      **/
-    PolicyTable* getPolicyTable() const;
+    PolicyTable* policy_table() const;
 
   private:
-    /**
-     * @brief get ptiority for app_id
-     *
-     * @param pt_object Policy Table as smart object
-     * @param app_id Application Id
-     *
-     * @return priority for app_id
-     */
-    Priority::eType getPriority(const NsSmartObjects::SmartObject& pt_object,
-                                const uint32_t app_id);
-
     /**
      * @brief Policy configuration
      */

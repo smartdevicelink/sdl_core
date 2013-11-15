@@ -57,7 +57,7 @@ namespace ns_str = NsSmartDeviceLink::NsJSONHandler::strings;
 
 TEST(policy_manager_generic_test, test_straight_forward) {
   PolicyConfiguration config;
-  config.setPTFileName("SDLPolicyTable_basic.json");
+  config.set_pt_file_name("SDLPolicyTable_basic.json");
 
   PolicyManagerImpl policy_manager(config);
 
@@ -68,38 +68,38 @@ TEST(policy_manager_generic_test, test_straight_forward) {
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GenericResponse";
   CheckPermissionResult result =
-    policy_manager.checkPermission(123456,              // existing app
+    policy_manager.CheckPermission(123456,              // existing app
                                    rpc,
                                    mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Speak";
-  result = policy_manager.checkPermission(1,            // non existing app
+  result = policy_manager.CheckPermission(1,            // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
-  result = policy_manager.checkPermission(789,            // existing app
-                                          rpc,
-                                          mobile_apis::HMILevel::HMI_BACKGROUND);
+  result = policy_manager.CheckPermission(789,            // existing app
+                                         rpc,
+                                         mobile_apis::HMILevel::HMI_BACKGROUND);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 }
 
 // ----------------------------------------------------------------------------
 
 TEST(policy_manager_generic_test, test_straight_forward_deny) {
   PolicyConfiguration config;
-  config.setPTFileName("SDLPolicyTable_basic.json");
+  config.set_pt_file_name("SDLPolicyTable_basic.json");
 
   PolicyManagerImpl policy_manager(config);
 
@@ -110,49 +110,49 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
   CheckPermissionResult result =
-    policy_manager.checkPermission(123456,              // existing app
+    policy_manager.CheckPermission(123456,              // existing app
                                    rpc,
                                    mobile_apis::HMILevel::HMI_BACKGROUND);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority); 
+  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);git
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
-  result = policy_manager.checkPermission(123456,              // existing app
+  result = policy_manager.CheckPermission(123456,              // existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GetVehicleData";
-  result = policy_manager.checkPermission(234234,          // non existing app
+  result = policy_manager.CheckPermission(234234,          // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "UnknownRPC";
-  result = policy_manager.checkPermission(234234,          // non existing app
+  result = policy_manager.CheckPermission(234234,          // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "SubscribeVehicleData";
-  result = policy_manager.checkPermission(123456,              // existing app
+  result = policy_manager.CheckPermission(123456,              // existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_NONE);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
   // TODO(YS): Fix enum handling
-  //ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 }
 
 }  // namespace policy_manager_generic_test

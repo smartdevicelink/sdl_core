@@ -42,20 +42,16 @@
 namespace NsSmartDeviceLink {
 namespace policies {
 
-namespace PTValidationResult {
-enum eType {
+enum PTValidationResult {
   VALIDATION_OK = 0,
   VALIDATION_FAILED_BAD_JSON,
   VALIDATION_FAILED
 };
-}  // namespace PTValidationResult
 
-namespace PTType {
-enum eType {
+enum PolicyTableType {
   TYPE_PT = 0,
   TYPE_PRELOAD
 };
-}  // namespace PTType
 
 class PolicyTable {
   public:
@@ -65,8 +61,7 @@ class PolicyTable {
      * @param policy_table_string String containing policy table 
      * @param pt_type PolicyTable type (PT or Preload)
      **/
-    explicit PolicyTable(const std::string policy_table_string,
-                         PTType::eType pt_type);
+    PolicyTable(const std::string policy_table_string, PolicyTableType pt_type);
 
     /**
      * @brief Destructor
@@ -81,7 +76,7 @@ class PolicyTable {
     NsSmartDeviceLink::NsSmartObjects::SmartObject& AsSmartObject();
 
     /**
-     * @brief Get policy table as string
+     * @brief Get policy table as a string
      * 
      * @return Policy table as string
      */
@@ -94,7 +89,7 @@ class PolicyTable {
     *
     * @return validation result as enum
     **/
-    PTValidationResult::eType Validate();
+    PTValidationResult Validate();
 
     /**
     * @brief Tells wether Policy Table is Preload
@@ -119,12 +114,12 @@ class PolicyTable {
     /**
      * @brief is Policy Table valid
      **/
-    PTValidationResult::eType is_PT_valid_;
+    PTValidationResult is_pt_valid_;
 
     /**
      * @brief PolicyTable type
      **/
-    PTType::eType pt_type_;
+    PolicyTableType pt_type_;
 
     /**
      * @brief Schema to verify policy table

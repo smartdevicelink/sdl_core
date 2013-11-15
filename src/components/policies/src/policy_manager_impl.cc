@@ -75,23 +75,23 @@ policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
 
   std::string pt_string;
   if (0 == policy_table_) {
-    if (true == file_system::ReadFile(policy_config_.getPTFileName(),
+    if (true == file_system::ReadFile(policy_config_.pt_file_name(),
                                     pt_string)) {
       policy_table_ = new policies_ns::PolicyTable(pt_string,
-              policies_ns::PTType::TYPE_PT);
+              policies_ns::PolicyTableType::TYPE_PT);
       init_result = InitResult::INIT_OK;
     } else {
       LOG4CXX_WARN(logger_, "Can't read policy table file "
-          << policy_config_.getPTFileName());
+          << policy_config_.pt_file_name());
       if (true == file_system::ReadFile(
-          policy_config_.getPreloadPTFileName(), pt_string)) {
+          policy_config_.preload_pt_file_name(), pt_string)) {
         policy_table_ = new policies_ns::PolicyTable(
-            pt_string, policies_ns::PTType::TYPE_PRELOAD);
+            pt_string, policies_ns::PolicyTableType::TYPE_PRELOAD);
         init_result = InitResult::INIT_OK_PRELOAD;
       } else {
         init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
         LOG4CXX_ERROR(logger_, "Can't read Preload policy table file "
-            << policy_config_.getPreloadPTFileName());
+            << policy_config_.preload_pt_file_name());
       }
     }
   } else {
@@ -104,17 +104,17 @@ policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
 //---------------------------------------------------------------
 
 policies_ns::CheckPermissionResult
-  policies_ns::PolicyManagerImpl::checkPermission(
+  policies_ns::PolicyManagerImpl::CheckPermission(
     uint32_t app_id, const so_ns::SmartObject& rpc,
     mobile_apis::HMILevel::eType hmi_status) {
 
   CheckPermissionResult result =
     {PermissionResult::PERMISSION_NOK_DISALLOWED, Priority::PRIORITY_NONE};
-  PolicyTable* policy_table = getPolicyTable();
+  PolicyTable* pt = policy_table();
 
-  if (0 != policy_table
-      && PTValidationResult::VALIDATION_OK == policy_table->Validate()) {
-    so_ns::SmartObject pt_object = policy_table->AsSmartObject();
+  if (0 != pt
+      && PTValidationResult::VALIDATION_OK == pt->Validate()) {
+    so_ns::SmartObject pt_object = pt->AsSmartObject();
 
     result.result =  PermissionsCalculator::CalcPermissions(pt_object,
                                                             app_id,
@@ -138,9 +138,9 @@ void policies_ns::PolicyManagerImpl::StorePolicyTable() {
       const std::vector<unsigned char> char_vector_pdata(
           pt_string.begin(), pt_string.end());
       if (false == file_system::Write(
-          policy_config_.getPTFileName(), char_vector_pdata)) {
+          policy_config_.pt_file_name(), char_vector_pdata)) {
         LOG4CXX_ERROR(logger_, "Can't write policy table file "
-            << policy_config_.getPTFileName());
+            << policy_config_.pt_file_name());
       }
     }
   }
@@ -149,6 +149,6 @@ void policies_ns::PolicyManagerImpl::StorePolicyTable() {
 //---------------------------------------------------------------
 
 policies_ns::PolicyTable*
-  policies_ns::PolicyManagerImpl::getPolicyTable() const {
+  policies_ns::PolicyManagerImpl::policy_table() const {
     return policy_table_;
 }

@@ -55,7 +55,7 @@ namespace policies_draft_test {
         init_result = Init();
       }
     pn::PolicyTable* getPolicyTable() {
-      return PolicyManagerImpl::getPolicyTable();
+      return PolicyManagerImpl::policy_table();
     }
 
     void StorePolicyTable() {
@@ -83,7 +83,7 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_modify_write_verify_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("PT4test.json");
+    policy_config.set_pt_file_name("PT4test.json");
 
     {
       PolicyManagerTest initial_PT(policy_config);
@@ -122,7 +122,7 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_read_write_compare_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("PT4test.json");
+    policy_config.set_pt_file_name("PT4test.json");
 
     std::string initial_json;
     std::string stored_json;
@@ -142,8 +142,8 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_no_PT_no_Preload_files_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("missing_file_for_sure.json");
-    policy_config.setPreloadPTFileName("missing_too.json");
+    policy_config.set_pt_file_name("missing_file_for_sure.json");
+    policy_config.set_preload_pt_file_name("missing_too.json");
     PolicyManagerTest policy_manager(policy_config);
     ASSERT_TRUE(NULL == policy_manager.getPolicyTable());
     ASSERT_EQ(pn::InitResult::INIT_FAILED_PRELOAD_NO_FILE,
@@ -152,8 +152,8 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("bad.json");
-    policy_config.setPreloadPTFileName("PT4test.json");
+    policy_config.set_pt_file_name("bad.json");
+    policy_config.set_preload_pt_file_name("PT4test.json");
     PolicyManagerTest policy_manager(policy_config);
 
     ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
@@ -163,8 +163,8 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_Preload_bad_json_file_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("missing_file.json");
-    policy_config.setPreloadPTFileName("bad.json");
+    policy_config.set_pt_file_name("missing_file.json");
+    policy_config.set_preload_pt_file_name("bad.json");
     PolicyManagerTest policy_manager(policy_config);
 
     ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
@@ -174,14 +174,14 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_reInit_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("PT4test.json");
-    policy_config.setPreloadPTFileName("bad.json");
+    policy_config.set_pt_file_name("PT4test.json");
+    policy_config.set_preload_pt_file_name("bad.json");
     PolicyManagerTest policy_manager(policy_config);
 
     ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
 
-    policy_config.setPTFileName("nofile");
-    policy_config.setPreloadPTFileName("nofile");
+    policy_config.set_pt_file_name("nofile");
+    policy_config.set_preload_pt_file_name("nofile");
 
     policy_manager.Init();
 
@@ -191,13 +191,13 @@ namespace policies_draft_test {
 
   TEST_F(Policies_test, test_policies_json_validate_test) {
     pn::PolicyConfiguration policy_config;
-    policy_config.setPTFileName("SDLPolicyTable_basic.json");
+    policy_config.set_pt_file_name("SDLPolicyTable_basic.json");
     PolicyManagerTest policy_manager(policy_config);
 
     ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
       policy_manager.getPolicyTable()->Validate());
 
-    policy_config.setPTFileName("Stored.json");
+    policy_config.set_pt_file_name("Stored.json");
     policy_manager.StorePolicyTable();
 
     PolicyManagerTest policy_manager2(policy_config);

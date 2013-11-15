@@ -74,6 +74,8 @@ enum eType {
 };
 }  // namespace PermissionResult
 
+// Namespace is neseccary because it is used for automatic string<->enum
+// convertion using schema
 namespace Priority {
 enum eType {
   /**
@@ -154,7 +156,7 @@ class PolicyManager {
      *
      * @return result of check permission
      */
-    virtual CheckPermissionResult checkPermission(uint32_t app_id,
+    virtual CheckPermissionResult CheckPermission(uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
         const mobile_apis::HMILevel::eType hmi_status) = 0;
 };
