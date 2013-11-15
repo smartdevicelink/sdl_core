@@ -187,12 +187,8 @@ GeneralView {
         }
     }
 
-    Text {
-        id: statusBar
+    StatusBar {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        text: dataContainer.currentApplication.hmiUIText.statusBar
-        color: Constants.primaryColor
-        font.pixelSize: Constants.statusBarFontSize
     }
 }

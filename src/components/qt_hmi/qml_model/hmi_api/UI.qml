@@ -99,7 +99,7 @@ Item {
                     "mainField2": fieldSubstrings[Common.TextFieldName.mainField2],
                     "mainField3": fieldSubstrings[Common.TextFieldName.mainField3],
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
-                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar] ? fieldSubstrings[Common.TextFieldName.statusBar] : "",
+                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar] || "",
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
                             "image": graphic ? graphic.value : ""
                 },
