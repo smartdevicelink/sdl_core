@@ -203,8 +203,6 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
     } else {
       return RESULT_FAIL;
     }
-  } else {
-    return RESULT_FAIL;
   }
 
   packet_data_.data = data;
