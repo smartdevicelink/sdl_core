@@ -306,4 +306,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onKeyboardInput(OnKeyboardInput msg);
 
     void onRegisterAppRequest(RegisterAppInterface msg);
+
+    public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
 }

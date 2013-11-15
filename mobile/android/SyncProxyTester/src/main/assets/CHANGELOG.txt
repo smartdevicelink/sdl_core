@@ -1,3 +1,6 @@
+[CW46]
++ SyncProxyAndroid SDK: add onAppUnregisteredAfterLanguageChange() callback to IProxyListenerBase to notify an app when it has been disconnected due to language change.
+
 [CW45]
 + Add the ability to stream MP4 or raw H264 data over MobileNavi.
 

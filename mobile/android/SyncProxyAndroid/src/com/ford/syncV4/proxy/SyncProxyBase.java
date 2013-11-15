@@ -106,6 +106,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -221,6 +222,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
 	private Vector<String> _vrSynonyms = null;
+
+    private OnLanguageChange _lastLanguageChange = null;
 
 	// JSON RPC Marshaller
 	private IJsonRPCMarshaller _jsonRPCMarshaller = new JsonRPCMarshaller();
@@ -2491,6 +2494,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				// OnLanguageChange
 
 				final OnLanguageChange msg = new OnLanguageChange(hash);
+                _lastLanguageChange = msg;
 				if (_callbackToUIThread) {
 					// Run in UI thread
 					_mainUIHandler.post(new Runnable() {
@@ -2569,11 +2573,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				final OnAppInterfaceUnregistered msg = new OnAppInterfaceUnregistered(hash);
 
 				if (_advancedLifecycleManagementEnabled) {
-					// This requires the proxy to be cycled
-                    if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
-                        cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
+                    if (msg.getReason() == AppInterfaceUnregisteredReason.LANGUAGE_CHANGE) {
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
+                        }
                     } else {
-                        Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                        // This requires the proxy to be cycled
+                        if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
+                            cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
+                        } else {
+                            Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                        }
                     }
                 } else {
 					if (_callbackToUIThread) {
