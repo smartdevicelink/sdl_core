@@ -207,13 +207,18 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             classNameBindings: ['MFT.helpMode:scan_button_help'],
             classNames:		['rs-item','helpmode_box_shadow'],
             icon:			  'images/media/passiv_horiz_led.png',
+            // Change Icon for Frequency Scan
+            onIconChange: function(){
+                if(MFT.MediaController.isFrequencyScan){
+                    this.set('icon', 'images/media/active_horiz_led.png');
+                }else{
+                    this.set('icon', 'images/media/passiv_horiz_led.png');
+                }
+            }.observes('MFT.MediaController.isFrequencyScan'),
             target:			'MFT.MediaController',
-            action:			'turnScanHelpVideoOn',
-            disabled:		  true,
+            action:			'turnFrequencyScan',
             onDown: 			false,
-            text: 	   MFT.locale.label.view_media_scan,
-            disabledBinding:   'MFT.reversHelpModeBoolean'
-
+            text: 	   MFT.locale.label.view_media_scan
         }),
 
         optionsButton: MFT.Button.extend({

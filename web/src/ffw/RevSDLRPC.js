@@ -38,7 +38,12 @@ FFW.RevSDL = FFW.RPCObserver.create({
         switch (response.id) {
             case this.GrantAccessRequestId:
                 MFT.MediaController.set('sdlAccessStatus', response.result.success);
-                this.set('isFirstStart', response.result.isFirstStart);
+                break;
+            case this.StartScanRequestId:
+                MFT.MediaController.set('isFrequencyScan', response.result.success);
+                break;
+            case this.StopScanRequestId:
+                MFT.MediaController.set('isFrequencyScan', !response.result.success);
                 break;
         }
     },
@@ -79,6 +84,8 @@ FFW.RevSDL = FFW.RPCObserver.create({
     GrantAccessRequestId: -1,
     CancelAccessRequestId: -1,
     TuneRadioRequestId: -1,
+    StartScanRequestId: -1,
+    StopScanRequestId: -1,
 
     /**
      * Sends a request for access to the management of HMI, through SDL interface
@@ -127,5 +134,33 @@ FFW.RevSDL = FFW.RPCObserver.create({
         };
         this.client.send(JSONMessage);
 
+    },
+
+    /**
+     * Start frequency scan on head unit, through SDL interface
+     **/
+    sendStartScanRequest: function(){
+        this.StartScanRequestId = this.client.generateId();
+
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		this.StartScanRequestId,
+            "method":	"RevSDL.StartScan"
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Stop frequency scan on head unit, through SDL interface
+     **/
+    sendStopScanRequest: function(){
+        this.StopScanRequestId = this.client.generateId();
+
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		this.StopScanRequestId,
+            "method":	"RevSDL.StopScan"
+        };
+        this.client.send(JSONMessage);
     }
 });

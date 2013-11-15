@@ -36,6 +36,20 @@ RevSDL = {
                     HD: "int"
                 }
             }
+        },
+
+        /**
+         * Start frequency scan on head unit, through SDL interface
+         **/
+        StartScan: {
+
+        },
+
+        /**
+         * Stop frequency scan on head unit, through SDL interface
+         **/
+        StopScan: {
+
         }
     },
 

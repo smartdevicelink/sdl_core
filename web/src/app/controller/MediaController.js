@@ -44,6 +44,9 @@ MFT.MediaController = Em.Object.create({
 	/** Visibility of Home Media Radio Status if preset have been activated */
 	isPresetActivated: false,
 
+    /** Stop/Start radio frequency scan status**/
+    isFrequencyScan: false,
+
 	/** text labels (dinamicaly could be changed)*/
 	amLabelBinding: Ember.Binding.oneWay('MFT.locale.label.view_media_am1'),
 
@@ -1123,10 +1126,19 @@ MFT.MediaController = Em.Object.create({
         return (tune.toString() === stations.toString());
 	},
 
-	turnScanHelpVideoOn: function(){
+	turnFrequencyScan: function(){
 		if ( MFT.helpMode ) {
 			MFT.VideoPlayerController.start('ent_Scan');
+            return;
 		}
+
+        if (this.isFrequencyScan) {
+//            this.set('isFrequencyScan', false);
+            FFW.RevSDL.sendStopScanRequest();
+        } else {
+//            this.set('isFrequencyScan', true);
+            FFW.RevSDL.sendStartScanRequest();
+        }
 	},
 
 	turnReplayHelpVideoOn: function(){
