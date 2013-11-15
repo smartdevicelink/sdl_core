@@ -85,7 +85,7 @@ var fontSize = 20
 var ovalButtonFontSize = 15
 
 // Title font size
-var titleFontSize = 45
+var titleFontSize = 35
 
 // Power on/off button font size
 var powerButtonFornSize = 25

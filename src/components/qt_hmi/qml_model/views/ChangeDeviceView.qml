@@ -49,17 +49,22 @@ GeneralView {
             anchors.left: parent.left
 
             Text {
-                width: parent.width
                 id: searchDeviceText
+                anchors.left: parent.left
+                anchors.top: parent.top
+                height: 1/4 * parent.height
+                width: parent.width                
                 color: Constants.primaryColor
-                font.pixelSize: 40
+                font.pixelSize: Constants.titleFontSize
+                text: "Devices available:"
+                verticalAlignment: Text.AlignVCenter
             }
 
             ListView {
                 id: changeDeviceListView
+                anchors.left: parent.left
+                anchors.top: searchDeviceText.bottom
                 model: dataContainer.deviceList
-
-                y: searchDeviceText.height
                 width:parent.width
                 height:parent.height - searchDeviceText.height
 
@@ -74,7 +79,7 @@ GeneralView {
                     }
                     text: name
                     color: Constants.primaryColor
-                    font.pixelSize: 50
+                    font.pixelSize: Constants.titleFontSize
                 }
             }
         }
