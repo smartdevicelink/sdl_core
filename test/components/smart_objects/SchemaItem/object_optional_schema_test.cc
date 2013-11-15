@@ -75,6 +75,18 @@ enum eType {
 };
 }  // namespace TestType
 
+namespace Priority {
+enum eType {
+  PRIORITY_NONE = 0,
+  PRIORITY_NORMAL,
+  PRIORITY_COMMUNICATION,
+  PRIORITY_NAVIGATION,
+  PRIORITY_EMERGENCY,
+  INVALID_ENUM,
+};
+}  // namespace Priority
+
+
 class ObjectSchemaItemTest : public ::testing::Test {
   protected:
   //Create SmartObjectSchema for test object
@@ -185,6 +197,53 @@ class ObjectSchemaItemTest : public ::testing::Test {
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
     std::map<std::string, CObjectSchemaItem::SMember> default_map;
     app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
+    app_id_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
+    app_id_map["nicknames"] = CObjectSchemaItem::SMember(nicknames_item, true);
+    default_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
+    default_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
+    // optional parameter
+    app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
+    app_policies_map["default"] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
+    policy_table_map["app_policies"] =
+      CObjectSchemaItem::SMember(
+        ObjectOptionalSchemaItem::create(app_policies_map), true);
+
+    std::map<std::string, CObjectSchemaItem::SMember> root_map;
+    root_map["policy_table"] =
+    CObjectSchemaItem::SMember(
+        CObjectSchemaItem::create(policy_table_map), true);
+
+    return CObjectSchemaItem::create(root_map);
+  }
+
+  //------------------------------------------------------------------------
+
+  utils::SharedPtr<ISchemaItem> initTestSchemaWithEnum(bool isOtptionalMandatory = false) {
+
+    std::set<Priority::eType> allowed_priority;
+    allowed_priority.insert(Priority::PRIORITY_COMMUNICATION);
+    allowed_priority.insert(Priority::PRIORITY_EMERGENCY);
+    allowed_priority.insert(Priority::PRIORITY_NAVIGATION);
+    allowed_priority.insert(Priority::PRIORITY_NONE);
+    allowed_priority.insert(Priority::PRIORITY_NORMAL);
+
+    utils::SharedPtr<ISchemaItem> priority_item =
+      TEnumSchemaItem<Priority::eType>::create(allowed_priority);
+
+    utils::SharedPtr<ISchemaItem> groups_item =
+      CArraySchemaItem::create(CStringSchemaItem::create());
+
+    utils::SharedPtr<ISchemaItem> nicknames_item =
+      CArraySchemaItem::create(CStringSchemaItem::create());
+
+    std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
+    std::map<std::string, CObjectSchemaItem::SMember> default_map;
+    app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);   
     app_id_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
     app_id_map["nicknames"] = CObjectSchemaItem::SMember(nicknames_item, true);
     default_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
@@ -464,6 +523,65 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_and_static_param) {
   EXPECT_EQ(Errors::OK, resultType);
 }
 
+// ----------------------------------------------------------------------------
+
+TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
+  std::string json_str(
+  "{\n"
+    "  \"policy_table\":{\n"
+    "    \"app_policies\": {\n"
+    "        \"789\":{\n"
+    "            \"priority\":\"NORMAL\",\n"
+    "            \"groups\":[\n"
+    "               \"Notifications\",\n"
+    "               \"Base-4\"\n"
+    "            ],\n"
+    "            \"nicknames\":[\n"
+    "               \"Music App\"\n"
+    "            ]\n"
+    "        },\n"
+    "       \"default\":{\n"
+    "            \"priority\":\"NONE\",\n"
+    "            \"groups\":[\n"
+    "               \"Base-4\"\n"
+    "            ]\n"
+    "        }\n"
+    "    }\n"
+    "}\n"
+  "}");
+
+  smartobj::SmartObject object;
+  bool fromstring_result =
+    formatters::GenericJsonFormatter::FromString(json_str, object);
+
+  ASSERT_EQ(true, fromstring_result);
+
+  utils::SharedPtr<ISchemaItem> schema1 = initTestSchemaWithEnum(false);
+  schema1->applySchema(object);
+  int resultType = schema1->validate(object);
+  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(Priority::PRIORITY_NORMAL,
+    object["policy_table"]["app_policies"]["789"]["priority"].asInt());
+
+  EXPECT_EQ(Priority::PRIORITY_NONE,
+    object["policy_table"]["app_policies"]["default"]["priority"].asInt());
+
+  schema1->unapplySchema(object);
+  EXPECT_EQ("NORMAL",
+    object["policy_table"]["app_policies"]["789"]["priority"].asString());
+
+  EXPECT_EQ("NONE",
+    object["policy_table"]["app_policies"]["default"]["priority"].asString());
+  
+
+//   utils::SharedPtr<ISchemaItem> schema2 = initTestSchemaWithEnum(true);
+//   resultType = schema2->validate(object);
+//   EXPECT_EQ(Errors::OK, resultType);
+}
+
+// ----------------------------------------------------------------------------
+
+
 }
 }
 }
@@ -471,6 +589,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_and_static_param) {
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
 template<>
 const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string>& TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void) {
   static bool isInitialized = false;
@@ -492,8 +611,41 @@ const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std:
   }
   return enumStringRepresentationMap;
 }
+
+// ----------------------------------------------------------------------------
+
+namespace TestPriority = test::components::SmartObjects::SchemaItem::Priority;
+
+template <>
+const std::map<TestPriority::eType, std::string>&
+  TEnumSchemaItem<TestPriority::eType>::
+    getEnumElementsStringRepresentation() {
+
+  static bool is_initialized = false;
+  static std::map<TestPriority::eType, std::string>
+    enum_string_representation;
+
+  if (false == is_initialized) {
+    enum_string_representation.insert(
+      std::make_pair(TestPriority::PRIORITY_NONE, "NONE"));
+    enum_string_representation.insert(
+      std::make_pair(TestPriority::PRIORITY_NORMAL, "NORMAL"));
+    enum_string_representation.insert(
+      std::make_pair(TestPriority::PRIORITY_COMMUNICATION,
+                     "COMMUNICATION"));
+    enum_string_representation.insert(
+      std::make_pair(TestPriority::PRIORITY_NAVIGATION, "NAVIGATION"));
+    enum_string_representation.insert(
+      std::make_pair(TestPriority::PRIORITY_EMERGENCY, "EMERGENCY"));
+
+    is_initialized = true;
+  }
+
+  return enum_string_representation;
 }
-}
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleMock(&argc, argv);
