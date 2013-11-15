@@ -68,7 +68,7 @@ import com.ford.avarsdl.util.Utils;
 import com.ford.avarsdl.util.WebViewUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
-import com.ford.syncV4.proxy.rpc.GiveControl;
+import com.ford.syncV4.proxy.rpc.GrantAccess;
 
 /**
  * Title: AvatarActivity.java<br>
@@ -1154,7 +1154,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     public void onSDLAccessRequested(JSONRevSDLController controller) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
-            GiveControl msg = new GiveControl();
+            GrantAccess msg = new GrantAccess();
             msg.setTimeout(10000);
             msg.setCorrelationID(nextCorrelationID());
 
