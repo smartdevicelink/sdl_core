@@ -36,6 +36,7 @@
 
 #include <map>
 #include <string>
+#include <set>
 
 #include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
@@ -81,6 +82,20 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       **/
     virtual Errors::eType validate(const SmartObject & object);
 
+    /**
+     * @brief Apply schema.
+     *
+     * @param Object Object to apply schema.
+     **/
+    virtual void applySchema(SmartObject & Object);
+
+    /**
+     * @brief Unapply schema.
+     *
+     * @param Object Object to unapply schema.
+     **/
+    virtual void unapplySchema(SmartObject & Object);
+
   private:
     /**
       * @brief Constructor.
@@ -122,6 +137,16 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       * @return Whether FieldName is generic optional
       */
     bool IsOptionalName(std::string name);
+
+    /**
+      * @brief Extracts a set of sub object keys from the root object that are
+      * optional.
+      *
+      * @param Object Object from which the sub object keys will be extracted.
+      *
+      * @return A set of keys of sub-objects that are optional.
+      */
+    std::set<std::string> GetOptionalObjectKeys(SmartObject &root_obj);
 };
 
 }  // namespace NsSmartObjects

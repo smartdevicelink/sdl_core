@@ -36,6 +36,9 @@
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+
 namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
 const char* so_ns::ObjectOptionalSchemaItem::sOptionalGenericFieldName1
@@ -121,3 +124,63 @@ so_ns::ObjectOptionalSchemaItem::ObjectOptionalSchemaItem(
     const std::map<std::string, so_ns::CObjectSchemaItem::SMember> & members):
   CObjectSchemaItem(members) {
 }
+
+//----------------------------------------------------------------------------
+
+std::set<std::string>
+ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject &root_obj) {
+  std::set<std::string> optional_objects;
+
+  const std::set<std::string> object_keys = root_obj.enumerate();
+  typedef std::set<std::string>::const_iterator Iter;
+  for (Iter k = object_keys.begin(); k != object_keys.end(); ++k) {
+    // if an object is not among the schema items then it is optional
+    if (mMembers.end() == mMembers.find(*k)) {
+      optional_objects.insert(*k);
+    }
+  }
+
+  return optional_objects;
+}
+
+//----------------------------------------------------------------------------
+
+void ObjectOptionalSchemaItem::applySchema(SmartObject & Object) {
+  // At first apply schema for the regular objects
+  CObjectSchemaItem::applySchema(Object);
+
+  if (0 == mMembers.count(sOptionalGenericFieldName1)) {
+    return;             // There are no optional items
+  }
+
+  // Then apply schema for all the optional objects
+  std::set<std::string> optionals = GetOptionalObjectKeys(Object);
+  typedef std::set<std::string>::const_iterator Iter;
+  for (Iter key = optionals.begin(); key != optionals.end(); ++key) {
+
+    mMembers.at(sOptionalGenericFieldName1).mSchemaItem->applySchema(
+      Object[*key]);
+  }
+}
+
+//----------------------------------------------------------------------------
+
+void ObjectOptionalSchemaItem::unapplySchema(SmartObject & Object) {
+  CObjectSchemaItem::unapplySchema(Object);
+
+  if (0 == mMembers.count(sOptionalGenericFieldName1)) {
+    return;             // There are no optional items
+  }
+
+  std::set<std::string> optionals = GetOptionalObjectKeys(Object);
+  typedef std::set<std::string>::iterator Iter;
+  for (Iter key = optionals.begin(); key != optionals.end(); ++key) {
+
+    mMembers.at(sOptionalGenericFieldName1).mSchemaItem->unapplySchema(
+      Object[*key]);
+  }
+}
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+

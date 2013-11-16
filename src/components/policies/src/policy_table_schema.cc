@@ -196,8 +196,7 @@ SchemaItemPtr PolicyTableSchema::CreateAppId(void) {
   app_id_map[kStrNicknames] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
   app_id_map[kStrPriority] = CObjectSchemaItem::SMember(
-//  CreatePriority(), true);
-    CStringSchemaItem::create(), true);  // TODO(YS): switch to enums
+    CreatePriority(), true);
 
   return CObjectSchemaItem::create(app_id_map);
 }
@@ -208,8 +207,7 @@ SchemaItemPtr PolicyTableSchema::CreateAppPoliciesDefault(void) {
   std::map<std::string, CObjectSchemaItem::SMember> default_map;
 
   default_map[kStrPriority] = CObjectSchemaItem::SMember(
-//  CreatePriority(), true);
-    CStringSchemaItem::create(), true);  // TODO(YS): switch to enums
+    CreatePriority(), true);
   default_map[kStrGroups] = CObjectSchemaItem::SMember(
     CArraySchemaItem::create(CStringSchemaItem::create()), true);
 

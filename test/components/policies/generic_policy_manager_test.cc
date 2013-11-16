@@ -73,8 +73,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                    mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Speak";
   result = policy_manager.CheckPermission(1,            // non existing app
@@ -82,8 +81,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
   result = policy_manager.CheckPermission(789,            // existing app
@@ -91,8 +89,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                          mobile_apis::HMILevel::HMI_BACKGROUND);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 }
 
 // ----------------------------------------------------------------------------
@@ -115,8 +112,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                    mobile_apis::HMILevel::HMI_BACKGROUND);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);git
+  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
   result = policy_manager.CheckPermission(123456,              // existing app
@@ -124,8 +120,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GetVehicleData";
   result = policy_manager.CheckPermission(234234,          // non existing app
@@ -133,8 +128,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "UnknownRPC";
   result = policy_manager.CheckPermission(234234,          // non existing app
@@ -142,8 +136,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                           mobile_apis::HMILevel::HMI_FULL);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NONE, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "SubscribeVehicleData";
   result = policy_manager.CheckPermission(123456,              // existing app
@@ -151,8 +144,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                           mobile_apis::HMILevel::HMI_NONE);
 
   ASSERT_EQ(PermissionResult::PERMISSION_NOK_DISALLOWED, result.result);
-  // TODO(YS): Fix enum handling
-  // ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 }
 
 }  // namespace policy_manager_generic_test
