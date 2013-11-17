@@ -128,7 +128,7 @@ so_ns::ObjectOptionalSchemaItem::ObjectOptionalSchemaItem(
 //----------------------------------------------------------------------------
 
 std::set<std::string>
-ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject &root_obj) {
+ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject & root_obj) {
   std::set<std::string> optional_objects;
 
   const std::set<std::string> object_keys = root_obj.enumerate();
@@ -145,22 +145,30 @@ ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject &root_obj) {
 
 //----------------------------------------------------------------------------
 
-void ObjectOptionalSchemaItem::applySchema(SmartObject & Object) {
-  // At first apply schema for the regular objects
-  CObjectSchemaItem::applySchema(Object);
-
+void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject & object,
+  void (ISchemaItem::* action)(SmartObject&) ) {
   if (0 == mMembers.count(sOptionalGenericFieldName1)) {
     return;             // There are no optional items
   }
 
+  utils::SharedPtr<ISchemaItem> schema =
+    mMembers.at(sOptionalGenericFieldName1).mSchemaItem;
+
   // Then apply schema for all the optional objects
-  std::set<std::string> optionals = GetOptionalObjectKeys(Object);
+  std::set<std::string> optionals = GetOptionalObjectKeys(object);
   typedef std::set<std::string>::const_iterator Iter;
   for (Iter key = optionals.begin(); key != optionals.end(); ++key) {
-
-    mMembers.at(sOptionalGenericFieldName1).mSchemaItem->applySchema(
-      Object[*key]);
+    (schema.get()->*action)(object[*key]);
   }
+}
+
+//----------------------------------------------------------------------------
+
+void ObjectOptionalSchemaItem::applySchema(SmartObject & Object) {
+  // At first apply schema for the regular objects
+  CObjectSchemaItem::applySchema(Object);
+
+  IterateOverOptionalItems(Object, &ISchemaItem::applySchema);
 }
 
 //----------------------------------------------------------------------------
@@ -168,17 +176,7 @@ void ObjectOptionalSchemaItem::applySchema(SmartObject & Object) {
 void ObjectOptionalSchemaItem::unapplySchema(SmartObject & Object) {
   CObjectSchemaItem::unapplySchema(Object);
 
-  if (0 == mMembers.count(sOptionalGenericFieldName1)) {
-    return;             // There are no optional items
-  }
-
-  std::set<std::string> optionals = GetOptionalObjectKeys(Object);
-  typedef std::set<std::string>::iterator Iter;
-  for (Iter key = optionals.begin(); key != optionals.end(); ++key) {
-
-    mMembers.at(sOptionalGenericFieldName1).mSchemaItem->unapplySchema(
-      Object[*key]);
-  }
+  IterateOverOptionalItems(Object, &ISchemaItem::unapplySchema);
 }
 
 }  // namespace NsSmartObjects

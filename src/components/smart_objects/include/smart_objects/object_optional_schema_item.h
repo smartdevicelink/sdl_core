@@ -146,7 +146,21 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * @return A set of keys of sub-objects that are optional.
       */
-    std::set<std::string> GetOptionalObjectKeys(SmartObject &root_obj);
+    std::set<std::string> GetOptionalObjectKeys(SmartObject & root_obj);
+
+    /**
+     * @brief Method iterates over optional sub-objects.
+     *
+     *  The method iterates over optional sub-objects in the root object
+     *  and performs action on each object.
+     *  The action is intended as either "applySchema" or "unapplySchema"
+     *
+     *  @param object The root object.
+     *  @param action Pointer to the method of ISchemaItem. Either "applySchema"
+     *                or "unapplySchema"
+     */
+    void IterateOverOptionalItems(SmartObject & object,
+      void (ISchemaItem:: *action)(SmartObject&) );
 };
 
 }  // namespace NsSmartObjects
