@@ -36,6 +36,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import sys
+for argv in sys.argv:
+	if argv == "-h" or argv == "--help":
+		print "This script contains generator of QML to QDbus QML part\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
+		print "Output: applink/src/components/qt_hmi/qml_model/hmi_api"
+		exit("Exit from help. To run script don't use -h, --help")
+
 from os import path
 from os import makedirs
 from sys import argv

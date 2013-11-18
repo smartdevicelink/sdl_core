@@ -36,6 +36,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import sys
+for argv in sys.argv:
+	if argv == "-h" or argv == "--help":
+		print "This script generates HMI API message descriptions for D-Bus\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
+		print "Output: applink/src/components/dbus/message_descriptions.cc\n"
+		exit("Exit from help. To run script don't use -h, --help")
+
 from argparse import ArgumentParser
 from xml.etree import ElementTree
 from copy import copy

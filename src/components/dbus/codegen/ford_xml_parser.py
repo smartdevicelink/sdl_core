@@ -36,9 +36,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import sys
+for argv in sys.argv:
+	if argv == "-h" or argv == "--help":
+		print "This script contains parser for HMI_API.xml\n"
+		exit("Exit from help. To run script don't use -h, --help")
+
 from xml.etree import ElementTree
 from collections import OrderedDict
-
 
 node_name = '/com/ford/hmi'
 
