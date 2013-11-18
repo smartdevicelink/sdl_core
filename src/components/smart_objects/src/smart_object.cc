@@ -514,7 +514,7 @@ std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string(
       return *(m_data.str_value);
     case SmartType_Integer:
       // TODO(AK): fix this hack
-      return std::to_string(static_cast<int>(m_data.unsigned_int_value));
+      return std::to_string(m_data.unsigned_int_value);
       break;
     case SmartType_Character:
       return std::string(1, m_data.char_value);
@@ -653,6 +653,10 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](int Index) {
   return handle_array_access(Index);
 }
+const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](int Index) const{
+  return getElement(Index);
+}
 
 inline NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_array_access(
@@ -691,11 +695,24 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
   return handle_map_access(Key);
 }
 
+const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
+    const std::string Key) const {
+  return getElement(Key);
+}
+
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
     char* Key) {
   std::string str(Key);
   return handle_map_access(str);
+}
+
+const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
+    char* Key) const {
+  std::string str(Key);
+  return getElement(str);
 }
 
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
@@ -953,7 +970,7 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::erase(
   return (1 == m_data.map_value->erase(Key));
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::isValid() {
+bool NsSmartDeviceLink::NsSmartObjects::SmartObject::isValid() const {
   return (Errors::OK == m_schema.validate(*this));
 }
 

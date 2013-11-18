@@ -2206,7 +2206,7 @@
     <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
       <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="true">
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
       <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
@@ -2278,12 +2278,13 @@
   </function>
   <function name="ShowConstantTBT" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
-    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
+    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="5">
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA
-          totalDistance.
+          ETA	  
+          totalDistance
+	  timeToDestination
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
