@@ -1,7 +1,7 @@
 include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
-  ../../../src/components/media_manager/include
+  ../../../src/components/media_manager_new/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/components/utils/include/
   ../../../src/components/protocol_handler/include/
@@ -22,9 +22,18 @@ set (LIBRARIES
     gtest_main
     gmock
     gmock_main
-    MediaManager
+    MediaManagerNew
+    ApplicationManager
+    connectionHandler
+    SmartObjects
+    Utils
     ${GSTREAMER_gstreamer_LIBRARY}
+    pulse-simple
+    ConfigProfile
+    formatters
+    jsoncpp
+    log4cxx
 )
 
-#create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
-add_library("test_MediaManagerTest" "${SOURCES}")
+create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
+#add_library("test_MediaManagerTest" "${SOURCES}")

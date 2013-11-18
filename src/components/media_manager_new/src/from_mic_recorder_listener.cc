@@ -30,35 +30,64 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
-
-#include <set>
-#include "protocol_handler/raw_message.h"
-#include "media_manager/media_adapter.h"
-#include "media_manager/media_adapter_listener.h"
-#include "utils/macro.h"
-#include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "media_manager/from_mic_recorder_listener.h"
+#include "./audio_stream_sender_thread.h"
 
 namespace media_manager {
 
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
+log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("FromMicRecorderListener"));
 
-class MediaAdapterImpl : public MediaAdapter {
-  public:
-    virtual ~MediaAdapterImpl();
-    virtual void AddListener(const MediaListenerPtr& listener);
-    virtual void RemoveListener(const MediaListenerPtr& listener);
+FromMicRecorderListener::FromMicRecorderListener(
+  const std::string& file_name)
+  : reader_(NULL)
+  , file_name_(file_name) {
+}
 
-  protected:
-    MediaAdapterImpl();
+FromMicRecorderListener::~FromMicRecorderListener() {
+  if (reader_) {
+    reader_->stop();
+    delete reader_;
+    reader_ = NULL;
+  }
+}
 
-  private:
-    std::set<MediaListenerPtr> media_listeners_;
-    static log4cxx::LoggerPtr logger_;
+void FromMicRecorderListener::OnDataReceived(
+  int application_key,
+  const protocol_handler::RawMessagePtr& message) {
+}
 
-    DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
-};
+void FromMicRecorderListener::OnErrorReceived(
+  int application_key,
+  const protocol_handler::RawMessagePtr& message) {
+}
+
+void FromMicRecorderListener::OnActivityStarted(int application_key) {
+  if (application_key == current_application_) {
+    return;
+  }
+  if (!reader_) {
+    AudioStreamSenderThread* thread_delegate =
+      new AudioStreamSenderThread(file_name_, application_key);
+    reader_ = new threads::Thread("FromMicRecorderSender", thread_delegate);
+  }
+  if (reader_) {
+    reader_->start();
+    current_application_ = application_key;
+  }
+}
+
+void FromMicRecorderListener::OnActivityEnded(int application_key) {
+  if (application_key != current_application_) {
+    return;
+  }
+  if (reader_) {
+    reader_->stop();
+    delete reader_;
+    reader_ = NULL;
+  }
+  current_application_ = 0;
+}
+
 }  //  namespace media_manager
-
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_

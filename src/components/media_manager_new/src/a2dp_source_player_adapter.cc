@@ -29,7 +29,7 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-
+#include <net/if.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include <string.h>
@@ -38,6 +38,7 @@
 #include "media_manager/a2dp_source_player_adapter.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/synchronisation_primitives.h"
+#include "connection_handler/connection_handler_impl.h"
 
 namespace media_manager {
 
@@ -102,9 +103,18 @@ void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
         current_application_ = 0;
       }
     } else {
+      unsigned int device_id = 0;
+      connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+        application_key, 0, NULL, &device_id);
+      std::string mac_adddress;
+      connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
+        device_id,
+        NULL,
+        NULL,
+        &mac_adddress);
       threads::Thread* new_activity = new threads::Thread(
-        "itoa(application_key)",
-        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(""));
+        mac_adddress.c_str(),
+        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress));
       if (NULL != new_activity) {
         sources_.insert(std::pair<int, threads::Thread*>(
                           application_key, new_activity));

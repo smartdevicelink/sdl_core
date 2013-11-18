@@ -345,7 +345,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     void StopAudioPassThru();
 
     void SendAudioPassThroughNotification(unsigned int session_key,
-                                          unsigned int correlation_id,
                                           std::vector<unsigned char> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);

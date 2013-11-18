@@ -30,35 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_
 
-#include <set>
+#include <string>
 #include "protocol_handler/raw_message.h"
-#include "media_manager/media_adapter.h"
 #include "media_manager/media_adapter_listener.h"
-#include "utils/macro.h"
-#include "utils/logger.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
-
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-
-class MediaAdapterImpl : public MediaAdapter {
+class FromMicRecorderListener : public MediaAdapterListener {
   public:
-    virtual ~MediaAdapterImpl();
-    virtual void AddListener(const MediaListenerPtr& listener);
-    virtual void RemoveListener(const MediaListenerPtr& listener);
-
-  protected:
-    MediaAdapterImpl();
+    explicit FromMicRecorderListener(
+      const std::string& file_name);
+    ~FromMicRecorderListener();
+    virtual void OnDataReceived(
+      int application_key,
+      const protocol_handler::RawMessagePtr& message);
+    virtual void OnErrorReceived(
+      int application_key,
+      const protocol_handler::RawMessagePtr& message);
+    virtual void OnActivityStarted(int application_key);
+    virtual void OnActivityEnded(int application_key);
 
   private:
-    std::set<MediaListenerPtr> media_listeners_;
+    threads::Thread* reader_;
+    std::string file_name_;
+    int current_application_;
     static log4cxx::LoggerPtr logger_;
-
-    DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };
 }  //  namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_

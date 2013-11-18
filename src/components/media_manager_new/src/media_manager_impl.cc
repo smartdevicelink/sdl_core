@@ -31,17 +31,74 @@
 */
 
 #include "media_manager/media_manager_impl.h"
+#include "media_manager/a2dp_source_player_adapter.h"
+#include "media_manager/from_mic_recorder_adapter.h"
+#include "media_manager/from_mic_recorder_listener.h"
 
 namespace media_manager {
+
+log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("MediaManagerImpl"));
+
 MediaManagerImpl* MediaManagerImpl::instance() {
   static MediaManagerImpl instance;
   return &instance;
 }
 
+MediaManagerImpl::MediaManagerImpl()
+  : a2dp_player_(NULL)
+  , from_mic_recorder_(NULL)
+  , from_mic_listener_(NULL) {
+  Init();
+}
+
 MediaManagerImpl::~MediaManagerImpl() {
+  if (a2dp_player_) {
+    delete a2dp_player_;
+    a2dp_player_ = NULL;
+  }
+
+  if (from_mic_listener_) {
+    delete from_mic_listener_;
+    from_mic_listener_ = NULL;
+  }
+
+  if (from_mic_recorder_) {
+    delete from_mic_recorder_;
+    from_mic_recorder_ = NULL;
+  }
+}
+
+void MediaManagerImpl::Init() {
+#if defined(DEFAULT_MEDIA)
+  a2dp_player_ = new A2DPSourcePlayerAdapter();
+  from_mic_recorder_ = new FromMicRecorderAdapter();
+#endif
 }
 
 void MediaManagerImpl::PlayA2DPSource(int application_key) {
-  a2dp_player_.StartActivity(application_key);
+  a2dp_player_->StartActivity(application_key);
 }
+
+void MediaManagerImpl::StopA2DPSource(int application_key) {
+  a2dp_player_->StopActivity(application_key);
+}
+
+void MediaManagerImpl::StartMicrophoneRecording(
+  int application_key,
+  const std::string& output_file,
+  int duration) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording")  ;
+  from_mic_listener_ = new FromMicRecorderListener(output_file);
+  from_mic_recorder_->AddListener(from_mic_listener_);
+#if defined(DEFAULT_MEDIA)
+  (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
+  ->set_output_file(output_file);
+  (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
+  ->set_duration(duration);
+  from_mic_recorder_->StartActivity(application_key);
+#endif
+  from_mic_listener_->OnActivityStarted(application_key);
+}
+
 }  //  namespace media_manager

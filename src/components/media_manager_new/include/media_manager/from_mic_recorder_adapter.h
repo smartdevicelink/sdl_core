@@ -30,30 +30,37 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+
 #include "media_manager/media_adapter_impl.h"
+#include "utils/logger.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
 
-log4cxx::LoggerPtr MediaAdapterImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MediaAdapterImpl"));
+class FromMicRecorderAdapter : public MediaAdapterImpl {
+  public:
+    FromMicRecorderAdapter();
+    ~FromMicRecorderAdapter();
+    void SendData(int application_key,
+                  const protocol_handler::RawMessagePtr& message) {}
+    void StartActivity(int application_key);
+    void StopActivity(int application_key);
+    bool is_app_performing_activity(int application_key);
+    void set_output_file(const std::string& output_file);
+    void set_duration(int duration);
+  private:
+    threads::Thread* recorder_thread_;
+    int current_application_;
+    std::string output_file_;
+    int duration_;
+    const int kDefaultDuration;
+    static log4cxx::LoggerPtr logger_;
+};
+}  // namespace media_manager
 
-MediaAdapterImpl::MediaAdapterImpl() {
-}
-
-MediaAdapterImpl::~MediaAdapterImpl() {
-  media_listeners_.clear();
-}
-
-void MediaAdapterImpl::AddListener(const MediaListenerPtr& listener) {
-  LOG4CXX_INFO(logger_, "MediaAdapterImpl::AddListener");
-  DCHECK(listener);
-  media_listeners_.insert(listener);
-}
-
-void MediaAdapterImpl::RemoveListener(const MediaListenerPtr& listener) {
-  LOG4CXX_INFO(logger_, "MediaAdapterImpl::RemoveListener");
-  DCHECK(listener);
-  media_listeners_.erase(listener);
-}
-
-}  //  namespace media_manager
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_

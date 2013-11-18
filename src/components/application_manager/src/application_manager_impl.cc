@@ -763,7 +763,6 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
   unsigned int session_key,
-  unsigned int correlation_id,
   std::vector<unsigned char> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -780,8 +779,6 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::message_type] =
     application_manager::MessageType::kNotification;
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::correlation_id] =
-    static_cast<int>(correlation_id);
 
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::connection_key] =
     static_cast<int>(session_key);

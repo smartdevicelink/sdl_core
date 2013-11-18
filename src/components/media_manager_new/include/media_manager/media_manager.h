@@ -34,5 +34,6 @@ namespace media_manager {
 class MediaManager {
   public:
     virtual void PlayA2DPSource(int application_key) = 0;
+    virtual void StopA2DPSource(int application_key) = 0;
 };
 }  // namespace media_manager
