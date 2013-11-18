@@ -78,7 +78,7 @@ policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
     if (true == file_system::ReadFile(policy_config_.pt_file_name(),
                                     pt_string)) {
       policy_table_ = new policies_ns::PolicyTable(pt_string,
-              policies_ns::PolicyTableType::TYPE_PT);
+              policies_ns::PolicyTableType::TYPE_POLICY_TABLE);
       init_result = InitResult::INIT_OK;
     } else {
       LOG4CXX_WARN(logger_, "Can't read policy table file "
@@ -86,7 +86,7 @@ policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
       if (true == file_system::ReadFile(
           policy_config_.preload_pt_file_name(), pt_string)) {
         policy_table_ = new policies_ns::PolicyTable(
-            pt_string, policies_ns::PolicyTableType::TYPE_PRELOAD);
+            pt_string, policies_ns::PolicyTableType::TYPE_PT_PRELOAD);
         init_result = InitResult::INIT_OK_PRELOAD;
       } else {
         init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
@@ -109,7 +109,7 @@ policies_ns::CheckPermissionResult
     mobile_apis::HMILevel::eType hmi_status) {
 
   CheckPermissionResult result =
-    {PermissionResult::PERMISSION_NOK_DISALLOWED, Priority::PRIORITY_NONE};
+    {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};
   PolicyTable* pt = policy_table();
 
   if (0 != pt
@@ -123,7 +123,7 @@ policies_ns::CheckPermissionResult
 
     result.priority = PermissionsCalculator::GetPriority(pt_object, app_id);
   } else {
-    result.result = PermissionResult::PERMISSION_NOK_PT_VERIFICATION_FAILED;
+    result.result = PermissionResult::PERMISSION_PT_VERIFICATION_FAILED;
   }
 
   return result;

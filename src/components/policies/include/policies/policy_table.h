@@ -49,8 +49,8 @@ enum PTValidationResult {
 };
 
 enum PolicyTableType {
-  TYPE_PT = 0,
-  TYPE_PRELOAD
+  TYPE_POLICY_TABLE = 0,
+  TYPE_PT_PRELOAD
 };
 
 class PolicyTable {
@@ -100,18 +100,6 @@ class PolicyTable {
 
   private:
     /**
-     * @brief Creates smart object by previously set schema.
-     * 
-     * Created object has fields which are required in Policy Table.
-     * Created object doesn't have fields which are required only 
-     * in Preload policy table. Therefore if such fields are absent in 
-     * Preload policy table, policy table should be treated as invalid.
-     * 
-     * @return Policy table as smart object
-     */
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& CreateDefaultPT();
-
-    /**
      * @brief is Policy Table valid
      **/
     PTValidationResult is_pt_valid_;
@@ -130,11 +118,6 @@ class PolicyTable {
      * @brief policy table as smart object
      */
     NsSmartDeviceLink::NsSmartObjects::SmartObject pt_smart_object_;
-
-    /**
-     * @brief default policy table smart object
-     */
-    NsSmartDeviceLink::NsSmartObjects::SmartObject pt_default_smart_object_;
 };
 
 }  // namespace policies

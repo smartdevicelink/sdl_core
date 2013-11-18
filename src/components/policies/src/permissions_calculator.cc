@@ -115,7 +115,7 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
     return CalcPermissionsByGroups(pt_object, rpc_groups, rpc, hmi_status);
   }
 
-  return PermissionResult::PERMISSION_NOK_DISALLOWED;
+  return PermissionResult::PERMISSION_DISALLOWED;
 }
 
 //----------------------------------------------------------------------------
@@ -155,7 +155,7 @@ PermissionResult::eType
       rpc_object.getElement(jsonhandler_ns::strings::S_PARAMS)
                 .getElement(jsonhandler_ns::strings::S_FUNCTION_ID);
   if (function_id.asString().length() == 0) {
-    return PermissionResult::PERMISSION_NOK_DISALLOWED;
+    return PermissionResult::PERMISSION_DISALLOWED;
   }
 
   const SmartObject& functional_groupings_object =
@@ -163,7 +163,7 @@ PermissionResult::eType
               .getElement(PolicyTableSchema::kStrFunctionalGroupings);
   if (so_ns::SmartType::SmartType_Map !=
       functional_groupings_object.getType()) {
-    return PermissionResult::PERMISSION_NOK_DISALLOWED;
+    return PermissionResult::PERMISSION_DISALLOWED;
   }
 
   for (std::vector<std::string>::const_iterator it = rpc_groups.begin() ;
@@ -194,7 +194,7 @@ PermissionResult::eType
     }
   }
 
-  return PermissionResult::PERMISSION_NOK_DISALLOWED;
+  return PermissionResult::PERMISSION_DISALLOWED;
 }
 
 //----------------------------------------------------------------------------

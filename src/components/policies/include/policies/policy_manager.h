@@ -58,19 +58,19 @@ enum eType {
    *
    * Policy Table as smart object has failed in verification against schema.
    */
-  PERMISSION_NOK_PT_VERIFICATION_FAILED,
+  PERMISSION_PT_VERIFICATION_FAILED,
   /**
    * @brief RPC is allowed by the PT(backend), but disallowed by the user.
    */
-  PERMISSION_NOK_USER_DISALLOWED,
+  PERMISSION_USER_DISALLOWED,
   /**
    * @brief RPC  is not allowed by the PT(backend).
    */
-  PERMISSION_NOK_DISALLOWED,
+  PERMISSION_DISALLOWED,
   /**
    * @brief RPC is allowed by PT(backend), but user has not been prompted yet.
    */
-  PERMISSION_NOK_PENDING_USER_CONSENT
+  PERMISSION_PENDING_USER_CONSENT
 };
 }  // namespace PermissionResult
 

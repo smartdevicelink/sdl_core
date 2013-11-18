@@ -48,8 +48,7 @@ policies_ns::PolicyTable::PolicyTable(
   : is_pt_valid_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
   , schema_(policies_ns::PolicyTableSchema::Create())
-  , pt_smart_object_()
-  , pt_default_smart_object_() {
+  , pt_smart_object_() {
 //{
   if (false == formatters_ns::GenericJsonFormatter::FromString(
       policy_table_string, pt_smart_object_)) {
@@ -106,8 +105,3 @@ bool policies_ns::PolicyTable::IsPTPreload() {
   return false;
 }
 
-//---------------------------------------------------------------------------
-
-so_ns::SmartObject& policies_ns::PolicyTable::CreateDefaultPT() {
-  return pt_default_smart_object_;
-}
