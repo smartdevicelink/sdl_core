@@ -33,7 +33,10 @@ set (LIBRARIES
 
 create_test("test_policies_draft_test" "./policies_draft_test.cc" "${LIBRARIES}")
 create_test("test_generic_policy_manager_test" "./generic_policy_manager_test.cc" "${LIBRARIES}")
+create_test("test_wp1_integration_test" "./wp1_integration_test.cc" "${LIBRARIES}")
+
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SDLPolicyTable_basic.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bad.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
