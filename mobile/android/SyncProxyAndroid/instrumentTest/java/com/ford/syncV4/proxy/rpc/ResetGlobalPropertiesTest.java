@@ -32,4 +32,25 @@ public class ResetGlobalPropertiesTest extends AndroidTestCase{
         assertEquals(GlobalProperty.MENUICON, result.get(1));
     }
 
+    public void testMenuIconIsSet() throws Exception {
+        ResetGlobalProperties msg = new ResetGlobalProperties();
+        Vector<GlobalProperty> properties = new Vector<GlobalProperty>();
+        assertNotNull(msg);
+        properties.add(GlobalProperty.MENUICON);
+        msg.setProperties(properties);
+        JSONObject jsonObject = msg.serializeJSON((byte) 2);
+        JSONArray result = jsonObject.getJSONArray("properties");
+        assertEquals(GlobalProperty.MENUICON, result.get(0));
+    }
+
+    public void testMenuNameIsSet() throws Exception {
+        ResetGlobalProperties msg = new ResetGlobalProperties();
+        Vector<GlobalProperty> properties = new Vector<GlobalProperty>();
+        assertNotNull(msg);
+        properties.add(GlobalProperty.MENUNAME);
+        msg.setProperties(properties);
+        JSONObject jsonObject = msg.serializeJSON((byte) 2);
+        JSONArray result = jsonObject.getJSONArray("properties");
+        assertEquals(GlobalProperty.MENUNAME, result.get(0));
+    }
 }
