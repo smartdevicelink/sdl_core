@@ -74,7 +74,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+      MessageHelper::ProcessSoftButtons(msg_params, app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     if (mobile_apis::Result::INVALID_DATA == processing_result) {
@@ -89,7 +89,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+      MessageHelper::VerifyImageFiles(msg_params, app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
