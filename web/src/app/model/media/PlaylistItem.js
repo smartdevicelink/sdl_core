@@ -16,6 +16,12 @@ MFT.PlaylistItem = Em.Object.extend({
 
 	/** HD Flag for FM Stations*/
 	isHd: 		false,
+
+    /** Number of HD sub-channels if available **/
+    HDChannels: 0,
+
+    /** Current HD sub-channel if available **/
+    currentHDChannel: 0,
 	
 	/** frequency name */
 	frequency:'',
@@ -50,4 +56,4 @@ MFT.PlaylistItem = Em.Object.extend({
 		this.set('channel', 			src.channel);
 		Ember.endPropertyChanges();
 	}
-})
+});

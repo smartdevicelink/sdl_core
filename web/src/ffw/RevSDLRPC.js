@@ -120,16 +120,22 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         this.TuneRadioRequestId = this.client.generateId();
 
+        var RadioStation = {
+            frequency: Number(frequency[0]),
+            fraction: Number(frequency[1])
+        };
+
+        if (data.isHd) {
+            RadioStation.availableHDs = data.HDChannels;
+            RadioStation.currentHD = data.currentHDChannel;
+        }
+
         var JSONMessage = {
             "jsonrpc":	"2.0",
             "id": 		this.TuneRadioRequestId,
             "method":	"RevSDL.TuneRadio",
             params: {
-                RadioStation: {
-                    frequency: Number(frequency[0]),
-                    fraction: Number(frequency[1]),
-                    HD: data.isHd
-                }
+                RadioStation: RadioStation
             }
         };
         this.client.send(JSONMessage);

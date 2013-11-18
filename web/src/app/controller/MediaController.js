@@ -1041,7 +1041,9 @@ MFT.MediaController = Em.Object.create({
                 genre: data.SongInfo.genre,
                 title: data.SongInfo.name,
                 artist: data.SongInfo.artist,
-                isHd: data.RadioStation.HD
+                isHd: !!(data.RadioStation.currentHD),
+                HDChannels: data.RadioStation.availableHDs,
+                currentHDChannel: data.RadioStation.currentHD
             });
         }
 

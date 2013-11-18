@@ -45,8 +45,8 @@ MFT.FmModel = Em.Object.create({
 		items: {
 			0:MFT.PlaylistItem.create({frequency: '99.1',genre: 'Pop',title: 'BlUE SKY',artist: 'THE MAX', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '98.8',genre: 'Club',title: 'JUMP AND DOWN',artist: 'THE PROJECT X', isHd: false}),
-			2:MFT.PlaylistItem.create({frequency: '100.9',genre: 'Rock',title: 'WELCOME HOME',artist: 'TODD SULLIVAN',isHd: MFT.SettingsModel.isEnglish}),
-			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Pop',title: 'LETS DANCE',artist: 'MICHAEL JOHNSON',isHd: MFT.SettingsModel.isEnglish}),
+			2:MFT.PlaylistItem.create({frequency: '100.9',genre: 'Rock',title: 'WELCOME HOME',artist: 'TODD SULLIVAN',isHd: MFT.SettingsModel.isEnglish, HDChannels: 3, currentHDChannel: 2}),
+			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Pop',title: 'LETS DANCE',artist: 'MICHAEL JOHNSON',isHd: MFT.SettingsModel.isEnglish, HDChannels: 2, currentHDChannel: 1}),
 			4:MFT.PlaylistItem.create({frequency: '106.1',genre: 'Pop Rock',title: 'YESTERDAY NIGHT',artist: 'JOHN SMITH', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '105.2',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'TENTH SYMPHONY',artist: 'SPENCER M.', isHd: false})
 		}
@@ -58,8 +58,8 @@ MFT.FmModel = Em.Object.create({
 		items:{
 			0:MFT.PlaylistItem.create({frequency: '101.1',genre: 'Club',title: 'SPRING TIME',artist: 'DJ SKY', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '103.2',genre: 'Rock',title: 'RAINBOW',artist: 'THE BEES', isHd: false}),
-			2:MFT.PlaylistItem.create({frequency: '99.3',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'SUNSET',artist: 'SKYLARK',isHd: MFT.SettingsModel.isEnglish}),
-			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Club',title: 'JUMP AND DOWN',artist: 'THE PROJECT X',isHd: MFT.SettingsModel.isEnglish}),
+			2:MFT.PlaylistItem.create({frequency: '99.3',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'SUNSET',artist: 'SKYLARK',isHd: MFT.SettingsModel.isEnglish, HDChannels: 3, currentHDChannel: 2}),
+			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Club',title: 'JUMP AND DOWN',artist: 'THE PROJECT X',isHd: MFT.SettingsModel.isEnglish, HDChannels: 3, currentHDChannel: 3}),
 			4:MFT.PlaylistItem.create({frequency: '104.1',genre: 'Pop',title: 'HONEY',artist: 'EPTON JOHN', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '105.2',genre: 'Pop',title: 'LETS DANCE',artist: 'MICHAEL JOHNSON', isHd: false})
 		}
@@ -71,8 +71,8 @@ MFT.FmModel = Em.Object.create({
 		items:{
 			0:MFT.PlaylistItem.create({frequency: '98.2',genre: 'Club',title: 'SPRING TIME',artist: 'DJ SKY', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '106.6',genre: 'Rock',title: 'WELCOME HOME',artist: 'TODD SULLIVAN', isHd: false}),
-			2:MFT.PlaylistItem.create({frequency: '99.3',genre: 'Pop',title: 'GOOD MORNING',artist: 'SUSAN BAKER',isHd: MFT.SettingsModel.isEnglish}),
-			3:MFT.PlaylistItem.create({frequency: '107.5',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'SUNSET',artist: 'SKYLARK',isHd: MFT.SettingsModel.isEnglish}),
+			2:MFT.PlaylistItem.create({frequency: '99.3',genre: 'Pop',title: 'GOOD MORNING',artist: 'SUSAN BAKER',isHd: MFT.SettingsModel.isEnglish, HDChannels: 2, currentHDChannel: 2}),
+			3:MFT.PlaylistItem.create({frequency: '107.5',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'SUNSET',artist: 'SKYLARK',isHd: MFT.SettingsModel.isEnglish, HDChannels: 3, currentHDChannel: 1}),
 			4:MFT.PlaylistItem.create({frequency: '106.1',genre: 'Pop',title: 'HONEY',artist: 'EPTON JOHN', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '104.2',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'TENTH SYMPHONY',artist: 'SPENCER M.', isHd: false})
 		}

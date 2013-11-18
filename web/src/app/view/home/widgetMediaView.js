@@ -67,7 +67,7 @@ MFT.WidgetMediaView = Em.ContainerView.extend({
 						'<span class="station" {{bindAttr class="controler.isStationLogo:hidden"}}>' +
                             '{{controler.currentActiveData.frequency}}' +
                             '{{#if controler.currentActiveData.isHd}}' +
-                                '-2' +
+                                '-{{controler.currentActiveData.currentHDChannel}}' +
                             '{{/if}}' +
                         '</span>'+
 					'</div>'+
@@ -166,7 +166,7 @@ MFT.WidgetMediaView = Em.ContainerView.extend({
      * Select media state
      * should be called when user press home media block
      */
-    actionUp: function(event){
+    actionUp: function(){
         if (MFT.helpMode) return false;
 
         /**

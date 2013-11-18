@@ -39,9 +39,29 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             wrapper: Em.View.create({
                 classNames: 'info_wrapper',
                 controlerBinding: 'MFT.MediaController',
+                HDChannels: function () {
+                    var list = [],
+                        i;
+
+                    for (i = 1; i <= this.controler.get('currentActiveData').HDChannels; i++) {
+                        list.push(
+                            {
+                                title: i,
+                                active: (this.controler.get('currentActiveData').currentHDChannel == i)
+                            }
+                        );
+                    }
+
+                    return list;
+                }.property('this.controler.currentActiveData'),
                 template:  Em.Handlebars.compile(
                     '<div class="hdInfo hidden_display" {{bindAttr class="view.controler.currentActiveData.isHd:visible_display"}}>'+
-                        '<div class="fmInfoHdIco"></div>'+
+                        '<div class="HDChannels">' +
+                        '{{#each view.HDChannels}}' +
+                            '<span {{bindAttr class="active:active"}}>{{title}}</span>'+
+                        '{{/each}}'+
+                            '<span class="type"> - WDVD</span>'+
+                        '</div>'+
                         '<div class="hdtitle">{{view.controler.currentActiveData.title}}</div>'+
                         '<div class="hdartist">{{view.controler.currentActiveData.artist}}</div>'+
                         '</div>'+
@@ -148,7 +168,9 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
                     '{{view.controller.directTuneToString}}'+
                     '{{else}}'+
                     '{{view.controller.currentActiveData.frequency}}'+
-                    '{{#if view.controller.currentActiveData.isHd}}-2{{/if}}'+
+                    '{{#if view.controller.currentActiveData.isHd}}' +
+                        '-{{view.controller.currentActiveData.currentHDChannel}}' +
+                    '{{/if}}'+
                     '{{/if}}'
             )
         })

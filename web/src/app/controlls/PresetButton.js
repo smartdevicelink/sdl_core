@@ -28,7 +28,7 @@ MFT.PresetButton = MFT.Button.extend({
 	/** Form right frequency name according to station type (HD or not HD)*/
 	frequency: function(){
 			if(this.content.isHd)
-			return  this.content.frequency+' HD2';
+			return  this.content.frequency+' HD'+this.content.currentHDChannel;
 		 else 
 			return  this.content.frequency;
 	}.property('content.frequency'),
@@ -72,4 +72,4 @@ MFT.PresetButton = MFT.Button.extend({
         event.stopPropagation();
 	}
 
-})
+});
