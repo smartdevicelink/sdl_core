@@ -65,6 +65,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -220,18 +221,18 @@ class ApplicationManagerImpl : public ApplicationManager,
       const unsigned int& hmi_correlation_id) const;
 
     /*
-     * @brief Retrieves flag for audio pass thru request
+     * @brief Starts audio passthru process
      *
-     * @return Current state of the audio pass thru request flag
+     * @return true on success, false if passthru is already in process
      */
-    bool audio_pass_thru_flag() const;
+    bool begin_audio_pass_thru();
 
     /*
-     * @brief Sets flag for audio pass thru request
+     * @brief Finishes already started audio passthru process
      *
-     * @param flag New state to be set
+     * @return true on success, false if passthru is not active
      */
-    void set_audio_pass_thru_flag(bool flag);
+    bool end_audio_pass_thru();
 
     /*
      * @brief Retrieves driver distraction state
@@ -481,7 +482,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::list<CommandSharedPtr> notification_list_;
 
     MessageChain message_chaining_;
-    bool audio_pass_thru_flag_;
+    bool audio_pass_thru_active_;
+    Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
     bool is_vr_session_strated_;
     bool hmi_cooperating_;

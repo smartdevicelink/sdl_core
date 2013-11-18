@@ -65,7 +65,7 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-  : audio_pass_thru_flag_(false),
+  : audio_pass_thru_active_(false),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
@@ -697,12 +697,23 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
   return NULL;
 }
 
-bool ApplicationManagerImpl::audio_pass_thru_flag() const {
-  return audio_pass_thru_flag_;
+bool ApplicationManagerImpl::begin_audio_pass_thru() {
+  AutoLock lock(audio_pass_thru_lock_);
+  if (audio_pass_thru_active_)
+    return false;
+  else {
+    audio_pass_thru_active_ = true;
+    return true;
+  }
 }
 
-void ApplicationManagerImpl::set_audio_pass_thru_flag(bool flag) {
-  audio_pass_thru_flag_ = flag;
+bool ApplicationManagerImpl::end_audio_pass_thru() {
+  AutoLock lock(audio_pass_thru_lock_);
+  if (audio_pass_thru_active_) {
+    audio_pass_thru_active_ = false;
+    return true;
+  } else
+    return false;
 }
 
 void ApplicationManagerImpl::set_driver_distraction(bool is_distracting) {
@@ -751,9 +762,10 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int sampling_rate,
     int bits_per_sample,
     int audio_type) {
-  LOG4CXX_ERROR(logger_, "START MICROPHONE RECORDER");
+  LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   if (NULL != media_manager_) {
-    media_manager_->startMicrophoneRecording(std::string("record.wav"),
+    media_manager_->startMicrophoneRecording(
+        std::string("record.wav"),
         static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
         max_duration,
         static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
@@ -767,6 +779,15 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   unsigned int correlation_id,
   std::vector<unsigned char> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  {
+    AutoLock lock(audio_pass_thru_lock_);
+    if (!audio_pass_thru_active_) {
+      LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
+                             " when PassThrough is not active");
+      return;
+    }
+  }
 
   smart_objects::SmartObject* on_audio_pass = NULL;
   on_audio_pass = new smart_objects::SmartObject();
@@ -796,16 +817,12 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
   LOG4CXX_INFO_EXT(logger_, "After fill binary data");
 
-  if (audio_pass_thru_flag()) {
-
-    LOG4CXX_INFO_EXT(logger_, "Send data");
-
-    CommandSharedPtr command = MobileCommandFactory::CreateCommand(&(*on_audio_pass));
-    command->Init();
-    command->Run();
-    command->CleanUp();
-  }
-
+  LOG4CXX_INFO_EXT(logger_, "Send data");
+  CommandSharedPtr command =
+      MobileCommandFactory::CreateCommand(&(*on_audio_pass));
+  command->Init();
+  command->Run();
+  command->CleanUp();
 }
 
 void ApplicationManagerImpl::StopAudioPassThru() {
