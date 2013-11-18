@@ -582,8 +582,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         boolean isMedia = mediaCheckBox.isChecked();
                         boolean isNavi = naviCheckBox.isChecked();
                         int videoSource = (videoSourceGroup.getCheckedRadioButtonId() == R.id.selectprotocol_radioSourceMP4 ?
-                            Const.KEY_VIDEOSOURCE_MP4 :
-                            Const.KEY_VIDEOSOURCE_H264);
+                                Const.KEY_VIDEOSOURCE_MP4 :
+                                Const.KEY_VIDEOSOURCE_H264);
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem())
                                 .name();
@@ -3448,6 +3448,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpTitle);
                             final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpItems);
                             final CheckBox choiceKeyboardProperties = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceKeyboardProperties);
+                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceMenuIcon);
+                            final CheckBox choiceMenuName = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceMenuName);
 
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3469,6 +3471,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                     if (choiceVRHelpItem.isChecked()) {
                                         properties.add(GlobalProperty.VRHELPITEMS);
+                                    }
+
+                                    if (choiceMenuIcon.isChecked()) {
+                                        properties.add(GlobalProperty.MENUICON);
+                                    }
+
+                                    if (choiceMenuName.isChecked()) {
+                                        properties.add(GlobalProperty.MENUNAME);
                                     }
 
                                     if (choiceKeyboardProperties.isChecked()) {
@@ -3909,7 +3919,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             if (isExtStorageWritable()) {
                 audioPassThruMediaPlayer.setDataSource(outFile.toString());
             } else {
-				/*
+                /*
 				 * setDataSource with a filename on the internal storage throws
 				 * "java.io.IOException: Prepare failed.: status=0x1", so we
 				 * open the file with a special method
