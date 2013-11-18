@@ -64,6 +64,7 @@ SocketVideoServer::SocketVideoServer()
 }
 
 SocketVideoServer::~SocketVideoServer() {
+  LOG4CXX_INFO(logger_, "SocketVideoServer::~SocketVideoServer()");
   delete thread_;
   thread_ = NULL;
   if (socket_ != -1) {
@@ -143,6 +144,7 @@ SocketVideoServer::VideoStreamer::VideoStreamer(SocketVideoServer* const server)
 }
 
 SocketVideoServer::VideoStreamer::~VideoStreamer() {
+  LOG4CXX_INFO(logger_, "VideoStreamer::~VideoStreamer");
   stop();
 }
 

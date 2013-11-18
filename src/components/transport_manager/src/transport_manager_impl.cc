@@ -911,7 +911,9 @@ void TransportManagerImpl::MessageQueueThread(void) {
 void TransportManagerImpl::SetProtocolHandler(
     protocol_handler::ProtocolHandler* ph) {
   //YK: temp solution until B1.0 release
-  protocol_handler_ = ph;
+  if (ph) {
+    protocol_handler_ = ph;
+  }
 }
 
 }  // namespace transport_manager

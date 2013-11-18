@@ -305,6 +305,7 @@ namespace NsMessageBroker
          }
       }
       m_receivingBuffers.clear();
+      Server::Close();
       /* listen socket should be closed in Server destructor */
    }
 

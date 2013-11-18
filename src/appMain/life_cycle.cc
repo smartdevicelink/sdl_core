@@ -100,14 +100,13 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
-
-  media_manager::MediaManagerImpl::getMediaManager()->setVideoRedecoder(NULL);
+  media_manager_->setVideoRedecoder(NULL);
 
   if ("socket" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
+    media_manager_->setConsumer(
        new media_manager::video_stream_producer_consumer::SocketVideoServer());
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
+    media_manager_->setConsumer(
        new media_manager::video_stream_producer_consumer::PipeVideoServer());
   }
 
@@ -228,9 +227,12 @@ void LifeCycle::StopComponents(int params) {
   instance()->transport_manager_->SetProtocolHandler(NULL);
   instance()->transport_manager_->RemoveEventListener(
     instance()->protocol_handler_);
+
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
   instance()->media_manager_->SetProtocolHandler(NULL);
-  delete instance()->protocol_handler_;
   delete instance()->media_manager_;
+
+  delete instance()->protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
   delete instance()->transport_manager_;

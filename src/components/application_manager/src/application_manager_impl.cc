@@ -171,7 +171,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   message_chaining_.clear();
 
   if (media_manager_) {
-    delete media_manager_;
+    media_manager_ = NULL;
   }
 }
 

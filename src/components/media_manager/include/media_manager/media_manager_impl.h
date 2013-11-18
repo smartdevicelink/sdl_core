@@ -100,7 +100,7 @@ class MediaManagerImpl : public MediaManager,
     std::map<std::string, threads::Thread*>              sources_;
     threads::Thread*                                     recorderThread_;
     video_stream_producer_consumer::VideoStreamConsumer* video_server_;
-    redecoding::VideoRedecoder*                          redecoder_;
+    //redecoding::VideoRedecoder*                          redecoder_;
 
     const int                                            MAC_ADDRESS_LENGTH_;
     static MediaManagerImpl*                             sInstance_;
