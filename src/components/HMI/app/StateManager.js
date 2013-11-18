@@ -45,6 +45,7 @@ Em.State.reopen({
     exit: function () {
 
         this.set('active', false);
+        SDL.SDLController.triggerState();
     }
 });
 

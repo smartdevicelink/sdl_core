@@ -84,7 +84,6 @@ SDL.SDLVehicleInfoModel = Em.Object
          */
         vehicleData: {
             'speed': 80.0,
-            'rpm': 5000,
             'fuelLevel': 0.2,
             'fuelLevel_State': "UNKNOWN",
             'instantFuelConsumption': 2.2,

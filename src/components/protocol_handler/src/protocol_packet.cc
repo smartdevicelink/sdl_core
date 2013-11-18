@@ -185,16 +185,24 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
     packet_header_.messageId = 0u;
   }
 
-  const unsigned int dataPayloadSize = messageSize - offset;
+
+  unsigned int dataPayloadSize = 0;
+  if (offset < messageSize) {
+    dataPayloadSize = messageSize - offset;
+  }
 
   if (dataPayloadSize != packet_header_.dataSize) {
     return RESULT_FAIL;
   }
 
   unsigned char * data = 0;
-  if (dataPayloadSize != 0u) {
+  if (dataPayloadSize) {
     data = new unsigned char[messageSize - offset];
-    memcpy(data, message + offset, dataPayloadSize);
+    if (data) {
+      memcpy(data, message + offset, dataPayloadSize);
+    } else {
+      return RESULT_FAIL;
+    }
   }
 
   packet_data_.data = data;

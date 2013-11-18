@@ -90,9 +90,44 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
    *
-   * return TRUE if no coincidence of app. name, TTS and VR syn, otherwise FALSE
+   * return TRUE if there is coincidence of app.name/TTS/VR synonyms, otherwise FALSE
   */
-  bool checkAppParams();
+  bool CheckCoincidence();
+
+  /*
+   * @brief Predicate for using with CheckCoincidence method to compare with TTS SO
+   *
+   * return TRUE if there is coincidence of TTS text field, otherwise FALSE
+   */
+  struct CoincidencePredicateTTS {
+    explicit CoincidencePredicateTTS(const std::string &newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::text] == newItem_;
+    };
+
+    const std::string &newItem_;
+  };
+
+  /*
+  * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
+  *
+  * return TRUE if there is coincidence of VR, otherwise FALSE
+  */
+  struct CoincidencePredicateVR {
+      explicit CoincidencePredicateVR(const std::string &newItem)
+      :newItem_(newItem)
+      {};
+
+      bool operator()(smart_objects::SmartObject obj) {
+        return obj == newItem_;
+      };
+
+      const std::string &newItem_;
+    };
+
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
