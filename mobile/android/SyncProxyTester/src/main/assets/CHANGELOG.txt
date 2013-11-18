@@ -1,3 +1,8 @@
+[CW47]
++ Use "Close Session" menu item to unregister app w/o disconnecting. When the app is started again, it reregisters itself automagically.
++ SyncProxyAndroid SDK: Add SyncProxyBase.closeSession() method that allows to close session w/o disconnecting.
++ SyncProxyAndroid SDK: a few changes to simplify testing.
+
 [CW46]
 + Reregister app when it has been disconnected due to language change.
 + SyncProxyAndroid SDK: add onAppUnregisteredAfterLanguageChange() callback to IProxyListenerBase to notify an app when it has been disconnected due to language change.

@@ -199,7 +199,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_CLEAR = 10;
     private final int MNU_EXIT = 11;
     private final int MNU_TOGGLE_MEDIA = 12;
-    private final int MNU_UNREGISTER = 14;
+    private final int MNU_CLOSESESSION = 14;
     private final int MNU_APP_VERSION = 15;
     private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
     private final int MNU_WAKELOCK = 17;
@@ -644,13 +644,27 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void startSyncProxy() {
         // Publish an SDP record and create a SYNC proxy.
         // startSyncProxyService();
-        if (ProxyService.getInstance() == null) {
+        final ProxyService instance = ProxyService.getInstance();
+        if (instance == null) {
             Intent startIntent = new Intent(SyncProxyTester._activity, ProxyService.class);
             startService(startIntent);
             // bindService(startIntent, this, Context.BIND_AUTO_CREATE);
         } else {
             // need to get the instance and add myself as a listener
-            ProxyService.getInstance().setCurrentActivity(SyncProxyTester._activity);
+            instance.setCurrentActivity(SyncProxyTester._activity);
+
+            final SyncProxyALM proxyInstance = ProxyService.getProxyInstance();
+            if (proxyInstance.getIsConnected()) {
+                if (!proxyInstance.getAppInterfaceRegistered()) {
+                    try {
+                        proxyInstance.openSession();
+                    } catch (SyncException e) {
+                        Log.e(logTag, "Can't open session", e);
+                    }
+                }
+            } else {
+                instance.startProxy();
+            }
         }
     }
 
@@ -772,7 +786,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             menu.add(0, MNU_EXIT, 0, "Exit");
 /*			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");*/
             menu.add(0, MNU_APP_VERSION, 0, "App version");
-            menu.add(0, MNU_UNREGISTER, 0, "Unregister");
+            menu.add(0, MNU_CLOSESESSION, 0, "Close Session");
             menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
             menu.add(0, XML_TEST, 0, "XML Test");
             menu.add(0, POLICIES_TEST, 0, "Policies Test");
@@ -870,25 +884,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 editor.commit();
                 //super.finish();
                 return true;
-            case MNU_UNREGISTER:
-            /*
-            endSyncProxyInstance();
-        	startSyncProxyService();
-        	*/
-                if (ProxyService.getInstance() == null) {
-                    Intent startIntent = new Intent(this, ProxyService.class);
-                    startService(startIntent);
-                    //bindService(startIntent, this, Context.BIND_AUTO_CREATE);
-                } else {
-                    // need to get the instance and add myself as a listener
-                    ProxyService.getInstance().setCurrentActivity(this);
-                }
-                if (ProxyService.getInstance().getProxyInstance() != null) {
-                    try {
-                        ProxyService.getInstance().getProxyInstance().resetProxy();
-                    } catch (SyncException e) {
-                    }
-                }
+            case MNU_CLOSESESSION:
+                closeSession();
                 return true;
             case MNU_APP_VERSION: {
                 showAppVersion();
@@ -903,6 +900,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
 
         return false;
+    }
+
+    private void closeSession() {
+        ProxyService.getProxyInstance().closeSession(true);
+        finish();
+        saveMessageSelectCount();
     }
 
     private void xmlTest() {
