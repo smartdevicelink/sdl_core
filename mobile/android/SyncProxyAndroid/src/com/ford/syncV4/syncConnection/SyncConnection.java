@@ -110,7 +110,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 if (_transport != null && _transport.getIsConnected()) {
                     _protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
                 }
-                _protocol = null;
+                if (!keepConnection) {
+                    _protocol = null;
+                }
             } // end-if
         }
 
