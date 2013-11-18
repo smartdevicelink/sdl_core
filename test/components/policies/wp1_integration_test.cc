@@ -40,6 +40,7 @@
 #include "smart_objects/smart_object.h"
 #include "formatters/CSmartFactory.hpp"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/MOBILE_API_schema.h"
 
 namespace test {
 namespace components {
@@ -48,18 +49,20 @@ namespace policy_manager_generic_test {
 
 using ::NsSmartDeviceLink::policies::CheckPermissionResult;
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
-namespace Policies = NsSmartDeviceLink::policies;
+namespace policies = NsSmartDeviceLink::policies;
 namespace PermissionResult = NsSmartDeviceLink::policies::PermissionResult;
 namespace Strings = NsSmartDeviceLink::NsJSONHandler::strings;
 namespace HMILevel = mobile_apis::HMILevel;
+namespace func_ids = mobile_apis::FunctionID;
+namespace msg_type = mobile_apis::messageType;
 
 
 class TestWP1Integration: public ::testing::Test {
   private:
-    Policies::PolicyConfiguration policy_config_;
+    policies::PolicyConfiguration policy_config_;
 
   protected:
-    Policies::PolicyManager *policy_manager_;
+    policies::PolicyManager *policy_manager_;
 
     TestWP1Integration()
       : Test()
@@ -68,10 +71,10 @@ class TestWP1Integration: public ::testing::Test {
 
     virtual void SetUp() {
       policy_config_.set_pt_file_name("wp1_policy_table.json");
-      policy_manager_ = new Policies::PolicyManagerImpl(policy_config_);
+      policy_manager_ = new policies::PolicyManagerImpl(policy_config_);
 
-      Policies::InitResult::eType init_result = policy_manager_->Init();
-      ASSERT_EQ(Policies::InitResult::INIT_OK, init_result);
+      policies::InitResult::eType init_result = policy_manager_->Init();
+      ASSERT_EQ(policies::InitResult::INIT_OK, init_result);
     }
 
     virtual void TearDown() {
@@ -79,6 +82,9 @@ class TestWP1Integration: public ::testing::Test {
       policy_manager_ = 0;
     }
 
+    // ------------------------------------------------------------------------
+
+    // String version. Pretend that the schema has already been unapplied.
     void AssertRPC(const std::string& rpc,
                    HMILevel::eType hmi_level,
                    bool allowed) {
@@ -90,40 +96,142 @@ class TestWP1Integration: public ::testing::Test {
         policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
 
       if (allowed) {
-        ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+        ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result) <<
+          "Failed at rpc: " << rpc;
       } else {
-        ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result);
+        ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result) <<
+          "Failed at rpc: " << rpc;
       }
-      ASSERT_EQ(Policies::Priority::PRIORITY_NORMAL, result.priority);
+      ASSERT_EQ(policies::Priority::PRIORITY_NORMAL, result.priority);
+    }
+
+    // ------------------------------------------------------------------------
+
+    void AssertRPC(func_ids::eType rpc_id,
+                   msg_type::eType type,
+                   HMILevel::eType hmi_level,
+                   bool allowed) {
+      static mobile_apis::MOBILE_API mobile_factory;
+      SmartObject rpc_obj;
+
+      rpc_obj[Strings::S_PARAMS][Strings::S_FUNCTION_ID] = rpc_id;
+      rpc_obj[Strings::S_PARAMS][Strings::S_MESSAGE_TYPE] = type;
+
+      mobile_factory.attachSchema(rpc_obj);
+
+      CheckPermissionResult result =
+        policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
+
+      if (allowed) {
+        ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result) <<
+          "Failed at rpc: " << rpc_id;
+      } else {
+        ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result) <<
+          "Failed at rpc: " << rpc_id;
+      }
+      ASSERT_EQ(policies::Priority::PRIORITY_NORMAL, result.priority);
     }
 };
 
+// ----------------------------------------------------------------------------
+
+TEST_F(TestWP1Integration, test_straight_forward_str_ok) {
+  AssertRPC("GetDTCsID", HMILevel::HMI_BACKGROUND, true);
+  AssertRPC("ReadDIDID", HMILevel::HMI_FULL, true);
+  AssertRPC("AlertManeuverID", HMILevel::HMI_LIMITED, true);
+  AssertRPC("ChangeRegistrationID", HMILevel::HMI_FULL, true);
+  AssertRPC("ChangeRegistrationID", HMILevel::HMI_BACKGROUND, true);
+  AssertRPC("ChangeRegistrationID", HMILevel::HMI_NONE, true);
+  AssertRPC("ChangeRegistrationID", HMILevel::HMI_LIMITED, true);
+  AssertRPC("PutFileID", HMILevel::HMI_BACKGROUND, true);
+  AssertRPC("ListFilesID", HMILevel::HMI_BACKGROUND, true);
+  AssertRPC("OnSyncPDataID", HMILevel::HMI_BACKGROUND, true);
+}
+
+// ----------------------------------------------------------------------------
+
+TEST_F(TestWP1Integration, test_straight_forward_str_deny) {
+  AssertRPC("SpeakID", HMILevel::HMI_BACKGROUND, false);
+  AssertRPC("DeleteSubMenuID", HMILevel::HMI_NONE, false);
+  AssertRPC("OnButtonEventID", HMILevel::HMI_NONE, false);
+  AssertRPC("UnknownRPCID", HMILevel::HMI_FULL, false);
+  AssertRPC("OnCommandID", HMILevel::HMI_BACKGROUND, false);
+  AssertRPC("DeleteSubMenuID", HMILevel::HMI_NONE, false);
+  AssertRPC("AlertID", HMILevel::HMI_BACKGROUND, false);
+  AssertRPC("DeleteInteractionChoiceSetID", HMILevel::HMI_NONE, false);
+  AssertRPC("DeleteCommandID", HMILevel::HMI_NONE, false);
+  AssertRPC("GetVehicleDataID", HMILevel::HMI_NONE, false);
+}
+
+// ----------------------------------------------------------------------------
+
 TEST_F(TestWP1Integration, test_straight_forward_ok) {
-  AssertRPC("GetDTCs", HMILevel::HMI_BACKGROUND, true);
-  AssertRPC("ReadDID", HMILevel::HMI_FULL, true);
-  AssertRPC("AlertManeuver", HMILevel::HMI_LIMITED, true);
-  AssertRPC("ChangeRegistration", HMILevel::HMI_FULL, true);
-  AssertRPC("ChangeRegistration", HMILevel::HMI_BACKGROUND, true);
-  AssertRPC("ChangeRegistration", HMILevel::HMI_NONE, true);
-  AssertRPC("ChangeRegistration", HMILevel::HMI_LIMITED, true);
-  AssertRPC("PutFile", HMILevel::HMI_BACKGROUND, true);
-  AssertRPC("ListFiles", HMILevel::HMI_BACKGROUND, true);
-  AssertRPC("OnSyncPData", HMILevel::HMI_BACKGROUND, true);
+  AssertRPC(func_ids::GetDTCsID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, true);
+
+  AssertRPC(func_ids::GetDTCsID, msg_type::response,
+            HMILevel::HMI_BACKGROUND, true);
+
+  AssertRPC(func_ids::ReadDIDID, msg_type::request,
+            HMILevel::HMI_FULL, true);
+
+  AssertRPC(func_ids::AlertManeuverID, msg_type::response,
+            HMILevel::HMI_LIMITED, true);
+
+  AssertRPC(func_ids::ChangeRegistrationID, msg_type::request,
+            HMILevel::HMI_FULL, true);
+
+  AssertRPC(func_ids::ChangeRegistrationID, msg_type::response,
+            HMILevel::HMI_BACKGROUND, true);
+
+  AssertRPC(func_ids::ChangeRegistrationID, msg_type::request,
+            HMILevel::HMI_NONE, true);
+
+  AssertRPC(func_ids::ChangeRegistrationID, msg_type::response,
+            HMILevel::HMI_LIMITED, true);
+
+  AssertRPC(func_ids::PutFileID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, true);
+
+  AssertRPC(func_ids::ListFilesID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, true);
+
+  AssertRPC(func_ids::OnSyncPDataID, msg_type::notification,
+            HMILevel::HMI_BACKGROUND, true);
 }
 
 // ----------------------------------------------------------------------------
 
 TEST_F(TestWP1Integration, test_straight_forward_deny) {
-  AssertRPC("Speak", HMILevel::HMI_BACKGROUND, false);
-  AssertRPC("DeleteSubMenu", HMILevel::HMI_NONE, false);
-  AssertRPC("OnButtonEvent", HMILevel::HMI_NONE, false);
-  AssertRPC("UnknownRPC", HMILevel::HMI_FULL, false);
-  AssertRPC("OnCommand", HMILevel::HMI_BACKGROUND, false);
-  AssertRPC("DeleteSubMenu", HMILevel::HMI_NONE, false);
-  AssertRPC("Alert", HMILevel::HMI_BACKGROUND, false);
-  AssertRPC("DeleteInteractionChoiceSet", HMILevel::HMI_NONE, false);
-  AssertRPC("DeleteCommand", HMILevel::HMI_NONE, false);
-  AssertRPC("GetVehicleData", HMILevel::HMI_NONE, false);
+  AssertRPC(func_ids::SpeakID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, false);
+
+  AssertRPC(func_ids::DeleteSubMenuID, msg_type::request,
+            HMILevel::HMI_NONE, false);
+
+  AssertRPC(func_ids::OnButtonEventID, msg_type::notification,
+            HMILevel::HMI_NONE, false);
+
+  AssertRPC(static_cast<func_ids::eType>(37483), msg_type::request,
+            HMILevel::HMI_FULL, false);          // unknown rpc
+
+  AssertRPC(func_ids::OnCommandID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, false);
+
+  AssertRPC(func_ids::DeleteSubMenuID, msg_type::response,
+            HMILevel::HMI_NONE, false);
+
+  AssertRPC(func_ids::AlertID, msg_type::request,
+            HMILevel::HMI_BACKGROUND, false);
+
+  AssertRPC(func_ids::DeleteInteractionChoiceSetID, msg_type::response,
+            HMILevel::HMI_NONE, false);
+
+  AssertRPC(func_ids::DeleteCommandID, msg_type::request,
+            HMILevel::HMI_NONE, false);
+
+  AssertRPC(func_ids::GetVehicleDataID, msg_type::request,
+            HMILevel::HMI_NONE, false);
 }
 
 }  // namespace policy_manager_generic_test

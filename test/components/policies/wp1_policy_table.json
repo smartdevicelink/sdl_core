@@ -12,95 +12,95 @@
         "functional_groupings":{
             "Base-4":{
                 "rpcs":{
-                        "GetDTCs":{
+                        "GetDTCsID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "ReadDID":{
+                        "ReadDIDID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "AlertManeuver":{
+                        "AlertManeuverID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "ShowConstantTBT":{
+                        "ShowConstantTBTID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "UpdateTurnList":{
+                        "UpdateTurnListID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "UnsubscribeVehicleData":{
+                        "UnsubscribeVehicleDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "SubscribeVehicleData":{
+                        "SubscribeVehicleDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "GetVehicleData":{
+                        "GetVehicleDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnVehicleData":{
+                        "OnVehicleDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "GenericResponse":{
+                        "GenericResponseID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "DeleteCommand":{
+                        "DeleteCommandID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "PerformInteraction":{
+                        "PerformInteractionID":{
                             "hmi_levels":[
                               "FULL"
                             ]
                         },
-                        "Speak":{
+                        "SpeakID":{
                             "hmi_levels":[
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnAppInterfaceUnregistered":{
+                        "OnAppInterfaceUnregisteredID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -108,13 +108,13 @@
                               "NHMONE"
                             ]
                         },
-                        "OnButtonPress":{
+                        "OnButtonPressID":{
                             "hmi_levels":[
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnEncodedSyncPData":{
+                        "OnEncodedSyncPDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -122,20 +122,20 @@
                               "NONE"
                             ]
                         },
-                        "SetMediaClockTimer":{
+                        "SetMediaClockTimerID":{
                             "hmi_levels":[
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "AddSubMenu":{
+                        "AddSubMenuID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "RegisterAppInterface":{
+                        "RegisterAppInterfaceID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -143,7 +143,7 @@
                               "NONE"
                             ]
                         },
-                        "UnregisterAppInterface":{
+                        "UnregisterAppInterfaceID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -151,41 +151,20 @@
                               "NONE"
                             ]
                         },
-                        "DeleteSubMenu":{
+                        "DeleteSubMenuID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "Alert":{
+                        "AlertID":{
                             "hmi_levels":[
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "EncodedSyncPData":{
-                            "hmi_levels":[
-                              "BACKGROUND",
-                              "FULL",
-                              "LIMITED",
-                              "NONE"
-                            ]
-                        },
-                        "OnButtonEvent":{
-                            "hmi_levels":[
-                              "FULL",
-                              "LIMITED"
-                            ]
-                        },
-                        "DeleteInteractionChoiceSet":{
-                            "hmi_levels":[
-                              "BACKGROUND",
-                              "FULL",
-                              "LIMITED"
-                            ]
-                        },
-                        "OnPermissionsChange":{
+                        "EncodedSyncPDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -193,34 +172,20 @@
                               "NONE"
                             ]
                         },
-                        "SetGlobalProperties":{
+                        "OnButtonEventID":{
+                            "hmi_levels":[
+                              "FULL",
+                              "LIMITED"
+                            ]
+                        },
+                        "DeleteInteractionChoiceSetID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnCommand":{
-                            "hmi_levels":[
-                              "FULL",
-                              "LIMITED"
-                            ]
-                        },
-                        "Show":{
-                            "hmi_levels":[
-                              "BACKGROUND",
-                              "FULL",
-                              "LIMITED"
-                            ]
-                        },
-                        "AddCommand":{
-                            "hmi_levels":[
-                              "BACKGROUND",
-                              "FULL",
-                              "LIMITED"
-                            ]
-                        },
-                        "ChangeRegistration":{
+                        "OnPermissionsChangeID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -228,33 +193,68 @@
                               "NONE"
                             ]
                         },
-                        "CreateInteractionChoiceSet":{
+                        "SetGlobalPropertiesID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "Slider":{
+                        "OnCommandID":{
+                            "hmi_levels":[
+                              "FULL",
+                              "LIMITED"
+                            ]
+                        },
+                        "ShowID":{
+                            "hmi_levels":[
+                              "BACKGROUND",
+                              "FULL",
+                              "LIMITED"
+                            ]
+                        },
+                        "AddCommandID":{
+                            "hmi_levels":[
+                              "BACKGROUND",
+                              "FULL",
+                              "LIMITED"
+                            ]
+                        },
+                        "ChangeRegistrationID":{
+                            "hmi_levels":[
+                              "BACKGROUND",
+                              "FULL",
+                              "LIMITED",
+                              "NONE"
+                            ]
+                        },
+                        "CreateInteractionChoiceSetID":{
+                            "hmi_levels":[
+                              "BACKGROUND",
+                              "FULL",
+                              "LIMITED"
+                            ]
+                        },
+                        "SliderID":{
                             "hmi_levels":[
                               "FULL"
                             ]
                         },
-                        "ResetGlobalProperties":{
+                        "ResetGlobalPropertiesID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnDriverDistraction":{
+                        "OnDriverDistractionID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnHMIStatus":{
+                        "OnHMIStatusID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -262,53 +262,53 @@
                               "NONE"
                             ]
                         },
-                        "SubscribeButton":{
+                        "SubscribeButtonID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "UnsubscribeButton":{
+                        "UnsubscribeButtonID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnTBTClientState":{
+                        "OnTBTClientStateID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "OnAudioPassThru":{
+                        "OnAudioPassThruID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "PerformAudioPassThru":{
+                        "PerformAudioPassThruID":{
                             "hmi_levels":[
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "EndAudioPassThru":{
+                        "EndAudioPassThruID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]
                         },
-                        "ScrollableMessage":{
+                        "ScrollableMessageID":{
                             "hmi_levels":[
                               "FULL"
                             ]
                         },
-                        "OnLanguageChange":{
+                        "OnLanguageChangeID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -316,7 +316,7 @@
                               "NONE"
                             ]
                         },
-                        "SetDisplayLayout":{
+                        "SetDisplayLayoutID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -324,7 +324,7 @@
                               "NONE"
                             ]
                         },
-                        "SyncPData":{
+                        "SyncPDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -332,7 +332,7 @@
                               "NONE"
                             ]
                         },
-                        "DialNumber":{
+                        "DialNumberID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -340,7 +340,7 @@
                               "NONE"
                             ]
                         },
-                        "PutFile":{
+                        "PutFileID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -348,7 +348,7 @@
                               "NONE"
                             ]
                         },
-                        "DeleteFile":{
+                        "DeleteFileID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -356,7 +356,7 @@
                               "NONE"
                             ]
                         },
-                        "ListFiles":{
+                        "ListFilesID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -364,7 +364,7 @@
                               "NONE"
                             ]
                         },
-                        "SetAppIcon":{
+                        "SetAppIconID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
@@ -372,7 +372,7 @@
                               "NONE"
                             ]
                         },
-                        "OnSyncPData":{
+                        "OnSyncPDataID":{
                             "hmi_levels":[
                               "BACKGROUND",
                               "FULL",
