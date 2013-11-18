@@ -30,6 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
+#include <unistd.h>
+
 #include "media_manager/pipe_video_server.h"
 #include "config_profile/profile.h"
 
