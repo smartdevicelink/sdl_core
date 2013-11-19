@@ -55,7 +55,7 @@ versionmatch()
 # called with "qmake 2" return Qt installation dir
 qmakedata()
 {
-    $1 --version | grep "Using Qt version" | sed "s/.*Qt version \\([0-9\\.]*\\) in \\(.*\\)$/\\$2/"
+    $1 --version 2>/dev/null | grep "Using Qt version" | sed "s/.*Qt version \\([0-9\\.]*\\) in \\(.*\\)$/\\$2/"
 }
 
 
@@ -76,7 +76,7 @@ findfiles()
                 fi
                 ;;
             file)
-                qt5_file=$(find $QT5_INSTALLDIR -name "$3" -type f -print0 -quit) # check specified binary
+                qt5_file=$(find $QT5_INSTALLDIR -name "$3" -type f -print0 -quit 2>/dev/null) # check specified binary
                 if [ -n "$qt5_file" -a ! -d "$qt5_file" ]; then # if found
                     echo -n $qt5_file #output without newline
                     exit 0
@@ -117,7 +117,7 @@ export -f version2int
 if find -L $CUSTOM_QT5_DIR ~ /opt /usr -name '.*' -prune \
         -o -name qmake -type f \
         -executable \
-        -exec /bin/bash -c "findfiles \$0 $1 $2" {} \; -quit; then
+        -exec /bin/bash -c "findfiles \$0 $1 $2" {} \; -quit 2>/dev/null; then
    exit 0;
 fi
 exit 1

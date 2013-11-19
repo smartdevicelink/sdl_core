@@ -74,9 +74,12 @@ var panelColor = "#003"
 // Color for text in hardware and simulation panels
 var panelTextColor = "white"
 
+// Audio pass thru PopUp text color
+var audioPassThruTextColor = "white"
+
 //--------------------------------------------------------------------------------------
 
-// Other
+// Font sizes of different elements
 
 // Font size for most of text in HMI model.
 var fontSize = 20
@@ -93,27 +96,30 @@ var powerButtonFornSize = 25
 // Font size of status bar
 var statusBarFontSize = 15
 
-// Offset from the edges of the screen.
-var margin = 20
+// Size icon for buttons
+var iconButtonSize = 30
 
-// Offset from the edges of the popup
-var popupMargin = 15
+// Size icon for item list
+var iconItemListSize = 40
 
-// Spacing between contacts at contact screen view.
-var contactListSpacing = 30
+// font size fo TTS popup
+var ttsFontSize = 12
+
+// Font size for list of applications
+var appListFontSize = 40
+
+// Size of contact list fields
+var contactListNameFieldSize = 0.4
+var contactListPhoneFieldSize = 0.3
+var contactListDescriptionFieldSize = 0.3
+
+//--------------------------------------------------------------------------------------
+
+// Sizes of buttons, menus, screen, etc
 
 // Minimal width and height of screen (screen wont resize, if height and width are lower).
 var mainScreenMinWidth = 800
 var mainScreenMiHeight = 600
-
-// Duration of appearance of icon/button at icon/button menus.
-var animationDuration = 500
-
-// Duration of appearence of "OK" button at warning screen view, when HMI starts.
-var warningScreenDuration = 1000
-
-// Timer to check how long preset button is pressed.
-var presetButtonTimer = 400
 
 // Width for long oval button
 var ovalButtonWidth = 163
@@ -121,56 +127,14 @@ var ovalButtonWidth = 163
 // Height for oval button
 var ovalButtonHeight = 65
 
-// Size icon for buttons
-var iconButtonSize = 30
-
-// Size icon for item list
-var iconItemListSize = 40
-
-// Spacing between icon and item in list
-var iconItemListSpacing = 20
-
 // Height item list
 var itemListHeight = 60
-
-// Spacing between item on views
-var generalSpacing = 10
-
-// Width of scrollBar
-var scrollBarWidth = 5
-
-// Speak text for a given time
-var ttsSpeakTime = 2000
-
-// font size fo TTS popup
-var ttsFontSize = 12
-
-// Maximal number of submenus
-var maximumSubmenus = 1000
-
-// Maximal number of commands in submenu or root menu
-var maximumCommandsPerSubmenu = 1000
-
-// padding for popup view
-var popUpPadding = 20
 
 // Width for TTS popup
 var ttsPopUpWidth = 250
 
 // Height for TTS popup
 var ttsPopUpHeight = 100
-
-// Padding for TTS popup
-var ttsPopUpPadding = 10
-
-// -------------------------
-var sliderBarWidth = 400
-var sliderBarHeight = 50
-var sliderBarRadius = 3
-var sliderBarBorderWidth = 1
-var sliderTextColor = "white"
-var sliderBarBorderColor = "white"
-var sliderBarFillColor = "white"
 
 // Width for popup view
 var popupWidth = 700
@@ -184,25 +148,75 @@ var popupHeigth = 500
 // Width for combobox
 var comboboxWidth = 300
 
+// Size icon for list of applications
+var appListIconSize = 100
+
+
+//---------------------------------------------------------------------------------------
+
+// Other
+
+// Offset from the edges of the screen.
+var margin = 20
+
+// Offset from the edges of the popup
+var popupMargin = 15
+
+// Spacing between contacts at contact screen view.
+var contactListSpacing = 30
+
+// Duration of appearance of icon/button at icon/button menus.
+var animationDuration = 500
+
+// Duration of appearence of "OK" button at warning screen view, when HMI starts.
+var warningScreenDuration = 1000
+
+// Timer to check how long preset button is pressed.
+var presetButtonTimer = 400
+
+// Spacing between icon and item in list
+var iconItemListSpacing = 20
+
+// Spacing between item on views
+var generalSpacing = 10
+
+// Width of scrollBar
+var scrollBarWidth = 5
+
+// Speak text for a given time
+var ttsSpeakTime = 2000
+
+// Maximal number of submenus
+var maximumSubmenus = 1000
+
+// Maximal number of commands in submenu or root menu
+var maximumCommandsPerSubmenu = 1000
+
+// padding for popup view
+var popUpPadding = 20
+
+// Padding for TTS popup
+var ttsPopUpPadding = 10
+
+// -------------------------
+var sliderBarWidth = 400
+var sliderBarHeight = 50
+var sliderBarRadius = 3
+var sliderBarBorderWidth = 1
+var sliderTextColor = "white"
+var sliderBarBorderColor = "white"
+var sliderBarFillColor = "white"
+
 // -------------------------
 var scrollableMessageTextColor = "white"
 var scrollableMessageScrollBarColor = "gray"
 var scrollableMessageScrollBarWidth = 10
-
-// -------------------------
-var audioPassThruTextColor = "white"
 
 // Padding for hardware and simulation panels
 var panelPadding = 20
 
 // Scale for pressed icon in menu
 var pressedIconScale = 1.1
-
-// Font size for list of applications
-var appListFontSize = 40
-
-// Size icon for list of applications
-var appListIconSize = 100
 
 // Values of color effect for highlighted button
 var highlightedButtonHue = 0.9

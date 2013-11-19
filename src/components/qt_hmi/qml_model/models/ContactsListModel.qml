@@ -43,7 +43,7 @@ ListModel
     ListElement { name: "Alice" ; phone:"(313)878-3566";type:"Office"}
     ListElement { name: "Alec" ; phone:"(917)608-2418";type:"Mobile"}
     ListElement { name: "Alexander" ; phone:"(614)608-2400";type:"Home"}
-    ListElement { name: "Alexander" ; phone:"(614)608-2400";type:"Mobile"}
+    ListElement { name: "Alexander Vasil'evich Michail Leontiy" ; phone:"(614)608-2400";type:"Mobile"}
     ListElement { name: "Amber" ; phone:"(614)608-2111";type:"Mobile"}
     ListElement { name: "Amy" ; phone:"(440)245-3434";type:"Mobile" }
     ListElement { name: "Andy" ; phone:"(313)245-3434";type:"Mobile" }

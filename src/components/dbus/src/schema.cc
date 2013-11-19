@@ -32,6 +32,7 @@
 #include "dbus/schema.h"
 
 #include <algorithm>
+#include <functional>
 
 namespace dbus {
 
