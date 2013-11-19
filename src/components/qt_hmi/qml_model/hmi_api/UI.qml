@@ -101,7 +101,7 @@ Item {
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
-                            "image": graphic ? graphic.value : ""
+                    "image": graphic ? graphic.value : ""
                 },
                 "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined ? {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,

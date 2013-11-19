@@ -47,9 +47,8 @@ Item {
                              softButtons, appID) {
         console.debug("enter")
         navigationTexts.forEach(fillTexts);
-        if (turnIcon !== undefined) {
-            dataContainer.navigationModel.icon = turnIcon;
-        }
+        dataContainer.navigationModel.turnIcon = turnIcon ? turnIcon.value : ""
+        dataContainer.navigationModel.nextTurnIcon = nextTurnIcon ? nextTurnIcon.value : ""
         dataContainer.navigationModel.distanceToManeuver = distanceToManeuver;
         dataContainer.navigationModel.distanceToManeuverScale = distanceToManeuverScale;
         if (maneuverComplete !== undefined) {
@@ -97,17 +96,20 @@ Item {
         case Common.TextFieldName.totalDistance:
             dataContainer.navigationModel.totalDistance = element.fieldText;
             break;
+        case Common.TextFieldName.timeToDestination:
+            dataContainer.navigationModel.timeToDestination = element.fieldText;
+            break;
         }
     }
 
     function fillSoftButtons(element, index, array) {
         this.append({
                         type: element.type,
-                        name: element.text,
+                        text: element.text,
                         image: element.image,
                         isHighlighted: element.isHighlighted,
                         buttonId: element.softButtonID,
-                        action: element.systemAction
+                        systemAction: element.systemAction
                     });
     }
 

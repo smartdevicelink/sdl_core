@@ -41,10 +41,10 @@ import "../models"
 GeneralView {
     applicationContext: true
 
-    Rectangle {
+    Item {
         id: turnByTurnView
         anchors.fill: parent
-        color: Constants.secondaryColor
+      //  color: Constants.secondaryColor
 
         Item {
             // top 3/4 of screen
@@ -53,6 +53,151 @@ GeneralView {
             width: parent.width
             height: parent.height * 3/4
 
+            Item {
+                // row of oval buttons
+                id: ovalButtonsRow
+                anchors.top: parent.top
+                anchors.left: parent.left
+                width: parent.width
+                height: 1/4 * parent.height
+
+                PagedFlickable {
+                    id: buttonsRow
+                    width: parent.width
+                    spacing: (width - 4 * elementWidth) / 3
+                    anchors.verticalCenter: parent.verticalCenter
+                    snapTo: Constants.ovalButtonWidth + spacing
+                    elementWidth: Constants.ovalButtonWidth
+
+                    OvalButton {
+                        id: turnListButton
+                        text: "TurnList"
+                        onClicked: {
+                            console.log("Go to TurnListView");
+                            contentLoader.go("./views/TbtTurnListView.qml");
+                        }
+                    }
+
+                    Repeater {
+                        model: dataContainer.navigationModel.softButtons ?
+                                   dataContainer.navigationModel.softButtons.count :
+                                   0
+                        delegate:
+                            SoftButton {
+                                appId: dataContainer.navigationModel.appId
+                                button: dataContainer.navigationModel.softButtons.get(index)
+                            }
+                    }
+                }
+            }
+
+            Column {
+                // Picture + text information + media clock
+                id: mediaContent
+                width: parent.width
+                height: 3/4 * parent.height
+                anchors.left: parent.left
+                anchors.top: ovalButtonsRow.bottom
+
+                Row {
+                    // picture + text info
+                    width: parent.width
+                    height: 3/4 * parent.height
+                    spacing: Constants.margin
+
+                    Image {
+                        id: image
+                        height: parent.height
+                        width: height
+                        source: dataContainer.navigationModel.turnIcon
+                    }
+
+                    Column {
+                        // text info
+                        id: textInfo
+                        height: parent.height
+                        width: parent.width - image.width - parent.spacing
+                        spacing: (height - 5 * navText1.height) / 4
+
+                        Text {
+                            id: navText1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: dataContainer.navigationModel.text1
+                            font.pixelSize: Constants.fontSize
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: dataContainer.navigationModel.text2
+                            font.pixelSize: Constants.fontSize
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "Total distance: " + dataContainer.navigationModel.totalDistance
+                            font.pixelSize: Constants.fontSize
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                            font.pixelSize: Constants.fontSize
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "ETA: " + dataContainer.navigationModel.eta
+                            font.pixelSize: Constants.fontSize
+                        }
+                    }
+                }
+
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 1/4 * parent.height
+                    width: 2/3 * parent.width
+
+                    Rectangle {
+                       id: coveredDistance
+                       anchors.verticalCenter: parent.verticalCenter
+                       height: 5
+                       width: dataContainer.navigationModel.distanceToManeuver / dataContainer.navigationModel.distanceToManeuverScale * parent.width
+                       color: "white"
+                    }
+
+                    Rectangle {
+                       anchors.verticalCenter: parent.verticalCenter
+                       height: 5
+                       width: parent.width - coveredDistance.width
+                       color: Constants.primaryColor
+                    }
+                }
+
+
+
+                /*
+                MediaClockView {
+                    width: parent.width
+                    height: parent.height * 1/4
+                }
+                */
+            }
+
+
+
+
+
+            /*
             Row {
                 // top part for buttons
                 id: top
@@ -64,10 +209,7 @@ GeneralView {
 
                 OvalButton {
                     id: turnListButton
-                    width: Constants.ovalButtonWidth
-                    anchors.verticalCenter: parent.verticalCenter
                     text: "TurnList"
-                    fontSize: Constants.fontSize
                     onClicked: {
                         console.log("Go to TurnListView");
                         contentLoader.go("./views/TbtTurnListView.qml");
@@ -83,15 +225,23 @@ GeneralView {
 
                     orientation: ListView.Horizontal
                     interactive: false
-                    model: dataContainer.navigationModel.softButtons
+                    //model: dataContainer.navigationModel.softButtons
 
+                    Repeater {
+                        model: dataContainer.currentApplication.softButtons ?
+                                   dataContainer.currentApplication.softButtons.count :
+                                   0
+                        delegate:
+                            SoftButton {
+                                appId: dataContainer.currentApplication.appId
+                                button: dataContainer.currentApplication.softButtons.get(index)
+                            }
+                    }
+*/
+                    /*
                     delegate: OvalButton {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: turnListButton.width
-                        height: turnListButton.height
                         text: name
                         icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
-                        fontSize: Constants.fontSize
                         highlighted: isHighlighted
                         onPressed: {
                             console.log("TBT view soft button: On pressed");
@@ -119,9 +269,11 @@ GeneralView {
                         }
                         // TODO(KKolodiy): System action doesn't work in WebHMI
                     }
-                }
+                    */
+
             }
 
+        /*
             Row {
                 // mid part for picture, information.
                 id: mid
@@ -174,14 +326,7 @@ GeneralView {
                     }
                 }
             }
-
-            Item {
-                id: bot
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                width: parent.width
-                height: 1/4 * parent.height
-            }
+            */
         }
 
         Item {
@@ -192,5 +337,5 @@ GeneralView {
             height: 1/4 * parent.height
             BackButton { anchors.centerIn: parent }
         }
-    }
+
 }
