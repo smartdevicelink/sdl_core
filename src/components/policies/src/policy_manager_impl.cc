@@ -38,26 +38,26 @@
 #include "smart_objects/always_true_schema_item.h"
 #include "utils/file_system.h"
 
-namespace policies_ns = NsSmartDeviceLink::policies;
-namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
-using ::policies_ns::PermissionsCalculator;
+namespace NsSmartDeviceLink {
+namespace policies {
 
-log4cxx::LoggerPtr policies_ns::PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
+log4cxx::LoggerPtr PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
 
 //---------------------------------------------------------------
 
-policies_ns::PolicyManagerImpl::PolicyManagerImpl(
-    const PolicyConfiguration& policy_config)
+PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager()
-  , policy_config_(policy_config)
+  , policy_config_()
   , policy_table_(0) {
 }
 
 //---------------------------------------------------------------
 
-policies_ns::PolicyManagerImpl::~PolicyManagerImpl() {
+PolicyManagerImpl::~PolicyManagerImpl() {
   StorePolicyTable();
   if (0 != policy_table_) {
     delete policy_table_;
@@ -67,26 +67,34 @@ policies_ns::PolicyManagerImpl::~PolicyManagerImpl() {
 
 //---------------------------------------------------------------
 
-policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
+PolicyManagerImpl* PolicyManagerImpl::instance() {
+  static PolicyManagerImpl instance;
+  return &instance;
+}
+
+//---------------------------------------------------------------
+
+InitResult::eType PolicyManagerImpl::Init(
+  const PolicyConfiguration& config) {
   // TODO(anyone): Provide some mechanism for recovery (from Preload???)
   // if PT file corrupted (e.g. bad json)
-
+  policy_config_ = config;
   InitResult::eType init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
 
   std::string pt_string;
   if (0 == policy_table_) {
     if (true == file_system::ReadFile(policy_config_.pt_file_name(),
-                                    pt_string)) {
-      policy_table_ = new policies_ns::PolicyTable(pt_string,
-              policies_ns::PolicyTableType::TYPE_POLICY_TABLE);
+                                      pt_string)) {
+      policy_table_ = new PolicyTable(pt_string,
+                                      PolicyTableType::TYPE_POLICY_TABLE);
       init_result = InitResult::INIT_OK;
     } else {
       LOG4CXX_WARN(logger_, "Can't read policy table file "
           << policy_config_.pt_file_name());
       if (true == file_system::ReadFile(
           policy_config_.preload_pt_file_name(), pt_string)) {
-        policy_table_ = new policies_ns::PolicyTable(
-            pt_string, policies_ns::PolicyTableType::TYPE_PT_PRELOAD);
+        policy_table_ = new PolicyTable(
+            pt_string, PolicyTableType::TYPE_PT_PRELOAD);
         init_result = InitResult::INIT_OK_PRELOAD;
       } else {
         init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
@@ -103,18 +111,18 @@ policies_ns::InitResult::eType policies_ns::PolicyManagerImpl::Init() {
 
 //---------------------------------------------------------------
 
-policies_ns::CheckPermissionResult
-  policies_ns::PolicyManagerImpl::CheckPermission(
-    uint32_t app_id, const so_ns::SmartObject& rpc,
-    mobile_apis::HMILevel::eType hmi_status) {
-
+CheckPermissionResult
+  PolicyManagerImpl::CheckPermission(uint32_t app_id,
+                                     const smart_objects::SmartObject& rpc,
+                                     mobile_apis::HMILevel::eType hmi_status) {
   CheckPermissionResult result =
     {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};
+
   PolicyTable* pt = policy_table();
 
   if (0 != pt
       && PTValidationResult::VALIDATION_OK == pt->Validate()) {
-    so_ns::SmartObject pt_object = pt->AsSmartObject();
+    smart_objects::SmartObject pt_object = pt->AsSmartObject();
 
     result.result =  PermissionsCalculator::CalcPermissions(pt_object,
                                                             app_id,
@@ -131,9 +139,10 @@ policies_ns::CheckPermissionResult
 
 //---------------------------------------------------------------
 
-void policies_ns::PolicyManagerImpl::StorePolicyTable() {
+void PolicyManagerImpl::StorePolicyTable() {
   if (0 != policy_table_) {
-    if (so_ns::SmartType_Null != policy_table_->AsSmartObject().getType()) {
+    if (smart_objects::SmartType_Null !=
+        policy_table_->AsSmartObject().getType()) {
       const std::string pt_string = policy_table_->AsString();
       const std::vector<unsigned char> char_vector_pdata(
           pt_string.begin(), pt_string.end());
@@ -148,7 +157,9 @@ void policies_ns::PolicyManagerImpl::StorePolicyTable() {
 
 //---------------------------------------------------------------
 
-policies_ns::PolicyTable*
-  policies_ns::PolicyManagerImpl::policy_table() const {
+PolicyTable* PolicyManagerImpl::policy_table() const {
     return policy_table_;
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

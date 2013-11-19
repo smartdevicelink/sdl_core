@@ -51,8 +51,8 @@ namespace policies_draft_test {
   class PolicyManagerTest: public pn::PolicyManagerImpl {
   public:
     explicit PolicyManagerTest(const pn::PolicyConfiguration& policy_config):
-      PolicyManagerImpl(policy_config) {
-        init_result = Init();
+      PolicyManagerImpl() {
+        init_result = Init(policy_config);
       }
     pn::PolicyTable* getPolicyTable() {
       return PolicyManagerImpl::policy_table();
@@ -183,7 +183,7 @@ namespace policies_draft_test {
     policy_config.set_pt_file_name("nofile");
     policy_config.set_preload_pt_file_name("nofile");
 
-    policy_manager.Init();
+    policy_manager.Init(policy_config);
 
     ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
     ASSERT_FALSE(NULL == policy_manager.getPolicyTable());

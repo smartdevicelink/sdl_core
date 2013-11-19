@@ -57,6 +57,14 @@ namespace func_ids = mobile_apis::FunctionID;
 namespace msg_type = mobile_apis::messageType;
 
 
+class PolicyManagerTest : public policies::PolicyManagerImpl {
+  public:
+    PolicyManagerTest() :
+      PolicyManagerImpl() {}
+
+    virtual ~PolicyManagerTest() {};
+};
+
 class TestWP1Integration: public ::testing::Test {
   private:
     policies::PolicyConfiguration policy_config_;
@@ -71,9 +79,11 @@ class TestWP1Integration: public ::testing::Test {
 
     virtual void SetUp() {
       policy_config_.set_pt_file_name("wp1_policy_table.json");
-      policy_manager_ = new policies::PolicyManagerImpl(policy_config_);
+      policy_manager_ = new PolicyManagerTest();
 
-      policies::InitResult::eType init_result = policy_manager_->Init();
+      policies::InitResult::eType init_result =
+        policy_manager_->Init(policy_config_);
+
       ASSERT_EQ(policies::InitResult::INIT_OK, init_result);
     }
 
@@ -96,7 +106,7 @@ class TestWP1Integration: public ::testing::Test {
         policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
 
       if (allowed) {
-        ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result) <<
+        ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result) <<
           "Failed at rpc: " << rpc;
       } else {
         ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result) <<
@@ -123,7 +133,7 @@ class TestWP1Integration: public ::testing::Test {
         policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
 
       if (allowed) {
-        ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result) <<
+        ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result) <<
           "Failed at rpc: " << rpc_id;
       } else {
         ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result) <<

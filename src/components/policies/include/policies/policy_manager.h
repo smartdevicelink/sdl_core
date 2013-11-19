@@ -52,7 +52,7 @@ enum eType {
   /**
    * @brief RPC is allowed.
    */
-  PERMISSION_OK_ALLOWED = 0,
+  PERMISSION_ALLOWED = 0,
   /**
    * @brief Verification of Policy Table failed.
    *
@@ -144,8 +144,10 @@ class PolicyManager {
 
     /**
     * @brief Initialization method
+    *
+    * @param config PolicyManager configuration
     */
-    virtual InitResult::eType Init() = 0;
+    virtual InitResult::eType Init(const PolicyConfiguration& config) = 0;
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.

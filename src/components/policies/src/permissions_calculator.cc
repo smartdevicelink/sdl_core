@@ -184,7 +184,7 @@ PermissionResult::eType
         for (uint16_t n = 0; n < hmi_levels.length(); n++) {
           if (hmi_levels[n].getType() == so_ns::SmartType::SmartType_String) {
             if (hmi_status_string.compare(hmi_levels[n].asString()) == 0) {
-              return PermissionResult::PERMISSION_OK_ALLOWED;
+              return PermissionResult::PERMISSION_ALLOWED;
             }
           }
         }

@@ -55,13 +55,22 @@ namespace Priority = NsSmartDeviceLink::policies::Priority;
 namespace ns_str = NsSmartDeviceLink::NsJSONHandler::strings;
 
 
+class PolicyManagerTest : public PolicyManagerImpl {
+  public:
+    PolicyManagerTest() :
+      PolicyManagerImpl() {}
+
+    virtual ~PolicyManagerTest() {};
+};
+
+
 TEST(policy_manager_generic_test, test_straight_forward) {
   PolicyConfiguration config;
   config.set_pt_file_name("SDLPolicyTable_basic.json");
 
-  PolicyManagerImpl policy_manager(config);
+  PolicyManagerTest policy_manager;
 
-  InitResult::eType init_result = policy_manager.Init();
+  InitResult::eType init_result = policy_manager.Init(config);
   ASSERT_EQ(InitResult::INIT_OK, init_result);
 
   SmartObject rpc;
@@ -72,7 +81,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                    rpc,
                                    mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
   ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Speak";
@@ -80,7 +89,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
   ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
@@ -88,7 +97,7 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                          rpc,
                                          mobile_apis::HMILevel::HMI_BACKGROUND);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
   ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 }
 
@@ -98,9 +107,9 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
   PolicyConfiguration config;
   config.set_pt_file_name("SDLPolicyTable_basic.json");
 
-  PolicyManagerImpl policy_manager(config);
+  PolicyManagerTest policy_manager;
 
-  InitResult::eType init_result = policy_manager.Init();
+  InitResult::eType init_result = policy_manager.Init(config);
   ASSERT_EQ(InitResult::INIT_OK, init_result);
 
   SmartObject rpc;
@@ -119,7 +128,7 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_OK_ALLOWED, result.result);
+  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
   ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GetVehicleData";

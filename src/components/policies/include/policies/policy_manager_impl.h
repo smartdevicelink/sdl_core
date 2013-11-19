@@ -54,11 +54,11 @@ namespace policies {
 class PolicyManagerImpl : public PolicyManager {
   public:
     /**
-     * @brief Constructor
+     * @brief PolicyManagerImpl is a singleton.
      *
-     * @param policy_config Policy configuration
+     * @return Pointer to the single instance of PolicyManagerImpl.
      */
-    explicit PolicyManagerImpl(const PolicyConfiguration& policy_config);
+    static PolicyManagerImpl* instance();
 
     /**
      * @brief Destructor
@@ -68,8 +68,11 @@ class PolicyManagerImpl : public PolicyManager {
 
     /**
     * @brief Initialization method
+    *
+    * @param config PolicyManager configuration
+    * 
     */
-    virtual InitResult::eType Init(void);
+    virtual InitResult::eType Init(const PolicyConfiguration& config);
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.
@@ -86,6 +89,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   protected:
     /**
+     * @brief Hidden constructor.
+     */
+    PolicyManagerImpl();
+
+    /**
      * @brief Store policy table to filesystem
      */
     void StorePolicyTable();
@@ -101,7 +109,7 @@ class PolicyManagerImpl : public PolicyManager {
     /**
      * @brief Policy configuration
      */
-    const PolicyConfiguration& policy_config_;
+    PolicyConfiguration policy_config_;
 
     /**
      * @brief Policy table
