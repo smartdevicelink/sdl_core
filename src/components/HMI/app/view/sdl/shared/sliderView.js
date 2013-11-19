@@ -163,15 +163,26 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
         this.set( 'sliderRequestId', message.id );
 
         this.set( 'headerLabel.content', data.sliderHeader );
-        this.set( 'footerLabel.content', data.sliderFooter ? data.sliderFooter : '' );
         this.get( 'adjustControl.sliderValue' ).set( 'range', data.numTicks );
         this.get( 'adjustControl.sliderValue' ).set( 'value', data.position );
-
-        this.footerLabel.data = data.sliderFooter;
 
         setTimeout( function() {
             SDL.SliderView.adjustControl.rerender();
         }, 1 );
+
+        if (!data.sliderFooter) {
+            this.set('footerLabel.content', '');
+            return;
+        }
+
+        this.footerLabel.data = data.sliderFooter;
+
+        if (data.sliderFooter.length != data.numTicks) {
+            this.set( 'footerLabel.content', data.sliderFooter[0] );
+        } else {
+            // Magick number is array index correction
+            this.set( 'footerLabel.content', data.sliderFooter[data.position - 1] );
+        }
     },
 
     /**

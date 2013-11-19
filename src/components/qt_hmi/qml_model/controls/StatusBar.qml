@@ -1,6 +1,6 @@
 /**
- * @file PopUp.qml
- * @brief General popup view.
+ * @file StatusBar.qml
+ * @brief Status bar that contains text string.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,51 +35,8 @@
 import QtQuick 2.0
 import "../models/Constants.js" as Constants
 
-Item {
-    default property alias content: content.children
-    property int padding: Constants.popUpPadding
-
-    visible: false
-
-    width: Constants.popupWidth
-    height: Constants.popupHeigth
-
-    MouseArea { anchors.fill: parent }
-
-    Rectangle {
-        width: parent.width - padding / 2
-        height: parent.height - padding / 2
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: Constants.secondaryColor
-        border.width: 1
-        border.color: Constants.popUpBorderColor
-        radius: padding
-        Rectangle {
-            id: content
-            width: parent.width - padding
-            height: parent.height - padding
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: Constants.transparentColor
-        }
-    }
-
-    onVisibleChanged: {
-        dataContainer.activePopup = visible ? this : null
-    }
-
-    function show() {
-
-        console.debug("enter");
-        visible = true;
-        console.debug("exit");
-    }
-
-    function hide() {
-        console.debug("enter");
-        visible = false;
-        console.debug("exit");
-    }
-
+Text {
+    text: dataContainer.currentApplication.hmiUIText.statusBar
+    color: Constants.primaryColor
+    font.pixelSize: Constants.statusBarFontSize
 }
