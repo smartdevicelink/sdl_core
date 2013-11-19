@@ -1,6 +1,6 @@
 /**
- * @file NavigationMenuView.qml
- * @brief Navigation menu screen view.
+ * @file StatusBar.qml
+ * @brief Status bar that contains text string.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,38 +33,10 @@
  */
 
 import QtQuick 2.0
-import "../models"
-import "../controls"
 import "../models/Constants.js" as Constants
 
-Item {
-    anchors.fill: parent
-    GridMenu {
-        id: menu
-        model: NavigationMenuModel {}
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: bottomPanel.top
-        delegate: GridItem {
-            width: menu.width / menu.columnsOnPage
-            height: menu.height / menu.rows
-            OvalButton {
-                text: title
-                onReleased: contentLoader.go(qml, appId)
-                anchors.centerIn: parent
-                fontSize: Constants.fontSize
-            }
-        }
-    }
-
-    Item {
-        id: bottomPanel
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        height: 1/4 * parent.height
-
-        BackButton { anchors.centerIn: parent }
-    }
+Text {
+    text: dataContainer.currentApplication.hmiUIText.statusBar
+    color: Constants.primaryColor
+    font.pixelSize: Constants.statusBarFontSize
 }
