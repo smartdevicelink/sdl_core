@@ -28,7 +28,7 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
-import com.ford.syncV4.proxy.rpc.GiveControlResponse;
+import com.ford.syncV4.proxy.rpc.GrantAccessResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
@@ -41,6 +41,7 @@ import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnRadioDetails;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -48,6 +49,7 @@ import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
+import com.ford.syncV4.proxy.rpc.RadioStation;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
@@ -435,9 +437,9 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onGiveControlResponse(GiveControlResponse response) {
+    public void onGiveControlResponse(GrantAccessResponse response) {
         final String msg =
-                "GiveControlResponse success " + response.getSuccess() +
+                "GrantAccessResponse success " + response.getSuccess() +
                         ", " + response.getResultCode() + ", " +
                         response.getInfo();
         Log.i(TAG, msg);
@@ -474,6 +476,24 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
 
+    }
+
+    @Override
+    public void onOnRadioDetails(OnRadioDetails notification) {
+        // TODO: Expand notification information here
+        final RadioStation radioStation = notification.getRadioStation();
+        String msg = "onRadioDetails";
+        if (radioStation == null) {
+            msg += " Radio Station invalid";
+            Log.i(TAG, msg);
+            notifyUI(msg);
+            return;
+        }
+        msg += " frequency: " +
+                notification.getRadioStation().getFrequency() + "." +
+                notification.getRadioStation().getFraction();
+        Log.i(TAG, msg);
+        notifyUI(msg);
     }
 
     @Override
