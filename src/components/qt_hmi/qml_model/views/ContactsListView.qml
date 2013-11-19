@@ -79,7 +79,7 @@ GeneralView {
                     id: contactName
                     anchors.left: parent.left
                     text: name
-                    width: 0.40 * parent.width
+                    width: Constants.contactListNameFieldSize * parent.width
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
                     elide: Text.ElideRight
@@ -87,7 +87,7 @@ GeneralView {
                 Text  {
                     id: phoneText
                     anchors.left: contactName.right
-                    width: 0.30 * parent.width
+                    width: Constants.contactListPhoneFieldSize * parent.width
                     text: phone
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
@@ -96,7 +96,7 @@ GeneralView {
                 Text  {
                     id: typeText
                     anchors.right: parent.right
-                    width: 0.30 * parent.width
+                    width: Constants.contactListDescriptionFieldSize * parent.width
                     text: type
                     color: Constants.contactTextColor
                     font.pixelSize: Constants.fontSize
