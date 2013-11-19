@@ -32,12 +32,12 @@
  */
 
 #include <string.h>
+#include <algorithm>
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/so_helper.h"
 
 namespace application_manager {
 
@@ -79,14 +79,20 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (!checkAppParams()) {
+  if (CheckCoincidence()) {
     LOG4CXX_ERROR_EXT(logger_, "DUPLICATE_NAME");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
+  LOG4CXX_ERROR(logger_, "1");
+  MessageHelper::PrintSmartObject(*message_);
+
   Application* app =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);
+
+  LOG4CXX_ERROR(logger_, "2");
+    MessageHelper::PrintSmartObject(*message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -227,66 +233,117 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   SendResponse(true, result, "", params);
 }
 
-bool RegisterAppInterfaceRequest::checkAppParams() {
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::checkAppName ");
+bool RegisterAppInterfaceRequest::CheckCoincidence() {
 
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckCoincidence ");
 
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+    const smart_objects::SmartObject& msg_params =
+        (*message_)[strings::msg_params];
 
-  const std::set<Application*>& applications = app_manager->applications();
-  std::set<Application*>::const_iterator it = applications.begin();
+    ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
-  for (; applications.end() != it; ++it) {
+    const std::set<Application*>& applications = app_manager->applications();
+    std::set<Application*>::const_iterator it = applications.begin();
 
-    const std::string &curName = (*it)->name();
-    TTS curTTS((*it)->tts_name());
-    VR curVR((*it)->vr_synonyms());
+    for (; applications.end() != it; ++it) {
 
-
-    // new appName checks
-    const std::string appName = msg_params[strings::app_name].asString();
-    if (    curName == appName
-        ||  checkCoincidence<std::string, TTS>(appName, curTTS)
-        ||  checkCoincidence<std::string, VR>(appName, curVR)
-        ) {
-
-      LOG4CXX_ERROR(logger_, "Application name is known already.");
-      return false;
-    }
-
-    // new tts checks
-    if ( msg_params.keyExists(strings::tts_name) )
-    {
-      TTS tts(&msg_params[strings::tts_name]);
-      if (    checkCoincidence<std::string, TTS>(curName, tts)
-          ||  checkCoincidence<TTS, TTS>(curTTS, tts)
-          ||  checkCoincidence<VR, TTS>(curVR, tts)
-          ) {
-
-        LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
-        return false;
+      // name check
+      const std::string &curName = (*it)->name();
+      const std::string appName = msg_params[strings::app_name].asString();
+      if (appName == curName) {
+        LOG4CXX_ERROR(logger_, "Application name is known already.");
+        return true;
       }
-    }
 
-    // new vr checks
-    if (msg_params.keyExists(strings::vr_synonyms))
-    {
-      VR vr(&msg_params[strings::vr_synonyms]);
-      if (    checkCoincidence<std::string, VR>(curName, vr)
-          ||  checkCoincidence<TTS, VR>(curTTS, vr)
-          ||  checkCoincidence<VR, VR>(curVR, vr)
-          ) {
+      const smart_objects::SmartObject *tts = (*it)->tts_name();
+      std::vector<smart_objects::SmartObject> *curTTS = NULL;
+      if (NULL != tts) {
+        curTTS = tts->asArray();
+        CoincidencePredicateTTS t(appName);
 
-        LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-        return false;
+        if (std::any_of((*curTTS).begin(), (*curTTS).end(), t) ) {
+          LOG4CXX_ERROR(logger_, "Application name is known already.");
+          return true;
+        }
       }
-    }
-  }
 
-  return true;
-}
+      const smart_objects::SmartObject *vr = (*it)->vr_synonyms();
+      const std::vector<smart_objects::SmartObject>* curVR = NULL;
+      if (NULL != vr) {
+        curVR = vr->asArray();
+        CoincidencePredicateVR v(appName);
+
+        if (std::any_of(curVR->begin(), curVR->end(), v )) {
+          LOG4CXX_ERROR(logger_, "Application name is known already.");
+          return true;
+        }
+      }
+
+
+      // tts check
+      if (    msg_params.keyExists(strings::tts_name)) {
+
+        const std::vector<smart_objects::SmartObject> *newTTS = msg_params[strings::tts_name].asArray();
+
+        std::vector<smart_objects::SmartObject>::const_iterator it = newTTS->begin();
+        std::vector<smart_objects::SmartObject>::const_iterator itEnd = newTTS->end();
+
+        for (; it != itEnd; ++it) {
+          if (curName == (*it)[strings::text].asString()) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+
+          CoincidencePredicateTTS t((*it)[strings::text].asString());
+          if (    NULL != curTTS
+              &&  std::any_of(curTTS->begin(), curTTS->end(), t)) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+
+          CoincidencePredicateVR v((*it)[strings::text].asString());
+          if (    NULL != curVR
+              &&  std::any_of(curVR->begin(), curVR->end(), v)) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+        }
+      } // end tts check
+
+      if (msg_params.keyExists(strings::vr_synonyms)) {
+
+        const std::vector<smart_objects::SmartObject> *newVR = msg_params[strings::vr_synonyms].asArray();
+
+        std::vector<smart_objects::SmartObject>::const_iterator it = newVR->begin();
+        std::vector<smart_objects::SmartObject>::const_iterator itEnd = newVR->end();
+
+        for (; it != itEnd; ++it) {
+          if (curName == it->asString()) {
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+
+          CoincidencePredicateTTS t(it->asString());
+          if (    NULL !=curTTS
+              &&  std::any_of(curTTS->begin(), curTTS->end(), t)){
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+
+          CoincidencePredicateVR v(it->asString());
+          if (    NULL != curVR
+              &&  std::any_of(curVR->begin(), curVR->end(), v)) {
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+        }
+      } // end vr check
+
+    }// application for end
+
+    return false;
+} // method end
+
 
 }  // namespace commands
 

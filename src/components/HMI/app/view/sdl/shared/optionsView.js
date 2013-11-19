@@ -25,7 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.SliderView
+ * @name SDL.OptionsView
  * @desc Options visual representation
  * @category View
  * @filesource app/view/sdl/shared/optionsView.js

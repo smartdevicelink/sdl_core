@@ -41,6 +41,8 @@ import "../controls"
 ContextPopup {
     property var async
     property int position: 1
+    property int resultCode: -1
+    signal onReady
 
     function showSlider(){
         console.debug("enter")
@@ -55,6 +57,7 @@ ContextPopup {
         position = dataContainer.uiSlider.position
         show()
         timer.start()
+        onReady()
         console.debug("exit")
     }
 
@@ -67,11 +70,13 @@ ContextPopup {
         switch(reason) {
         case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
-            DBus.sendReply(async, {__retCode: Common.Result.ABORTED,
+            resultCode = Common.Result.ABORTED
+            DBus.sendReply(async, {__retCode: resultCode,
                                sliderPosition: dataContainer.uiSlider.position})
             break
         case Common.Result.SUCCESS:
             console.debug("send position", position)
+            resultCode = Common.Result.SUCCESS
             dataContainer.uiSlider.position = position
             DBus.sendReply(async, {sliderPosition:position})
             break
@@ -90,7 +95,9 @@ ContextPopup {
         Timer {
             id: timer
             interval: dataContainer.uiSlider.timeout
+            triggeredOnStart:true
             onTriggered: {
+                console.debug("triggered")
                 complete(Common.Result.SUCCESS)
             }
         }
@@ -121,8 +128,6 @@ ContextPopup {
             radius: Constants.sliderBarRadius
             color: "black"
 
-
-
             Rectangle {
                 id: rectangle
                 color: Constants.sliderBarFillColor
@@ -137,8 +142,8 @@ ContextPopup {
                 }
             }
 
-
             MouseArea{
+                id: mouseArea
                 anchors.fill: parent
                 onClicked: {
                     onPositionChanged(mouse)
@@ -184,5 +189,18 @@ ContextPopup {
                 console.debug("exit")
             }
         }
+    }
+
+    function getTimer() {
+        return timer
+    }
+    function getBackButton() {
+        return backButton
+    }
+    function getFooterText() {
+        return footerText
+    }
+    function getBorderRectangle() {
+        return borderRectangle
     }
 }

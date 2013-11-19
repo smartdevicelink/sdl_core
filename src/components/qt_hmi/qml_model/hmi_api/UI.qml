@@ -99,7 +99,7 @@ Item {
                     "mainField2": fieldSubstrings[Common.TextFieldName.mainField2],
                     "mainField3": fieldSubstrings[Common.TextFieldName.mainField3],
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
-                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
+                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar] || "",
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
                             "image": graphic ? graphic.value : ""
                 },
@@ -292,7 +292,7 @@ Item {
         console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
         if (dataContainer.uiSlider.running) {
             console.debug("aborted")
-            throw Common.Result.ABORTED
+            return  {__retCode: Common.Result.ABORTED, sliderPosition: position}
         }
 
         dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName

@@ -41,28 +41,20 @@ import "../controls"
 PopUp {
     Text {
         id: title
-        height: 50
+        anchors.left: parent.left
+        anchors.top: parent.top
+        height: voice.height
+        width: parent.width - voice.width
         text: "Speak the command"
         verticalAlignment: Text.AlignVCenter
-        anchors.right: voice.left
-        anchors.rightMargin: 10
-        anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.left: parent.left
-        anchors.leftMargin: 15
-        font.pixelSize: 14
+        font.pixelSize: Constants.fontSize
         color: Constants.primaryColor
     }
 
     Image {
         id: voice
-        x: 591
-        width: 50
-        height: 50
         anchors.top: parent.top
-        anchors.topMargin: 5
         anchors.right: parent.right
-        anchors.rightMargin: 15
         source: "../res/controlButtons/vrImage.png"
     }
 
@@ -74,7 +66,6 @@ PopUp {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.topMargin: 0
 
         model: dataContainer.vrCommands
 

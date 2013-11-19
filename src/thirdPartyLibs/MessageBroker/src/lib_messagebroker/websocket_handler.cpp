@@ -21,99 +21,129 @@
 
 namespace NsMessageBroker 
 {
+
+   unsigned int CWebSocketHandler::parseWebSocketDataLength(
+       const char* Buffer, unsigned int& b_size) {
+
+     unsigned char payload =
+         (unsigned char)((Buffer[1] & 0x40) | (Buffer[1] & 0x20) |
+         (Buffer[1] & 0x10) | (Buffer[1] & 0x08) | (Buffer[1] & 0x04) |
+         (Buffer[1] & 0x02) | (Buffer[1] & 0x01));
+      unsigned long length = 0;
+      unsigned char position = 2; // current buffer position
+
+      switch(payload) {
+         case 126:
+            {
+               length = (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               break;
+            }
+         case 127:
+            {
+               length = (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               length <<=8;
+               length |= (unsigned char)Buffer[position++];
+               break;
+            }
+         default:
+            {
+               length = payload;
+               return length;
+            }
+      }
+
+      return length;
+   }
+
    int CWebSocketHandler::parseWebSocketData(char* Buffer, unsigned int& b_size)
    {
-      // Please see RFC6455 standard protocol specification:
-      //http://tools.ietf.org/html/rfc6455
-      // Chapter 5.2
-      DBG_MSG(("CWebSocketHandler::parseWebSocketData()b_size = %d\n", b_size));
-      char* recBuffer = Buffer;
-      unsigned int parsedBufferPosition = 0;
-      unsigned int nextBufferPosition = 0;
-      while (nextBufferPosition < b_size)
-      {
-         DBG_MSG(("CWebSocketHandler::parseWebSocketData()recBuffer[0] = %s\n", std::string(recBuffer, 1).c_str()));
-         bool fin = (recBuffer[0] & 0x80) == 0x80;
+     // Please see RFC6455 standard protocol specification:
+     //http://tools.ietf.org/html/rfc6455
+     // Chapter 5.2
+     DBG_MSG(("CWebSocketHandler::parseWebSocketData()b_size = %d\n", b_size));
+     char* recBuffer = Buffer;
 
-         bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
-         bool rsv2 = (recBuffer[0] & 0x20) == 0x20;
-         bool rsv3 = (recBuffer[0] & 0x10) == 0x10;
 
-         unsigned char opCode = ((recBuffer[0] & 0x08) | (recBuffer[0] & 0x04) | (recBuffer[0] & 0x02) | (recBuffer[0] & 0x01));
+     DBG_MSG(("CWebSocketHandler::parseWebSocketData()recBuffer[0] = %s\n",
+         std::string(recBuffer, 1).c_str()));
+     bool fin = (recBuffer[0] & 0x80) == 0x80;
+     bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
+     bool rsv2 = (recBuffer[0] & 0x20) == 0x20;
+     bool rsv3 = (recBuffer[0] & 0x10) == 0x10;
+     unsigned char opCode = ((recBuffer[0] & 0x08) | (recBuffer[0] & 0x04) |
+         (recBuffer[0] & 0x02) | (recBuffer[0] & 0x01));
+     bool mask = (recBuffer[1] & 0x80) == 0x80;
 
-         bool mask = (recBuffer[1] & 0x80) == 0x80;
+     unsigned char payload = (unsigned char)
+         ((Buffer[1] & 0x40) | (Buffer[1] & 0x20) | (Buffer[1] & 0x10) |
+          (Buffer[1] & 0x08) | (Buffer[1] & 0x04) | (Buffer[1] & 0x02) |
+          (Buffer[1] & 0x01));
 
-         unsigned char payload = 
-            (unsigned char)((recBuffer[1] & 0x40) | (recBuffer[1] & 0x20) | (recBuffer[1] & 0x10) |
-            (recBuffer[1] & 0x08) | (recBuffer[1] & 0x04) | (recBuffer[1] & 0x02) | (recBuffer[1] & 0x01));
-         unsigned long length = 0;
-         DBG_MSG(("CWebSocketHandler::parseWebSocketData()fin:%d; rsv1:%d; rsv2:%d; rsv3:%d; opCode:%d; mask:%d; payload:%d\n", fin, rsv1, rsv2, rsv3, opCode, mask, payload));
+     unsigned int size = b_size;
+     unsigned long length = parseWebSocketDataLength(Buffer, size);
+     unsigned char position = 2; // current buffer position
 
-         unsigned char position = 2; // current buffer position
 
-         switch(payload) {
-            case 126:
-               {
-                  length = (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  break;
-               }
-            case 127:
-               {
-                  length = (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  length <<=8;
-                  length |= (unsigned char)recBuffer[position++];
-                  break;
-               }
-            default:
-               {
-                  length = payload;
-                  break;
-               }
-         }
+     switch(payload) {
+        case 126:
+           {
+              position +=2;
+              break;
+           }
+        case 127:
+           {
+              position +=8;
+              break;
+           }
+        default:
+           {
+              break;
+           }
+     }
 
-         if (mask)
-         {
-            unsigned char maskKeys[4];
-            maskKeys[0] = recBuffer[position++];
-            maskKeys[1] = recBuffer[position++];
-            maskKeys[2] = recBuffer[position++];
-            maskKeys[3] = recBuffer[position++];
-            DBG_MSG(("CWebSocketHandler::parseWebSocketData()maskKeys[0]:0x%02X; maskKeys[1]:0x%02X; maskKeys[2]:0x%02X; maskKeys[3]:0x%02X\n"
-                     , maskKeys[0], maskKeys[1], maskKeys[2], maskKeys[3]));
-            for( unsigned long i = position; i < position+length; i++)
-            {
-               recBuffer[i] = recBuffer[i] ^ maskKeys[(i-position)%4];
-            }
-         }
-         DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; position:%d\n", (int)length, position));
-         for( unsigned long i = position; i < position+length; i++)
-         {
-            Buffer[parsedBufferPosition++] = recBuffer[i];
-         }
-         nextBufferPosition += position+length;
-         recBuffer += position+length;
-         DBG_MSG(("CWebSocketHandler::parseWebSocketData()nextBufferPosition = %d; parsedBufferPosition = %d\n", nextBufferPosition, parsedBufferPosition));
-         std::string message = std::string(Buffer, b_size);
-      }
+     if (mask)
+     {
+        unsigned char maskKeys[4];
+        maskKeys[0] = recBuffer[position++];
+        maskKeys[1] = recBuffer[position++];
+        maskKeys[2] = recBuffer[position++];
+        maskKeys[3] = recBuffer[position++];
+        DBG_MSG(("CWebSocketHandler::parseWebSocketData()maskKeys[0]:0x%02X;"
+                 " maskKeys[1]:0x%02X; maskKeys[2]:0x%02X; maskKeys[3]:0x%02X\n"
+                 , maskKeys[0], maskKeys[1], maskKeys[2], maskKeys[3]));
+        for( unsigned long i = position; i < position+length; i++)
+        {
+           recBuffer[i] = recBuffer[i] ^ maskKeys[(i-position)%4];
+        }
+     }
+     DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
+              " position:%d\n", (int)length, size, position));
+     unsigned int parsedBufferPosition = 0;
+     for( unsigned long i = position; i < size, i < position+length; i++)
+     {
+        Buffer[parsedBufferPosition++] = recBuffer[i];
+     }
+
       b_size = parsedBufferPosition;
       return b_size;
    }
 
-   int CWebSocketHandler::prepareWebSocketDataHeader(unsigned char* Buffer, unsigned long b_size)
+   int CWebSocketHandler::prepareWebSocketDataHeader(unsigned char* Buffer,
+                                                     unsigned long b_size)
    {
       unsigned int headerLength = 2;
       unsigned char payload;
