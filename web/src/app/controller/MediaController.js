@@ -911,6 +911,18 @@ MFT.MediaController = Em.Object.create({
 		this.showStorePresetMessage();
 	},
 
+    /** Set presets, when was changed presets on the HMI **/
+    setSDLPresets: function (data) {
+        var i,
+            items = {};
+
+        for (i=0; i < data.customPresets.length; i++) {
+            items[i] = MFT.PlaylistItem.create({frequency: data.customPresets[i]})
+        }
+
+        MFT.FmModel.fm1.set('items', items);
+    },
+
 	/** Player Next track event*/
 	nextTrack: function() {
 		this.currentSelectedPlayer.nextTrack();
@@ -1032,9 +1044,12 @@ MFT.MediaController = Em.Object.create({
         }
 	},
 
+
+    /** Set Direct Tune Station, when was changed current station on the HMI **/
     setSDLDirectTuneStation: function(data) {
-        var fullFrequency = Number(data.radioStation.frequency.toString() + (data.radioStation.fraction ? data.radioStation.fraction.toString() : "0")),
-            directTuneItem = MFT.FmModel.directTunestations.directTuneItems[fullFrequency];
+        var frequency = data.radioStation.frequency.toString() + (data.radioStation.fraction ? data.radioStation.fraction.toString() : "0"),
+            frequencyIndex = Number(frequency),
+            directTuneItem = MFT.FmModel.directTunestations.directTuneItems[frequencyIndex];
 
         if (!directTuneItem) {
             return;
@@ -1049,22 +1064,22 @@ MFT.MediaController = Em.Object.create({
             directTuneItem.set('currentHDChannel', data.radioStation.currentHD);
         }
 
-        MFT.FmModel.directTunestations.set('selectedDirectTuneStation', fullFrequency);
+        MFT.FmModel.directTunestations.set('selectedDirectTuneStation', frequencyIndex);
+
+        for (var key in MFT.FmModel.fm1.items) {
+            if (frequency === MFT.FmModel.fm1.items[key].frequency.replace('.', '')) {
+                MFT.FmModel.fm1.set('selectedIndex',key);
+
+                MFT.FmModel.directTunestations.set('selectedDirectTuneStation', null);
+                this.set('directTuneSelected', false);
+
+                return;
+            }
+        }
 
         if (MFT.States.media.radio.fm.active && MFT.FmModel.band.value == 0) {
             this.set('directTuneSelected', true);
         }
-    },
-
-    setSDLPresets: function (data) {
-        var i,
-            items = {};
-
-        for (i=0; i < data.customPresets.length; i++) {
-            items[i] = MFT.PlaylistItem.create({frequency: data.customPresets[i]})
-        }
-
-        MFT.FmModel.fm1.set('items', items);
     },
 
 	/**
