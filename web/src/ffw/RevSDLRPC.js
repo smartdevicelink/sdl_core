@@ -75,6 +75,9 @@ FFW.RevSDL = FFW.RPCObserver.create({
             case "RevSDL.OnRadioDetails":
                 MFT.MediaController.setSDLDirectTuneStation(notification.params);
                 break;
+            case "RevSDL.OnPresetsChanged":
+                MFT.MediaController.setSDLPresets(notification.params);
+                break;
         }
     },
 
@@ -120,22 +123,15 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         this.TuneRadioRequestId = this.client.generateId();
 
-        var RadioStation = {
-            frequency: Number(frequency[0]),
-            fraction: Number(frequency[1])
-        };
-
-        if (data.isHd) {
-            RadioStation.availableHDs = data.HDChannels;
-            RadioStation.currentHD = data.currentHDChannel;
-        }
-
         var JSONMessage = {
             "jsonrpc":	"2.0",
             "id": 		this.TuneRadioRequestId,
             "method":	"RevSDL.TuneRadio",
             params: {
-                RadioStation: RadioStation
+                radioStation: {
+                    frequency: Number(frequency[0]),
+                    fraction: Number(frequency[1])
+                }
             }
         };
         this.client.send(JSONMessage);

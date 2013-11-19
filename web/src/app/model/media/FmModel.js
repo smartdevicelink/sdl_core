@@ -10,8 +10,31 @@
  * @author		Igor Zhavoronkin
  */
 MFT.FmModel = Em.Object.create({
+
+    init: function () {
+        var i,
+            directTunes = [],
+            directTuneItems = {},
+            frequency,
+            pointIndex;
+
+        this._super();
+
+        for (i = 879; i <= 1079; i++) {
+            directTunes.push(i.toString().split(''));
+
+            pointIndex = (i <= 1000) ? 2 : 3;
+            frequency = i.toString();
+            frequency = frequency.slice(0,pointIndex)+'.'+frequency.slice(pointIndex);
+
+            directTuneItems[i] = MFT.PlaylistItem.create({frequency: frequency});
+        }
+
+        this.directTunestations.set('directTunes', directTunes);
+        this.directTunestations.set('directTuneItems', directTuneItems);
+    },
 	
-	band:		MFT.RangedValue.create({value:-1, activeBand:0}),
+	band: MFT.RangedValue.create({value:-1, activeBand:0}),
 
     customDirectTuneStations: MFT.Playlist.create({
         directTuneItems: {}
@@ -20,22 +43,10 @@ MFT.FmModel = Em.Object.create({
 	directTunestations: MFT.Playlist.create({
 		
 			/** Direct tune dial station matrix */
-			directTunes: [
-				[9,8,7],
-				[1,0,0,4],
-				[1,0,2,0],
-				[1,0,3,4],
-				[1,0,7,1]
-			],
+			directTunes: [],
 			
 			/** Direct tune Data */
-			directTuneItems: {
-				987:MFT.PlaylistItem.create({frequency: '98.7',genreBinding: 'MFT.locale.label.view_media_genre_trance',title: 'Space',artist: 'Dreamers', isHd: false}),
-				1004:MFT.PlaylistItem.create({frequency: '100.4',genre: 'Pop',title: 'Take me with you',artist: 'Silva', isHd: false}),
-				1020:MFT.PlaylistItem.create({frequency: '102.0',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
-				1034:MFT.PlaylistItem.create({frequency: '103.4',genre: 'Pop',title: 'Space',artist: 'Dreamers', isHd: false}),
-				1071:MFT.PlaylistItem.create({frequency: '107.1',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false})
-			}
+			directTuneItems: {}
 	
 	}),
 	
