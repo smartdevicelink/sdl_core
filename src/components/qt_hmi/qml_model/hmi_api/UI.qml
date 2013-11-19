@@ -101,7 +101,7 @@ Item {
                     "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
                     "statusBar": fieldSubstrings[Common.TextFieldName.statusBar],
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
-                    "image": graphic ? graphic.value : undefined
+                            "image": graphic ? graphic.value : ""
                 },
                 "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined ? {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
@@ -292,7 +292,7 @@ Item {
         console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
         if (dataContainer.uiSlider.running) {
             console.debug("aborted")
-            throw Common.Result.ABORTED
+            return  {__retCode: Common.Result.ABORTED, sliderPosition: position}
         }
 
         dataContainer.uiSlider.appName = dataContainer.getApplication(appID).appName

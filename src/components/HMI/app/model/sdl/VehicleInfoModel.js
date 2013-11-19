@@ -84,7 +84,6 @@ SDL.SDLVehicleInfoModel = Em.Object
          */
         vehicleData: {
             'speed': 80.0,
-            'rpm': 5000,
             'fuelLevel': 0.2,
             'fuelLevel_State': "UNKNOWN",
             'instantFuelConsumption': 2.2,
@@ -144,7 +143,6 @@ SDL.SDLVehicleInfoModel = Em.Object
             'batteryPackVoltage': 12.5,
             'batteryPackCurrent': 7.0,
             'batteryPackTemperature': 30,
-            'engineTorque': 650,
             'tripOdometer': 0,
             'genericbinary': '165165650',
             'satRadioESN': "165165650",
@@ -168,7 +166,36 @@ SDL.SDLVehicleInfoModel = Em.Object
                 'altitude': 7,
                 'heading': 173,
                 'speed': 2
+            },
+            'eCallInfo': {
+                'eCallNotificationStatus': 'NORMAL',
+                'auxECallNotificationStatus': 'NORMAL',
+                'eCallConfirmationStatus': 'NORMAL'
+            },
+            'airbagStatus': {
+                'driverAirbagDeployed': 'NO_EVENT',
+                'driverSideAirbagDeployed': 'NO_EVENT',
+                'driverCurtainAirbagDeployed': 'NO_EVENT',
+                'passengerAirbagDeployed': 'NO_EVENT',
+                'passengerCurtainAirbagDeployed': 'NO_EVENT',
+                'driverKneeAirbagDeployed': 'NO_EVENT',
+                'passengerSideAirbagDeployed': 'NO_EVENT',
+                'passengerKneeAirbagDeployed': 'NO_EVENT'
+            },
+            'emergencyEvent': {
+                'emergencyEventType': 'NO_EVENT',
+                'fuelCutoffStatus': 'NORMAL_OPERATION',
+                'rolloverEvent': 'NO_EVENT',
+                'maximumChangeVelocity': 'NO_EVENT',
+                'multipleEvents': 'NO_EVENT'
+            },
+            'clusterModeStatus': {
+                'powerModeActive': false,
+                'powerModeQualificationStatus': 'POWER_MODE_EVALUATION_IN_PROGRESS',
+                'carModeStatus': 'FACTORY',
+                'powerModeStatus': 'KEY_OUT'
             }
+
         },
 
         /**

@@ -202,7 +202,7 @@ class DBusAdapter {
    * \return true if success
    */
   bool SetArguments(DBusMessage* msg, const ListArgs& rules,
-                    smart_objects::SmartObject& args);
+                    const smart_objects::SmartObject& args);
 
   /**
    * \brief Sets one argument to message
@@ -214,7 +214,7 @@ class DBusAdapter {
   bool SetOneArgument(
       DBusMessageIter* iter,
       const ford_message_descriptions::ParameterDescription* rules,
-      smart_objects::SmartObject& param);
+      const smart_objects::SmartObject& param);
 
   /**
    * \brief sets value for argument
@@ -225,7 +225,7 @@ class DBusAdapter {
    */
   bool SetValue(DBusMessageIter* iter,
                 const ford_message_descriptions::ParameterDescription* rules,
-                smart_objects::SmartObject& param);
+                const smart_objects::SmartObject& param);
 
   /**
    * \brief sets value for every element of argument
@@ -236,7 +236,7 @@ class DBusAdapter {
    */
   bool SetArrayValue(DBusMessageIter* iter,
                      const ford_message_descriptions::ArrayDescription* rules,
-                     smart_objects::SmartObject& param);
+                     const smart_objects::SmartObject& param);
 
   /**
    * \brief sets struct value for argument
@@ -247,7 +247,7 @@ class DBusAdapter {
    */
   bool SetStructValue(DBusMessageIter* iter,
                       const ford_message_descriptions::StructDescription* rules,
-                      smart_objects::SmartObject& param);
+                      const smart_objects::SmartObject& param);
 
   /**
    * \brief sets optional value for argument.
@@ -260,7 +260,7 @@ class DBusAdapter {
   bool SetOptionalValue(
       DBusMessageIter* iter,
       const ford_message_descriptions::ParameterDescription* rules,
-      smart_objects::SmartObject &param);
+      const smart_objects::SmartObject &param);
 
   /**
    * \brief gets arguments from message

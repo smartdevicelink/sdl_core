@@ -70,6 +70,7 @@ Item {
     }
 
     function show() {
+
         console.debug("enter");
         visible = true;
         console.debug("exit");
@@ -80,4 +81,5 @@ Item {
         visible = false;
         console.debug("exit");
     }
+
 }

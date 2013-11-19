@@ -61,7 +61,7 @@ PopUp {
                 width: 1/4 * parent.width
                 height: 1/5 * parent.height
                 anchors.verticalCenter: parent.verticalCenter
-                text: "PRNDL: " + dataContainer.vehicleInfoModel.prndl
+                text: "PRNDL: "
                 font.pixelSize: Constants.fontSize
                 verticalAlignment: Text.AlignVCenter
                 color: Constants.primaryColor

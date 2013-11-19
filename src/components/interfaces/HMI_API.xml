@@ -578,7 +578,7 @@
   </element>
 </enum>
 
- <enum name="PRNDL">
+<enum name="PRNDL">
   <description>The selected gear.</description>
   <element name="PARK">
     <description>Parking</description>
@@ -880,6 +880,108 @@
   <element name="AUDIO_MP3" />
 </enum>
 
+<enum name="ECallConfirmationStatus">
+  <description>Reflects the status of the eCall Notification.</description>
+  <element name="NORMAL" internal_name="ECCS_NORMAL">
+  </element>
+  <element name="CALL_IN_PROGRESS" internal_name="ECCS_CALL_IN_PROGRESS">
+  </element>
+  <element name="CALL_CANCELLED" internal_name="ECCS_CALL_CANCELLED">
+  </element>
+  <element name="CALL_COMPLETED">
+  </element>
+  <element name="CALL_UNSUCCESSFUL" internal_name="ECCS_CALL_UNSUCCESSFUL">
+  </element>
+  <element name="ECALL_CONFIGURED_OFF" internal_name="ECCS_ECALL_CONFIGURED_OFF">
+  </element>
+  <element name="CALL_COMPLETE_DTMF_TIMEOUT" internal_name="ECCS_CALL_COMPLETE_DTMF_TIMEOUT">
+  </element>
+</enum>
+
+<enum name="VehicleDataNotificationStatus">
+  <description>Reflects the status of a vehicle data notification.</description>
+  <element name="NOT_SUPPORTED" internal_name="VDNS_NOT_SUPPORTED">
+  </element>
+  <element name="NORMAL" internal_name="VDNS_NORMAL">
+  </element>
+  <element name="ACTIVE" internal_name="VDNS_ACTIVE">
+  </element>
+</enum>
+
+<enum name="EmergencyEventType">
+  <description>Reflects the emergency event status of the vehicle.</description>
+  <element name="NO_EVENT" internal_name="EET_NO_EVENT">
+  </element>
+  <element name="FRONTAL" internal_name="EET_FRONTAL">
+  </element>
+  <element name="SIDE" internal_name="EET_SIDE">
+  </element>
+  <element name="REAR" internal_name="EET_REAR">
+  </element>
+  <element name="ROLLOVER" internal_name="EET_ROLLOVER">
+  </element>
+  <element name="NOT_SUPPORTED" internal_name="EET_NOT_SUPPORTED">
+  </element>
+  <element name="FAULT" internal_name="EET_FAULT">
+  </element>
+</enum>
+
+<enum name="FuelCutoffStatus">
+  <description>Reflects the status of the RCM fuel cutoff.</description>
+  <element name="TERMINATE_FUEL" internal_name="FCS_TERMINATE_FUEL">
+  </element>
+  <element name="NORMAL_OPERATION" internal_name="FCS_NORMAL_OPERATION">
+  </element>
+  <element name="FAULT" internal_name="FCS_FAULT">
+  </element>
+</enum>
+
+<enum name="PowerModeQualificationStatus">
+  <description>Reflects the status of the current power mode qualification.</description>
+  <element name="POWER_MODE_UNDEFINED">
+  </element>
+  <element name="POWER_MODE_EVALUATION_IN_PROGRESS">
+  </element>
+  <element name="NOT_DEFINED">
+  </element>
+  <element name="POWER_MODE_OK">
+  </element>
+</enum>
+
+<enum name="CarModeStatus">
+  <description>Reflects the status of the current car mode.</description>
+  <element name="NORMAL" internal_name="CMS_NORMAL">
+  </element>
+  <element name="FACTORY" internal_name="CMS_FACTORY">
+  </element>
+  <element name="TRANSPORT" internal_name="CMS_TRANSPORT">
+  </element>
+  <element name="CRASH" internal_name="CMS_CRASH">
+  </element>
+</enum>
+
+<enum name="PowerModeStatus">
+  <description>Reflects the status of the current power mode.</description>
+  <element name="KEY_OUT">
+  </element>
+  <element name="KEY_RECENTLY_OUT">
+  </element>
+  <element name="KEY_APPROVED_0">
+  </element>
+  <element name="POST_ACCESORY_0">
+  </element>
+  <element name="ACCESORY_1">
+  </element>
+  <element name="POST_IGNITION_1">
+  </element>
+  <element name="IGNITION_ON_2">
+  </element>
+  <element name="RUNNING_2">
+  </element>
+  <element name="CRANK_3">
+  </element>
+</enum>
+
 <!-- End of IVI part-->
 
 <struct name="ButtonCapabilities">
@@ -1081,9 +1183,6 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
-  <param name="imageFields" type="Common.ImageField" mandatory="false" minsize="1" maxsize="100" array="true">
-    <description>A set of all fields that support images. See ImageField</description>
-  </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
@@ -1091,15 +1190,6 @@
   </param>
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
-  </param>
-  <param name="templatesAvailable" type="String" minsize="0" mandatory="false" maxsize="100" maxlength="100" array="true">
-    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
-  </param>
-  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
-    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
-  </param>
-  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
-    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
   </param>
 </struct>
 
@@ -1400,58 +1490,130 @@
 </param>
 </struct>
 
-  <struct name="BodyInformation">
+<struct name="BodyInformation">
   <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>Must be true if the park brake is active</description>
-</param>
+  </param>
   <param name="ignitionStableStatus" type="Common.IgnitionStableStatus" mandatory="true">
     <description>Information about the ignition switch. See IgnitionStableStatus.</description>
-</param>
+  </param>
   <param name="ignitionStatus" type="Common.IgnitionStatus" mandatory="true">
     <description>The status of the ignition. See IgnitionStatus.</description>
-</param>
+  </param>
 </struct>
 
 <struct name="DeviceStatus">
   <param name="voiceRecOn" type="Boolean" mandatory="false">
     <description>Must be true if the voice recording is on.</description>
-</param>
+  </param>
   <param name="btIconOn" type="Boolean" mandatory="false">
     <description>Must be true if Bluetooth icon is displayed.</description>
-</param>
+  </param>
   <param name="callActive" type="Boolean" mandatory="false">
     <description>Must be true if there is an active call..</description>
-</param>
+  </param>
   <param name="phoneRoaming" type="Boolean" mandatory="false">
     <description>Must be true if ther is a phone roaming.</description>
-</param>
+  </param>
   <param name="textMsgAvailable" type="Boolean" mandatory="false">
     <description>Must be true if the text message is available.</description>
-</param>
+  </param>
   <param name="battLevelStatus" type="Common.DeviceLevelStatus" mandatory="false">
     <description>Device battery level status. See DeviceLevelStatus.</description>
-</param>
+  </param>
   <param name="stereoAudioOutputMuted" type="Boolean" mandatory="false">
     <description>Must be true if stereo audio output is muted.</description>
-</param>
+  </param>
   <param name="monoAudioOutputMuted" type="Boolean" mandatory="false">
     <description>Must be true if mono audio output is muted.</description>
-</param>
+  </param>
   <param name="signalLevelStatus" type="Common.DeviceLevelStatus" mandatory="false">
     <description>Device signal level status. See DeviceLevelStatus.</description>
-</param>
+  </param>
   <param name="primaryAudioSource" type="Common.PrimaryAudioSource" mandatory="false">
     <description>See PrimaryAudioSource.</description>
-</param>
+  </param>
   <param name="eCallEventActive" type="Boolean" mandatory="false">
     <description>Must be true if emergency call event is active.</description>
-</param>
+  </param>
+</struct>
+
+<struct name="ECallInfo">
+  <param name="eCallNotificationStatus" type="Common.VehicleDataNotificationStatus">
+    <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
+  </param>
+  <param name="auxECallNotificationStatus" type="Common.VehicleDataNotificationStatus">
+    <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
+  </param>
+  <param name="eCallConfirmationStatus" type="Common.ECallConfirmationStatus">
+    <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
+  </param>
+</struct>
+
+<struct name="AirbagStatus">
+  <param name="driverAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="driverSideAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="driverCurtainAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="passengerAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="passengerCurtainAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="driverKneeAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="passengerSideAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="passengerKneeAirbagDeployed" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+</struct>
+
+<struct name="EmergencyEvent">
+  <param name="emergencyEventType" type="Common.EmergencyEventType">
+    <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
+  </param>
+  <param name="fuelCutoffStatus" type="Common.FuelCutoffStatus">
+    <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
+  </param>
+  <param name="rolloverEvent" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="maximumChangeVelocity" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+  <param name="multipleEvents" type="Common.VehicleDataEventStatus">
+    <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
+  </param>
+</struct>
+
+<struct name="ClusterModeStatus">
+  <param name="powerModeActive" type="Boolean">
+    <description>References signal "PowerMode_UB".</description>
+  </param>
+  <param name="powerModeQualificationStatus" type="Common.PowerModeQualificationStatus">
+    <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
+  </param>
+  <param name="carModeStatus" type="Common.CarModeStatus">
+    <description>References signal "CarMode". See CarMode.</description>
+  </param>
+  <param name="powerModeStatus" type="Common.PowerModeStatus">
+    <description>References signal "PowerMode". See PowerMode.</description>
+  </param>
 </struct>
 
 <struct name="MyKey">
   <param name="e911Override" type="Common.VehicleDataStatus" mandatory="true">
     <description>Indicates whether e911 override is on. See VehicleDataStatus.</description>
-</param>
+  </param>
 </struct>
 <!--end of IVI part-->
 
@@ -1523,7 +1685,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
-      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
     </function>
@@ -2278,12 +2440,13 @@
   </function>
   <function name="ShowConstantTBT" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
-    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="4">
+    <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="5">
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA
-          totalDistance.
+          ETA	  
+          totalDistance
+	  timeToDestination.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
@@ -2477,6 +2640,18 @@
     </param>
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>

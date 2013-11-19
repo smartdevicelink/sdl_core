@@ -257,7 +257,7 @@ bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
                                        hmi_apis::messageType::response);
   DBusMessageIter iter;
   dbus_message_iter_init(msg, &iter);
-  int code;
+  int code = 0;
   std::string message;
   smart_objects::SmartObject description(smart_objects::SmartType_Map);
   bool ret = GetHeader(&iter, &code, &message)
@@ -357,13 +357,12 @@ bool DBusAdapter::ProcessSignal(DBusMessage* msg,
 }
 
 bool DBusAdapter::SetArguments(DBusMessage* msg, const ListArgs& rules,
-                               smart_objects::SmartObject& args) {
+                               const smart_objects::SmartObject& args) {
   DBusMessageIter iter;
   dbus_message_iter_init_append(msg, &iter);
   size_t size = rules.size();
   for (size_t i = 0; i < size; ++i) {
-    smart_objects::SmartObject& param =
-        const_cast<smart_objects::SmartObject&>(args.getElement(rules[i]->name));
+    const smart_objects::SmartObject& param = args.getElement(rules[i]->name);
     if (!SetOneArgument(&iter, rules[i], param)) {
       return false;
     }
@@ -373,7 +372,7 @@ bool DBusAdapter::SetArguments(DBusMessage* msg, const ListArgs& rules,
 
 bool DBusAdapter::SetOneArgument(DBusMessageIter* iter,
                                  const ParameterDescription* rules,
-                                 smart_objects::SmartObject& param) {
+                                 const smart_objects::SmartObject& param) {
   if (rules->obligatory) {
     if (param.isValid()) {
       return SetValue(iter, rules, param);
@@ -390,8 +389,8 @@ bool DBusAdapter::SetOneArgument(DBusMessageIter* iter,
 bool DBusAdapter::SetValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
-    smart_objects::SmartObject& param) {
-  LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name << " = " << param.asString());
+    const smart_objects::SmartObject& param) {
+ // LOG4CXX_DEBUG(logger_, "DBus: Set param " << rules->name << " = " << param.asString());
   int type = 0;
   void* value = 0;
   dbus_int32_t integerValue = 0;
@@ -443,7 +442,7 @@ bool DBusAdapter::SetValue(
 bool DBusAdapter::SetOptionalValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
-    smart_objects::SmartObject &param) {
+    const smart_objects::SmartObject &param) {
   DBusMessageIter sub_iter;
   if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL,
                                         &sub_iter)) {
@@ -474,7 +473,7 @@ bool DBusAdapter::SetOptionalValue(
 bool DBusAdapter::SetArrayValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ArrayDescription* rules,
-    smart_objects::SmartObject& param) {
+    const smart_objects::SmartObject& param) {
   DBusMessageIter sub_iter;
   if (!dbus_message_iter_open_container(iter, DBUS_TYPE_ARRAY,
                                         rules->element_dbus_signature,
@@ -498,7 +497,7 @@ bool DBusAdapter::SetArrayValue(
 bool DBusAdapter::SetStructValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::StructDescription* rules,
-    smart_objects::SmartObject& structure) {
+    const smart_objects::SmartObject& structure) {
   DBusMessageIter sub_iter;
   if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL,
                                         &sub_iter)) {
@@ -508,9 +507,8 @@ bool DBusAdapter::SetStructValue(
   const ParameterDescription** entry;
   entry = rules->parameters;
   while (*entry != NULL) {
-    smart_objects::SmartObject& param =
-        const_cast<smart_objects::SmartObject&>(structure.getElement(
-            (*entry)->name));
+    const smart_objects::SmartObject& param =
+        structure.getElement((*entry)->name);
     if (!SetOneArgument(&sub_iter, *entry, param)) {
       return false;
     }
@@ -532,9 +530,9 @@ bool DBusAdapter::GetHeader(DBusMessageIter* iter, int* code,
     LOG4CXX_ERROR(logger_, "DBus: Unknown format of header");
     return false;
   }
-  LOG4CXX_DEBUG(logger_, "DBus: Code of response " << *code);
   dbus_message_iter_get_basic(iter, &intValue);
   *code = intValue;
+  LOG4CXX_DEBUG(logger_, "DBus: Code of response " << *code);
 
   dbus_message_iter_next(iter);
 

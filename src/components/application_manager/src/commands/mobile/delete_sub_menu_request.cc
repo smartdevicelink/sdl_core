@@ -87,6 +87,11 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
+
+    if (!(*it->second).keyExists(strings::menu_params)) {
+      continue;
+    }
+
     if ((*message_)[strings::msg_params][strings::menu_id].asInt()
         == (*it->second)[strings::menu_params]
                          [hmi_request::parent_id].asInt()) {
@@ -107,6 +112,11 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
+
+    if (!(*it->second).keyExists(strings::menu_params)) {
+      continue;
+    }
+
     if ((*message_)[strings::msg_params][strings::menu_id].asInt()
         == (*it->second)[strings::menu_params]
                          [hmi_request::parent_id].asInt()) {

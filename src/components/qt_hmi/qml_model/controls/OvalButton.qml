@@ -149,8 +149,8 @@ Item {
         anchors.bottomMargin: 10
         anchors.topMargin: 10
         visible: false
-
     }
+
     HueSaturation {
         anchors.fill: background
         source: background
@@ -200,12 +200,14 @@ Item {
         }
         Text {
             id: label
+            width: image.visible ? parent.width - image.width : parent.width
             color: Constants.primaryColor
             anchors.centerIn: parent
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: Constants.ovalButtonFontSize
             visible: false
+            elide: Text.ElideRight
         }
         HueSaturation {
             anchors.fill: label
