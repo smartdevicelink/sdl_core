@@ -939,6 +939,20 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   messages_from_mobile_.push(message);
 }
 
+void ApplicationManagerImpl::OnMessageReceived(const protocol_handler::
+                                               RawMessagePtr& message) {
+
+}
+
+void ApplicationManagerImpl::OnLastMobileMessageSent(unsigned int key) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnLastMobileMessageSent");
+  if (NULL != connection_handler_) {
+    static_cast<connection_handler::ConnectionHandlerImpl*>
+      (connection_handler_)->CloseConnection(key);
+  }
+}
+
+
 void ApplicationManagerImpl::OnMessageReceived(
   utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");

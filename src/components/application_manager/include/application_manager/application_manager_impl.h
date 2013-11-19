@@ -46,7 +46,7 @@
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 #include "media_manager/media_manager_impl.h"
-
+#include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 
@@ -111,6 +111,7 @@ typedef std::map<unsigned int, MobileRequest> MessageChain;
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public mobile_message_handler::MobileMessageObserver,
+  public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
   public HMICapabilities {
   public:
@@ -384,6 +385,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      */
     virtual void OnMobileMessageReceived(const MobileMessage& message);
+
+    virtual void OnMessageReceived(const protocol_handler::
+                                   RawMessagePtr& message);
+
+    virtual void OnLastMobileMessageSent(unsigned int key);
 
     void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message);

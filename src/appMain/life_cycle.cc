@@ -99,6 +99,7 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
+  protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
   media_manager_->setVideoRedecoder(NULL);
 
