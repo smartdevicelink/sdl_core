@@ -61,18 +61,54 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      */
     sliderRequestId: null,
 
+    timer: null,
+
+    timeout: null,
+
     /**
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
     deactivate: function(ABORTED) {
         this._super();
+        this.timeout = null;
+        clearTimeout(this.timer);
+        this.timer = null;
+
         if (ABORTED === true) {
             FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
         } else {
             FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
         }
     },
+
+    activate: function(text, timeout) {
+        if( text ){
+            this.set( 'caption', text );
+        }
+
+        this.set( 'active', true );
+
+        this.set('timeout', timeout);
+
+        this.timer = setTimeout(function () {
+            if (SDL.SliderView.active) {
+                SDL.SliderView.deactivate(true);
+            }
+        }, timeout);
+    },
+
+    dataChange: function(){
+        if (this.timeout){
+            var self = this;
+
+            clearTimeout(this.timer);
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.Slider");
+            this.timer = setTimeout(function () {
+                self.deactivate(true);
+            }, this.timeout);
+        }
+    }.observes('this.adjustControl.sliderValue.value'),
 
     adjustControl: Em.ContainerView.extend( {
 
@@ -127,15 +163,26 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
         this.set( 'sliderRequestId', message.id );
 
         this.set( 'headerLabel.content', data.sliderHeader );
-        this.set( 'footerLabel.content', data.sliderFooter ? data.sliderFooter : '' );
         this.get( 'adjustControl.sliderValue' ).set( 'range', data.numTicks );
         this.get( 'adjustControl.sliderValue' ).set( 'value', data.position );
-
-        this.footerLabel.data = data.sliderFooter;
 
         setTimeout( function() {
             SDL.SliderView.adjustControl.rerender();
         }, 1 );
+
+        if (!data.sliderFooter) {
+            this.set('footerLabel.content', '');
+            return;
+        }
+
+        this.footerLabel.data = data.sliderFooter;
+
+        if (data.sliderFooter.length != data.numTicks) {
+            this.set( 'footerLabel.content', data.sliderFooter[0] );
+        } else {
+            // Magick number is array index correction
+            this.set( 'footerLabel.content', data.sliderFooter[data.position - 1] );
+        }
     },
 
     /**

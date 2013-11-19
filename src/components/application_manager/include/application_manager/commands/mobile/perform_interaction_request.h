@@ -88,15 +88,48 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event);
 
   /**
    * @brief Timer callback function
    *
    */
-  void onTimer() const;
+  void onTimer();
 
  private:
+  /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+    virtual void onTimeOut();
+
+  /*
+   * @brief Function will be called when VR_OnCommand event
+   * comes
+   *
+   * @param message which should send to mobile side
+   *
+   */
+  void ProcessVRNotification(const smart_objects::SmartObject& message);
+
+  /*
+   * @brief Sends VRDeleteCommand request to HMI
+   *
+   * @param app_id Application ID
+   *
+   */
+  void SendVrDeleteCommand(Application* const app);
+
+  /*
+   * @brief Sends PerformInteraction response to mobile side
+   *
+   * @param message which should send to mobile side
+   *
+   */
+  void ProcessPerformInteractionResponse
+  (const smart_objects::SmartObject& message);
+
   /*
    * @brief Sends VR AddCommand request to HMI
    *
@@ -168,6 +201,9 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
+  bool is_keyboard_trigger_source_;
+  mobile_apis::TriggerSource::eType trigger_source_;
+  bool is_vr_help_item_;
 };
 
 }  // namespace commands

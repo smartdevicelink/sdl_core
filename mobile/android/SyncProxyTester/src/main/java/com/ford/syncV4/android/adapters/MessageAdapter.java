@@ -1,11 +1,8 @@
 package com.ford.syncV4.android.adapters;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +13,10 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public class MessageAdapter extends ArrayAdapter<Object> {
 	private LayoutInflater vi;
@@ -108,17 +109,13 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 				} catch (NoSuchMethodException e) {
 					lblBottom.setVisibility(View.GONE);
 				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
 				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
 				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
 				}
 			}
 		}

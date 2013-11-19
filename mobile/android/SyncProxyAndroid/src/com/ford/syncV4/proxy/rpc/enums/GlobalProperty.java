@@ -4,7 +4,9 @@ public enum GlobalProperty{
     HELPPROMPT,
     TIMEOUTPROMPT,
     VRHELPTITLE,
-    VRHELPITEMS;
+    KEYBOARDPROPERTIES,
+    VRHELPITEMS,
+    MENUNAME, MENUICON;
 
     public static GlobalProperty valueForString(String value) {
         return valueOf(value);

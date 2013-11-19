@@ -42,7 +42,8 @@ RequestInfo::RequestInfo(int FunctionId, int ConnectionID
   : functionID_(FunctionId),
     connectionID_(ConnectionID),
     correlationID_(CorrelationId),
-    customTimeout_(CustomTimeout)
+    customTimeout_(CustomTimeout),
+    delayed_delete_(false)
 {}
 
 bool operator==(const RequestInfo& left, const RequestInfo& right) {

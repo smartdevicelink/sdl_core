@@ -185,13 +185,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:text="@string/show_includeSoftButtons" />
+                android:text="@string/includeSoftButtons" />
 
             <Button
                 android:id="@+id/show_btnSoftButtons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/show_softButtons" />
+                android:text="@string/softButtons" />
         </LinearLayout>
 
         <CheckBox

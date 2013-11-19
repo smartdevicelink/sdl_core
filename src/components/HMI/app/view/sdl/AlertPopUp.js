@@ -50,7 +50,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
             'message1',
             'message2',
             'message3',
-            'softbuttons'
+            'softbuttons',
+            'progressIndicatorView'
         ],
 
     /**
@@ -68,6 +69,10 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
     timer: null,
 
+    timeout: null,
+
+    progressIndicator: false,
+
     /**
      * Wagning image on Alert PopUp
      */
@@ -75,6 +80,15 @@ SDL.AlertPopUp = Em.ContainerView.create({
         elementId: 'alertPopUpImage',
 
         classNames: 'alertPopUpImage'
+    }),
+
+    /**
+     * Wagning image on Alert PopUp
+     */
+    progressIndicatorView: Em.View.extend({
+        elementId: 'progressIndicator',
+
+        classNameBindings: 'this.parentView.progressIndicator:progressIndicator'
     }),
 
     applicationName: SDL.Label.extend({
@@ -148,10 +162,8 @@ SDL.AlertPopUp = Em.ContainerView.create({
      */
     addSoftButtons: function(params, appID) {
 
-        var count = this.get('softbuttons.buttons.childViews').length - 1;
-        for(var i = count; i >= 0; i--){
-            this.get('softbuttons.buttons.childViews').removeObject(this.get('softbuttons.buttons.childViews')[0]);
-        }
+        this.softbuttons.buttons.removeAllChildren();
+        this.softbuttons.buttons.rerender();
 
         if(params){
 
@@ -195,9 +207,9 @@ SDL.AlertPopUp = Em.ContainerView.create({
 
         this.set('alertRequestId', alertRequestId);
 
-        if (message.softButtons) {
-            this.addSoftButtons(message.softButtons, message.appID);
-        }
+        this.addSoftButtons(message.softButtons, message.appID);
+
+        this.set('progressIndicator', message.progressIndicator);
 
         this.set('appName', SDL.SDLController.getApplicationModel(message.appID).appName);
 
@@ -219,6 +231,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
         }
         
         this.set('active', true);
+        this.set('timeout', message.duration);
         SDL.SDLController.onSystemContextChange();
 
         clearTimeout(this.timer);

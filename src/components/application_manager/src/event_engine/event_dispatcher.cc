@@ -67,7 +67,8 @@ void EventDispatcher::raise_event(const Event& event) {
     }
   }
 
-  if (hmi_apis::messageType::response == event.smart_object_type()) {
+  if (hmi_apis::messageType::response == event.smart_object_type() ||
+      hmi_apis::messageType::error_response == event.smart_object_type()) {
     list = observers_[event.id()][event.smart_object_correlation_id()];
   }
 

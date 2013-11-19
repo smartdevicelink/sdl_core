@@ -1,13 +1,13 @@
 package com.ford.syncV4.android.module.reader;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import android.annotation.SuppressLint;
-import android.util.Log;
 
 /**
  * Reads the binary data from the file which name is specified by the input
@@ -69,7 +69,7 @@ public class FileBinaryDataReader implements BinaryDataReader {
 				try {
 					is.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
 				}
 			}
 		}

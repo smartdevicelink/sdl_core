@@ -107,6 +107,11 @@ public class FunctionID {
              */
             put(Names.OnEncodedSyncPData, 98304);
             put(Names.OnSyncPData, 98305);
+
+            // OnKeyboardInput
+            put(Names.OnKeyboardInput, 32779);
+            // OnTouchEvent
+            put(Names.OnTouchEvent, 32780);
         }};
     }
 }

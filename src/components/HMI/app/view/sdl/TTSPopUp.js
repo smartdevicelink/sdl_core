@@ -85,11 +85,18 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         }, 2000); // 2 second timeout for TTS popUp
     },
 
-    DeactivateTTS: function(id) {
+    DeactivateTTS: function(aborted) {
 
-        FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
-            this.requestId,
-            "TTS.Speak");
+        if (aborted) {
+            FFW.TTS.sendError(SDL.SDLModel.resultCode["ABORTED"],
+                this.requestId,
+                "TTS.Speak",
+                "TTS Speak request aborted");
+        } else {
+            FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
+                this.requestId,
+                "TTS.Speak");
+        }
 
         this.requestId = null;
 

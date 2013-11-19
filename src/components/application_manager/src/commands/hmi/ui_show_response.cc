@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_show_response.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -46,10 +46,9 @@ UIShowResponse::~UIShowResponse() {
 void UIShowResponse::Run() {
   LOG4CXX_INFO(logger_, "UIShowResponse::Run");
 
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::ShowID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::UI_Show);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

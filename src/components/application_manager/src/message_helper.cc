@@ -32,6 +32,7 @@
 
 #include <set>
 #include <string>
+#include <algorithm>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
@@ -40,77 +41,40 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "connection_handler/connection_handler_impl.h"
 
 namespace application_manager {
 
-const VehicleData MessageHelper::vehicle_data_ = { {
-    strings::gps,
-    VehicleDataType::GPS
-  }, { strings::speed, VehicleDataType::SPEED }, {
-    strings::rpm, VehicleDataType::RPM
-  }, {
-    strings::fuel_level,
-    VehicleDataType::FUELLEVEL
-  }, {
-    strings::fuel_level_state,
-    VehicleDataType::FUELLEVEL_STATE
-  }, {
-    strings::instant_fuel_consumption,
-    VehicleDataType::FUELCONSUMPTION
-  }, {
-    strings::external_temp,
-    VehicleDataType::EXTERNTEMP
-  }, { strings::vin, VehicleDataType::VIN }, {
-    strings::prndl, VehicleDataType::PRNDL
-  }, {
-    strings::tire_pressure,
-    VehicleDataType::TIREPRESSURE
-  }, {
-    strings::odometer,
-    VehicleDataType::ODOMETER
-  }, {
-    strings::belt_status,
-    VehicleDataType::BELTSTATUS
-  }, {
-    strings::body_information,
-    VehicleDataType::BODYINFO
-  }, {
-    strings::device_status,
-    VehicleDataType::DEVICESTATUS
-  }, {
-    strings::e_call_info,
-    VehicleDataType::ECALLINFO
-  }, {
-    strings::airbag_status,
-    VehicleDataType::AIRBAGSTATUS
-  }, {
-    strings::emergency_event,
-    VehicleDataType::EMERGENCYEVENT
-  }, {
-    strings::cluster_mode_status,
-    VehicleDataType::CLUSTERMODESTATUS
-  }, {
-    strings::my_key,
-    VehicleDataType::MYKEY
-  }, {
-    strings::driver_braking,
-    VehicleDataType::BRAKING
-  }, {
-    strings::wiper_status,
-    VehicleDataType::WIPERSTATUS
-  }, {
-    strings::head_lamp_status,
-    VehicleDataType::HEADLAMPSTATUS
-  },
+const VehicleData MessageHelper::vehicle_data_ =
+{ {strings::gps, VehicleDataType::GPS},
+  {strings::speed, VehicleDataType::SPEED },
+  {strings::rpm, VehicleDataType::RPM},
+  {strings::fuel_level, VehicleDataType::FUELLEVEL},
+  {strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE},
+  {strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION},
+  {strings::external_temp, VehicleDataType::EXTERNTEMP},
+  {strings::vin, VehicleDataType::VIN },
+  {strings::prndl, VehicleDataType::PRNDL},
+  {strings::tire_pressure, VehicleDataType::TIREPRESSURE},
+  {strings::odometer, VehicleDataType::ODOMETER},
+  {strings::belt_status, VehicleDataType::BELTSTATUS},
+  {strings::body_information, VehicleDataType::BODYINFO},
+  {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::e_call_info, VehicleDataType::ECALLINFO},
+  {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
+  {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
+  {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
+  {strings::my_key, VehicleDataType::MYKEY},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},
    */
-  { strings::engine_torque, VehicleDataType::ENGINETORQUE }, {
-    strings::acc_pedal_pos, VehicleDataType::ACCPEDAL
-  }, {
-    strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL
-  },
+  {strings::engine_torque, VehicleDataType::ENGINETORQUE },
+  {strings::acc_pedal_pos, VehicleDataType::ACCPEDAL},
+  {strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL},
 };
 
 void MessageHelper::SendHMIStatusNotification(
@@ -661,12 +625,8 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
       if (((*i->second)[strings::cmd_icon].keyExists(strings::value))
           && (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
         msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
-
-        std::string file_path = file_system::FullPath(app->name());
-        file_path += "/";
-        file_path += (*i->second)[strings::cmd_icon][strings::value].asString();
-
-        msg_params[strings::cmd_icon][strings::value] = file_path;
+        msg_params[strings::cmd_icon][strings::value] =
+            (*i->second)[strings::cmd_icon][strings::value].asString();
       }
       (*ui_command)[strings::msg_params] = msg_params;
 
@@ -779,7 +739,9 @@ void MessageHelper::SendAddVRCommandToHMI(
     msg_params[strings::cmd_id] = cmd_id;
   }
   msg_params[strings::vr_commands] = vr_commands;
-  msg_params[strings::app_id] = app_id;
+  if (0 < app_id) {
+    msg_params[strings::app_id] = app_id;
+  }
   (*vr_command)[strings::msg_params] = msg_params;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
@@ -1034,6 +996,87 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   SendGlobalPropertiesToHMI(app);
 }
 
+void MessageHelper::SendNaviStartStream(
+  const std::string& url, int connection_key) {
+  smart_objects::SmartObject* start_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!start_stream) {
+    return;
+  }
+
+  (*start_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StartStream;
+  (*start_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*start_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*start_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*start_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // TODO(PV) : remove connectionhandler
+  unsigned int app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+      &app_id);
+
+  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+
+  /*Application* app =
+      ApplicationManagerImpl::instance()->application(connection_key);
+
+
+  if (NULL == app) {
+    return;
+  }*/
+
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::url] = url;
+
+  (*start_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
+}
+
+void MessageHelper::SendNaviStopStream(int connection_key) {
+  smart_objects::SmartObject* stop_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!stop_stream) {
+    return;
+  }
+
+  (*stop_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StopStream;
+  (*stop_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*stop_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*stop_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*stop_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // TODO(PV) : remove connectionhandler
+  unsigned int app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+      &app_id);
+
+  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+  msg_params[strings::app_id] = app_id;
+
+  (*stop_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
@@ -1074,6 +1117,12 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image, const Application* app) {
   const std::string& file_name = image[strings::value];
 
+  std::string str = file_name;
+  str.erase(remove(str.begin(), str.end(), ' '), str.end());
+  if (0 == str.size()) {
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
   std::string relative_file_path = app->name();
   relative_file_path += "/";
   relative_file_path += file_name;
@@ -1093,6 +1142,20 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   image[strings::value] = full_file_path;
 
   return mobile_apis::Result::SUCCESS;
+}
+
+bool MessageHelper::VerifySoftButtonText
+(smart_objects::SmartObject& soft_button) {
+  std::string text = soft_button[strings::text].asString();
+  text.erase(remove(text.begin(), text.end(), ' '), text.end());
+  text.erase(remove(text.begin(), text.end(), '\n'), text.end());
+  if (text.size()) {
+    return true;
+  } else {
+    soft_button.erase(strings::text);
+  }
+
+  return false;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -1128,6 +1191,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              request_soft_buttons[i].erase(strings::image);
+            }
             return verification_result;
           }
         } else {
@@ -1137,12 +1204,20 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
         if (!request_soft_buttons[i].keyExists(strings::text)) {
+          return mobile_apis::Result::INVALID_DATA;
+        }
+
+        if (!VerifySoftButtonText(request_soft_buttons[i])) {
           continue;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = request_soft_buttons[i].keyExists(strings::text);
+        bool text_exist = false;
+
+        if (request_soft_buttons[i].keyExists(strings::text)) {
+          text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+        }
 
         bool image_exist = false;
         if (image_supported) {
@@ -1158,8 +1233,13 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
+            request_soft_buttons[i].erase(strings::image);
             if (!text_exist) {
               return mobile_apis::Result::INVALID_DATA;
+            }
+            if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+                verification_result) {
+              return verification_result;
             }
           }
         }
@@ -1193,13 +1273,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 // TODO(VS): change printf to logger
 bool MessageHelper::VerifyApplicationName(
   smart_objects::SmartObject& msg_params) {
-  for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-    const std::string& tts_name = msg_params[strings::tts_name][i].asString();
-    if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-        ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-      printf("Invalid characters in tts name.\n");
-      return false;
-    }
+
+  if (msg_params.keyExists(strings::tts_name)) {
+    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
+        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
+        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
+            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+          printf("Invalid characters in tts name.\n");
+          return false;
+        }
+      }
   }
 
   const std::string& name = msg_params[strings::app_name].asString();

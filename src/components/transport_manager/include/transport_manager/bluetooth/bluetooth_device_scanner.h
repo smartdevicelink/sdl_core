@@ -55,7 +55,7 @@ class TransportAdapterController;
  * @brief Scan for devices using bluetooth.
  */
 class BluetoothDeviceScanner : public DeviceScanner {
- public:
+  public:
 
   /**
    * @brief Constructor.
@@ -66,10 +66,10 @@ class BluetoothDeviceScanner : public DeviceScanner {
   BluetoothDeviceScanner(TransportAdapterController* controller,
                          bool auto_repeat_search, int repeat_search_pause_sec);
 
-  /**
-   * @brief Destructor.
-   */
-  ~BluetoothDeviceScanner();
+    /**
+     * @brief Destructor.
+     */
+    ~BluetoothDeviceScanner();
 
   /**
    * @brief Main thread initialization.
@@ -77,12 +77,12 @@ class BluetoothDeviceScanner : public DeviceScanner {
   void Thread();
  protected:
 
-  /**
-   * @brief Start device scanner.
-   *
-   * @return Error information about reason of initialization failure.
-   */
-  virtual TransportAdapter::Error Init();
+    /**
+     * @brief Start device scanner.
+     *
+     * @return Error information about reason of initialization failure.
+     */
+    virtual TransportAdapter::Error Init();
 
   /**
    * @brief Terminates device scanner thread
@@ -96,16 +96,16 @@ class BluetoothDeviceScanner : public DeviceScanner {
    */
   virtual TransportAdapter::Error Scan();
 
-  /**
-   * @brief Check device scanner for initialization.
-   *
-   * @return true - initialized.
-   * false - not initialized.
-   */
-  virtual bool IsInitialised() const;
- private:
+    /**
+     * @brief Check device scanner for initialization.
+     *
+     * @return true - initialized.
+     * false - not initialized.
+     */
+    virtual bool IsInitialised() const;
+  private:
 
-  typedef std::vector<uint8_t> RfcommChannelVector;
+    typedef std::vector<uint8_t> RfcommChannelVector;
 
   /**
    * @brief Waits for external scan request or time out for repeated search or terminate request

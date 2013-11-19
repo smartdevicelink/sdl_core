@@ -1,3 +1,47 @@
+[CW47]
++ Use "Close Session" menu item to unregister app w/o disconnecting. When the app is started again, it reregisters itself automagically.
++ SyncProxyAndroid SDK: Add SyncProxyBase.closeSession() method that allows to close session w/o disconnecting.
++ SyncProxyAndroid SDK: a few changes to simplify testing.
+
+[CW46]
++ Reregister app when it has been disconnected due to language change.
++ SyncProxyAndroid SDK: add onAppUnregisteredAfterLanguageChange() callback to IProxyListenerBase to notify an app when it has been disconnected due to language change.
+
+[CW45]
++ Add the ability to stream MP4 or raw H264 data over MobileNavi.
+
+[CW43]
++ Fixed main thread blocking
++ Add RegisterAppInterface dialog.
++ Added KeyboardProperties to ResetGlobalProperties request
++ Added new API: TextFieldName new elements, KeyBoardproperties new param keyPreaaMode, etc.
++ Alert request: add progressIndicator parameter.
++ SyncProxyAndroid SDK: add SAVED value to Result enum.
+* Slider dialog: allow to set custom dynamic footer values.
+
+[CW42]
++ KeyboardProperties dialog: add keypressMode parameter.
+* SyncProxyAndroid SDK: add PrerecordedSpeech, and KeypressMode enums; add GEN3_8-INCH to DisplayType enum; add AUDIO_AAC to FileType enum; add keypressMode parameter to KeyboardProperties request.
+
+[CW40]
++ SyncProxyAndroid SDK: add SEARCH value to ButtonName enum.
++ SetGlobalProperties dialog: add menuTitle, menuIcon, and keyboardProperties parameters.
++ ShowConstantTBT dialog: add timeToDestination and nextTurnIcon parameters.
++ SyncProxyAndroid SDK: Extend ShowConstantTBT and SetGlobalProperties request objects.
++ PerformInteraction dialog: add interactionLayout parameter.
++ SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
+
+[CW35.3]
+*Fixed crashes on end session/disconnect.
+
+[CW35.2]
+*OnKeyboard event support added
+
+[CW35.1]
+*Added MobileNavi AppType registration button
+*Added Mobile Navi session support
+*Added USB Support
+
 [CW37]
 * SoftButtons, PerformInteraction, Show, SetGlobalProperties dialogs: change default imageFilename.png to action.png.
 

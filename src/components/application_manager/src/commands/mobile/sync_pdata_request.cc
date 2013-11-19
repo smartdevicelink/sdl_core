@@ -86,11 +86,11 @@ void SyncPDataRequest::Run() {
 
     relative_file_path += sync_file_name;
 
-    LOG4CXX_ERROR(logger_, "relative_file_path = " << relative_file_path);
+    LOG4CXX_INFO(logger_, "relative_file_path = " << relative_file_path);
 
     if (file_system::Write(file_system::FullPath(relative_file_path),
                            char_vector_pdata)) {
-      LOG4CXX_ERROR(logger_, "Successfully write data to file");
+      LOG4CXX_INFO(logger_, "Successfully write data to file");
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       LOG4CXX_ERROR(logger_, "Failed wrire to file");

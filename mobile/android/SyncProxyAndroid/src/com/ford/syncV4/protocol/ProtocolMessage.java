@@ -15,7 +15,11 @@ public class ProtocolMessage {
 	
 	private byte[] _data = null;
 	private byte[] _bulkData = null;
-	
+
+    public static byte RPCTYPE_REQUEST = 0x00;
+    public static byte RPCTYPE_RESPONSE = 0x01;
+    public static byte RPCTYPE_NOTIFICATION = 0x02;
+
 	public ProtocolMessage() {}
 
 	public byte getVersion() {
@@ -38,10 +42,19 @@ public class ProtocolMessage {
 		return _data;
 	}
 
-	public void setData(byte[] data) {
-		this._data = data;
-		this._jsonSize = data.length;
-	}
+    public void setData(byte[] data) {
+        this._data = new byte[data.length];
+        System.arraycopy(data, 0, this._data, 0, _data.length);
+        this._jsonSize = data.length;
+    }
+
+    public void setData(byte[] data, int length) {
+        if (this._data != null)
+            this._data = null;
+        this._data = new byte[length];
+        System.arraycopy(data, 0, this._data, 0, length);
+        this._jsonSize = 0;
+    }
 
 	public byte[] getBulkData() {
 		return _bulkData;

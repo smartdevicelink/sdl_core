@@ -23,8 +23,236 @@
 	left: 20px;
 }
 
+#keyboard_view .back-button{
+    top: 58px;
+}
+
+#keyboard_view .controlls{
+    top: 350px;
+    width: 800px;
+    height: 75px;
+}
+
+#keyboard_view .controll{
+    margin: 10px;
+    height: 60px;
+    border: 1px solid #333;
+    text-align: center;
+    line-height: 60px;
+    border-radius: 3px;
+}
+
+#keyboard_view .controlls .leftBtn{
+    width: 130px;
+    left: 0px;
+}
+
+#keyboard_view .controlls .numericBtn{
+    width: 60px;
+    left: 145px;
+}
+
+#keyboard_view .controlls .symbolBtn{
+    width: 60px;
+    left: 220px;
+}
+
+#keyboard_view .controlls .spaceBtn{
+    width: 215px;
+    left: 295px;
+}
+
+#keyboard_view .controlls .caseSwitchBtn{
+    width: 60px;
+    left: 525px;
+}
+
+#keyboard_view .controlls .localisationBtn{
+    width: 60px;
+    left: 600px;
+}
+
+#keyboard_view .controlls .searchBtn{
+    width: 100px;
+    left: 677px;
+}
+
+#keyboard_view .keyboardLayout{
+    width: 750px;
+    height: 185px;
+    top: 170px;
+    left: 25px;
+}
+
+#keyboard_view .keyboardLayout.wide{
+    left: 5px !important;
+}
+
+#keyboard_view .searchBar{
+    top: 58px;
+    width: 666px;
+    height: 49px;
+    left: 120px;
+}
+
+#keyboard_view input{
+    width: 597px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    background: rgba(119, 119, 119, 0.42);
+    cursor: pointer;
+    font-size: 32px;
+    color: #FFF;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#keyboard_view .microphone{
+    text-align: center;
+    line-height: 49px;
+}
+
+#keyboard_view .clearBtn{
+    right: 0px;
+    top: 0px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    font-size: 32px;
+    text-align: center;
+    line-height: 50px;
+}
+
+#keyboard_view .microphone{
+    left: 63px;
+    top: 58px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+#keyboard_view .keyboardLayout .ffw-button{
+    width: 60px;
+    height: 50px;
+    border-radius: 3px;
+    border: 1px solid #333;
+    margin: 5px;
+    font-size: 42px;
+    text-align: center;
+    line-height: 50px;
+}
+#keyboard_view .keyboardLayout .k1{
+    left: 75px;
+}
+#keyboard_view .keyboardLayout .k2{
+    left: 150px;
+}
+#keyboard_view .keyboardLayout .k3{
+    left: 225px;
+}
+#keyboard_view .keyboardLayout .k4{
+    left: 300px;
+}
+#keyboard_view .keyboardLayout .k5{
+    left: 375px;
+}
+#keyboard_view .keyboardLayout .k6{
+    left: 450px;
+}
+#keyboard_view .keyboardLayout .k7{
+    left: 525px;
+}
+#keyboard_view .keyboardLayout .k8{
+    left: 600px;
+}
+#keyboard_view .keyboardLayout .k9{
+    left: 675px;
+}
+#keyboard_view .keyboardLayout .k10{
+    left: 38px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k11{
+    left: 113px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k12{
+    left: 188px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k13{
+    left: 263px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k14{
+    left: 338px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k15{
+    left: 413px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k16{
+    left: 488px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k17{
+    left: 563px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k18{
+    left: 638px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k19{
+    left: 713px;
+    top: 62px;
+}
+#keyboard_view .keyboardLayout .k20{
+    left: 0px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k21{
+    left: 75px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k22{
+    left: 150px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k23{
+    left: 225px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k24{
+    left: 300px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k25{
+    left: 375px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k26{
+    left: 450px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k27{
+    left: 525px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k28{
+    left: 600px;
+    top: 124px;
+}
+#keyboard_view .keyboardLayout .k29{
+    left: 675px;
+    top: 124px;
+}
 #infoTable.infoTable {
-	width: 375px;
+	width: 400px;
 	height: 96px;
 	top: 308px;
 	left: 801px;
@@ -35,7 +263,7 @@
 }
 
 #infoTable .sdlGPLabel {
-	width: 157px;
+	width: 190px;
 	border-right: 1px solid #14100F;
 	height: 96px;
 	position: relative;

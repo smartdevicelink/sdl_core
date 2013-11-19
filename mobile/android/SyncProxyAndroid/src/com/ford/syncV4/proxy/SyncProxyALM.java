@@ -11,11 +11,13 @@ import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
 import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.VehicleType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -232,7 +234,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version) throws SyncException {
 		super(	listener, 
@@ -246,13 +248,14 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				syncMsgVersion,
 				languageDesired,
 				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
-				/*App Type*/null,
+				/*App Type*/appHMIType,
 				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread,
 				preRegister,
 				version,
-				new BTTransportConfig());
+				new BTTransportConfig(),
+                null);
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
@@ -501,7 +504,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
 			BaseTransportConfig transportConfig) throws SyncException {
@@ -516,20 +519,58 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				syncMsgVersion,
 				languageDesired,
 				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
-				/*App Type*/null,
+				/*App Type*/appHMIType,
 				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread,
 				preRegister,
 				version,
-				transportConfig);
+				transportConfig,
+                null);
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
 				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
 	}
-		
-	/***************************************** END OF TRANSPORT SWITCHING SUPPORT ***************************************/
+
+    // TODO: use Builder here
+    public SyncProxyALM(IProxyListenerALM listener,
+                        SyncProxyConfigurationResources syncProxyConfigurationResources,
+                        String appName, String ngnMediaScreenAppName,
+                        Vector<String> vrSynonyms, Boolean isMediaApp,
+                        Vector<AppHMIType> appHMIType,
+                        SyncMsgVersion syncMsgVersion, Language languageDesired,
+                        Language hmiDisplayLanguageDesired, String appID,
+                        String autoActivateID, boolean callbackToUIThread,
+                        boolean preRegister, int version,
+                        BaseTransportConfig transportConfig,
+                        SyncConnection connection) throws SyncException {
+		super(	listener,
+				syncProxyConfigurationResources,
+				/*enable advanced lifecycle management*/true,
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/appHMIType,
+				/*App ID*/appID,
+				autoActivateID,
+				callbackToUIThread,
+				preRegister,
+				version,
+				transportConfig,
+                connection);
+
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
+				"callbackToUIThread, version, transportConfig, and connection", SYNC_LIB_TRACE_KEY);
+	}
+
+    /***************************************** END OF TRANSPORT SWITCHING SUPPORT ***************************************/
 	
 	// Allow applications using ALM to reset the proxy (dispose and reinstantiate)
 	/**
@@ -540,7 +581,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	public void resetProxy() throws SyncException {
 		super.cycleProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT);
 	}
-	
+
 	/********* Getters for values returned by RegisterAppInterfaceResponse **********/
 	
 	/**

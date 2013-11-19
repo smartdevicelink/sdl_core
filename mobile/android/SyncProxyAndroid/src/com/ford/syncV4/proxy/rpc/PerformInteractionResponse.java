@@ -43,4 +43,14 @@ public class PerformInteractionResponse extends RPCResponse {
             parameters.put(Names.triggerSource, triggerSource );
         }
     }
+    public void setManualTextEntry(String manualTextEntry) {
+        if (manualTextEntry != null) {
+            parameters.put(Names.manualTextEntry, manualTextEntry);
+        } else {
+            parameters.remove(Names.manualTextEntry);
+        }
+    }
+    public String getManualTextEntry() {
+        return (String) parameters.get(Names.manualTextEntry);
+    }
 }

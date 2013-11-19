@@ -106,8 +106,6 @@ void OnButtonPressNotification::SendButtonPress(const Application* app) {
       hmi_response::custom_button_id)) {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] =
         (*message_)[strings::msg_params][strings::custom_button_id];
-  } else {
-    (*on_btn_press)[strings::msg_params][strings::custom_button_id] = 0;
   }
 
   message_.reset(on_btn_press);

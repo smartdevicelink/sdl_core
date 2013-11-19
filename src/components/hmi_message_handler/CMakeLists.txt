@@ -3,6 +3,8 @@ include_directories (
   ../application_manager/include/
   ../utils/include/
   ../config_profile/include/
+  ../media_manager/include/
+  ../protocol_handler/include
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/Interfaces/

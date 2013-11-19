@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <vector>
 #include "mobile_message_handler/messages_from_mobile_app_handler.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
-
 #include "application_manager/message.h"
 
 namespace mobile_message_handler {
 
 log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("MessagesFromMobileAppHandler"));
+      log4cxx::Logger::getLogger("MessagesFromMobileAppHandler"));
 
 //! ---------------------------------------------------------------------------
 
@@ -56,12 +56,17 @@ void MessagesFromMobileAppHandler::threadMain() {
 
   while (1) {
     while (!handler->messages_from_mobile_app_.empty()) {
-      const protocol_handler::RawMessage* message = handler
+      const protocol_handler::RawMessagePtr& message = handler
           ->messages_from_mobile_app_.pop();
 
       application_manager::Message* outgoing_message =
           new application_manager::Message;
       // TODO(AK): change this
+      if (message->is_fully_binary()) {
+        // skip this message, not under handling of MMH
+        continue;
+      }
+
       if (message->protocol_version() == 1) {
         outgoing_message = handler->HandleIncomingMessageProtocolV1(message);
       } else if (message->protocol_version() == 2) {

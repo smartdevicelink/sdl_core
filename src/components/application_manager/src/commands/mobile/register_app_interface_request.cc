@@ -31,6 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
+#include <algorithm>
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -42,9 +44,9 @@ namespace application_manager {
 namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      timer_(NULL) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message),
+    timer_(NULL) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
@@ -66,63 +68,83 @@ bool RegisterAppInterfaceRequest::Init() {
 }
 
 void RegisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(
-      logger_,
-      "RegisterAppInterfaceRequest::Run "
-          << (*message_)[strings::params][strings::connection_key].asInt());
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "<< connection_key());
 
   // wait till all HMI capabilities initialized
   while (!ApplicationManagerImpl::instance()->IsHMICapabilitiesInitialized()) {
-    timer_->StartWait(1);
+    sleep(1);
+    // TODO(DK): timer_->StartWait(1);
+    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                             correlation_id(),
+                                                             default_timeout());
   }
 
-  Application* application_impl = ApplicationManagerImpl::instance()
-      ->RegisterApplication(message_);
+  if (CheckCoincidence()) {
+    LOG4CXX_ERROR_EXT(logger_, "DUPLICATE_NAME");
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
 
-  if (!application_impl) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "Application " << ((*message_)[strings::msg_params][strings::app_name].asString()) << "  hasn't been registered!");
+  LOG4CXX_ERROR(logger_, "1");
+  MessageHelper::PrintSmartObject(*message_);
+
+  Application* app =
+      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+
+  LOG4CXX_ERROR(logger_, "2");
+    MessageHelper::PrintSmartObject(*message_);
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "Application " <<
+                      msg_params[strings::app_name].asString() <<
+                      "  hasn't been registered!");
   } else {
-    application_impl->set_mobile_app_id(
-        (*message_)[strings::msg_params][strings::app_id]);
+    app->set_mobile_app_id(msg_params[strings::app_id]);
+    app->set_is_media_application(msg_params[strings::is_media_application]);
 
-    application_impl->set_is_media_application(
-        (*message_)[strings::msg_params][strings::is_media_application]);
-
-    if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
-      application_impl->set_vr_synonyms(
-          (*message_)[strings::msg_params][strings::vr_synonyms]);
+    if (msg_params.keyExists(strings::vr_synonyms)) {
+      app->set_vr_synonyms(msg_params[strings::vr_synonyms]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(
-        strings::ngn_media_screen_app_name)) {
-      application_impl->set_ngn_media_screen_name(
-          (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]);
+    if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
+      app->set_ngn_media_screen_name(
+          msg_params[strings::ngn_media_screen_app_name]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-      application_impl->set_tts_name(
-          (*message_)[strings::msg_params][strings::tts_name]);
+    if (msg_params.keyExists(strings::tts_name)) {
+      app->set_tts_name(msg_params[strings::tts_name]);
     }
 
-    if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
-      application_impl->set_app_types(
-          (*message_)[strings::msg_params][strings::app_hmi_type]);
+    if (msg_params.keyExists(strings::app_hmi_type)) {
+      app->set_app_types(msg_params[strings::app_hmi_type]);
+
+      // check if app is NAVI
+      const int is_navi_type = mobile_apis::AppHMIType::NAVIGATION;
+      const smart_objects::SmartObject& app_type =
+          msg_params.getElement(strings::app_hmi_type);
+
+      for (size_t i = 0; i < app_type.length(); ++i) {
+        if (is_navi_type == app_type.getElement(i).asInt()) {
+          app->set_allowed_support_navigation(true);
+        }
+      }
     }
 
-    SendRegisterAppInterfaceResponseToMobile(*application_impl);
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*application_impl);
-    MessageHelper::SendHMIStatusNotification(*application_impl);
-    MessageHelper::SendVrCommandsOnRegisterAppToHMI(application_impl);
+    SendRegisterAppInterfaceResponseToMobile(*app);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+    MessageHelper::SendHMIStatusNotification(*app);
+    MessageHelper::SendVrCommandsOnRegisterAppToHMI(app);
   }
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-    const Application& application_impl) {
+  const Application& application_impl) {
   mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+    smart_objects::SmartType_Map);
 
   if (!params) {
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
@@ -134,9 +156,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      application_impl.version().max_supported_api_version;
+    APIVersion::kAPIV2;
   response_params[strings::sync_msg_version][strings::minor_version] =
-      application_impl.version().min_supported_api_version;
+    APIVersion::kAPIV2;
 
   response_params[strings::language] = app_manager->active_vr_language();
   response_params[strings::hmi_display_language] = app_manager
@@ -145,32 +167,32 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if ((*message_)[strings::msg_params][strings::language_desired].asInt()
       != app_manager->active_vr_language()
       || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
-          .asInt() != app_manager->active_ui_language()) {
+      .asInt() != app_manager->active_ui_language()) {
     LOG4CXX_WARN_EXT(
-        logger_,
-        "Wrong language on registering application " << application_impl.name());
+      logger_,
+      "Wrong language on registering application " << application_impl.name());
     LOG4CXX_ERROR_EXT(
-        logger_,
-        "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
+      logger_,
+      "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
     smart_objects::SmartObject& display_caps =
-        response_params[hmi_response::display_capabilities];
+      response_params[hmi_response::display_capabilities];
 
     display_caps[hmi_response::display_type] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::display_type);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::display_type);
     display_caps[hmi_response::text_fields] =
-        app_manager->display_capabilities()->getElement(
-            hmi_response::text_fields);
+      app_manager->display_capabilities()->getElement(
+        hmi_response::text_fields);
     display_caps[hmi_response::media_clock_formats] = app_manager
         ->display_capabilities()->getElement(hmi_response::media_clock_formats);
     if (app_manager->display_capabilities()->getElement(
-        hmi_response::image_capabilities).length() > 0) {
+          hmi_response::image_capabilities).length() > 0) {
       display_caps[hmi_response::graphic_supported] = true;
     } else {
       display_caps[hmi_response::graphic_supported] = false;
@@ -210,6 +232,118 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   SendResponse(true, result, "", params);
 }
+
+bool RegisterAppInterfaceRequest::CheckCoincidence() {
+
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckCoincidence ");
+
+    const smart_objects::SmartObject& msg_params =
+        (*message_)[strings::msg_params];
+
+    ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+
+    const std::set<Application*>& applications = app_manager->applications();
+    std::set<Application*>::const_iterator it = applications.begin();
+
+    for (; applications.end() != it; ++it) {
+
+      // name check
+      const std::string &curName = (*it)->name();
+      const std::string appName = msg_params[strings::app_name].asString();
+      if (appName == curName) {
+        LOG4CXX_ERROR(logger_, "Application name is known already.");
+        return true;
+      }
+
+      const smart_objects::SmartObject *tts = (*it)->tts_name();
+      std::vector<smart_objects::SmartObject> *curTTS = NULL;
+      if (NULL != tts) {
+        curTTS = tts->asArray();
+        CoincidencePredicateTTS t(appName);
+
+        if (std::any_of((*curTTS).begin(), (*curTTS).end(), t) ) {
+          LOG4CXX_ERROR(logger_, "Application name is known already.");
+          return true;
+        }
+      }
+
+      const smart_objects::SmartObject *vr = (*it)->vr_synonyms();
+      const std::vector<smart_objects::SmartObject>* curVR = NULL;
+      if (NULL != vr) {
+        curVR = vr->asArray();
+        CoincidencePredicateVR v(appName);
+
+        if (std::any_of(curVR->begin(), curVR->end(), v )) {
+          LOG4CXX_ERROR(logger_, "Application name is known already.");
+          return true;
+        }
+      }
+
+
+      // tts check
+      if (    msg_params.keyExists(strings::tts_name)) {
+
+        const std::vector<smart_objects::SmartObject> *newTTS = msg_params[strings::tts_name].asArray();
+
+        std::vector<smart_objects::SmartObject>::const_iterator it = newTTS->begin();
+        std::vector<smart_objects::SmartObject>::const_iterator itEnd = newTTS->end();
+
+        for (; it != itEnd; ++it) {
+          if (curName == (*it)[strings::text].asString()) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+
+          CoincidencePredicateTTS t((*it)[strings::text].asString());
+          if (    NULL != curTTS
+              &&  std::any_of(curTTS->begin(), curTTS->end(), t)) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+
+          CoincidencePredicateVR v((*it)[strings::text].asString());
+          if (    NULL != curVR
+              &&  std::any_of(curVR->begin(), curVR->end(), v)) {
+            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+            return true;
+          }
+        }
+      } // end tts check
+
+      if (msg_params.keyExists(strings::vr_synonyms)) {
+
+        const std::vector<smart_objects::SmartObject> *newVR = msg_params[strings::vr_synonyms].asArray();
+
+        std::vector<smart_objects::SmartObject>::const_iterator it = newVR->begin();
+        std::vector<smart_objects::SmartObject>::const_iterator itEnd = newVR->end();
+
+        for (; it != itEnd; ++it) {
+          if (curName == it->asString()) {
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+
+          CoincidencePredicateTTS t(it->asString());
+          if (    NULL !=curTTS
+              &&  std::any_of(curTTS->begin(), curTTS->end(), t)){
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+
+          CoincidencePredicateVR v(it->asString());
+          if (    NULL != curVR
+              &&  std::any_of(curVR->begin(), curVR->end(), v)) {
+            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+            return true;
+          }
+        }
+      } // end vr check
+
+    }// application for end
+
+    return false;
+} // method end
+
 
 }  // namespace commands
 

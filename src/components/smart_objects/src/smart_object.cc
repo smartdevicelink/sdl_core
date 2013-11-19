@@ -598,6 +598,15 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::asBinary() const {
   return convert_binary();
 }
 
+NsSmartDeviceLink::NsSmartObjects::SmartArray*
+NsSmartDeviceLink::NsSmartObjects::SmartObject::asArray() const {
+  if (m_type != SmartType_Array) {
+    return NULL;
+  }
+
+  return m_data.array_value;
+}
+
 NsSmartDeviceLink::NsSmartObjects::SmartObject&
 NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
     SmartBinary NewValue) {

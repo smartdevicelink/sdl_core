@@ -45,12 +45,73 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 mediaClock   : '<mediaClock>',
                 trackIcon    : 'images/sdl/audio_icon.jpg',
                 customPresets: [
-                    '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>', '<no definition>'
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
+                    '<no definition>'
                 ],
-                alignment    : "text-align:left"
+                alignment    : "text-align:center"
             }));
 
+            this.set('constantTBTParams', {
+                "navigationTexts":[
+                    {
+                        "fieldName": "navigationText1",
+                        "fieldText": "mainField1"
+                    },
+                    {
+                        "fieldName": "navigationText2",
+                        "fieldText": "mainField2"
+                    },
+                    {
+                        "fieldName": "ETA",
+                        "fieldText": "mainField3"
+                    },
+                    {
+                        "fieldName": "totalDistance",
+                        "fieldText": "mainField4"
+                    },
+                    {
+                        "fieldName": "navigationText",
+                        "fieldText": "mainField5"
+                    },
+                    {
+                        "fieldName": "timeToDestination",
+                        "fieldText": "mainField6"
+                    }
+                ],
+                "softButtons": [
+                    {
+                        "text" : "Menu",
+                        "isHighlighted" : true,
+                        "softButtonID" : 1
+                    },
+                    {
+                        "text" : "Custom button",
+                        "isHighlighted" : false,
+                        "softButtonID" : 2
+                    },
+                    {
+                        "text" : "+",
+                        "isHighlighted" : true,
+                        "softButtonID" : 3
+                    },
+                    {
+                        "text" : "-",
+                        "isHighlighted" : false,
+                        "softButtonID" : 4
+                    }
+                ]
+            });
+
             this.set('isPlaying', true);
+            this.set('globalProperties.helpPrompt', []);
+            this.set('globalProperties.timeoutPrompt', []);
+            this.set('globalProperties.keyboardProperties', Em.Object.create());
+            this.set('globalProperties.keyboardProperties.keyboardLayout', 'QWERTY');
+
             this.set('commandsList', {"top": []});
             this.set('softButtons', []);
         },

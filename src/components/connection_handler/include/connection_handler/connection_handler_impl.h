@@ -146,7 +146,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int Id (number) of new session if successful otherwise -1.
      */
     virtual unsigned int OnSessionStartedCallback(
-      transport_manager::ConnectionUID connection_handle);
+      transport_manager::ConnectionUID connection_handle,
+      unsigned char service_type);
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -159,7 +160,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual unsigned int OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char session_id, unsigned int hashCode);
+      unsigned char session_id, unsigned int hashCode,
+      unsigned char service_type);
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
@@ -191,9 +193,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param device_id Returned: DeviceID
      * \return int -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id,
-                                    std::list<int>* sessions_list,
-                                    unsigned int* device_id);
+    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id = 0,
+                                    std::list<int>* sessions_list = 0,
+                                    unsigned int* device_id = 0);
 
     /**
      * \brief information about given Connection Key.

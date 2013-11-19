@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+    <SurfaceView
+            android:layout_width="352px"
+            android:layout_height="288px"
+            android:id="@+id/surfaceView"
+            android:layout_alignParentLeft="true"
+
+            android:layout_alignParentTop="true"/>
+
+    <RelativeLayout
+            android:layout_width="320px"
+            android:layout_height="240px"
+            android:id="@+id/testLayout"
+            android:layout_below="@+id/surfaceView"
+
+            >
+
+        <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/imageView"
+                android:src="@drawable/lena"
+                />
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_button"
+                android:id="@+id/button"
+                android:onClick="endStream"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
+
+
+</RelativeLayout>

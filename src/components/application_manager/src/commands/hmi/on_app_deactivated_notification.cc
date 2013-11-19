@@ -54,9 +54,7 @@ void OnAppDeactivatedNotification::Run() {
   Application* app = ApplicationManagerImpl::instance()->active_application();
 
   if (NULL == app) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "Memory allocation in OnAppDeactivatedNotification::Run failed!");
+    LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
     return;
   }
 
@@ -82,6 +80,7 @@ void OnAppDeactivatedNotification::Run() {
               mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
+      ApplicationManagerImpl::instance()->DeactivateApplication(app);
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
@@ -94,6 +93,7 @@ void OnAppDeactivatedNotification::Run() {
           app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
+        ApplicationManagerImpl::instance()->DeactivateApplication(app);
         app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
       break;

@@ -6,6 +6,7 @@ import java.util.Vector;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
+import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.util.DebugTool;
 
 public class PerformInteraction extends RPCRequest {
@@ -175,6 +176,28 @@ public class PerformInteraction extends RPCRequest {
             parameters.put(Names.vrHelp, vrHelp);
         } else {
         	parameters.remove(Names.vrHelp);
+        }
+    }
+    public LayoutMode getInteractionLayout() {
+        Object obj = parameters.get(Names.interactionLayout);
+        if (obj instanceof LayoutMode) {
+            return (LayoutMode) obj;
+        } else if (obj instanceof String) {
+            LayoutMode theCode = null;
+            try {
+                theCode = LayoutMode.valueForString((String) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.interactionLayout, e);
+            }
+            return theCode;
+        }
+        return null;
+    }
+    public void setInteractionLayout(LayoutMode layoutMode) {
+        if (layoutMode != null) {
+            parameters.put(Names.interactionLayout, layoutMode);
+        } else {
+            parameters.remove(Names.interactionLayout);
         }
     }
 }

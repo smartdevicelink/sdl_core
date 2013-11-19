@@ -58,15 +58,6 @@ void GetDTCsResponse::Run() {
     }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(hmi_response::dtc)) {
-    (*message_)[strings::msg_params][strings::dtc_list] =
-        (*message_)[strings::msg_params][hmi_response::dtc];
-
-    (*message_)[strings::msg_params].erase(hmi_response::dtc);
-  }
-
-  (*message_)[strings::msg_params].erase(hmi_response::ecu_header);
-
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS == code) {

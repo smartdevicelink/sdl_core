@@ -143,14 +143,17 @@ void BluetoothDeviceScanner::DoInquiry() {
 
   const int device_id = hci_get_route(0);
   if (device_id < 0) {
-    LOG4CXX_INFO(logger_, "device_id < 0, exit DoInquiry");
+    LOG4CXX_INFO(logger_, "HCI device is not available");
+    shutdown_requested_ = true;
     controller_->SearchDeviceFailed(SearchDeviceError());
+    return;
   }
 
   int device_handle = hci_open_dev(device_id);
   if (device_handle < 0) {
     LOG4CXX_INFO(logger_, "device_handle < 0, exit DoInquiry");
     controller_->SearchDeviceFailed(SearchDeviceError());
+    return;
   }
 
   if (paired_devices_.empty()) {
@@ -454,7 +457,7 @@ void BluetoothDeviceScanner::Terminate() {
 
 TransportAdapter::Error BluetoothDeviceScanner::Scan() {
   LOG4CXX_TRACE_ENTER(logger_);
-  if ((!thread_started_) && shutdown_requested_) {
+  if ((!thread_started_) || shutdown_requested_) {
     LOG4CXX_INFO(logger_, "bad state");
     return TransportAdapter::BAD_STATE;
   }

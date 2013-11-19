@@ -48,11 +48,23 @@ SDL.SDLAppModel = Em.Object.extend({
         appName: '',
 
         /**
+         * Navigation streaming url
+         */
+        navigationStream: null,
+
+        /**
          * Chosen device name
          *
          * @type {String}
          */
         deviceName: '',
+
+        /**
+         * Global properties for current application
+         *
+         * @type {Object}
+         */
+        globalProperties: {},
 
         /**
          * Statusbar text
@@ -67,6 +79,13 @@ SDL.SDLAppModel = Em.Object.extend({
          * @type: {Em.Object}
          */
         appInfo: null,
+
+        /**
+         * Info navigation data for ShowConstantTBT request
+         *
+         * @type: {Object}
+         */
+        constantTBTParams: null,
 
         /**
          * Current language of applications UI component
@@ -194,9 +213,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     icon     : request.params.cmdIcon ? request.params.cmdIcon.value : null
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
@@ -213,8 +233,8 @@ SDL.SDLAppModel = Em.Object.extend({
         deleteCommand: function (commandID, requestID) {
 
             for (var i in this.commandsList) {
-                if (this.commandsList[i].filterProperty('commandID', commandID)) {
-                    if (i != this.currentSubMenuId) {
+                if (this.commandsList[i].filterProperty('commandID', commandID).length) {
+                    if (i != this.currentSubMenuId || this.currentSubMenuId == 'top') {
                         this.get('commandsList.' + i).removeObjects(this.get('commandsList.' + i).filterProperty('commandID', commandID));
                         SDL.SDLModel.deleteCommandResponse(SDL.SDLModel.resultCode["SUCCESS"], requestID);
                         return;
@@ -250,9 +270,10 @@ SDL.SDLAppModel = Em.Object.extend({
                     position: request.params.menuParams.position ? request.params.menuParams.position : 0
                 };
 
-                SDL.SDLAppController.buttonsSort(parentID);
-
-                SDL.OptionsView.commands.refreshItems();
+                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                    SDL.SDLAppController.buttonsSort(parentID, this.appID);
+                    SDL.OptionsView.commands.refreshItems();
+                }
 
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
@@ -267,8 +288,8 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         deleteSubMenu: function (menuID) {
 
-            if (this.commandsList[0].filterProperty('commandID', menuID)) {
-                this.get('commandsList.0').removeObjects(this.get('commandsList.0').filterProperty('menuID', menuID));
+            if (this.commandsList['top'].filterProperty('commandID', menuID)) {
+                this.get('commandsList.top').removeObjects(this.get('commandsList.top').filterProperty('menuID', menuID));
                 delete(this.commandsList[menuID]);
             }
 
@@ -290,14 +311,13 @@ SDL.SDLAppModel = Em.Object.extend({
 
             if (message) {
 
-                SDL.InteractionChoicesView.preformChoices(message.choiceSet, performInteractionRequestId, message.timeout);
-
-                SDL.InteractionChoicesView.activate(message.initialText.fieldText);
+                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
 
             } else {
-                //Magic number is standard 30 seconds for popUp Timer
-                SDL.InteractionChoicesView.preformChoices([], performInteractionRequestId, 30000);
-                SDL.InteractionChoicesView.activate("");
+//                SDL.InteractionChoicesView.preformChoices([],
+//                    performInteractionRequestId,
+//                    30000);
+                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
             }
 
             SDL.SDLController.VRMove();
@@ -337,13 +357,7 @@ SDL.SDLAppModel = Em.Object.extend({
 
             SDL.SliderView.loadData(message);
 
-            SDL.SliderView.activate(this.appName);
-            setTimeout(function () {
-
-                if (SDL.SliderView.active) {
-                    SDL.SliderView.deactivate(true);
-                }
-            }, message.params.timeout);
+            SDL.SliderView.activate(this.appName, message.params.timeout);
 
         }
     });

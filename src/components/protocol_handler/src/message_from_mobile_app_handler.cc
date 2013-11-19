@@ -34,11 +34,11 @@
 
 namespace protocol_handler {
 log4cxx::LoggerPtr MessagesFromMobileAppHandler::logger_ =
-      log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "ProtocolHandler"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
 
 MessagesFromMobileAppHandler::MessagesFromMobileAppHandler(
-    ProtocolHandlerImpl* handler)
-    : handler_(handler) {
+  ProtocolHandlerImpl* handler)
+  : handler_(handler) {
   CHECK(handler_);
 }
 
@@ -48,8 +48,8 @@ MessagesFromMobileAppHandler::~MessagesFromMobileAppHandler() {
 void MessagesFromMobileAppHandler::threadMain() {
   while (1) {
     while (!handler_->messages_from_mobile_app_.empty()) {
-      const transport_manager::RawMessageSptr& message = handler_
-                                      ->messages_from_mobile_app_.pop();
+      const RawMessagePtr& message = handler_
+                                     ->messages_from_mobile_app_.pop();
       LOG4CXX_INFO_EXT(
         logger_,
         "Message " << message->data() << " from mobile app received of size "
@@ -67,13 +67,12 @@ void MessagesFromMobileAppHandler::threadMain() {
         } else {
           LOG4CXX_INFO_EXT(logger_,
                            "Packet: dataSize " << packet->data_size());
-          handler_->HandleMessage(message, packet);
+          handler_->HandleMessage(message->connection_key(), packet);
         }
       } else {
         LOG4CXX_WARN(
           logger_, "handleMessagesFromMobileApp() - incorrect or NULL data");
       }
-
     }
     handler_->messages_from_mobile_app_.wait();
   }

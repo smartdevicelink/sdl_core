@@ -195,36 +195,30 @@ SDL.InfoNonMedia = Em.ContainerView
                             'perset6'
                         ],
 
-                        perset1: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.0',
-                                presetName: 'PRESET_1'
-                            }),
-                        perset2: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.1',
-                                presetName: 'PRESET_2'
-                            }),
-                        perset3: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.2',
-                                presetName: 'PRESET_3'
-                            }),
-                        perset4: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.3',
-                                presetName: 'PRESET_4'
-                            }),
-                        perset5: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.4',
-                                presetName: 'PRESET_5'
-                            }),
-                        perset6: SDL.SDLPresetButton
-                            .extend( {
-                                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
-                                presetName: 'PRESET_6'
-                            })
+                        perset1: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.0',
+                            presetName: 'PRESET_1'
+                        }),
+                        perset2: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.1',
+                            presetName: 'PRESET_2'
+                        }),
+                        perset3: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.2',
+                            presetName: 'PRESET_3'
+                        }),
+                        perset4: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.3',
+                            presetName: 'PRESET_4'
+                        }),
+                        perset5: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.4',
+                            presetName: 'PRESET_5'
+                        }),
+                        perset6: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
+                            presetName: 'PRESET_6'
+                        })
                     })
             })
     });

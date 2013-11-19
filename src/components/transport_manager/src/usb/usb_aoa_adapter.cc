@@ -43,10 +43,13 @@ namespace transport_adapter {
 
 UsbAoaAdapter::UsbAoaAdapter()
     : TransportAdapterImpl(new UsbDeviceScanner(this),
-                        new UsbConnectionFactory(this), 0),
+                           new UsbConnectionFactory(this), 0),
       is_initialised_(false),
       libusb_handler_(new LibusbHandler()) {
-  static_cast<UsbDeviceScanner*>(device_scanner_)->SetLibusbHandler(libusb_handler_);
+  static_cast<UsbDeviceScanner*>(device_scanner_)->SetLibusbHandler(
+      libusb_handler_);
+  static_cast<UsbConnectionFactory*>(server_connection_factory_)
+      ->SetLibusbHandler(libusb_handler_);
 }
 
 UsbAoaAdapter::~UsbAoaAdapter() {

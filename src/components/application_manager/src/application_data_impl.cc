@@ -36,13 +36,13 @@
 namespace application_manager {
 
 InitialApplicationDataImpl::InitialApplicationDataImpl()
-  : app_types_(NULL),
-    vr_synonyms_(NULL),
-    mobile_app_id_(NULL),
-    tts_name_(NULL),
-    ngn_media_screen_name_(NULL),
-    language_(mobile_api::Language::INVALID_ENUM),
-    ui_language_(mobile_api::Language::INVALID_ENUM) {
+    : app_types_(NULL),
+      vr_synonyms_(NULL),
+      mobile_app_id_(NULL),
+      tts_name_(NULL),
+      ngn_media_screen_name_(NULL),
+      language_(mobile_api::Language::INVALID_ENUM),
+      ui_language_(mobile_api::Language::INVALID_ENUM) {
 }
 
 InitialApplicationDataImpl::~InitialApplicationDataImpl() {
@@ -107,7 +107,7 @@ InitialApplicationDataImpl::ui_language() const {
 }
 
 void InitialApplicationDataImpl::set_app_types(
-  const smart_objects::SmartObject& app_types) {
+    const smart_objects::SmartObject& app_types) {
   if (app_types_) {
     delete app_types_;
   }
@@ -116,7 +116,7 @@ void InitialApplicationDataImpl::set_app_types(
 }
 
 void InitialApplicationDataImpl::set_vr_synonyms(
-  const smart_objects::SmartObject& vr_synonyms) {
+    const smart_objects::SmartObject& vr_synonyms) {
   if (vr_synonyms_) {
     delete vr_synonyms_;
   }
@@ -124,7 +124,7 @@ void InitialApplicationDataImpl::set_vr_synonyms(
 }
 
 void InitialApplicationDataImpl::set_mobile_app_id(
-  const smart_objects::SmartObject& mobile_app_id) {
+    const smart_objects::SmartObject& mobile_app_id) {
   if (mobile_app_id_) {
     delete mobile_app_id_;
   }
@@ -132,7 +132,7 @@ void InitialApplicationDataImpl::set_mobile_app_id(
 }
 
 void InitialApplicationDataImpl::set_tts_name(
-  const smart_objects::SmartObject& tts_name) {
+    const smart_objects::SmartObject& tts_name) {
   if (tts_name_) {
     delete tts_name_;
   }
@@ -141,7 +141,7 @@ void InitialApplicationDataImpl::set_tts_name(
 }
 
 void InitialApplicationDataImpl::set_ngn_media_screen_name(
-  const smart_objects::SmartObject& ngn_name) {
+    const smart_objects::SmartObject& ngn_name) {
   if (ngn_media_screen_name_) {
     delete ngn_media_screen_name_;
   }
@@ -150,31 +150,31 @@ void InitialApplicationDataImpl::set_ngn_media_screen_name(
 }
 
 void InitialApplicationDataImpl::set_language(
-  const mobile_api::Language::eType& language) {
+    const mobile_api::Language::eType& language) {
   language_ = language;
 }
 
 void InitialApplicationDataImpl::set_ui_language(
-  const mobile_api::Language::eType& ui_language) {
+    const mobile_api::Language::eType& ui_language) {
   ui_language_ = ui_language;
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
-  : help_promt_(NULL),
-    timeout_promt_(NULL),
-    vr_help_title_(NULL),
-    vr_help_(NULL),
-    tbt_state_(mobile_api::TBTState::INVALID_ENUM),
-    show_command_(NULL),
-    tbt_show_command_(NULL),
-    commands_(),
-    sub_menu_(),
-    choice_set_map_(),
-    performinteraction_choice_set_map_(),
-    is_perform_interaction_active_(false),
-    perform_interaction_ui_corrid_(0),
-    is_reset_global_properties_active_(false),
-    perform_interaction_mode_(-1) {
+    : help_promt_(NULL),
+      timeout_promt_(NULL),
+      vr_help_title_(NULL),
+      vr_help_(NULL),
+      tbt_state_(mobile_api::TBTState::INVALID_ENUM),
+      show_command_(NULL),
+      tbt_show_command_(NULL),
+      commands_(),
+      sub_menu_(),
+      choice_set_map_(),
+      performinteraction_choice_set_map_(),
+      is_perform_interaction_active_(false),
+      perform_interaction_ui_corrid_(0),
+      is_reset_global_properties_active_(false),
+      perform_interaction_mode_(-1) {
 }
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
@@ -209,13 +209,13 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   }
 
   for (CommandsMap::iterator command_it = commands_.begin();
-       commands_.end() != command_it; ++command_it) {
+      commands_.end() != command_it; ++command_it) {
     delete command_it->second;
   }
   commands_.clear();
 
   for (SubMenuMap::iterator sub_menu_it = sub_menu_.begin();
-       sub_menu_.end() != sub_menu_it; ++sub_menu_it) {
+      sub_menu_.end() != sub_menu_it; ++sub_menu_it) {
     delete sub_menu_it->second;
   }
   sub_menu_.clear();
@@ -263,7 +263,7 @@ DynamicApplicationDataImpl::tbt_show_command() const {
 }
 
 void DynamicApplicationDataImpl::set_help_prompt(
-  const smart_objects::SmartObject& help_promt) {
+    const smart_objects::SmartObject& help_promt) {
   if (help_promt_) {
     delete help_promt_;
   }
@@ -271,7 +271,7 @@ void DynamicApplicationDataImpl::set_help_prompt(
 }
 
 void DynamicApplicationDataImpl::set_timeout_prompt(
-  const smart_objects::SmartObject& timeout_promt) {
+    const smart_objects::SmartObject& timeout_promt) {
   if (timeout_promt_) {
     delete timeout_promt_;
   }
@@ -279,7 +279,7 @@ void DynamicApplicationDataImpl::set_timeout_prompt(
 }
 
 void DynamicApplicationDataImpl::set_vr_help_title(
-  const smart_objects::SmartObject& vr_help_title) {
+    const smart_objects::SmartObject& vr_help_title) {
   if (vr_help_title_) {
     delete vr_help_title_;
   }
@@ -294,7 +294,7 @@ void DynamicApplicationDataImpl::reset_vr_help_title() {
 }
 
 void DynamicApplicationDataImpl::set_vr_help(
-  const smart_objects::SmartObject& vr_help) {
+    const smart_objects::SmartObject& vr_help) {
   if (vr_help_) {
     delete vr_help_;
   }
@@ -309,12 +309,12 @@ void DynamicApplicationDataImpl::reset_vr_help() {
 }
 
 void DynamicApplicationDataImpl::set_tbt_state(
-  const mobile_api::TBTState::eType& tbt_state) {
+    const mobile_api::TBTState::eType& tbt_state) {
   tbt_state_ = tbt_state;
 }
 
 void DynamicApplicationDataImpl::set_show_command(
-  const smart_objects::SmartObject& show_command) {
+    const smart_objects::SmartObject& show_command) {
   if (show_command_) {
     delete show_command_;
   }
@@ -322,7 +322,7 @@ void DynamicApplicationDataImpl::set_show_command(
 }
 
 void DynamicApplicationDataImpl::set_tbt_show_command(
-  const smart_objects::SmartObject& tbt_show) {
+    const smart_objects::SmartObject& tbt_show) {
   if (tbt_show_command_) {
     delete tbt_show_command_;
   }
@@ -344,7 +344,7 @@ void DynamicApplicationDataImpl::RemoveCommand(unsigned int cmd_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
-  unsigned int cmd_id) {
+    unsigned int cmd_id) {
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (it != commands_.end()) {
     return it->second;
@@ -369,7 +369,7 @@ void DynamicApplicationDataImpl::RemoveSubMenu(unsigned int menu_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
-  unsigned int menu_id) const {
+    unsigned int menu_id) const {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
     return it->second;
@@ -379,7 +379,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-  const std::string& name) {
+    const std::string& name) {
   for (SubMenuMap::iterator it = sub_menu_.begin();
        sub_menu_.end() != it;
        ++it) {
@@ -406,7 +406,7 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(unsigned int choice_set_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
-  unsigned int choice_set_id) {
+    unsigned int choice_set_id) {
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
     return it->second;
@@ -418,7 +418,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
   unsigned int choice_set_id, const smart_objects::SmartObject& vr_commands) {
   performinteraction_choice_set_map_[choice_set_id] =
-    new smart_objects::SmartObject(vr_commands);
+      new smart_objects::SmartObject(vr_commands);
 }
 
 void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSetMap() {
@@ -443,17 +443,17 @@ DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_active(
-  unsigned int active) {
+    unsigned int active) {
   is_perform_interaction_active_ = active;
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_ui_corrid(
-  unsigned int corr_id) {
+    unsigned int corr_id) {
   perform_interaction_ui_corrid_ = corr_id;
 }
 
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
-  bool active) {
+    bool active) {
   is_reset_global_properties_active_ = active;
 }
 

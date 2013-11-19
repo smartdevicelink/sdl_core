@@ -213,6 +213,24 @@ class MessageHelper {
 
     static void SendActivateAppToHMI(Application* const app);
 
+
+    /*
+     * @brief Sends notification to HMI to start video streaming
+     *
+     * @param url             URL for video streamng
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendNaviStartStream(const std::string& url, int connection_key);
+
+    /*
+     * @brief Sends notification to HMI to stop video streaming
+     *
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendNaviStopStream(int connection_key);
+
     static smart_objects::SmartObject* CreateNegativeResponse(
       unsigned int connection_key, int function_id, unsigned int correlation_id,
       int result_code);
@@ -243,6 +261,8 @@ class MessageHelper {
      */
     static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, const Application* app);
+
+    static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
                                   smart_objects::SmartObject& message_params,

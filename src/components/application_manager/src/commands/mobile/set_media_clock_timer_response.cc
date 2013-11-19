@@ -43,7 +43,7 @@ namespace commands {
 
 SetMediaClockTimerResponse::SetMediaClockTimerResponse(
   const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
+    : CommandResponseImpl(message) {
 }
 
 SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {

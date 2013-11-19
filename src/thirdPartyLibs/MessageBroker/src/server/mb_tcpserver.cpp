@@ -39,9 +39,10 @@ namespace NsMessageBroker
       std::string rep = data;
       if (isWebSocket(fd))
       {
-         char buf[10];
-         ssize_t headerlen = mWebSocketHandler.prepareWebSocketDataHeader((char*)buf, (unsigned long)rep.length());
-         std::string header = std::string(buf, headerlen);
+         unsigned char buf[10] = {'\0'};
+         ssize_t headerlen = mWebSocketHandler.prepareWebSocketDataHeader(
+                              (unsigned char*)buf, (unsigned long)rep.length());
+         std::string header = std::string((char*)buf, headerlen);
          rep = header + rep;
       }
       int bytesToSend = rep.length();
@@ -55,36 +56,52 @@ namespace NsMessageBroker
          }
          bytesToSend -= retVal;
          ptrBuffer += retVal;
-      }while(bytesToSend > 0); 
+      } while (bytesToSend > 0);
       return rep.length();
    }
 
    bool TcpServer::Recv(int fd)
    {
       ssize_t nb = -1;
-      char buf[RECV_BUFFER_LENGTH];
+      char buf[RECV_BUFFER_LENGTH] = {'\0'};
 
       nb = recv(fd, buf, MAX_RECV_DATA, 0);
-      DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
-      if(nb > 0)
+      DBG_MSG(("Recieved %d from %d\n", nb, fd));
+      if (nb > 0)
       {
+         unsigned int recieved_data = nb;
+         char* data = buf;
          if (isWebSocket(fd))
          {
-            mWebSocketHandler.parseWebSocketData(buf, (unsigned int&)nb);
-            assert(nb < RECV_BUFFER_LENGTH);
+           const unsigned int data_length =
+               mWebSocketHandler.parseWebSocketDataLength(buf, recieved_data);
+
+           DBG_MSG(("Received %d actual data length %d\n",
+               recieved_data, data_length));
+           if (data_length > RECV_BUFFER_LENGTH) {
+             char buf_tmp[MAX_RECV_BUFFER_LENGTH];
+             memset(buf_tmp, 0 , MAX_RECV_BUFFER_LENGTH);
+             memcpy(buf_tmp, buf, MAX_RECV_DATA);
+             while ((data_length > recieved_data) &&
+                 (0 < (recv(fd, buf_tmp + recieved_data, MAX_RECV_DATA, 0)))) {
+               recieved_data += MAX_RECV_DATA;
+             }
+             nb = recieved_data;
+             data = buf_tmp;
+           }
+           mWebSocketHandler.parseWebSocketData(data, (unsigned int&)nb);
          }
-         std::string msg = std::string(buf, nb);
+         std::string msg = std::string(data, nb);
          DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
          std::string* pReceivingBuffer = getBufferFor(fd);
          *pReceivingBuffer += msg;
          // we need to check websocket clients here
          if (!checkWebSocketHandShake(fd, pReceivingBuffer))
          {//JSON MESSAGE received. Send data in CMessageBroker.
-            if(mpMessageBroker)
+            if (mpMessageBroker)
             {
                mpMessageBroker->onMessageReceived(fd, *pReceivingBuffer);
-            } else
-            {
+            } else {
                return false;
             }
          } else
@@ -288,6 +305,7 @@ namespace NsMessageBroker
          }
       }
       m_receivingBuffers.clear();
+      Server::Close();
       /* listen socket should be closed in Server destructor */
    }
 

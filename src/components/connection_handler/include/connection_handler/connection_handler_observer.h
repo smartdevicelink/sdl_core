@@ -44,59 +44,73 @@
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
+/**
+  * \brief Enum describing possible types of sessions: RPC for API messages,
+  Navi for video streaming.
+  */
+enum ServiceType {
+  kUnknownSession = -1,
+  kRPCSession = 0x07,
+  kNaviSession = 0x0B,
+  kBulkSession = 0x0F
+};
+
 /**
  * \class ConnectionHandlerObserver
  * \brief ConnectionHandlerObserver class
  */
 class ConnectionHandlerObserver {
- public:
-  /**
-   * \brief Available devices list updated.
-   *
-   * Called when device scanning initiated with scanForNewDevices
-   * is completed.
-   *
-   * \param DeviceList New list of available devices.
-   **/
-  virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceList & device_list) = 0;
+  public:
+    /**
+     * \brief Available devices list updated.
+     *
+     * Called when device scanning initiated with scanForNewDevices
+     * is completed.
+     *
+     * \param DeviceList New list of available devices.
+     **/
+    virtual void OnDeviceListUpdated(
+      const connection_handler::DeviceList& device_list) = 0;
 
-  /**
-   * \brief Removes device.
-   *
-   * Called when device has been removed from a list.
-   *
-   * \param DeviceHandle Handle of removed device.
-   **/
-  virtual void RemoveDevice(
+    /**
+     * \brief Removes device.
+     *
+     * Called when device has been removed from a list.
+     *
+     * \param DeviceHandle Handle of removed device.
+     **/
+    virtual void RemoveDevice(
       const connection_handler::DeviceHandle device_handle) = 0;
 
-  /**
-   * \brief Callback function used by connection_handler
-   * when Mobile Application initiates start of new session.
-   * \param deviceHandle Device identifier within which session has to be started.
-   * \param sessionKey Key of started session.
-   * \param firstSessionKey Session key of first session in this connection.
-   */
-  virtual void OnSessionStartedCallback(
+    /**
+     * \brief Callback function used by connection_handler
+     * when Mobile Application initiates start of new session.
+     * \param deviceHandle Device identifier within which session has to be started.
+     * \param sessionKey Key of started session.
+     * \param firstSessionKey Session key of first session in this connection.
+     */
+    virtual bool OnSessionStartedCallback(
       connection_handler::DeviceHandle device_handle, int session_key,
-      int first_session_key) = 0;
+      int first_session_key, ServiceType type = ServiceType::kRPCSession) = 0;
 
-  /**
-   * \brief Callback function used by connection_handler
-   * when Mobile Application initiates session ending.
-   * \param sessionKey Key of session which should be ended
-   * \param firstSessionKey Session key of first session in this connection
-   */
-  virtual void OnSessionEndedCallback(int session_key,
-                                      int first_session_key) = 0;
+    /**
+     * \brief Callback function used by connection_handler
+     * when Mobile Application initiates session ending.
+     * \param sessionKey Key of session which should be ended
+     * \param firstSessionKey Session key of first session in this connection
+     */
+    virtual void OnSessionEndedCallback(
+      int session_key,
+      int first_session_key,
+      ServiceType type = ServiceType::kRPCSession) = 0;
 
- protected:
-  /**
-   * \brief Destructor
-   */
-  virtual ~ConnectionHandlerObserver() {
-  }
+  protected:
+    /**
+     * \brief Destructor
+     */
+    virtual ~ConnectionHandlerObserver() {
+    }
 };
 }/* namespace connection_handler */
 

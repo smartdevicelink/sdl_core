@@ -29,7 +29,7 @@ import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
-import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -332,7 +332,7 @@ public class RPCRequestFactory {
 	public static RegisterAppInterface buildRegisterAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
-			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType,
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
 			String appID, Integer correlationID) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
@@ -377,7 +377,7 @@ public class RPCRequestFactory {
 		
 		msg.setHmiDisplayLanguageDesired(hmiDisplayLanguageDesired);
 		
-		msg.setAppType(appType);
+		msg.setAppType(appHMIType);
 		
 		msg.setAppID(appID);
 

@@ -43,7 +43,8 @@ namespace hmi_message_handler {
 class MessageBrokerAdapter : public HMIMessageAdapter,
     public NsMessageBroker::CMessageBrokerController {
  public:
-  explicit MessageBrokerAdapter(HMIMessageHandler* handler);
+  MessageBrokerAdapter(HMIMessageHandler* handler, const std::string&
+                                server_address, uint16_t port);
   ~MessageBrokerAdapter();
   void SendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
 
