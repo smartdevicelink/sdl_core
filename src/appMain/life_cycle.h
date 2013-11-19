@@ -44,6 +44,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
+#include "policies/policy_manager_impl.h"
 
 #include "CMessageBroker.hpp"
 #include "mb_tcpserver.hpp"
@@ -71,6 +72,7 @@ class LifeCycle {
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
+    NsSmartDeviceLink::policies::PolicyManagerImpl* policy_manager_;
 
     NsMessageBroker::CMessageBroker* message_broker_;
     NsMessageBroker::TcpServer* message_broker_server_;

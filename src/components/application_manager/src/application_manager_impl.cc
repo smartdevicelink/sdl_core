@@ -53,6 +53,7 @@
 #include "./to_hmh_thread_impl.h"
 #include "./from_mobile_thread_impl.h"
 #include "./to_mobile_thread_impl.h"
+#include "policies/policy_manager.h"
 
 namespace application_manager {
 
@@ -63,6 +64,7 @@ const unsigned int ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
+namespace policies = NsSmartDeviceLink::policies;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
   : audio_pass_thru_active_(false),
@@ -77,6 +79,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_handler_(NULL),
     mobile_handler_(NULL),
     connection_handler_(NULL),
+    policy_manager_(NULL),
     from_mobile_thread_(NULL),
     to_mobile_thread_(NULL),
     from_hmh_thread_(NULL),
@@ -1054,6 +1057,11 @@ void ApplicationManagerImpl::set_connection_handler(
   connection_handler_ = handler;
 }
 
+void ApplicationManagerImpl::set_policy_manager(
+    policies::PolicyManager* policy_manager) {
+  policy_manager_ = policy_manager;
+}
+
 void ApplicationManagerImpl::StartDevicesDiscovery() {
   connection_handler::ConnectionHandlerImpl::instance()->
   StartDevicesDiscovery();
@@ -1149,7 +1157,15 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       return false;
     }
 
-    if (!policies_manager_.IsValidHmiStatus(function_id, app->hmi_level())) {
+    // Message for "CheckPermission" must be with attached schema
+    mobile_so_factory().attachSchema(*message);
+
+    policies::CheckPermissionResult result =
+      policy_manager_->CheckPermission(app->app_id(),
+                                       *message,
+                                       app->hmi_level());
+
+    if (policies::PermissionResult::PERMISSION_ALLOWED != result.result) {
       LOG4CXX_WARN(
         logger_,
         "Request blocked by policies. " << "FunctionID: "

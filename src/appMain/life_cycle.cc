@@ -48,6 +48,7 @@ LifeCycle::LifeCycle()
   , app_manager_(NULL)
   , hmi_handler_(NULL)
   , media_manager_(NULL)
+  , policy_manager_(NULL)
   , mb_adapter_(NULL)
   , message_broker_(NULL)
   , message_broker_server_(NULL)
@@ -85,7 +86,11 @@ bool LifeCycle::StartComponents() {
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler_)
+  DCHECK(hmi_handler_);
+
+  policy_manager_ =
+    NsSmartDeviceLink::policies::PolicyManagerImpl::instance();
+  DCHECK(policy_manager_);
 
   transport_manager_->SetProtocolHandler(protocol_handler_);
   transport_manager_->AddEventListener(protocol_handler_);
@@ -119,10 +124,15 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
+  NsSmartDeviceLink::policies::PolicyConfiguration policy_config;
+  policy_config.set_pt_file_name("wp1_policy_table.json");
+  policy_manager_->Init(policy_config);
+
   app_manager_->set_mobile_message_handler(mmh_);
   mmh_->AddMobileMessageListener(app_manager_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+  app_manager_->set_policy_manager(policy_manager_);
 
   return true;
 }
@@ -212,6 +222,9 @@ void LifeCycle::StopComponents(int params) {
   instance()->connection_handler_->set_connection_handler_observer(NULL);
   instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
   instance()->app_manager_->~ApplicationManagerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
+  instance()->policy_manager_->~PolicyManager();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   instance()->transport_manager_->RemoveEventListener(
