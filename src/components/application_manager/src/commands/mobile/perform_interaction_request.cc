@@ -509,7 +509,7 @@ void PerformInteractionRequest::SendUIShowVRHelpRequest(
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
             item[strings::text] = vr_commands[0].asString();
-            item[strings::position] = index;
+            item[strings::position] = index + 1;
             msg_params[strings::vr_help][index++] = item;
           }
         }
