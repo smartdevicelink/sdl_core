@@ -497,7 +497,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     MessageChain message_chaining_;
     bool audio_pass_thru_active_;
-    Lock audio_pass_thru_lock_;
+    sync_primitives::Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
     bool is_vr_session_strated_;
     bool hmi_cooperating_;

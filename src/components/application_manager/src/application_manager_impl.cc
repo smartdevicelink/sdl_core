@@ -698,7 +698,7 @@ MessageChaining* ApplicationManagerImpl::GetMessageChain(
 }
 
 bool ApplicationManagerImpl::begin_audio_pass_thru() {
-  AutoLock lock(audio_pass_thru_lock_);
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_)
     return false;
   else {
@@ -708,7 +708,7 @@ bool ApplicationManagerImpl::begin_audio_pass_thru() {
 }
 
 bool ApplicationManagerImpl::end_audio_pass_thru() {
-  AutoLock lock(audio_pass_thru_lock_);
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (audio_pass_thru_active_) {
     audio_pass_thru_active_ = false;
     return true;
@@ -781,7 +781,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   LOG4CXX_TRACE_ENTER(logger_);
 
   {
-    AutoLock lock(audio_pass_thru_lock_);
+    sync_primitives::AutoLock lock(audio_pass_thru_lock_);
     if (!audio_pass_thru_active_) {
       LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
                              " when PassThrough is not active");
