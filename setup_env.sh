@@ -218,9 +218,20 @@ if $QT_HMI || $INSTALL_ALL; then
 	apt-install ${GDEBI}
 	echo $OK
 
-	echo "Installing CMake build system"
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	if dpkg -s cmake | grep installed > /dev/null; then
+		echo "Checking for installed cmake"
+		CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
+		CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
+		case ${CMAKE_COMPARE_RESULT} in
+		"equal"|"1 > 2");;
+		"2 > 1") echo "Removing CMake build system"
+		   sudo apt-get remove -y cmake cmake-data
+		   echo "Installing CMake build system"
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+		   ;;
+		esac
+	fi
 	echo $OK
 
 	if [ ${ARCH} = "i386" ]; then
@@ -278,3 +289,4 @@ if $INSTALL_ALL; then
 	echo $OK
 fi
 echo "Environment configuration successfully done!"
+

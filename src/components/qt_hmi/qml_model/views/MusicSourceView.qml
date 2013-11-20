@@ -36,36 +36,40 @@ import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
 
-Item {
-    anchors.fill: parent
-    GridMenu {
-        id: menu
-        model: dataContainer.musicSourceModel
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: bottomPanel.top
-        delegate: GridItem {
-            width: menu.width / menu.columnsOnPage
-            height: menu.height / menu.rows
-            OvalButton {
-                text: title
-                onReleased: contentLoader.go(qml, appId)
-                anchors.centerIn: parent
-                fontSize: Constants.fontSize
+GeneralView {
+    Item {
+        anchors.fill: parent
+        GridMenu {
+            id: menu
+            model: dataContainer.musicSourceModel
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: bottomPanel.top
+            delegate: GridItem {
+                width: menu.width / menu.columnsOnPage
+                height: menu.height / menu.rows
+                OvalButton {
+                    text: title
+                    onReleased: contentLoader.go(qml, appId)
+                    anchors.centerIn: parent
+                    fontSize: Constants.fontSize
+                }
             }
         }
-    }
 
-    Item {
-        id: bottomPanel
-        // 1/4 bottom screen
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        height: 1/4 * parent.height
-        width: parent.width
+        Item {
+            id: bottomPanel
+            // 1/4 bottom screen
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            height: 1/4 * parent.height
+            width: parent.width
 
-        BackButton { anchors.centerIn: parent }
+            BackButton { anchors.centerIn: parent }
+        }
     }
 }
+
+
 

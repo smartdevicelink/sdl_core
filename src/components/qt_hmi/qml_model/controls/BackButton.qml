@@ -39,4 +39,10 @@ OvalButton {
     text: "Back"
     onClicked: { contentLoader.back() }
     fontSize: Constants.fontSize
+    opacity: 0
+
+    NumberAnimation on opacity {
+        to: 1;
+        duration: Constants.animationDuration
+    }
 }

@@ -59,6 +59,7 @@ ContextPopup {
         delegate: OvalButton {
             width: parent.width
             text: name
+            icon: image
             onClicked: {
                 timer.stop()
                 DBus.sendReply(dataContainer.interactionModel.async, {"choiceID": id})
