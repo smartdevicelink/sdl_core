@@ -15,10 +15,16 @@ set(default_sources
     ./src/socket_video_streamer_adapter.cc
     ./src/pipe_video_streamer_adapter.cc
 )
+set(LIBRARIES
+  ${GSTREAMER_gstreamer_LIBRARY}
+  pulse-simple
+)
 else(DEFAULT_MEDIA_FLAG)
 set(default_includes
 )
 set(default_sources
+)
+set(LIBRARIES
 )
 endif()
 
@@ -44,6 +50,8 @@ set (SOURCES
     ./src/from_mic_recorder_listener.cc
     ./src/audio_stream_sender_thread.cc
     ./src/video_streamer_listener.cc
+    ./src/media_manager_impl.cc
 )
 
 add_library("MediaManager" ${SOURCES} ${default_sources})
+target_link_libraries("MediaManager" ${LIBRARIES})

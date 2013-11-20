@@ -35,6 +35,7 @@
 
 #include <string>
 #include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
@@ -42,10 +43,12 @@
 namespace media_manager {
 
 class MediaManagerImpl : public MediaManager,
-    protocol_handler::ProtocolObserver {
+  public protocol_handler::ProtocolObserver {
   public:
     static MediaManagerImpl* instance();
     virtual ~MediaManagerImpl();
+    virtual void SetProtocolHandler(
+      protocol_handler::ProtocolHandler* protocol_handler);
     virtual void PlayA2DPSource(int application_key);
     virtual void StopA2DPSource(int application_key);
     virtual void StartMicrophoneRecording(int application_key,
@@ -61,7 +64,7 @@ class MediaManagerImpl : public MediaManager,
   protected:
     MediaManagerImpl();
     virtual void Init();
-
+    protocol_handler::ProtocolHandler* protocol_handler_;
     MediaAdapter* a2dp_player_;
     MediaAdapterImpl* from_mic_recorder_;
     MediaAdapterListener* from_mic_listener_;

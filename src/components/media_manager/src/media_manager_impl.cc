@@ -35,6 +35,7 @@
 #include "media_manager/a2dp_source_player_adapter.h"
 #include "media_manager/from_mic_recorder_adapter.h"
 #include "media_manager/from_mic_recorder_listener.h"
+#include "media_manager/video_streamer_listener.h"
 #include "./socket_video_streamer_adapter.h"
 #include "./pipe_video_streamer_adapter.h"
 
@@ -49,7 +50,8 @@ MediaManagerImpl* MediaManagerImpl::instance() {
 }
 
 MediaManagerImpl::MediaManagerImpl()
-  : a2dp_player_(NULL)
+  : protocol_handler_(NULL)
+  , a2dp_player_(NULL)
   , from_mic_recorder_(NULL)
   , from_mic_listener_(NULL)
   , video_streamer_(NULL)
@@ -84,6 +86,11 @@ MediaManagerImpl::~MediaManagerImpl() {
   }
 }
 
+void MediaManagerImpl::SetProtocolHandler(
+  protocol_handler::ProtocolHandler* protocol_handler) {
+  protocol_handler_ = protocol_handler;
+}
+
 void MediaManagerImpl::Init() {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
 #if defined(DEFAULT_MEDIA)
@@ -93,7 +100,7 @@ void MediaManagerImpl::Init() {
   if ("socket" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new SocketVideoStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    video_streamer_ = new PipeVideoServer();
+    video_streamer_ = new PipeVideoStreamerAdapter();
   }
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
@@ -143,7 +150,7 @@ void MediaManagerImpl::StopMicrophoneRecording(int application_key) {
   }
 #endif
   if (from_mic_listener_) {
-    from_mic_listener_->StopActivity(application_key);
+    from_mic_listener_->OnActivityEnded(application_key);
   }
 }
 
@@ -175,8 +182,8 @@ void MediaManagerImpl::OnMessageReceived(
 void MediaManagerImpl::FramesProcessed(int application_key,
                                        int frame_number) {
   if (protocol_handler_) {
-    protocol_handler_->SendFramesNumber(app_connection_key,
-                                        messsages_for_session);
+    protocol_handler_->SendFramesNumber(application_key,
+                                        frame_number);
   }
 }
 
