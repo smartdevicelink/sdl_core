@@ -172,8 +172,8 @@ SDL.InfoView = Em.ContainerView.create( {
                 }.property( 'SDL.NonMediaController.currentAppId' ),
                 textBinding: 'SDL.NonMediaController.currentAppName',
                 iconBinding: 'SDL.NonMediaController.currentAppIcon',
-                action: 'activateCurrentApp',
-                target: 'SDL.NonMediaController'
+                action: 'onState',
+                target: 'SDL.InfoController'
             } )
         } )
     } )

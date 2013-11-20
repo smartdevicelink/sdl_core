@@ -45,9 +45,8 @@ SDL.SDLMediaController = Em.Object.create( {
      */
     currentAppName: function() {
 
-        if (this.currentAppId) {
-            return SDL.SDLController.getApplicationModel(this.currentAppId).appName;
-        }
+        if (this.currentAppId) { return SDL.SDLController
+            .getApplicationModel(this.currentAppId).appName; }
     }.property('this.currentAppId'),
 
     /**
@@ -80,6 +79,10 @@ SDL.SDLMediaController = Em.Object.create( {
         // set active model
         SDL.SDLAppController.set('model', applicationModel);
 
+        // FFW.BasicCommunication.ActivateApp( applicationModel.appID );
+
+        // SDL.MediaController.listDown();
+
         SDL.MediaController.turnOnSDL();
 
     },
@@ -87,9 +90,14 @@ SDL.SDLMediaController = Em.Object.create( {
     /**
      * Restore current application to active state
      */
-    activateCurrentApp: function() {
+    restoreCurrentApp: function() {
 
-        FFW.BasicCommunication.OnAppActivated(this.currentAppId);
+        if (SDL.SDLAppController.model.appID === this.currentAppId) {
+            FFW.BasicCommunication.OnAppActivated(this.currentAppId);
+            return;
+        }
+        this.activateApp(SDL.SDLController
+            .getApplicationModel(this.currentAppId));
     },
 
     /** SDL perform interaction action from VR */
