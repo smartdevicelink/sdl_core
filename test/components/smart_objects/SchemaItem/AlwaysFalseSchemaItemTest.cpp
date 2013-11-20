@@ -52,17 +52,17 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj = 5;
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(5, (int)obj);
+        EXPECT_EQ(5, obj.asInt());
 
         obj = true;
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         obj = "Test";
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(std::string("Test"), (std::string)obj);
+        EXPECT_EQ(std::string("Test"), obj.asString());
 
         obj["First"] = "Some string";
         obj["Second"] = 555;
@@ -72,8 +72,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::ERROR, resultType);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(std::string("Some string"),(std::string)obj["First"]);
-        EXPECT_EQ(555, (int)obj["Second"]);
+        EXPECT_EQ(std::string("Some string"),obj["First"].asString());
+        EXPECT_EQ(555, obj["Second"].asInt());
 
 
         obj[0] = true;
@@ -84,8 +84,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::ERROR, resultType);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_TRUE((bool)obj[0]);
-        EXPECT_FALSE((bool)obj[1]);
+        EXPECT_TRUE(obj[0].asBool());
+        EXPECT_FALSE(obj[1].asBool());
 
     }
 }}}}}

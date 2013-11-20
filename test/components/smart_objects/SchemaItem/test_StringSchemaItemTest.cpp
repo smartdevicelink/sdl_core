@@ -54,13 +54,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object - valid string
         obj = "New valid string";
-        ASSERT_EQ(std::string("New valid string"), (std::string)obj);
+        ASSERT_EQ(std::string("New valid string"), obj.asString());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_EQ(std::string("New valid string"), (std::string)obj);
+        EXPECT_EQ(std::string("New valid string"), obj.asString());
 
         //Obj - bool
         obj = true;
@@ -69,7 +69,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         //Object - number
         obj = 3.1415926;
@@ -81,7 +81,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_FALSE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        EXPECT_EQ(3.1415926, (double)obj);
+        EXPECT_EQ(3.1415926, obj.asDouble());
     }
 
     /**
@@ -103,13 +103,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object - valid string
         obj = "New valid string";
-        ASSERT_EQ(std::string("New valid string"), (std::string)obj);
+        ASSERT_EQ(std::string("New valid string"), obj.asString());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
 
         //Obj - bool
         obj = true;
@@ -118,7 +118,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
 
         //Object - number
         obj = 3.1415926;
@@ -130,7 +130,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
     }
 
     /**
@@ -148,24 +148,24 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object - valid string
         obj = "New valid string";
-        ASSERT_EQ(std::string("New valid string"), (std::string)obj);
+        ASSERT_EQ(std::string("New valid string"), obj.asString());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
 
         //Object - too long string
         obj = "New very very loooooong string";
-        ASSERT_EQ(std::string("New very very loooooong string"), (std::string)obj);
+        ASSERT_EQ(std::string("New very very loooooong string"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
     }
@@ -203,15 +203,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj["str"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj["str"]);
+        EXPECT_EQ(std::string("Default string"), obj["str"].asString());
 
         resDefault = item->setDefaultValue(obj["bool"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj["bool"]);
+        EXPECT_EQ(std::string("Default string"), obj["bool"].asString());
 
         resDefault = item->setDefaultValue(obj["num"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj["num"]);
+        EXPECT_EQ(std::string("Default string"), obj["num"].asString());
 
         resultType = item->validate(obj["str"]);
         EXPECT_EQ(Errors::OK, resultType);
@@ -227,7 +227,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -278,10 +278,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resDefault = item->setDefaultValue(obj[5]);
         EXPECT_TRUE(resDefault);
 
-        EXPECT_EQ(std::string("Default string"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj[2]);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj[4]);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj[5]);
+        EXPECT_EQ(std::string("Default string"), obj[0].asString());
+        EXPECT_EQ(std::string("Default string"), obj[2].asString());
+        EXPECT_EQ(std::string("Default string"), obj[4].asString());
+        EXPECT_EQ(std::string("Default string"), obj[5].asString());
 
         resultType = item->validate(obj[0]);
         EXPECT_EQ(Errors::OK, resultType);
@@ -298,7 +298,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(std::string("Default string"), (std::string)obj);
+        EXPECT_EQ(std::string("Default string"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);    }

@@ -59,7 +59,7 @@ set(LIBRARIES
     Utils
     ConfigProfile
     #test_JSONHandler_v4_protocol_v2_0_revP
-    #test_JSONHandlerTest
+    # test_json_handler
     test_SmartObjectTest
     test_FormattersCommandsTest
     test_UtilsTest

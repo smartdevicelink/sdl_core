@@ -1,7 +1,3 @@
-/**
- * @file CFormatterJsonSDLRPCv1.hpp
- * @brief CFormatterJsonSDLRPCv1 header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -44,15 +40,17 @@
 #include "formatters/CSmartFactory.hpp"
 #include "formatters/meta_formatter.h"
 
-namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink {
+namespace NsJSONHandler {
+namespace Formatters {
 
 /**
  * @brief Class is used to convert SmartObjects to JSON string and vice versa.
  *
  * JSON strings is in SDLRPCv1 format.
  */
-class CFormatterJsonSDLRPCv1: public CFormatterJsonBase {
-private:
+class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
+ private:
   /**
    * @brief Hidden constructor.
    *
@@ -112,7 +110,7 @@ private:
    */
   static const std::string S_CORRELATION_ID;
 
-public:
+ public:
 
   static const int kSuccess;
   static const int kParsingError;
@@ -120,8 +118,7 @@ public:
   static const int kMessageTypeNotFound;
   static const int kCorrelationIdNotFound;
 
-  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
-    meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
+  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
 
   /**
    * @brief Creates a JSON string from a SmartObject.
@@ -143,86 +140,99 @@ public:
    */
   template<typename FunctionId, typename MessageType>
   static int fromString(const std::string &str,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
+                        NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
 
   /**
-    * @brief Converts to string the smart object against the given schema
-    *
-    * @param object Original smart object
-    * @param schema Smart schema which describes 'fake' smart object to be formatted
-    * @param outStr Resulting JSON string
-    * @return formatting error code
-    */
+   * @brief Converts to string the smart object against the given schema
+   *
+   * @param object Original smart object
+   * @param schema Smart schema which describes 'fake' smart object to be formatted
+   * @param outStr Resulting JSON string
+   * @return formatting error code
+   */
   static tMetaFormatterErrorCode MetaFormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-            std::string& outStr);
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
+      std::string& outStr);
 
 };
 
 // ----------------------------------------------------------------------------
 
 template<typename FunctionId, typename MessageType>
-int Formatters::CFormatterJsonSDLRPCv1::fromString(const std::string& str,
+int Formatters::CFormatterJsonSDLRPCv1::fromString(
+    const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
-  Json::Value root;
-  Json::Reader reader;
-  std::string type;
   int result = kSuccess;
 
-  if (false == reader.parse(str, root)) {
-    result = kParsingError | kMessageTypeNotFound |
-              kFunctionIdNotFound | kCorrelationIdNotFound;
-  }
+  try {
+    Json::Value root;
+    Json::Reader reader;
+    std::string type;
 
-  if (kSuccess == result) {
-    type = getMessageType(root);
-    if (true == type.empty()) {
-      result = kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
+    if (false == reader.parse(str, root)) {
+      result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound
+          | kCorrelationIdNotFound;
     }
-  }
 
-  FunctionId functionId;
-  MessageType messageType;
-
-  if (kSuccess == result) {
-    typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageType> MessageTypeEnum;
-    if (false == MessageTypeEnum::stringToEnum(type, messageType)) {
-      // If MessageType is not found than FunctionId and CorrelationId can not be found either
-      result = kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
-    }
-  }
-
-  if (kSuccess == result) {
-    typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionId> FunctionIdEnum;
-    if (false == FunctionIdEnum::stringToEnum(root[type][S_NAME].asString(), functionId)) {
-      result = kFunctionIdNotFound;
-      functionId = FunctionId::INVALID_ENUM;
-    }
-  }
-
-  namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
-
-  if (!(result & kMessageTypeNotFound)) {
-    jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
-
-    out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
-    out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
-    if (true == root[type][S_CORRELATION_ID].empty()) {
-      if (type != S_NOTIFICATION) {   // Notification may not have CorrelationId
-        result |= kCorrelationIdNotFound;
-        out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
+    if (kSuccess == result) {
+      type = getMessageType(root);
+      if (true == type.empty()) {
+        result = kMessageTypeNotFound | kFunctionIdNotFound
+            | kCorrelationIdNotFound;
       }
-    } else {
-      out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID].asInt();
     }
-    out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
-    out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
+
+    FunctionId functionId;
+    MessageType messageType;
+
+    if (kSuccess == result) {
+      typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageType> MessageTypeEnum;
+      if (false == MessageTypeEnum::stringToEnum(type, messageType)) {
+        // If MessageType is not found than FunctionId and CorrelationId can not be found either
+        result = kMessageTypeNotFound | kFunctionIdNotFound
+            | kCorrelationIdNotFound;
+      }
+    }
+
+    if (kSuccess == result) {
+      typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionId> FunctionIdEnum;
+      if (false
+          == FunctionIdEnum::stringToEnum(root[type][S_NAME].asString(),
+                                          functionId)) {
+        result = kFunctionIdNotFound;
+        functionId = FunctionId::INVALID_ENUM;
+      }
+    }
+
+    namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+
+    if (!(result & kMessageTypeNotFound)) {
+      jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
+
+      out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
+      out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
+      if (true == root[type][S_CORRELATION_ID].empty()) {
+        if (type != S_NOTIFICATION) {  // Notification may not have CorrelationId
+          result |= kCorrelationIdNotFound;
+          out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
+        }
+      } else {
+        out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID]
+            .asInt();
+      }
+      out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
+      out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
+    }
+  } catch (...) {
+    result = kParsingError;
   }
 
   return result;
 }
 
-} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}
+}
+}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__

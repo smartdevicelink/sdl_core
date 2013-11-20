@@ -273,9 +273,10 @@ class FormatterJsonRpc: public CFormatterJsonBase {
 template <typename FunctionId, typename MessageType>
 int FormatterJsonRpc::FromString(const std::string& str,
                                  NsSmartObjects::SmartObject& out) {
+  int result = kSuccess;
+  try {
   Json::Value root;
   Json::Reader reader;
-  int result = kSuccess;
   namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
   if (false == reader.parse(str, root)) {
@@ -459,6 +460,9 @@ int FormatterJsonRpc::FromString(const std::string& str,
 
   out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 1;
   out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
+  } catch(...) {
+    result = kParsingError;
+  }
 
   return result;
 }

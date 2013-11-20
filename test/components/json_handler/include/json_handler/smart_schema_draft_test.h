@@ -36,7 +36,7 @@
 
 #include <string>
 #include <iostream>
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "test/components/json_handler/test_JSONHandler_v4_protocol_v2_0_revP_schema.h"
 
 using namespace Gen::test::components::JSONHandler2;
@@ -77,8 +77,8 @@ namespace test { namespace components { namespace json_handler { namespace smart
         bResult = CFormatterJsonSDLRPCv2::fromString<FunctionID::eType, messageType::eType>(inputJsonString, obj, FunctionID::RegisterAppInterfaceID, messageType::request, 1);
         ASSERT_TRUE(bResult);
 
-        ASSERT_EQ(FunctionID::RegisterAppInterfaceID, (int)obj[S_PARAMS][S_FUNCTION_ID]);
-        ASSERT_EQ(messageType::request, (int)obj[S_PARAMS][S_MESSAGE_TYPE]);
+        ASSERT_EQ(FunctionID::RegisterAppInterfaceID, obj[S_PARAMS][S_FUNCTION_ID].asInt());
+        ASSERT_EQ(messageType::request, obj[S_PARAMS][S_MESSAGE_TYPE].asInt());
 
         //std::cout<<"TTS:"<<static_cast<std::string>(obj["msg_params"]["ttsName"][0]["type"])<<std::endl;
         // While fromString is not fully complete yet
@@ -107,14 +107,14 @@ namespace test { namespace components { namespace json_handler { namespace smart
         ASSERT_TRUE(bResult);
 
         // STEP 3. Validating object
-        ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, obj.isValid());
+        ASSERT_TRUE(obj.isValid());
 
         // STEP 4. Working with object
         obj[S_PARAMS][S_MESSAGE_TYPE] = messageType::notification;
         obj[S_MSG_PARAMS]["appName"] = "NEW APP NAME";
 
         // STEP 5. Validating object
-        ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, obj.isValid());
+        ASSERT_TRUE(obj.isValid());
 
         // STEP 6. Converting object to json string
 
@@ -155,7 +155,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
 
       ASSERT_FALSE(factory.AttachSchema(StructIdentifiers::INVALID_ENUM,
                                        object));
-      
+
       ASSERT_TRUE(factory.AttachSchema(StructIdentifiers::TextField,
                                        object));
 
@@ -165,24 +165,20 @@ namespace test { namespace components { namespace json_handler { namespace smart
       object["width"] = 100;
       object["rows"] = 2;
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
-                object.isValid());
+      ASSERT_TRUE(object.isValid());
 
       // Invalid value range for TextField
       object["rows"] = 20;
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
-                object.isValid());
+      ASSERT_FALSE(object.isValid());
 
       object["rows"] = 2;
       // Add unexpected field
       object["xxx"] = 1234;
 
-      ASSERT_EQ(
-          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
-          object.isValid());
+      ASSERT_FALSE(object.isValid());
     }
-    
+
     TEST(test_general, test_SmartObjectCreation) {
       test_JSONHandler_v4_protocol_v2_0_revP factory;
 
@@ -202,7 +198,7 @@ namespace test { namespace components { namespace json_handler { namespace smart
           messageType::INVALID_ENUM);
 
       ASSERT_EQ(SmartType_Null, object.getType());
-      
+
       object = factory.CreateSmartObject(
           FunctionID::INVALID_ENUM,
           messageType::response);
@@ -216,14 +212,11 @@ namespace test { namespace components { namespace json_handler { namespace smart
       object["value"] = "xxx";
       object["imageType"] = ImageType::STATIC;
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
-                object.isValid());
+      ASSERT_TRUE(object.isValid());
 
       object["zzz"] = "yyy";
 
-      ASSERT_EQ(
-          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
-          object.isValid());
+      ASSERT_FALSE(object.isValid());
 
       object = factory.CreateSmartObject(FunctionID::AddSubMenuID,
                                          messageType::request);
@@ -236,15 +229,12 @@ namespace test { namespace components { namespace json_handler { namespace smart
       object[S_MSG_PARAMS]["menuID"] = 10;
       object[S_MSG_PARAMS]["position"] = 20;
       object[S_MSG_PARAMS]["menuName"] = "MenuItem";
-      
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
-                object.isValid());
 
-      object[S_MSG_PARAMS]["Noise"] = "Bzzzzzz!!!";      
-      
-      ASSERT_EQ(
-          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
-          object.isValid());
+      ASSERT_TRUE(object.isValid());
+
+      object[S_MSG_PARAMS]["Noise"] = "Bzzzzzz!!!";
+
+      ASSERT_FALSE(object.isValid());
     }
 
     TEST(test_general, test_GetSmartSchema) {
@@ -268,27 +258,23 @@ namespace test { namespace components { namespace json_handler { namespace smart
 
       ASSERT_TRUE(factory.GetSchema(StructIdentifiers::SyncMsgVersion,
                                     schema));
-      
-      SmartObject object(SmartType_Map);      
+
+      SmartObject object(SmartType_Map);
       object.setSchema(schema);
 
       object["majorVersion"] = 1;
       object["minorVersion"] = 2;
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
-                object.isValid());
+      ASSERT_TRUE(object.isValid());
 
       object["majorVersion"] = 1000;
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
-                object.isValid());
+      ASSERT_FALSE(object.isValid());
 
       object["majorVersion"] = 1;
       object["zzzz"] = 200;
 
-      ASSERT_EQ(
-          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
-          object.isValid());
+      ASSERT_FALSE(object.isValid());
 
       ASSERT_TRUE(factory.GetSchema(FunctionID::UnregisterAppInterfaceID,
                                     messageType::request,
@@ -304,19 +290,18 @@ namespace test { namespace components { namespace json_handler { namespace smart
       object[S_PARAMS][S_PROTOCOL_TYPE] = 1;
       object[S_MSG_PARAMS] = SmartObject(SmartType_Map);
 
-      ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK,
-                object.isValid());
+      ASSERT_TRUE(object.isValid());
 
       object[S_PARAMS]["blah-blah"] = "YouShallNotPass!";
 
-      ASSERT_EQ(
-          NsSmartDeviceLink::NsSmartObjects::Errors::UNEXPECTED_PARAMETER,
-          object.isValid());
+      ASSERT_FALSE(object.isValid());
     }
 }}}}
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
     //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
-}
+}*/
+
+#endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_SMART_SCHEMA_DRAFT_TEST_H_
