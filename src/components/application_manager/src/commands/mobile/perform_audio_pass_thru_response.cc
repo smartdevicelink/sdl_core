@@ -41,8 +41,8 @@ namespace application_manager {
 namespace commands {
 
 PerformAudioPassThruResponse::PerformAudioPassThruResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+  const MessageSharedPtr& message)
+  : CommandResponseImpl(message) {
 }
 
 PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {
@@ -62,11 +62,14 @@ void PerformAudioPassThruResponse::Run() {
     }
   }
 
+  int session_key =
+    (*message_)[strings::params][strings::connection_key].asInt();
+
   if (!IsPendingResponseExist()) {
-    if(ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
-      ApplicationManagerImpl::instance()->StopAudioPassThru();
+    if (ApplicationManagerImpl::instance()->audio_pass_thru_flag()) {
+      ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
       ApplicationManagerImpl::instance()->set_audio_pass_thru_flag(false);
-  }
+    }
 
     SendResponse(true);
   }

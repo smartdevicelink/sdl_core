@@ -33,41 +33,17 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
-#include "interfaces/MOBILE_API.h"
-#include "media_manager/redecoder_client.h"
-#include "media_manager/video_stream_producer.h"
-
 namespace media_manager {
-
-class string;
-class MediaManager : public redecoding::RedecoderClient,
-                     public video_stream_producer_consumer::VideoStreamProducer {
+class MediaManager {
   public:
-    virtual void SetProtocolHandler(
-      protocol_handler::ProtocolHandler* protocol_hndlr) = 0;
-    virtual void addA2DPSource(const sockaddr& device) = 0;
-    virtual void removeA2DPSource(const sockaddr& device) = 0;
-    virtual void playA2DPSource(const sockaddr& device) = 0;
-    virtual void stopA2DPSource(const sockaddr& device) = 0;
-
-    virtual void addA2DPSource(const std::string& device) = 0;
-    virtual void removeA2DPSource(const std::string& device) = 0;
-    virtual void playA2DPSource(const std::string& device) = 0;
-    virtual void stopA2DPSource(const std::string& device) = 0;
-
-    virtual void startMicrophoneRecording(const std::string& outputFileName,
-                                          mobile_apis::SamplingRate::eType type,
-                                          int duration,
-                                          mobile_apis::BitsPerSample::eType,
-                                          unsigned int session_key, unsigned int correlation_id) = 0;
-    virtual void stopMicrophoneRecording() = 0;
-    virtual void startVideoStreaming() = 0;
-    virtual void stopVideoStreaming() = 0;
-
-    virtual ~MediaManager() {
-    }
+    virtual void PlayA2DPSource(int application_key) = 0;
+    virtual void StopA2DPSource(int application_key) = 0;
+    virtual void StartMicrophoneRecording(int application_key,
+                                          const std::string& outputFileName,
+                                          int duration) = 0;
+    virtual void StopMicrophoneRecording(int application_key) = 0;
+    virtual void StartVideoStreaming(int application_key) = 0;
+    virtual void StopVideoStreaming(int application_key) = 0;
 };
-
-}  //  namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+}  // namespace media_manager
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_

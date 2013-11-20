@@ -30,14 +30,8 @@ set(LIBRARIES
   MobileMessageHandler
   RequestWatchdog
   MediaManager
-  MediaManagerNew
   Libusb-1.0.16
 )
-
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
   ./
@@ -58,10 +52,10 @@ include_directories (
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
+  #/usr/lib/i386-linux-gnu/glib-2.0/include
+  #/usr/lib/x86_64-linux-gnu/glib-2.0/include/
+  #${GSTREAMER_gst_INCLUDE_DIR}
+  #${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set (SOURCES
