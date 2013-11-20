@@ -67,7 +67,7 @@ GeneralView {
                     width: Constants.ovalButtonWidth
                     anchors.verticalCenter: parent.verticalCenter
                     text: "TurnList"
-                    fontSize: Constants.fontSize
+                  //  fontSize: Constants.fontSize
                     onClicked: {
                         console.log("Go to TurnListView");
                         contentLoader.go("./views/TbtTurnListView.qml");
@@ -91,7 +91,7 @@ GeneralView {
                         height: turnListButton.height
                         text: name
                         icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
-                        fontSize: Constants.fontSize
+                      //  fontSize: Constants.fontSize
                         highlighted: isHighlighted
                         onPressed: {
                             console.log("TBT view soft button: On pressed");

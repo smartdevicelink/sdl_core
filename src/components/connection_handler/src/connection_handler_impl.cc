@@ -194,8 +194,8 @@ void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
   LOG4CXX_INFO(
     logger_,
-    "Delete Connection:" << static_cast<int>(connection_id)
-    << "from the list.");
+    "Delete Connection: " << static_cast<int>(connection_id)
+    << " from the list.");
   ConnectionListIterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");

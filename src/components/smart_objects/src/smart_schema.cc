@@ -46,7 +46,7 @@ NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(utils::SharedPtr<N
 
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
+NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object) const
 {
     return mSchemaItem->validate(object);
 }

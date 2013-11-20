@@ -47,7 +47,7 @@ QtObject {
         this.initialText = initialText.fieldText
         choice.clear()
         for (var i = 0; i < choiceSet.length; ++i) {
-            choice.append({"id": choiceSet[i].choiceID, "name": choiceSet[i].menuName ? choiceSet[i].menuName : "choiceID = " + choiceSet[i].choiceID})
+            choice.append({"id": choiceSet[i].choiceID, "name": choiceSet[i].menuName ? choiceSet[i].menuName : "choiceID = " + choiceSet[i].choiceID, image: choiceSet[i].image})
         }
         this.timeout = timeout
         interactionPopup.activate()

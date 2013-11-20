@@ -49,7 +49,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
   ui_alert_result_(mobile_apis::Result::INVALID_ENUM),
   is_tts_speak_send_(false),
   is_tts_speak_received_(false) {
-
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
 AlertRequest::~AlertRequest() {
@@ -134,6 +134,13 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+        correlation_id(),
+      default_timeout());
+      break;
+    }
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
 
@@ -171,22 +178,28 @@ void AlertRequest::SendAlertRequest(int app_id) {
 
   msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
-  msg_params[hmi_request::alert_strings][0][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT1;
-  msg_params[hmi_request::alert_strings][0][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text1];
 
-  // alert2
-  msg_params[hmi_request::alert_strings][1][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT2;
-  msg_params[hmi_request::alert_strings][1][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text2];
-
-  // alert3
-  msg_params[hmi_request::alert_strings][2][hmi_request::field_name] =
-      TextFieldName::ALERT_TEXT3;
-  msg_params[hmi_request::alert_strings][2][hmi_request::field_text] =
-      (*message_)[strings::msg_params][strings::alert_text3];
+  int index = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+         TextFieldName::ALERT_TEXT1;
+     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+         (*message_)[strings::msg_params][strings::alert_text1];
+     index++;
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+        TextFieldName::ALERT_TEXT2;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+        (*message_)[strings::msg_params][strings::alert_text2];
+    index++;
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
+         TextFieldName::ALERT_TEXT3;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+         (*message_)[strings::msg_params][strings::alert_text3];
+  }
 
   // softButtons
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {

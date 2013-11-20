@@ -63,13 +63,10 @@ GeneralView {
             // 1/4 bottom screen
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.right: parent.right
             height: 1/4 * parent.height
+            width: parent.width
 
-            BackButton {
-                id: backButton
-                anchors.centerIn: parent
-            }
+            BackButton { anchors.centerIn: parent }
         }
     }
 }

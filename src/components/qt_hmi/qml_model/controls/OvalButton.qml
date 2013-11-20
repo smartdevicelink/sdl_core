@@ -201,12 +201,14 @@ Item {
         }
         Text {
             id: label
+            width: image.visible ? parent.width - image.width : parent.width
             color: Constants.primaryColor
             anchors.centerIn: parent
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: Constants.ovalButtonFontSize
             visible: false
+            elide: Text.ElideRight
         }
         HueSaturation {
             anchors.fill: label

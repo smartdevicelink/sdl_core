@@ -58,7 +58,7 @@ Rectangle {
         id: dataContainer
 
         onSystemContextChanged: {
-            sdlUI.onSystemContext(systemContext)
+            sdlUIProxy.onSystemContext(systemContext)
         }
 
         // Please note that applicationContext is changed only after setting currentApplication
@@ -256,7 +256,7 @@ Rectangle {
             objectName: "VehicleInfo"
         }
         HmiApi.UIProxy {
-            id: sdlUI
+            id: sdlUIProxy
             objectName: "UI"
         }
     }
@@ -312,4 +312,28 @@ Rectangle {
 
         sdlBasicCommunication.onReady()
     }
+
+    /*
+      * Test Support Section
+      *
+      */
+    function getSlider(){
+        return sliderPopup
+    }
+
+    function getDataStorage(){
+        return dataContainer
+    }
+
+    function getUIProxy(){
+        return sdlUIProxy
+    }
+
+    function getMainScreen(){
+        return mainScreen
+    }
+    /*
+      * Test Support Section End
+      */
+
 }

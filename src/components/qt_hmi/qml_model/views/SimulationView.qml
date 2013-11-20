@@ -120,7 +120,7 @@ Rectangle {
                 model: languagesList
                 onCurrentIndexChanged: {
                     dataContainer.hmiUILanguage = settingsContainer.sdlLanguagesList[currentIndex];
-                    sdlUI.onLanguageChange(dataContainer.hmiUILanguage);
+                    sdlUIProxy.onLanguageChange(dataContainer.hmiUILanguage);
                 }
             }
 

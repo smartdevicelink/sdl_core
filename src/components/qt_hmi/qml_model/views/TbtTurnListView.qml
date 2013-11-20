@@ -46,7 +46,7 @@ GeneralView {
         id: title
         verticalAlignment: Text.AlignVCenter
         anchors.topMargin: 5
-        font.pixelSize: 14
+        font.pixelSize: Constants.fontSize
         color: Constants.primaryColor
         text: "Turn List"
         anchors.horizontalCenter: parent.horizontalCenter
@@ -55,12 +55,10 @@ GeneralView {
 
     ListView {
         id: turnList
-        anchors.topMargin: 0
         anchors.bottom: softButton.top
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.top: title.bottom
-        anchors.bottomMargin: 0
         delegate: ListItem {
             height: Constants.itemListHeight
             width: parent.width
@@ -75,11 +73,8 @@ GeneralView {
         id: softButton
         height: 65
         anchors.bottom: back.top
-        anchors.bottomMargin: 0
         anchors.right: parent.right
-        anchors.rightMargin: 0
         anchors.left: parent.left
-        anchors.leftMargin: 0
         delegate: OvalButton {
             width: parent.width
             text: name
@@ -115,12 +110,13 @@ GeneralView {
                    dataContainer.navigationModel.appId).turnListSoftButtons
     }
 
-    OvalButton {
+    Item {
+        // 1/4 bottom screen
         id: back
-        width: Constants.ovalButtonWidth
-        text: "Back"
         anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        onClicked: contentLoader.back()
+        anchors.left: parent.left
+        width: parent.width
+        height: 1/4 * parent.height
+        BackButton { anchors.centerIn: parent }
     }
 }
