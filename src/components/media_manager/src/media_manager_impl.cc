@@ -289,6 +289,10 @@ void MediaManagerImpl::OnMessageReceived(
   }
 }
 
+void MediaManagerImpl::OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr& message) {
+}
+
 void MediaManagerImpl::onRedecoded(const protocol_handler::RawMessagePtr&
                                         message) {
 }

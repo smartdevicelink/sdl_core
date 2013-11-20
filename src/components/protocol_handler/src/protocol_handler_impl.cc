@@ -263,7 +263,7 @@ void ProtocolHandlerImpl::OnTMMessageSend() {
         protocol_observers_.end() != it;
         ++it) {
       // TODO(PK): Paste valid app_id taken from message
-      (*it)->OnLastMobileMessageSent(0 /*Valid app id*/);
+      (*it)->OnMobileMessageSent(NULL /*Valid message*/);
     }
   }
 }

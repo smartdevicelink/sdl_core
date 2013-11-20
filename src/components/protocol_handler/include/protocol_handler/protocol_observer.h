@@ -61,7 +61,7 @@ class ProtocolObserver {
      */
     virtual void OnMessageReceived(const RawMessagePtr& message) = 0;
 
-    virtual void OnLastMobileMessageSent(unsigned int key) {};
+    virtual void OnMobileMessageSent(const RawMessagePtr& message)  = 0;
 
 
   protected:

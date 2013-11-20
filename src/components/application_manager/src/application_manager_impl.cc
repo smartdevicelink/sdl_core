@@ -940,15 +940,32 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
 }
 
 void ApplicationManagerImpl::OnMessageReceived(const protocol_handler::
-                                               RawMessagePtr& message) {
-
+                                   RawMessagePtr& message) {
 }
 
-void ApplicationManagerImpl::OnLastMobileMessageSent(unsigned int key) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnLastMobileMessageSent");
-  if (NULL != connection_handler_) {
-    static_cast<connection_handler::ConnectionHandlerImpl*>
-      (connection_handler_)->CloseConnection(key);
+void ApplicationManagerImpl::OnMobileMessageSent(const protocol_handler::
+                             RawMessagePtr& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
+
+  application_manager::Message app_mngr_message;
+
+  // TODO(PK): Convert RawMessage to application_manager::Message
+
+  // Application connection should be closed if RegisterAppInterface failed and
+  // RegisterAppInterfaceResponse with success == false was sent to the mobile
+  if (app_mngr_message.function_id() ==
+        mobile_apis::FunctionID::RegisterAppInterfaceID
+      && app_mngr_message.type() ==
+          MessageType::kResponse
+      // TODO(PK): Implement suscess() getter in application_manager::Message
+      /*&& app_mngr_message.success() == false*/) {
+
+    unsigned int key = app_mngr_message.connection_key();
+
+    if (NULL != connection_handler_) {
+      static_cast<connection_handler::ConnectionHandlerImpl*>
+        (connection_handler_)->CloseConnection(key);
+    }
   }
 }
 

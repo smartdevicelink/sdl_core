@@ -386,10 +386,18 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     virtual void OnMobileMessageReceived(const MobileMessage& message);
 
+
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
     virtual void OnMessageReceived(const protocol_handler::
                                    RawMessagePtr& message);
 
-    virtual void OnLastMobileMessageSent(unsigned int key);
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
+    virtual void OnMobileMessageSent(const protocol_handler::
+                                     RawMessagePtr& message);
 
     void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
