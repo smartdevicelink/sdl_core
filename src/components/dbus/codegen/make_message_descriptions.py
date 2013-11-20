@@ -36,13 +36,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-for argv in sys.argv:
-	if argv == "-h" or argv == "--help":
-		print "This script generates HMI API message descriptions for D-Bus\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
-		print "Output: applink/src/components/dbus/message_descriptions.cc\n"
-		exit("Exit from help. To run script don't use -h, --help")
-
 from argparse import ArgumentParser
 from xml.etree import ElementTree
 from copy import copy
@@ -213,9 +206,9 @@ class Impl(FordXmlParser):
         out.write("};\n")
 
 
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description="Generates HMI API message descriptions for D-Bus")
+arg_parser.add_argument('--infile', required=True, help="path to input file QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path of output file message_descriptions.cc")
 args = arg_parser.parse_args()
 
 if not path.isdir(args.outdir):

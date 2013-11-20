@@ -36,13 +36,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-for argv in sys.argv:
-	if argv == "-h" or argv == "--help":
-		print "This script converts introspection.xml to C-string\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
-		print "Output: applink/src/components/dbus/introspection.cc\n"
-		exit("Exit from help. To run script don't use -h, --help")
-
 from argparse import ArgumentParser
 from ford_xml_parser import FordXmlParser
 from ford_xml_parser import node_name
@@ -57,10 +50,9 @@ class Impl(FordXmlParser):
             if el is not None:
                 out_el_tree.append(el)
 
-
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description='Converts introspection.xml to C-string')
+arg_parser.add_argument('--infile', required=True, help="path to input file QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path of output file introspection_xml.cc")
 args = arg_parser.parse_args()
 
 if not path.isdir(args.outdir):

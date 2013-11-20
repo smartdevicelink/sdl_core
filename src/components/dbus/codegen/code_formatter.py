@@ -35,12 +35,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
-import sys
-for argv in sys.argv:
-	if argv == "-h" or argv == "--help":
-		print "This script contains utility that helps to manage indents in generated code\n"
-		exit("Exit from help. To run script don't use -h --help")
 	
 class CodeBlock:
     indent = 0

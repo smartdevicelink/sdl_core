@@ -36,13 +36,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-for argv in sys.argv:
-	if argv == "-h" or argv == "--help":
-		print "This script contains generator of QML to QDbus QML part\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
-		print "Output: applink/src/components/qt_hmi/qml_model/hmi_api"
-		exit("Exit from help. To run script don't use -h, --help")
-
 from os import path
 from os import makedirs
 from sys import argv
@@ -169,9 +162,9 @@ def write_header(out):
 
 """)
 
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description="Generator of QML to QDbus QML part")
+arg_parser.add_argument('--infile', required=True, help="path to input file QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path to directory for output BasicCommunicationProxy.qml, ButtonsProxy.qml, NavigationProxy.qml, TTSProxy.qml, UIProxy.qml, VehicleInfoProxy.qml, VRProxy.qml files")
 args = arg_parser.parse_args()
 
 if not path.isdir(args.outdir):

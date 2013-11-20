@@ -36,13 +36,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-for argv in sys.argv:
-	if argv == "-h" or argv == "--help":
-		print "This script contains generator of QML to QDbus C++ part\nInput: applink/src/components/interfaces/QT_HMI_API.xml"
-		print "Output: applink/src/components/qt_hmi/qml_plugins/dbus_adapter/"
-		exit("Exit from help. To run script don't use -h, --help")
-
 from argparse import ArgumentParser
 import os.path
 from sys import argv
@@ -616,9 +609,9 @@ class Impl(FordXmlParser):
 
 
 
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description="Generator of QML to QDbus C++ part")
+arg_parser.add_argument('--infile', required=True, help="path to input file QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path to directory for output qml_dbus.cc, qml_dbus.h files")
 args = arg_parser.parse_args()
 
 header_name = 'qml_dbus.h'
