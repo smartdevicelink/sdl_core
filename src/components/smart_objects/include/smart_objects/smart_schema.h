@@ -108,6 +108,8 @@ namespace NsSmartDeviceLink
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) const;
 
+            virtual ~CSmartSchema() {}
+
         protected:
 
             /**

@@ -79,7 +79,8 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 fi
 
 echo "Register gstreamer repository PUBLIC KEY in system"
-sudo apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
+#sudo apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
+sudo apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
 	echo "Apdating repository..."

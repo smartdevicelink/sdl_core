@@ -34,6 +34,12 @@
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 
+namespace {
+log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
+}
+
+
+
 namespace application_manager {
 
 ApplicationImpl::ApplicationImpl(unsigned int app_id)
@@ -144,6 +150,10 @@ void ApplicationImpl::set_name(const std::string& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
+  // Audio streaming state for non-media application can not be defferent
+  // from NOT_AUDIBLE
+  if (!is_media)
+    set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
 }
 
 void ApplicationImpl::set_hmi_level(
@@ -158,8 +168,14 @@ void ApplicationImpl::set_system_context(
 
 void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
+  if (!is_media_application()
+      && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
+    LOG4CXX_ERROR(g_logger, "Trying to set audio streaming state"
+                  " for non-media application to different from NOT_AUDIBLE");
+  }
   audio_streaming_state_ = state;
 }
+
 bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
       app_files_.end() != it;

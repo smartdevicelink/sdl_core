@@ -94,6 +94,8 @@ namespace NsSmartDeviceLink
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
+            virtual ~CStringSchemaItem() {}
+
         private:
             /**
              * @brief Constructor.

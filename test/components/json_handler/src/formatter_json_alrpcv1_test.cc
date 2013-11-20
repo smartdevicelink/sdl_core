@@ -28,28 +28,4 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_TEST_HELPER_H_
-#define TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_TEST_HELPER_H_
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
-#include "SmartObjects/SmartObject.hpp"
-
-namespace test { namespace components { namespace json_handler { namespace formatters {
-
-
-    class CFormatterTestHelper : public ::testing::Test
-    {
-    protected:
-        void fillTestObject(NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
-
-        //bool checkTestObject(const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
-
-        void compareObjects(const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
-                            const NsSmartDeviceLink::NsSmartObjects::SmartObject& second);
-    };
-
-}}}}
-
-#endif // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_TEST_HELPER_H_
+#include "json_handler/formatter_json_alrpcv1_test.h"

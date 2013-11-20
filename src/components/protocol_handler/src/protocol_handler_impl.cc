@@ -256,6 +256,16 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 void ProtocolHandlerImpl::OnTMMessageSend() {
   // TODO(PV): implement if needed.
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
+
+  // TODO(PK): Check if it RegisterAppInterfaceResponse with error was sent
+  if(false) {
+    for (ProtocolObservers::iterator it = protocol_observers_.begin();
+        protocol_observers_.end() != it;
+        ++it) {
+      // TODO(PK): Paste valid app_id taken from message
+      (*it)->OnMobileMessageSent(NULL /*Valid message*/);
+    }
+  }
 }
 
 void ProtocolHandlerImpl::OnTMMessageSendFailed(

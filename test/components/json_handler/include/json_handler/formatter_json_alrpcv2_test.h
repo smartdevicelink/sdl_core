@@ -36,12 +36,12 @@
 
 #include <iostream>
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CSmartFactory.hpp"
 
 #include "json/json.h"
 
-#include "json_handler/formatters/formatter_test_helper.h"
-
+#include "formatter_test_helper.h"
 
 namespace test { namespace components { namespace json_handler { namespace formatters {
 
@@ -59,12 +59,12 @@ namespace test { namespace components { namespace json_handler { namespace forma
         srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
 
         // SmartObjects --> JSON
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, str);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(srcObj, str);
 
         //std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
             fromString<std::string, std::string>(str, dstObj, "some function", "request", 12);
 
 
@@ -96,17 +96,17 @@ namespace test { namespace components { namespace json_handler { namespace forma
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         bool result;
 
-        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::
+        result = NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
                 fromString<std::string, std::string>(str, obj, "some name", "request", 12);
 
         ASSERT_TRUE(result) << "Error parsing JSON string";
 
-        ASSERT_EQ("some name", (std::string)obj[S_PARAMS][S_FUNCTION_ID]);
-        ASSERT_EQ(12, (int)obj[S_PARAMS][S_CORRELATION_ID]);
-        ASSERT_EQ(2, (int)obj[S_PARAMS][S_PROTOCOL_VERSION]);
-        ASSERT_EQ(10, (int)obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]);
-        ASSERT_EQ("TEXT", (std::string)obj[S_MSG_PARAMS]["ttsName"][0]["type"]);
-        ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
+        ASSERT_EQ("some name", obj[S_PARAMS][S_FUNCTION_ID].asString());
+        ASSERT_EQ(12, obj[S_PARAMS][S_CORRELATION_ID].asInt());
+        ASSERT_EQ(2, obj[S_PARAMS][S_PROTOCOL_VERSION].asInt());
+        ASSERT_EQ(10, obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"].asInt());
+        ASSERT_EQ("TEXT", obj[S_MSG_PARAMS]["ttsName"][0]["type"].asString());
+        ASSERT_EQ("Synonym 2", obj[S_MSG_PARAMS]["vrSynonyms"][1].asString());
     }
 
 }}}}

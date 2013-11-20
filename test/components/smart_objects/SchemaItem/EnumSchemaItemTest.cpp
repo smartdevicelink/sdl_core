@@ -95,7 +95,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
         //Obj - bool
         obj = true;
@@ -104,7 +104,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
         //Object - number
         obj = 3.1415926;
@@ -114,7 +114,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
         //Object - string
         obj = "Some string";
@@ -123,7 +123,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
     }
 
     /**
@@ -145,7 +145,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_EQ(TestType::BLUETOOTH_OFF, (int)obj);
+        EXPECT_EQ(TestType::BLUETOOTH_OFF, obj.asInt());
 
         //Obj - bool
         obj = true;
@@ -154,7 +154,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         //Object - number
         obj = 3.1415926;
@@ -164,7 +164,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_EQ(3.1415926, (double)obj);
+        EXPECT_EQ(3.1415926, obj.asDouble());
 
         //Object - string
         obj = "Some string";
@@ -173,7 +173,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_EQ(std::string("Some string"), (std::string)obj);
+        EXPECT_EQ(std::string("Some string"), obj.asString());
 
         //Object - int in range of enum
         obj = 6;
@@ -202,29 +202,29 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
         item->unapplySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        EXPECT_EQ(std::string("FACTORY_DEFAULTS"), (std::string)obj);
+        EXPECT_EQ(std::string("FACTORY_DEFAULTS"), obj.asString());
 
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(TestType::FACTORY_DEFAULTS, (int)obj);
+        EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
         obj = "TOO_MANY_REQUESTS";
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(TestType::TOO_MANY_REQUESTS, (int)obj);
+        EXPECT_EQ(TestType::TOO_MANY_REQUESTS, obj.asInt());
 
         obj = "ENOUGH_REQUESTS";
         item->applySchema(obj);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        EXPECT_EQ(std::string("ENOUGH_REQUESTS"), (std::string)obj);
+        EXPECT_EQ(std::string("ENOUGH_REQUESTS"), obj.asString());
     }
 
 }}}}

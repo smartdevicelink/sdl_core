@@ -33,22 +33,26 @@
 
 #include <iostream>
 
-#include "JSONHandler/formatters/formatter_json_rpc.h"
-#include "test/components/JSONHandler/test_json_rpc.h"
+#include "smart_objects/smart_object.h"
+#include "formatters/formatter_json_rpc.h"
+#include "json_handler/formatter_test_helper.h"
+
+#include "test/components/json_handler/test_json_rpc.h"
+#include "test/components/json_handler/test_json_rpc_schema.h"
 
 #include "json/json.h"
-
-#include "CFormatterTestHelper.hpp"
 
 namespace test {
 namespace components {
 namespace JSONHandler {
 namespace Formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace gen::test::components::json_rpc;
+using namespace test::components::json_handler::formatters;
+using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+
 typedef NsSmartDeviceLink::NsJSONHandler::Formatters::FormatterJsonRpc JSONFormatter;
-typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase FBase;
 
 /**
  * @brief Convert SmartObject to JSON string.
@@ -62,7 +66,7 @@ void AnyObjectToJsonString(
 
   Json::Value params(Json::objectValue);
   NsSmartDeviceLink::NsSmartObjects::SmartObject formattedObj(obj);
-  FBase::objToJsonValue(formattedObj, params);
+  CFormatterJsonBase::objToJsonValue(formattedObj, params);
   result_string = params.toStyledString();
 }
 
@@ -95,7 +99,7 @@ TEST_F(CFormatterTestHelper, ToString) {
   srcObj[S_MSG_PARAMS]["param3"]["member4"][0] = 13;
   srcObj[S_MSG_PARAMS]["param3"]["member4"][1] = 14;
 
-  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, srcObj.isValid());
+  ASSERT_TRUE(srcObj.isValid());
 
   // SmartObjects --> JSON
   ASSERT_TRUE(JSONFormatter::ToString(srcObj, str));
@@ -106,7 +110,7 @@ TEST_F(CFormatterTestHelper, ToString) {
   ASSERT_TRUE(JSONFormatter::kSuccess == result);
 
   // Compare SmartObjects
-  compareObjects(srcObj, dstObj);
+  CFormatterTestHelper::compareObjects(srcObj, dstObj);
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject srcObj2;
   NsSmartDeviceLink::NsSmartObjects::SmartObject dstObj2;
@@ -130,7 +134,7 @@ TEST_F(CFormatterTestHelper, ToString) {
   srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member3"] = 0.01;
   srcObj2[S_MSG_PARAMS]["i1"]["m4"][0]["member4"][0] = 99;
 
-  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, srcObj2.isValid());
+  ASSERT_TRUE(srcObj2.isValid());
 
   // SmartObjects --> JSON
   ASSERT_TRUE(JSONFormatter::ToString(srcObj2, str));
@@ -175,16 +179,16 @@ TEST_F(CFormatterTestHelper, FromString) {
                                 schema);
   dstObj.setSchema(schema);
 
-  ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, dstObj.isValid());
+  ASSERT_TRUE(dstObj.isValid());
 
-  ASSERT_EQ(99, (int)dstObj[S_PARAMS][S_CORRELATION_ID]);
-  ASSERT_EQ(2, (int)dstObj[S_PARAMS][S_PROTOCOL_VERSION]);
-  ASSERT_EQ(messageType::response, (int)dstObj[S_PARAMS][S_MESSAGE_TYPE]);
-  ASSERT_EQ(0, (int)dstObj[S_PARAMS][kCode]);
-  ASSERT_EQ(FunctionID::interface1_Function1, (int)dstObj[S_PARAMS][S_FUNCTION_ID]);
-  ASSERT_EQ(interface1_enum1::element1, (int)dstObj[S_MSG_PARAMS]["p1"]);
-  ASSERT_EQ(interface1_enum1::element3, (int)dstObj[S_MSG_PARAMS]["p2"]);
-  ASSERT_EQ(true, (bool)dstObj[S_MSG_PARAMS]["p3"]);
+  ASSERT_EQ(99, dstObj[S_PARAMS][S_CORRELATION_ID].asInt());
+  ASSERT_EQ(2, dstObj[S_PARAMS][S_PROTOCOL_VERSION].asInt());
+  ASSERT_EQ(messageType::response, dstObj[S_PARAMS][S_MESSAGE_TYPE].asInt());
+  ASSERT_EQ(0, dstObj[S_PARAMS]["code"].asInt());
+  ASSERT_EQ(FunctionID::interface1_Function1, dstObj[S_PARAMS][S_FUNCTION_ID].asInt());
+  ASSERT_EQ(interface1_enum1::element1, dstObj[S_MSG_PARAMS]["p1"].asInt());
+  ASSERT_EQ(interface1_enum1::element3, dstObj[S_MSG_PARAMS]["p2"].asInt());
+  ASSERT_EQ(true, dstObj[S_MSG_PARAMS]["p3"].asBool());
 }
 
 /**
@@ -197,6 +201,8 @@ TEST_F(CFormatterTestHelper, FromString) {
  */
 bool CheckErrorCode(int error, const std::string &str) {
   NsSmartDeviceLink::NsSmartObjects::SmartObject out;
+
+  printf("%s\n", str.c_str());
 
   return error == (error & JSONFormatter::FromString<FunctionID::eType,
                                                      messageType::eType>(
@@ -326,13 +332,6 @@ TEST(FormatterJsonRpc, InvalidFormat) {
                               "  \"id\": 1,"
                               "  \"result\": {}"
                               "}"));
-
-  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kInvalidFormat,
-                             "{"
-                             "  \"jsonrpc\": \"2.0\","
-                             "  \"id\": 1,"
-                             "  \"error\": 10"
-                             "}"));
 
   ASSERT_FALSE(CheckErrorCode(JSONFormatter::kInvalidFormat,
                               "{"
@@ -574,13 +573,6 @@ TEST(FormatterJsonRpc, UnknownMessageType) {
                               "{"
                               "  \"jsonrpc\": \"2.0\","
                               "  \"id\": 1,"
-                              "  \"params\": {}"
-                              "}"));
-
-  ASSERT_FALSE(CheckErrorCode(JSONFormatter::kUnknownMessageType,
-                              "{"
-                              "  \"jsonrpc\": \"2.0\","
-                              "  \"id\": 1,"
                               "  \"result\": {}"
                               "}"));
 
@@ -758,13 +750,6 @@ TEST(FormatterJsonRpc, ErrorResponseMessageNotAvailable) {
                               "    \"message\": 1"
                               "  }"
                               "}"));
-
-  ASSERT_TRUE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
-                             "{"
-                             "  \"jsonrpc\": \"2.0\","
-                             "  \"id\": 1,"
-                             "  \"error\": 10"
-                             "}"));
 
   ASSERT_TRUE(CheckErrorCode(JSONFormatter::kErrorResponseMessageNotAvailable,
                              "{"

@@ -53,22 +53,22 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(); // No default value
 
         obj = 5;
-        ASSERT_EQ(5, (int)obj);
+        ASSERT_EQ(5, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         obj = true;
-        ASSERT_TRUE((bool)obj);
+        ASSERT_TRUE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         obj = "Test";
-        ASSERT_EQ(std::string("Test"), (std::string)obj);
+        ASSERT_EQ(std::string("Test"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
@@ -93,32 +93,32 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
 
         obj = 5;
-        ASSERT_EQ(5, (int)obj);
+        ASSERT_EQ(5, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
 
         obj = true;
-        ASSERT_TRUE((bool)obj);
+        ASSERT_TRUE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
         bool resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_FALSE((bool)obj);
+        EXPECT_FALSE(obj.asBool());
 
         obj = "Test";
-        ASSERT_EQ(std::string("Test"), (std::string)obj);
+        ASSERT_EQ(std::string("Test"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_FALSE((bool)obj);
+        EXPECT_FALSE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
-        EXPECT_FALSE((bool)obj);
+        EXPECT_FALSE(obj.asBool());
     }
 
     TEST(test_map_validate, test_BoolSchemaItemTest)
@@ -128,7 +128,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
 
         obj["aa"] = true;
-        ASSERT_TRUE((bool)obj["aa"]);
+        ASSERT_TRUE(obj["aa"].asBool());
 
         int resultType = item->validate(obj["aa"]);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
@@ -138,11 +138,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj["aa"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_FALSE((bool)obj["aa"]);
+        EXPECT_FALSE(obj["aa"].asBool());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_FALSE((bool)obj);
+        EXPECT_FALSE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
@@ -161,8 +161,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[0] = true;
         obj[1] = false;
 
-        ASSERT_TRUE((bool)obj[0]);
-        ASSERT_FALSE((bool)obj[1]);
+        ASSERT_TRUE(obj[0].asBool());
+        ASSERT_FALSE(obj[1].asBool());
 
         int resultType = item->validate(obj[0]);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
@@ -175,11 +175,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj[0]);
         EXPECT_FALSE(resDefault);
-        EXPECT_TRUE((bool)obj[0]);
+        EXPECT_TRUE(obj[0].asBool());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_FALSE(resDefault);
-        EXPECT_FALSE((bool)obj[1]);
+        EXPECT_FALSE(obj[1].asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE, resultType);

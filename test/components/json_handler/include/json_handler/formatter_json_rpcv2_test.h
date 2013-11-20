@@ -36,7 +36,7 @@
 
 #include <iostream>
 
-#include "JSONHandler/formatters/CFormatterJsonRPC2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
 
 #include "json/json.h"
 
@@ -71,22 +71,22 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         srcObj["msg_params"]["ttsName"][0]["type"] = "TEXT";
         srcObj["msg_params"]["vrSynonyms"][0] = "Synonym1";
         srcObj["msg_params"]["vrSynonyms"][1] = "Synonym2";
-        srcObj["msg_params"]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
-        srcObj["msg_params"]["double"] = -0.1234;
+        // srcObj["msg_params"]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
+        // srcObj["msg_params"]["double"] = -0.1234;
 
         // SmartObjects --> JSON
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::toString(srcObj, str);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(srcObj, str);
 
         std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonRPC2::fromString(str, dstObj);
+        NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::fromString(str, dstObj, 0, 0);
 
         // Compare SmartObjects
-        ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj["msg_params"]["appName"]));
-        ASSERT_EQ(10, static_cast<int>(dstObj["msg_params"]["syncMsgVersion"]["minorVersion"]));
-        ASSERT_EQ("TEXT", static_cast<std::string>(dstObj["msg_params"]["ttsName"][0]["type"]));
-        ASSERT_TRUE(static_cast<bool>(dstObj["msg_params"]["isMediaApplication"]));
+        ASSERT_EQ("APP NAME",  dstObj["msg_params"]["appName"].asString());
+        ASSERT_EQ(10, dstObj["msg_params"]["syncMsgVersion"]["minorVersion"].asInt());
+        ASSERT_EQ("TEXT", dstObj["msg_params"]["ttsName"][0]["type"].asString());
+        ASSERT_TRUE(dstObj["msg_params"]["isMediaApplication"].asBool());
 
         ASSERT_TRUE(srcObj == dstObj);      // High level comparison
     }

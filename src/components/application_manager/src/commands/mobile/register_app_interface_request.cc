@@ -103,7 +103,7 @@ void RegisterAppInterfaceRequest::Run() {
                       "  hasn't been registered!");
   } else {
     app->set_mobile_app_id(msg_params[strings::app_id]);
-    app->set_is_media_application(msg_params[strings::is_media_application]);
+    app->set_is_media_application(msg_params[strings::is_media_application].asBool());
 
     if (msg_params.keyExists(strings::vr_synonyms)) {
       app->set_vr_synonyms(msg_params[strings::vr_synonyms]);

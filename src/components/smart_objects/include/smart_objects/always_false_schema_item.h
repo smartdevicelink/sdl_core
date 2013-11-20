@@ -64,6 +64,8 @@ namespace NsSmartDeviceLink
              **/
             virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
 
+            virtual ~CAlwaysFalseSchemaItem() {}
+
         private:
             /**
              * @brief Constructor.

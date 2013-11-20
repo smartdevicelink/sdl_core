@@ -35,6 +35,8 @@
 #ifndef __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 #define __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
 
+#include <typeinfo>
+
 #include "utils/shared_ptr.h"
 
 #include "smart_objects/smart_object.h"
@@ -95,6 +97,8 @@ namespace NsSmartDeviceLink
             virtual void BuildObjectBySchema(
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+
+            virtual ~TNumberSchemaItem() {}
 
         private:
 
@@ -205,7 +209,18 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
     if (isNumberType(Object.getType()))
     {
         result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
-        NumberType value = Object;
+        NumberType value; // = Object;
+
+        if (std::string("i") == typeid(value).name()) {
+          value = Object.asInt();
+        } else if (std::string("j") == typeid(value).name()) {
+          value = Object.asUInt();
+        } else if (std::string("d") == typeid(value).name()) {
+          value = Object.asDouble();
+        } else {
+          NOTREACHED();
+        }
+
         NumberType rangeLimit;
 
         if (true == mMinValue.getValue(rangeLimit))
@@ -255,7 +270,7 @@ void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObje
     NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
 
   if (getSmartType() == pattern_object.getType()) {
-    result_object = static_cast<NumberType>(pattern_object);
+    result_object = pattern_object; // TODO(AK): check this..
   }else {
     bool result = setDefaultValue(result_object);
     if (false == result)  {

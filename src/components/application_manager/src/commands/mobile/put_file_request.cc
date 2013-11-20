@@ -51,7 +51,7 @@ void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -62,13 +62,13 @@ void PutFileRequest::Run() {
   unsigned int free_space = file_system::AvailableSpaceApp(application->name());
 
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   bool is_persistent_file = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file =
-        (*message_)[strings::msg_params][strings::persistent_file];
+        (*message_)[strings::msg_params][strings::persistent_file].asBool();
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {

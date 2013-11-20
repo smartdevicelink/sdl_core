@@ -34,21 +34,21 @@
 #include <iostream>
 #include "json/json.h"
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CSmartFactory.hpp"
 
-#include "SmartObjects/CArraySchemaItem.hpp"
-#include "SmartObjects/CBoolSchemaItem.hpp"
-#include "SmartObjects/CObjectSchemaItem.hpp"
-#include "SmartObjects/CStringSchemaItem.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
-#include "SmartObjects/TNumberSchemaItem.hpp"
-#include "SmartObjects/TSchemaItemParameter.hpp"
+#include "smart_objects/array_schema_item.h"
+#include "smart_objects/bool_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/string_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/number_schema_item.h"
+#include "smart_objects/schema_item_parameter.h"
 
-#include "CFormatterTestHelper.hpp"
+#include "json_handler/formatter_test_helper.h"
 
 
-namespace test { namespace components { namespace JSONHandler { namespace Formatters {
+namespace test { namespace components { namespace json_handler { namespace formatters {
 
 namespace function_id {
 /**
@@ -105,9 +105,7 @@ enum Type {
 } //namespace messageType
 
 
-  
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-
     typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2 FormatterV2;
 
     TEST_F(CFormatterTestHelper, test_fromObjToSDLRPCv2AndBack)
@@ -164,12 +162,12 @@ enum Type {
 
         ASSERT_TRUE(result) << "Error parsing JSON string";
 
-        ASSERT_EQ("some name", (std::string)obj[S_PARAMS][S_FUNCTION_ID]);
-        ASSERT_EQ(12, (int)obj[S_PARAMS][S_CORRELATION_ID]);
-        ASSERT_EQ(2, (int)obj[S_PARAMS][S_PROTOCOL_VERSION]);
-        ASSERT_EQ(10, (int)obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"]);
-        ASSERT_EQ("TEXT", (std::string)obj[S_MSG_PARAMS]["ttsName"][0]["type"]);
-        ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
+        ASSERT_EQ("some name", obj[S_PARAMS][S_FUNCTION_ID].asString());
+        ASSERT_EQ(12, obj[S_PARAMS][S_CORRELATION_ID].asInt());
+        ASSERT_EQ(2, obj[S_PARAMS][S_PROTOCOL_VERSION].asInt());
+        ASSERT_EQ(10, obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"].asInt());
+        ASSERT_EQ("TEXT", obj[S_MSG_PARAMS]["ttsName"][0]["type"].asString());
+        ASSERT_EQ("Synonym 2", obj[S_MSG_PARAMS]["vrSynonyms"][1].asString());
     }
 
     TEST_F(CFormatterTestHelper, test_SDLRPCv2_EmptyMapArrayTest) {
@@ -237,7 +235,8 @@ enum Type {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-namespace func_id = test::components::JSONHandler::Formatters::function_id;
+
+namespace func_id = test::components::json_handler::formatters::function_id;
 
 template <>
 const std::map<func_id::Type, std::string> &
@@ -259,7 +258,7 @@ TEnumSchemaItem<func_id::Type>::getEnumElementsStringRepresentation() {
   return enum_string_representation;
 }
 
-namespace msg_type = test::components::JSONHandler::Formatters::message_type;
+namespace msg_type = test::components::json_handler::formatters::message_type;
 
 template <>
 const std::map<msg_type::Type, std::string> &

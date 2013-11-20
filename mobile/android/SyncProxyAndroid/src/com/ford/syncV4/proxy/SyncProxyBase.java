@@ -106,6 +106,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -221,6 +222,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
 	private Vector<String> _vrSynonyms = null;
+
+    private OnLanguageChange _lastLanguageChange = null;
 
 	// JSON RPC Marshaller
 	private IJsonRPCMarshaller _jsonRPCMarshaller = new JsonRPCMarshaller();
@@ -736,7 +739,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
 			String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
-			BaseTransportConfig transportConfig)
+			BaseTransportConfig transportConfig, SyncConnection connection)
 			throws SyncException {
 
 		setWiProVersion((byte)version);
@@ -782,6 +785,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 
 		_proxyListener = listener;
+        _syncConnection = connection;
 
 		// Get information from syncProxyConfigurationResources
 		TelephonyManager telephonyManager = null;
@@ -1153,8 +1157,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 
 
-	// Function to initialize new proxy connection
-	protected void initializeProxy() throws SyncException {
+	private void initState() throws SyncException {
 		// Reset all of the flags and state variables
 		_haveReceivedFirstNonNoneHMILevel = false;
 		_haveReceivedFirstFocusLevel = false;
@@ -1164,14 +1167,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		//TODO: Set Heart Beat Active!
 		//_proxyHeartBeat = new ProxyHeartBeat();
 		//_heartBeatEnabled = true;
+    }
+
+    // Function to initialize new proxy connection
+    protected void initializeProxy() throws SyncException {
+        initState();
 
 		// Setup SyncConnection
 		synchronized(CONNECTION_REFERENCE_LOCK) {
-			if (_syncConnection != null) {
-				_syncConnection.closeConnection(_rpcSessionID);
-				_syncConnection = null;
-			}
-			_syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+            if (_syncConnection == null) {
+                _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+            }
 			WiProProtocol protocol = (WiProProtocol)_syncConnection.getWiProProtocol();
 			protocol.setVersion(_wiproVersion);
 		}
@@ -1183,7 +1189,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 
-	// Public method to enable the siphon transport
+    private void closeSyncConnection(boolean keepConnection) {
+        if (_syncConnection != null) {
+            _syncConnection.closeConnection(_rpcSessionID, keepConnection);
+            if (!keepConnection) {
+                _syncConnection = null;
+            }
+        }
+    }
+
+    // Public method to enable the siphon transport
 	public static void enableSiphonDebug() {
 		SiphonServer.enableSiphonServer();
 	}
@@ -1208,7 +1223,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		dispose();
 	}
 
-	private void cleanProxy(SyncDisconnectedReason disconnectedReason) throws SyncException {
+	private void cleanProxy(SyncDisconnectedReason disconnectedReason,
+                            boolean keepConnection) throws SyncException {
 		try {
 
 			// ALM Specific Cleanup
@@ -1241,11 +1257,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 			// Clean up SYNC Connection
 			synchronized(CONNECTION_REFERENCE_LOCK) {
-				if (_syncConnection != null) {
-					_syncConnection.closeConnection(_rpcSessionID);
-					_syncConnection = null;
-				}
-			}
+                closeSyncConnection(keepConnection);
+            }
 
 			// Clean up Heartbeat Thread
 			if (_proxyHeartBeat != null) {
@@ -1273,7 +1286,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		try{
 			// Clean the proxy
-			cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT);
+			cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false);
 
             clearReconnectTimer();
 
@@ -1312,17 +1325,34 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	// Method to cycle the proxy, only called in ALM
 	protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
 		try{
-			cleanProxy(disconnectedReason);
+			cleanProxy(disconnectedReason, false);
 			scheduleInitializeProxy();
 			notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
 		} catch (SyncException e) {
-            handleSyncException(e);
+            handleCyclingSyncException(e);
         } catch (Exception e) {
 			notifyProxyClosed("Cycling the proxy failed.", e);
 		}
 	}
 
-    private void handleSyncException(SyncException e) {
+    /**
+     * Unregisters the application from SYNC, and closes the session.
+     * Optionally, closes the transport connection.
+     */
+    public void closeSession(boolean keepConnection) {
+        try{
+            cleanProxy(
+                    SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection);
+            notifyProxyClosed("Sync Proxy Cycled",
+                    new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
+        } catch (SyncException e) {
+            handleCyclingSyncException(e);
+        } catch (Exception e) {
+            notifyProxyClosed("Cycling the proxy failed.", e);
+        }
+    }
+
+    private void handleCyclingSyncException(SyncException e) {
         switch(e.getSyncExceptionCause()) {
         case BLUETOOTH_DISABLED:
             notifyProxyClosed("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.",
@@ -1352,10 +1382,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 try {
                     Log.d(TAG, "Reconnect task is running, clearing reference");
                     setCurrentReconnectTimerTask(null);
+                    closeSyncConnection(false);
                     initializeProxy();
                 } catch (SyncException e) {
                     Log.e(TAG, "Cycling the proxy failed.", e);
-                    handleSyncException(e);
+                    handleCyclingSyncException(e);
                 } catch (Exception e) {
                     notifyProxyClosed("Cycling the proxy failed.", e);
                 }
@@ -1367,6 +1398,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         timer.schedule(reconnectTask, PROXY_RECONNECT_DELAY);
     }
 
+    /**
+     * Opens a session, and registers the application. The connection must be
+     * already opened.
+     *
+     * @throws SyncException if a transport connection is not opened
+     */
+    public void openSession() throws SyncException {
+        if (!getIsConnected()) {
+            throw new SyncException("Transport connection must be opened",
+                    SyncExceptionCause.SYNC_CONNECTION_FAILED);
+        }
+
+        initState();
+        _syncConnection.onTransportConnected();
+    }
 
 
 	/************* Functions used by the Message Dispatching Queues ****************/
@@ -1665,6 +1711,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 						handleOffboardSyncTransmissionTread.start();
 					}
+                } else if (((new RPCResponse(hash)).getCorrelationID() == UNREGISTER_APP_INTERFACE_CORRELATION_ID)
+                        && functionName.equals(Names.UnregisterAppInterface)) {
+                    onUnregisterAppInterfaceResponse(hash);
 				}
 				return;
 			}
@@ -1983,35 +2032,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					_proxyListener.onResetGlobalPropertiesResponse((ResetGlobalPropertiesResponse)msg);
 				}
 			} else if (functionName.equals(Names.UnregisterAppInterface)) {
-				// UnregisterAppInterface
-
-				_appInterfaceRegisterd = false;
-				synchronized(APP_INTERFACE_REGISTERED_LOCK) {
-					APP_INTERFACE_REGISTERED_LOCK.notify();
-				}
-
-				final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
-				if (_callbackToUIThread) {
-					// Run in UI thread
-					_mainUIHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							if (_proxyListener instanceof IProxyListener) {
-								((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
-							} else if (_proxyListener instanceof IProxyListenerALMTesting) {
-								((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
-							}
-						}
-					});
-				} else {
-					if (_proxyListener instanceof IProxyListener) {
-						((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
-					} else if (_proxyListener instanceof IProxyListenerALMTesting) {
-						((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
-					}
-				}
-
-				notifyProxyClosed("UnregisterAppInterfaceResponse", null);
+                onUnregisterAppInterfaceResponse(hash);
 			} else if (functionName.equals(Names.GenericResponse)) {
 				// GenericResponse (Usually and error)
 				final GenericResponse msg = new GenericResponse(hash);
@@ -2491,6 +2512,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				// OnLanguageChange
 
 				final OnLanguageChange msg = new OnLanguageChange(hash);
+                _lastLanguageChange = msg;
 				if (_callbackToUIThread) {
 					// Run in UI thread
 					_mainUIHandler.post(new Runnable() {
@@ -2569,11 +2591,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				final OnAppInterfaceUnregistered msg = new OnAppInterfaceUnregistered(hash);
 
 				if (_advancedLifecycleManagementEnabled) {
-					// This requires the proxy to be cycled
-                    if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
-                        cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
+                    if (msg.getReason() == AppInterfaceUnregisteredReason.LANGUAGE_CHANGE) {
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
+                        }
                     } else {
-                        Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                        // This requires the proxy to be cycled
+                        if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
+                            cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
+                        } else {
+                            Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                        }
                     }
                 } else {
 					if (_callbackToUIThread) {
@@ -2603,7 +2639,39 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SYNC_LIB_TRACE_KEY);
 	}
 
-	/**
+    private void onUnregisterAppInterfaceResponse(Hashtable hash) {
+        // UnregisterAppInterface
+
+        _appInterfaceRegisterd = false;
+        synchronized(APP_INTERFACE_REGISTERED_LOCK) {
+            APP_INTERFACE_REGISTERED_LOCK.notify();
+        }
+
+        final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (_proxyListener instanceof IProxyListener) {
+                        ((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                        ((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+                    }
+                }
+            });
+        } else {
+            if (_proxyListener instanceof IProxyListener) {
+                ((IProxyListener)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                ((IProxyListenerALMTesting)_proxyListener).onUnregisterAppInterfaceResponse(msg);
+            }
+        }
+
+        notifyProxyClosed("UnregisterAppInterfaceResponse", null);
+    }
+
+    /**
 	 * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.
 	 *
 	 * @param msg
@@ -2695,6 +2763,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private void startRPCProtocolSession(byte sessionID, String correlationID) {
 		_rpcSessionID = sessionID;
 
+        restartRPCProtocolSession();
+    }
+
+    private void restartRPCProtocolSession() {
 		// Set Proxy Lifecyclek Available
 		if (_advancedLifecycleManagementEnabled) {
 
@@ -3607,4 +3679,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    /**
+     * Sets the desired SYNC and HMI display languages, and re-registers the
+     * application.
+     */
+    public void resetLanguagesDesired(Language syncLanguageDesired,
+                                      Language hmiDisplayLanguageDesired) {
+        this._syncLanguageDesired = syncLanguageDesired;
+        this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+
+        restartRPCProtocolSession();
+    }
 } // end-class

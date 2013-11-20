@@ -81,7 +81,7 @@ void SetIconResponse::Run() {
           connection_key);
 
       app->set_app_icon_path(
-          data[strings::msg_params][strings::sync_file_name]);
+          data[strings::msg_params][strings::sync_file_name].asString());
 
       SendResponse(true);
     } else {

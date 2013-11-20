@@ -51,7 +51,7 @@ void DeleteFileRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
 
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -60,7 +60,7 @@ void DeleteFileRequest::Run() {
   }
 
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string relative_file_path = application->name();
   relative_file_path += "/";

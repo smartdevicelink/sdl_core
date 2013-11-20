@@ -34,6 +34,7 @@
 #include <iterator>
 #include <vector>
 #include <stdio.h>
+#include "utils/threads/thread.h"
 #include "config_profile/profile.h"
 #include "media_manager/media_manager_impl.h"
 
@@ -43,6 +44,7 @@ log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaManagerImpl"));
 
 MediaManagerImpl* MediaManagerImpl::sInstance_ = 0;
+
 
 const std::string MediaManagerImpl::sA2DPSourcePrefix_ = "bluez_source.";
 
@@ -58,21 +60,16 @@ MediaManagerImpl::MediaManagerImpl()
 // Six hex-pairs + five underscores + '\n'
   : MAC_ADDRESS_LENGTH_(12 + 5 + 1),
     protocol_handler_(NULL),
-    redecoder_(NULL),
     video_server_(NULL),
     senderThread_(NULL),
     recorderThread_(NULL) {
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
+  LOG4CXX_INFO(logger_, "Dctr MediaManagerImpl.");
   if (NULL  != video_server_) {
     delete video_server_;
     video_server_ = NULL;
-  }
-
-  if (NULL != redecoder_) {
-    delete redecoder_;
-    redecoder_ = NULL;
   }
 
   protocol_handler_ = NULL;
@@ -80,9 +77,14 @@ MediaManagerImpl::~MediaManagerImpl() {
 
 void MediaManagerImpl::SetProtocolHandler(
   protocol_handler::ProtocolHandler* protocol_hndlr) {
-  DCHECK(protocol_hndlr);
+
+  if (!protocol_hndlr) {
+    return;
+  }
+
   protocol_handler_ = protocol_hndlr;
   protocol_handler_->AddProtocolObserver(this);
+
 }
 
 void MediaManagerImpl::addA2DPSource(const std::string& device) {
@@ -287,19 +289,28 @@ void MediaManagerImpl::OnMessageReceived(
   }
 }
 
+void MediaManagerImpl::OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr& message) {
+}
+
 void MediaManagerImpl::onRedecoded(const protocol_handler::RawMessagePtr&
                                         message) {
 }
 
+
 void MediaManagerImpl::setVideoRedecoder(redecoding::VideoRedecoder* redecoder) {
+  /*
+  if (redecoder) {
    redecoder_ = redecoder;
+  }*/
 }
 
 void MediaManagerImpl::setConsumer(video_stream_producer_consumer::VideoStreamConsumer* server) {
   LOG4CXX_TRACE_ENTER(logger_);
-  video_server_ = server;
-
-  startVideoStreaming();
+  if (server) {
+    video_server_ = server;
+    startVideoStreaming();
+  }
 }
 
 }  // namespace media_manager

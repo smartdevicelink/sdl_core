@@ -173,19 +173,20 @@ int main(int argc, char** argv) {
   gst_init(&argc, &argv);
 
   // --------------------------------------------------------------------------
+  // Third-Party components initialization.
+
+  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
+    LOG4CXX_INFO(logger, "InitMessageBroker failed");
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+
+  // --------------------------------------------------------------------------
   // Components initialization
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   main_namespace::LifeCycle::instance()->StartComponents();
-
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
 
   if (profile::Profile::instance()->server_address() ==

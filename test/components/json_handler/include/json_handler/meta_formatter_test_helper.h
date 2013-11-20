@@ -1,6 +1,6 @@
 /**
  * @file meta_formatter_test_helper.h
- * @brief file describes class CMetaFormatterTestHelper which is designed to 
+ * @brief file describes class CMetaFormatterTestHelper which is designed to
  *        create test environemnt to test class CMetaFormatter
  */
 // Copyright (c) 2013, Ford Motor Company
@@ -39,10 +39,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.hpp"
+#include "test/components/json_handler/test_JSONHandler_v4_protocol_v2_0_revP.h"
+#include "test/components/json_handler/test_JSONHandler_v4_protocol_v2_0_revP_schema.h"
 
-#include "SmartObjects/SmartObject.hpp"
-#include "test/components/JSONHandler/formatters/test_JSONHandler_alrpcv2.h"
+#include "smart_objects/smart_object.h"
 
 namespace generated_ns = Gen::test::components::JSONHandler2;
 
@@ -110,7 +110,7 @@ enum EType {
   kNotification = 2
 };
 }
-  
+
 class CMetaFormatterTestHelper :public ::testing::Test {
   protected:
 
@@ -142,7 +142,7 @@ class CMetaFormatterTestHelper :public ::testing::Test {
     NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   // members
-  generated_ns::test_JSONHandler_alrpcv2 factory_;
+  generated_ns::test_JSONHandler_v4_protocol_v2_0_revP factory_;
   std::set<function_id::EType> function_id_items_;
   std::set<message_type::EType> message_type_items_;
 

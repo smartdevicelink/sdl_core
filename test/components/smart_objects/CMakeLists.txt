@@ -1,3 +1,5 @@
+add_definitions(-DUNIT_TESTS)
+
 # --- SchemaItems
 add_subdirectory(./SchemaItem)
 

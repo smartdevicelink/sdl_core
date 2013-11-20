@@ -16,7 +16,7 @@ find ./src/ -type d -name "*include*" | awk '{print "--i../." $0}'  > ./tools/Fl
 
 cd ./tools/FlexeLint/
 
-./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ smartdevicelink-changes.lnt
+./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ -dOS_POSIX smartdevicelink-changes.lnt 
 
 rm ./sdl-include-path.lnt
 rm ./sdl-changed-modules.lnt

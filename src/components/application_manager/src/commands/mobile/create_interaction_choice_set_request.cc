@@ -58,7 +58,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

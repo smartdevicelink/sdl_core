@@ -1,7 +1,3 @@
-/**
- * @file CFormatterJsonSDLRPCv2.hpp
- * @brief CFormatterJsonSDLRPCv2 header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -42,143 +38,139 @@
 #include "CFormatterJsonBase.hpp"
 #include "formatters/CSmartFactory.hpp"
 
-namespace NsSmartDeviceLink { namespace NsJSONHandler { namespace Formatters {
+namespace NsSmartDeviceLink {
+namespace NsJSONHandler {
+namespace Formatters {
 
+/**
+ * @brief Class is used to convert SmartObjects to JSON string and vice versa.
+ *
+ * JSON strings is in SDLRPCv2 format.
+ */
+class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
+ private:
 
-    /**
-     * @brief Class is used to convert SmartObjects to JSON string and vice versa.
-     *
-     * JSON strings is in SDLRPCv2 format.
-     */
-    class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase
-    {
-    private:
+  /**
+   * @brief Hidden constructor.
+   *
+   * The class contains only static methods. Should not be instantiated.
+   */
+  CFormatterJsonSDLRPCv2();
 
-        /**
-         * @brief Hidden constructor.
-         *
-         * The class contains only static methods. Should not be instantiated.
-         */
-        CFormatterJsonSDLRPCv2();
+  /**
+   * @brief Hidden copy constructor.
+   *
+   * The class contains only static methods. Should not be instantiated.
+   */
+  CFormatterJsonSDLRPCv2(const CFormatterJsonSDLRPCv2&);
 
-        /**
-         * @brief Hidden copy constructor.
-         *
-         * The class contains only static methods. Should not be instantiated.
-         */
-        CFormatterJsonSDLRPCv2(const CFormatterJsonSDLRPCv2&);
+ public:
 
-    public:
+  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
 
-        typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
-        meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
+  /**
+   * @brief Creates a JSON string from a SmartObject.
+   *
+   * @param obj input SmartObject
+   * @param outStr resulting JSON string
+   * @return true if success, false otherwise
+   */
+  static bool toString(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
+      std::string& outStr);
 
-        /**
-         * @brief Creates a JSON string from a SmartObject.
-         *
-         * @param obj input SmartObject
-         * @param outStr resulting JSON string
-         * @return true if success, false otherwise
-         */
-        static bool toString(const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
-                std::string& outStr);
+  /**
+   * @brief Creates a SmartObject from a JSON string.
+   *
+   * @param str Input JSON string in SDLRPCv2 format
+   * @param out Output SmartObject
+   * @param functionId The corresponding field in SmartObject is filled with this param.
+   * @param messageType The corresponding field in SmartObject is filled with this param.
+   * @return true if success, otherwise - false
+   */
+  template<typename FunctionId, typename MessageType>
+  static bool fromString(const std::string &str,
+                         NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
+                         FunctionId functionId, MessageType messageType);
 
+  /**
+   * @brief Creates a SmartObject from a JSON string.
+   *
+   * Version with CorrelationID.
+   *
+   * @param str Input JSON string in SDLRPCv2 format
+   * @param out Output SmartObject
+   * @param functionId The corresponding field in SmartObject is filled with this param.
+   * @param messageType The corresponding field in SmartObject is filled with this param.
+   * @param correlatioId It's like sequence number. The corresponding field in SmartObject
+   *  is filled with this param.
+   * @return true if success, otherwise - false
+   */
+  template<typename FunctionId, typename MessageType>
+  static bool fromString(const std::string &str,
+                         NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
+                         FunctionId functionId, MessageType messageType,
+                         int correlationId);
 
-        /**
-         * @brief Creates a SmartObject from a JSON string.
-         *
-         * @param str Input JSON string in SDLRPCv2 format
-         * @param out Output SmartObject
-         * @param functionId The corresponding field in SmartObject is filled with this param.
-         * @param messageType The corresponding field in SmartObject is filled with this param.
-         * @return true if success, otherwise - false
-         */
-        template<typename FunctionId, typename MessageType>
-        static bool fromString(const std::string &str,
-                NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
-                FunctionId functionId,
-                MessageType messageType);
-
-        /**
-         * @brief Creates a SmartObject from a JSON string.
-         *
-         * Version with CorrelationID.
-         *
-         * @param str Input JSON string in SDLRPCv2 format
-         * @param out Output SmartObject
-         * @param functionId The corresponding field in SmartObject is filled with this param.
-         * @param messageType The corresponding field in SmartObject is filled with this param.
-         * @param correlatioId It's like sequence number. The corresponding field in SmartObject
-         *  is filled with this param.
-         * @return true if success, otherwise - false
-         */
-        template<typename FunctionId, typename MessageType>
-        static bool fromString(const std::string &str,
-                NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
-                FunctionId functionId,
-                MessageType messageType,
-                int correlationId);
-
-      /**
-        * @brief Converts to string the smart object against the given schema
-        *
-        * @param object Original smart object
-        * @param schema Smart schema which describes 'fake' smart object to be formatted
-        * @param outStr Resulting JSON string
-        * @return formatting error code
-        */
-      static tMetaFormatterErrorCode MetaFormatToString(
-                const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-                const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-                std::string& outStr);
-    };
+  /**
+   * @brief Converts to string the smart object against the given schema
+   *
+   * @param object Original smart object
+   * @param schema Smart schema which describes 'fake' smart object to be formatted
+   * @param outStr Resulting JSON string
+   * @return formatting error code
+   */
+  static tMetaFormatterErrorCode MetaFormatToString(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
+      std::string& outStr);
+};
 
 template<typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
-        const std::string& str,
-        NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
-        FunctionId functionId,
-        MessageType messageType) {
+    const std::string& str, NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
+    FunctionId functionId, MessageType messageType) {
+  bool result = true;
 
-  Json::Value root;
-  Json::Reader reader;
+  try {
+    Json::Value root;
+    Json::Reader reader;
 
-  namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+    namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+    bool result = reader.parse(str, root);
 
-  bool parsingSuccessful = reader.parse(str, root);
+    if (true == result) {
+      out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
+      out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
+      out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
+      out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
 
-  if (true == parsingSuccessful) {
-    out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
-    out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
-    out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
-    out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 2;
-
-    jsonValueToObj(root,
-        out[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS]);
-  }
-
-  return parsingSuccessful;
-}
-
-template<typename FunctionId, typename MessageType>
-inline bool CFormatterJsonSDLRPCv2::fromString(
-        const std::string& str,
-        NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
-        FunctionId functionId,
-        MessageType messageType,
-        int correlationId) {
-
-  bool result = fromString(str, out, functionId, messageType);
-
-  namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
-
-  if (true == result) {
-    out[S::S_PARAMS][S::S_CORRELATION_ID] = correlationId;
+      jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
+    }
+  } catch (...) {
+    result = false;
   }
 
   return result;
 }
 
-} } } // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+template<typename FunctionId, typename MessageType>
+inline bool CFormatterJsonSDLRPCv2::fromString(
+    const std::string& str, NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
+    FunctionId functionId, MessageType messageType, int correlationId) {
+
+  bool result = fromString(str, out, functionId, messageType);
+  namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+
+  if (true == result) {
+    out[strings::S_PARAMS][strings::S_CORRELATION_ID] = correlationId;
+  }
+
+  return result;
+}
+
+}
+}
+}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
 #endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__

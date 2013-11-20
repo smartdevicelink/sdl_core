@@ -443,7 +443,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
       if ((*it_app)->vr_synonyms()) {
         smart_objects::SmartObject item(smart_objects::SmartType_Map);
         item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(0);
-        item[strings::position] = index;
+        item[strings::position] = index + 1;
         vr_help[strings::vr_help][index++] = item;
       }
     }
@@ -456,7 +456,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
       item[strings::text] =
         (*it->second)[strings::vr_commands][0].asString();
-      item[strings::position] = index;
+      item[strings::position] = index + 1;
       vr_help[strings::vr_help][index++] = item;
     }
   }
@@ -490,7 +490,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
     for (int i = 0; i < help_size; ++i) {
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
       item[strings::text] = (*vr_commands_array).getElement(i);
-      item[strings::position] = i;
+      item[strings::position] = i + 1;
 
       ui_msg_params[strings::vr_help][i++] = item;
     }
@@ -504,7 +504,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
       if ((*it)->vr_synonyms()) {
         smart_objects::SmartObject item(smart_objects::SmartType_Map);
         item[strings::text] = (*((*it)->vr_synonyms())).getElement(0);
-        item[strings::position] = i;
+        item[strings::position] = i + 1;
         ui_msg_params[strings::vr_help][i++] = item;
       }
     }
@@ -1115,7 +1115,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image, const Application* app) {
-  const std::string& file_name = image[strings::value];
+  const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
   str.erase(remove(str.begin(), str.end(), ' '), str.end());
