@@ -85,14 +85,8 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  LOG4CXX_ERROR(logger_, "1");
-  MessageHelper::PrintSmartObject(*message_);
-
   Application* app =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);
-
-  LOG4CXX_ERROR(logger_, "2");
-    MessageHelper::PrintSmartObject(*message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
