@@ -7,6 +7,8 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.StartScan;
 
+import org.json.JSONObject;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -16,7 +18,7 @@ import com.ford.syncV4.proxy.rpc.StartScan;
 public class StartScanCommand implements RequestCommand {
 
     @Override
-    public void execute() {
+    public void execute(JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             StartScan msg = new StartScan();

@@ -5,7 +5,12 @@ import com.ford.avarsdl.service.SDLService;
 import com.ford.avarsdl.util.Logger;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.RadioStation;
 import com.ford.syncV4.proxy.rpc.TuneRadio;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created with Android Studio.
@@ -16,11 +21,23 @@ import com.ford.syncV4.proxy.rpc.TuneRadio;
 public class TuneRadioCommand implements RequestCommand {
 
     @Override
-    public void execute() {
+    public void execute(JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             TuneRadio msg = new TuneRadio();
             msg.setCorrelationID(MainApp.getInstance().nextCorrelationID());
+
+            RadioStation radioStation = new RadioStation();
+            if (jsonParameters != null) {
+                try {
+                    radioStation.deserializeJSON(jsonParameters.getJSONObject(Names.radioStation));
+                    Logger.d(getClass().getSimpleName() + " RadioStation: " +
+                            radioStation.serializeJSON().toString());
+                } catch (JSONException e) {
+                    Logger.e(getClass().getSimpleName() + " can not deserialize RadioStation: " + e);
+                }
+            }
+            msg.setRadioStation(radioStation);
 
             try {
                 proxy.sendRPCRequest(msg);

@@ -32,10 +32,10 @@ public class JSONRevSDLController extends JSONController {
     protected void processRequest(String request) {
         String method = mJSONParser.getMethod();
         method = method.substring(method.indexOf('.') + 1, method.length());
-        Logger.d(getClass().getSimpleName() + " Request: " + method + ", request: " + request);
+        Logger.d(getClass().getSimpleName() + " request: " + request);
         RequestCommand requestCommand = commandsHashTable.get(method);
         if (requestCommand != null) {
-            requestCommand.execute();
+            requestCommand.execute(mJSONParser.getParams());
         } else {
             Logger.w(getClass().getSimpleName() + " unknown request");
         }

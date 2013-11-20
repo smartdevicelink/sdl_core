@@ -7,6 +7,8 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.StopScan;
 
+import org.json.JSONObject;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -16,7 +18,7 @@ import com.ford.syncV4.proxy.rpc.StopScan;
 public class StopScanCommand implements RequestCommand {
 
     @Override
-    public void execute() {
+    public void execute(JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             StopScan msg = new StopScan();
