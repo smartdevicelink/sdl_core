@@ -116,9 +116,10 @@ Item {
                 id: textInfo
                 height: parent.height
                 width: parent.width - image.width - parent.spacing
-                spacing: (height - textInfo.height) / 2
+                spacing: (height - titleText.height - 3 * text.height) / 3
 
                 Text {
+                    id: titleText
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
@@ -130,6 +131,7 @@ Item {
                 }
 
                 Text {
+                    id: text
                     anchors.left: parent.left
                     anchors.right: parent.right
                     horizontalAlignment: dataContainer.hmiUITextAlignment
@@ -147,6 +149,16 @@ Item {
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaTrack
                                                                  : playerState.trackNumber
                     font.pixelSize: Constants.fontSize
+                }
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    color: Constants.primaryColor
+                    text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                    font.pixelSize: Constants.fontSize
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    visible: mediaPlayerView.playerType === "SDL" && dataContainer.navigationModel.timeToDestination
                 }
             }
         }

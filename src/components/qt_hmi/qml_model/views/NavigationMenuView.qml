@@ -64,6 +64,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         height: 1/4 * parent.height
+        width: parent.width
 
         BackButton { anchors.centerIn: parent }
     }

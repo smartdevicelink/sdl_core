@@ -44,7 +44,6 @@ GeneralView {
     Item {
         id: turnByTurnView
         anchors.fill: parent
-      //  color: Constants.secondaryColor
 
         Item {
             // top 3/4 of screen
@@ -74,7 +73,7 @@ GeneralView {
                         text: "TurnList"
                         onClicked: {
                             console.log("Go to TurnListView");
-                            contentLoader.go("./views/TbtTurnListView.qml");
+                            contentLoader.go("./views/TurnListView.qml");
                         }
                     }
 
@@ -86,7 +85,7 @@ GeneralView {
                             SoftButton {
                                 appId: dataContainer.navigationModel.appId
                                 button: dataContainer.navigationModel.softButtons.get(index)
-                            }
+                       }
                     }
                 }
             }
@@ -126,6 +125,7 @@ GeneralView {
                             color: Constants.primaryColor
                             text: dataContainer.navigationModel.text1
                             font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.text1
                         }
 
                         Text {
@@ -134,6 +134,7 @@ GeneralView {
                             color: Constants.primaryColor
                             text: dataContainer.navigationModel.text2
                             font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.text2
                         }
 
                         Text {
@@ -142,6 +143,7 @@ GeneralView {
                             color: Constants.primaryColor
                             text: "Total distance: " + dataContainer.navigationModel.totalDistance
                             font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.totalDistance
                         }
 
                         Text {
@@ -150,6 +152,7 @@ GeneralView {
                             color: Constants.primaryColor
                             text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
                             font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.timeToDestination
                         }
 
                         Text {
@@ -158,6 +161,7 @@ GeneralView {
                             color: Constants.primaryColor
                             text: "ETA: " + dataContainer.navigationModel.eta
                             font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.eta
                         }
                     }
                 }
@@ -170,172 +174,28 @@ GeneralView {
                     Rectangle {
                        id: coveredDistance
                        anchors.verticalCenter: parent.verticalCenter
-                       height: 5
+                       height: Constants.distanceBarHeight
                        width: dataContainer.navigationModel.distanceToManeuver / dataContainer.navigationModel.distanceToManeuverScale * parent.width
                        color: "white"
                     }
 
                     Rectangle {
                        anchors.verticalCenter: parent.verticalCenter
-                       height: 5
+                       height: Constants.distanceBarHeight
                        width: parent.width - coveredDistance.width
                        color: Constants.primaryColor
                     }
                 }
-
-
-
-                /*
-                MediaClockView {
-                    width: parent.width
-                    height: parent.height * 1/4
-                }
-                */
             }
-
-
-
-
-
-            /*
-            Row {
-                // top part for buttons
-                id: top
-                anchors.top: parent.top
-                anchors.left: parent.left
-                width: parent.width
-                height: 1/4 * parent.height
-                spacing: (width - 4 * turnListButton.width) / 3
-
-                OvalButton {
-                    id: turnListButton
-                    text: "TurnList"
-                    onClicked: {
-                        console.log("Go to TurnListView");
-                        contentLoader.go("./views/TbtTurnListView.qml");
-                    }
-                }
-
-                ListView {
-                    id: softButtons
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - turnListButton.width
-                    height: parent.height
-                    spacing: parent.spacing
-
-                    orientation: ListView.Horizontal
-                    interactive: false
-                    //model: dataContainer.navigationModel.softButtons
-
-                    Repeater {
-                        model: dataContainer.currentApplication.softButtons ?
-                                   dataContainer.currentApplication.softButtons.count :
-                                   0
-                        delegate:
-                            SoftButton {
-                                appId: dataContainer.currentApplication.appId
-                                button: dataContainer.currentApplication.softButtons.get(index)
-                            }
-                    }
-*/
-                    /*
-                    delegate: OvalButton {
-                        text: name
-                        icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
-                        highlighted: isHighlighted
-                        onPressed: {
-                            console.log("TBT view soft button: On pressed");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONDOWN,
-                                                     buttonId);
-                        }
-                        onReleased: {
-                            console.log("TBT view soft button: On released");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONUP,
-                                                     buttonId);
-                        }
-                        onClicked: {
-                            console.log("TBT view soft button: On clicked");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.SHORT,
-                                                     buttonId);
-                        }
-                        onPressAndHold: {
-                            console.log("TBT view soft button: On press and hold");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.LONG,
-                                                     buttonId);
-                        }
-                        // TODO(KKolodiy): System action doesn't work in WebHMI
-                    }
-                    */
-
-            }
-
-        /*
-            Row {
-                // mid part for picture, information.
-                id: mid
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                width: parent.width
-                height: 2/4 * parent.height
-                spacing: 1/2 * turnIcon.width
-
-                Icon {
-                    id: turnIcon
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.height
-                    height: parent.height
-                    source: dataContainer.navigationModel.icon
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: parent.height
-                    width: parent.width - turnIcon.width - spacing
-                    spacing: (height - text1.height - text2.height - text3.height - text4.height) / 3
-
-                    Text {
-                        id: text1
-                        text: dataContainer.navigationModel.text1
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-
-                    Text {
-                        id: text2
-                        text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-
-                    Text {
-                        id: text4
-                        text: "Total datance: " + dataContainer.navigationModel.totalDistance
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-
-                    Text {
-                        id: text3
-                        text: dataContainer.navigationModel.text2
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-                }
-            }
-            */
         }
+    }
 
-        Item {
-            // 1/4 bottom screen
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            width: parent.width
-            height: 1/4 * parent.height
-            BackButton { anchors.centerIn: parent }
-        }
-
+    Item {
+        // 1/4 bottom screen
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: parent.width
+        height: 1/4 * parent.height
+        BackButton { anchors.centerIn: parent }
+    }
 }

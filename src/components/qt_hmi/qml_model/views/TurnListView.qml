@@ -1,6 +1,6 @@
 /**
- * @file MusicSourceView.qml
- * @brief Music source screen view.
+ * @file TurnListView.qml
+ * @brief View for TurnByTurn list.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,41 +31,73 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 import QtQuick 2.0
-import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
+import "../hmi_api/Common.js" as Common
 
-Item {
-    anchors.fill: parent
-    GridMenu {
-        id: menu
-        model: dataContainer.musicSourceModel
+GeneralView {
+    applicationContext: true
+
+    Item {
         anchors.left: parent.left
-        anchors.right: parent.right
         anchors.top: parent.top
-        anchors.bottom: bottomPanel.top
-        delegate: GridItem {
-            width: menu.width / menu.columnsOnPage
-            height: menu.height / menu.rows
-            OvalButton {
-                text: title
-                onReleased: contentLoader.go(qml, appId)
-                anchors.centerIn: parent
-                fontSize: Constants.fontSize
+        width: parent.width
+        height: 3/4 * parent.height
+
+        Item {
+            id: sotfButtons
+            width: parent.width
+            height: 1/4 * parent.height
+
+            PagedFlickable {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                elementWidth: Constants.ovalButtonWidth
+                snapTo: elementWidth + spacing
+                spacing: (width - 4 * elementWidth) / 3
+
+                Repeater {
+                    model: dataContainer.currentApplication.turnListSoftButtons ?
+                               dataContainer.currentApplication.turnListSoftButtons.count :
+                               0
+                    delegate:
+                        SoftButton {
+                            appId: dataContainer.currentApplication.appId
+                            button: dataContainer.currentApplication.turnListSoftButtons.get(index)
+                        }
+                }
+            }
+        }
+
+        ScrollableListView {
+            id: scrollableList
+            anchors.top: sotfButtons.bottom
+            anchors.left: parent.left
+            width: parent.width
+            height: 3/4 * parent.height
+
+            model: dataContainer.currentApplication.turnList
+
+            delegate:
+                ListItem {
+                    width: scrollableList.width
+                    height: Constants.iconItemListSize
+                    text: dataContainer.currentApplication.turnList.get(index).navigationText.fieldText
+                    fontSize: Constants.fontSize
+                    icon: dataContainer.currentApplication.turnList.get(index).turnIcon
             }
         }
     }
 
     Item {
-        id: bottomPanel
         // 1/4 bottom screen
+        id: back
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        height: 1/4 * parent.height
         width: parent.width
-
+        height: 1/4 * parent.height
         BackButton { anchors.centerIn: parent }
     }
 }
-

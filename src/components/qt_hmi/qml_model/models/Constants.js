@@ -151,6 +151,9 @@ var comboboxWidth = 300
 // Size icon for list of applications
 var appListIconSize = 100
 
+// DistanceBar height
+var distanceBarHeight = 1
+
 
 //---------------------------------------------------------------------------------------
 
