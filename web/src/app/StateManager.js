@@ -416,12 +416,10 @@ var StateManager = Em.StateManager.extend({
 			fm: Em.State.create({
 				enter: function(){
 					this._super();
-                    this.set('active', true);
 					MFT.MediaController.onRadioEnter(MFT.FmModel);
 				},
 				exit: function(){
 					this._super();
-                    this.set('active', false);
 					MFT.MediaController.onRadioExit(MFT.FmModel);
 				},
 
