@@ -30,64 +30,31 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/threads/thread.h"
-#include "media_manager/from_mic_recorder_listener.h"
-#include "./audio_stream_sender_thread.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
+
+#include "media_manager/media_adapter_listener.h"
+#include "utils/macro.h"
+#include "utils/logger.h"
 
 namespace media_manager {
-
-log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("FromMicRecorderListener"));
-
-FromMicRecorderListener::FromMicRecorderListener(
-  const std::string& file_name)
-  : reader_(NULL)
-  , file_name_(file_name) {
-}
-
-FromMicRecorderListener::~FromMicRecorderListener() {
-  if (reader_) {
-    reader_->stop();
-    delete reader_;
-    reader_ = NULL;
-  }
-}
-
-void FromMicRecorderListener::OnDataReceived(
-  int application_key,
-  const DataForListener& data) {
-}
-
-void FromMicRecorderListener::OnErrorReceived(
-  int application_key,
-  const DataForListener& data) {
-}
-
-void FromMicRecorderListener::OnActivityStarted(int application_key) {
-  if (application_key == current_application_) {
-    return;
-  }
-  if (!reader_) {
-    AudioStreamSenderThread* thread_delegate =
-      new AudioStreamSenderThread(file_name_, application_key);
-    reader_ = new threads::Thread("FromMicRecorderSender", thread_delegate);
-  }
-  if (reader_) {
-    reader_->start();
-    current_application_ = application_key;
-  }
-}
-
-void FromMicRecorderListener::OnActivityEnded(int application_key) {
-  if (application_key != current_application_) {
-    return;
-  }
-  if (reader_) {
-    reader_->stop();
-    delete reader_;
-    reader_ = NULL;
-  }
-  current_application_ = 0;
-}
-
+class VideoStreamerListener : public MediaAdapterListener {
+  public:
+    VideoStreamerListener();
+    ~VideoStreamerListener();
+    virtual void OnDataReceived(
+      int application_key,
+      const DataForListener& data);
+    virtual void OnErrorReceived(
+      int application_key,
+      const DataForListener& data);
+    virtual void OnActivityStarted(int application_key);
+    virtual void OnActivityEnded(int application_key);
+  private:
+    int current_application_;
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(VideoStreamerListener);
+};
 }  //  namespace media_manager
+
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_

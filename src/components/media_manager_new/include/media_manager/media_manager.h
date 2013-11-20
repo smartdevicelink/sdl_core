@@ -35,5 +35,11 @@ class MediaManager {
   public:
     virtual void PlayA2DPSource(int application_key) = 0;
     virtual void StopA2DPSource(int application_key) = 0;
+    virtual void StartMicrophoneRecording(int application_key,
+                                          const std::string& outputFileName,
+                                          int duration) = 0;
+    virtual void StopMicrophoneRecording(int application_key) = 0;
+    virtual void StartVideoStreaming(int application_key) = 0;
+    virtual void StopVideoStreaming(int application_key) = 0;
 };
 }  // namespace media_manager

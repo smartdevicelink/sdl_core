@@ -31,30 +31,43 @@
 */
 
 #include <string>
+#include "protocol_handler/protocol_observer.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 
 namespace media_manager {
 
-class MediaManagerImpl : public MediaManager {
+class MediaManagerImpl : public MediaManager,
+    protocol_handler::ProtocolObserver {
   public:
     static MediaManagerImpl* instance();
-    ~MediaManagerImpl();
+    virtual ~MediaManagerImpl();
     virtual void PlayA2DPSource(int application_key);
     virtual void StopA2DPSource(int application_key);
     virtual void StartMicrophoneRecording(int application_key,
                                           const std::string& outputFileName,
                                           int duration);
     virtual void StopMicrophoneRecording(int application_key);
+    virtual void StartVideoStreaming(int application_key);
+    virtual void StopVideoStreaming(int application_key);
+    virtual void OnMessageReceived(
+      const protocol_handler::RawMessagePtr& message);
+    virtual void FramesProcessed(int application_key, int frame_number);
 
   protected:
     MediaManagerImpl();
     virtual void Init();
+
     MediaAdapter* a2dp_player_;
     MediaAdapterImpl* from_mic_recorder_;
     MediaAdapterListener* from_mic_listener_;
+    MediaAdapterImpl* video_streamer_;
+    MediaAdapterListener* video_streamer_listener_;
+
+  private:
     static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };
 
 }  //  namespace media_manager

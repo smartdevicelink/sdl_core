@@ -52,9 +52,9 @@ class MediaAdapterImpl : public MediaAdapter {
 
   protected:
     MediaAdapterImpl();
+    std::set<MediaListenerPtr> media_listeners_;
 
   private:
-    std::set<MediaListenerPtr> media_listeners_;
     static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);

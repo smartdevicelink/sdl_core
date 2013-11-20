@@ -14,6 +14,7 @@ include_directories (
   ../mobile_message_handler/include/
   ../request_watchdog/include/
   ../formatters/include
+  ../config_profile/include/
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
@@ -22,11 +23,13 @@ include_directories (
 set (SOURCES
     ./src/media_adapter_impl.cc
     ./src/a2dp_source_player_adapter.cc
-    ./src/media_manager_impl.cc
     ./src/from_mic_recorder_adapter.cc
     ./src/from_mic_to_file_recorder_thread.cc
     ./src/from_mic_recorder_listener.cc
     ./src/audio_stream_sender_thread.cc
+    ./src/socket_video_streamer_adapter.cc
+    ./src/pipe_video_streamer_adapter.cc
+    ./src/video_streamer_listener.cc
 )
 
 add_library("MediaManagerNew" ${SOURCES} )

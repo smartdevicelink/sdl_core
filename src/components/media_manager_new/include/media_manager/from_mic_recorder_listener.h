@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_
 
 #include <string>
-#include "protocol_handler/raw_message.h"
 #include "media_manager/media_adapter_listener.h"
 
 namespace threads {
@@ -49,10 +48,10 @@ class FromMicRecorderListener : public MediaAdapterListener {
     ~FromMicRecorderListener();
     virtual void OnDataReceived(
       int application_key,
-      const protocol_handler::RawMessagePtr& message);
+      const DataForListener& data);
     virtual void OnErrorReceived(
       int application_key,
-      const protocol_handler::RawMessagePtr& message);
+      const DataForListener& data);
     virtual void OnActivityStarted(int application_key);
     virtual void OnActivityEnded(int application_key);
 
@@ -61,6 +60,7 @@ class FromMicRecorderListener : public MediaAdapterListener {
     std::string file_name_;
     int current_application_;
     static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
 };
 }  //  namespace media_manager
 

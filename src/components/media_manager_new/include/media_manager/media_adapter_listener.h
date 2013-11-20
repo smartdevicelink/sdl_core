@@ -34,14 +34,17 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_
 
 namespace media_manager {
+
+typedef int DataForListener;
+
 class MediaAdapterListener {
   public:
     virtual void OnDataReceived(
       int application_key,
-      const protocol_handler::RawMessagePtr& message) = 0;
+      const DataForListener& data) = 0;
     virtual void OnErrorReceived(
       int application_key,
-      const protocol_handler::RawMessagePtr& message) = 0;
+      const DataForListener& data) = 0;
     virtual void OnActivityStarted(int application_key) = 0;
     virtual void OnActivityEnded(int application_key) = 0;
 };

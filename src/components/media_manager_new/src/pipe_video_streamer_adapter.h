@@ -30,38 +30,31 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
 
+#include <string>
 #include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
-
-namespace threads {
-class Thread;
-}
 
 namespace media_manager {
-
-class FromMicRecorderAdapter : public MediaAdapterImpl {
+class PipeVideoStreamerAdapter : public MediaAdapterImpl {
   public:
-    FromMicRecorderAdapter();
-    ~FromMicRecorderAdapter();
-    void SendData(int application_key,
-                  const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int application_key);
-    void StopActivity(int application_key);
-    bool is_app_performing_activity(int application_key);
-    void set_output_file(const std::string& output_file);
-    void set_duration(int duration);
-  private:
-    threads::Thread* recorder_thread_;
-    int current_application_;
-    std::string output_file_;
-    int duration_;
-    const int kDefaultDuration;
-    static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
-};
-}  // namespace media_manager
+    PipeVideoStreamerAdapter();
+    ~PipeVideoStreamerAdapter();
+    virtual void SendData(int application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int application_key);
+    virtual void StopActivity(int application_key);
+    virtual bool is_app_performing_activity(int application_key);
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+  private:
+    static log4cxx::LoggerPtr logger_;
+    int pipe_fd_;
+    std::string named_pipe_path_;
+    int current_application_;
+    DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
+};
+
+}  //  namespace media_manager
+
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_

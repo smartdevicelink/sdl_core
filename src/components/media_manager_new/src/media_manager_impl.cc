@@ -30,10 +30,13 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "config_profile/profile.h"
 #include "media_manager/media_manager_impl.h"
 #include "media_manager/a2dp_source_player_adapter.h"
 #include "media_manager/from_mic_recorder_adapter.h"
 #include "media_manager/from_mic_recorder_listener.h"
+#include "./socket_video_streamer_adapter.h"
+#include "./pipe_video_streamer_adapter.h"
 
 namespace media_manager {
 
@@ -48,7 +51,9 @@ MediaManagerImpl* MediaManagerImpl::instance() {
 MediaManagerImpl::MediaManagerImpl()
   : a2dp_player_(NULL)
   , from_mic_recorder_(NULL)
-  , from_mic_listener_(NULL) {
+  , from_mic_listener_(NULL)
+  , video_streamer_(NULL)
+  , video_streamer_listener_(NULL) {
   Init();
 }
 
@@ -67,38 +72,112 @@ MediaManagerImpl::~MediaManagerImpl() {
     delete from_mic_recorder_;
     from_mic_recorder_ = NULL;
   }
+
+  if (video_streamer_) {
+    delete video_streamer_;
+    video_streamer_ = NULL;
+  }
+
+  if (video_streamer_listener_) {
+    delete video_streamer_listener_;
+    video_streamer_listener_ = NULL;
+  }
 }
 
 void MediaManagerImpl::Init() {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
 #if defined(DEFAULT_MEDIA)
+  LOG4CXX_INFO(logger_, "Called Init with default configuration.");
   a2dp_player_ = new A2DPSourcePlayerAdapter();
   from_mic_recorder_ = new FromMicRecorderAdapter();
+  if ("socket" == profile::Profile::instance()->video_server_type()) {
+    video_streamer_ = new SocketVideoStreamerAdapter();
+  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
+    video_streamer_ = new PipeVideoServer();
+  }
+#endif
+  video_streamer_listener_ = new VideoStreamerListener();
+#if defined(DEFAULT_MEDIA)
+  video_streamer_->AddListener(video_streamer_listener_);
 #endif
 }
 
 void MediaManagerImpl::PlayA2DPSource(int application_key) {
-  a2dp_player_->StartActivity(application_key);
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::PlayA2DPSource");
+  if (a2dp_player_) {
+    a2dp_player_->StartActivity(application_key);
+  }
 }
 
 void MediaManagerImpl::StopA2DPSource(int application_key) {
-  a2dp_player_->StopActivity(application_key);
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StopA2DPSource");
+  if (a2dp_player_) {
+    a2dp_player_->StopActivity(application_key);
+  }
 }
 
 void MediaManagerImpl::StartMicrophoneRecording(
   int application_key,
   const std::string& output_file,
   int duration) {
-  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording")  ;
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording");
   from_mic_listener_ = new FromMicRecorderListener(output_file);
-  from_mic_recorder_->AddListener(from_mic_listener_);
 #if defined(DEFAULT_MEDIA)
-  (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-  ->set_output_file(output_file);
-  (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-  ->set_duration(duration);
-  from_mic_recorder_->StartActivity(application_key);
+  if (from_mic_recorder_) {
+    from_mic_recorder_->AddListener(from_mic_listener_);
+    (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
+    ->set_output_file(output_file);
+    (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
+    ->set_duration(duration);
+    from_mic_recorder_->StartActivity(application_key);
+  }
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
+}
+
+void MediaManagerImpl::StopMicrophoneRecording(int application_key) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StopMicrophoneRecording");
+#if defined(DEFAULT_MEDIA)
+  if (from_mic_recorder_) {
+    from_mic_recorder_->StopActivity(application_key);
+  }
+#endif
+  if (from_mic_listener_) {
+    from_mic_listener_->StopActivity(application_key);
+  }
+}
+
+void MediaManagerImpl::StartVideoStreaming(int application_key) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartVideoStreaming");
+
+  if (video_streamer_) {
+    video_streamer_->StartActivity(application_key);
+  }
+}
+
+void MediaManagerImpl::StopVideoStreaming(int application_key) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StopVideoStreaming");
+  if (video_streamer_) {
+    video_streamer_->StopActivity(application_key);
+  }
+}
+
+void MediaManagerImpl::OnMessageReceived(
+  const protocol_handler::RawMessagePtr& message) {
+  DCHECK(!(!message));
+  if (message->is_fully_binary()) {
+    if (video_streamer_) {
+      video_streamer_->SendData(message->connection_key(), message);
+    }
+  }
+}
+
+void MediaManagerImpl::FramesProcessed(int application_key,
+                                       int frame_number) {
+  if (protocol_handler_) {
+    protocol_handler_->SendFramesNumber(app_connection_key,
+                                        messsages_for_session);
+  }
 }
 
 }  //  namespace media_manager

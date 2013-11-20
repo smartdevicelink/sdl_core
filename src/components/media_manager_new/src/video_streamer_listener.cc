@@ -30,64 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/threads/thread.h"
-#include "media_manager/from_mic_recorder_listener.h"
-#include "./audio_stream_sender_thread.h"
+#include "media_manager/video_streamer_listener.h"
+#include "media_manager/media_manager_impl.h"
 
 namespace media_manager {
 
-log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("FromMicRecorderListener"));
+log4cxx::LoggerPtr VideoStreamerListener::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("VideoStreamerListener"));
 
-FromMicRecorderListener::FromMicRecorderListener(
-  const std::string& file_name)
-  : reader_(NULL)
-  , file_name_(file_name) {
+VideoStreamerListener::VideoStreamerListener()
+  : current_application_(0) {
 }
 
-FromMicRecorderListener::~FromMicRecorderListener() {
-  if (reader_) {
-    reader_->stop();
-    delete reader_;
-    reader_ = NULL;
-  }
+VideoStreamerListener::~VideoStreamerListener() {
+  OnActivityEnded(current_application_);
 }
 
-void FromMicRecorderListener::OnDataReceived(
+void VideoStreamerListener::OnDataReceived(
   int application_key,
   const DataForListener& data) {
+  MediaManagerImpl::instance()->FramesProcessed(application_key, data);
 }
 
-void FromMicRecorderListener::OnErrorReceived(
+void VideoStreamerListener::OnErrorReceived(
   int application_key,
   const DataForListener& data) {
+  LOG4CXX_ERROR(logger_, "VideoStreamerListener::OnErrorReceived");
 }
 
-void FromMicRecorderListener::OnActivityStarted(int application_key) {
-  if (application_key == current_application_) {
+void VideoStreamerListener::OnActivityStarted(int application_key) {
+  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityStarted");
+  if (current_application_ == application_key) {
+    LOG4CXX_WARN(logger_, "Already performing activity for "
+                 << application_key);
     return;
   }
-  if (!reader_) {
-    AudioStreamSenderThread* thread_delegate =
-      new AudioStreamSenderThread(file_name_, application_key);
-    reader_ = new threads::Thread("FromMicRecorderSender", thread_delegate);
-  }
-  if (reader_) {
-    reader_->start();
-    current_application_ = application_key;
-  }
+  current_application_ = application_key;
 }
 
-void FromMicRecorderListener::OnActivityEnded(int application_key) {
-  if (application_key != current_application_) {
+void VideoStreamerListener::OnActivityEnded(int application_key) {
+  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityEnded");
+  if (current_application_ != application_key) {
+    LOG4CXX_WARN(logger_, "Already not performing activity for "
+                 << application_key);
     return;
-  }
-  if (reader_) {
-    reader_->stop();
-    delete reader_;
-    reader_ = NULL;
   }
   current_application_ = 0;
 }
-
 }  //  namespace media_manager
