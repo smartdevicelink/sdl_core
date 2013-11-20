@@ -126,7 +126,7 @@ SchemaItemPtr PolicyTableSchema::CreateModuleConfig(void) {
 
   std::map<std::string, CObjectSchemaItem::SMember> endpoint_map;
 
-  endpoint_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+  endpoint_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
     CObjectSchemaItem::SMember(
       CObjectSchemaItem::create(service_type_map), true);
 
@@ -149,7 +149,7 @@ SchemaItemPtr PolicyTableSchema::CreateFunctionalGroupings(void) {
     CArraySchemaItem::create(CStringSchemaItem::create()), false);
 
   std::map<std::string, CObjectSchemaItem::SMember> rpcs_map;
-  rpcs_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+  rpcs_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
     CObjectSchemaItem::SMember(CObjectSchemaItem::create(rpc_map), false);
 
   std::map<std::string, CObjectSchemaItem::SMember> functional_grouping_map;
@@ -162,7 +162,7 @@ SchemaItemPtr PolicyTableSchema::CreateFunctionalGroupings(void) {
   std::map<std::string, CObjectSchemaItem::SMember> functional_groupings_map;
 
   functional_groupings_map[
-    ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+    ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
       CObjectSchemaItem::SMember(
         CObjectSchemaItem::create(functional_grouping_map), false);
 
@@ -221,7 +221,7 @@ SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
 
   app_policies_map[kStrDefault] =
     CObjectSchemaItem::SMember(CreateAppPoliciesDefault(), true);
-  app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+  app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
     CObjectSchemaItem::SMember(CreateAppId(), true);
 
   return ObjectOptionalSchemaItem::create(app_policies_map);

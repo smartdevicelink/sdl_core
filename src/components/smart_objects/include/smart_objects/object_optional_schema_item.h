@@ -58,7 +58,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * Name should be uniqe, not to itersect with all possible regular names
       */
-    static const char* kOptionalGenericFieldName1;
+    static const char* kOptionalGenericFieldName;
 
      /**
       * @brief Create a new schema item.

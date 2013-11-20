@@ -41,7 +41,7 @@ namespace NsSmartObjects {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-const char* smart_objects::ObjectOptionalSchemaItem::kOptionalGenericFieldName1
+const char* smart_objects::ObjectOptionalSchemaItem::kOptionalGenericFieldName
   = "<-- @@@@$$$&&& uniqe1 uancdm,vn 991188 --->";
 
 
@@ -79,7 +79,7 @@ smart_objects::Errors::eType smart_objects::ObjectOptionalSchemaItem::validate(
 
     bool have_optional_parameter = false;
     std::map<std::string, CObjectSchemaItem::SMember>::const_iterator
-      optional_iterator = mMembers.find(kOptionalGenericFieldName1);
+      optional_iterator = mMembers.find(kOptionalGenericFieldName);
     if (smart_objects::Errors::OK == result) {
       for (std::set<std::string>::const_iterator k = object_keys.begin();
             k != object_keys.end(); ++k) {
@@ -115,7 +115,7 @@ smart_objects::Errors::eType smart_objects::ObjectOptionalSchemaItem::validate(
 //----------------------------------------------------------------------------
 
 bool smart_objects::ObjectOptionalSchemaItem::IsOptionalName(std::string name) {
-  return (0 == name.compare(kOptionalGenericFieldName1));
+  return (0 == name.compare(kOptionalGenericFieldName));
 }
 
 //----------------------------------------------------------------------------
@@ -148,12 +148,12 @@ ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject & root_obj) {
 
 void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject & object,
   void (ISchemaItem::* action)(SmartObject&) ) {
-  if (0 == mMembers.count(kOptionalGenericFieldName1)) {
+  if (0 == mMembers.count(kOptionalGenericFieldName)) {
     return;             // There are no optional items
   }
 
   utils::SharedPtr<ISchemaItem> schema =
-    mMembers.at(kOptionalGenericFieldName1).mSchemaItem;
+    mMembers.at(kOptionalGenericFieldName).mSchemaItem;
 
   // Then apply schema for all the optional objects
   std::set<std::string> optionals = GetOptionalObjectKeys(object);

@@ -179,7 +179,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // non mandatory optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory); // NOLINT
 
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
@@ -221,7 +221,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map),
                                  isOtptionalMandatory);
     app_policies_map["default"] =
@@ -271,7 +271,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map),
                                   isOtptionalMandatory);
     app_policies_map["default"] =

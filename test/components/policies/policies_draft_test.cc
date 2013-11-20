@@ -55,7 +55,7 @@ namespace policies_draft_test {
         init_result = Init(policy_config);
       }
     pn::PolicyTable* getPolicyTable() {
-      return PolicyManagerImpl::GetPolicyTable();
+      return PolicyManagerImpl::policy_table();
     }
 
     void StorePolicyTable() {

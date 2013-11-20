@@ -117,7 +117,7 @@ CheckPermissionResult
                                      mobile_apis::HMILevel::eType hmi_status) {
   CheckPermissionResult result =
     {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};
-  PolicyTable* pt = GetPolicyTable();
+  PolicyTable* pt = policy_table();
 
   if (0 != pt
       && PTValidationResult::VALIDATION_OK == pt->Validate()) {
@@ -156,7 +156,7 @@ void PolicyManagerImpl::StorePolicyTable() {
 
 //---------------------------------------------------------------
 
-policies::PolicyTable* policies::PolicyManagerImpl::GetPolicyTable() const {
+policies::PolicyTable* policies::PolicyManagerImpl::policy_table() const {
   if (0 == policy_table_) {
     LOG4CXX_ERROR(logger_, "Accessing not initialized policy table.");
   }
