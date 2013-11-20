@@ -6,5 +6,7 @@ package com.ford.avarsdl.service;
  * Date: 11/19/13
  * Time: 11:56 AM
  */
-public class ISDLServiceConnection {
+public interface ISDLServiceConnection {
+    void onSDLServiceConnected(SDLServiceBinder service);
+    void onSDLServiceDisconnected();
 }

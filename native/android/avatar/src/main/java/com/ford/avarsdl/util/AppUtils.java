@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Looper;
 
 import java.io.File;
 
@@ -21,6 +22,10 @@ public class AppUtils {
 
     public static void setAppInstance(Application appInstance) {
         AppUtils.appInstance = appInstance;
+    }
+
+    public static boolean isRunningUIThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
     }
 
     public static boolean externalStorageAvailable() {
@@ -44,7 +49,7 @@ public class AppUtils {
 
     public static String getExternalStorageDir() {
         if (Build.VERSION.SDK_INT < 8) {
-            return Environment.getExternalStorageDirectory().getAbsolutePath() + "/OpenXC/" +
+            return Environment.getExternalStorageDirectory().getAbsolutePath() + "/RevSDL/" +
                     getPackageInfo().packageName;
         } else {
             File externalDir = getExternalFilesDirAPI8(null);
@@ -55,7 +60,7 @@ public class AppUtils {
     @TargetApi(8)
     private static File getExternalFilesDirAPI8(String type) {
         if (appInstance == null) {
-            throw new NullPointerException("OpenXC AppUtils getPackageInfo appInstance is NULL");
+            throw new NullPointerException("RevSDL AppUtils getPackageInfo appInstance is NULL");
         }
         return appInstance.getExternalFilesDir(type);
     }
@@ -65,7 +70,7 @@ public class AppUtils {
      */
     private static PackageInfo getPackageInfo() {
         if (appInstance == null) {
-            throw new NullPointerException("OpenXC AppUtils getPackageInfo appInstance is NULL");
+            throw new NullPointerException("RevSDL AppUtils getPackageInfo appInstance is NULL");
         }
         final PackageManager pm = appInstance.getPackageManager();
         if (pm == null) {

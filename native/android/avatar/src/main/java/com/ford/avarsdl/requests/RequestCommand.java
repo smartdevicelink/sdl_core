@@ -6,5 +6,6 @@ package com.ford.avarsdl.requests;
  * Date: 11/19/13
  * Time: 3:33 PM
  */
-public class RequestCommand {
+public interface RequestCommand {
+    public void execute();
 }

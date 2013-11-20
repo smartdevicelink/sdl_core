@@ -26,6 +26,7 @@
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name"
+        android:name=".business.MainApp"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         <activity
             android:name=".activity.AvatarActivity"

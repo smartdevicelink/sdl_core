@@ -1,10 +1,11 @@
 package com.ford.avarsdl.activity;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
-import yuriy.chernyshov.yakimbi.business.MainApp;
-import yuriy.chernyshov.yakimbi.utils.AppUtils;
+
+import com.ford.avarsdl.business.MainApp;
+import com.ford.avarsdl.util.AppUtils;
+import com.ford.avarsdl.util.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,7 +37,7 @@ public class SafeToast {
         if (context == null) {
             context = MainApp.getInstance();
         }
-        Log.d(MainApp.APP_TAG, "- Show toast: " + text);
+        Logger.d("- Show toast: " + text);
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 }

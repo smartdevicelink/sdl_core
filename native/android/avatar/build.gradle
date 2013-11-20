@@ -1,6 +1,12 @@
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
+    compile 'log4j:log4j:1.2.16'
+    compile 'commons-lang:commons-lang:20030203.000129'
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':GooglePlayDownloaderLibrary')
     compile project(':GooglePlayZipLibrary')

@@ -15,14 +15,16 @@ import java.util.Arrays;
 
 public class Logger {
 
-    public static final String LOG_TAG = "OPEN_XC";
+    public static final String LOG_TAG = "RevSDL";
 	public static final String ERROR_LOG_PREFIX = "LOG_ERR: ";
-	private static final String LOG_FILENAME = "OpenXC.log";
+	private static final String LOG_FILENAME = "RevSDL.log";
 	private static final int MAX_BACKUP_INDEX = 3;
 	private static final String MAX_FILE_SIZE = "750KB";
 
-    private static String intlogsDirectory;
-	private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(com.openxc.util.Logger.class);
+    private static String intLogsDirectory;
+
+	private static final org.apache.log4j.Logger logger =
+            org.apache.log4j.Logger.getLogger(com.ford.avarsdl.util.Logger.class);
     private static boolean isEnableVerboseLog;
     
 	//TODO
@@ -38,7 +40,7 @@ public class Logger {
         try {
             logger.removeAllAppenders();
         } catch (Exception e){
-            com.openxc.util.Logger.e("Unable to remove logger uppenders.");
+            com.ford.avarsdl.util.Logger.e("Unable to remove logger uppenders.");
         }
 		try {
 			RollingFileAppender rollingFileAppender = new RollingFileAppender(layout, fileName);
@@ -46,9 +48,9 @@ public class Logger {
 			rollingFileAppender.setMaxBackupIndex(MAX_BACKUP_INDEX);
 			logger.addAppender(rollingFileAppender);
 		} catch(IOException ioe) {
-			Log.e("OPEN_XC", "unable to create log file: " + fileName);
+			Log.e("RevSDL", "unable to create log file: " + fileName);
 		}
-        Logger.d("Current log stored to " + fileName);
+        com.ford.avarsdl.util.Logger.d("Current log stored to " + fileName);
 	}
     
     public static void enableVerboseLog(boolean enable) {
@@ -64,7 +66,7 @@ public class Logger {
     }
 
     private static void initLogsDirectories(Context context) {
-        intlogsDirectory = context.getFilesDir() + "/logs";
+        intLogsDirectory = context.getFilesDir() + "/logs";
     }
         
     public static String getCurrentLogsDirectory() {
@@ -74,7 +76,7 @@ public class Logger {
                 return extLogsDirectory + "/logs";
             }
         }
-        return intlogsDirectory;
+        return intLogsDirectory;
     }
 
     public static boolean isUsingExternalStorage() {
@@ -85,10 +87,10 @@ public class Logger {
         if (AppUtils.externalStorageAvailable()) {
             String extLogsDirectory = AppUtils.getExternalStorageDir();
             if (StringUtils.isNotEmpty(extLogsDirectory)) {
-                return new File[] {new File(intlogsDirectory), new File(extLogsDirectory + "/logs")};
+                return new File[] {new File(intLogsDirectory), new File(extLogsDirectory + "/logs")};
             }
         }
-		return new File[] {new File(intlogsDirectory)} ;
+		return new File[] {new File(intLogsDirectory)} ;
 	}
 
     public static File[] getAllLogs() {
@@ -103,7 +105,7 @@ public class Logger {
     }
 
     public static File[] getInternalLogs() {
-        return getLogs(new File(intlogsDirectory));
+        return getLogs(new File(intLogsDirectory));
     }
     
     private static File[] getLogs(File directory) {

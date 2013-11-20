@@ -5,5 +5,4 @@ public interface ITcpClient {
 	public String receiveMsg();
 	public void connect();
 	public void disconnect();
-
 }

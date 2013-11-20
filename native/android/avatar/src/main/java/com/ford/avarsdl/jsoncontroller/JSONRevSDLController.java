@@ -1,32 +1,30 @@
 package com.ford.avarsdl.jsoncontroller;
 
-import android.util.Log;
-
-import com.ford.avarsdl.jsonparser.ERevSDLMethods;
-import com.ford.avarsdl.util.Const;
+import com.ford.avarsdl.requests.GrantAccessCommand;
+import com.ford.avarsdl.requests.RequestCommand;
+import com.ford.avarsdl.requests.StartScanCommand;
+import com.ford.avarsdl.requests.StopScanCommand;
+import com.ford.avarsdl.requests.TuneRadioCommand;
+import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
+import com.ford.syncV4.proxy.constants.Names;
+
+import java.util.Hashtable;
 
 public class JSONRevSDLController extends JSONController {
-    private static final boolean DEBUG = true;
-    private static final String TAG =
-            JSONRevSDLController.class.getSimpleName();
-    private Delegate delegate;
+
+    private final Hashtable<String, RequestCommand> commandsHashTable;
 
     public JSONRevSDLController() {
         super(RPCConst.CN_REVSDL);
-    }
 
-    public Delegate getDelegate() {
-        return delegate;
-    }
-
-    public void setDelegate(Delegate delegate) {
-        this.delegate = delegate;
+        commandsHashTable = new Hashtable<String, RequestCommand>();
+        initializeCommandsTable();
     }
 
     @Override
     protected void processResponse(String response) {
-        logMsg("received response " + response);
+        Logger.i(getClass().getSimpleName() + " Response: " + response);
         processRegistrationResponse(response);
     }
 
@@ -34,28 +32,26 @@ public class JSONRevSDLController extends JSONController {
     protected void processRequest(String request) {
         String method = mJSONParser.getMethod();
         method = method.substring(method.indexOf('.') + 1, method.length());
-        switch (ERevSDLMethods.valueOf(method)) {
-            case sendSDLAccessRequest:
-                logMsg("Received access request");
-                if (delegate != null) {
-                    delegate.onSDLAccessRequested(this);
-                }
-                break;
-
-            default:
-                logMsg("Unknown request: " + method);
-                break;
+        Logger.d(getClass().getSimpleName() + " Request: " + method + ", request: " + request);
+        RequestCommand requestCommand = commandsHashTable.get(method);
+        if (requestCommand != null) {
+            requestCommand.execute();
+        } else {
+            Logger.w(getClass().getSimpleName() + " unknown request");
         }
     }
 
-    private void logMsg(String msg) {
-        if (DEBUG && Const.DEBUG) {
-            Log.i(TAG, msg);
-        }
-    }
+    private void initializeCommandsTable() {
+        GrantAccessCommand grantAccessCommand = new GrantAccessCommand();
+        commandsHashTable.put(Names.GrantAccess, grantAccessCommand);
 
-    public static interface Delegate {
-        public abstract void onSDLAccessRequested(
-                JSONRevSDLController controller);
+        StartScanCommand startScanCommand = new StartScanCommand();
+        commandsHashTable.put(Names.StartScan, startScanCommand);
+
+        StopScanCommand stopScanCommand = new StopScanCommand();
+        commandsHashTable.put(Names.StopScan, stopScanCommand);
+
+        TuneRadioCommand tuneRadioCommand = new TuneRadioCommand();
+        commandsHashTable.put(Names.TuneRadio, tuneRadioCommand);
     }
 }

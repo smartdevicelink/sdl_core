@@ -6,5 +6,6 @@ package com.ford.avarsdl.service;
  * Date: 11/19/13
  * Time: 12:31 PM
  */
-public class ISDLService {
+public interface ISDLService {
+
 }

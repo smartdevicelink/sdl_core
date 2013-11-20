@@ -4,14 +4,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.activity.SafeToast;
+import com.ford.avarsdl.notifications.NotificationCommand;
+import com.ford.avarsdl.notifications.NotificationCommandImpl;
+import com.ford.avarsdl.util.APIObjectsSimulator;
 import com.ford.avarsdl.util.Const;
+import com.ford.avarsdl.util.Logger;
+import com.ford.avarsdl.util.RPCConst;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
@@ -72,18 +76,25 @@ import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
+import java.util.Hashtable;
+
 /**
  * Service that is responsible for communicating with the SDL.
  *
  * It's a started service, and doesn't support binding.
  *
- * Created by enikolsky on 2013-10-29.
+ * Created by enikolsky on 2013-10-29
+ * Co-author: Yuriy Chernyshov
  */
 public class SDLService extends Service implements IProxyListenerALM {
-    private static final String TAG = SDLService.class.getSimpleName();
+
     private static final String APPID = "42";
     private static final String APPNAME = "MFTGuide";
     private static SyncProxyALM mSyncProxy;
+
+    private final IBinder mBinder = new SDLServiceBinder(this);
+    private static final Hashtable<String, NotificationCommand> commandsHashTable
+            = new Hashtable<String, NotificationCommand>();
 
     public static SyncProxyALM getProxyInstance() {
         return mSyncProxy;
@@ -91,16 +102,16 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand " + intent + ", " + flags + ", " + startId);
+        Logger.d("onStartCommand " + intent + ", " + flags + ", " + startId);
 
+        initializeCommandsHashTable();
         startProxy();
-
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
+        Logger.d(getClass().getSimpleName() + " onDestroy, hash: " + hashCode());
 
         stopProxy();
         super.onDestroy();
@@ -108,19 +119,17 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind unsupported");
+        Logger.d("onBind unsupported");
         // binding is not supported
-        return null;
+        return mBinder;
     }
 
     private void startProxy() {
-        Log.d(TAG, "starting proxy");
+        Logger.d("starting proxy");
 
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR,
-                Const.PREFS_DEFAULT_IPADDR);
-        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT,
-                Const.PREFS_DEFAULT_TCPPORT);
+        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
 
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
@@ -131,7 +140,7 @@ public class SDLService extends Service implements IProxyListenerALM {
                     null, false, false, 2,
                     new TCPTransportConfig(tcpPortInt, ipAddressString));
         } catch (SyncException e) {
-            Log.e(TAG, "Failed to start proxy", e);
+            Logger.e("Failed to start proxy", e);
             if (mSyncProxy == null) {
                 stopSelf();
             }
@@ -139,13 +148,13 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     private void stopProxy() {
-        Log.d(TAG, "stopping proxy");
+        Logger.d("stopping proxy");
 
         if (mSyncProxy != null) {
             try {
                 mSyncProxy.dispose();
             } catch (SyncException e) {
-                Log.e(TAG, "Failed to stop proxy", e);
+                Logger.e("Failed to stop proxy", e);
             }
             mSyncProxy = null;
         }
@@ -154,36 +163,20 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onOnHMIStatus(OnHMIStatus notification) {
         final String msg = "HMI Status " + notification.getHmiLevel() + ", " +
-                notification.getSystemContext() + ", first run " +
-                notification.getFirstRun();
-        Log.i(TAG, msg);
-        notifyUI(msg);
+                notification.getSystemContext() + ", first run " + notification.getFirstRun();
+        SafeToast.showToastAnyThread(msg);
     }
 
     @Override
     public void onProxyClosed(String info, Exception e) {
         final String msg = "Proxy Closed. Info: " + info;
-        Log.i(TAG, msg, e);
-        notifyUI(msg);
+        SafeToast.showToastAnyThread(msg);
 
-        final SyncExceptionCause cause =
-                ((SyncException) e).getSyncExceptionCause();
+        final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
         if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
                 (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                 (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
             resetProxy();
-        }
-    }
-
-    private void notifyUI(final String msg) {
-        final AvatarActivity activity = AvatarActivity.getInstance();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
-                }
-            });
         }
     }
 
@@ -203,15 +196,13 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onError(String info, Exception e) {
         final String msg = "Proxy Error: " + info;
-        Log.i(TAG, msg, e);
-        notifyUI(msg);
+        SafeToast.showToastAnyThread(msg);
     }
 
     @Override
     public void onGenericResponse(GenericResponse response) {
         final String msg = "Generic response " + response.getResultCode();
-        Log.i(TAG, msg);
-        notifyUI(msg);
+        SafeToast.showToastAnyThread(msg);
     }
 
     @Override
@@ -230,8 +221,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onCreateInteractionChoiceSetResponse(
-            CreateInteractionChoiceSetResponse response) {
+    public void onCreateInteractionChoiceSetResponse(CreateInteractionChoiceSetResponse response) {
 
     }
 
@@ -246,8 +236,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onDeleteInteractionChoiceSetResponse(
-            DeleteInteractionChoiceSetResponse response) {
+    public void onDeleteInteractionChoiceSetResponse(DeleteInteractionChoiceSetResponse response) {
 
     }
 
@@ -267,26 +256,22 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onPerformInteractionResponse(
-            PerformInteractionResponse response) {
+    public void onPerformInteractionResponse(PerformInteractionResponse response) {
 
     }
 
     @Override
-    public void onResetGlobalPropertiesResponse(
-            ResetGlobalPropertiesResponse response) {
+    public void onResetGlobalPropertiesResponse(ResetGlobalPropertiesResponse response) {
 
     }
 
     @Override
-    public void onSetGlobalPropertiesResponse(
-            SetGlobalPropertiesResponse response) {
+    public void onSetGlobalPropertiesResponse(SetGlobalPropertiesResponse response) {
 
     }
 
     @Override
-    public void onSetMediaClockTimerResponse(
-            SetMediaClockTimerResponse response) {
+    public void onSetMediaClockTimerResponse(SetMediaClockTimerResponse response) {
 
     }
 
@@ -316,8 +301,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onUnsubscribeButtonResponse(
-            UnsubscribeButtonResponse response) {
+    public void onUnsubscribeButtonResponse(UnsubscribeButtonResponse response) {
 
     }
 
@@ -327,14 +311,12 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onSubscribeVehicleDataResponse(
-            SubscribeVehicleDataResponse response) {
+    public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
 
     }
 
     @Override
-    public void onUnsubscribeVehicleDataResponse(
-            UnsubscribeVehicleDataResponse response) {
+    public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response) {
 
     }
 
@@ -359,8 +341,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onPerformAudioPassThruResponse(
-            PerformAudioPassThruResponse response) {
+    public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
 
     }
 
@@ -395,14 +376,12 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
-    public void onScrollableMessageResponse(
-            ScrollableMessageResponse response) {
+    public void onScrollableMessageResponse(ScrollableMessageResponse response) {
 
     }
 
     @Override
-    public void onChangeRegistrationResponse(
-            ChangeRegistrationResponse response) {
+    public void onChangeRegistrationResponse(ChangeRegistrationResponse response) {
 
     }
 
@@ -440,17 +419,14 @@ public class SDLService extends Service implements IProxyListenerALM {
     public void onGiveControlResponse(GrantAccessResponse response) {
         final String msg =
                 "GrantAccessResponse success " + response.getSuccess() +
-                        ", " + response.getResultCode() + ", " +
-                        response.getInfo();
-        Log.i(TAG, msg);
-        notifyUI(msg);
+                        ", " + response.getResultCode() + ", " + response.getInfo();
+        SafeToast.showToastAnyThread(msg);
     }
 
     @Override
     public void onOnControlChanged(OnControlChanged notification) {
         final String msg = "onControlChanged " + notification.getReason();
-        Log.i(TAG, msg);
-        notifyUI(msg);
+        SafeToast.showToastAnyThread(msg);
     }
 
     @Override
@@ -478,6 +454,32 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     }
 
+    public static void onOnRadioDetailsTest() {
+        // TEST:
+        OnRadioDetails notification = APIObjectsSimulator.getOnRadioDetails();
+
+        // TODO: Expand notification information here
+        final RadioStation radioStation = notification.getRadioStation();
+        String msg = "onRadioDetails";
+        if (radioStation == null) {
+            msg += " Radio Station invalid";
+            SafeToast.showToastAnyThread(msg);
+            return;
+        }
+        msg += " frequency: " +
+                notification.getRadioStation().getFrequency() + "." +
+                notification.getRadioStation().getFraction();
+        SafeToast.showToastAnyThread(msg);
+
+        NotificationCommand command = commandsHashTable.get(Names.OnRadioDetails);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnRadioDetails;
+            command.execute(method, notification);
+        } else {
+            Logger.w("TEST NotificationCommand NULL");
+        }
+    }
+
     @Override
     public void onOnRadioDetails(OnRadioDetails notification) {
         // TODO: Expand notification information here
@@ -485,15 +487,21 @@ public class SDLService extends Service implements IProxyListenerALM {
         String msg = "onRadioDetails";
         if (radioStation == null) {
             msg += " Radio Station invalid";
-            Log.i(TAG, msg);
-            notifyUI(msg);
+            SafeToast.showToastAnyThread(msg);
             return;
         }
         msg += " frequency: " +
                 notification.getRadioStation().getFrequency() + "." +
                 notification.getRadioStation().getFraction();
-        Log.i(TAG, msg);
-        notifyUI(msg);
+        SafeToast.showToastAnyThread(msg);
+
+        NotificationCommand command = commandsHashTable.get(Names.OnRadioDetails);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnRadioDetails;
+            command.execute(method, notification);
+        } else {
+            Logger.w(getClass().getSimpleName() + " NotificationCommand NULL");
+        }
     }
 
     @Override
@@ -514,5 +522,10 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onOnTBTClientState(OnTBTClientState notification) {
 
+    }
+
+    private void initializeCommandsHashTable() {
+        NotificationCommand command = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnRadioDetails, command);
     }
 }

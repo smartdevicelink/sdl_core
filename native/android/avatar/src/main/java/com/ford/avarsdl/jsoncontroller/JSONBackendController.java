@@ -6,14 +6,14 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Window;
-import android.widget.Toast;
 
 import com.ford.avarsdl.activity.AvatarActivity;
 import com.ford.avarsdl.activity.EulaActivity;
+import com.ford.avarsdl.activity.SafeToast;
 import com.ford.avarsdl.jsonparser.EBEMethods;
 import com.ford.avarsdl.util.Const;
+import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
 import com.ford.avarsdl.util.Utils;
 
@@ -29,24 +29,21 @@ public class JSONBackendController extends JSONController {
 	}
 
 	public void sendFullScreenRequest(Boolean value) {
-		String method = RPCConst.CN_BACKEND_CLIENT + "."
-				+ EBEMethods.onFullScreenChanged.toString();
+		String method = RPCConst.CN_BACKEND_CLIENT + "." + EBEMethods.onFullScreenChanged.toString();
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putBooleanValue("isFullScreen", value);
 		sendRequest(method, mJSONParser.getJSONObject());
 	}
 
 	public void sendHasMapsNotification(Boolean value) {
-		String method = RPCConst.CN_BACKEND + "."
-				+ EBEMethods.onHasMapsChanged.toString();
+		String method = RPCConst.CN_BACKEND + "." + EBEMethods.onHasMapsChanged.toString();
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putBooleanValue("hasMaps", value);
 		sendNotification(method, mJSONParser.getJSONObject());
 	}
 
 	public void sendVehicleNotification(String value) {
-		String method = RPCConst.CN_BACKEND + "."
-				+ EBEMethods.onVehicleChanged.toString();
+		String method = RPCConst.CN_BACKEND + "." + EBEMethods.onVehicleChanged.toString();
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putStringValue("vehicle", value);
 		sendNotification(method, mJSONParser.getJSONObject());
@@ -56,11 +53,6 @@ public class JSONBackendController extends JSONController {
 	// private and protected section
 	// =======================================================
 	// private String mResponse;
-	private final boolean DEBUG = true;
-	private final String TAG_NAME = JSONBackendController.class.getSimpleName();// on
-																				// and
-																				// off
-																				// logs
 	private AvatarActivity mActivity;
 
 	protected void processRequest(String request) {
@@ -104,13 +96,12 @@ public class JSONBackendController extends JSONController {
 			break;
 		case logToOS:
 			mJSONParser.putJSONObject(mJSONParser.getParams());
-			logMsg('i', mJSONParser.getStringParam("message"));
+			Logger.i(getClass().getSimpleName() + " " + mJSONParser.getStringParam("message"));
 			out = null;
 			break;
 		case onAppLoaded:
-			logMsg('i', "onAppLoaded");
-			Message msg = mActivity.getMainHandler().obtainMessage(
-					Const.WEBVIEW_SHOW, null);
+			Logger.i(getClass().getSimpleName() +  " onAppLoaded");
+			Message msg = mActivity.getMainHandler().obtainMessage(Const.WEBVIEW_SHOW, null);
 			mActivity.getMainHandler().sendMessage(msg);
 			out = null;
 			break;
@@ -123,7 +114,7 @@ public class JSONBackendController extends JSONController {
 		default:
 			mJSONParser.putEmptyJSONRPCObject();
 			mJSONParser.putStringValue(RPCConst.TAG_ERROR,
-					"Backend does not support function : " + method);
+                    "Backend does not support function : " + method);
 			out = mJSONParser.getJSONObject();
 			break;
 		}
@@ -228,7 +219,7 @@ public class JSONBackendController extends JSONController {
 				height = dm.heightPixels;
 			}
 		}
-		logMsg('i', "GetWindowHeight = " + height);
+		Logger.i(getClass().getSimpleName() +  " GetWindowHeight = " + height);
 		return height;
 	}
 
@@ -241,7 +232,7 @@ public class JSONBackendController extends JSONController {
 		} else {
 			width = dm.widthPixels;
 		}
-		logMsg('i', "GetWindowWidth = " + width);
+		Logger.i(getClass().getSimpleName() +  " GetWindowWidth = " + width);
 		return width;
 	}
 
@@ -249,7 +240,7 @@ public class JSONBackendController extends JSONController {
 		DisplayMetrics dm = new DisplayMetrics();
 		mActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
 		Float dens = dm.density;
-		logMsg('i', "GetWindowDpi = " + dens);
+		Logger.i(getClass().getSimpleName() +  " GetWindowDpi = " + dens);
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putDoubleValue("windowDensity", dens.doubleValue());
 		return mJSONParser.getJSONObject();
@@ -257,7 +248,7 @@ public class JSONBackendController extends JSONController {
 
 	private String isFullScreen() {
 		boolean fullScreen = mActivity.getFullscreenStatus();
-		logMsg('i', "Full screen = " + fullScreen);
+		Logger.i(getClass().getSimpleName() +  " Full screen = " + fullScreen);
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putBooleanValue("isFullScreen", fullScreen);
 		return mJSONParser.getJSONObject();
@@ -265,7 +256,7 @@ public class JSONBackendController extends JSONController {
 
 	private String hasMaps() {
 		boolean hasMaps = mActivity.getMapsStatus();
-		logMsg('i', "hasMaps = " + hasMaps);
+		Logger.i(getClass().getSimpleName() + " hasMaps = " + hasMaps);
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putBooleanValue("hasMaps", hasMaps);
 		return mJSONParser.getJSONObject();
@@ -273,7 +264,7 @@ public class JSONBackendController extends JSONController {
 
 	private String getVehicleModel() {
 		String vehicle = mActivity.getVehicleStatus();
-		logMsg('i', "hasMaps = " + vehicle);
+		Logger.i(getClass().getSimpleName() + " hasMaps = " + vehicle);
 		mJSONParser.putEmptyJSONObject();
 		mJSONParser.putStringValue("vehicle", vehicle);
 		return mJSONParser.getJSONObject();
@@ -289,7 +280,7 @@ public class JSONBackendController extends JSONController {
 		} else {
 			mJSONParser.putEmptyJSONObject();
 			mJSONParser.putStringValue("result",
-					"!!! ERROR in navigation setting");
+                    "!!! ERROR in navigation setting");
 			return mJSONParser.getJSONObject();
 		}
 	}
@@ -327,7 +318,7 @@ public class JSONBackendController extends JSONController {
 	}
 
 	public String getOSVersion() {
-		logMsg('i', "getAndroidVersion:" + Build.VERSION.SDK_INT);
+		Logger.i(getClass().getSimpleName() + " getAndroidVersion:" + Build.VERSION.SDK_INT);
 		switch (Build.VERSION.SDK_INT) {
 		case 8:
 			return "2.2";
@@ -354,7 +345,6 @@ public class JSONBackendController extends JSONController {
 		default:
 			return "unknown";
 		}
-
 	}
 
 	private String sendSupportEmail() {
@@ -366,24 +356,11 @@ public class JSONBackendController extends JSONController {
 		i.putExtra(Intent.EXTRA_TEXT, "Sent from Android OS v." + getOSVersion());
 		try {
 			mActivity.startActivity(Intent.createChooser(i, "Send mail..."));
-
 			mJSONParser.putStringValue("result", "OK");
 		} catch (android.content.ActivityNotFoundException ex) {
-			Toast.makeText(mActivity, "There are no email clients installed.",
-					Toast.LENGTH_SHORT).show();
-			mJSONParser.putStringValue("result",
-					"Error!!! There are no email clients installed.");
+            SafeToast.showToastAnyThread("There are no email clients installed.");
+			mJSONParser.putStringValue("result", "Error!!! There are no email clients installed.");
 		}
 		return mJSONParser.getJSONObject();
 	}
-
-	private void logMsg(char type, String msg) {
-		if (DEBUG && Const.DEBUG) {
-			if (type == 'i')
-				Log.i(TAG_NAME, msg);
-			else if (type == 'w')
-				Log.w(TAG_NAME, msg);
-		}
-	}
-
 }

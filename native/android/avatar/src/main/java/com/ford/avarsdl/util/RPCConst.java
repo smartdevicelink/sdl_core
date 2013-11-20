@@ -57,8 +57,4 @@ public class RPCConst {
 
 	public static final int ID_RANGE = 999;
 	public static final String TAG_SCALE = "scale";
-
-	
-	
-
 }

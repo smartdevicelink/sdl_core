@@ -23,7 +23,6 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,16 +58,18 @@ import com.ford.avarsdl.jsoncontroller.JSONVideoController;
 import com.ford.avarsdl.jsonserver.JSONServer;
 import com.ford.avarsdl.media.AvatarOnPreparedListener;
 import com.ford.avarsdl.rater.AppRater;
+import com.ford.avarsdl.service.ISDLServiceConnection;
 import com.ford.avarsdl.service.SDLService;
+import com.ford.avarsdl.service.SDLServiceBinder;
+import com.ford.avarsdl.service.SDLServiceConnectionProxy;
 import com.ford.avarsdl.util.ActivityUtils;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.ExtStorageUtils;
+import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.MessageConst;
 import com.ford.avarsdl.util.Utils;
 import com.ford.avarsdl.util.WebViewUtils;
-import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.proxy.SyncProxyALM;
-import com.ford.syncV4.proxy.rpc.GrantAccess;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 
 /**
  * Title: AvatarActivity.java<br>
@@ -76,11 +77,13 @@ import com.ford.syncV4.proxy.rpc.GrantAccess;
  * and video handling<br>
  * 
  * @author vsaenko/Eugene Sagan
+ * @co-author Yuriy Chernyshov
  */
 public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
-        JSONRevSDLController.Delegate {
-    private int correlationID = 1;
-    private static AvatarActivity instance;
+        ISDLServiceConnection {
+
+    private final SDLServiceConnectionProxy mSDLServiceConnectionProxy = new SDLServiceConnectionProxy(this);
+    private IProxyListenerALM mBoundSDLService;
 
 	// for monkey testing
 	// adb shell monkey -p com.ford.avarsdl -v 100
@@ -91,15 +94,23 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 	public static Boolean ratePreferenceEnabled;
 
-    public static AvatarActivity getInstance() {
-        return instance;
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Logger.i(getClass().getSimpleName() + " onStart ");
+
+        if (mBoundSDLService != null) {
+
+        } else {
+            bindSDLService(this, mSDLServiceConnectionProxy);
+        }
     }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		logMsg("onCreate");
-        instance = this;
+		Logger.i(getClass().getSimpleName() + " onCreate, hash:" + hashCode());
 
         // FIXME: the old code with new SDK crashes with
         // android.os.NetworkOnMainThreadException
@@ -138,7 +149,6 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	public void onBackPressed() {
 		// do something on back.
 		this.moveTaskToBack(true);
-		return;
 	}
 
 	@Override
@@ -146,21 +156,46 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		getMenuInflater().inflate(R.menu.optionsmenu, menu);
 		return true;
 	}
+    public void bindSDLService(Context context, SDLServiceConnectionProxy connectionProxy) {
+        Logger.i("BindStorageService(), connection proxy: " + connectionProxy);
+        context.bindService(new Intent(context, SDLService.class), connectionProxy, BIND_AUTO_CREATE);
+    }
+
+    public void unbindSDLService(Context context, SDLServiceConnectionProxy connectionProxy) {
+        if (!connectionProxy.isConnected()) {
+            Logger.v("ServiceConnection is not connected, ignoring unbindService: " + connectionProxy);
+            return;
+        }
+        try {
+            Logger.i("Unbind Service(), connection proxy: " + connectionProxy);
+            context.unbindService(connectionProxy);
+        } catch (IllegalArgumentException iae) {
+            // sometimes this exception is still thrown, in spite of isConnected() check above
+            // simply ignore this exception
+            Logger.w("Unbind IllegalArgumentException: " + iae);
+        } catch (Exception e) {
+            Logger.e("Error unbinding from connection: " + connectionProxy, e);
+        }
+    }
+
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final int itemId = item.getItemId();
 		switch (itemId) {
-		case R.id.mnuQuit:
-			exitApp();
-			break;
-		default:
-			break;
+            case R.id.mnuQuit:
+                exitApp();
+                break;
+            case R.id.menuOnRadioDetailsTest:
+                SDLService.onOnRadioDetailsTest();
+                break;
+            default:
+                break;
 		}
 		return false;
 	}
 
     private void exitApp() {
-        Log.d(TAG, "Exiting application");
+        Logger.d("Exiting application");
 
         finish();
         // the delay should be long enough, so that UnregisterAppInterface and
@@ -174,10 +209,8 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     }
 
 	public boolean isFirstStart() {
-		SharedPreferences prefs = getSharedPreferences(
-				Const.SHPREF_FIRST_LAUNCH, 0);
-		int previousCodeVersion = prefs.getInt(
-				Const.SHPREF_PREVIOUS_CODE_VERSION, 0);
+		SharedPreferences prefs = getSharedPreferences(Const.SHPREF_FIRST_LAUNCH, 0);
+		int previousCodeVersion = prefs.getInt(Const.SHPREF_PREVIOUS_CODE_VERSION, 0);
 		int currentCodeVersion = Utils.getAppVersionCode(this);
 		if (previousCodeVersion < currentCodeVersion) {
 			return true;
@@ -186,13 +219,13 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
-		logMsg("surface created");
+		Logger.i("surface created");
 		playVideo(holder);
 
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		logMsg("surface destroyed");
+		Logger.i("surface destroyed");
 	}
 
 	// =============================================================
@@ -299,7 +332,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 	public void startVideoTimer() {
 		// start timer to send every N ms current time position of video
-		logMsg("Start Timer");
+		Logger.i("Start Timer");
 		int N = 500;
 
 		stopVideoTimer();
@@ -311,13 +344,10 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 				// current position in MP never reaches duration value
 				// check difference on 500 msec
 				if (mVideoPrepared) {
-					if ((mMediaPlayer.getDuration() - mMediaPlayer
-							.getCurrentPosition()) < 500)
-						mVideoController.sendPositionNotification(mMediaPlayer
-								.getDuration());
+					if ((mMediaPlayer.getDuration() - mMediaPlayer.getCurrentPosition()) < 500)
+						mVideoController.sendPositionNotification(mMediaPlayer.getDuration());
 					else
-						mVideoController.sendPositionNotification(mMediaPlayer
-								.getCurrentPosition());
+						mVideoController.sendPositionNotification(mMediaPlayer.getCurrentPosition());
 				}
 			}
 		};
@@ -332,10 +362,6 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	// =====================================================================
 	// private section
 	// =====================================================================
-
-	private static final String TAG = AvatarActivity.class.getSimpleName();
-
-	private final static boolean DEBUG = true;
 
 	// private Context ctx;
 
@@ -364,10 +390,8 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	private JSONServer mServerThread;
 	private JSONBackendController mBEController;
 	private JSONVideoController mVideoController;
-	private JSONRateController mRateController;
-	private JSONRevSDLController mRevSDLController;
 
-	// for video time visualization
+    // for video time visualization
 	private Timer mVideoTimer;// timer to send notifications about current video
 								// time
 	private boolean mVideoWasPaused = false;// indicate if video was on paused
@@ -396,7 +420,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 			// /// VIDEO
 			case Const.VIDEO_START:
-				logMsg("mMediaPlayer.play handler");
+				Logger.i("mMediaPlayer.play handler");
 				Object[] obj = (Object[]) msg.obj;
 				String videoFile = (String) obj[0];
 				Double scale = (Double) obj[1];
@@ -407,7 +431,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 				initVideoSurface();
 				break;
 			case Const.VIDEO_PAUSE:
-				logMsg("mMediaPlayer.pause handler");
+				Logger.i("mMediaPlayer.pause handler");
 				stopVideoTimer();
 				if (mMediaPlayer != null)
 					mMediaPlayer.pause();
@@ -431,11 +455,11 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 			case Const.VIDEO_PLAY:
 				startVideoTimer();
 				mVideoWasPaused = false;
-				logMsg("mMediaPlayer.start case Const.VIDEO_PLAY");
+				Logger.i("mMediaPlayer.start case Const.VIDEO_PLAY");
 				if (null != mMediaPlayer) {
 					mMediaPlayer.start();
 				} else {
-					logMsg("mMediaPlayer == null");
+					Logger.i("mMediaPlayer == null");
 				}
 				break;
 			case Const.VIDEO_STOP:
@@ -452,7 +476,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 				mVideoPauseTime = 0;
 				break;
 			case Const.VIDEO_PLAY_AFTER_SCALE:
-				logMsg("mMediaPlayer.play after scale handler");
+				Logger.i("mMediaPlayer.play after scale handler");
 				obj = (Object[]) msg.obj;
 				scale = (Double) obj[0];
 				int left = (Integer) obj[1];
@@ -476,7 +500,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 							+ String.valueOf(currTime - mStartTime);
 					Toast.makeText(getApplicationContext(), str,
 							Toast.LENGTH_LONG).show();
-					logMsg(str);
+					Logger.i(str);
 				}
                 showSDLSetupDialog();
                 break;
@@ -514,7 +538,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 						.getAPKExpansionZipFile(this, mainVersionCode,
 								patchVersionCode);
 			} catch (IOException e) {
-				Log.e(TAG, e.getMessage(), e);
+				Logger.e(e.getMessage(), e);
 			}
 
 		} else {
@@ -577,15 +601,15 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
                 return success;
             }
         }
-        logMsg("Couldn't remove old video files");
+        Logger.i("Couldn't remove old video files");
         return false;
     }
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+        Logger.i(getClass().getSimpleName() + " onPause, hash:" + hashCode());
 		if (!isFirstStart()) {
-			logMsg("onPause");
 			ActivityUtils.setAppIsForeground(false);
 			// switch of timer
 			stopVideoTimer();
@@ -600,7 +624,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 	protected void onResume() {
 		super.onResume();
-		logMsg("onResume");
+        Logger.i(getClass().getSimpleName() + " onResume, hash:" + hashCode());
 		if (!isFirstStart()) {
 			resumeAvatarActivity();
 		}
@@ -618,11 +642,9 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		if (!isTaskRoot()) {
 			final Intent intent = getIntent();
 			final String intentAction = intent.getAction();
-			if (intent.hasCategory(Intent.CATEGORY_LAUNCHER)
-					&& intentAction != null
+			if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && intentAction != null
 					&& intentAction.equals(Intent.ACTION_MAIN)) {
-				Log.w(TAG,
-						"Main Activity is not the root.  Finishing Main Activity instead of launching.");
+				Logger.w("Main Activity is not the root. Finishing Main Activity instead of launching.");
 				finish();
 				return;
 			}
@@ -660,8 +682,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 			if (mWebView.getUrl() == null) {
 				if (!loadContent()) {
-                    Toast.makeText(this, R.string.toast_index_not_found,
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.toast_index_not_found, Toast.LENGTH_LONG).show();
                 }
             }
 		}
@@ -671,17 +692,16 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.sdl_settings, null);
 
-        final EditText ipAddressText =
-                (EditText) dialogView.findViewById(R.id.sdl_ipAddr);
-        final EditText tcpPortText =
-                (EditText) dialogView.findViewById(R.id.sdl_tcpPort);
+        if (dialogView == null) {
+            return;
+        }
 
-        final SharedPreferences prefs =
-                getSharedPreferences(Const.PREFS_NAME, 0);
-        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR,
-                Const.PREFS_DEFAULT_IPADDR);
-        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT,
-                Const.PREFS_DEFAULT_TCPPORT);
+        final EditText ipAddressText = (EditText) dialogView.findViewById(R.id.sdl_ipAddr);
+        final EditText tcpPortText = (EditText) dialogView.findViewById(R.id.sdl_tcpPort);
+
+        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
 
         ipAddressText.setText(ipAddressString);
         tcpPortText.setText(String.valueOf(tcpPortInt));
@@ -692,30 +712,25 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
                .setPositiveButton(android.R.string.ok,
                        new DialogInterface.OnClickListener() {
                            @Override
-                           public void onClick(DialogInterface dialog,
-                                               int which) {
-                               String ipAddressString =
-                                       ipAddressText.getText().toString();
+                           public void onClick(DialogInterface dialog, int which) {
+                               String ipAddressString = ipAddressText.getText().toString();
                                int tcpPortInt;
                                try {
-                                   tcpPortInt = Integer.parseInt(
-                                           tcpPortText.getText().toString());
+                                   tcpPortInt = Integer.parseInt(tcpPortText.getText().toString());
                                } catch (NumberFormatException e) {
-                                   Log.i(TAG, "Couldn't parse port number", e);
+                                   Logger.i("Couldn't parse port number", e);
                                    tcpPortInt = Const.PREFS_DEFAULT_TCPPORT;
                                }
 
                                SharedPreferences.Editor prefsEditor =
-                                       getSharedPreferences(Const.PREFS_NAME, 0)
-                                               .edit();
-                               prefsEditor.putString(Const.PREFS_KEY_IPADDR,
-                                       ipAddressString);
-                               prefsEditor.putInt(Const.PREFS_KEY_TCPPORT,
-                                       tcpPortInt);
+                                       getSharedPreferences(Const.PREFS_NAME, 0).edit();
+                               prefsEditor.putString(Const.PREFS_KEY_IPADDR, ipAddressString);
+                               prefsEditor.putInt(Const.PREFS_KEY_TCPPORT, tcpPortInt);
                                prefsEditor.commit();
 
-                               startService(new Intent(getApplicationContext(),
-                                       SDLService.class));
+                               Intent intent = new Intent(getApplicationContext(), SDLService.class);
+                               //intent.putExtra()
+                               startService(intent);
                            }
                        })
                .show();
@@ -723,9 +738,9 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
 	protected void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        instance = null;
+        Logger.i(getClass().getSimpleName() + " onDestroy, hash:" + hashCode());
 
+        unbindSDLService(getBaseContext(), mSDLServiceConnectionProxy);
         stopService(new Intent(this, SDLService.class));
 
 		if (!isFirstStart()) {
@@ -762,7 +777,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private boolean loadContent() {
-        logMsg("loadContent");
+        Logger.i("loadContent");
         boolean successful = false;
         if (assetExists(Const.INDEX_PAGE)) {
             mWebView.loadUrl(Const.WEB_MAIN_PAGE_PATH);
@@ -772,8 +787,8 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     }
 
 	private void startRPCComponents() {
-		// run new thread for server
-		logMsg("run new thread for JSON server");
+		Logger.i(getClass().getSimpleName() + " Start RPC Components");
+
 		mServerThread = new JSONServer();
 		mServerThread.setName("ServerThread");
 		mServerThread.start();
@@ -786,8 +801,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 				e.printStackTrace();
 			}
 		}
-		// run controllers
-		logMsg("create Beckend controller");
+
 		mBEController = new JSONBackendController(this);
 		mBEController.register(27);
 		// wait for a while
@@ -799,7 +813,6 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		}
 
-		logMsg("create Video controller");
 		mVideoController = new JSONVideoController(this);
 		mVideoController.register(28);
 		// wait for a while
@@ -811,8 +824,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		}
 
-		logMsg("create Rate controller");
-		mRateController = new JSONRateController(mAppRater);
+        JSONRateController mRateController = new JSONRateController(mAppRater);
 		mRateController.register(29);
 		// wait for a while
 		while (!mRateController.isRegistered()) {
@@ -823,9 +835,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 			}
 		}
 
-        // FIXME oh no, don't make me do this!
-		logMsg("create RevSDL controller");
-		mRevSDLController = new JSONRevSDLController();
+        JSONRevSDLController mRevSDLController = new JSONRevSDLController();
 		mRevSDLController.register(30);
 		// wait for a while
 		while (!mRevSDLController.isRegistered()) {
@@ -835,19 +845,16 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 				e.printStackTrace();
 			}
 		}
-        mRevSDLController.setDelegate(this);
-
 	}
 
 	private void prepareMainView() {
-		logMsg("prepareMainView");
+		Logger.i("prepareMainView");
 		setContentView(R.layout.main);
 
-		mPreferences = PreferenceManager
-				.getDefaultSharedPreferences(getApplicationContext());
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		Boolean fullScreen = getFullscreenStatus();
 		mLogo = (ImageView) findViewById(R.id.logo);
-		logMsg("mFullScreen is " + fullScreen.toString());
+		Logger.i("mFullScreen is " + fullScreen.toString());
 		if (fullScreen) {
 			RelativeLayout.LayoutParams params = new LayoutParams(
 					LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
@@ -872,20 +879,16 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		mProgressBar = (ProgressBar) findViewById(R.id.pbProgress);
 		LayoutParams progressParams = (LayoutParams) mProgressBar
 				.getLayoutParams();
-		double loaderHeight = Const.WEB_HEIGHT * getScale() * 0.07
-				* getWindowDensity();
+		double loaderHeight = Const.WEB_HEIGHT * getScale() * 0.07 * getWindowDensity();
 		progressParams.height = (int) loaderHeight;
 		progressParams.width = progressParams.height;
 		double loaderVerticalCenter = getWindowHeight() * 0.5;
-		double loaderVerticalShift = Const.WEB_HEIGHT * getScale() * 0.5 * 0.41
-				* getWindowDensity();
-		double top = (loaderVerticalCenter - 0.5 * loaderHeight)
-				+ loaderVerticalShift;
+		double loaderVerticalShift = Const.WEB_HEIGHT * getScale() * 0.5 * 0.41 * getWindowDensity();
+		double top = (loaderVerticalCenter - 0.5 * loaderHeight) + loaderVerticalShift;
 		progressParams.topMargin = (int) Math.round(top);
 		mProgressBar.setLayoutParams(progressParams);
 
 		mAnimationShow = AnimationUtils.loadAnimation(this, R.anim.show);
-
 	}
 
 	private double getScale() {
@@ -893,7 +896,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		if (isFullScreen()) {
 			/** Calculate Scale Point */
 			double scalePointW = (double) getWindowWidth()
-					/ (double) Const.WEB_WIDTH / getWindowDensity();
+                    / (double) Const.WEB_WIDTH / getWindowDensity();
 			double scalePointH = (double) getWindowHeight()
 					/ (double) Const.WEB_HEIGHT / getWindowDensity();
 			/** Set calculated ScalePoint */
@@ -943,7 +946,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void initVideoSurface() {
-		logMsg("init surface");
+		Logger.i("init surface");
 
 		mVideoLayout.setVisibility(View.INVISIBLE);
 		mVideoLayout.removeAllViews();
@@ -968,14 +971,14 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void hideSplashScreen() {
-		logMsg("hide screen ");
+		Logger.i("hide screen ");
 		mVideoLayout.setVisibility(View.VISIBLE);
 		mLogo.setVisibility(View.INVISIBLE);
 	}
 
 	private double mediaGetPosition() {
 		// setIsGetPosition(true);
-		logMsg("mediaGetPosition");
+		Logger.i("mediaGetPosition");
 		// isDoubleSeek = true;
 		if (mMediaPlayer == null) {
 			return -1;
@@ -984,7 +987,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 			return Utils
 					.getShortDouble(mMediaPlayer.getCurrentPosition() / 1000.0);
 		} catch (IllegalStateException e) {
-			Log.e(TAG, e.getMessage(), e);
+			Logger.e(e.getMessage(), e);
 			return -1;
 		}
 	}
@@ -994,13 +997,13 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		// setIsGetPosition(false);
 		// position *= 1000;
 		mSeekTo = (int) position;
-		logMsg("mediaSetPosition=" + position);
+		Logger.i("mediaSetPosition=" + position);
 
 		try {
 			if (mSeekTo != 0)
 				mMediaPlayer.seekTo(mSeekTo);
 		} catch (IllegalStateException e) {
-			Log.e(TAG, e.getMessage(), e);
+			Logger.e(e.getMessage(), e);
 		}
 	}
 
@@ -1008,14 +1011,14 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		/* convert to milliseconds */
 		mSeekTo = (int) position;
 
-		logMsg("mediaSetPositionPaused=" + position);
+		Logger.i("mediaSetPositionPaused=" + position);
 
 		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 		audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
 		try {
 			mMediaPlayer.seekTo(mSeekTo);
 		} catch (IllegalStateException e) {
-			Log.e(TAG, e.getMessage(), e);
+			Logger.e(e.getMessage(), e);
 		}
 	}
 
@@ -1029,12 +1032,8 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void videoViewResize(double scale, int top, int left) {
-
-		mVideoWidth = (int) (Const.ORIG_VIDEO_WIDTH * scale
-				* getWindowDensity() - 1);
-		mVideoHeight = (int) (Const.ORIG_VIDEO_HEIGHT * scale
-				* getWindowDensity() - 1);
-
+		mVideoWidth = (int) (Const.ORIG_VIDEO_WIDTH * scale * getWindowDensity() - 1);
+		mVideoHeight = (int) (Const.ORIG_VIDEO_HEIGHT * scale * getWindowDensity() - 1);
 		mLeftMargin = (int) Math.round(left * getWindowDensity());
 		mTopMargin = (int) Math.round(top * getWindowDensity());
 	}
@@ -1046,7 +1045,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 	}
 
 	private void playVideo(SurfaceHolder holder) {
-		logMsg("playVideo");
+		Logger.i("playVideo");
 		if (mPath != null) {
 			try {
 				if (mMediaPlayer != null) {
@@ -1058,23 +1057,21 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
 				initDatasourceWith(mPath);
 
-				logMsg("video file path : " + mPath);
+				Logger.i("video file path : " + mPath);
 
 				mMediaPlayer.setDisplay(holder);
 
-				mMediaPlayer
-						.setOnPreparedListener(new AvatarOnPreparedListener(
-								this));
+				mMediaPlayer.setOnPreparedListener(new AvatarOnPreparedListener(this));
 				mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
 				mMediaPlayer.prepare();
 			} catch (Exception e) {
-				Log.e(TAG, "error: " + e.getMessage(), e);
+				Logger.e("error: " + e.getMessage(), e);
 				// set duration of video
 				mVideoController.setVideoDuration(-1);
 			}
 		} else {
-			logMsg("No video to play");
+			Logger.i("No video to play");
 		}
 	}
 
@@ -1104,22 +1101,18 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		AssetFileDescriptor assetFileDescriptor;
 		// welcome orientation video is in raw resources
 		if (fileName.toLowerCase().compareTo(Const.WELCOME_VIDEO_FILE_NAME) == 0) {
-			assetFileDescriptor = getResources().openRawResourceFd(
-					R.raw.faq_welcome_orientation);
+			assetFileDescriptor = getResources().openRawResourceFd(R.raw.faq_welcome_orientation);
 		} else {
 			// get file from expansion archive
 			if (apkExpansionZipFile == null) {
-				throw new ExtensionFileException(
-						"Expansion zip file variable is not initialized");
+				throw new ExtensionFileException("Expansion zip file variable is not initialized");
 			}
-			assetFileDescriptor = apkExpansionZipFile
-					.getAssetFileDescriptor(fileName);
+			assetFileDescriptor = apkExpansionZipFile.getAssetFileDescriptor(fileName);
 		}
 
 		if (assetFileDescriptor == null) {
-			throw new ExtensionFileException(
-					"Assert file descriptor for file: " + fileName
-							+ " not found");
+			throw new ExtensionFileException("Assert file descriptor for file: " + fileName +
+                    " not found");
 		}
 
 		try {
@@ -1133,36 +1126,23 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 		} catch (IOException e) {
 			throw new MediaPlayerException(e);
 		}
-
-	}
-
-	private void logMsg(String msg) {
-		if (DEBUG && Const.DEBUG) {
-			Log.i(TAG, msg);
-		}
 	}
 
 	@Override
 	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
 	}
 
-    private int nextCorrelationID() {
-        return ++correlationID;
+    @Override
+    public void onSDLServiceConnected(SDLServiceBinder service) {
+        Logger.i("SDLService connected " + service);
+
+        mBoundSDLService = service.getService();
     }
 
     @Override
-    public void onSDLAccessRequested(JSONRevSDLController controller) {
-        SyncProxyALM proxy = SDLService.getProxyInstance();
-        if (proxy != null) {
-            GrantAccess msg = new GrantAccess();
-            msg.setTimeout(10000);
-            msg.setCorrelationID(nextCorrelationID());
+    public void onSDLServiceDisconnected() {
+        Logger.i("SDLService disconnected");
 
-            try {
-                proxy.sendRPCRequest(msg);
-            } catch (SyncException e) {
-                Log.e(TAG, "Can't send message", e);
-            }
-        }
+        mBoundSDLService = null;
     }
 }

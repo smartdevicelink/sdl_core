@@ -12,8 +12,14 @@
         android:title="@string/str_menu_rate"/>
 
     -->
+
+    <item
+        android:id="@+id/menuOnRadioDetailsTest"
+        android:title="OnRadioDetails"/>
+
     <item
         android:id="@+id/mnuQuit"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        android:title="@string/str_menu_quit"/>
+        android:title="@string/str_menu_quit"/>
+
 </menu>

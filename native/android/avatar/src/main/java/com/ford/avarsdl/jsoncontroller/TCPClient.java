@@ -1,5 +1,7 @@
 package com.ford.avarsdl.jsoncontroller;
 
+import com.ford.avarsdl.util.Logger;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,9 +44,8 @@ public class TCPClient implements ITcpClient {
 			mSocketWriter.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+            Logger.e(getClass().getSimpleName() + " sendMsg: " + e);
 		}
-
 	}
 
 	@Override
