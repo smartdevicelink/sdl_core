@@ -31,7 +31,7 @@ MFT.DirectTune = Em.ContainerView.create({
 	childViews: [
 		'backspaceButton',
 		'enterButton',
-		'tuneButtons',
+		'tuneButtons'
 		//'siriusButtons'
 	],
 	
@@ -48,7 +48,7 @@ MFT.DirectTune = Em.ContainerView.create({
 		
 		disabled: function() {
 			return (!MFT.MediaController.directTune.length && !MFT.MediaController.siriusDirectTune.length);
-		}.property('MFT.MediaController.directTune.length','MFT.MediaController.siriusDirectTune.length'),
+		}.property('MFT.MediaController.directTune.length','MFT.MediaController.siriusDirectTune.length')
 	}),
 	
 	enterButton: MFT.Button.extend({
@@ -64,7 +64,7 @@ MFT.DirectTune = Em.ContainerView.create({
 		
 		disabled: function() {
 			return !MFT.MediaController.directTuneFinished;
-		}.property('MFT.MediaController.directTuneFinished')		
+		}.property('MFT.MediaController.directTuneFinished')
 	}),
 	
 	/* Active keys */
@@ -94,9 +94,9 @@ MFT.DirectTune = Em.ContainerView.create({
 					onDown:				false,
 					
 					isDisabled:	function() {
-						
+
 						if(MFT.States.media.radio.sirius.active)
-						
+
 						{
 							if(MFT.MediaController.get('disableZeroNum') && this.index == 0)
 							{
@@ -106,13 +106,9 @@ MFT.DirectTune = Em.ContainerView.create({
 							}
 						}else
 						{
-							if ( MFT.DirectTune.get('keys').contains( this.index ) ) {
-								return false
-							} else {
-								return true;
-							}
+                            return !MFT.DirectTune.get('keys').contains(this.index);
 						}
-						}.property('MFT.DirectTune.keys','MFT.MediaController.disableZeroNum')	
+						}.property('MFT.DirectTune.keys','MFT.MediaController.disableZeroNum')
 				});
 							
 				// Push element to list
