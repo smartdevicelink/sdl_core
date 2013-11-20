@@ -81,7 +81,38 @@ Item {
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
         console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
-// with this array we grab only the lines we need
+        var app = dataContainer.getApplication(appID);
+        app.softButtons.clear()
+        if (softButtons) {            
+            softButtons.forEach(function(x) { app.softButtons.append(x); });
+        }
+        app.customPresets.clear()
+        if (customPresets) {
+            customPresets.forEach( function(x) { app.customPresets.append( {text: x} ); } )
+        }
+
+        var textAlignment
+        if (alignment !== undefined) {
+            switch (alignment) {
+                case Common.TextAlignment.LEFT_ALIGNED:
+                    textAlignment = Text.AlignLeft
+                    break;
+                case Common.TextAlignment.RIGHT_ALIGNED:
+                    textAlignment = Text.AlignRight
+                    break;
+                case Common.TextAlignment.CENTERED:
+                    textAlignment = Text.AlignHCenter
+                    break;
+                default:
+                    textAlignment = Text.AlignHCenter
+                    break;
+            }
+        }
+        else {
+            textAlignment = Text.AlignHCenter
+        }
+
+        // with this array we grab only the lines we need
         var showFields = [
             Common.TextFieldName.mainField1,
             Common.TextFieldName.mainField2,
@@ -103,6 +134,7 @@ Item {
                     "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
                     "image": graphic ? graphic.value : ""
                 },
+                "hmiUITextAlignment": textAlignment,
                 "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined ? {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                     "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
@@ -112,36 +144,6 @@ Item {
                 undefined
             }
         )
-
-        var app = dataContainer.getApplication(appID);
-        app.softButtons.clear()
-        if (softButtons) {            
-            softButtons.forEach(function(x) { app.softButtons.append(x); });
-        }
-        app.customPresets.clear()
-        if (customPresets) {
-            customPresets.forEach( function(x) { app.customPresets.append( {text: x} ); } )
-        }
-
-        if (alignment !== undefined) {
-            switch (alignment) {
-                case Common.TextAlignment.LEFT_ALIGNED:
-                    dataContainer.hmiUITextAlignment = Text.AlignLeft
-                    break;
-                case Common.TextAlignment.RIGHT_ALIGNED:
-                    dataContainer.hmiUITextAlignment = Text.AlignRight
-                    break;
-                case Common.TextAlignment.CENTERED:
-                    dataContainer.hmiUITextAlignment = Text.AlignHCenter
-                    break;
-                default:
-                    dataContainer.hmiUITextAlignment = Text.AlignHCenter
-                    break;
-            }
-        }
-        else {
-            dataContainer.hmiUITextAlignment = Text.AlignHCenter
-        }
         console.debug("exit")
     }
 
