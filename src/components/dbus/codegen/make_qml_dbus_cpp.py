@@ -99,7 +99,6 @@ class Impl(FordXmlParser):
     def make_dbus_type_definitions(self, out):
         for struct in self.structs.items():
             self.write_struct_definition(struct, out)
-            self.write_validation_func(struct, out)
 
     def write_struct_definition(self, ((iface, name), params), out):
         struct_name = iface + '_' + name
@@ -232,15 +231,6 @@ class Impl(FordXmlParser):
                 conditions.append("(%s.size() > %s)" % (param_name, param.maxLength))
             if conditions:
                 out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
-
-    def write_validation_func(self, ((iface, name), params), out):
-        struct_name = iface + '_' + name
-        out.write("inline bool sanityCheck(const %s& s) {\n" % struct_name)
-        with CodeBlock(out) as out:
-            for param in params:
-                self.write_param_validation(param, "s." + param.name, "return false", out)
-            out.write("return true;\n")
-        out.write("}\n\n");
 
     def qt_param_type(self, param):
         if not param.mandatory:
@@ -424,9 +414,10 @@ class Impl(FordXmlParser):
                     param_name = p.name
                     param_type = self.qt_param_type(p)
                     out.write("%s %s_out;\n" % (param_type, p.name))
-                    out.write("""if (!GetArgFromMap(map, "{0}", {0}_out)) {{ return false; }}\n """.format(p.name))
+                    out.write("if (!GetArgFromMap(map, \"{0}\", {0}_out)) {{ return false; }}\n".format(p.name))
+                    self.write_param_validation(p, p.name + "_out", "return false", out)
                     out.write("QVariant {0}_arg;\n".format(p.name))
-                    out.write("{0}_arg.setValue({0}_out);".format(p.name))
+                    out.write("{0}_arg.setValue({0}_out);\n".format(p.name))
                     out.write("message << {0}_arg;\n".format(p.name))
                     out.write("LOG4CXX_DEBUG(logger_, \"Output arguments:\\n\" << QVariant(map));\n")
                 out.write("LOG4CXX_TRACE(logger_, \"REPLY ASYNC: \" << __PRETTY_FUNCTION__ );\n")
@@ -446,7 +437,7 @@ class Impl(FordXmlParser):
                 out.write("LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
                 method_name = request.get('name')[:1].lower() + request.get('name')[1:]
 
-                # XXX (dchmerev@luxoft.com): Can you smell the rot?
+                # FIXME (dchmerev@luxoft.com): Hardcoded exception
                 if method_name == 'endAudioPassThru':
                     out.write("message.setDelayedReply(true);\n")
                     out.write("QDBusMessage msg = message.createReply();\n")
@@ -461,7 +452,7 @@ class Impl(FordXmlParser):
                     out.write("return ret;\n")
                 out.write("}\n")
 
-                # XXX (dchmerev@luxoft.com)
+                # FIXME (dchmerev@luxoft.com)
                 if method_name == 'endAudioPassThru':
                     out.write("return ret;");
 
@@ -484,8 +475,8 @@ class Impl(FordXmlParser):
                 out.write("}\n\n")
 
                 for param in out_params:
-                    param_name = param.name
-                    out.write('if (!GetArgFromMap(out_arg, \"' + param_name + '\", ' + param_name + "_out)) { RaiseDbusError(this, InvalidData); return ret; }\n")
+                    out.write("if (!GetArgFromMap(out_arg, \"{0}\", {0}_out)) {{ RaiseDbusError(this, InvalidData); return ret; }}\n".format(param.name))
+                    self.write_param_validation(param, param.name + "_out", "RaiseDbusError(this, InvalidData); return ret", out)
 
                 out.write("GetArgFromMap(out_arg, \"__retCode\", ret);\n")
                 out.write("GetArgFromMap(out_arg, \"__message\", userMessage_out);\n")

@@ -17,8 +17,11 @@ void DBusController::sendReply(QVariant asyncObject, QVariant data) {
     std::map<int, delayedReply>::iterator it = replies.find(uid);
     if (it != replies.end()) {
         QDBusMessage msg = it->second.message.createReply();
-        it->second.fill(msg, data.toMap());
-        QDBusConnection::sessionBus().send(msg);
+        if(!it->second.fill(msg, data.toMap())) {
+            QDBusConnection::sessionBus().send(it->second.message.createErrorReply(QDBusError::InternalError, "11"));
+        } else {
+            QDBusConnection::sessionBus().send(msg);
+        }
         replies.erase(it);
     }
 }
