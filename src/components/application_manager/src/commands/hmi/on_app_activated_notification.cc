@@ -50,7 +50,7 @@ void OnAppActivatedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppActivatedNotification::Run");
 
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::msg_params][strings::app_id]);
+      (*message_)[strings::msg_params][strings::app_id].asUInt());
 
   if (!application) {
     (*message_)[strings::params][hmi_response::code] =

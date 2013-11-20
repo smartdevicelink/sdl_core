@@ -310,15 +310,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
                 if (!value.compare("true"))
                 {
-                    ASSERT_TRUE(static_cast<bool>(obj));
+                    ASSERT_TRUE(obj.asBool());
                 }
                 else if (!value.compare("false"))
                 {
-                    ASSERT_FALSE(static_cast<bool>(obj));
+                    ASSERT_FALSE(obj.asBool());
                 }
                 else
                 {
-                    ASSERT_EQ(value, static_cast<std::string>(obj)) << "Object value is not correct. Object path: " << it->first;
+                    ASSERT_EQ(value, obj.asString()) << "Object value is not correct. Object path: " << it->first;
                 }
             }
         }
@@ -345,8 +345,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         refObj["M1"]["M0"]["M0"][0] = true;
 
         // FIXME: Figure out why there's a trailing zero while converting from double to string
-        ASSERT_EQ("0.59432", static_cast<std::string>(get_object(obj, "A6 A4 M0")));
-        ASSERT_TRUE(static_cast<bool>(get_object(obj, "A6 A4 M1 M0 M0 A0")));
+        ASSERT_EQ("0.59432", get_object(obj, "A6 A4 M0").asString());
+        ASSERT_TRUE(get_object(obj, "A6 A4 M1 M0 M0 A0").asBool());
     }
 
 }}}}

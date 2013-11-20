@@ -434,7 +434,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
 
   // store priority value
   std::string priority =
-      object["policy_table"]["app_policies"]["789"]["priority"];
+      object["policy_table"]["app_policies"]["789"]["priority"].asString();
   // set empty string. Validation should pass successfuly.
   object["policy_table"]["app_policies"]["789"]["priority"] = "";
   resultType = schema1->validate(object);

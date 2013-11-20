@@ -28,9 +28,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "json_handler/formatters/formatter_test_helper.h"
-
-#include "JSONHandler/CSmartFactory.hpp"
+#include "json_handler/formatter_test_helper.h"
+#include "formatters/CSmartFactory.hpp"
 
 using namespace test::components::json_handler::formatters;
 using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -56,7 +55,7 @@ void CFormatterTestHelper::fillTestObject(SmartObject& obj)
     obj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
     obj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
     obj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-    obj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
+    // obj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
     obj[S_MSG_PARAMS]["double"] = -0.1234;
 }
 
@@ -80,13 +79,13 @@ void CFormatterTestHelper::compareObjects(
       compareObjects(first.getElement(*key), second.getElement(*key));
     }
   } else if (SmartType_Boolean == first.getType()) {
-    ASSERT_EQ((bool) first, (bool) second);
+    ASSERT_EQ(first.asBool(), second.asBool());
   } else if (SmartType_Integer == first.getType()) {
-    ASSERT_EQ((int) first, (int) second);
+    ASSERT_EQ(first.asInt(), second.asInt());
   } else if (SmartType_Double == first.getType()) {
-    ASSERT_EQ((double) first, (double) second);
+    ASSERT_EQ(first.asDouble(), second.asDouble());
   } else if (SmartType_String == first.getType()) {
-    ASSERT_EQ((std::string) first, (std::string) second);
+    ASSERT_EQ(first.asString(), second.asString());
   } else if (SmartType_Null == first.getType()) {
     ASSERT_EQ(SmartType_Null, second.getType());
   } else {

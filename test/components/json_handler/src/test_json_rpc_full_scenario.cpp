@@ -32,8 +32,9 @@
 
 #include "gtest/gtest.h"
 
-#include "JSONHandler/formatters/formatter_json_rpc.h"
-#include "test/components/JSONHandler/test_json_rpc.h"
+#include "formatters/formatter_json_rpc.h"
+#include "test/components/json_handler/test_json_rpc.h"
+#include "test/components/json_handler/test_json_rpc_schema.h"
 
 
 namespace test {
@@ -71,13 +72,13 @@ TEST(test_general, test_json_rpc_full) {
       input_json, object)));
 
   ASSERT_EQ(gen::FunctionID::interface1_Function1,
-            (int)object[jhs::S_PARAMS][jhs::S_FUNCTION_ID]);
+            object[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
   ASSERT_EQ(gen::messageType::request,
-            (int)object[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE]);
+            object[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE].asInt());
 
   gen::test_json_rpc factory;
   ASSERT_TRUE(factory.attachSchema(object));
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+  ASSERT_TRUE(object.isValid());
 
   std::string output_json;
   ASSERT_TRUE(fm::FormatterJsonRpc::ToString(object, output_json));
@@ -101,16 +102,16 @@ TEST(test_JSONRPC_general, test_AttachSchema) {
   object["member3"] = 13.1313;
   object["member4"][0] = 12;
 
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+  ASSERT_TRUE(object.isValid());
 
   object["member3"] = 29.0;
 
-  ASSERT_EQ(so::Errors::OUT_OF_RANGE, object.isValid());
+  ASSERT_FALSE(object.isValid());
 
   object["member3"] = 13.0;
   object["xxx"] = 1234;
 
-  ASSERT_EQ(so::Errors::UNEXPECTED_PARAMETER, object.isValid());
+  ASSERT_FALSE(object.isValid());
 }
 
 TEST(test_JSONRPC_general, test_SmartObjectCreation) {
@@ -149,11 +150,11 @@ TEST(test_JSONRPC_general, test_SmartObjectCreation) {
   object["m4"][0]["member3"] = 13.1313;
   object["m4"][0]["member4"][0] = 12;
 
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+  ASSERT_TRUE(object.isValid());
 
   object["zzz"] = "yyy";
 
-  ASSERT_EQ(so::Errors::UNEXPECTED_PARAMETER, object.isValid());
+  ASSERT_FALSE(object.isValid());
 
   object = factory.CreateSmartObject(gen::FunctionID::interface2_Function1,
                                      gen::messageType::notification);
@@ -173,17 +174,17 @@ TEST(test_JSONRPC_general, test_SmartObjectCreation) {
   object[jhs::S_MSG_PARAMS]["i1"]["m4"][0]["member3"] = 13.1313;
   object[jhs::S_MSG_PARAMS]["i1"]["m4"][0]["member4"][0] = 12;
 
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+  ASSERT_TRUE(object.isValid());
 
   object[jhs::S_MSG_PARAMS]["Noise"] = "Bzzzzzz!!!";
 
-  ASSERT_EQ(so::Errors::UNEXPECTED_PARAMETER, object.isValid());
+  ASSERT_FALSE(object.isValid());
 }
 
 TEST(test_JSONRPC_general, test_GetSmartSchema) {
   gen::test_json_rpc factory;
   so::CSmartSchema schema;
-  
+
   ASSERT_FALSE(factory.GetSchema(gen::StructIdentifiers::INVALID_ENUM,
                                  schema));
 
@@ -209,18 +210,17 @@ TEST(test_JSONRPC_general, test_GetSmartSchema) {
   object["member2"] = true;
   object["member3"] = 13.1313;
   object["member4"][0] = 12;
-  
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+
+  ASSERT_TRUE(object.isValid());
 
   object["member3"] = 1000.0;
 
-  ASSERT_EQ(so::Errors::OUT_OF_RANGE, object.isValid());
+  ASSERT_FALSE(object.isValid());
 
   object["member3"] = 13.1313;
   object["zzzz"] = 200;
 
-  ASSERT_EQ(so::Errors::UNEXPECTED_PARAMETER,
-            object.isValid());
+  ASSERT_FALSE(object.isValid());
 
   ASSERT_TRUE(factory.GetSchema(gen::FunctionID::interface1_Function1,
                                 gen::messageType::request,
@@ -237,12 +237,11 @@ TEST(test_JSONRPC_general, test_GetSmartSchema) {
   object[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
   object[jhs::S_MSG_PARAMS]["param2"] = 10;
 
-  ASSERT_EQ(so::Errors::OK, object.isValid());
+  ASSERT_TRUE(object.isValid());
 
   object[jhs::S_PARAMS]["blah-blah"] = "YouShallNotPass!";
 
-  ASSERT_EQ(so::Errors::UNEXPECTED_PARAMETER,
-            object.isValid());
+  ASSERT_FALSE(object.isValid());
 }
 
 } // namespace test_json_rpc_full_scenario

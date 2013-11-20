@@ -37,21 +37,21 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "JSONHandler/formatters/meta_formatter.h"
-#include "JSONHandler/CSmartFactory.hpp"
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/meta_formatter.h"
+#include "formatters/CSmartFactory.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
 
-#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
-#include "SmartObjects/CAlwaysFalseSchemaItem.hpp"
-#include "SmartObjects/CArraySchemaItem.hpp"
-#include "SmartObjects/CBoolSchemaItem.hpp"
-#include "SmartObjects/CObjectSchemaItem.hpp"
-#include "SmartObjects/CStringSchemaItem.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
-#include "SmartObjects/TNumberSchemaItem.hpp"
-#include "SmartObjects/TSchemaItemParameter.hpp"
+#include "smart_objects/always_true_schema_item.h"
+#include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/array_schema_item.h"
+#include "smart_objects/bool_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/string_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/number_schema_item.h"
+#include "smart_objects/schema_item_parameter.h"
 
-#include "meta_formatter_test_helper.h" 
+#include "json_handler/meta_formatter_test_helper.h"
 
 using test::components::JSONHandler::formatters::CMetaFormatterTestHelper;
 namespace testhelper_ns = test::components::JSONHandler::formatters;
@@ -340,11 +340,11 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
   schemaMembersMap["mandatory_string"] =
     smartobjects_ns::CObjectSchemaItem::SMember(
       smartobjects_ns::CStringSchemaItem::create(
-        500, std::string("defValue")), true);
+        0, 500, std::string("defValue")), true);
   schemaMembersMap["non_mandatory_string"] =
     smartobjects_ns::CObjectSchemaItem::SMember(
       smartobjects_ns::CStringSchemaItem::create(
-        500, std::string("ignoredDefValue")), false);
+        0, 500, std::string("ignoredDefValue")), false);
 
   std::map<std::string, smartobjects_ns::CObjectSchemaItem::SMember>
     rootMembersMap;

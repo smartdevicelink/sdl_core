@@ -255,7 +255,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   DCHECK(request_for_registration);
   smart_objects::SmartObject& message = *request_for_registration;
   unsigned int connection_key =
-    message[strings::params][strings::connection_key];
+    message[strings::params][strings::connection_key].asInt();
 
   if (false == is_all_apps_allowed_) {
     LOG4CXX_INFO(logger_,
@@ -263,7 +263,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
         connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id],
+        message[strings::params][strings::correlation_id].asUInt(),
         mobile_apis::Result::DISALLOWED));
     ManageMobileCommand(response);
     return NULL;
@@ -284,7 +284,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
       utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
           connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id],
+          message[strings::params][strings::correlation_id].asUInt(),
           mobile_apis::Result::GENERIC_ERROR));
       ManageMobileCommand(response);
       return NULL;
@@ -296,7 +296,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
         connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id],
+        message[strings::params][strings::correlation_id].asUInt(),
         mobile_apis::Result::INVALID_DATA));
     ManageMobileCommand(response);
     return NULL;
@@ -313,7 +313,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
       utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
           connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id],
+          message[strings::params][strings::correlation_id].asUInt(),
           mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
       ManageMobileCommand(response);
       return NULL;
@@ -324,7 +324,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
       utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
           connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id],
+          message[strings::params][strings::correlation_id].asUInt(),
           mobile_apis::Result::DUPLICATE_NAME));
       ManageMobileCommand(response);
       return NULL;
@@ -336,7 +336,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
         connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id],
+        message[strings::params][strings::correlation_id].asUInt(),
         mobile_apis::Result::OUT_OF_MEMORY));
     ManageMobileCommand(response);
     return NULL;
@@ -942,6 +942,37 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   messages_from_mobile_.push(message);
 }
 
+void ApplicationManagerImpl::OnMessageReceived(const protocol_handler::
+                                   RawMessagePtr& message) {
+}
+
+void ApplicationManagerImpl::OnMobileMessageSent(const protocol_handler::
+                             RawMessagePtr& message) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
+
+  application_manager::Message app_mngr_message;
+
+  // TODO(PK): Convert RawMessage to application_manager::Message
+
+  // Application connection should be closed if RegisterAppInterface failed and
+  // RegisterAppInterfaceResponse with success == false was sent to the mobile
+  if (app_mngr_message.function_id() ==
+        mobile_apis::FunctionID::RegisterAppInterfaceID
+      && app_mngr_message.type() ==
+          MessageType::kResponse
+      // TODO(PK): Implement suscess() getter in application_manager::Message
+      /*&& app_mngr_message.success() == false*/) {
+
+    unsigned int key = app_mngr_message.connection_key();
+
+    if (NULL != connection_handler_) {
+      static_cast<connection_handler::ConnectionHandlerImpl*>
+        (connection_handler_)->CloseConnection(key);
+    }
+  }
+}
+
+
 void ApplicationManagerImpl::OnMessageReceived(
   utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
@@ -1097,7 +1128,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   smart_objects::SmartObject& msg_to_mobile = *message;
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl.terminateRequest(
-      msg_to_mobile[strings::params][strings::correlation_id].asInt());
+      msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
   messages_to_mobile_.push(message_to_send);

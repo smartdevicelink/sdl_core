@@ -37,18 +37,18 @@
 #include <iostream>
 #include "json/json.h"
 
-#include "JSONHandler/formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "JSONHandler/CSmartFactory.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CSmartFactory.hpp"
 
-#include "SmartObjects/CArraySchemaItem.hpp"
-#include "SmartObjects/CBoolSchemaItem.hpp"
-#include "SmartObjects/CObjectSchemaItem.hpp"
-#include "SmartObjects/CStringSchemaItem.hpp"
-#include "SmartObjects/TEnumSchemaItem.hpp"
-#include "SmartObjects/TNumberSchemaItem.hpp"
-#include "SmartObjects/TSchemaItemParameter.hpp"
+#include "smart_objects/array_schema_item.h"
+#include "smart_objects/bool_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/string_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/number_schema_item.h"
+#include "smart_objects/schema_item_parameter.h"
 
-#include "CFormatterTestHelper.hpp"
+#include "formatter_test_helper.h"
 
 
 namespace test { namespace components { namespace json_handler { namespace formatters {
@@ -116,7 +116,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     // end of cut and pasted code
 
     using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-    typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1 FormatterV1;
+    typedef NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1 FormatterV1;
 
     TEST_F(CFormatterTestHelper, test_fromObjToALRPCv1AndBack)
     {
@@ -172,15 +172,15 @@ namespace test { namespace components { namespace json_handler { namespace forma
 
         ASSERT_EQ(FormatterV1::kSuccess, result) << "Error parsing JSON string";
 
-        ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj[S_PARAMS][S_FUNCTION_ID]);
-        ASSERT_EQ(messageType::request, (int)obj[S_PARAMS][S_MESSAGE_TYPE]);
-        ASSERT_EQ(11, (int)obj[S_PARAMS][S_CORRELATION_ID]);
-        ASSERT_EQ("version", (std::string)obj[S_MSG_PARAMS]["syncMsgVersion"]);
-        ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
-        ASSERT_EQ("some app name", (std::string)obj[S_MSG_PARAMS]["appName"]);
-        ASSERT_EQ(1, (int)obj[S_PARAMS][S_PROTOCOL_VERSION]);
-        ASSERT_EQ("TEXT", (std::string)obj[S_MSG_PARAMS]["ttsName"][0]["type"]);
-        ASSERT_EQ("Synonym 2", (std::string)obj[S_MSG_PARAMS]["vrSynonyms"][1]);
+        ASSERT_EQ(FunctionID::SetGlobalProperties, obj[S_PARAMS][S_FUNCTION_ID].asInt());
+        ASSERT_EQ(messageType::request, obj[S_PARAMS][S_MESSAGE_TYPE].asInt());
+        ASSERT_EQ(11, obj[S_PARAMS][S_CORRELATION_ID].asInt());
+        ASSERT_EQ("version", obj[S_MSG_PARAMS]["syncMsgVersion"].asString());
+        ASSERT_EQ("some app name", obj[S_MSG_PARAMS]["appName"].asString());
+        ASSERT_EQ("some app name", obj[S_MSG_PARAMS]["appName"].asString());
+        ASSERT_EQ(1, obj[S_PARAMS][S_PROTOCOL_VERSION].asInt());
+        ASSERT_EQ("TEXT", obj[S_MSG_PARAMS]["ttsName"][0]["type"].asString());
+        ASSERT_EQ("Synonym 2", obj[S_MSG_PARAMS]["vrSynonyms"][1].asString());
     }
 
   TEST_F(CFormatterTestHelper, test_ALRPCv1_ErrorParsing)
@@ -264,9 +264,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
     ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
     ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
-    ASSERT_EQ(11, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::request, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(11, obj1[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, obj1[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::request, obj1[S_PARAMS][S_MESSAGE_TYPE].asInt());
 
     std::string str2 = "\
     {\
@@ -286,9 +286,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is not set";
     ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
     ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
-    ASSERT_EQ(12, (int)obj2[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj2[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::request, (int)obj2[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(12, obj2[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, obj2[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::request, obj2[S_PARAMS][S_MESSAGE_TYPE].asInt());
   }
 
   TEST_F(CFormatterTestHelper, test_ALRPCv1_CorrelationID_Error)
@@ -311,9 +311,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
     ASSERT_FALSE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is set";
     ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
-    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::request, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(-1, obj1[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::SetGlobalProperties, obj1[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::request, obj1[S_PARAMS][S_MESSAGE_TYPE].asInt());
   }
 
   TEST_F(CFormatterTestHelper, test_ALRPCv1_CombinationError)
@@ -336,9 +336,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
     ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
     ASSERT_TRUE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is not set";
-    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::response, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(-1, obj1[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, obj1[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::response, obj1[S_PARAMS][S_MESSAGE_TYPE].asInt());
   }
 
   TEST_F(CFormatterTestHelper, test_ALRPCv1_NotificationCorrelationId)
@@ -361,9 +361,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
     ASSERT_FALSE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is set";
     ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
-    ASSERT_EQ(-1, (int)obj1[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::SetGlobalProperties, (int)obj1[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::notification, (int)obj1[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(-1, obj1[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::SetGlobalProperties, obj1[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::notification, obj1[S_PARAMS][S_MESSAGE_TYPE].asInt());
 
     std::string str2 = "\
     {\
@@ -382,9 +382,9 @@ namespace test { namespace components { namespace json_handler { namespace forma
     ASSERT_FALSE(FormatterV1::kMessageTypeNotFound & result) << "MessageType error code is set";
     ASSERT_TRUE(FormatterV1::kFunctionIdNotFound & result) << "FunctionID error code is not set";
     ASSERT_FALSE(FormatterV1::kCorrelationIdNotFound & result) << "CorrelationID error code is set";
-    ASSERT_EQ(-1, (int)obj2[S_PARAMS][S_CORRELATION_ID]) << "Wrong CorrelationID";
-    ASSERT_EQ(FunctionID::INVALID_ENUM, (int)obj2[S_PARAMS][S_FUNCTION_ID]);
-    ASSERT_EQ(messageType::notification, (int)obj2[S_PARAMS][S_MESSAGE_TYPE]);
+    ASSERT_EQ(-1, obj2[S_PARAMS][S_CORRELATION_ID].asInt()) << "Wrong CorrelationID";
+    ASSERT_EQ(FunctionID::INVALID_ENUM, obj2[S_PARAMS][S_FUNCTION_ID].asInt());
+    ASSERT_EQ(messageType::notification, obj2[S_PARAMS][S_MESSAGE_TYPE].asInt());
   }
 
   TEST_F(CFormatterTestHelper, test_SDLRPCv1_EmptyMapArrayTest) {
@@ -421,7 +421,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
   namespace so = NsSmartDeviceLink::NsSmartObjects;
   namespace mf = NsSmartDeviceLink::NsJSONHandler::Formatters::
       meta_formatter_error_code;
-      
+
   TEST_F(CFormatterTestHelper, test_SDLRPCv1_MetaFormatToString_Empty) {
     std::string result;
     FormatterV1::tMetaFormatterErrorCode error_code;
@@ -436,7 +436,6 @@ namespace test { namespace components { namespace json_handler { namespace forma
     std::string expected_result(
         "{\n"
         "   \"\" : {\n"
-        "      \"correlationID\" : -1,\n"
         "      \"name\" : \"\",\n"
         "      \"parameters\" : \"\"\n"
         "   }\n"
@@ -447,10 +446,10 @@ namespace test { namespace components { namespace json_handler { namespace forma
 
     ASSERT_FALSE(mf::kErrorOk & error_code) <<
         "Result must not be OK in such case";
-    
+
     ASSERT_TRUE(mf::kErrorObjectIsNotFunction & error_code) <<
         "Object must be not be detected as function";
-    
+
     ASSERT_TRUE(mf::kErrorSchemaIsNotFunction & error_code) <<
         "Target schema does not define a function";
 
@@ -466,7 +465,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     error_code = FormatterV1::MetaFormatToString(object,
                                                  empty_schema,
                                                  result);
-    
+
     ASSERT_EQ(expected_result, result) <<
         "Unexpected result string";
 
@@ -514,6 +513,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
     non_function_schema_members_map["StringField"] =
         so::CObjectSchemaItem::SMember(
             so::CStringSchemaItem::create(
+                so::TSchemaItemParameter<size_t>(),
                 so::TSchemaItemParameter<size_t>(1000),
                 so::TSchemaItemParameter<std::string>()),
             false);
@@ -552,7 +552,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
   TEST_F(CFormatterTestHelper, test_SDLRPCv1_MetaFormatToString_Valid) {
     std::string result;
     FormatterV1::tMetaFormatterErrorCode error_code;
-    
+
     so::SmartObject empty_object;
 
     std::set<FunctionID::eType> function_id_items;
@@ -571,17 +571,19 @@ namespace test { namespace components { namespace json_handler { namespace forma
     test_struct_members["mandatory_int_field"] =
         so::CObjectSchemaItem::SMember(so::TNumberSchemaItem<int>::create(
             1, 20, 15), true);
-        
+
     test_struct_members["mandatory_string_field"] =
         so::CObjectSchemaItem::SMember(
             so::CStringSchemaItem::create(
+                0,
                 500,
                 std::string("Mandatory text")),
             true);
-            
+
     test_struct_members["non_mandatory_string_field"] =
         so::CObjectSchemaItem::SMember(
             so::CStringSchemaItem::create(
+                0,
                 500,
                 std::string("Non-mandatory text")),
             false);
@@ -594,7 +596,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         1, 20, 15), false);
 
     std::map<std::string, so::CObjectSchemaItem::SMember> schema_members;
-    
+
     schema_members["mandatory_auto_default_string"] =
         so::CObjectSchemaItem::SMember(so::CStringSchemaItem::create(100),
                                        true);
@@ -605,14 +607,18 @@ namespace test { namespace components { namespace json_handler { namespace forma
 
     schema_members["mandatory_manual_default_string"] =
         so::CObjectSchemaItem::SMember(
-            so::CStringSchemaItem::create(500,
-                                          std::string("String")),
+            so::CStringSchemaItem::create(
+                0,
+                500,
+                std::string("String")),
             true);
 
     schema_members["non_mandatory_manual_default_string"] =
         so::CObjectSchemaItem::SMember(
-            so::CStringSchemaItem::create(500,
-                                          std::string("String")),
+            so::CStringSchemaItem::create(
+                0,
+                500,
+                std::string("String")),
             false);
 
     schema_members["mandatory_auto_default_int"] =
@@ -697,7 +703,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
 
     schema_members["mandatory_struct_nm"] =
         so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
-            test_non_mandatory_struct_members), true);    
+            test_non_mandatory_struct_members), true);
 
     schema_members["non_mandatory_struct_nm"] =
         so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
@@ -718,10 +724,10 @@ namespace test { namespace components { namespace json_handler { namespace forma
     schema_members["non_mandatory_empty_map"] =
         so::CObjectSchemaItem::SMember(so::CObjectSchemaItem::create(
             std::map<std::string, so::CObjectSchemaItem::SMember>()), false);
-        
+
     std::map<std::string, so::CObjectSchemaItem::SMember>
         function_params_members;
-        
+
     function_params_members[S_FUNCTION_ID] =
         so::CObjectSchemaItem::SMember(
             so::TEnumSchemaItem<FunctionID::eType>::create(function_id_items),
@@ -773,18 +779,18 @@ namespace test { namespace components { namespace json_handler { namespace forma
         "            \"mandatory_int_field\" : 15,\n"
         "            \"mandatory_string_field\" : \"Mandatory text\"\n"
         "         },\n"
-        "         \"mandatory_struct_nm\" : {}\n"        
+        "         \"mandatory_struct_nm\" : {}\n"
         "      }\n"
         "   }\n"
         "}\n");
-    
+
     error_code = FormatterV1::MetaFormatToString(empty_object,
                                                  function_schema,
                                                  result);
-    
+
     ASSERT_EQ(expected_result1, result) <<
         "Invalid result JSON string";
-    
+
     ASSERT_FALSE(mf::kErrorOk & error_code) <<
         "Result must not be OK in such case";
 
@@ -815,7 +821,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         "         \"mandatory_auto_default_int\" : 0,\n"
         "         \"mandatory_auto_default_string\" : \"\",\n"
         "         \"mandatory_empty_array\" : [],\n"
-        "         \"mandatory_empty_map\" : {},\n"        
+        "         \"mandatory_empty_map\" : {},\n"
         "         \"mandatory_manual_default_bool\" : true,\n"
         "         \"mandatory_manual_default_enum\" : \"request\",\n"
         "         \"mandatory_manual_default_int\" : 10,\n"
@@ -828,7 +834,7 @@ namespace test { namespace components { namespace json_handler { namespace forma
         "      }\n"
         "   }\n"
         "}\n");
-    
+
     error_code = FormatterV1::MetaFormatToString(function_object,
                                                  function_schema,
                                                  result);
@@ -931,24 +937,24 @@ namespace test { namespace components { namespace json_handler { namespace forma
         "Target schema defines a function";
 
     ASSERT_FALSE(mf::kErrorFailedCreateObjectBySchema & error_code) <<
-        "This creation shold not fail because of valid schema";    
+        "This creation shold not fail because of valid schema";
   }
 }}}}
 
 namespace NsSmartDeviceLink { namespace NsSmartObjects {
 
     template <>
-    const std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::FunctionID::eType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::json_handler::formatters::FunctionID::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::json_handler::formatters::FunctionID::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::JSONHandler::formatters::FunctionID::eType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::json_handler::formatters::FunctionID::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::RegisterAppInterface, "RegisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::UnregisterAppInterface, "UnregisterAppInterface"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::FunctionID::SetGlobalProperties, "SetGlobalProperties"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::FunctionID::RegisterAppInterface, "RegisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::FunctionID::UnregisterAppInterface, "UnregisterAppInterface"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::FunctionID::SetGlobalProperties, "SetGlobalProperties"));
 
             isInitialized = true;
         }
@@ -957,17 +963,17 @@ namespace NsSmartDeviceLink { namespace NsSmartObjects {
     }
 
     template <>
-    const std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> &
-    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::JSONHandler::formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
+    const std::map<test::components::json_handler::formatters::messageType::eType, std::string> &
+    NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::json_handler::formatters::messageType::eType>::getEnumElementsStringRepresentation(void)
     {
         static bool isInitialized = false;
-        static std::map<test::components::JSONHandler::formatters::messageType::eType, std::string> enumStringRepresentationMap;
+        static std::map<test::components::json_handler::formatters::messageType::eType, std::string> enumStringRepresentationMap;
 
         if (false == isInitialized)
         {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::request, "request"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::response, "response"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::JSONHandler::formatters::messageType::notification, "notification"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::messageType::request, "request"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::messageType::response, "response"));
+            enumStringRepresentationMap.insert(std::make_pair(test::components::json_handler::formatters::messageType::notification, "notification"));
 
             isInitialized = true;
         }
@@ -976,8 +982,10 @@ namespace NsSmartDeviceLink { namespace NsSmartObjects {
     }
 }}
 
-int main(int argc, char **argv)
+/*int main(int argc, char **argv)
 {
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
-}
+}*/
+
+#endif  // TEST_COMPONENTS_JSON_HANDLER_INCLUDE_JSON_HANDLER_FORMATTERS_FORMATTER_JSON_ALRPCV1_TEST_H_

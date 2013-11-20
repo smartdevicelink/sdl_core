@@ -84,6 +84,8 @@ class MediaManagerImpl : public MediaManager,
 
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
+    virtual void OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr& message);
 
     virtual void onRedecoded(const protocol_handler::RawMessagePtr& message);
     virtual void setVideoRedecoder(redecoding::VideoRedecoder* redecoder);

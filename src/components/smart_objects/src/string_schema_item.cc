@@ -54,7 +54,7 @@ NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjec
 
         size_t minLength;
         size_t maxLength;
-        std::string value = Object;
+        std::string value = Object.asString();
 
         if (true == mMinLength.getValue(minLength))
         {

@@ -45,7 +45,7 @@ void UnregisterAppInterfaceRequest::Run() {
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   Application* application = app_manager->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -66,7 +66,7 @@ void UnregisterAppInterfaceRequest::Run() {
   MessageHelper::SendOnAppUnregNotificationToHMI(application);
 
   if (!app_manager->UnregisterApplication(
-      (*message_)[strings::params][strings::connection_key])) {
+      (*message_)[strings::params][strings::connection_key].asUInt())) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;

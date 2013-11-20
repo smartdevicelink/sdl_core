@@ -54,7 +54,7 @@ void ShowConstantTBTRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

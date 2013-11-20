@@ -28,4 +28,4 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "json_handler/formatters/formatter_json_alrpcv2_test.h"
+#include "json_handler/formatter_json_alrpcv2_test.h"
