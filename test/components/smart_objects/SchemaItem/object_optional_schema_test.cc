@@ -89,12 +89,15 @@ enum eType {
 
 class ObjectSchemaItemTest : public ::testing::Test {
   protected:
-  //Create SmartObjectSchema for test object
+  // Create SmartObjectSchema for test object
   utils::SharedPtr<ISchemaItem> initObjectSchemaItem(void) {
     std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
-    resultCode_allowedEnumSubsetValues.insert(TestType::APPLICATION_NOT_REGISTERED);
-    resultCode_allowedEnumSubsetValues.insert(TestType::SUCCESS);
-    resultCode_allowedEnumSubsetValues.insert(TestType::TOO_MANY_PENDING_REQUESTS);
+    resultCode_allowedEnumSubsetValues.insert(
+        TestType::APPLICATION_NOT_REGISTERED);
+    resultCode_allowedEnumSubsetValues.insert(
+        TestType::SUCCESS);
+    resultCode_allowedEnumSubsetValues.insert(
+        TestType::TOO_MANY_PENDING_REQUESTS);
     resultCode_allowedEnumSubsetValues.insert(TestType::REJECTED);
     resultCode_allowedEnumSubsetValues.insert(TestType::INVALID_DATA);
     resultCode_allowedEnumSubsetValues.insert(TestType::OUT_OF_MEMORY);
@@ -107,8 +110,9 @@ class ObjectSchemaItemTest : public ::testing::Test {
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
     utils::SharedPtr<ISchemaItem> resultCode_SchemaItem =
-      TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues
-          , TSchemaItemParameter<TestType::eType>());
+      TEnumSchemaItem<TestType::eType>::create(
+        resultCode_allowedEnumSubsetValues
+        , TSchemaItemParameter<TestType::eType>());
 
     utils::SharedPtr<ISchemaItem> info_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0)
@@ -122,67 +126,80 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, ObjectOptionalSchemaItem::SMember> schemaMembersMap;
 
-    schemaMembersMap["success"] = ObjectOptionalSchemaItem::SMember(success_SchemaItem, true);
-    schemaMembersMap["resultCode"] = ObjectOptionalSchemaItem::SMember(resultCode_SchemaItem, true);
-    schemaMembersMap["info"] = ObjectOptionalSchemaItem::SMember(info_SchemaItem, false);
-    schemaMembersMap["tryAgainTime"] = ObjectOptionalSchemaItem::SMember(tryAgainTime_SchemaItem, true);
+    schemaMembersMap["success"] =
+        ObjectOptionalSchemaItem::SMember(success_SchemaItem, true);
+    schemaMembersMap["resultCode"] =
+        ObjectOptionalSchemaItem::SMember(resultCode_SchemaItem, true);
+    schemaMembersMap["info"] =
+        ObjectOptionalSchemaItem::SMember(info_SchemaItem, false);
+    schemaMembersMap["tryAgainTime"] =
+        ObjectOptionalSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
     std::map<std::string, ObjectOptionalSchemaItem::SMember> paramsMembersMap;
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] = ObjectOptionalSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] = ObjectOptionalSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] = ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] = ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] = ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] =  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);  // NOLINT
+    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] =  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);  // NOLINT
+    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] =  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);  // NOLINT
+    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] =  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);  // NOLINT
+    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] =  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);  // NOLINT
 
     std::map<std::string, ObjectOptionalSchemaItem::SMember> rootMembersMap;
-    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] = ObjectOptionalSchemaItem::SMember(ObjectOptionalSchemaItem::create(schemaMembersMap), true);
-    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] = ObjectOptionalSchemaItem::SMember(ObjectOptionalSchemaItem::create(paramsMembersMap), true);
+    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] =
+      ObjectOptionalSchemaItem::SMember(ObjectOptionalSchemaItem::create(schemaMembersMap), true);  // NOLINT
+    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
+      ObjectOptionalSchemaItem::SMember(ObjectOptionalSchemaItem::create(paramsMembersMap), true);  // NOLINT
 
     return ObjectOptionalSchemaItem::create(rootMembersMap);
   }
-  
+
   //------------------------------------------------------------------------
-  
-  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItem(bool isOtptionalMandatory = false) {
-    
-    utils::SharedPtr<ISchemaItem> priority_item = 
+
+  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItem(
+      bool isOtptionalMandatory = false) {
+  // NOLINT
+    utils::SharedPtr<ISchemaItem> priority_item =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(100),
                                 TSchemaItemParameter<std::string>("NONE"));
-      
-    utils::SharedPtr<ISchemaItem> groups_item = 
-      CArraySchemaItem::create(CStringSchemaItem::create());      
-      
-    utils::SharedPtr<ISchemaItem> nicknames_item = 
+
+    utils::SharedPtr<ISchemaItem> groups_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
-      
+
+    utils::SharedPtr<ISchemaItem> nicknames_item =
+      CArraySchemaItem::create(CStringSchemaItem::create());
+
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
     app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
     app_id_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
     app_id_map["nicknames"] = CObjectSchemaItem::SMember(nicknames_item, true);
-    
+
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // non mandatory optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] = 
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
-    
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory); // NOLINT
+
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
-    policy_table_map["app_policies"] = 
+    policy_table_map["app_policies"] =
       CObjectSchemaItem::SMember(
         ObjectOptionalSchemaItem::create(app_policies_map), true);
-      
+
     std::map<std::string, CObjectSchemaItem::SMember> root_map;
     root_map["policy_table"] =
     CObjectSchemaItem::SMember(
         CObjectSchemaItem::create(policy_table_map), true);
-    
+
     return CObjectSchemaItem::create(root_map);
   }
 
   //------------------------------------------------------------------------
-  
-  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItemAlongWithStaticMember(bool isOtptionalMandatory = false) {
 
+  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItemAlongWithStaticMember(  // NOLINT
+      bool isOtptionalMandatory = false) {
+  // NOLINT
     utils::SharedPtr<ISchemaItem> priority_item =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(100),
@@ -204,9 +221,11 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
-    app_policies_map["default"] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map),
+                                 isOtptionalMandatory);
+    app_policies_map["default"] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
 
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
     policy_table_map["app_policies"] =
@@ -223,8 +242,9 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
   //------------------------------------------------------------------------
 
-  utils::SharedPtr<ISchemaItem> initTestSchemaWithEnum(bool isOtptionalMandatory = false) {
-
+  utils::SharedPtr<ISchemaItem>
+    initTestSchemaWithEnum(bool isOtptionalMandatory = false) {
+  // NOLINT
     std::set<Priority::eType> allowed_priority;
     allowed_priority.insert(Priority::PRIORITY_COMMUNICATION);
     allowed_priority.insert(Priority::PRIORITY_EMERGENCY);
@@ -243,7 +263,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
     std::map<std::string, CObjectSchemaItem::SMember> default_map;
-    app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);   
+    app_id_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
     app_id_map["groups"] = CObjectSchemaItem::SMember(groups_item, true);
     app_id_map["nicknames"] = CObjectSchemaItem::SMember(nicknames_item, true);
     default_map["priority"] = CObjectSchemaItem::SMember(priority_item, true);
@@ -251,9 +271,11 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // optional parameter
-    app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
-    app_policies_map["default"] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
+    app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map),
+                                  isOtptionalMandatory);
+    app_policies_map["default"] =
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(default_map), true);
 
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
     policy_table_map["app_policies"] =
@@ -307,7 +329,8 @@ TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
   srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
+  srcObj[S_MSG_PARAMS]["null"] =
+    NsSmartDeviceLink::NsSmartObjects::SmartObject();
   srcObj[S_MSG_PARAMS]["double"] = -0.1234;
   srcObj[S_MSG_PARAMS]["success"] = true;
   srcObj[S_MSG_PARAMS]["resultCode"] = 2;
@@ -376,7 +399,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params) {
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 }
 
-TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {  
+TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
   std::string json_str(
   "{\n"
     "  \"policy_table\":{\n"
@@ -394,13 +417,13 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
     "    }\n"
     "}\n"
   "}");
-  
+
   smartobj::SmartObject object;
-  bool fromstring_result = 
+  bool fromstring_result =
     formatters::GenericJsonFormatter::FromString(json_str, object);
-  
+
   ASSERT_EQ(true, fromstring_result);
-  
+
   utils::SharedPtr<ISchemaItem> schema1 = initObjectOptonalSchemaItem(false);
   int resultType = schema1->validate(object);
   EXPECT_EQ(Errors::OK, resultType);
@@ -424,10 +447,10 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
   // remove non-mandatory (for schema1) section "789"
   object["policy_table"]["app_policies"].erase("789");
   resultType = schema1->validate(object);
-  EXPECT_EQ(Errors::OK, resultType);  
+  EXPECT_EQ(Errors::OK, resultType);
 }
 
-TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation) {
+TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation) {  // NOLINT
   std::string json_str(
   "{\n"
     "  \"policy_table\":{\n"
@@ -460,7 +483,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation)
   /////////////////////////////////////////////
 
   // Schema is created in initObjectOptonalSchemaItemAlongWithStaticMember()
-  // that describes another object (object from TEST_F(test_object_with_optional_and_static_param))
+  // that describes another object (object from TEST_F(test_object_with_optional_and_static_param))  // NOLINT
   utils::SharedPtr<ISchemaItem> schema_item_another_object =
     initObjectOptonalSchemaItemAlongWithStaticMember();
   int resultType = schema_item_another_object->validate(object);
@@ -572,7 +595,7 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
 
   EXPECT_EQ("NONE",
     object["policy_table"]["app_policies"]["default"]["priority"].asString());
-  
+
 
 //   utils::SharedPtr<ISchemaItem> schema2 = initTestSchemaWithEnum(true);
 //   resultType = schema2->validate(object);
@@ -582,30 +605,42 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
 // ----------------------------------------------------------------------------
 
 
-}
-}
-}
-}
+}  // namespace SchemaItem
+}  // namespace SmartObjects
+}  // namespace components
+}  // namespace test
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 template<>
-const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string>& TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void) {
+const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string>&  // NOLINT
+  TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void) {  // NOLINT
+  // NOLINT
   static bool isInitialized = false;
-  static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;
+  static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;  // NOLINT
 
   if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::SUCCESS, "SUCCESS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::REJECTED, "REJECTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA, "INVALID_DATA"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::ABORTED, "ABORTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED, "USER_DISALLOWED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR, "GENERIC_ERROR"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::DISALLOWED, "DISALLOWED"));
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::SUCCESS, "SUCCESS"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::REJECTED, "REJECTED"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA, "INVALID_DATA"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::ABORTED, "ABORTED"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED, "USER_DISALLOWED"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR, "GENERIC_ERROR"));  // NOLINT
+    enumStringRepresentationMap.insert(std::make_pair(
+      test::components::SmartObjects::SchemaItem::TestType::DISALLOWED, "DISALLOWED"));  // NOLINT
 
     isInitialized = true;
   }
@@ -620,7 +655,7 @@ template <>
 const std::map<TestPriority::eType, std::string>&
   TEnumSchemaItem<TestPriority::eType>::
     getEnumElementsStringRepresentation() {
-
+  // NOLINT
   static bool is_initialized = false;
   static std::map<TestPriority::eType, std::string>
     enum_string_representation;

@@ -103,7 +103,7 @@ class PolicyManagerImpl : public PolicyManager {
      *
      * @return PolicyTable* ptr.
      **/
-    PolicyTable* policy_table() const;
+    PolicyTable* GetPolicyTable() const;
 
   private:
     /**

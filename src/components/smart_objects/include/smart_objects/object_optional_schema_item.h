@@ -46,19 +46,19 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 /**
- * @brief Object schema item for object which can have optional
- *        parameter with any(unknwon when describing scema) name.
+ * @brief Object schema item for object which can have "optional"
+ *        parameter with any(unknown when describing schema) name.
  *
- * Please not that optioanl parameter can be also as mandatory.
+ * Please note that optional parameter can be also as mandatory.
  */
 class ObjectOptionalSchemaItem : public CObjectSchemaItem {
   public:
      /**
-      * @brief Generic field names for optional members of smart obejct.
+      * @brief Generic field name for optional members of smart object.
       *
-      * Names should be uniq, not to iterfere with all possible regualr names
+      * Name should be uniqe, not to itersect with all possible regular names
       */
-    static const char* sOptionalGenericFieldName1;
+    static const char* kOptionalGenericFieldName1;
 
      /**
       * @brief Create a new schema item.
@@ -103,7 +103,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       * @param Members Map of member name to SMember structure
       *                describing the object member.
       * @param ObjectHasOptioanalMembers Smart object can have
-      *                                  optioanal members
+      *                                  any name members
       **/
     ObjectOptionalSchemaItem(const std::map<std::string,
                              CObjectSchemaItem::SMember> & members);
@@ -130,11 +130,12 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
         const ObjectOptionalSchemaItem & Other);
 
     /**
-      * @brief Tells whether Name is generic optional
+      * @brief Tells whether name (normally schema item field name)
+      *        may have any string value
       *
-      * @param name Name field (key) in object
+      * @param name Name of field (key) in object
       *
-      * @return Whether FieldName is generic optional
+      * @return Whether schema item with name may have any string value as name
       */
     bool IsOptionalName(std::string name);
 

@@ -39,29 +39,29 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-const char* so_ns::ObjectOptionalSchemaItem::sOptionalGenericFieldName1
+const char* smart_objects::ObjectOptionalSchemaItem::kOptionalGenericFieldName1
   = "<-- @@@@$$$&&& uniqe1 uancdm,vn 991188 --->";
 
 
 //----------------------------------------------------------------------------
 
-utils::SharedPtr<so_ns::ObjectOptionalSchemaItem>
-  so_ns::ObjectOptionalSchemaItem::create(
+utils::SharedPtr<smart_objects::ObjectOptionalSchemaItem>
+  smart_objects::ObjectOptionalSchemaItem::create(
     const std::map<std::string,
-    so_ns::CObjectSchemaItem::SMember> & members) {
+    smart_objects::CObjectSchemaItem::SMember> & members) {
   return new ObjectOptionalSchemaItem(members);
 }
 
 //----------------------------------------------------------------------------
 
-so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
-    const so_ns::SmartObject & object) {
-  so_ns::Errors::eType result = so_ns::Errors::ERROR;
+smart_objects::Errors::eType smart_objects::ObjectOptionalSchemaItem::validate(
+    const smart_objects::SmartObject & object) {
+  smart_objects::Errors::eType result = smart_objects::Errors::ERROR;
 
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == object.getType()) {
-    result = so_ns::Errors::OK;
+    result = smart_objects::Errors::OK;
     const std::set<std::string> object_keys = object.enumerate();
 
     for (std::map<std::string, CObjectSchemaItem::SMember>
@@ -70,17 +70,17 @@ so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
           result = i->second.mSchemaItem->validate(object.getElement(i->first));
       } else if (true == i->second.mIsMandatory
           && false == IsOptionalName(i->first)) {
-        result = so_ns::Errors::MISSING_MANDATORY_PARAMETER;
+        result = smart_objects::Errors::MISSING_MANDATORY_PARAMETER;
       }
-      if (so_ns::Errors::OK != result) {
+      if (smart_objects::Errors::OK != result) {
         break;
       }
     }
 
     bool have_optional_parameter = false;
     std::map<std::string, CObjectSchemaItem::SMember>::const_iterator
-      optional_iterator = mMembers.find(sOptionalGenericFieldName1);
-    if (so_ns::Errors::OK == result) {
+      optional_iterator = mMembers.find(kOptionalGenericFieldName1);
+    if (smart_objects::Errors::OK == result) {
       for (std::set<std::string>::const_iterator k = object_keys.begin();
             k != object_keys.end(); ++k) {
         if (mMembers.end() == mMembers.find(*k)) {
@@ -91,10 +91,10 @@ so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
             result = optional_iterator->
                      second.mSchemaItem->validate(object.getElement(*k));
           } else {
-            result = so_ns::Errors::UNEXPECTED_PARAMETER;
+            result = smart_objects::Errors::UNEXPECTED_PARAMETER;
             break;
           }
-          if (so_ns::Errors::OK != result) {
+          if (smart_objects::Errors::OK != result) {
             break;
           }
         }
@@ -102,11 +102,11 @@ so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
       if (false == have_optional_parameter
           && mMembers.end() != optional_iterator
           && true == optional_iterator->second.mIsMandatory) {
-        result = so_ns::Errors::MISSING_MANDATORY_UNTITLED_PARAMETER;
+        result = smart_objects::Errors::MISSING_MANDATORY_UNTITLED_PARAMETER;
       }
     }
   } else {
-    result = so_ns::Errors::INVALID_VALUE;
+    result = smart_objects::Errors::INVALID_VALUE;
   }
 
   return result;
@@ -114,14 +114,15 @@ so_ns::Errors::eType so_ns::ObjectOptionalSchemaItem::validate(
 
 //----------------------------------------------------------------------------
 
-bool so_ns::ObjectOptionalSchemaItem::IsOptionalName(std::string name) {
-  return (0 == name.compare(sOptionalGenericFieldName1));
+bool smart_objects::ObjectOptionalSchemaItem::IsOptionalName(std::string name) {
+  return (0 == name.compare(kOptionalGenericFieldName1));
 }
 
 //----------------------------------------------------------------------------
 
-so_ns::ObjectOptionalSchemaItem::ObjectOptionalSchemaItem(
-    const std::map<std::string, so_ns::CObjectSchemaItem::SMember> & members):
+smart_objects::ObjectOptionalSchemaItem::ObjectOptionalSchemaItem(
+    const std::map<std::string,
+                   smart_objects::CObjectSchemaItem::SMember> & members):
   CObjectSchemaItem(members) {
 }
 
@@ -147,12 +148,12 @@ ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject & root_obj) {
 
 void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject & object,
   void (ISchemaItem::* action)(SmartObject&) ) {
-  if (0 == mMembers.count(sOptionalGenericFieldName1)) {
+  if (0 == mMembers.count(kOptionalGenericFieldName1)) {
     return;             // There are no optional items
   }
 
   utils::SharedPtr<ISchemaItem> schema =
-    mMembers.at(sOptionalGenericFieldName1).mSchemaItem;
+    mMembers.at(kOptionalGenericFieldName1).mSchemaItem;
 
   // Then apply schema for all the optional objects
   std::set<std::string> optionals = GetOptionalObjectKeys(object);

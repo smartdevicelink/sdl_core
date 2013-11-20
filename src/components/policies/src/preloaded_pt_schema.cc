@@ -87,7 +87,7 @@ SchemaItemPtr PreloadedPTSchema::CreateAppPolicies(void) {
 
   app_policies_map[kStrDefault] =
     CObjectSchemaItem::SMember(CreateAppPoliciesDefault(), true);
-  app_policies_map[ObjectOptionalSchemaItem::sOptionalGenericFieldName1] =
+  app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName1] =
     CObjectSchemaItem::SMember(CreateAppId(), false);
 
   return ObjectOptionalSchemaItem::create(app_policies_map);
