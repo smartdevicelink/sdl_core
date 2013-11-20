@@ -165,13 +165,18 @@ bool file_system::Write(
 }
 
 std::string file_system::FullPath(const std::string& file) {
-  char currentAppPath[FILENAME_MAX];
-  memset(currentAppPath, 0, FILENAME_MAX);
-  getcwd(currentAppPath, FILENAME_MAX);
+  // FILENAME_MAX defined stdio_lim.h was replaced with less value
+  // since it seems, that is caused overflow in some cases
+  // TODO(AO): Will be checked during release testing
 
-  char path[FILENAME_MAX];
-  memset(path, 0, FILENAME_MAX);
-  snprintf(path, FILENAME_MAX - 1, "%s/%s", currentAppPath, file.c_str());
+  size_t filename_max_lenght = 1024;
+  char currentAppPath[filename_max_lenght];
+  memset(currentAppPath, 0, filename_max_lenght);
+  getcwd(currentAppPath, filename_max_lenght);
+
+  char path[filename_max_lenght];
+  memset(path, 0, filename_max_lenght);
+  snprintf(path, filename_max_lenght - 1, "%s/%s", currentAppPath, file.c_str());
   return std::string(path);
 }
 
