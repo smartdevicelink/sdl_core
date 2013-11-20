@@ -976,6 +976,10 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
     application_manager::MessageHelper::SendNaviStartStream(
       url, session_key);
 
+    if (media_manager_) {
+      media_manager_->StartVideoStreaming(session_key);
+    }
+
     // !!!!!!!!!!!!!!!!!!!!!!!
     // TODO(DK): add check if navi streaming allowed for this app.
   }

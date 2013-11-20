@@ -53,6 +53,10 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
+#if defined(DEFAULT_MEDIA)
+#include <gst/gst.h>
+#endif
+
 #include "media_manager/media_manager_impl.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
@@ -171,7 +175,7 @@ int main(int argc, char** argv) {
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(DEFAULT_MEDIA)
-  //gst_init(&argc, &argv);
+  gst_init(&argc, &argv);
 #endif
   // --------------------------------------------------------------------------
   // Components initialization

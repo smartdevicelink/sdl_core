@@ -1,7 +1,7 @@
 include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
-  ../../../src/components/media_manager_new/include
+  ../../../src/components/media_manager/include
   ../../../src/thirdPartyLibs/logger/include/
   ../../../src/components/utils/include/
   ../../../src/components/protocol_handler/include/
@@ -22,7 +22,7 @@ set (LIBRARIES
     gtest_main
     gmock
     gmock_main
-    MediaManagerNew
+    MediaManager
     ApplicationManager
     connectionHandler
     SmartObjects

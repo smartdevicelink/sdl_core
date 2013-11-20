@@ -160,7 +160,7 @@ void SocketVideoStreamerAdapter::SendData(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "SocketVideoStreamerAdapter::sendData");
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Currently working with other app.");
+    LOG4CXX_WARN(logger_, "Currently working with other app " << current_application_);
     return;
   }
   if (is_ready_) {
