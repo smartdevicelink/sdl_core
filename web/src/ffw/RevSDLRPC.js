@@ -13,18 +13,21 @@ FFW.RevSDL = FFW.RPCObserver.create({
     OnRadioDetailsProperty: "RevSDL.OnRadioDetails",
     OnPresetsChangedProperty: "RevSDL.OnPresetsChanged",
 
-    OnControlChangedRequestId: -1,
-    OnRadioDetailsRequestId: -1,
-    OnPresetsChangedRequestId: -1,
+    OnControlChangedSubscribeRequestId: -1,
+    OnRadioDetailsSubscribeRequestId: -1,
+    OnPresetsChangedSubscribeRequestId: -1,
+    OnControlChangedUnsubscribeRequestId: -1,
+    OnRadioDetailsUnsubscribeRequestId: -1,
+    OnPresetsChangedUnsubscribeRequestId: -1,
 
     connect: function() {
         this.client.connect(this);
     },
 
     disconnect: function() {
-        this.OnControlChangedRequestId = this.unsubscribeFromProperty(this.OnControlChangedProperty);
-        this.OnRadioDetailsRequestId = this.unsubscribeFromProperty(this.OnRadioDetailsProperty);
-        this.OnPresetsChangedRequestId = this.unsubscribeFromProperty(this.OnPresetsChangedProperty);
+        this.OnControlChangedUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnControlChangedProperty);
+        this.OnRadioDetailsUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnRadioDetailsProperty);
+        this.OnPresetsChangedUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnPresetsChangedProperty);
 
         this.client.disconnect();
     },
@@ -33,9 +36,9 @@ FFW.RevSDL = FFW.RPCObserver.create({
         this._super();
         Em.Logger.log("FFW.RevSDLClient.onRPCRegistered");
 
-        this.OnControlChangedRequestId = this.subscribeToProperty(this.OnControlChangedProperty);
-        this.OnRadioDetailsRequestId = this.subscribeToProperty(this.OnRadioDetailsProperty);
-        this.OnPresetsChangedRequestId = this.subscribeToProperty(this.OnPresetsChangedProperty);
+        this.OnControlChangedSubscribeRequestId = this.subscribeToProperty(this.OnControlChangedProperty);
+        this.OnRadioDetailsSubscribeRequestId = this.subscribeToProperty(this.OnRadioDetailsProperty);
+        this.OnPresetsChangedSubscribeRequestId = this.subscribeToProperty(this.OnPresetsChangedProperty);
     },
 
     onRPCUnregistered: function () {
