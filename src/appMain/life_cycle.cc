@@ -94,25 +94,13 @@ bool LifeCycle::StartComponents() {
   mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
-  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
+  media_manager_ = media_manager::MediaManagerImpl::instance();
 
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
-  media_manager_->setVideoRedecoder(NULL);
-
-  if ("socket" == profile::Profile::instance()->video_server_type()) {
-    media_manager_->setConsumer(
-       new media_manager::video_stream_producer_consumer::SocketVideoServer());
-  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    media_manager_->setConsumer(
-       new media_manager::video_stream_producer_consumer::PipeVideoServer());
-  }
-
-  // TODO(PV): add media manager
-
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
@@ -231,9 +219,8 @@ void LifeCycle::StopComponents(int params) {
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   instance()->media_manager_->SetProtocolHandler(NULL);
-  delete instance()->media_manager_;
-
   delete instance()->protocol_handler_;
+  instance()->media_manager_->~MediaManagerImpl();
 
   LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
   delete instance()->transport_manager_;

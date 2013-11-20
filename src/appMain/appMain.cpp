@@ -53,6 +53,10 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
+#if defined(DEFAULT_MEDIA)
+#include <gst/gst.h>
+#endif
+
 #include "media_manager/media_manager_impl.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
@@ -72,83 +76,83 @@ const char kLocalHostAddress[] = "127.0.0.1";
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("appMain"));
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                                log4cxx::Logger::getLogger("appMain"));
 
-pid_t pid_hmi = 0;
-struct stat sb;
-if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
-  return false;
-}
-
-std::ifstream file_str;
-file_str.open("hmi_link");
-
-if (!file_str.is_open()) {
-  LOG4CXX_INFO(logger, "File with HMI link was not opened!");
-  return false;
-}
-
-file_str.seekg(0, std::ios::end);
-int length = file_str.tellg();
-file_str.seekg(0, std::ios::beg);
-
-char* raw_data = new char[length + 1];
-if (!raw_data) {
-  LOG4CXX_INFO(logger, "Memory allocation failed.");
-  return false;
-}
-
-memset(raw_data, 0, length + 1);
-file_str.getline(raw_data, length + 1);
-std::string hmi_link = std::string(raw_data, strlen(raw_data));
-delete[] raw_data;
-
-LOG4CXX_INFO(logger,
-             "Input string:" << hmi_link << " length = " << hmi_link.size());
-file_str.close();
-
-if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
-  return false;
-}
-// Create a child process.
-pid_hmi = fork();
-
-switch (pid_hmi) {
-  case -1: {  // Error
-    LOG4CXX_INFO(logger, "fork() failed!");
+  pid_t pid_hmi = 0;
+  struct stat sb;
+  if (stat("hmi_link", &sb) == -1) {
+    LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
     return false;
   }
-  case 0: {  // Child process
-    int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
-    if (0 > fd_dev0) {
-      LOG4CXX_WARN(logger, "Open dev0 failed!");
+
+  std::ifstream file_str;
+  file_str.open("hmi_link");
+
+  if (!file_str.is_open()) {
+    LOG4CXX_INFO(logger, "File with HMI link was not opened!");
+    return false;
+  }
+
+  file_str.seekg(0, std::ios::end);
+  int length = file_str.tellg();
+  file_str.seekg(0, std::ios::beg);
+
+  char* raw_data = new char[length + 1];
+  if (!raw_data) {
+    LOG4CXX_INFO(logger, "Memory allocation failed.");
+    return false;
+  }
+
+  memset(raw_data, 0, length + 1);
+  file_str.getline(raw_data, length + 1);
+  std::string hmi_link = std::string(raw_data, strlen(raw_data));
+  delete[] raw_data;
+
+  LOG4CXX_INFO(logger,
+               "Input string:" << hmi_link << " length = " << hmi_link.size());
+  file_str.close();
+
+  if (stat(hmi_link.c_str(), &sb) == -1) {
+    LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
+    return false;
+  }
+  // Create a child process.
+  pid_hmi = fork();
+
+  switch (pid_hmi) {
+    case -1: {  // Error
+      LOG4CXX_INFO(logger, "fork() failed!");
       return false;
     }
-    // close input/output file descriptors.
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    case 0: {  // Child process
+      int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+      if (0 > fd_dev0) {
+        LOG4CXX_WARN(logger, "Open dev0 failed!");
+        return false;
+      }
+      // close input/output file descriptors.
+      close(STDIN_FILENO);
+      close(STDOUT_FILENO);
+      close(STDERR_FILENO);
 
-    // move input/output to /dev/null.
-    dup2(fd_dev0, STDIN_FILENO);
-    dup2(fd_dev0, STDOUT_FILENO);
-    dup2(fd_dev0, STDERR_FILENO);
+      // move input/output to /dev/null.
+      dup2(fd_dev0, STDIN_FILENO);
+      dup2(fd_dev0, STDOUT_FILENO);
+      dup2(fd_dev0, STDERR_FILENO);
 
-    // Execute the program.
-    execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
-           reinterpret_cast<char*>(0));
-    LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
+      // Execute the program.
+      execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
+             reinterpret_cast<char*>(0));
+      LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
 
-    return true;
+      return true;
+    }
+    default: { /* Parent process */
+      LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
+      return true;
+    }
   }
-  default: { /* Parent process */
-    LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
-    return true;
-  }
-}
 }
 }
 
@@ -170,8 +174,9 @@ int main(int argc, char** argv) {
   LOG4CXX_INFO(logger, " Application started!");
 
   // Initialize gstreamer. Needed to activate debug from the command line.
+#if defined(DEFAULT_MEDIA)
   gst_init(&argc, &argv);
-
+#endif
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 

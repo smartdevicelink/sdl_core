@@ -128,7 +128,8 @@ class SessionObserver {
     virtual int GetDataOnDeviceID(
       unsigned int device_handle,
       std::string* device_name,
-      std::list<unsigned int>* applications_list) = 0;
+      std::list<unsigned int>* applications_list,
+      std::string* mac_address) = 0;
 
   protected:
     /**

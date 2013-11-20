@@ -29,6 +29,15 @@ ELSE (CMAKE_C_FLAGS_DEBUG)
     add_definitions(-DRELEASE)
 ENDIF(CMAKE_C_FLAGS_DEBUG)
 
+option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" ON)
+if (DEFAULT_MEDIA_FLAG)
+add_definitions(-DDEFAULT_MEDIA)
+# required to find 'glibconfig.h'
+find_package(PkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+add_definitions(${GLIB2_CFLAGS})
+endif()
+
 # --- Interface generator
 
 find_package(PythonInterp)

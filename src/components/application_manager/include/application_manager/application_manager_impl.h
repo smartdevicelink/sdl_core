@@ -343,11 +343,12 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /*
      * @brief Terminates audio pass thru thread
+     * @param application_key Id of application for which
+     * audio pass thru should be stopped
      */
-    void StopAudioPassThru();
+    void StopAudioPassThru(int application_key);
 
     void SendAudioPassThroughNotification(unsigned int session_key,
-                                          unsigned int correlation_id,
                                           std::vector<unsigned char> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);

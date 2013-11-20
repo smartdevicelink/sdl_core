@@ -30,26 +30,30 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_REDECODER_CLIENT_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_REDECODER_CLIENT_H_
+#include "media_manager/media_adapter_impl.h"
 
 namespace media_manager {
-namespace redecoding {
 
-class VideoRedecoder;
+log4cxx::LoggerPtr MediaAdapterImpl::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("MediaAdapterImpl"));
 
-class RedecoderClient {
-  public:
+MediaAdapterImpl::MediaAdapterImpl() {
+}
 
-    virtual void setVideoRedecoder(VideoRedecoder* redecoder) = 0;
-    virtual void onRedecoded(const protocol_handler::RawMessagePtr& message) = 0;
+MediaAdapterImpl::~MediaAdapterImpl() {
+  media_listeners_.clear();
+}
 
-    virtual ~RedecoderClient() {
-    }
-};
+void MediaAdapterImpl::AddListener(const MediaListenerPtr& listener) {
+  LOG4CXX_INFO(logger_, "MediaAdapterImpl::AddListener");
+  DCHECK(listener);
+  media_listeners_.insert(listener);
+}
 
-}  //  namespace redecoding
+void MediaAdapterImpl::RemoveListener(const MediaListenerPtr& listener) {
+  LOG4CXX_INFO(logger_, "MediaAdapterImpl::RemoveListener");
+  DCHECK(listener);
+  media_listeners_.erase(listener);
+}
 
 }  //  namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_REDECODER_H_

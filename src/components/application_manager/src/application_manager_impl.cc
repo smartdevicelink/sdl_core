@@ -39,7 +39,6 @@
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_chaining.h"
-#include "media_manager/audio_stream_sender_thread.h"
 #include "application_manager/message_helper.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
@@ -114,7 +113,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     return;
   }
 
-  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
+  media_manager_ = media_manager::MediaManagerImpl::instance();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -764,19 +763,15 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   if (NULL != media_manager_) {
-    media_manager_->startMicrophoneRecording(
-        std::string("record.wav"),
-        static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
-        max_duration,
-        static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
-        static_cast<unsigned int>(session_key),
-        static_cast<unsigned int>(correlation_id));
+    media_manager_->StartMicrophoneRecording(
+      session_key,
+      std::string("record.wav"),
+      max_duration);
   }
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
   unsigned int session_key,
-  unsigned int correlation_id,
   std::vector<unsigned char> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -802,8 +797,6 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::message_type] =
     application_manager::MessageType::kNotification;
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::correlation_id] =
-    static_cast<int>(correlation_id);
 
   (*on_audio_pass)[application_manager::strings::params][application_manager::strings::connection_key] =
     static_cast<int>(session_key);
@@ -825,11 +818,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   command->CleanUp();
 }
 
-void ApplicationManagerImpl::StopAudioPassThru() {
+void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (NULL != media_manager_) {
-    media_manager_->stopMicrophoneRecording();
+    media_manager_->StopMicrophoneRecording(application_key);
   }
 }
 
@@ -1031,6 +1024,10 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
     application_manager::MessageHelper::SendNaviStartStream(
       url, session_key);
 
+    if (media_manager_) {
+      media_manager_->StartVideoStreaming(session_key);
+    }
+
     // !!!!!!!!!!!!!!!!!!!!!!!
     // TODO(DK): add check if navi streaming allowed for this app.
   }
@@ -1061,7 +1058,7 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     case connection_handler::ServiceType::kNaviSession: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       application_manager::MessageHelper::SendNaviStopStream(session_key);
-      media_manager_->stopVideoStreaming();
+      media_manager_->StopVideoStreaming(session_key);
       break;
     }
     default:
