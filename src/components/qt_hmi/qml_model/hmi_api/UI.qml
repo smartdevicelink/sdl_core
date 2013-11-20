@@ -92,24 +92,19 @@ Item {
         }
 
         var textAlignment
-        if (alignment !== undefined) {
-            switch (alignment) {
-                case Common.TextAlignment.LEFT_ALIGNED:
-                    textAlignment = Text.AlignLeft
-                    break;
-                case Common.TextAlignment.RIGHT_ALIGNED:
-                    textAlignment = Text.AlignRight
-                    break;
-                case Common.TextAlignment.CENTERED:
-                    textAlignment = Text.AlignHCenter
-                    break;
-                default:
-                    textAlignment = Text.AlignHCenter
-                    break;
-            }
-        }
-        else {
-            textAlignment = Text.AlignHCenter
+        switch (alignment) {
+            case Common.TextAlignment.LEFT_ALIGNED:
+                textAlignment = Text.AlignLeft
+                break;
+            case Common.TextAlignment.RIGHT_ALIGNED:
+                textAlignment = Text.AlignRight
+                break;
+            case Common.TextAlignment.CENTERED:
+                textAlignment = Text.AlignHCenter
+                break;
+            default:
+                textAlignment = Text.AlignHCenter
+                break;
         }
 
         // with this array we grab only the lines we need
