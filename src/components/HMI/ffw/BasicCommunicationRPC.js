@@ -206,7 +206,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.method);
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
-                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL();
+                    SDL.SDLController.onActivateSDLApp({"activeAppId": request.params.appID});
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
             }
@@ -289,7 +289,8 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Send request if application was activated
          * 
-         * @param {number} appID
+         * @param {String}
+         *            appName
          */
         OnAppActivated: function(appID) {
 

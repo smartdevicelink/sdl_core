@@ -538,7 +538,8 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            FFW.BasicCommunication.OnAppActivated(element.appID);
+            // FFW.BasicCommunication.ActivateApp(element.appID);
+            this.getApplicationModel(element.activeAppId).turnOnSDL();
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC
