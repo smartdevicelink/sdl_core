@@ -127,7 +127,7 @@ Rectangle {
                 property string currentLocation
                 function go(path, appId) {
                     console.debug("enter:", path, appId)
-                    if (path !== "" && path !== undefined) {
+                    if (path) {
                         if (currentLocation !== path) {
                             viewTransitionStack.push(source.toString())
                             if (appId) {
