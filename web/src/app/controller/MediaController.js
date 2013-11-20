@@ -921,6 +921,8 @@ MFT.MediaController = Em.Object.create({
         }
 
         MFT.FmModel.fm1.set('items', items);
+
+        FFW.RevSDL.sendGetRadioDetailsRequest();
     },
 
 	/** Player Next track event*/

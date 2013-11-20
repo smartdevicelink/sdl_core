@@ -50,6 +50,11 @@ RevSDL = {
          **/
         StopScan: {
 
+        },
+
+        /** Sends a request show application on HMI, through SDL interface**/
+        Show: {
+
         }
     },
 
@@ -67,12 +72,12 @@ RevSDL = {
 
         OnRadioDetails: {
             parameters: {
-                RadioStation: {
+                radioStation: {
                     frequency: "int",
                     fraction: "int",
                     HD: "int"
                 },
-                SongInfo: {
+                songInfo: {
                     name: "string",
                     artist: "string",
                     genre: "string"

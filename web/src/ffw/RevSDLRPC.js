@@ -39,11 +39,15 @@ FFW.RevSDL = FFW.RPCObserver.create({
             case this.GrantAccessRequestId:
                 MFT.MediaController.set('sdlAccessStatus', response.result.success);
                 break;
-            case this.StartScanRequestId:
-                MFT.MediaController.set('isFrequencyScan', response.result.success);
-                break;
-            case this.StopScanRequestId:
-                MFT.MediaController.set('isFrequencyScan', !response.result.success);
+//            case this.StartScanRequestId:
+//                MFT.MediaController.set('isFrequencyScan', response.result.success);
+//                break;
+//            case this.StopScanRequestId:
+//                MFT.MediaController.set('isFrequencyScan', !response.result.success);
+//                break;
+            case this.GetRadioDetailsRequestId:
+                MFT.MediaController.setSDLDirectTuneStation(response.result);
+                this.sendShowRequest();
                 break;
         }
     },
@@ -89,6 +93,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
     TuneRadioRequestId: -1,
     StartScanRequestId: -1,
     StopScanRequestId: -1,
+    GetRadioDetailsRequestId: -1,
 
     /**
      * Sends a request for access to the management of HMI, through SDL interface
@@ -162,6 +167,31 @@ FFW.RevSDL = FFW.RPCObserver.create({
             "jsonrpc":	"2.0",
             "id": 		this.StopScanRequestId,
             "method":	"RevSDL.StopScan"
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Stop frequency scan on head unit, through SDL interface
+     **/
+    sendGetRadioDetailsRequest: function(){
+        this.GetRadioDetailsRequestId = this.client.generateId();
+
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		this.GetRadioDetailsRequestId,
+            "method":	"RevSDL.GetRadioDetails"
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Stop frequency scan on head unit, through SDL interface
+     **/
+    sendShowRequest: function(){
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "method":	"RevSDL.Show"
         };
         this.client.send(JSONMessage);
     }
