@@ -118,7 +118,7 @@ MFT.MediaController = Em.Object.create({
             /** load  direct tune  data*/
             this.set('currentDirectTuneData', data.directTunestations);
 
-            if(data.directTunestations.selectedDirectTuneStation && MFT.States.media.radio.fm.active && data.band.activeBand == 0){
+            if (MFT.FmModel.directTunestations.selectedDirectTuneStation && MFT.States.media.radio.fm.active && MFT.FmModel.band.activeBand == 0) {
                 this.set('directTuneSelected', true);
             }
 
@@ -194,6 +194,12 @@ MFT.MediaController = Em.Object.create({
 	toggleFmStation: function(){
 		if(MFT.States.media.radio.fm.active){
 			MFT.FmModel.band.toggleIndicators();
+
+            if(MFT.FmModel.band.value != 0){
+                this.set('directTuneSelected', false);
+            } else if (MFT.FmModel.directTunestations.selectedDirectTuneStation) {
+                this.set('directTuneSelected', true);
+            }
 		}else{
 			this.onRadioEnter(MFT.FmModel,'fm');
 		}
