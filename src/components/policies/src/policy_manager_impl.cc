@@ -158,8 +158,11 @@ void PolicyManagerImpl::StorePolicyTable() {
 //---------------------------------------------------------------
 
 PolicyTable* PolicyManagerImpl::policy_table() const {
-    return policy_table_;
+  if (0 == policy_table_) {
+    LOG4CXX_ERROR(logger_, "Accessing not initialized policy table.");
+  }
+  return policy_table_;
 }
 
-}  // namespace NsSmartObjects
+}  // namespace policies
 }  // namespace NsSmartDeviceLink

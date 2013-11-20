@@ -196,14 +196,6 @@ namespace policies_draft_test {
 
     ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
       policy_manager.getPolicyTable()->Validate());
-
-    policy_config.set_pt_file_name("Stored.json");
-    policy_manager.StorePolicyTable();
-
-    PolicyManagerTest policy_manager2(policy_config);
-
-    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
-      policy_manager2.getPolicyTable()->Validate());
   }
 
 
