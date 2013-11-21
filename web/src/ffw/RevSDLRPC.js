@@ -9,17 +9,36 @@ FFW.RevSDL = FFW.RPCObserver.create({
      */
     client:		FFW.RPCClient.create({ componentName: "RevSDLClient" }),
 
+    OnControlChangedProperty: "RevSDL.OnControlChanged",
+    OnRadioDetailsProperty: "RevSDL.OnRadioDetails",
+    OnPresetsChangedProperty: "RevSDL.OnPresetsChanged",
+
+    OnControlChangedSubscribeRequestId: -1,
+    OnRadioDetailsSubscribeRequestId: -1,
+    OnPresetsChangedSubscribeRequestId: -1,
+    OnControlChangedUnsubscribeRequestId: -1,
+    OnRadioDetailsUnsubscribeRequestId: -1,
+    OnPresetsChangedUnsubscribeRequestId: -1,
+
     connect: function() {
         this.client.connect(this);
     },
 
     disconnect: function() {
+        this.OnControlChangedUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnControlChangedProperty);
+        this.OnRadioDetailsUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnRadioDetailsProperty);
+        this.OnPresetsChangedUnsubscribeRequestId = this.unsubscribeFromProperty(this.OnPresetsChangedProperty);
+
         this.client.disconnect();
     },
 
     onRPCRegistered: function () {
         this._super();
         Em.Logger.log("FFW.RevSDLClient.onRPCRegistered");
+
+        this.OnControlChangedSubscribeRequestId = this.subscribeToProperty(this.OnControlChangedProperty);
+        this.OnRadioDetailsSubscribeRequestId = this.subscribeToProperty(this.OnRadioDetailsProperty);
+        this.OnPresetsChangedSubscribeRequestId = this.subscribeToProperty(this.OnPresetsChangedProperty);
     },
 
     onRPCUnregistered: function () {
@@ -71,16 +90,15 @@ FFW.RevSDL = FFW.RPCObserver.create({
     onRPCNotification: function(notification) {
         Em.Logger.log("FFW.RevSDLClient.onRPCNotification");
         this._super();
-	alert("onRPCNotification")
+
         switch (notification.method) {
-            case "RevSDLClient.OnControlChanged":
+            case this.OnControlChangedProperty:
                 MFT.MediaController.set('sdlAccessStatus', false);
                 break;
-            case "RevSDLClient.OnRadioDetails":
-		alert("OnRadioDetails")
+            case this.OnRadioDetailsProperty:
                 MFT.MediaController.setSDLDirectTuneStation(notification.params);
                 break;
-            case "RevSDLClient.OnPresetsChanged":
+            case this.OnPresetsChangedProperty:
                 MFT.MediaController.setSDLPresets(notification.params);
                 break;
         }
