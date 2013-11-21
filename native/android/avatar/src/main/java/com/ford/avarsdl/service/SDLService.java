@@ -473,7 +473,7 @@ public class SDLService extends Service implements IProxyListenerALM {
 
         NotificationCommand command = commandsHashTable.get(Names.OnRadioDetails);
         if (command != null) {
-            String method = RPCConst.CN_REVSDL_CLIENT + "." + Names.OnRadioDetails;
+            String method = RPCConst.CN_REVSDL + "." + Names.OnRadioDetails;
             command.execute(method, notification);
         } else {
             Logger.w("TEST NotificationCommand NULL");
