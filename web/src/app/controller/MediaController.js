@@ -17,6 +17,16 @@ MFT.MediaController = Em.Object.create({
     /** Reverse SDL functionality **/
     sdlAccessStatus: false,
 
+    /**
+     * Reverse SDL control status icon
+     *
+     * 1 - Driver control
+     * 2 - Waiting passenger control
+     * 3 - Passenger control rejected
+     * 4 - Passenger control
+     */
+    sdlControlStatusIco: 1,
+
 	/** Visibility of Home Media Status */
 	isHomeMediaStatusHidden: false,
 	isHomeMediaStatusInfoHidden: false,
@@ -230,15 +240,15 @@ MFT.MediaController = Em.Object.create({
         var curStation = this.get('currentActiveData');
 
         if (this.taggedTracks[curStation.uid]) {
-            this.showTagStorePopup(2000, MFT.locale.label.view_media_fm_tag_alreadyStored);
+            this.showPopup('tagStorePopup', 2000, MFT.locale.label.view_media_fm_tag_alreadyStored);
         } else if(this.isFullMemory){
-            this.showTagStorePopup();
+            this.showPopup('tagStorePopup');
         } else {
             /* Checking for remaining locations */
             if(this.storageLocationsRemain === 0){
                 /* */
                 this.set('isFullMemory', true);
-                this.showTagStorePopup();
+                this.showPopup('tagStorePopup');
             } else{
                 /* Reduces storage locations count */
                 this.storageLocationsRemain--;
@@ -249,11 +259,11 @@ MFT.MediaController = Em.Object.create({
     },
 
     deleteAllTags: function(){
-        this.hideTagStorePopup();
+        this.hidePopup('tagStorePopup');
         this.storageLocationsRemain = this.STORAGE_LOCATIONS_COUNT;
         this.taggedTracks = {};
         this.set('isFullMemory', false);
-        this.showTagStorePopup(2000, MFT.locale.label.view_media_fm_tags_tagsDeleted + ' ' + this.storageLocationsRemain + ' ' + MFT.locale.label.view_media_fm_tags_remaining);
+        this.showPopup('tagStorePopup', 2000, MFT.locale.label.view_media_fm_tags_tagsDeleted + ' ' + this.storageLocationsRemain + ' ' + MFT.locale.label.view_media_fm_tags_remaining);
     },
 
     /**
@@ -263,7 +273,7 @@ MFT.MediaController = Em.Object.create({
         var self = this;
         var popup = $('#tagStorePopup').children('.popup-window');
         /* Show message */
-        this.showTagStorePopup(5000, MFT.locale.label.view_media_fm_tag_tagging);
+        this.showPopup('tagStorePopup', 5000, MFT.locale.label.view_media_fm_tag_tagging);
         setTimeout(function() {
             popup.animate({opacity: 0},500, function() {
                 self.set('popUpMessage', MFT.locale.label.view_media_fm_tag_stored + ' ' + self.storageLocationsRemain + ' ' + MFT.locale.label.view_media_fm_tags_remaining);
@@ -278,26 +288,31 @@ MFT.MediaController = Em.Object.create({
      * @param {number} closeTime time, after which the popup will close
      * @param {string} message, displaying message popup
      */
-    showTagStorePopup: function(closeTime, message){
+    showPopup: function(elementId, closeTime, message, callback){
         var self = this;
 
         if (typeof message != 'undefined') {
             this.set('popUpMessage', message);
         }
 
-        $('#tagStorePopup').show().animate({
+        $('#'+elementId).show().animate({
             opacity: 1
         },500);
+
         if(!isNaN(closeTime)){
-            setTimeout(self.hideTagStorePopup, closeTime);
+            this[elementId+'TimerId'] = setTimeout(function() {
+                self.hidePopup('tagStorePopup');
+            }, closeTime, callback);
         }
     },
 
-    hideTagStorePopup: function(){
-        $('#tagStorePopup').css({
-            'opacity': 0,
-            'display': 'none'
-        });
+    hidePopup: function(elementId, callback){
+        clearTimeout(this[elementId+'TimerId']);
+        $('#'+elementId).css({
+            'opacity': 0
+        }).hide();
+
+        callback();
     },
 
 	/**
@@ -1063,13 +1078,13 @@ MFT.MediaController = Em.Object.create({
             return;
         }
 
-        directTuneItem.set('title', data.songInfo.name);
-        directTuneItem.set('artist', data.songInfo.artist);
-        directTuneItem.set('genre', data.songInfo.genre);
+        directTuneItem.set('title', (data.songInfo.name) ? data.songInfo.name : '');
+        directTuneItem.set('artist', (data.songInfo.artist) ? data.songInfo.name : '');
+        directTuneItem.set('genre', (data.songInfo.genre) ? data.songInfo.genre : '');
         if (data.radioStation.currentHD) {
             directTuneItem.set('isHd', !!(data.radioStation.currentHD));
-            directTuneItem.set('HDChannels', data.radioStation.availableHDs);
-            directTuneItem.set('currentHDChannel', data.radioStation.currentHD);
+            directTuneItem.set('HDChannels', (data.radioStation.availableHDs) ? data.radioStation.availableHDs : 0);
+            directTuneItem.set('currentHDChannel', (data.radioStation.currentHD) ? data.radioStation.currentHD : 0);
         }
 
         MFT.FmModel.directTunestations.set('selectedDirectTuneStation', frequencyIndex);
@@ -1239,8 +1254,19 @@ MFT.MediaController = Em.Object.create({
     sendAccessRequest: function() {
         if(MFT.MediaController.sdlAccessStatus){
             FFW.RevSDL.sendCancelAccessRequest();
+            this.set('sdlControlStatusIco', 1);
         } else {
             FFW.RevSDL.sendGrantAccessRequest();
+            this.set('sdlControlStatusIco', 2);
+        }
+    },
+
+    GrantAccessResult: function(data) {
+        if (data.success) {
+            this.set('sdlAccessStatus', true);
+            this.set('sdlControlStatusIco', 4);
+        } else {
+
         }
     }
 });
