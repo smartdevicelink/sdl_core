@@ -41,7 +41,18 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Array}
          */
         vehicleInfoPRNDL: [
-            "PARK", "REVERSE", "NEUTRAL", "FORWARD_DRIVE_2", "LOWGEAR"
+            "PARK",
+            "REVERSE",
+            "NEUTRAL",
+            "DRIVE",
+            "SPORT",
+            "LOWGEAR",
+            "FIRST",
+            "SECOND",
+            "THIRD",
+            "FOURTH",
+            "FIFTH",
+            "SIXTH"
         ],
 
         /**
@@ -148,8 +159,8 @@ SDL.SDLVehicleInfoModel = Em.Object
             'satRadioESN': "165165650",
             'rainSensor': 165165650,
             'gps': {
-                'longitudeDegrees': 423293,
-                'latitudeDegrees': -830464,
+                'longitudeDegrees': 42,
+                'latitudeDegrees': -83,
                 'utcYear': 2013,
                 'utcMonth': 2,
                 'utcDay': 14,
@@ -157,9 +168,9 @@ SDL.SDLVehicleInfoModel = Em.Object
                 'utcMinutes': 16,
                 'utcSeconds': 54,
                 'compassDirection': 'SOUTHWEST',
-                'pdop': 15,
+                'pdop': 8,
                 'hdop': 5,
-                'vdop': 30,
+                'vdop': 3,
                 'actual': false,
                 'satellites': 8,
                 'dimension': '2D',
