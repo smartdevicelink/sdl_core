@@ -25,7 +25,7 @@ import com.ford.avarsdl.jssupport.JavaScriptFacade;
  * 
  */
 public class WebViewUtils {
-    private static final boolean WEB_LOGS_ENABLED = false;
+    private static final boolean WEB_LOGS_ENABLED = true;
 
 	private static Boolean isPushed = false;
 	private final static String TAG = WebViewUtils.class.getName();

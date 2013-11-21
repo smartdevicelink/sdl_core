@@ -71,15 +71,16 @@ FFW.RevSDL = FFW.RPCObserver.create({
     onRPCNotification: function(notification) {
         Em.Logger.log("FFW.RevSDLClient.onRPCNotification");
         this._super();
-
+	alert("onRPCNotification")
         switch (notification.method) {
-            case "RevSDL.OnControlChanged":
+            case "RevSDLClient.OnControlChanged":
                 MFT.MediaController.set('sdlAccessStatus', false);
                 break;
-            case "RevSDL.OnRadioDetails":
+            case "RevSDLClient.OnRadioDetails":
+		alert("OnRadioDetails")
                 MFT.MediaController.setSDLDirectTuneStation(notification.params);
                 break;
-            case "RevSDL.OnPresetsChanged":
+            case "RevSDLClient.OnPresetsChanged":
                 MFT.MediaController.setSDLPresets(notification.params);
                 break;
         }

@@ -47,6 +47,7 @@ public class RPCConst {
 	public static final String CN_RATE = "Rate";
 	public static final String CN_RATE_CLIENT = "RateClient";
     public static final String CN_REVSDL = "RevSDL";
+    public static final String CN_REVSDL_CLIENT = "RevSDLClient";
 
 	//notification tags
 	public static final String TAG_CALL_STATUS = "callStatus";

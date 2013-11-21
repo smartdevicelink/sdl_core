@@ -8,7 +8,7 @@ package com.ford.avarsdl.util;
  */
 public class Const {
 	/** Enable debug messages. For release should be false */
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	public static final long MAIN_EXP_FILE_SIZE = 110836326L;
 	public static final String MAIN_EXPANSION_FILE_MD5 = "02bf57db6f2c72e57ee7805afec8938d";
