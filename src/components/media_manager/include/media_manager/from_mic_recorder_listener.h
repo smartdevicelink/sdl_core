@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,39 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_
 
-namespace application_manager {
+#include <string>
+#include "media_manager/media_adapter_listener.h"
 
-namespace commands {
-
-EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+namespace threads {
+class Thread;
 }
 
-EndAudioPassThruRequest::~EndAudioPassThruRequest() {
-}
+namespace media_manager {
+class FromMicRecorderListener : public MediaAdapterListener {
+  public:
+    explicit FromMicRecorderListener(
+      const std::string& file_name);
+    ~FromMicRecorderListener();
+    virtual void OnDataReceived(
+      int application_key,
+      const DataForListener& data);
+    virtual void OnErrorReceived(
+      int application_key,
+      const DataForListener& data);
+    virtual void OnActivityStarted(int application_key);
+    virtual void OnActivityEnded(int application_key);
 
-void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
+  private:
+    threads::Thread* reader_;
+    std::string file_name_;
+    int current_application_;
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
+};
+}  //  namespace media_manager
 
-  if (ended_successfully) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
-    int session_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
-  } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "No PerformAudioPassThru is now active");
-  }
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_LISTENER_H_

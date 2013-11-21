@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,39 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#include "media_manager/video_streamer_listener.h"
+#include "media_manager/media_manager_impl.h"
 
-namespace application_manager {
+namespace media_manager {
 
-namespace commands {
+log4cxx::LoggerPtr VideoStreamerListener::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("VideoStreamerListener"));
 
-EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+VideoStreamerListener::VideoStreamerListener()
+  : current_application_(0) {
 }
 
-EndAudioPassThruRequest::~EndAudioPassThruRequest() {
+VideoStreamerListener::~VideoStreamerListener() {
+  OnActivityEnded(current_application_);
 }
 
-void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
+void VideoStreamerListener::OnDataReceived(
+  int application_key,
+  const DataForListener& data) {
+  MediaManagerImpl::instance()->FramesProcessed(application_key, data);
+}
 
-  if (ended_successfully) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
-    int session_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
-  } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "No PerformAudioPassThru is now active");
+void VideoStreamerListener::OnErrorReceived(
+  int application_key,
+  const DataForListener& data) {
+  LOG4CXX_ERROR(logger_, "VideoStreamerListener::OnErrorReceived");
+}
+
+void VideoStreamerListener::OnActivityStarted(int application_key) {
+  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityStarted");
+  if (current_application_ == application_key) {
+    LOG4CXX_WARN(logger_, "Already performing activity for "
+                 << application_key);
+    return;
   }
+  current_application_ = application_key;
 }
 
-}  // namespace commands
-
-}  // namespace application_manager
+void VideoStreamerListener::OnActivityEnded(int application_key) {
+  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityEnded");
+  if (current_application_ != application_key) {
+    LOG4CXX_WARN(logger_, "Already not performing activity for "
+                 << application_key);
+    return;
+  }
+  current_application_ = 0;
+}
+}  //  namespace media_manager

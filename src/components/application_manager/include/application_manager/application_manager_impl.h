@@ -343,11 +343,12 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /*
      * @brief Terminates audio pass thru thread
+     * @param application_key Id of application for which
+     * audio pass thru should be stopped
      */
-    void StopAudioPassThru();
+    void StopAudioPassThru(int application_key);
 
     void SendAudioPassThroughNotification(unsigned int session_key,
-                                          unsigned int correlation_id,
                                           std::vector<unsigned char> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
@@ -439,6 +440,25 @@ class ApplicationManagerImpl : public ApplicationManager,
                               unsigned int mobile_correlation_id,
                               unsigned int new_timeout_value);
 
+    /*
+     * @brief Retrieves application id associated whith correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     *
+     * @return application id associated whith correlation id
+     */
+    unsigned int application_id(int correlation_id);
+
+    /*
+     * @brief Sets application id correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     * @param app_id Application ID
+     */
+    void set_application_id(int correlation_id, unsigned int app_id);
+
+
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -495,9 +515,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     std::list<CommandSharedPtr> notification_list_;
 
+    /**
+     * @brief Map of correlation id  and associated application id.
+     */
+    std::map<int, unsigned int> appID_list_;
+
     MessageChain message_chaining_;
     bool audio_pass_thru_active_;
-    Lock audio_pass_thru_lock_;
+    sync_primitives::Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
     bool is_vr_session_strated_;
     bool hmi_cooperating_;

@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,39 +30,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_
 
-namespace application_manager {
+namespace media_manager {
 
-namespace commands {
+typedef int DataForListener;
 
-EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
-}
+class MediaAdapterListener {
+  public:
+    virtual void OnDataReceived(
+      int application_key,
+      const DataForListener& data) = 0;
+    virtual void OnErrorReceived(
+      int application_key,
+      const DataForListener& data) = 0;
+    virtual void OnActivityStarted(int application_key) = 0;
+    virtual void OnActivityEnded(int application_key) = 0;
+};
+}  //  namespace media_manager
 
-EndAudioPassThruRequest::~EndAudioPassThruRequest() {
-}
-
-void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
-
-  if (ended_successfully) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
-    int session_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
-  } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "No PerformAudioPassThru is now active");
-  }
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_

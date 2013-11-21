@@ -30,72 +30,36 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 
+#include "media_manager/media_adapter_impl.h"
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "protocol_handler/protocol_handler.h"
-#include "media_manager/video_stream_consumer.h"
 
 namespace media_manager {
-
-namespace video_stream_producer_consumer {
-
-class VideoStreamer;
-
-class SocketVideoServer : public VideoStreamConsumer {
+class SocketVideoStreamerAdapter : public MediaAdapterImpl {
   public:
-
-    friend class VideoStreamer;
-
-    /*
-     * Default constructor
-     */
-    SocketVideoServer();
-
-    /*
-     * Destructor
-     */
-    ~SocketVideoServer();
-
-    /*
-     * Starts server
-     *
-     * @param return TRUE on success, otherwise FALSE
-     */
-    bool start();
-
-    /*
-     * Stops server
-     *
-     * @param return TRUE on success, otherwise FALSE
-     */
-    bool stop();
-
-    /*
-     * Sends message
-     *
-     * @param data  The received NAVI binary data
-     */
-    void sendMsg(const protocol_handler::RawMessagePtr& message);
-
-  protected:
+    SocketVideoStreamerAdapter();
+    ~SocketVideoStreamerAdapter();
+    virtual void SendData(int application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int application_key);
+    virtual void StopActivity(int application_key);
+    virtual bool is_app_performing_activity(int application_key);
 
   private:
-
     class VideoStreamer : public threads::ThreadDelegate {
       public:
-
         /*
          * Default constructor
          *
          * @param server  Server pointer
          */
-        explicit VideoStreamer(SocketVideoServer* const server);
+        explicit VideoStreamer(SocketVideoStreamerAdapter* const server);
 
         /*
          * Destructor
@@ -132,33 +96,30 @@ class SocketVideoServer : public VideoStreamConsumer {
          */
         bool send(const protocol_handler::RawMessagePtr& msg);
 
-      protected:
-
       private:
-        SocketVideoServer* const              server_;
-        int                             socket_fd_;
-        bool                            is_first_loop_;
-        volatile bool                   is_client_connected_;
-        volatile bool                   stop_flag_;
+        SocketVideoStreamerAdapter* const server_;
+        int socket_fd_;
+        bool is_first_loop_;
+        volatile bool is_client_connected_;
+        volatile bool stop_flag_;
 
         DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
     };
 
 
-    int                                           port_;
-    std::string                                   ip_;
-    int                                           socket_;
-    bool                                          is_ready_;
-    VideoStreamer*                                delegate_;
-    threads::Thread*                              thread_;
+    int port_;
+    std::string ip_;
+    int socket_;
+    bool is_ready_;
+    volatile int current_application_;
+    VideoStreamer* delegate_;
+    threads::Thread* thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
-    static log4cxx::LoggerPtr                     logger_;
+    static log4cxx::LoggerPtr logger_;
 
-    DISALLOW_COPY_AND_ASSIGN(SocketVideoServer);
+    DISALLOW_COPY_AND_ASSIGN(SocketVideoStreamerAdapter);
 };
-
-}  //  namespace video_stream_producer_consumer
-
 }  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_VIDEO_SERVER_H_
+
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_

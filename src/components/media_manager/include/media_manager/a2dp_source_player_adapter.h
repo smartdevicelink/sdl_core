@@ -30,26 +30,40 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAM_PRODUCER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAM_PRODUCER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+
+#include "protocol_handler/raw_message.h"
+#include "media_manager/media_adapter.h"
+#include "utils/logger.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
 
-namespace video_stream_producer_consumer {
-
-class VideoStreamConsumer;
-
-class VideoStreamProducer {
+class A2DPSourcePlayerAdapter : public MediaAdapter {
   public:
+    A2DPSourcePlayerAdapter();
+    ~A2DPSourcePlayerAdapter();
+    void SendData(int application_key,
+                  const protocol_handler::RawMessagePtr& message) {}
+    void StartActivity(int application_key);
+    void StopActivity(int application_key);
+    bool is_app_performing_activity(int application_key);
 
-    virtual void setConsumer(VideoStreamConsumer* server) = 0;
+  private:
+    class A2DPSourcePlayerThread;
 
-    virtual ~VideoStreamProducer() {
-    }
+    std::map<int, threads::Thread*> sources_;
+
+    //A2DPSourcePlayerThread* thread_;
+    static log4cxx::LoggerPtr logger_;
+    int current_application_;
+    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 
-}  //  namespace video_stream_producer_consumer
+}  // namespace media_manager
 
-}  //  namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAM_PRODUCER_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_

@@ -30,67 +30,31 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_VIDEO_SERVER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_VIDEO_SERVER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include "utils/logger.h"
-#include "protocol_handler/protocol_handler.h"
-#include "media_manager/video_stream_consumer.h"
+#include <string>
+#include "media_manager/media_adapter_impl.h"
 
 namespace media_manager {
-
-namespace video_stream_producer_consumer {
-
-class PipeVideoServer : public VideoStreamConsumer {
+class PipeVideoStreamerAdapter : public MediaAdapterImpl {
   public:
-
-  /*
-   * Default constructor
-   */
-  PipeVideoServer();
-
-  /*
-   * Destructor
-   */
-  ~PipeVideoServer();
-
-  /*
-   * Starts server
-   *
-   * @param return TRUE on success, otherwise FALSE
-   */
-  bool start();
-
-  /*
-   * Stops server
-   *
-   * @param return TRUE on success, otherwise FALSE
-   */
-  bool stop();
-
-  /*
-   * Sends message
-   *
-   * @param data  The received NAVI binary data
-   */
-  void sendMsg(const protocol_handler::RawMessagePtr& message);
-
-  protected:
+    PipeVideoStreamerAdapter();
+    ~PipeVideoStreamerAdapter();
+    virtual void SendData(int application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int application_key);
+    virtual void StopActivity(int application_key);
+    virtual bool is_app_performing_activity(int application_key);
 
   private:
-
-    static log4cxx::LoggerPtr                     logger_;
+    static log4cxx::LoggerPtr logger_;
     int pipe_fd_;
-    std::string                                   named_pipe_path_;
-
-    DISALLOW_COPY_AND_ASSIGN(PipeVideoServer);
+    std::string named_pipe_path_;
+    int current_application_;
+    DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
 };
-
-}  //  namespace video_stream_producer_consumer
 
 }  //  namespace media_manager
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_VIDEO_SERVER_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_

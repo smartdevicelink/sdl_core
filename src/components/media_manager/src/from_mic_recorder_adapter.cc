@@ -30,69 +30,64 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
-
-#include <net/if.h>
-#include <gst/gst.h>
 #include <string>
 #include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
+#include "./from_mic_to_file_recorder_thread.h"
+#include "media_manager/from_mic_recorder_adapter.h"
 
 namespace media_manager {
 
-class FromMicToFileRecorderThread : public threads::ThreadDelegate {
-  public:
-    FromMicToFileRecorderThread();
+log4cxx::LoggerPtr FromMicRecorderAdapter::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("FromMicRecorderAdapter"));
 
-    void threadMain();
+FromMicRecorderAdapter::FromMicRecorderAdapter()
+  : recorder_thread_(NULL)
+  , current_application_(0)
+  , output_file_("default_recorded_audio.wav")
+  , kDefaultDuration(1000)
+  , duration_(0) {
+  duration_ = kDefaultDuration;
+}
 
-    bool exitThreadMain();
+FromMicRecorderAdapter::~FromMicRecorderAdapter() {
+  StopActivity(current_application_);
+}
 
-    void setOutputFileName(const std::string& outputFileName);
-    void setRecordDuration(int duration);
+void FromMicRecorderAdapter::StartActivity(int application_key) {
+  if (application_key == current_application_) {
+    return;
+  }
+  if (!recorder_thread_) {
+    FromMicToFileRecorderThread* thread_delegate = new FromMicToFileRecorderThread(
+      output_file_, duration_);
+    recorder_thread_ = new threads::Thread("MicrophoneRecorder",
+                                           thread_delegate);
+  }
+  if (NULL != recorder_thread_) {
+    recorder_thread_->start();
+    current_application_ = application_key;
+  }
+}
 
-  private:
-    static log4cxx::LoggerPtr logger_;
+void FromMicRecorderAdapter::StopActivity(int application_key) {
+  if (NULL != recorder_thread_) {
+    recorder_thread_->stop();
+    delete recorder_thread_;
+    recorder_thread_ = NULL;
+  }
+  current_application_ = 0;
+}
 
-    int argc_;
-    gchar** argv_;
+bool FromMicRecorderAdapter::is_app_performing_activity(int application_key) {
+  return (application_key == current_application_);
+}
 
-    const std::string oKey_;
-    const std::string tKey_;
+void FromMicRecorderAdapter::set_output_file(const std::string& output_file) {
+  output_file_ = output_file;
+}
 
-    static GMainLoop* loop;
-    threads::Thread* sleepThread_;
-    bool shouldBeStoped_;
-    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
-
-    std::string outputFileName_, durationString_;
-
-    typedef struct {
-      GstElement* pipeline;
-      gint duration;
-    } GstTimeout;
-
-    void initArgs();
-
-    void psleep(void* timeout);
-
-    class SleepThreadDelegate : public threads::ThreadDelegate {
-      public:
-        SleepThreadDelegate(GstTimeout timeout);
-
-        void threadMain();
-
-      private:
-        GstTimeout timeout_;
-
-        DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
-    };
-
-    DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
-};
+void FromMicRecorderAdapter::set_duration(int duration) {
+  duration_ = duration;
+}
 
 }  // namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_

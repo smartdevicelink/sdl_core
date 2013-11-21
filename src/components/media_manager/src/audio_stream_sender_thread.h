@@ -78,8 +78,8 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @param session_key     Session key of connection for Mobile side
      * @param correlation_id  Correlation id for response for Mobile side
      */
-    AudioStreamSenderThread(const std::string fileName, unsigned int session_key,
-                            unsigned int correlation_id);
+    AudioStreamSenderThread(const std::string fileName,
+                            unsigned int session_key);
 
     /*
      * @brief AudioStreamSenderThread class destructor
@@ -97,13 +97,6 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @return Stored session key
      */
     unsigned int session_key() const;
-
-    /*
-     * @brief Retrieve correlation id
-     *
-     * @return Stored correlation id
-     */
-    unsigned int correlation_id() const;
 
     bool exitThreadMain();
 
@@ -124,7 +117,6 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
       NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
     unsigned int session_key_;
-    unsigned int correlation_id_;
     const std::string fileName_;
     int offset_;
     bool shouldBeStoped_;

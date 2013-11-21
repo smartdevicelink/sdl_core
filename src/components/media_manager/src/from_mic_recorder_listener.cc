@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -31,39 +30,64 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#include "utils/threads/thread.h"
+#include "media_manager/from_mic_recorder_listener.h"
+#include "./audio_stream_sender_thread.h"
 
-namespace application_manager {
+namespace media_manager {
 
-namespace commands {
+log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("FromMicRecorderListener"));
 
-EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+FromMicRecorderListener::FromMicRecorderListener(
+  const std::string& file_name)
+  : reader_(NULL)
+  , file_name_(file_name) {
 }
 
-EndAudioPassThruRequest::~EndAudioPassThruRequest() {
-}
-
-void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
-
-  if (ended_successfully) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
-    int session_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
-  } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "No PerformAudioPassThru is now active");
+FromMicRecorderListener::~FromMicRecorderListener() {
+  if (reader_) {
+    reader_->stop();
+    delete reader_;
+    reader_ = NULL;
   }
 }
 
-}  // namespace commands
+void FromMicRecorderListener::OnDataReceived(
+  int application_key,
+  const DataForListener& data) {
+}
 
-}  // namespace application_manager
+void FromMicRecorderListener::OnErrorReceived(
+  int application_key,
+  const DataForListener& data) {
+}
+
+void FromMicRecorderListener::OnActivityStarted(int application_key) {
+  if (application_key == current_application_) {
+    return;
+  }
+  if (!reader_) {
+    AudioStreamSenderThread* thread_delegate =
+      new AudioStreamSenderThread(file_name_, application_key);
+    reader_ = new threads::Thread("FromMicRecorderSender", thread_delegate);
+  }
+  if (reader_) {
+    reader_->start();
+    current_application_ = application_key;
+  }
+}
+
+void FromMicRecorderListener::OnActivityEnded(int application_key) {
+  if (application_key != current_application_) {
+    return;
+  }
+  if (reader_) {
+    reader_->stop();
+    delete reader_;
+    reader_ = NULL;
+  }
+  current_application_ = 0;
+}
+
+}  //  namespace media_manager

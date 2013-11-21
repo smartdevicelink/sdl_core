@@ -901,7 +901,7 @@ void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   }
 }
 
-void MessageHelper::SendActivateAppToHMI(Application* const app) {
+void MessageHelper::SendActivateAppToHMI(unsigned int const app_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {
@@ -913,7 +913,7 @@ void MessageHelper::SendActivateAppToHMI(Application* const app) {
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
   (*message)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+  (*message)[strings::msg_params][strings::app_id] = app_id;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
