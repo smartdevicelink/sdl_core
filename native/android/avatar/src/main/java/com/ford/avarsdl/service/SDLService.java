@@ -73,10 +73,12 @@ import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Service that is responsible for communicating with the SDL.
@@ -134,9 +136,13 @@ public class SDLService extends Service implements IProxyListenerALM {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
         syncMsgVersion.setMinorVersion(2);
+
+        Vector<AppHMIType> appHMIType = new Vector<AppHMIType>();
+        appHMIType.add(AppHMIType.RADIO);
+
         try {
             mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
-                    null, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                    appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
                     null, false, false, 2,
                     new TCPTransportConfig(tcpPortInt, ipAddressString));
         } catch (SyncException e) {
