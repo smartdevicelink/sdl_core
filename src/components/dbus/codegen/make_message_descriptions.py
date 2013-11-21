@@ -206,9 +206,9 @@ class Impl(FordXmlParser):
         out.write("};\n")
 
 
-arg_parser = ArgumentParser(description="Generates HMI API message descriptions for D-Bus")
-arg_parser.add_argument('--infile', required=True, help="path to input file QT_HMI_API.xml")
-arg_parser.add_argument('--outdir', required=True, help="path of output file message_descriptions.cc")
+arg_parser = ArgumentParser(description="Generates HMI API message descriptions for D-Bus on SDL core side")
+arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path to directory where output file message_descriptions.cc will be saved")
 args = arg_parser.parse_args()
 
 if not path.isdir(args.outdir):
