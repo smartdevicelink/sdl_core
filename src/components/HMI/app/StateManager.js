@@ -189,13 +189,6 @@ var StateManager = Em.StateManager.extend({
 
                 }),
 
-                enter: function () {
-
-                    this._super();
-
-                    SDL.SDLMediaController.restoreCurrentApp();
-                },
-
                 exit: function () {
 
                     this._super();
@@ -203,13 +196,6 @@ var StateManager = Em.StateManager.extend({
                     SDL.SDLAppController.deactivateApp();
                 }
             }),
-
-            enter: function () {
-
-                this._super();
-
-                SDL.SDLMediaController.restoreCurrentApp();
-            },
 
             exit: function () {
 
