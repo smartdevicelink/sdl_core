@@ -1078,10 +1078,12 @@ MFT.MediaController = Em.Object.create({
             return;
         }
 
-        directTuneItem.set('title', (data.songInfo.name) ? data.songInfo.name : '');
-        directTuneItem.set('artist', (data.songInfo.artist) ? data.songInfo.name : '');
-        directTuneItem.set('genre', (data.songInfo.genre) ? data.songInfo.genre : '');
-        if (data.radioStation.currentHD) {
+        if (typeof (data.songInfo) != 'undefined') {
+            directTuneItem.set('title', (data.songInfo.name) ? data.songInfo.name : '');
+            directTuneItem.set('artist', (data.songInfo.artist) ? data.songInfo.name : '');
+            directTuneItem.set('genre', (data.songInfo.genre) ? data.songInfo.genre : '');
+        }
+        if (typeof (data.radioStation.currentHD) != 'undefined') {
             directTuneItem.set('isHd', !!(data.radioStation.currentHD));
             directTuneItem.set('HDChannels', (data.radioStation.availableHDs) ? data.radioStation.availableHDs : 0);
             directTuneItem.set('currentHDChannel', (data.radioStation.currentHD) ? data.radioStation.currentHD : 0);
