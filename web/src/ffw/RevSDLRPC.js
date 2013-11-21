@@ -46,6 +46,40 @@ FFW.RevSDL = FFW.RPCObserver.create({
         Em.Logger.log("FFW.RevSDLClient.onRPCUnregistered");
     },
 
+    /*
+     * Subscribes to property. Returns the request's id.
+     */
+    subscribeToProperty: function(property) {
+        var msgId = this.client.generateId();
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		msgId,
+            "method":	"MB.subscribeTo",
+            "params":	{
+                "propertyName": property
+            }
+        };
+        this.client.send(JSONMessage);
+        return msgId;
+    },
+
+    /*
+     * Unsubscribes from property. Returns the request's id.
+     */
+    unsubscribeFromProperty: function(property) {
+        var msgId = this.client.generateId();
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		msgId,
+            "method":	"MB.unsubscribeFrom",
+            "params":	{
+                "propertyName": property
+            }
+        };
+        this.client.send(JSONMessage);
+        return msgId;
+    },
+
     /**
      * when result is received from RPC component this function is called
      * It is the appropriate place to check results of request execution
