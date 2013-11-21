@@ -73,8 +73,6 @@ BLUEZ_TOOLS="bluez-tools"
 LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
-INSTALL_ALL=""
-QT_HMI=""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -210,7 +208,7 @@ if $QT_HMI || $INSTALL_ALL; then
 
 	echo "Checking out CMake packages, please be patient"
 	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
-	echo $OKu
+	echo $OK
 
 	echo "Installing gdebi"
 	apt-install ${GDEBI}
