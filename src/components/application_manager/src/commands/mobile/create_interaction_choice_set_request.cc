@@ -134,13 +134,18 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       }
     }
 
-    /* Choice ID doesn't exist in application choiceSet map */
-    const ChoiceSetMap& choice_set_map = app->choice_set_map();
-    ChoiceSetMap::const_iterator it = choice_set_map.begin();
-    for (; choice_set_map.end() != it; ++it) {
-      for (size_t i = 0; i < (*it->second)[strings::choice_set].length(); ++i) {
-        if ((*it->second)[strings::choice_set][i][strings::choice_id].asInt()
-            == choice_set[i][strings::choice_id].asInt()) {
+    /* Check for the same choice ID along with already registered sets*/
+    const ChoiceSetMap& app_choice_set_map = app->choice_set_map();
+    ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
+    ChoiceSetMap::const_iterator itEnd = app_choice_set_map.end();
+    for (; it != itEnd; ++it) {
+      const smart_objects::SmartObject* app_choice_set = it->second;
+      if (NULL != app_choice_set) {
+        const std::vector<smart_objects::SmartObject>* curr_choice_set
+          = (*app_choice_set)[strings::choice_set].asArray();
+
+        CoincidencePredicateChoiceSetID p(choice_set[i][strings::choice_id].asInt());
+        if ( std::any_of(curr_choice_set->begin(), curr_choice_set->end(), p)) {
           LOG4CXX_ERROR(logger_, "Incoming choice ID already exist");
           return mobile_apis::Result::INVALID_ID;
         }
