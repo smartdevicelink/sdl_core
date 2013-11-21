@@ -106,7 +106,8 @@ void MediaManagerImpl::Init() {
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
 #if defined(DEFAULT_MEDIA)
-  video_streamer_->AddListener(video_streamer_listener_);
+  MediaListenerPtr listener(video_streamer_listener_);
+  video_streamer_->AddListener(listener);
 #endif
 }
 
@@ -132,7 +133,8 @@ void MediaManagerImpl::StartMicrophoneRecording(
   from_mic_listener_ = new FromMicRecorderListener(output_file);
 #if defined(DEFAULT_MEDIA)
   if (from_mic_recorder_) {
-    from_mic_recorder_->AddListener(from_mic_listener_);
+    MediaListenerPtr listener(from_mic_listener_);
+    from_mic_recorder_->AddListener(listener);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
     ->set_output_file(output_file);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
