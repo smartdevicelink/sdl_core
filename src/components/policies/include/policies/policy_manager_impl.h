@@ -120,6 +120,11 @@ class PolicyManagerImpl : public PolicyManager {
      * @brief Logger
      */
     static log4cxx::LoggerPtr logger_;
+
+    /**
+     * @brief Result of call of public method Init()
+     */
+    InitResult::eType init_result_;
 };
 
 }  // namespace policies

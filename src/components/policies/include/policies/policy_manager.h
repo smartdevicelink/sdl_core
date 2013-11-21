@@ -54,6 +54,10 @@ enum eType {
    */
   PERMISSION_ALLOWED = 0,
   /**
+  * @brief Initialization of Policy Manager failed.
+  */ 
+  PERMISSION_INIT_FAILED,  
+  /**
    * @brief Verification of Policy Table failed.
    *
    * Policy Table as smart object has failed in verification against schema.
@@ -116,13 +120,12 @@ enum eType {
    **/
   INIT_OK = 0,
   /**
-   * @brief PT file missing, Preload file used
+   * @brief Initialization has failed
+   *
+   * Possible reason: Policy Table file missing, failed verification
+   *
    **/
-  INIT_OK_PRELOAD,
-  /**
-   * @brief PT file missing, Preload file missing
-   **/
-  INIT_FAILED_PRELOAD_NO_FILE
+  INIT_FAILED
 };
 }  // namespace InitResult
 

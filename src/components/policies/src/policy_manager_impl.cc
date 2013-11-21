@@ -52,7 +52,8 @@ log4cxx::LoggerPtr PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
 PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager()
   , policy_config_()
-  , policy_table_(0) {
+  , policy_table_(0)
+  , init_result_(InitResult::INIT_FAILED){
 }
 
 //---------------------------------------------------------------
@@ -79,7 +80,6 @@ InitResult::eType PolicyManagerImpl::Init(
   // TODO(anyone): Provide some mechanism for recovery (from Preload???)
   // if PT file corrupted (e.g. bad json)
   policy_config_ = config;
-  InitResult::eType init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
 
   std::string pt_string;
   if (0 == policy_table_) {
@@ -87,7 +87,7 @@ InitResult::eType PolicyManagerImpl::Init(
                                       pt_string)) {
       policy_table_ = new PolicyTable(pt_string,
                                       PolicyTableType::TYPE_POLICY_TABLE);
-      init_result = InitResult::INIT_OK;
+      init_result_ = InitResult::INIT_OK;
     } else {
       LOG4CXX_WARN(logger_, "Can't read policy table file "
           << policy_config_.pt_file_name());
@@ -95,18 +95,18 @@ InitResult::eType PolicyManagerImpl::Init(
           policy_config_.preload_pt_file_name(), pt_string)) {
         policy_table_ = new PolicyTable(
             pt_string, PolicyTableType::TYPE_PT_PRELOAD);
-        init_result = InitResult::INIT_OK_PRELOAD;
+        init_result_ = InitResult::INIT_OK;
       } else {
-        init_result = InitResult::INIT_FAILED_PRELOAD_NO_FILE;
+        init_result_ = InitResult::INIT_FAILED;
         LOG4CXX_ERROR(logger_, "Can't read Preload policy table file "
             << policy_config_.preload_pt_file_name());
       }
     }
   } else {
-    init_result = InitResult::INIT_OK;
+    init_result_ = InitResult::INIT_OK;
     LOG4CXX_WARN(logger_, "Policy table is already created.");
   }
-  return init_result;
+  return init_result_;
 }
 
 //---------------------------------------------------------------
@@ -119,9 +119,11 @@ CheckPermissionResult
     {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};
   PolicyTable* pt = policy_table();
 
-  if (0 != pt
-      && PTValidationResult::VALIDATION_OK == pt->Validate()) {
-    smart_objects::SmartObject pt_object = pt->AsSmartObject();
+  if (init_result_ == InitResult::INIT_FAILED) {
+    result.result = PermissionResult::PERMISSION_INIT_FAILED;
+  }else if (0 != pt
+            && PTValidationResult::VALIDATION_OK == pt->Validate()) {
+    smart_objects::SmartObject& pt_object = pt->AsSmartObject();
 
     result.result =  PermissionsCalculator::CalcPermissions(pt_object,
                                                             app_id,

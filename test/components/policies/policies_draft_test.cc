@@ -146,8 +146,14 @@ namespace policies_draft_test {
     policy_config.set_preload_pt_file_name("missing_too.json");
     PolicyManagerTest policy_manager(policy_config);
     ASSERT_TRUE(NULL == policy_manager.getPolicyTable());
-    ASSERT_EQ(pn::InitResult::INIT_FAILED_PRELOAD_NO_FILE,
+    ASSERT_EQ(pn::InitResult::INIT_FAILED,
               policy_manager.init_result);
+
+    pn::CheckPermissionResult perm_result =  policy_manager.CheckPermission(
+        789,  // some app
+        so_ns::SmartObject(),
+        mobile_apis::HMILevel::HMI_BACKGROUND);
+    ASSERT_EQ(pn::PermissionResult::PERMISSION_INIT_FAILED, perm_result.result);
   }
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
@@ -169,7 +175,7 @@ namespace policies_draft_test {
 
     ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
               policy_manager.getPolicyTable()->Validate());
-    ASSERT_EQ(pn::InitResult::INIT_OK_PRELOAD, policy_manager.init_result);
+    ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
   }
 
   TEST_F(Policies_test, test_policies_reInit_test) {
