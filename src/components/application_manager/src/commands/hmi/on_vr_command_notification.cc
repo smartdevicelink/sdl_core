@@ -43,8 +43,8 @@ namespace application_manager {
 namespace commands {
 
 OnVRCommandNotification::OnVRCommandNotification(
-  const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
 OnVRCommandNotification::~OnVRCommandNotification() {
@@ -54,44 +54,41 @@ void OnVRCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
 
   Application* active_app = ApplicationManagerImpl::instance()
-  ->active_application();
-  if (NULL == active_app) {
+      ->active_application();
+  const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
+      .asUInt();
+  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  if (NULL == active_app && cmd_id > max_cmd_id + 1) {
+    MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
+    return;
+  } else if (NULL == active_app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-                              .asUInt();
-
   // Check if this is one of standart VR commands (i.e. "Help")
-  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
   if (cmd_id > max_cmd_id) {
-    if (max_cmd_id + 1 == cmd_id &&
-        0 == active_app->is_perform_interaction_active()) {
+    if (max_cmd_id + 1 == cmd_id
+        && 0 == active_app->is_perform_interaction_active()) {
       MessageHelper::SendShowVrHelpToHMI(active_app);
-    } else if (max_cmd_id + 1 == cmd_id &&
-        0 != active_app->is_perform_interaction_active()) {
+    } else if (max_cmd_id + 1 == cmd_id
+        && 0 != active_app->is_perform_interaction_active()) {
       event_engine::Event event(hmi_apis::FunctionID::UI_ShowVrHelp);
       event.set_smart_object(*message_);
       event.raise();
     } else {
-      Application* app = ApplicationManagerImpl::instance()->application(
-                           cmd_id - max_cmd_id);
-      if (app) {
-        ApplicationManagerImpl::instance()->ActivateApplication(app);
-        MessageHelper::SendActivateAppToHMI(app);
-      }
+      LOG4CXX_INFO(logger_, "Switched App");
+      MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
     }
     return;
   }
   const unsigned int app_id = (*message_)[strings::msg_params][strings::app_id]
-                                  .asUInt();
-  Application* app = ApplicationManagerImpl::instance()
-    ->application(app_id);
-    if (NULL == app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
+      .asUInt();
+  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
   /* check if perform interaction is active
    * if it is active we should sent to HMI DeleteCommand request
    * and PerformInterActionResponse to mobile
@@ -102,10 +99,10 @@ void OnVRCommandNotification::Run() {
     event.raise();
   } else {
     (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnCommandID;
+        mobile_apis::FunctionID::eType::OnCommandID;
 
     (*message_)[strings::msg_params][strings::trigger_source] =
-      mobile_apis::TriggerSource::TS_VR;
+        mobile_apis::TriggerSource::TS_VR;
     SendNotificationToMobile(message_);
   }
 }

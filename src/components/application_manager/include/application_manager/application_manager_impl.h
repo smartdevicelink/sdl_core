@@ -440,6 +440,25 @@ class ApplicationManagerImpl : public ApplicationManager,
                               unsigned int mobile_correlation_id,
                               unsigned int new_timeout_value);
 
+    /*
+     * @brief Retrieves application id associated whith correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     *
+     * @return application id associated whith correlation id
+     */
+    unsigned int application_id(int correlation_id);
+
+    /*
+     * @brief Sets application id correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     * @param app_id Application ID
+     */
+    void set_application_id(int correlation_id, unsigned int app_id);
+
+
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -495,6 +514,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Set of HMI notifications with timeout.
      */
     std::list<CommandSharedPtr> notification_list_;
+
+    /**
+     * @brief Map of correlation id  and associated application id.
+     */
+    std::map<int, unsigned int> appID_list_;
 
     MessageChain message_chaining_;
     bool audio_pass_thru_active_;
