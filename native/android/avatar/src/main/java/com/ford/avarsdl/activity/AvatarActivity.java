@@ -185,9 +185,6 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
             case R.id.mnuQuit:
                 exitApp();
                 break;
-            case R.id.menuOnRadioDetailsTest:
-                SDLService.onOnRadioDetailsTest();
-                break;
             default:
                 break;
 		}

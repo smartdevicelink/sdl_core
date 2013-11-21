@@ -8,6 +8,7 @@ import android.os.IBinder;
 import com.ford.avarsdl.activity.SafeToast;
 import com.ford.avarsdl.notifications.NotificationCommand;
 import com.ford.avarsdl.notifications.NotificationCommandImpl;
+import com.ford.avarsdl.responses.ResponseCommand;
 import com.ford.avarsdl.util.APIObjectsSimulator;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.Logger;
@@ -76,6 +77,8 @@ import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TCPTransportConfig;
+
+import org.json.JSONException;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -427,6 +430,16 @@ public class SDLService extends Service implements IProxyListenerALM {
                 "GrantAccessResponse success " + response.getSuccess() +
                         ", " + response.getResultCode() + ", " + response.getInfo();
         SafeToast.showToastAnyThread(msg);
+
+        ResponseCommand command = new com.ford.avarsdl.responses.GrantAccessResponse();
+        try {
+            byte serializeMethod = 2;
+            command.execute(response.getCorrelationID(),
+                    response.serializeJSON(serializeMethod).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Logger.e(getClass().getSimpleName() + " onGiveControlResponse " + e);
+        }
     }
 
     @Override
@@ -458,32 +471,6 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
 
-    }
-
-    public static void onOnRadioDetailsTest() {
-        // TEST:
-        OnRadioDetails notification = APIObjectsSimulator.getOnRadioDetails();
-
-        // TODO: Expand notification information here
-        final RadioStation radioStation = notification.getRadioStation();
-        String msg = "onRadioDetails";
-        if (radioStation == null) {
-            msg += " Radio Station invalid";
-            SafeToast.showToastAnyThread(msg);
-            return;
-        }
-        msg += " frequency: " +
-                notification.getRadioStation().getFrequency() + "." +
-                notification.getRadioStation().getFraction();
-        SafeToast.showToastAnyThread(msg);
-
-        NotificationCommand command = commandsHashTable.get(Names.OnRadioDetails);
-        if (command != null) {
-            String method = RPCConst.CN_REVSDL + "." + Names.OnRadioDetails;
-            command.execute(method, notification);
-        } else {
-            Logger.w("TEST NotificationCommand NULL");
-        }
     }
 
     @Override

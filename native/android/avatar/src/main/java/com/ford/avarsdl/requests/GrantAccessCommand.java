@@ -1,9 +1,7 @@
 package com.ford.avarsdl.requests;
 
-import com.ford.avarsdl.business.MainApp;
 import com.ford.avarsdl.service.SDLService;
 import com.ford.avarsdl.util.Logger;
-import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.GrantAccess;
 
@@ -18,15 +16,15 @@ import org.json.JSONObject;
 public class GrantAccessCommand implements RequestCommand {
 
     @Override
-    public void execute(JSONObject jsonParameters) {
+    public void execute(int id, JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             GrantAccess msg = new GrantAccess();
             msg.setTimeout(10000);
-            msg.setCorrelationID(MainApp.getInstance().nextCorrelationID());
+            msg.setCorrelationID(id);
             try {
                 proxy.sendRPCRequest(msg);
-            } catch (SyncException e) {
+            } catch (Throwable e) {
                 Logger.e(getClass().getSimpleName() + " can't send message", e);
             }
         }

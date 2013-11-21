@@ -18,7 +18,7 @@ import org.json.JSONObject;
 public class StopScanCommand implements RequestCommand {
 
     @Override
-    public void execute(JSONObject jsonParameters) {
+    public void execute(int id, JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             StopScan msg = new StopScan();

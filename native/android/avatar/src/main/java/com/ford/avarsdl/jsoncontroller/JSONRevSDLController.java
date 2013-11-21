@@ -35,7 +35,7 @@ public class JSONRevSDLController extends JSONController {
         Logger.d(getClass().getSimpleName() + " request: " + request);
         RequestCommand requestCommand = commandsHashTable.get(method);
         if (requestCommand != null) {
-            requestCommand.execute(mJSONParser.getParams());
+            requestCommand.execute(mJSONParser.getId(), mJSONParser.getParams());
         } else {
             Logger.w(getClass().getSimpleName() + " unknown request");
         }

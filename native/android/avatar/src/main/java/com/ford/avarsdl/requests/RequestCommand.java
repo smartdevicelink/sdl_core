@@ -13,7 +13,8 @@ import org.json.JSONObject;
 public interface RequestCommand {
     /**
      * Executes a request command
+     * @param id - id of the message
      * @param jsonParameters - JSON object that represents RPCStruct
      */
-    public void execute(JSONObject jsonParameters);
+    public void execute(int id, JSONObject jsonParameters);
 }

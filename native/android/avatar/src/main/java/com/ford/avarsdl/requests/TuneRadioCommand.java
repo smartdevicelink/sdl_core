@@ -21,7 +21,7 @@ import org.json.JSONObject;
 public class TuneRadioCommand implements RequestCommand {
 
     @Override
-    public void execute(JSONObject jsonParameters) {
+    public void execute(int id, JSONObject jsonParameters) {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             TuneRadio msg = new TuneRadio();
