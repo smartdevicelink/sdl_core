@@ -45,8 +45,10 @@ ActivateAppRequest::~ActivateAppRequest() {
 
 void ActivateAppRequest::Run() {
   LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
-  int correlation_id = (*message_)[strings::params][strings::correlation_id];
-  unsigned int app_id = (*message_)[strings::msg_params][strings::app_id];
+  int correlation_id = (*message_)[strings::params][strings::correlation_id]
+                                                    .asInt();
+  unsigned int app_id = (*message_)[strings::msg_params][strings::app_id]
+                                                         .asUInt();
   ApplicationManagerImpl::instance()->set_application_id(correlation_id, app_id);
   SendRequest();
 }
