@@ -32,6 +32,7 @@
 
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "./pipe_video_streamer_adapter.h"
 #include "config_profile/profile.h"
 

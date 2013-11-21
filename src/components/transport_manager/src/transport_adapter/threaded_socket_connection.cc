@@ -240,15 +240,16 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
+  // clear notifications
+  char buffer[256];
+  ssize_t bytes_read = -1;
+  do {
+    bytes_read = read(read_fd_, buffer, sizeof(buffer));
+  } while (bytes_read > 0);
+
   // send data if possible
   if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
     LOG4CXX_INFO(logger_, "frames_to_send_ not empty()  (#" << pthread_self() << ")");
-    // clear notifications
-    char buffer[256];
-    ssize_t bytes_read = -1;
-    do {
-      bytes_read = read(read_fd_, buffer, sizeof(buffer));
-    } while (bytes_read > 0);
 
     if ((bytes_read < 0) && (EAGAIN != errno)) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
