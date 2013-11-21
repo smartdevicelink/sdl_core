@@ -77,6 +77,23 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   mobile_apis::Result::eType CheckChoiceSet(const Application* app);
 
   /*
+  * @brief Predicate for using with CheckChoiceSet method to compare with ChoiceSetID
+  *
+  * return TRUE if there is coincidence of choice set ID, otherwise FALSE
+  */
+  struct CoincidencePredicateChoiceSetID {
+    explicit CoincidencePredicateChoiceSetID(const unsigned int newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::choice_id].asInt() == newItem_;
+    };
+
+    const unsigned int newItem_;
+  };
+
+  /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
    *
    * @param choice1  Choice to compare

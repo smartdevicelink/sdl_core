@@ -134,7 +134,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       }
     }
 
-    /* Choice ID doesn't exist in application choiceSet map */
+    /* Check for the same choice ID along with already registered sets*/
     const ChoiceSetMap& choice_set_map = app->choice_set_map();
     ChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
@@ -146,9 +146,9 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         }
       }
     }
-  }
+ }
 
-  return  mobile_apis::Result::SUCCESS;
+ return  mobile_apis::Result::SUCCESS;
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
