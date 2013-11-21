@@ -2644,7 +2644,7 @@
       <description>Requires investigation regarding the nav display capabilities. Potentially lower lowerStatusBar, upperStatusBar, titleBar, etc.</description>
     </param>
 
-    <param name="mediaClock" type="String" minlength="0" maxlength="500" mandatory="false">
+    <param name="mediaClock" type="String" minlength="1" maxlength="500" mandatory="false">
       <description>
       	Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
       	If this text is set, any automatic media clock updates previously set with SetMediaClockTimer will be stopped.
