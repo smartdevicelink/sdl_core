@@ -112,6 +112,11 @@ void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
         NULL,
         NULL,
         &mac_adddress);
+
+      // TODO(PK): Convert mac_adddress to the
+      // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed
+      // before passing to the A2DPSourcePlayerThread constructor
+
       threads::Thread* new_activity = new threads::Thread(
         mac_adddress.c_str(),
         new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress));
