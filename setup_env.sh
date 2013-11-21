@@ -73,6 +73,8 @@ BLUEZ_TOOLS="bluez-tools"
 LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
+INSTALL_ALL=""
+QT_HMI=""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -143,12 +145,14 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
-echo "Installing gstreamer..."
-apt-install ${GSTREAMER}
-echo $OK
-
+if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ] then
 echo "Installing CMake build system"
 apt-install ${CMAKE_BUILD_SYSTEM}
+echo $OK
+fi
+
+echo "Installing gstreamer..."
+apt-install ${GSTREAMER}
 echo $OK
 
 echo "Installng GNU C++ compiler"
@@ -206,19 +210,13 @@ if $QT_HMI || $INSTALL_ALL; then
 
 	echo "Checking out CMake packages, please be patient"
 	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
-	echo $OK
-
-	if [ ${ARCH} = "i386" ]; then
-		CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-	elif [ ${ARCH} = "x64" ]; then
-		CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
-	fi
+	echo $OKu
 
 	echo "Installing gdebi"
 	apt-install ${GDEBI}
 	echo $OK
 
-	if dpkg -s cmake | grep installed > /dev/null; then
+	if dpkg -s cmake | grep installed > /dev/null; then		
 		echo "Checking for installed cmake"
 		CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
 		CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
@@ -227,6 +225,11 @@ if $QT_HMI || $INSTALL_ALL; then
 		"2 > 1") echo "Removing CMake build system"
 		   sudo apt-get remove -y cmake cmake-data
 		   echo "Installing CMake build system"
+		   if [ ${ARCH} = "i386" ]; then
+		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+		   elif [ ${ARCH} = "x64" ]; then
+		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+		   fi
 		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
 		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 		   ;;
