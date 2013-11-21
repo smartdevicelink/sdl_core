@@ -60,7 +60,7 @@ class MediaManagerImpl : public MediaManager,
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
     virtual void OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr& message);
+      const protocol_handler::RawMessagePtr& message);
     virtual void FramesProcessed(int application_key, int frame_number);
 
   protected:
@@ -69,9 +69,9 @@ class MediaManagerImpl : public MediaManager,
     protocol_handler::ProtocolHandler* protocol_handler_;
     MediaAdapter* a2dp_player_;
     MediaAdapterImpl* from_mic_recorder_;
-    MediaAdapterListener* from_mic_listener_;
+    MediaListenerPtr from_mic_listener_;
     MediaAdapterImpl* video_streamer_;
-    MediaAdapterListener* video_streamer_listener_;
+    MediaListenerPtr video_streamer_listener_;
 
   private:
     static log4cxx::LoggerPtr logger_;

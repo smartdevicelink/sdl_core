@@ -53,9 +53,7 @@ MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
   , a2dp_player_(NULL)
   , from_mic_recorder_(NULL)
-  , from_mic_listener_(NULL)
-  , video_streamer_(NULL)
-  , video_streamer_listener_(NULL) {
+  , video_streamer_(NULL) {
   Init();
 }
 
@@ -63,11 +61,6 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (a2dp_player_) {
     delete a2dp_player_;
     a2dp_player_ = NULL;
-  }
-
-  if (from_mic_listener_) {
-    delete from_mic_listener_;
-    from_mic_listener_ = NULL;
   }
 
   if (from_mic_recorder_) {
@@ -78,12 +71,6 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (video_streamer_) {
     delete video_streamer_;
     video_streamer_ = NULL;
-  }
-
-
-  if (video_streamer_listener_) {
-    delete video_streamer_listener_;
-    video_streamer_listener_ = NULL;
   }
 }
 
@@ -106,8 +93,7 @@ void MediaManagerImpl::Init() {
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
 #if defined(DEFAULT_MEDIA)
-  MediaListenerPtr listener(video_streamer_listener_);
-  video_streamer_->AddListener(listener);
+  video_streamer_->AddListener(video_streamer_listener_);
 #endif
 }
 
@@ -133,8 +119,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
   from_mic_listener_ = new FromMicRecorderListener(output_file);
 #if defined(DEFAULT_MEDIA)
   if (from_mic_recorder_) {
-    MediaListenerPtr listener(from_mic_listener_);
-    from_mic_recorder_->AddListener(listener);
+    from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
     ->set_output_file(output_file);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -183,7 +168,7 @@ void MediaManagerImpl::OnMessageReceived(
 }
 
 void MediaManagerImpl::OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr& message) {
 }
 
 void MediaManagerImpl::FramesProcessed(int application_key,

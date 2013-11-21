@@ -222,7 +222,7 @@ void LifeCycle::StopComponents(int params) {
   delete instance()->protocol_handler_;
   instance()->media_manager_->~MediaManagerImpl();
 
-  LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
+  LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
