@@ -43,8 +43,18 @@ SDL.InfoNonMedia = Em.ContainerView
         ],
 
         classNameBindings: [
-            'SDL.States.info.nonMedia.active:active_state:inactive_state'
+            'this.activeState:active_state:inactive_state'
         ],
+
+        activeState: function(){
+            if (SDL.TurnByTurnView.active) {
+                return false;
+            } else if (SDL.States.info.nonMedia.active) {
+                return true;
+            } else {
+                return false;
+            }
+        }.property('SDL.States.info.nonMedia.active', 'SDL.TurnByTurnView.active'),
 
         content: Em.ContainerView
             .extend( {

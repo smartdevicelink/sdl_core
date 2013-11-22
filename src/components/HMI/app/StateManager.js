@@ -142,12 +142,6 @@ var StateManager = Em.StateManager.extend({
         }),
 
         nonMedia: Em.State.create({
-            enter: function () {
-
-                this._super();
-
-                SDL.NonMediaController.restoreCurrentApp();
-            },
 
             exit: function () {
 
