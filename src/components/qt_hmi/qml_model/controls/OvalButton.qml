@@ -132,6 +132,7 @@ Item {
             source: "../res/buttons/oval_btn_bottom.png"
         }
     }
+
     HueSaturation {
         anchors.fill: buttonBorderImage
         source: buttonBorderImage

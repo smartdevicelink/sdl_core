@@ -55,6 +55,8 @@ Rectangle {
     Text {
         id: label
         anchors.verticalCenter: parent.verticalCenter
+        height: image.height
+        width: parent.width - image.width
         z: 50
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: Constants.fontSize
