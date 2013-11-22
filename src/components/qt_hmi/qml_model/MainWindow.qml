@@ -36,7 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -127,20 +127,22 @@ Rectangle {
                 property string currentLocation
                 function go(path, appId) {
                     console.debug("enter:", path, appId)
-                    if (currentLocation !== path) {
-                        viewTransitionStack.push(source.toString())
-                        if (appId) {
-                            dataContainer.setCurrentApplication(appId)
+                    if (path) {
+                        if (currentLocation !== path) {
+                            viewTransitionStack.push({ uri: source.toString(), applicationContext: false })
+                            if (appId) {
+                                dataContainer.setCurrentApplication(appId)
+                            }
+                            currentLocation = path
+                            source = path
                         }
-                        currentLocation = path
-                        source = path
                     }
                     console.debug("exit")
                 }
 
                 function back() {
                     if (viewTransitionStack.length) {
-                        source = viewTransitionStack.pop()
+                        source = viewTransitionStack.pop().uri
                     }
                     currentLocation = ""
                 }
@@ -152,6 +154,9 @@ Rectangle {
                         }
                         else {
                             dataContainer.applicationSavedContext = item.applicationContext
+                        }
+                        if (viewTransitionStack) {
+                            viewTransitionStack[viewTransitionStack.length - 1].applicationContext = item.applicationContext
                         }
                         dataContainer.setSystemContext()
                     }
@@ -286,10 +291,13 @@ Rectangle {
         onAppUnregistered: {
             console.debug("enter")
             dataContainer.removeApplication(appId);
-            if (dataContainer.applicationContext &&
-                    (dataContainer.currentApplication.appId === appId)) {
-                contentLoader.go("views/ApplicationListView.qml");
-                contentLoader.reset();
+            if ((dataContainer.currentApplication.appId === appId)) {
+                if (dataContainer.applicationContext) {
+                    contentLoader.go("views/ApplicationListView.qml");
+                }
+                if (contentLoader.viewTransitionStack.filter(function(x) { return x.applicationContext })) {
+                    contentLoader.reset();
+                }
                 dataContainer.currentApplication.reset()
             }
             console.debug("exit")

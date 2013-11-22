@@ -1,6 +1,6 @@
 /**
- * @file InteractionModel.qml
- * @brief Interaction model.
+ * @file StatusBar.qml
+ * @brief Status bar that contains text string.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,26 +33,10 @@
  */
 
 import QtQuick 2.0
-import "../hmi_api/Async.js" as Async
+import "../models/Constants.js" as Constants
 
-QtObject {
-    property string initialText
-    property ListModel choice: ListModel {
-    }
-    property int timeout
-    property var async
-
-    function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
-        console.debug("enter")
-        this.initialText = initialText.fieldText
-        choice.clear()
-        for (var i = 0; i < choiceSet.length; ++i) {
-            choice.append({"id": choiceSet[i].choiceID, "name": choiceSet[i].menuName ? choiceSet[i].menuName : "choiceID = " + choiceSet[i].choiceID, image: choiceSet[i].image})
-        }
-        this.timeout = timeout
-        interactionPopup.activate()
-        async = new Async.AsyncCall()
-        console.debug("exit")
-        return async
-    }
+Text {
+    text: dataContainer.currentApplication.hmiUIText.statusBar
+    color: Constants.primaryColor
+    font.pixelSize: Constants.statusBarFontSize
 }

@@ -41,10 +41,9 @@ import "../models"
 GeneralView {
     applicationContext: true
 
-    Rectangle {
+    Item {
         id: turnByTurnView
         anchors.fill: parent
-        color: Constants.secondaryColor
 
         Item {
             // top 3/4 of screen
@@ -53,144 +52,150 @@ GeneralView {
             width: parent.width
             height: parent.height * 3/4
 
-            Row {
-                // top part for buttons
-                id: top
+            Item {
+                // row of oval buttons
+                id: ovalButtonsRow
                 anchors.top: parent.top
                 anchors.left: parent.left
                 width: parent.width
                 height: 1/4 * parent.height
-                spacing: (width - 4 * turnListButton.width) / 3
 
-                OvalButton {
-                    id: turnListButton
-                    width: Constants.ovalButtonWidth
+                PagedFlickable {
+                    id: buttonsRow
+                    width: parent.width
+                    spacing: (width - 4 * elementWidth) / 3
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "TurnList"
-                    fontSize: Constants.fontSize
-                    onClicked: {
-                        console.log("Go to TurnListView");
-                        contentLoader.go("./views/TbtTurnListView.qml");
-                    }
-                }
+                    snapTo: Constants.ovalButtonWidth + spacing
+                    elementWidth: Constants.ovalButtonWidth
 
-                ListView {
-                    id: softButtons
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - turnListButton.width
-                    height: parent.height
-                    spacing: parent.spacing
-
-                    orientation: ListView.Horizontal
-                    interactive: false
-                    model: dataContainer.navigationModel.softButtons
-
-                    delegate: OvalButton {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: turnListButton.width
-                        height: turnListButton.height
-                        text: name
-                        icon: (type !== Common.SoftButtonType.SBT_TEXT) ? image : undefined
-                        fontSize: Constants.fontSize
-                        highlighted: isHighlighted
-                        onPressed: {
-                            console.log("TBT view soft button: On pressed");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONDOWN,
-                                                     buttonId);
-                        }
-                        onReleased: {
-                            console.log("TBT view soft button: On released");
-                            sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonEventMode.BUTTONUP,
-                                                     buttonId);
-                        }
+                    OvalButton {
+                        id: turnListButton
+                        text: "TurnList"
                         onClicked: {
-                            console.log("TBT view soft button: On clicked");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.SHORT,
-                                                     buttonId);
+                            console.log("Go to TurnListView");
+                            contentLoader.go("./views/TurnListView.qml");
                         }
-                        onPressAndHold: {
-                            console.log("TBT view soft button: On press and hold");
-                            sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON,
-                                                     Common.ButtonPressMode.LONG,
-                                                     buttonId);
-                        }
-                        // TODO(KKolodiy): System action doesn't work in WebHMI
+                    }
+
+                    Repeater {
+                        model: dataContainer.navigationModel.softButtons ?
+                                   dataContainer.navigationModel.softButtons.count :
+                                   0
+                        delegate:
+                            SoftButton {
+                                appId: dataContainer.navigationModel.appId
+                                button: dataContainer.navigationModel.softButtons.get(index)
+                       }
                     }
                 }
             }
 
-            Row {
-                // mid part for picture, information.
-                id: mid
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
+            Column {
+                // Picture + text information + media clock
+                id: mediaContent
                 width: parent.width
-                height: 2/4 * parent.height
-                spacing: 1/2 * turnIcon.width
+                height: 3/4 * parent.height
+                anchors.left: parent.left
+                anchors.top: ovalButtonsRow.bottom
 
-                Icon {
-                    id: turnIcon
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.height
-                    height: parent.height
-                    source: dataContainer.navigationModel.icon
+                Row {
+                    // picture + text info
+                    width: parent.width
+                    height: 3/4 * parent.height
+                    spacing: Constants.margin
+
+                    Image {
+                        id: image
+                        height: parent.height
+                        width: height
+                        source: dataContainer.navigationModel.turnIcon
+                    }
+
+                    Column {
+                        // text info
+                        id: textInfo
+                        height: parent.height
+                        width: parent.width - image.width - parent.spacing
+                        spacing: (height - 5 * navText1.height) / 4
+
+                        Text {
+                            id: navText1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: dataContainer.navigationModel.text1
+                            font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.text1
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: dataContainer.navigationModel.text2
+                            font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.text2
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "Total distance: " + dataContainer.navigationModel.totalDistance
+                            font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.totalDistance
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                            font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.timeToDestination
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            color: Constants.primaryColor
+                            text: "ETA: " + dataContainer.navigationModel.eta
+                            font.pixelSize: Constants.fontSize
+                            visible: dataContainer.navigationModel.eta
+                        }
+                    }
                 }
 
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: parent.height
-                    width: parent.width - turnIcon.width - spacing
-                    spacing: (height - text1.height - text2.height - text3.height - text4.height) / 3
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 1/4 * parent.height
+                    width: 2/3 * parent.width
 
-                    Text {
-                        id: text1
-                        text: dataContainer.navigationModel.text1
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
+                    Rectangle {
+                       id: coveredDistance
+                       anchors.verticalCenter: parent.verticalCenter
+                       height: Constants.distanceBarHeight
+                       width: dataContainer.navigationModel.distanceToManeuver / dataContainer.navigationModel.distanceToManeuverScale * parent.width
+                       color: "white"
                     }
 
-                    Text {
-                        id: text2
-                        text: "Distance to Maneur " + dataContainer.navigationModel.distanceToManeuver
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-
-                    Text {
-                        id: text4
-                        text: "Total datance: " + dataContainer.navigationModel.totalDistance
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
-                    }
-
-                    Text {
-                        id: text3
-                        text: dataContainer.navigationModel.text2
-                        color: Constants.primaryColor
-                        font.pixelSize: Constants.fontSize
+                    Rectangle {
+                       anchors.verticalCenter: parent.verticalCenter
+                       height: Constants.distanceBarHeight
+                       width: parent.width - coveredDistance.width
+                       color: Constants.primaryColor
                     }
                 }
-            }
-
-            Item {
-                id: bot
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                width: parent.width
-                height: 1/4 * parent.height
             }
         }
+    }
 
-        Item {
-            // 1/4 bottom screen
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            width: parent.width
-            height: 1/4 * parent.height
-            BackButton { anchors.centerIn: parent }
-        }
+    Item {
+        // 1/4 bottom screen
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: parent.width
+        height: 1/4 * parent.height
+        BackButton { anchors.centerIn: parent }
     }
 }

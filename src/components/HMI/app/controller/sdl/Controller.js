@@ -92,6 +92,18 @@ SDL.SDLController = Em.Object
         },
 
         /**
+         * Notification from state manager about triggered state
+         * Method aborts all popups and requests currently in process
+         *
+         * @type object
+         */
+        triggerState: function(){
+            if (SDL.SliderView.active) {
+                SDL.SliderView.deactivate(false);
+            }
+        },
+
+        /**
          * Notify SDLCore that HMI is ready and all components are registered
          * 
          * @type {String}

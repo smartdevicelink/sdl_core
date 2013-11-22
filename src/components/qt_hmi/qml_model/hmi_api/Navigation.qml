@@ -47,9 +47,8 @@ Item {
                              softButtons, appID) {
         console.debug("enter")
         navigationTexts.forEach(fillTexts);
-        if (turnIcon !== undefined) {
-            dataContainer.navigationModel.icon = turnIcon;
-        }
+        dataContainer.navigationModel.turnIcon = turnIcon ? turnIcon.value : ""
+        dataContainer.navigationModel.nextTurnIcon = nextTurnIcon ? nextTurnIcon.value : ""
         dataContainer.navigationModel.distanceToManeuver = distanceToManeuver;
         dataContainer.navigationModel.distanceToManeuverScale = distanceToManeuverScale;
         if (maneuverComplete !== undefined) {
@@ -65,13 +64,16 @@ Item {
     }
 
     function alertManeuver(softButtons) {
+        console.debug("enter")
         if (softButtons !== undefined) {
             dataContainer.navigationModel.alertManeuverSoftButtons.clear();
             softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.alertManeuverSoftButtons);
         }
+        console.debug("exit")
     }
 
     function updateTurnList(turnList, softButtons, appID) {
+        console.debug("enter")
         if (turnList !== undefined) {
             dataContainer.getApplication(appID).turnList.clear();
             turnList.forEach(fillTurnList, dataContainer.getApplication(appID).turnList);
@@ -81,6 +83,7 @@ Item {
             softButtons.forEach(fillSoftButtons, dataContainer.getApplication(appID).turnListSoftButtons);
         }
         dataContainer.navigationModel.appId = appID;
+        console.debug("exit")
     }
 
     function fillTexts(element, index, array) {
@@ -97,24 +100,28 @@ Item {
         case Common.TextFieldName.totalDistance:
             dataContainer.navigationModel.totalDistance = element.fieldText;
             break;
+        case Common.TextFieldName.timeToDestination:
+            dataContainer.navigationModel.timeToDestination = element.fieldText;
+            break;
         }
     }
 
     function fillSoftButtons(element, index, array) {
         this.append({
                         type: element.type,
-                        name: element.text,
+                        text: element.text,
                         image: element.image,
                         isHighlighted: element.isHighlighted,
                         buttonId: element.softButtonID,
-                        action: element.systemAction
+                        systemAction: element.systemAction
                     });
     }
 
     function fillTurnList(element, index, array) {
-        this.append({
-                        name: element.navigationText,
-                        image: element.turnIcon
+        this.append({                        
+                        navigationText: element.navigationText,
+                        turnIcon: element.turnIcon
                     });
-    }
+        console.debug(element.navigationText)
+    }    
 }

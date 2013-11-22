@@ -179,8 +179,8 @@ GeneralView {
             anchors.left: parent.left
             width: parent.width
             height: 1/4 * parent.height
-            OvalButton {
-                text: "Back"
+
+            BackButton {
                 anchors.centerIn: parent
                 onClicked: {
                     console.debug("enter")

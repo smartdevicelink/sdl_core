@@ -46,6 +46,7 @@ else
 fi
 echo
 
+CMAKE_BUILD_SYSTEM="cmake"
 SUBVERSION="subversion"
 GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
@@ -70,7 +71,6 @@ GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
 BLUEZ_TOOLS="bluez-tools"
 LIB_UDEV="libudev-dev"
-ICECAST="icecast2"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
@@ -84,11 +84,11 @@ FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 while test $# -gt 0; do
         case "$1" in
                 -h|--help)
-                        echo "$ setup_enc.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
+                        echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
                         echo "                 and running." 
                         echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
                         echo " "
-                        echo "$ setup_enc.sh [options]"
+                        echo "$ setup_env.sh [options]"
                         echo " "
                         echo "options:"
                         echo "-h, --help                show brief help"
@@ -118,6 +118,38 @@ function apt-install() {
     sudo apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
     set +x
 }
+
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
+
+if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
+	echo "Adding gstreamer to /etc/apt/sources.list"
+	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
+fi
+
+if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
+	echo "Adding gstreamer sources to /etc/apt/sources.list"
+	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
+	UPDATE_SOURCES=true
+fi
+
+echo "Register gstreamer repository PUBLIC KEY in system"
+#sudo apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
+sudo apt-key add ./gstreamer.key.pub
+
+if $UPDATE_SOURCES; then
+	echo "Apdating repository..."
+	sudo apt-get update
+	sudo apt-get upgrade
+fi
+
+echo "Installing gstreamer..."
+apt-install ${GSTREAMER}
+echo $OK
+
+echo "Installing CMake build system"
+apt-install ${CMAKE_BUILD_SYSTEM}
+echo $OK
 
 echo "Installng GNU C++ compiler"
 apt-install ${GNU_CPP_COMPILER}
@@ -155,33 +187,6 @@ echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
 echo $OK
 
-echo "Installing libxml2"
-apt-install ${LIBXML2_DEV}
-echo $OK
-
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
-
-if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
-	echo "Adding gstreamer to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
-	UPDATE_SOURCES=true
-fi
-
-if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
-	echo "Adding gstreamer sources to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
-	UPDATE_SOURCES=true
-fi
-
-if $UPDATE_SOURCES; then
-	echo "Updating repository..."
-	sudo apt-get update
-fi
-
-echo "Installing gstreamer..."
-apt-install ${GSTREAMER}
-echo $OK
-
 echo "Setting up USB permissions..."
 if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
 	echo "Create permission file"
@@ -213,9 +218,20 @@ if $QT_HMI || $INSTALL_ALL; then
 	apt-install ${GDEBI}
 	echo $OK
 
-	echo "Installing CMake build system"
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	if dpkg -s cmake | grep installed > /dev/null; then
+		echo "Checking for installed cmake"
+		CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
+		CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
+		case ${CMAKE_COMPARE_RESULT} in
+		"equal"|"1 > 2");;
+		"2 > 1") echo "Removing CMake build system"
+		   sudo apt-get remove -y cmake cmake-data
+		   echo "Installing CMake build system"
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+		   ;;
+		esac
+	fi
 	echo $OK
 
 	if [ ${ARCH} = "i386" ]; then
@@ -271,18 +287,6 @@ if $INSTALL_ALL; then
 	echo "Installing Mscgen"
 	apt-install ${MSCGEN}
 	echo $OK
-
-	echo "Installing icecast..."
-	apt-install ${ICECAST}
-	echo $OK
-
-	echo "Configuring icecast..."
-	sudo sed -i 's/ENABLE=false/ENABLE=true/g' /etc/default/icecast2
-	echo $OK
-
-	echo "Starting icecast..."
-	sudo /etc/init.d/icecast2 start
-	echo $OK
-
 fi
 echo "Environment configuration successfully done!"
+

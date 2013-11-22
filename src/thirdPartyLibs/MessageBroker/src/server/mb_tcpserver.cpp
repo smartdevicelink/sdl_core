@@ -66,29 +66,42 @@ namespace NsMessageBroker
       char buf[RECV_BUFFER_LENGTH] = {'\0'};
 
       nb = recv(fd, buf, MAX_RECV_DATA, 0);
-      DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
-      if(nb > 0)
+      DBG_MSG(("Recieved %d from %d\n", nb, fd));
+      if (nb > 0)
       {
+         unsigned int recieved_data = nb;
+         char* data = buf;
          if (isWebSocket(fd))
          {
-            mWebSocketHandler.parseWebSocketData(buf, (unsigned int&)nb);
-            //assert(nb < RECV_BUFFER_LENGTH);
-            if (nb > RECV_BUFFER_LENGTH) {
-              nb = MAX_RECV_DATA;
-            }
+           const unsigned int data_length =
+               mWebSocketHandler.parseWebSocketDataLength(buf, recieved_data);
+
+           DBG_MSG(("Received %d actual data length %d\n",
+               recieved_data, data_length));
+           if (data_length > RECV_BUFFER_LENGTH) {
+             char buf_tmp[MAX_RECV_BUFFER_LENGTH];
+             memset(buf_tmp, 0 , MAX_RECV_BUFFER_LENGTH);
+             memcpy(buf_tmp, buf, MAX_RECV_DATA);
+             while ((data_length > recieved_data) &&
+                 (0 < (recv(fd, buf_tmp + recieved_data, MAX_RECV_DATA, 0)))) {
+               recieved_data += MAX_RECV_DATA;
+             }
+             nb = recieved_data;
+             data = buf_tmp;
+           }
+           mWebSocketHandler.parseWebSocketData(data, (unsigned int&)nb);
          }
-         std::string msg = std::string(buf, nb);
+         std::string msg = std::string(data, nb);
          DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
          std::string* pReceivingBuffer = getBufferFor(fd);
          *pReceivingBuffer += msg;
          // we need to check websocket clients here
          if (!checkWebSocketHandShake(fd, pReceivingBuffer))
          {//JSON MESSAGE received. Send data in CMessageBroker.
-            if(mpMessageBroker)
+            if (mpMessageBroker)
             {
                mpMessageBroker->onMessageReceived(fd, *pReceivingBuffer);
-            } else
-            {
+            } else {
                return false;
             }
          } else

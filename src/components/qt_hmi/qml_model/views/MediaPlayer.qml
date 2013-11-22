@@ -116,12 +116,13 @@ Item {
                 id: textInfo
                 height: parent.height
                 width: parent.width - image.width - parent.spacing
-                spacing: (height - textInfo.height) / 2
+                spacing: (height - titleText.height - 3 * text.height) / 3
 
                 Text {
+                    id: titleText
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    horizontalAlignment: dataContainer.currentApplication.hmiUITextAlignment
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField1
                                                                  : playerState.trackName
@@ -130,9 +131,10 @@ Item {
                 }
 
                 Text {
+                    id: text
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    horizontalAlignment: dataContainer.currentApplication.hmiUITextAlignment
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mainField2
                                                                  : playerState.albumName
@@ -142,11 +144,21 @@ Item {
                 Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    horizontalAlignment: Text.AlignHCenter
                     color: Constants.primaryColor
                     text: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.mediaTrack
                                                                  : playerState.trackNumber
                     font.pixelSize: Constants.fontSize
+                }
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    color: Constants.primaryColor
+                    text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                    font.pixelSize: Constants.fontSize
+                    horizontalAlignment: dataContainer.hmiUITextAlignment
+                    visible: mediaPlayerView.playerType === "SDL" && dataContainer.navigationModel.timeToDestination
                 }
             }
         }
@@ -175,7 +187,7 @@ Item {
         // Rewind, play, pause, forward buttons
         id: playPauseRewindForward
         width: parent.width
-        height: 1/5 * parent.height
+        height: 1/5 * parent.height - statusBar.height
         anchors.left: parent.left
         anchors.leftMargin: (width - playPauseButton.width - prevButton.width - nextButton.width) / 2
         anchors.top: spacingBetweenItems2.bottom
@@ -232,7 +244,7 @@ Item {
 
         PresetRow {
             id: presetsRow
-            anchors.bottom: parent.bottom
+            anchors.top: parent.top
             anchors.left: parent.left
             presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
             width: parent.width
@@ -269,6 +281,12 @@ Item {
                 }
             }
         }
+    }
+
+    StatusBar {
+        id: statusBar
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
     }
 
     states: [

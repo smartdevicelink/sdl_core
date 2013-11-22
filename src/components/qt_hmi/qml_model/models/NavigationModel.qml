@@ -39,7 +39,10 @@ QtObject {
     property string text2: ""
     property string totalDistance: ""
     property string eta: ""
-    property var icon: null
+    property string timeToDestination: ""
+    property var turnIcon
+    property var nextTurnIcon
+
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
     property bool maneuverComplete: null

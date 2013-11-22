@@ -1274,13 +1274,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 // TODO(VS): change printf to logger
 bool MessageHelper::VerifyApplicationName(
   smart_objects::SmartObject& msg_params) {
-  for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-    const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
-    if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-        ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-      printf("Invalid characters in tts name.\n");
-      return false;
-    }
+
+  if (msg_params.keyExists(strings::tts_name)) {
+    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
+        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
+        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
+            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+          printf("Invalid characters in tts name.\n");
+          return false;
+        }
+      }
   }
 
   const std::string& name = msg_params[strings::app_name].asString();
