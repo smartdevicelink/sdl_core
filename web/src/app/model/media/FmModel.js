@@ -15,19 +15,21 @@ MFT.FmModel = Em.Object.create({
         var i,
             directTunes = [],
             directTuneItems = {},
-            frequency,
-            pointIndex;
+            frequency = 87,
+            fraction = 9;
 
         this._super();
 
         for (i = 879; i <= 1079; i++) {
             directTunes.push(i.toString().split(''));
+            directTuneItems[i] = MFT.PlaylistItem.create({frequency: frequency+'.'+fraction});
 
-            pointIndex = (i <= 1000) ? 2 : 3;
-            frequency = i.toString();
-            frequency = frequency.slice(0,pointIndex)+'.'+frequency.slice(pointIndex);
-
-            directTuneItems[i] = MFT.PlaylistItem.create({frequency: frequency});
+            if (fraction < 9) {
+                fraction++;
+            } else {
+                frequency++;
+                fraction = 0;
+            }
         }
 
         this.directTunestations.set('directTunes', directTunes);
@@ -35,10 +37,6 @@ MFT.FmModel = Em.Object.create({
     },
 	
 	band: MFT.RangedValue.create({value:-1, activeBand:0}),
-
-    customDirectTuneStations: MFT.Playlist.create({
-        directTuneItems: {}
-    }),
 	
 	directTunestations: MFT.Playlist.create({
 		
@@ -53,6 +51,8 @@ MFT.FmModel = Em.Object.create({
 	fm1: MFT.Playlist.create( {
 		selectedIndex: 					1,
 
+        name: 'fm1',
+
 		items: {
 			0:MFT.PlaylistItem.create({frequency: '99.1',genre: 'Pop',title: 'BlUE SKY',artist: 'THE MAX', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '98.8',genre: 'Club',title: 'JUMP AND DOWN',artist: 'THE PROJECT X', isHd: false}),
@@ -66,7 +66,9 @@ MFT.FmModel = Em.Object.create({
 	fm2: MFT.Playlist.create( {
 		selectedIndex: 					4,
 
-		items:{
+        name: 'fm2',
+
+        items:{
 			0:MFT.PlaylistItem.create({frequency: '101.1',genre: 'Club',title: 'SPRING TIME',artist: 'DJ SKY', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '103.2',genre: 'Rock',title: 'RAINBOW',artist: 'THE BEES', isHd: false}),
 			2:MFT.PlaylistItem.create({frequency: '99.3',genreBinding: 'MFT.locale.label.view_media_genre_classic',title: 'SUNSET',artist: 'SKYLARK',isHd: MFT.SettingsModel.isEnglish, HDChannels: 3, currentHDChannel: 2}),
@@ -79,7 +81,9 @@ MFT.FmModel = Em.Object.create({
 	fmAst: MFT.Playlist.create( {				
 		selectedIndex: 					1,
 
-		items:{
+        name: 'fmAst',
+
+        items:{
 			0:MFT.PlaylistItem.create({frequency: '98.2',genre: 'Club',title: 'SPRING TIME',artist: 'DJ SKY', isHd: false}) ,
 			1:MFT.PlaylistItem.create({frequency: '106.6',genre: 'Rock',title: 'WELCOME HOME',artist: 'TODD SULLIVAN', isHd: false}),
 			2:MFT.PlaylistItem.create({frequency: '99.3',genre: 'Pop',title: 'GOOD MORNING',artist: 'SUSAN BAKER',isHd: MFT.SettingsModel.isEnglish, HDChannels: 2, currentHDChannel: 2}),

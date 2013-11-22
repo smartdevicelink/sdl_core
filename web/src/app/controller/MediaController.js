@@ -882,7 +882,7 @@ MFT.MediaController = Em.Object.create({
         this.currentDirectTuneData.set('selectedDirectTuneStation');
 		playlist.set('selectedIndex', index);
 
-        if (MFT.States.media.radio.fm.active && MFT.FmModel.band.value == 0) {
+        if (playlist.name == 'fm1') {
             FFW.RevSDL.sendTuneRadioRequest(this.get('currentActiveData'));
         }
 	},
@@ -1070,40 +1070,52 @@ MFT.MediaController = Em.Object.create({
 
     /** Set Direct Tune Station, when was changed current station on the HMI **/
     setSDLDirectTuneStation: function(data) {
-        var frequency = data.radioStation.frequency.toString() + (data.radioStation.fraction ? data.radioStation.fraction.toString() : "0"),
+        var presetActive = false,
+            frequency = data.radioStation.frequency.toString() + (data.radioStation.fraction ? data.radioStation.fraction.toString() : "0"),
             frequencyIndex = Number(frequency),
-            directTuneItem = MFT.FmModel.directTunestations.directTuneItems[frequencyIndex];
+            station = MFT.FmModel.directTunestations.directTuneItems[frequencyIndex];
 
-        if (!directTuneItem) {
+        if (!station) {
             return;
         }
 
-        if (typeof (data.songInfo) != 'undefined') {
-            directTuneItem.set('title', (data.songInfo.name) ? data.songInfo.name : '');
-            directTuneItem.set('artist', (data.songInfo.artist) ? data.songInfo.name : '');
-            directTuneItem.set('genre', (data.songInfo.genre) ? data.songInfo.genre : '');
-        }
-        if (typeof (data.radioStation.currentHD) != 'undefined') {
-            directTuneItem.set('isHd', !!(data.radioStation.currentHD));
-            directTuneItem.set('HDChannels', (data.radioStation.availableHDs) ? data.radioStation.availableHDs : 0);
-            directTuneItem.set('currentHDChannel', (data.radioStation.currentHD) ? data.radioStation.currentHD : 0);
-        }
-
-        MFT.FmModel.directTunestations.set('selectedDirectTuneStation', frequencyIndex);
-
         for (var key in MFT.FmModel.fm1.items) {
             if (frequency === MFT.FmModel.fm1.items[key].frequency.replace('.', '')) {
-                MFT.FmModel.fm1.set('selectedIndex',key);
+                var index = Number(key);
 
-                MFT.FmModel.directTunestations.set('selectedDirectTuneStation', null);
                 this.set('directTuneSelected', false);
 
-                return;
+                MFT.FmModel.fm1.set('selectedIndex',index);
+
+                station = MFT.FmModel.fm1.items[index];
+
+                presetActive = true;
+
+                break;
             }
         }
 
-        if (MFT.States.media.radio.fm.active && MFT.FmModel.band.value == 0) {
-            this.set('directTuneSelected', true);
+        if (!presetActive) {
+            station = MFT.FmModel.directTunestations.directTuneItems[frequencyIndex];
+        }
+
+        if (typeof (data.songInfo) != 'undefined') {
+            station.set('title', (data.songInfo.name) ? data.songInfo.name : '');
+            station.set('artist', (data.songInfo.artist) ? data.songInfo.name : '');
+            station.set('genre', (data.songInfo.genre) ? data.songInfo.genre : '');
+        }
+        if (typeof (data.radioStation.currentHD) != 'undefined') {
+            station.set('isHd', !!(data.radioStation.currentHD));
+            station.set('HDChannels', (data.radioStation.availableHDs) ? data.radioStation.availableHDs : 0);
+            station.set('currentHDChannel', (data.radioStation.currentHD) ? data.radioStation.currentHD : 0);
+        }
+
+        if (!presetActive) {
+            MFT.FmModel.directTunestations.set('selectedDirectTuneStation', frequencyIndex);
+
+            if (MFT.States.media.radio.fm.active && MFT.FmModel.band.value == 0) {
+                this.set('directTuneSelected', true);
+            }
         }
     },
 
@@ -1268,7 +1280,7 @@ MFT.MediaController = Em.Object.create({
             this.set('sdlAccessStatus', true);
             this.set('sdlControlStatusIco', 4);
         } else {
-
+            this.showPopup('')
         }
     }
 });
