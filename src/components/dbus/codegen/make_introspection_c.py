@@ -50,10 +50,9 @@ class Impl(FordXmlParser):
             if el is not None:
                 out_el_tree.append(el)
 
-
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description='Converts introspection.xml to C-string')
+arg_parser.add_argument('--infile', required=True, help="Full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="Path to directory where output file introspection_xml.cc will be saved")
 args = arg_parser.parse_args()
 
 if not path.isdir(args.outdir):

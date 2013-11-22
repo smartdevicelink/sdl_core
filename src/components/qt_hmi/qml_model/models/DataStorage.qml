@@ -100,6 +100,10 @@ QtObject {
                 if (application.hmiUIText.image !== undefined) {
                     currentApplication.hmiUIText.image = application.hmiUIText.image
                 }
+                if (application.hmiUITextAlignment !== undefined) {
+                    currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
+                }
+
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
@@ -131,6 +135,7 @@ QtObject {
             customPresets: app.customPresets ? app.customPresets : [],
             playPauseState: 'Pause',
             hmiUIText: app.hmiUIText,
+            hmiUITextAlignment: app.hmiUITextAlignment,
             options: [],
             turnList: [],
             turnListSoftButtons: [],
@@ -246,8 +251,6 @@ QtObject {
 
     property int hmiUILanguage: Common.Language.EN_US
     property int hmiTTSVRLanguage: Common.Language.EN_US
-
-    property int hmiUITextAlignment: Text.AlignLeft
 
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
