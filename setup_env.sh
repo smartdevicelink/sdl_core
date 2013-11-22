@@ -223,9 +223,9 @@ if $QT_HMI || $INSTALL_ALL; then
 		"2 > 1") echo "Removing CMake build system"
 		   sudo apt-get remove -y cmake cmake-data
 		   echo "Installing CMake build system"
-		   if [ ${ARCH} = "i386" ]; then
+		   if [ ${ARCH} == "i386" ]; then
 		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-		   elif [ ${ARCH} = "x64" ]; then
+		   elif [ ${ARCH} == "x64" ]; then
 		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 		   fi
 		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
