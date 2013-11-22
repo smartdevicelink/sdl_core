@@ -148,6 +148,7 @@
                },
                "Alert":{
                   "hmi_levels":[
+                     "BACKGROUND",
                      "FULL",
                      "LIMITED"
                   ]

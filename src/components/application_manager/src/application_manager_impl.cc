@@ -1336,7 +1336,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
-      if (output.validate() != smart_objects::Errors::OK) {
+      if (output.validate() != smart_objects::Errors::OK &&
+          output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER) {
         LOG4CXX_WARN(
             logger_,
             "Incorrect parameter from HMI");
