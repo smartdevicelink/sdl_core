@@ -100,7 +100,6 @@
 
 #info_nonMedia {
 	z-index: 1001;
-    overflow: hidden;
 }
 
 #info_nonMedia .backButton {
@@ -113,6 +112,7 @@
 	top: 90px;
 	width: 600px;
 	height: 300px;
+    overflow: hidden;
 }
 
 #info_nonMedia .app_title {
