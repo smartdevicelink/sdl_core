@@ -231,7 +231,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   if (all_complete) {
     smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
-    if (any_arg_success) {//(mobile_api::Result::eType::SUCCESS == status) {
+    if (any_arg_success) {
       for (HmiRequests::const_iterator it = hmi_requests_.begin();
           it != hmi_requests_.end(); ++it) {
         response_params[it->str] = it->value;
@@ -239,7 +239,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse( any_arg_success, status, NULL,//status == mobile_apis::Result::SUCCESS, status, NULL,
+    SendResponse( any_arg_success, status, NULL,
                  &response_params);
   }
 }
