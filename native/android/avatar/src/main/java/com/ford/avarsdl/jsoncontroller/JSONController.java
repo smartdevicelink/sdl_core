@@ -69,7 +69,6 @@ public class JSONController {
 	public void sendNotification(String method, String jsonParams) {
 		mJSONParser.putEmptyJSONRPCObject();
 		String jsonMsg = mJSONParser.createJSONNotification(method, jsonParams);
-        Logger.d(getClass().getSimpleName() + " sendNotification: " + jsonMsg);
 		sendJSONMsg(jsonMsg);
 	}
 

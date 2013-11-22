@@ -24,8 +24,8 @@ public class NotificationCommandImpl extends JSONController implements Notificat
         try {
             byte serializeMethod = 2;
             String notificationString = notification.serializeJSON(serializeMethod).toString();
-            Logger.d(getClass().getSimpleName() + " send method: " + method);
-            Logger.d(getClass().getSimpleName() + " send notification: " + notificationString);
+            //Logger.d(getClass().getSimpleName() + " send method: " + method);
+            Logger.d(getClass().getSimpleName() + " send: " + notificationString);
             sendNotification(method, notificationString);
         } catch (JSONException e) {
             Logger.e(getClass().getSimpleName() + " execute", e);
