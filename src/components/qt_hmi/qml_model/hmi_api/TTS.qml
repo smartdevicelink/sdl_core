@@ -96,6 +96,7 @@ Item {
                         }
                      ).join(", ") :
                     dataContainer.globalProperties.helpPrompt
+
         var newTimeoutPrompt = timeoutPrompt ?
                     timeoutPrompt.map(
                         function (structure) {
@@ -108,17 +109,6 @@ Item {
             "helpPrompt": newHelpPropmt,
             "timeoutPrompt": newTimeoutPrompt
         }
-
-/*
-        if (helpPrompt) {
-            dataContainer.globalProperties.helpPrompt = helpPrompt.map( function (structure) { return structure.text } ).join(", ")
-            console.debug(dataContainer.globalProperties.helpPrompt)
-        }
-
-        if (timeoutPrompt) {
-            dataContainer.globalProperties.timeoutPrompt = timeoutPrompt.map( function (structure) { return structure.text } ).join(", ")
-        }
-        */
         console.debug("exit")
     }
 }
