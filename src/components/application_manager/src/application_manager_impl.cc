@@ -1573,10 +1573,12 @@ void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
                                     new_timeout_value);
 }
 
-unsigned int ApplicationManagerImpl::application_id(int correlation_id) {
-  std::map<int, unsigned int>::iterator it = appID_list_.find(correlation_id);
+const unsigned int ApplicationManagerImpl::application_id
+(const int correlation_id) {
+  std::map<const int, const unsigned int>::const_iterator it =
+      appID_list_.find(correlation_id);
     if (appID_list_.end() != it) {
-      unsigned int app_id = it->second;
+      const unsigned int app_id = it->second;
       appID_list_.erase(it);
       return app_id;
     } else {
@@ -1584,9 +1586,10 @@ unsigned int ApplicationManagerImpl::application_id(int correlation_id) {
     }
 }
 
-void ApplicationManagerImpl::set_application_id(int correlation_id,
-                                                unsigned int app_id) {
-  appID_list_.insert(std::pair<int, unsigned int>(correlation_id, app_id));
+void ApplicationManagerImpl::set_application_id(const int correlation_id,
+                                                const unsigned int app_id) {
+  appID_list_.insert(std::pair<const int, const unsigned int>
+  (correlation_id, app_id));
 }
 
 }  // namespace application_manager

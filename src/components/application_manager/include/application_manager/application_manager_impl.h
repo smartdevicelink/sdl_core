@@ -447,7 +447,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @return application id associated whith correlation id
      */
-    unsigned int application_id(int correlation_id);
+    const unsigned int application_id(const int correlation_id);
 
     /*
      * @brief Sets application id correlation id
@@ -455,7 +455,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-    void set_application_id(int correlation_id, unsigned int app_id);
+    void set_application_id(const int correlation_id,
+                            const unsigned int app_id);
 
 
 
@@ -518,7 +519,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Map of correlation id  and associated application id.
      */
-    std::map<int, unsigned int> appID_list_;
+    std::map<const int, const unsigned int> appID_list_;
 
     MessageChain message_chaining_;
     bool audio_pass_thru_active_;

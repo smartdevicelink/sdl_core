@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ACTIVATE_APP_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
