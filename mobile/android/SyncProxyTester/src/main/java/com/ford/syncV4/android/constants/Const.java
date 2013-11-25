@@ -55,15 +55,13 @@ public class Const {
 	}
 
 	// Keys to pass objects via IntentHelper
-	public static final String INTENTHELPER_KEY_SOFTBUTTON = "IntentSoftButton";
-	public static final String INTENTHELPER_KEY_SOFTBUTTONSLIST = "IntentSoftButtonsList";
+	public static final String INTENTHELPER_KEY_OBJECT = "IntentObject";
+	public static final String INTENTHELPER_KEY_OBJECTSLIST = "IntentObjectsList";
     public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES = "IntentKeyboardProperties";
 
 	// Keys to pass values via Intent
-	public static final String INTENT_KEY_SOFTBUTTONS_MAXNUMBER = "MaxSoftButtonsNumber";
+	public static final String INTENT_KEY_OBJECTS_MAXNUMBER = "MaxObjectsNumber";
 
-	// Request id for SoftButtonEditActivity
-	public static final int REQUEST_EDIT_SOFTBUTTON = 42;
 	// Request id for SoftButtonsListActivity
 	public static final int REQUEST_LIST_SOFTBUTTONS = 43;
 	// Request id for KeyboardPropertiesActivity

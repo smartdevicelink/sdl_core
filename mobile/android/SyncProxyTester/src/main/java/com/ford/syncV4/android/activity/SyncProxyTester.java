@@ -1386,9 +1386,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     @Override
                                     public void onClick(View v) {
                                         IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 SCROLLABLEMESSAGE_MAXSOFTBUTTONS);
                                         startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                     }
@@ -1715,9 +1715,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     @Override
                                     public void onClick(View v) {
                                         IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 ALERTMANEUVER_MAXSOFTBUTTONS);
                                         startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                     }
@@ -1826,9 +1826,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(View v) {
                                     IntentHelper
                                             .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
@@ -2406,9 +2406,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             SHOWCONSTANTTBT_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                 }
@@ -2719,9 +2719,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper
-                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
@@ -2996,9 +2996,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             UPDATETURNLIST_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
                                 }
@@ -4049,12 +4049,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             case Const.REQUEST_LIST_SOFTBUTTONS:
                 if (resultCode == RESULT_OK) {
                     currentSoftButtons = (Vector<SoftButton>) IntentHelper.
-                            getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                     if (chkIncludeSoftButtons != null) {
                         chkIncludeSoftButtons.setChecked(true);
                     }
                 }
-                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                 break;
 
             case REQUEST_FILE_OPEN:
