@@ -91,7 +91,7 @@ abstract class RPCStructAdapter<T extends RPCStruct> extends ArrayAdapter<T> {
                 }
 
                 text.setGravity(Gravity.CENTER);
-                text.setText("Add soft button");
+                text.setText(titleForAddRow());
 
                 return text;
             }
@@ -102,6 +102,8 @@ abstract class RPCStructAdapter<T extends RPCStruct> extends ArrayAdapter<T> {
                 return null;
         }
     }
+
+    protected abstract String titleForAddRow();
 
     protected abstract void fillItem(TwoLineListItem item, int position);
 

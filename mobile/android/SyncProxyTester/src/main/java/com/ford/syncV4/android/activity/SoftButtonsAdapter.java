@@ -19,6 +19,11 @@ class SoftButtonsAdapter extends RPCStructAdapter<SoftButton> {
     }
 
     @Override
+    protected String titleForAddRow() {
+        return "Add soft button";
+    }
+
+    @Override
     protected void fillItem(TwoLineListItem item, int position) {
         final SoftButton softButton = getItem(position);
         TextView text1 = item.getText1();

@@ -24,6 +24,11 @@ public class ChoiceAdapter extends RPCStructAdapter<Choice> {
     }
 
     @Override
+    protected String titleForAddRow() {
+        return "Add choice";
+    }
+
+    @Override
     protected void fillItem(TwoLineListItem item, int position) {
         final Choice choice = getItem(position);
         TextView text1 = item.getText1();
