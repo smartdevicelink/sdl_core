@@ -226,7 +226,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status << ", so response status become " << status);
     } else {
     	any_arg_success = true;
-      }
+    }
   }
 
   if (all_complete) {
@@ -239,8 +239,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse( any_arg_success, status, NULL,
-                 &response_params);
+    SendResponse( any_arg_success, status, NULL, &response_params);
   }
 }
 #endif // #ifdef QT_HMI
