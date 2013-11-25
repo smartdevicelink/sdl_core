@@ -161,6 +161,11 @@ class Profile {
      */
     const unsigned int app_time_scale_max_requests() const;
 
+    /**
+     * @brief Returns Max allowed number of PutFile requests for one application in NONE
+     */
+    const unsigned int put_file_in_none() const;
+
     // Members section
 
   protected:
@@ -230,6 +235,7 @@ class Profile {
     std::string                     named_pipe_path_;
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
+    unsigned int                    put_file_in_none_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

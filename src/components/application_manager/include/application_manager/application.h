@@ -339,6 +339,7 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
+    virtual const unsigned int put_file_in_none_count() const = 0;
     virtual const mobile_api::SystemContext::eType& system_context() const = 0;
     virtual const mobile_api::AudioStreamingState::eType&
     audio_streaming_state() const = 0;
@@ -349,6 +350,7 @@ class Application : public virtual InitialApplicationData,
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
     virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+    virtual void increment_put_file_in_none_count() = 0;
     virtual void set_system_context(
       const mobile_api::SystemContext::eType& system_context) = 0;
     virtual void set_audio_streaming_state(

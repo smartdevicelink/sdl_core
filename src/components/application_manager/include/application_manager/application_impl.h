@@ -79,6 +79,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
+  const unsigned int put_file_in_none_count() const;
   const mobile_api::SystemContext::eType& system_context() const;
   inline const mobile_api::AudioStreamingState::eType&
   audio_streaming_state() const;
@@ -89,6 +90,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
   void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
+  void increment_put_file_in_none_count();
   void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
   void set_audio_streaming_state(
@@ -123,6 +125,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool has_been_activated_;
 
   mobile_api::HMILevel::eType hmi_level_;
+  unsigned int put_file_in_none_count_;
   mobile_api::SystemContext::eType system_context_;
   mobile_api::AudioStreamingState::eType audio_streaming_state_;
   std::string app_icon_path_;
