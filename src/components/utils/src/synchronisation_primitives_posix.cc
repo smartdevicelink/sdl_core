@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
 #include "utils/macro.h"
 #include "utils/synchronisation_primitives.h"
 

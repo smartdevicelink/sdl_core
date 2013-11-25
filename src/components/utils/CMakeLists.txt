@@ -12,9 +12,7 @@ set (SOURCES
     ./src/timer_linux.cc
     ./src/date_time.cc
    ./src/signals_linux.cc
-    ./src/l4l.cc
-    ./src/logger.cc
 )
 
 add_library("Utils" ${SOURCES})
-#target_link_libraries ("Utils" log4cxx rt)
+target_link_libraries("Utils" log4cxx)

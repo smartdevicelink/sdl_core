@@ -299,4 +299,4 @@ set (HMI_COMMANDS_SOURCES
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
-#target_link_libraries ("ApplicationManager" log4cxx)
+target_link_libraries ("ApplicationManager" log4cxx)

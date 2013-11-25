@@ -30,8 +30,10 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-# MediaManager
-#  Libusb-1.0.16
+  #MediaManager
+  #Libusb-1.0.16
+  apr-1
+  aprutil-1
 )
 
 # required to find 'glibconfig.h'
