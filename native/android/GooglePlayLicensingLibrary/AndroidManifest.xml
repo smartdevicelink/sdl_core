@@ -18,7 +18,7 @@
     android:versionCode="2"
     android:versionName="1.5">
     <!-- Devices >= 3 have version of Android Market that supports licensing. -->
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="15" />
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="9" />
     <!-- Required permission to check licensing. -->
     <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
 </manifest>

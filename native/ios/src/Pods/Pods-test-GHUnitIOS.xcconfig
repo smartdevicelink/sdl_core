@@ -1,1 +1,0 @@
-PODS_TEST_GHUNITIOS_OTHER_LDFLAGS = -framework CoreLocation

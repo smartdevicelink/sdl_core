@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="@string/selectprotocol_ipAddress"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <EditText
+                android:id="@+id/sdl_ipAddr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="text"
+                android:maxLength="15"
+                android:text="@string/selectprotocol_ipAddressDefault"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="@string/selectprotocol_tcpPort"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <EditText
+                android:id="@+id/sdl_tcpPort"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:maxLength="5"
+                android:text="@string/selectprotocol_tcpPortDefault"/>
+    </LinearLayout>
+
+</LinearLayout>

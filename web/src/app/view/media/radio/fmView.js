@@ -11,18 +11,18 @@
  */
 MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
 
-	/** View Id */
-	elementId: 'fm_view',
+    /** View Id */
+    elementId: 'fm_view',
 
-	childViews: ['fmInfo','rightmenu'],
+    childViews: ['fmInfo','rightmenu'],
 
-	/** Class Name*/
-	classNames: ['hidden','fm-info'],
+    /** Class Name*/
+    classNames: ['hidden','fm-info'],
 
 
-	fmInfo: Em.ContainerView.create({
+    fmInfo: Em.ContainerView.create({
 
-		elementId: 'fm-info-view',
+        elementId: 'fm-info-view',
 
         childViews: ['divider', 'band', 'infoWrapper'],
 
@@ -39,15 +39,35 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             wrapper: Em.View.create({
                 classNames: 'info_wrapper',
                 controlerBinding: 'MFT.MediaController',
+                HDChannels: function () {
+                    var list = [],
+                        i;
+
+                    for (i = 1; i <= this.controler.get('currentActiveData').HDChannels; i++) {
+                        list.push(
+                            {
+                                title: i,
+                                active: (this.controler.get('currentActiveData').currentHDChannel == i)
+                            }
+                        );
+                    }
+
+                    return list;
+                }.property('this.controler.currentActiveData.HDChannels'),
                 template:  Em.Handlebars.compile(
                     '<div class="hdInfo hidden_display" {{bindAttr class="view.controler.currentActiveData.isHd:visible_display"}}>'+
-                        '<div class="fmInfoHdIco"></div>'+
+                        '<div class="HDChannels">' +
+                        '{{#each view.HDChannels}}' +
+                            '<span {{bindAttr class="active:active"}}>{{title}}</span>'+
+                        '{{/each}}'+
+                            '<span class="type"> - WDVD</span>'+
+                        '</div>'+
                         '<div class="hdtitle">{{view.controler.currentActiveData.title}}</div>'+
                         '<div class="hdartist">{{view.controler.currentActiveData.artist}}</div>'+
-                    '</div>'+
-                    '<div class="nonHDsonginfo not-visible" {{bindAttr class="view.controler.fmRDSTextIsHidden::visible"}}>{{view.songInfo}}</div>'+
-                    '<span class="STAName not-visible" {{bindAttr class=" view.controler.fmRDSTextIsHidden::visible"}}>STA-{{view.STAName}}</span>'+
-                    '<div class="fmgenre not-visible" {{bindAttr class="view.controler.genreIsVisible:visible "}}>{{view.controler.currentActiveData.genre}}</div>'
+                        '</div>'+
+                        '<div class="nonHDsonginfo not-visible" {{bindAttr class="view.controler.fmRDSTextIsHidden::visible"}}>{{view.songInfo}}</div>'+
+                        '<span class="STAName not-visible" {{bindAttr class=" view.controler.fmRDSTextIsHidden::visible"}}>STA-{{view.STAName}}</span>'+
+                        '<div class="fmgenre not-visible" {{bindAttr class="view.controler.genreIsVisible:visible "}}>{{view.controler.currentActiveData.genre}}</div>'
                 ),
                 /** Formate Station name according to HD or non HD State of Station*/
                 STAName: function(){
@@ -108,7 +128,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
 
                             template:  Em.Handlebars.compile(
                                 '<p>' + MFT.locale.label.view_media_fm_tags_memoryIsFull + '</p>' +
-                                '<p>' + MFT.locale.label.view_media_fm_tags_pleaseConnectIPod + '</p>'
+                                    '<p>' + MFT.locale.label.view_media_fm_tags_pleaseConnectIPod + '</p>'
                             )
                         }),
 
@@ -146,110 +166,136 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             template:  Em.Handlebars.compile(
                 '{{#if view.controller.directKeypressed}}'+
                     '{{view.controller.directTuneToString}}'+
-                '{{else}}'+
+                    '{{else}}'+
                     '{{view.controller.currentActiveData.frequency}}'+
-                    '{{#if view.controller.currentActiveData.isHd}}-2{{/if}}'+
-                '{{/if}}'
+                    '{{#if view.controller.currentActiveData.isHd}}' +
+                        '-{{view.controller.currentActiveData.currentHDChannel}}' +
+                    '{{/if}}'+
+                    '{{/if}}'
             )
         })
+    }),
 
-	}),
-
-	rightmenu: Em.ContainerView.create({
-		/** View Id */
-		elementId: 'fm_rightmenu_view',
-		/** Class Names */
-		classNames: ['right-stock'],
+    rightmenu: Em.ContainerView.create({
+        /** View Id */
+        elementId: 'fm_rightmenu_view',
+        /** Class Names */
+        classNames: ['right-stock'],
 
         classNameBindings: 	[
             'MFT.States.media.radio.fm.options.active:hide-important'
         ],
-		
-		/** View Components*/
-		childViews: [
-			'hdButton',
-			'scanButton',
-			'optionsButton',
-			'directTuneButton'
-		],
 
-		hdButton:  MFT.Button.extend({
-				elementId: 'media_fm_hdButton',
-				classNameBindings: [
-						'MFT.MediaController.isHDActive:isHd',
-						'MFT.MediaController.isHDButtonActiveInverted:replay_button_help',
-						'MFT.helpMode: hide_icon'
-				],
-				
-				classNames:			['rs-item','helpmode_box_shadow'],
-				target:			    'MFT.MediaController',
-				action:			    'turnHdHelpVideoOn',
-				text:		   MFT.locale.label.view_media_hdradio,
-				disabled:			true,
-				onDown: false,
-				icon: 'images/media/passiv_horiz_led.png',
-				// Change Icon for HD State
-				onIconChange: function(){
-					if(MFT.MediaController.get('isHDActive') && MFT.SettingsModel.isEnglish){
-						this.set('icon', 'images/media/active_horiz_led.png');
-					}else{
-						this.set('icon', 'images/media/passiv_horiz_led.png');
-					}
-				}.observes('MFT.MediaController.isHDActive'),
-				
-				disabledBinding: 'MFT.MediaController.isHDButtonActive'
-				
-		}),
+        /** View Components*/
+        childViews: [
+            'hdButton',
+            'scanButton',
+            'optionsButton',
+            'directTuneButton',
+            'sendRequestButton'
+        ],
 
-		scanButton:  MFT.Button.extend({
-			elementId:		'media_fm_scanButton',
-			classNameBindings: ['MFT.helpMode:scan_button_help'],
-			classNames:		['rs-item','helpmode_box_shadow'],
-			icon:			  'images/media/passiv_horiz_led.png',
-			target:			'MFT.MediaController',
-			action:			'turnScanHelpVideoOn',
-			disabled:		  true,
-			onDown: 			false,
-            text: 	   MFT.locale.label.view_media_scan,
-			disabledBinding:   'MFT.reversHelpModeBoolean'
-			
-		}),
-		
-		optionsButton: MFT.Button.extend({
-			elementId:	'media_fm_optionButton',
-			classNames:			['rs-item'],
-			icon:				'images/media/active_arrow.png',
+        hdButton:  MFT.Button.extend({
+            elementId: 'media_fm_hdButton',
+            classNameBindings: [
+                'MFT.MediaController.isHDActive:isHd',
+                'MFT.MediaController.isHDButtonActiveInverted:replay_button_help',
+                'MFT.helpMode: hide_icon'
+            ],
+
+            classNames:			['rs-item','helpmode_box_shadow'],
+            target:			    'MFT.MediaController',
+            action:			    'turnHdHelpVideoOn',
+            text:		   MFT.locale.label.view_media_hdradio,
+            disabled:			true,
+            onDown: false,
+            icon: 'images/media/passiv_horiz_led.png',
+            // Change Icon for HD State
+            onIconChange: function(){
+                if(MFT.MediaController.get('isHDActive') && MFT.SettingsModel.isEnglish){
+                    this.set('icon', 'images/media/active_horiz_led.png');
+                }else{
+                    this.set('icon', 'images/media/passiv_horiz_led.png');
+                }
+            }.observes('MFT.MediaController.isHDActive'),
+
+            disabledBinding: 'MFT.MediaController.isHDButtonActive'
+
+        }),
+
+        scanButton:  MFT.Button.extend({
+            elementId:		'media_fm_scanButton',
+            classNameBindings: ['MFT.helpMode:scan_button_help'],
+            classNames:		['rs-item','helpmode_box_shadow'],
+            icon:			  'images/media/passiv_horiz_led.png',
+            // Change Icon for Frequency Scan
+            onIconChange: function(){
+                if(MFT.MediaController.isFrequencyScan){
+                    this.set('icon', 'images/media/active_horiz_led.png');
+                }else{
+                    this.set('icon', 'images/media/passiv_horiz_led.png');
+                }
+            }.observes('MFT.MediaController.isFrequencyScan'),
+            target:			'MFT.MediaController',
+            action:			'turnFrequencyScan',
+            onDown: 			false,
+            text: 	   MFT.locale.label.view_media_scan
+        }),
+
+        optionsButton: MFT.Button.extend({
+            elementId:	'media_fm_optionButton',
+            classNames:			['rs-item'],
+            icon:				'images/media/active_arrow.png',
             text:		   MFT.locale.label.view_media_options,
-			action:			  'turnOnOptions',
-			target:    'MFT.MediaController',
-			disabledBinding:  'MFT.helpMode',
-			// Define button template
-			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
+            action:			  'turnOnOptions',
+            target:    'MFT.MediaController',
+            disabledBinding:  'MFT.helpMode',
+            // Define button template
+            template: Ember.Handlebars.compile(
+                '{{#with view}}'+
                     '<img class="ico" {{bindAttr src="icon"}} />'+
                     '<span>{{text}}</span>'+
-				'{{/with}}'
-			)
-		}),
+                    '{{/with}}'
+            )
+        }),
 
-		directTuneButton: MFT.Button.extend({
-			elementId:	'media_fm_directButton',
-			classNameBindings: ['MFT.helpMode:direct_button_help'],
-			templateName:	'text',
-			classNames:			['rs-item','helpmode_box_shadow'],
-			target:				'MFT.MediaController',
-			action:				'onDirectTune',
-			onDown: false,
-			text: function(){
-				if(!MFT.MediaController.directTuneHide){
-					this.set('action','offDirectTune');
-					return MFT.locale.label.view_media_presets
-				}else{
-					this.set('action','onDirectTune');
-					return MFT.locale.label.view_media_directTune
-				}
-			}.property('MFT.MediaController.directTuneHide','MFT.locale.label')
-		})
-	})
+        directTuneButton: MFT.Button.extend({
+            elementId:	'media_fm_directButton',
+            classNameBindings: ['MFT.helpMode:direct_button_help'],
+            templateName:	'text',
+            classNames:			['rs-item','helpmode_box_shadow'],
+            target:				'MFT.MediaController',
+            action:				'onDirectTune',
+            onDown: false,
+            text: function(){
+                if(!MFT.MediaController.directTuneHide){
+                    this.set('action','offDirectTune');
+                    return MFT.locale.label.view_media_presets
+                }else{
+                    this.set('action','onDirectTune');
+                    return MFT.locale.label.view_media_directTune
+                }
+            }.property('MFT.MediaController.directTuneHide','MFT.locale.label')
+        }),
+
+        sendRequestButton: MFT.Button.extend({
+            elementId:	'media_fm_sendRequestButton',
+            classNames:			['rs-item'],
+            target:				'MFT.AppController',
+            action:				'sendAccessRequest',
+            onDown: false,
+            templateName: 'text',
+            text: function(){
+                if(MFT.AppController.sdlAccessStatus){
+                    return MFT.locale.label.view_media_cancelAccess;
+                } else {
+                    return MFT.locale.label.view_media_grantAccess;
+                }
+            }.property('MFT.AppController.sdlAccessStatus'),
+            disabled: function() {
+                return (MFT.AppController.sdlControlStatus == 2);
+            }.property('MFT.AppController.sdlControlStatus')
+        })
+    })
 
 });

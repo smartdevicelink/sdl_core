@@ -17,9 +17,9 @@ MFT.TopControls = Em.ContainerView.extend({
 	classNameBindings:['MFT.StartUpController.isAllStatusHidden:hidden'],
 	
 	childViews: [
-		'controls',
-		'toggleFAQButton',
-        'toggleAppSettingsButton'
+		'controls'
+//		'toggleFAQButton',
+//        'toggleAppSettingsButton'
 	],
 	
 	controls: Em.ContainerView.extend({
@@ -29,7 +29,8 @@ MFT.TopControls = Em.ContainerView.extend({
 		childViews: [
 			'clock',
 			'vSeparator',
-			'toggleHelpButton'
+//			'toggleHelpButton',
+			'sdlControlStatus'
 		],
 		
 		clock: Em.View.extend({
@@ -47,7 +48,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			template: Em.Handlebars.compile('<div id="time_num"> {{#if MFT.States.settings.clock.active }} --:-- {{else}}{{MFT.SettingsController.time}}{{/if}} {{MFT.SettingsController.temperature}}</div><div id="time-skew-btn"></div>'),
 			
-			actionDown: function(event) {
+			actionDown: function() {
 				// Click handeler
 				MFT.States.goToState('settings.clock');
 				
@@ -75,31 +76,62 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			classNames: 'help_dev'
 		}),
-		
+
+        sdlControlStatus: MFT.Button.extend({
+			elementId:			'sdlControlStatus',
+
+            statusIcon: function() {
+                switch (MFT.AppController.sdlControlStatus) {
+                    case 1:
+                        return '';
+                        break;
+                    case 2:
+                        return 'yellow';
+                        break;
+                    case 3:
+                        return 'red';
+                        break;
+                    case 4:
+                        return 'mobile';
+                        break;
+                }
+            }.property('MFT.AppController.sdlControlStatus'),
+
+            template: Em.Handlebars.compile(
+                '<div class="icon" {{bindAttr class="view.statusIcon"}}></div>'+
+                '<div class="mask"></div>'
+            ),
+            target:				'MFT.AppController',
+            action:				'sendAccessRequest',
+            disabled: function() {
+                return (MFT.AppController.sdlControlStatus == 2 || MFT.AppController.SDLGrantAccessPopupVisible);
+            }.property('MFT.AppController.sdlControlStatus', 'MFT.AppController.SDLGrantAccessPopupVisible')
+		}),
+
 		toggleHelpButton: MFT.Button.extend({
 			elementId:			'help',
-			
+
 			indClassBinding:	Em.Binding.oneWay('MFT.helpMode'),
-			
+
 			hidden:				FLAGS.MCS_ENABLED,
-					
+
 			template: Em.Handlebars.compile(
 				'<div class="inact" {{bindAttr class="view.indClass:act"}}></div>'+
 				'<div id="sing" class="white" {{bindAttr class="view.indClass:yellow"}}></div>'+
 				'<div id="help-p"></div>'
 			),
-			
+
 			/** Toggle Help mode */
-			actionDown: function(event) {
+			actionDown: function() {
 				if ( FLAGS.MCS_ENABLED ) {
 					return;
 				}
-			
+
 				MFT.toggleProperty('helpMode');
-				
+
 				/** Switch off video player if active */
-				if(MFT.VideoPlayerController.model.isReady) MFT.VideoPlayerController.stop(); 
-				
+				if(MFT.VideoPlayerController.model.isReady) MFT.VideoPlayerController.stop();
+
 				/** Close FAQ state or App Settings state if they are active */
 				if( MFT.States.faq.active || MFT.States.appSettings.active) {
                     if(MFT.States.faq.from){
@@ -111,7 +143,7 @@ MFT.TopControls = Em.ContainerView.extend({
                     /** Reset from property */
                     MFT.States.faq.from = MFT.States.appSettings.from = null;
 				}
-				
+
 				this._super();
 			}
 		})

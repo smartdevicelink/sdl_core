@@ -1,0 +1,11 @@
+These are messages and their format of the HMI and OpenXC server communication.
+
+1. "station_up" - "up" event to switch to next tunable station
+2. "station_down" - "down" event to switch to next tunable station
+3. "step_up" - "up" event to increment tuned frequency by a single step
+4. "step_down" - "down" event to decrement tuned frequency by a single step
+5. "frequency_set_<value>" - tune radio module to the specified <value>, in kHz (example: "frequency_set_105300")
+6. "set_preset_<value>" - tune radio module to the specified in <value> preset number (example: "set_preset_4")
+7. "store_preset_<value>" - store radio module's preset at the <value> number (example: "store_preset_4")
+8. "set_tuner_band_<value>" - switch radio module to the <value> band (example: "store_preset_fm1").
+                              Possible valuas are: am, am_ast, fm1, fm2, fm3, fm_ast

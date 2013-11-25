@@ -123,7 +123,7 @@ div {
 #app_top_menu_cont {
 	z-index: 10000;
 	top: 0px;
-	left: 275px;
+	left: 261px;
 	position: relative;
 	pointer-events: none;
 }
@@ -776,6 +776,42 @@ div {
 	-webkit-transform: skewX(-43deg);
 	pointer-events: all;
 	left: -27px;
+}
+
+#sdlControlStatus {
+    width: 84px;
+    height: 53px;
+    left: 163px;
+    cursor: pointer;
+    z-index: 5000;
+    overflow: hidden;
+    pointer-events: none;
+    background: none;
+}
+
+#sdlControlStatus .icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url("../images/common/car.png") 50% 50% no-repeat;
+}
+#sdlControlStatus .icon.yellow {
+    background: url("../images/common/car_yellow.png") 50% 50% no-repeat;
+}
+#sdlControlStatus .icon.red {
+    background: url("../images/common/car_red.png") 50% 50% no-repeat;
+}
+#sdlControlStatus .icon.mobile {
+    background: url("../images/common/phone.png") 50% 50% no-repeat;
+}
+
+#sdlControlStatus .mask {
+    width: 93px;
+    height: 53px;
+    z-index: 5000;
+    -webkit-transform: skewX(-43deg);
+    pointer-events: all;
+    left: -27px;
 }
 
 #sing {

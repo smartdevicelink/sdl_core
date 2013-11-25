@@ -1,4 +1,4 @@
-package com.ford.avatar.test.jsoncontroller;
+package com.ford.avarsdl.test.jsoncontroller;
 
 import junit.framework.TestCase;
 

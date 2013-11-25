@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+
+    <string name="app_name_fr">Guide MyFord Touch (français)</string>
+
+    <!-- French settings -->
+    <string name="str_menu_quit_fr">Quitter</string>
+
+    <!-- French Downloader -->
+    <string name="toast_download_complete_fr">Download Complete.\nVideos are available to view.</string>
+
+</resources>

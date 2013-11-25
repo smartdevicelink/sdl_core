@@ -19,7 +19,7 @@ MFT.Playlist = Em.Object.extend( {
 		
 		onSelectDirecTune: function() {
 			 this.set('selectedDirectItem',this.directTuneItems[Number(this.selectedDirectTuneStation)]);
-		}.observes('this.selectedDirectTuneStation'),
-})
+		}.observes('this.selectedDirectTuneStation')
+});
 	
 

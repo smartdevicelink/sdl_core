@@ -1,0 +1,8 @@
+OpenXC server sends messages to the HMI's web socket in JSON format.
+
+webSocket.onmessage - is a callback which process messages from server.
+function parseMessage(message) - is an example of messages processing.
+
+These are JSON's keys to trace parameters from the server's message:
+1. "radio_frequency"
+2. "tuner_band"

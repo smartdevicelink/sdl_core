@@ -24,6 +24,23 @@ MFT.AppController = Em.Object.create({
 
 	// default navigation option
 	navigationEnabled: true,
+
+    popUpMessage: '',
+
+    /** Reverse SDL functionality **/
+    sdlAccessStatus: false,
+
+    /**
+     * Reverse SDL control status
+     *
+     * 1 - Driver control
+     * 2 - Waiting passenger control
+     * 3 - Passenger control rejected
+     * 4 - Passenger control
+     */
+    sdlControlStatus: 1,
+
+    SDLGrantAccessPopupVisible: false,
 	
 	/* Buttons array*/
 	buttons: MFT.SelectSystempopup.content.climate_style.list._childViews,
@@ -50,7 +67,7 @@ MFT.AppController = Em.Object.create({
 		this.set('navigationEnabled',false);
 	},
 	
-	onSettingsSubmit: function(view){
+	onSettingsSubmit: function(){
 		// sen selected options to backend
 		FFW.Backend.set('isNavigationEnabled',this.navigationEnabled);
 		FFW.Backend.set('vehicleModel', this.vehicleType);
@@ -71,5 +88,85 @@ MFT.AppController = Em.Object.create({
 	 */
 	invertIsNavigationEnabled: function(){
 		return !FFW.Backend.isNavigationEnabled
-	}.property('FFW.Backend.isNavigationEnabled')
+	}.property('FFW.Backend.isNavigationEnabled'),
+
+    /**
+     * Show popup and close it after closeTime, if it exists
+     * @param {number} closeTime time, after which the popup will close
+     * @param {string} message, displaying message popup
+     * @param {string} callback function
+     */
+    showPopup: function(elementId, closeTime, message, callback){
+        var self = this;
+
+        if (typeof message != 'undefined') {
+            this.set('popUpMessage', message);
+        }
+
+        $('#'+elementId).show().animate({
+            opacity: 1
+        },500);
+
+        if(!isNaN(closeTime)){
+            this[elementId+'TimerId'] = setTimeout(function() {
+                self.hidePopup(elementId, callback);
+            }, closeTime);
+        }
+    },
+
+    hidePopup: function(elementId, callback){
+        clearTimeout(this[elementId+'TimerId']);
+        $('#'+elementId).css({
+            'opacity': 0
+        }).hide();
+
+        if (typeof (callback) != 'undefined') {
+            callback();
+        }
+    },
+
+    showSDLGrantAccessPopup: function() {
+        this.showPopup('SDLGrantAccessPopup');
+        this.set('SDLGrantAccessPopupVisible', true);
+    },
+
+    hideSDLGrantAccessPopup: function() {
+        this.hidePopup('SDLGrantAccessPopup');
+        this.set('SDLGrantAccessPopupVisible', false);
+    },
+
+    sendAccessRequest: function() {
+        if(MFT.AppController.sdlAccessStatus){
+            FFW.RevSDL.sendCancelAccessRequest();
+        } else if (!this.SDLGrantAccessPopupVisible) {
+            this.showSDLGrantAccessPopup();
+        } else {
+            FFW.RevSDL.sendGrantAccessRequest();
+
+            this.set('sdlControlStatus', 2);
+
+            this.hideSDLGrantAccessPopup();
+        }
+    },
+
+    driverFocus: function() {
+        this.set('sdlAccessStatus', false);
+        this.set('sdlControlStatus', 1);
+        this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_driverControl);
+    },
+
+    changeAccessStatus: function(data) {
+        var self = this;
+
+        if (data.success) {
+            this.set('sdlAccessStatus', true);
+            this.set('sdlControlStatus', 4);
+            this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_granted);
+        } else if(data.resultCode == 'REJECTED') {
+            this.set('sdlControlStatus', 3);
+            this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_denied, function () {
+                self.set('sdlControlStatus', 1);
+            });
+        }
+    }
 });

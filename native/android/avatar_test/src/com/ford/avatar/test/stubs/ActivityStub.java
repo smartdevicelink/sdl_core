@@ -1,4 +1,4 @@
-package com.ford.avatar.test.stubs;
+package com.ford.avarsdl.test.stubs;
 
 import android.app.Activity;
 

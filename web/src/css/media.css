@@ -436,6 +436,32 @@
 #tagStorePopup .popup-window {
     min-width: 260px;
 }
+#SDLMessagesPopup {
+    top: 0;
+    left: 0;
+    z-index: 6;
+}
+#SDLMessagesPopupFormLabel{
+    margin-bottom: 20px;
+    line-height: 1.4em;
+}
+#SDLMessagesPopup .popup-window {
+    min-width: 260px;
+}
+#SDLGrantAccessPopup {
+    top: 0;
+    left: 0;
+    z-index: 6;
+}
+#SDLGrantAccessPopup .popup-window {
+    width: 376px;
+}
+#SDLGrantAccessPopup .label {
+    margin-bottom: 16px;
+}
+#SDLGrantAccessPopup .popup-window .ffw-button {
+    line-height: 46px;
+}
 
 /* Media options PTY Category view*/
 .media_options_PTYCategory_view {
@@ -782,13 +808,13 @@
 
 .rs-item {
     position: relative;
-    width: 135px;
+    width: 140px;
     height: 49px;
     cursor: pointer;
     border-bottom: 1px solid #333;
     font-size: 18px;
     line-height: 46px;
-    padding-left: 15px;
+    padding-left: 10px;
 }
 
 .rs-item.notpressed {
@@ -1780,6 +1806,30 @@
     background: url(../images/media/hd_ico.png) no-repeat;
     width: 149px;
     height: 30px;
+}
+
+.HDChannels {
+    position: absolute;
+    right: 292px;
+    top: 10px;
+    background: url(../images/media/hd-radio-ico.png) no-repeat;
+    padding-left: 36px;
+    width: 149px;
+    height: 28px;
+}
+.HDChannels span {
+    line-height: 28px;
+    font-size: 19px;
+    font-weight: bold;
+    padding: 0 2px;
+    color: #a6a6a6;
+}
+.HDChannels span.active {
+    color: #f89b1d;
+}
+.HDChannels span.type {
+    font-weight: normal;
+    padding: 0;
 }
 
 .channel {
