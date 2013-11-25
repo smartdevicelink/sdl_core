@@ -42,18 +42,17 @@ namespace application_manager {
 namespace commands {
 
 SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  : CommandRequestImpl(message) {
 }
 
 SpeakRequest::~SpeakRequest() {
-
 }
 
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
 
   Application* app = application_manager::ApplicationManagerImpl::instance()
-      ->application(connection_key());
+                     ->application(connection_key());
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -61,16 +60,9 @@ void SpeakRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
-  for (int i = 0;
-      i < (*message_)[strings::msg_params][strings::tts_chunks].length(); ++i) {
-    msg_params[strings::tts_chunks][i][strings::text] =
-        (*message_)[strings::msg_params][strings::tts_chunks][i][strings::text];
-  }
-  msg_params[strings::app_id] = app->app_id();
-  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+  (*message_)[strings::msg_params][strings::app_id] = app->app_id();
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak,
+                 &message_->getElement(strings::msg_params), true);
 }
 
 void SpeakRequest::on_event(const event_engine::Event& event) {
@@ -82,17 +74,17 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
 }
 
 void SpeakRequest::ProcessTTSSpeakResponse(
-    const smart_objects::SmartObject& message) {
+  const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_, "SpeakRequest::ProcessTTSSpeakResponse");
   Application* application = ApplicationManagerImpl::instance()->application(
-      connection_key());
+                               connection_key());
 
   if (NULL == application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -101,13 +93,13 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   bool result_code = false;
   const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+    static_cast<hmi_apis::Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
   if (hmi_apis::Common_Result::SUCCESS == code) {
     result_code = true;
   }
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SpeakID;
+    mobile_apis::FunctionID::SpeakID;
   SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
                NULL, &(message[strings::msg_params]));
 }

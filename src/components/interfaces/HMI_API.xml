@@ -1043,6 +1043,9 @@
     <param name="text" type="String" mandatory="true" maxlength="500">
         <description>The text or phonemes to be spoken.</description>
     </param>
+    <param name="type" type="Common.SpeechCapabilities" mandatory="true">
+      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
+    </param>
 </struct>
 
 <struct name="HMIApplication">
@@ -1898,7 +1901,7 @@
       <description>Timeout initiate timeoutPrompt</description>
     </param>
   </function>
-  <function name="PerformInteraction" messagetype="response">    
+  <function name="PerformInteraction" messagetype="response">
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
@@ -2382,7 +2385,7 @@
     <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
       <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="true">
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
       <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
