@@ -237,6 +237,11 @@ void PerformInteractionRequest::onTimeOut() {
   Application* app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key].asUInt());
   if (app) {
+
+    // Unsubscribe from event on UIPerformInteractionResponse to
+    // avoid of double execution of SendVrDeleteCommand()
+    unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+
     if(is_vr_help_item_) {
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
