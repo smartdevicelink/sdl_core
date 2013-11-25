@@ -39,7 +39,7 @@ public class SoftButtonsListActivity extends ListActivity {
         btnOk.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                IntentHelper.addObjectForKey(adapter.softButtons,
+                IntentHelper.addObjectForKey(adapter.objects,
                         Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
                 setResult(RESULT_OK);
                 finish();
@@ -73,7 +73,7 @@ public class SoftButtonsListActivity extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        if ((position == adapter.softButtons.size()) &&
+        if ((position == adapter.objects.size()) &&
                 !adapter.isMaxReached()) {
             // create and add default soft button
             Image img = new Image();
@@ -88,11 +88,11 @@ public class SoftButtonsListActivity extends ListActivity {
             sb.setIsHighlighted(true);
             sb.setSystemAction(SystemAction.DEFAULT_ACTION);
 
-            adapter.softButtons.add(sb);
+            adapter.objects.add(sb);
             adapter.notifyDataSetChanged();
         } else {
             currentSoftButtonIndex = position;
-            SoftButton softButton = adapter.softButtons.get(position);
+            SoftButton softButton = adapter.objects.get(position);
             IntentHelper.addObjectForKey(softButton,
                     Const.INTENTHELPER_KEY_SOFTBUTTON);
             startActivityForResult(
@@ -110,7 +110,7 @@ public class SoftButtonsListActivity extends ListActivity {
                     SoftButton result =
                             (SoftButton) IntentHelper.getObjectForKey(
                                     Const.INTENTHELPER_KEY_SOFTBUTTON);
-                    adapter.softButtons.set(currentSoftButtonIndex, result);
+                    adapter.objects.set(currentSoftButtonIndex, result);
                     adapter.notifyDataSetChanged();
                 }
                 currentSoftButtonIndex = -1;
