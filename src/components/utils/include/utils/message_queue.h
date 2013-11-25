@@ -34,7 +34,10 @@
 #define MESSAGE_QUEUE_CLASS
 
 #include <queue>
-#include "utils/synchronisation_primitives.h"
+
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
 
 /**
  * \class MessageQueue
@@ -95,23 +98,16 @@ template<typename T> class MessageQueue {
     /**
      *\brief Platform specific syncronisation variable
      */
-    mutable sync_primitives::SynchronisationPrimitives sync_variable_;
-    /**
-     *\brief Bool condition for waiting.
-     */
-    bool is_up_;
+    mutable sync_primitives::Lock queue_lock_;
+    mutable sync_primitives::ConditionalVariable queue_new_items_;
 };
 
-template<typename T> MessageQueue<T>::MessageQueue()
-  : is_up_(false) {
-  sync_variable_.init();
+template<typename T> MessageQueue<T>::MessageQueue() {
 }
 
 template<typename T> MessageQueue<T>::MessageQueue(std::queue<T> queue) {
-  sync_variable_.init();
-  sync_variable_.lock();
+  sync_primitives::AutoLock auto_lock(queue_lock_);
   queue_ = std::queue<T>(queue);
-  sync_variable_.unlock();
 }
 
 template<typename T> MessageQueue<T>::~MessageQueue() {
@@ -121,50 +117,39 @@ template<typename T> MessageQueue<T>::~MessageQueue() {
 }
 
 template<typename T> void MessageQueue<T>::wait() {
-  sync_variable_.lock();
-  while (!is_up_) {
-    sync_variable_.wait();
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  while (queue_.empty()) {
+    queue_new_items_.Wait(auto_lock);
   }
-  is_up_ = false;
-  sync_variable_.unlock();
 }
 
 template<typename T> int MessageQueue<T>::size() const {
-  int result = 0;
-  sync_variable_.lock();
-  result = queue_.size();
-  sync_variable_.unlock();
-  return result;
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  return queue_.size();
 }
 
 template<typename T> bool MessageQueue<T>::empty() const {
-  bool result = true;
-  sync_variable_.lock();
-  result = queue_.empty();
-  sync_variable_.unlock();
-  return result;
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  return queue_.empty();
 }
 
 template<typename T> void MessageQueue<T>::push(const T& element) {
-  sync_variable_.lock();
+  sync_primitives::AutoLock auto_lock(queue_lock_);
   queue_.push(element);
-
-  sync_variable_.signal();
-  is_up_ = true;
-
-  sync_variable_.unlock();
+  queue_new_items_.NotifyOne();
 }
 
 template<typename T> T MessageQueue<T>::pop() {
-  sync_variable_.lock();
+  sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
-    // error, TRACE
+    log4cxx::LoggerPtr logger =
+        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
+    LOG4CXX_ERROR(logger, "Runtime error, popping out of empty que");
   }
 
   T result = queue_.front();
   queue_.pop();
 
-  sync_variable_.unlock();
   return result;
 }
 
