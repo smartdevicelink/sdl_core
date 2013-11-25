@@ -17,6 +17,7 @@ set (LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
+    ConfigProfile
 )
 
 create_test("test_RequestWatchdog" "${SOURCES}" "${LIBRARIES}")
