@@ -55,6 +55,11 @@ class Lock {
   // Basic debugging aid, a flag that signals wether this lock is currently taken
   // Allows detection of abandoned and recursively captured mutexes
   bool lock_taken_;
+  void AssertFreeAndMarkTaken();
+  void AssertTakenAndMarkFree();
+#else
+  void AssertFreeAndMarkTaken() {}
+  void AssertTakenAndMarkFree() {}
 #endif
 
  private:

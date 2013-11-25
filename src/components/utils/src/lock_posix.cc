@@ -37,21 +37,11 @@ void Lock::Ackquire() {
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to acquire mutex");
   }
-#ifndef NDEBUG
-  if (lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Locking already taken mutex");
-  }
-  lock_taken_ = true;
-#endif
+  AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
-#ifndef NDEBUG
-  if (!lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Unlocking a mutex that is not taken");
-  }
-  lock_taken_ = false;
-#endif
+  AssertTakenAndMarkFree();
   int status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to unlock mutex");
@@ -82,5 +72,21 @@ bool Lock::Try() {
   }
   return ackquired;
 }
+
+#ifndef NDEBUG
+void Lock::AssertFreeAndMarkTaken() {
+  if (lock_taken_) {
+    LOG4CXX_ERROR(g_logger, "Locking already taken mutex");
+  }
+  lock_taken_ = true;
+}
+void Lock::AssertTakenAndMarkFree() {
+  if (!lock_taken_) {
+    LOG4CXX_ERROR(g_logger, "Unlocking a mutex that is not taken");
+  }
+  lock_taken_ = false;
+}
+#endif
+
 
 } // namespace sync_primitives
