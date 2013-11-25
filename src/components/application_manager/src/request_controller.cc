@@ -60,28 +60,40 @@ RequestController::~RequestController() {
   }
 }
 
-void RequestController::addRequest(const Request& request) {
+bool RequestController::addRequest(const Request& request) {
   LOG4CXX_INFO(logger_, "RequestController::addRequest()");
 
   list_mutex_.lock();
-  request_list_.push_back(request);
 
+  bool result = true;
   const commands::CommandRequestImpl* request_impl =
     (static_cast<commands::CommandRequestImpl*>(&(*request)));
 
-  LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-               << request_impl->default_timeout());
+  if (true ==
+      watchdog_->timeScaleMaxRequestExceed(request_impl->connection_key())) {
+    LOG4CXX_ERROR(logger_, "Application requests count exceed limit");
+    result = false;
+    // remove all app request
+  } else {
 
-  watchdog_->addRequest(new request_watchdog::RequestInfo(
-                          request_impl->function_id(),
-                          request_impl->connection_key(),
-                          request_impl->correlation_id(),
-                          request_impl->default_timeout()));
+    request_list_.push_back(request);
 
-  LOG4CXX_INFO(logger_, "Added request to watchdog.");
+    LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+                 << request_impl->default_timeout());
+
+    watchdog_->addRequest(new request_watchdog::RequestInfo(
+                            request_impl->function_id(),
+                            request_impl->connection_key(),
+                            request_impl->correlation_id(),
+                            request_impl->default_timeout()));
+
+    LOG4CXX_INFO(logger_, "Added request to watchdog.");
+    LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
+  }
 
   list_mutex_.unlock();
-  LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
+
+  return result;
 }
 
 void RequestController::terminateRequest(unsigned int mobile_correlation_id) {

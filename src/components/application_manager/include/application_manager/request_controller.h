@@ -73,8 +73,10 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    *
    * @param request Active mobile request
    *
+   * @return TRUE on success, otherwise false
+   *
    */
-  void addRequest(const Request& request);
+  bool addRequest(const Request& request);
 
   /*
    * @brief Removes request from queue

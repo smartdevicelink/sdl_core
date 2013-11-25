@@ -54,7 +54,9 @@ Profile::Profile()
   , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
-  , space_available_(104857600) {
+  , space_available_(104857600)
+  , app_time_scale_max_requests_(100)
+  , app_requests_time_scale_(10) {
   UpdateValues();
 }
 
@@ -140,6 +142,14 @@ const std::string&  Profile::video_server_type() const {
 
 const std::string& Profile::named_pipe_path() const {
   return named_pipe_path_;
+}
+
+const unsigned int Profile::app_time_scale() const {
+  return app_requests_time_scale_;
+}
+
+const unsigned int Profile::app_time_scale_max_requests() const {
+  return app_time_scale_max_requests_;
 }
 
 void Profile::UpdateValues() {
@@ -308,6 +318,25 @@ void Profile::UpdateValues() {
       str = strtok(NULL, ",");
     }
   }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppTimeScaleMaxRequests", value))
+      && ('\0' != *value)) {
+    app_time_scale_max_requests_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set max amount of requests per application"
+                 " time scale " <<  app_time_scale_max_requests_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppRequestsTimeScale", value))
+      && ('\0' != *value)) {
+    app_requests_time_scale_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
+                 " of requests " << app_requests_time_scale_);
+  }
+
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

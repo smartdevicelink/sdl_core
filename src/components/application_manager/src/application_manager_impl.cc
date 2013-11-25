@@ -1137,6 +1137,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   MessageHelper::PrintSmartObject(*message);
 #endif
 
+  //check requestcontroller
+
   LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
@@ -1198,7 +1200,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
     if ((*message)[strings::params][strings::message_type].asInt() ==
         mobile_apis::messageType::request) {
-      request_ctrl.addRequest(command);
+      if (false == request_ctrl.addRequest(command)) {
+        LOG4CXX_ERROR_EXT(logger_, "Unable to add request");
+      }
     }
 
     command->Run();

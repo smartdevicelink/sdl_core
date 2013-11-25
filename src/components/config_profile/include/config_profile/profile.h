@@ -150,6 +150,17 @@ class Profile {
       */
     const std::string& named_pipe_path() const;
 
+    /**
+     * @brief Returns application time scale for max amount of requests per it.
+     */
+    const unsigned int app_time_scale() const;
+
+    /**
+     * @brief Returns allowable max amount of requests per application
+     * time scale
+     */
+    const unsigned int app_time_scale_max_requests() const;
+
     // Members section
 
   protected:
@@ -217,6 +228,8 @@ class Profile {
     unsigned int                    space_available_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
+    unsigned int                    app_time_scale_max_requests_;
+    unsigned int                    app_requests_time_scale_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

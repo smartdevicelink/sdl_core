@@ -39,6 +39,7 @@
 #include <functional>
 #include <map>
 #include "request_watchdog/request_watchdog.h"
+#include "config_profile/profile.h"
 
 namespace request_watchdog {
 
@@ -193,6 +194,34 @@ void RequestWatchdog::updateRequestTimeout(int connection_key,
   }
 
   requestsMapMutex_.unlock();
+}
+
+bool RequestWatchdog::timeScaleMaxRequestExceed(int connection_key) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  requestsMapMutex_.lock();
+  bool result = false;
+
+  TimevalStruct end = date_time::DateTime::getCurrentTime();
+  TimevalStruct start;
+  start.tv_sec = end.tv_sec - profile::Profile::instance()->app_time_scale();
+
+  TimeScale scale(start, end, connection_key);
+  int count = 0;
+
+  count = count_if (requests_.begin(), requests_.end(), scale);
+  int max_request_per_time_scale =
+      profile::Profile::instance()->app_time_scale_max_requests();
+
+  if (count == max_request_per_time_scale ) {
+    LOG4CXX_ERROR(logger_, "Requests count " << count
+                  << " exceed application limit" << max_request_per_time_scale);
+    result = true;
+  }
+
+  requestsMapMutex_.unlock();
+
+  return result;
 }
 
 void RequestWatchdog::removeAllRequests() {

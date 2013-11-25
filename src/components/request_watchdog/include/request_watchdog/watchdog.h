@@ -53,6 +53,9 @@ class Watchdog {
     virtual void updateRequestTimeout(int connection_key,
                                       int correlation_id,
                                       int new_timeout_value) = 0;
+
+    virtual bool timeScaleMaxRequestExceed(int connection_key) = 0;
+
     virtual void removeAllRequests() = 0;
 
     virtual int getRegesteredRequestsNumber() = 0;
