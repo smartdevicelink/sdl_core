@@ -22,7 +22,7 @@ public class StartScanCommand implements RequestCommand {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             StartScan msg = new StartScan();
-            msg.setCorrelationID(MainApp.getInstance().nextCorrelationID());
+            msg.setCorrelationID(id);
 
             try {
                 proxy.sendRPCRequest(msg);

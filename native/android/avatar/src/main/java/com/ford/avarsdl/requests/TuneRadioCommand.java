@@ -25,7 +25,7 @@ public class TuneRadioCommand implements RequestCommand {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             TuneRadio msg = new TuneRadio();
-            msg.setCorrelationID(MainApp.getInstance().nextCorrelationID());
+            msg.setCorrelationID(id);
 
             RadioStation radioStation = new RadioStation();
             if (jsonParameters != null) {

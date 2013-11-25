@@ -20,7 +20,6 @@ public class GrantAccessCommand implements RequestCommand {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             GrantAccess msg = new GrantAccess();
-            msg.setTimeout(10000);
             msg.setCorrelationID(id);
             try {
                 proxy.sendRPCRequest(msg);

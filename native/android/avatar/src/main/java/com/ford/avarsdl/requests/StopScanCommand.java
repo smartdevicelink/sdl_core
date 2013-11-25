@@ -22,7 +22,7 @@ public class StopScanCommand implements RequestCommand {
         SyncProxyALM proxy = SDLService.getProxyInstance();
         if (proxy != null) {
             StopScan msg = new StopScan();
-            msg.setCorrelationID(MainApp.getInstance().nextCorrelationID());
+            msg.setCorrelationID(id);
 
             try {
                 proxy.sendRPCRequest(msg);

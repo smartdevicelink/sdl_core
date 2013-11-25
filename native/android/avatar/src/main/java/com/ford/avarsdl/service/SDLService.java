@@ -179,7 +179,7 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onProxyClosed(String info, Exception e) {
         final String msg = "Proxy Closed. Info: " + info;
-        SafeToast.showToastAnyThread(msg);
+        //SafeToast.showToastAnyThread(msg);
 
         final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
         if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
@@ -429,7 +429,7 @@ public class SDLService extends Service implements IProxyListenerALM {
         final String msg =
                 "GrantAccessResponse success " + response.getSuccess() +
                         ", " + response.getResultCode() + ", " + response.getInfo();
-        SafeToast.showToastAnyThread(msg);
+        //SafeToast.showToastAnyThread(msg);
 
         ResponseCommand command = new com.ford.avarsdl.responses.GrantAccessResponse();
         try {
@@ -480,13 +480,13 @@ public class SDLService extends Service implements IProxyListenerALM {
         String msg = "onRadioDetails";
         if (radioStation == null) {
             msg += " Radio Station invalid";
-            SafeToast.showToastAnyThread(msg);
+            //SafeToast.showToastAnyThread(msg);
             return;
         }
         msg += " frequency: " +
                 notification.getRadioStation().getFrequency() + "." +
                 notification.getRadioStation().getFraction();
-        SafeToast.showToastAnyThread(msg);
+        //SafeToast.showToastAnyThread(msg);
 
         NotificationCommand command = commandsHashTable.get(Names.OnRadioDetails);
         if (command != null) {

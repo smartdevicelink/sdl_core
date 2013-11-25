@@ -1,7 +1,5 @@
 package com.ford.avarsdl.requests;
 
-import com.ford.avarsdl.jsonparser.JSONParser;
-
 import org.json.JSONObject;
 
 /**
@@ -13,7 +11,7 @@ import org.json.JSONObject;
 public interface RequestCommand {
     /**
      * Executes a request command
-     * @param id - id of the message
+     * @param id - id of the message (this id is received from web part of the mobile app)
      * @param jsonParameters - JSON object that represents RPCStruct
      */
     public void execute(int id, JSONObject jsonParameters);
