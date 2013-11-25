@@ -62,11 +62,10 @@ void PerformAudioPassThruResponse::Run() {
     }
   }
 
-  int session_key =
-    (*message_)[strings::params][strings::connection_key].asInt();
-
   if (!IsPendingResponseExist()) {
     if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
+      int session_key =
+        (*message_)[strings::params][strings::connection_key].asInt();
       ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
     }
     SendResponse(true);

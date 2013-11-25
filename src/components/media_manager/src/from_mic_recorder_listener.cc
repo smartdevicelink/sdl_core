@@ -64,6 +64,8 @@ void FromMicRecorderListener::OnErrorReceived(
 }
 
 void FromMicRecorderListener::OnActivityStarted(int application_key) {
+  LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityStarted "
+               << application_key);
   if (application_key == current_application_) {
     return;
   }
@@ -79,7 +81,11 @@ void FromMicRecorderListener::OnActivityStarted(int application_key) {
 }
 
 void FromMicRecorderListener::OnActivityEnded(int application_key) {
+  LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityEnded "
+               << application_key);
   if (application_key != current_application_) {
+    LOG4CXX_WARN(logger_, "Not performing activity on " << application_key
+                 << " but on " << current_application_);
     return;
   }
   if (reader_) {

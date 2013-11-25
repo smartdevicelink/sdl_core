@@ -151,9 +151,9 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         }
       }
     }
-  }
+ }
 
-  return  mobile_apis::Result::SUCCESS;
+ return  mobile_apis::Result::SUCCESS;
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(

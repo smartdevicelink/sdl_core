@@ -53,9 +53,7 @@ MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
   , a2dp_player_(NULL)
   , from_mic_recorder_(NULL)
-  , from_mic_listener_(NULL)
-  , video_streamer_(NULL)
-  , video_streamer_listener_(NULL) {
+  , video_streamer_(NULL) {
   Init();
 }
 
@@ -63,11 +61,6 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (a2dp_player_) {
     delete a2dp_player_;
     a2dp_player_ = NULL;
-  }
-
-  if (from_mic_listener_) {
-    delete from_mic_listener_;
-    from_mic_listener_ = NULL;
   }
 
   if (from_mic_recorder_) {
@@ -78,12 +71,6 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (video_streamer_) {
     delete video_streamer_;
     video_streamer_ = NULL;
-  }
-
-
-  if (video_streamer_listener_) {
-    delete video_streamer_listener_;
-    video_streamer_listener_ = NULL;
   }
 }
 
@@ -183,7 +170,7 @@ void MediaManagerImpl::OnMessageReceived(
 }
 
 void MediaManagerImpl::OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr& message) {
 }
 
 void MediaManagerImpl::FramesProcessed(int application_key,
