@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.avarsdl"
     android:installLocation="preferExternal"
-    android:versionCode="24"
-    android:versionName="3.6" >
+    android:versionCode="1"
+    android:versionName="E4" >
 
     <!-- Required to access Android Market Licensing -->
     <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
