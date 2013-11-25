@@ -132,6 +132,8 @@ SDL.SDLMediaController = Em.Object.create( {
             if (SDL.States.media.sdlmedia.active
                 || SDL.SDLAppController.model.active) {
 
+                SDL.SDLAppController.model.set('active', false);
+
                 SDL.States.goToStates('info.apps');
 
                 SDL.MediaController.set('activeState', 'media.player');
@@ -139,5 +141,6 @@ SDL.SDLMediaController = Em.Object.create( {
 
             this.set('currentAppId', 0);
         }
+        SDL.SDLModel.get('registeredApps').removeObjects(SDL.SDLModel.get('registeredApps').filterProperty('appID', appID));
     }
 });

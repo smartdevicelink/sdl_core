@@ -117,11 +117,11 @@ namespace NsMessageBroker
    {
       DBG_MSG(("CMessageBrokerController::sendJsonMessage()\n"));
       std::string mes = m_writer.write(message);
-      int bytesSent = Send(mes);
       if (!isNotification(message) && !isResponse(message))
       {// not notification, not a response, store id and method name to recognize an answer
          mWaitResponseQueue.insert(std::map<std::string, std::string>::value_type(message["id"].asString(), message["method"].asString()));
       }
+      int bytesSent = Send(mes);
       bytesSent = bytesSent; // to prevent compiler warnings in case DBG_MSG off
       DBG_MSG(("Length:%d, Sent: %d bytes\n", mes.length(), bytesSent));
    }

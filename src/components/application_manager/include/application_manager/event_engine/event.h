@@ -96,11 +96,6 @@ class Event {
   inline int smart_object_correlation_id() const;
 
   /*
-   * @brief Retrieves smart object connection key
-   */
-  inline int smart_object_connection_key() const;
-
-  /*
    * @brief Retrieves smart_object response type
    */
   inline int smart_object_type() const;
@@ -138,11 +133,6 @@ int Event::smart_object_function_id() const {
 int Event::smart_object_correlation_id() const {
   return response_so_.getElement(
       strings::params).getElement(strings::correlation_id).asInt();
-}
-
-int Event::smart_object_connection_key() const {
-  return response_so_.getElement(
-      strings::params).getElement(strings::connection_key).asInt();
 }
 
 int Event::smart_object_type() const {

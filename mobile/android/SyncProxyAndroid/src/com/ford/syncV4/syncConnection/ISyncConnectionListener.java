@@ -17,4 +17,6 @@ public interface ISyncConnectionListener {
 			byte sessionID, String correlationID);
 	
 	public void onProtocolError(String info, Exception e);
+
+    public void onMobileNavAckReceived(int frameReceivedNumber);
 }

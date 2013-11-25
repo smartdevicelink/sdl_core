@@ -41,9 +41,10 @@ typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("HMIMessageHandler"));
 
-MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler)
-    : MessageBrokerController(profile::Profile::instance()->server_address(),
-      profile::Profile::instance()->server_port(), "SDL"),
+MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler,
+                                           const std::string& server_address,
+                                           uint16_t port)
+    : MessageBrokerController(server_address, port, "SDL"),
       HMIMessageAdapter(handler) {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
@@ -95,6 +96,9 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
+  MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
+  MessageBrokerController::subscribeTo("UI.OnTouchEvent");
+  MessageBrokerController::subscribeTo("UI.OnResetTimeout");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");

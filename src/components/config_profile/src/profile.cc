@@ -46,11 +46,13 @@ Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
   , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
+  , server_port_(8087)
+  , navi_server_port_(5050)
   , help_promt_()
   , time_out_promt_()
-  , server_port_(8087)
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
   , is_mixing_audio_supported_(false)
+  , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
   , space_available_(104857600) {
@@ -113,6 +115,10 @@ const uint16_t& Profile::server_port() const {
   return server_port_;
 }
 
+const uint16_t& Profile::navi_server_port() const {
+  return navi_server_port_;
+}
+
 const uint64_t& Profile::thread_min_stach_size() const {
   return min_tread_stack_size_;
 }
@@ -123,6 +129,18 @@ bool Profile::is_mixing_audio_supported() const {
 
 const unsigned int Profile::space_available() const {
   return space_available_;
+}
+
+bool Profile::is_redecoding_enabled() const {
+  return is_redecoding_enabled_;
+}
+
+const std::string&  Profile::video_server_type() const {
+  return consumer_type_;
+}
+
+const std::string& Profile::named_pipe_path() const {
+  return named_pipe_path_;
 }
 
 void Profile::UpdateValues() {
@@ -155,6 +173,14 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "NaviServerPort", value))
+      && ('\0' != *value)) {
+    navi_server_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set navi server port to " << navi_server_port_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "ThreadStackSize", value))
       && ('\0' != *value)) {
     min_tread_stack_size_ = atoi(value);
@@ -162,6 +188,32 @@ void Profile::UpdateValues() {
       min_tread_stack_size_ = threads::Thread::kMinStackSize;
     }
     LOG4CXX_INFO(logger_, "Set threadStackMinSize to " << min_tread_stack_size_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "EnableRedecoding", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      is_redecoding_enabled_ = true;
+    }
+    LOG4CXX_INFO(logger_, "Set RedecodingEnabled to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "VideoStreamConsumer", value))
+      && ('\0' != *value)) {
+    consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << consumer_type_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedPipePath", value))
+      && ('\0' != *value)) {
+    named_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_pipe_path_);
   }
 
   *value = '\0';

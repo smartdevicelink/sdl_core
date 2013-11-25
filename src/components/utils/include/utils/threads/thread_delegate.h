@@ -45,24 +45,25 @@ namespace threads {
  * Look for "threads/thread.h" for example
  */
 class ThreadDelegate {
- public:
-  /**
-   * Dtor.
-   */
-  virtual ~ThreadDelegate() {
-  }
+  public:
+    /**
+     * Dtor.
+     */
+    virtual ~ThreadDelegate() {
+    }
 
-  /**
-   * Thread procedure.
-   */
-  virtual void threadMain() = 0;
+    /**
+     * Thread procedure.
+     */
+    virtual void threadMain() = 0;
 
-  /**
-   * Should be called to free all resources allocated in threadMain
-   * and exiting threadMain
-   */
-  virtual void exitThreadMain() {
-  }
+    /**
+     * Should be called to free all resources allocated in threadMain
+     * and exiting threadMain
+     */
+    virtual bool exitThreadMain() {
+      return false;
+    }
 };
 
 }  // namespace threads

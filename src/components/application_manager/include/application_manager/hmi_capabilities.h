@@ -201,8 +201,16 @@ struct HMICapabilities {
    * @return Currently supported Button's capabilities
    */
   inline const smart_objects::SmartObject* button_capabilities() const {
-    return soft_buttons_capabilities_;
+    return button_capabilities_;
   }
+
+  /*
+   * @brief Sets supported Button's capabilities
+   *
+   * @param soft_button_capabilities supported Button's capabilities
+   */
+  void set_button_capabilities(
+      const smart_objects::SmartObject& button_capabilities);
 
   /*
    * @brief Sets supported speech capabilities
@@ -254,14 +262,6 @@ struct HMICapabilities {
   audio_pass_thru_capabilities() const {
     return audio_pass_thru_capabilities_;
   }
-
-  /*
-   * @brief Sets supported Button's capabilities
-   *
-   * @param soft_button_capabilities supported Button's capabilities
-   */
-  void set_button_capabilities(
-      const smart_objects::SmartObject& button_capabilities);
 
   /*
    * @brief Retrieves information about the preset bank capabilities

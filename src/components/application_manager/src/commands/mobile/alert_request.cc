@@ -35,7 +35,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -45,10 +44,30 @@ namespace commands {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 AlertRequest::AlertRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+: CommandRequestImpl(message),
+  is_ui_alert_send_(false),
+  ui_alert_result_(mobile_apis::Result::INVALID_ENUM),
+  is_tts_speak_send_(false),
+  is_tts_speak_received_(false) {
+
 }
 
 AlertRequest::~AlertRequest() {
+}
+
+bool AlertRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::duration].asUInt();
+  } else {
+    const int def_value = 5000;
+    default_timeout_ = def_value;
+  }
+
+  return true;
 }
 
 void AlertRequest::Run() {
@@ -70,8 +89,20 @@ void AlertRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    if (mobile_apis::Result::INVALID_DATA == processing_result) {
+      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+      SendResponse(false, processing_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+      ui_alert_result_ = processing_result;
+    }
+  }
 
   // check if mandatory params(alertText1 and TTSChunk) specified
   if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1))
@@ -85,27 +116,59 @@ void AlertRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
+      is_tts_speak_send_ = true;
+    }
   }
 
   SendAlertRequest(app->app_id());
   SendPlayToneNotification(app->app_id());
-  SendSpeakRequest(app->app_id());
+  if (is_tts_speak_send_) {
+    SendSpeakRequest(app->app_id());
+  }
+}
+
+void AlertRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "AlertRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_Alert: {
+      LOG4CXX_INFO(logger_, "Received UI_Alert event");
+
+      if (is_tts_speak_send_ != is_tts_speak_received_) {
+        SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking);
+      }
+
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_) {
+        result_code = ui_alert_result_;
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      is_tts_speak_received_ = true;
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 void AlertRequest::SendAlertRequest(int app_id) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  // alert1
   msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
   msg_params[hmi_request::alert_strings][0][hmi_request::field_name] =
@@ -132,33 +195,29 @@ void AlertRequest::SendAlertRequest(int app_id) {
   }
   // app_id
   msg_params[strings::app_id] = app_id;
+  msg_params[strings::duration] = default_timeout_;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    msg_params[strings::duration] =
-        (*message_)[strings::msg_params][strings::duration];
-  } else {
-    msg_params[strings::duration] = 5000;
+  // NAVI platform progressIndicator
+  if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
+    msg_params[strings::progress_indicator] =
+      (*message_)[strings::msg_params][strings::progress_indicator];
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Alert, msg_params, true, 1);
+  SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
 void AlertRequest::SendSpeakRequest(int app_id) {
-  // check TTSChunk parameter
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
-      // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
 
-      msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
-          smart_objects::SmartType_Array);
-      msg_params[hmi_request::tts_chunks] =
-          (*message_)[strings::msg_params][strings::tts_chunks];
-      msg_params[strings::app_id] = app_id;
-      CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
-    }
-  }
+  // crate HMI speak request
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+
+  msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
+    smart_objects::SmartType_Array);
+  msg_params[hmi_request::tts_chunks] =
+    (*message_)[strings::msg_params][strings::tts_chunks];
+  msg_params[strings::app_id] = app_id;
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
 void AlertRequest::SendPlayToneNotification(int app_id) {

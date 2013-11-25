@@ -65,11 +65,6 @@ class TransportManagerListener {
   virtual void OnDeviceFound(const DeviceInfo &device_info) = 0;
 
   /**
-   * @brief Reaction to the event, when no device is found.
-   */
-  virtual void OnNoDeviceFound() = 0;
-
-  /**
    * @brief Reaction to the event, when scanning of devices is finished.
    */
   virtual void OnScanDevicesFinished() = 0;
@@ -105,6 +100,15 @@ class TransportManagerListener {
    * @param connection_id Connection unique identifier.
    */
   virtual void OnConnectionClosed(ConnectionUID connection_id) = 0;
+
+  /**
+   * @brief Called when connection is closed unexpectedly, i.e. disconnect was not requested
+   *
+   * @param connection_id Connection ID.
+   * @param error Error information.
+   */
+  virtual void OnUnexpectedDisconnect(ConnectionUID connection_id,
+                                      const CommunicationError& error) = 0;
 
   /**
    * @brief Reaction to the event, when connection close is failed.

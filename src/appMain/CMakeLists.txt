@@ -1,3 +1,10 @@
+cmake_policy(PUSH)
+# make link_directories() treat paths relative to the source dir
+# info: cmake --help-policy CMP0015
+cmake_policy(SET CMP0015 NEW)
+link_directories(../thirdPartyLibs/libusbx)
+cmake_policy(POP)
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -23,8 +30,8 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-  #AudioManager
-#  usb-1.0
+# MediaManager
+#  Libusb-1.0.16
 )
 
 # required to find 'glibconfig.h'
@@ -39,7 +46,6 @@ include_directories (
   ../components/mobile_message_handler/include
   ../components/application_manager/include
   ../components/formatters/include
-  ../components/AppMgr/include
   ../components/transport_manager/include
   ../components/config_profile/include
   ../components/utils/include/
@@ -47,7 +53,7 @@ include_directories (
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
-  ../components/audio_manager/include/
+  #../components/media_manager/include/
   ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
@@ -60,6 +66,7 @@ include_directories (
 
 set (SOURCES
   appMain.cpp
+  life_cycle.cc
 )
 
 if( NOT CMAKE_BUILD_TYPE )

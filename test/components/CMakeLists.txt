@@ -23,4 +23,4 @@ add_subdirectory(./smart_objects)
 #add_subdirectory(./mobile_message_handler)
 
 # --- Audio Manager
-#add_subdirectory(./audio_manager)
+#add_subdirectory(./media_manager)

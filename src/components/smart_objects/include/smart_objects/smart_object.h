@@ -546,6 +546,14 @@ class SmartObject {
   SmartObject& operator[](const char* Key);
 
   /**
+   * @brief Support of map-like access
+   *
+   * @param  Key Key of element to return
+   * @return const SmartObject&
+   **/
+  const SmartObject& operator[](const char* Key) const;
+
+  /**
    * @brief Get map element.
    *
    * This method does not automatically convert the object to a map or

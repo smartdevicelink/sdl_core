@@ -223,7 +223,7 @@ void ThreadedSocketConnection::Transmit() {
     LOG4CXX_INFO(logger_, "exit");
     return;
   }
-  LOG4CXX_INFO(logger_, "poll is ok (#" << pthread_self() << ") " << this);
+  LOG4CXX_INFO(logger_, "poll is ok (#" << pthread_self() << ") " << this << " revents0:" << std::hex << poll_fds[0].revents << " revents1:" << std::hex << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(logger_,
@@ -269,7 +269,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-  if (0 != poll_fds[0].revents & POLLIN) {
+  if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
     const bool receive_ok = Receive();
     if (!receive_ok) {
       LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");

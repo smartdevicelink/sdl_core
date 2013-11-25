@@ -46,12 +46,17 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 mainImage    : 'images/sdl/audio_icon.jpg',
                 image        : '',
                 customPresets: [],
-                alignment    : "text-align:left"
+                alignment    : "text-align:center"
             }));
 
-            // this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
+            this.set('constantTBTParams', null);
 
-            this.set('commandsList', {0: []});
+            this.set('globalProperties.helpPrompt', []);
+            this.set('globalProperties.timeoutPrompt', []);
+            this.set('globalProperties.keyboardProperties', Em.Object.create());
+            this.set('globalProperties.keyboardProperties.keyboardLayout', 'QWERTY');
+
+            this.set('commandsList', {'top': []});
             this.set('softButtons', []);
         },
 

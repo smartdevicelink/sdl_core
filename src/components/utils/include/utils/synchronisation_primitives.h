@@ -59,6 +59,8 @@ namespace sync_primitives {
 
 class SynchronisationPrimitives {
   public:
+    enum WaitStatus {SIGNALED = 0, TIMED_OUT, FAILED};
+  public:
     SynchronisationPrimitives();
     virtual ~SynchronisationPrimitives();
 
@@ -69,6 +71,8 @@ class SynchronisationPrimitives {
     virtual void unlock();
 
     virtual void wait();
+
+    virtual WaitStatus timedwait(time_t sec, uint32_t nsec);
 
     virtual void signal();
 

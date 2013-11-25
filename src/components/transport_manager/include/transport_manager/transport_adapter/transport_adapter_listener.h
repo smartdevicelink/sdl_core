@@ -62,7 +62,8 @@ class TransportAdapterListener {
    *
    * @param transport_adapter Pointer to the device adapter.
    */
-  virtual void OnSearchDeviceDone(const TransportAdapter* transport_adapter) = 0;
+  virtual void OnSearchDeviceDone(
+      const TransportAdapter* transport_adapter) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create search device error,
@@ -73,6 +74,17 @@ class TransportAdapterListener {
    */
   virtual void OnSearchDeviceFailed(const TransportAdapter* transport_adapter,
                                     const SearchDeviceError& error) = 0;
+
+  /**
+   * @brief Notification by transport adapter that list of known devices has
+   * changed. Updated list can be obtained using
+   * TransportAdapter::GetDeviceList()
+   *
+   * @param transport_adapter Transport adapter that sent notifcation
+   */
+  virtual void OnDeviceListUpdated(
+      const TransportAdapter* transport_adapter) = 0;
+
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
    * launch event ON_CONNECT_DONE in transport manager.
@@ -165,9 +177,9 @@ class TransportAdapterListener {
    * @param device Device unique identifier.
    * @param error Error class with information about possible reason of Disconnect from device failure.
    */
-  virtual void OnDisconnectDeviceFailed(const TransportAdapter* transport_adapter,
-                                        const DeviceUID& device_handle,
-                                        const DisconnectDeviceError& error) = 0;
+  virtual void OnDisconnectDeviceFailed(
+      const TransportAdapter* transport_adapter, const DeviceUID& device_handle,
+      const DisconnectDeviceError& error) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create error,

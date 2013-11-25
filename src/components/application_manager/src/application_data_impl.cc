@@ -286,12 +286,26 @@ void DynamicApplicationDataImpl::set_vr_help_title(
   vr_help_title_ = new smart_objects::SmartObject(vr_help_title);
 }
 
+void DynamicApplicationDataImpl::reset_vr_help_title() {
+  if (vr_help_title_) {
+    delete vr_help_title_;
+    vr_help_title_ = NULL;
+  }
+}
+
 void DynamicApplicationDataImpl::set_vr_help(
     const smart_objects::SmartObject& vr_help) {
   if (vr_help_) {
     delete vr_help_;
   }
   vr_help_ = new smart_objects::SmartObject(vr_help);
+}
+
+void DynamicApplicationDataImpl::reset_vr_help() {
+  if (vr_help_) {
+    delete vr_help_;
+  }
+  vr_help_ = NULL;
 }
 
 void DynamicApplicationDataImpl::set_tbt_state(
@@ -316,7 +330,7 @@ void DynamicApplicationDataImpl::set_tbt_show_command(
 }
 
 void DynamicApplicationDataImpl::AddCommand(
-    unsigned int cmd_id, const smart_objects::SmartObject& command) {
+  unsigned int cmd_id, const smart_objects::SmartObject& command) {
   commands_[cmd_id] = new smart_objects::SmartObject(command);
 }
 
@@ -341,7 +355,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
 
 // TODO(VS): Create common functions for processing collections
 void DynamicApplicationDataImpl::AddSubMenu(
-    unsigned int menu_id, const smart_objects::SmartObject& menu) {
+  unsigned int menu_id, const smart_objects::SmartObject& menu) {
   sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
 }
 
@@ -367,8 +381,8 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
     const std::string& name) {
   for (SubMenuMap::iterator it = sub_menu_.begin();
-      sub_menu_.end() != it;
-      ++it) {
+       sub_menu_.end() != it;
+       ++it) {
     smart_objects::SmartObject* menu = it->second;
     if ((*menu)[strings::menu_name] == name) {
       return true;
@@ -378,7 +392,7 @@ bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
 }
 
 void DynamicApplicationDataImpl::AddChoiceSet(
-    unsigned int choice_set_id, const smart_objects::SmartObject& choice_set) {
+  unsigned int choice_set_id, const smart_objects::SmartObject& choice_set) {
   choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
 }
 
@@ -402,7 +416,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
-    unsigned int choice_set_id, const smart_objects::SmartObject& vr_commands) {
+  unsigned int choice_set_id, const smart_objects::SmartObject& vr_commands) {
   performinteraction_choice_set_map_[choice_set_id] =
       new smart_objects::SmartObject(vr_commands);
 }
@@ -417,7 +431,7 @@ void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSetMap() {
 
 smart_objects::SmartObject*
 DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
-    unsigned int choice_set_id) const {
+  unsigned int choice_set_id) const {
   PerformChoiceSetMap::const_iterator it = performinteraction_choice_set_map_
       .find(choice_set_id);
 

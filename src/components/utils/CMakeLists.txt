@@ -1,6 +1,8 @@
 include_directories (
   ./include
   ../config_profile/include
+  ../media_manager/include/
+  ../protocol_handler/include/
 )
 
 set (SOURCES
@@ -9,8 +11,10 @@ set (SOURCES
     ./src/synchronisation_primitives_posix.cc
     ./src/timer_linux.cc
     ./src/date_time.cc
+   ./src/signals_linux.cc
     ./src/l4l.cc
     ./src/logger.cc
 )
 
 add_library("Utils" ${SOURCES})
+#target_link_libraries ("Utils" log4cxx rt)

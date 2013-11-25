@@ -59,10 +59,18 @@ void SliderResponse::Run() {
     }
   }
 
+  const unsigned int correlation_id =
+      (*message_)[strings::params][strings::correlation_id].asUInt();
+
+  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
+      ->GetMessageChain(correlation_id);
+
+  const smart_objects::SmartObject request_params = msg_chain->data();
+
   if (!IsPendingResponseExist()) {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
-    if (mobile_apis::Result::SUCCESS == code ||
-        mobile_apis::Result::ABORTED == code) {
+    if ((mobile_apis::Result::SUCCESS == code) ||
+        (mobile_apis::Result::ABORTED == code)) {
       SendResponse(true);
     } else {
       const unsigned int correlation_id =

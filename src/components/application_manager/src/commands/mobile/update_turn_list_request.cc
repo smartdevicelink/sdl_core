@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -43,7 +44,8 @@ namespace application_manager {
 namespace commands {
 
 UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ : CommandRequestImpl(message),
+   result_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {
@@ -61,8 +63,20 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    if (mobile_apis::Result::INVALID_DATA == processing_result) {
+      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+      SendResponse(false, processing_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+      result_ = processing_result;
+    }
+  }
 
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
@@ -75,14 +89,81 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
+  if (!CheckTurnListArray()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
+  for (int i = 0; i < msg_params[strings::turn_list].length(); ++i) {
+    if (msg_params[strings::turn_list][i].keyExists(hmi_request::navi_text)) {
+      std::string navigation_text =
+          msg_params[strings::turn_list][i][hmi_request::navi_text].asString();
+      msg_params[strings::turn_list][i].erase(hmi_request::navi_text);
+      msg_params[strings::turn_list]
+                 [i][hmi_request::navi_text][hmi_request::field_name] =
+          hmi_apis::Common_TextFieldName::turnText;
+      msg_params[strings::turn_list]
+                 [i][hmi_request::navi_text][hmi_request::field_text] =
+          navigation_text;
+    }
+  }
 
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList, msg_params,
+
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList, &msg_params,
                    true);
+}
+
+void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "UpdateTurnListRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
+      LOG4CXX_INFO(logger_, "Received Navigation_UpdateTurnList event");
+
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      if (mobile_apis::Result::INVALID_ENUM != result_) {
+        result_code = result_;
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
+}
+
+bool UpdateTurnListRequest::CheckTurnListArray() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::turn_list)) {
+    return false;
+  }
+  int length = (*message_)[strings::msg_params][strings::turn_list].length();
+  if (0 == length) {
+    return false;
+  }
+  for (int i = 0; i < length; ++i) {
+    if (!((*message_)[strings::msg_params][strings::turn_list][i].
+        keyExists(hmi_request::navi_text)) &&
+        !((*message_)[strings::msg_params][strings::turn_list][i].
+        keyExists(strings::turn_icon))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

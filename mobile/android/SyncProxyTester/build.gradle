@@ -1,13 +1,17 @@
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
+    instrumentTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
 android {
-
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
 
@@ -17,17 +21,25 @@ android {
         }
     }
 
+    def flavorNames = ["Alice", "Sandy", "Kate", "Caroline", "Amy"]
+
     productFlavors {
         mainFlavor {
         }
 
-        sptAliceFlavor {
-            packageName "com.ford.syncV4.SPTAlice"
+        flavorNames.each {
+            def fullFlavorName = "spt" + it + "Flavor"
+            def packageFlavorName = "com.ford.syncV4.SPT" + it
+            "${fullFlavorName}" {
+                packageName "${packageFlavorName}"
+            }
         }
     }
 }
 
 task saveBuildInfo {
+    description = "Saves the build info (current git branch/tag, commit hash, and build time)"
+
     doFirst {
         def git_version = new ByteArrayOutputStream()
         exec {
@@ -71,7 +83,9 @@ task saveBuildInfo {
 }
 
 gradle.projectsEvaluated {
-    [packageMainFlavorDebug, packageSptAliceFlavorDebug].each {
-        it.dependsOn(saveBuildInfo)
+    android.productFlavors.each { flavor ->
+        def flavorName = flavor.name.capitalize()
+        def flavorPackageTask = tasks.getByPath("package${flavorName}Debug")
+        flavorPackageTask.dependsOn(saveBuildInfo)
     }
 }

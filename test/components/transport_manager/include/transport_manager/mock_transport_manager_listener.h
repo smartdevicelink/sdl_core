@@ -53,6 +53,7 @@ using ::transport_manager::DisconnectError;
 using ::transport_manager::DisconnectDeviceError;
 using ::transport_manager::DataSendError;
 using ::transport_manager::DataReceiveError;
+using ::transport_manager::CommunicationError;
 using ::transport_manager::DeviceInfo;
 using ::transport_manager::DeviceHandle;
 
@@ -77,6 +78,8 @@ class MockTransportManagerListener :
   MOCK_METHOD1(OnConnectionClosed, void(ConnectionUID connection_id));
   MOCK_METHOD2(OnConnectionClosedFailure, void (ConnectionUID connection_id,
           const DisconnectError& error));
+  MOCK_METHOD2(OnUnexpectedDisconnect, void (ConnectionUID connection_id,
+          const CommunicationError& error));
   MOCK_METHOD2(OnDeviceConnectionLost, void (const DeviceHandle& device,
           const DisconnectDeviceError& error));
   MOCK_METHOD2(OnDisconnectFailed, void (const DeviceHandle& device,

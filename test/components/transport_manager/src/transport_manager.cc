@@ -187,9 +187,7 @@ MockTransportManagerListener *TransportManagerTest::tm_listener = nullptr;
 
 TEST_F(TransportManagerTest, ScanDeviceFailed) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
+  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1).WillOnce(SignalTest(this));
 
   mock_adapter->get_device_scanner()->fail_further_search();
   tm->SearchDevices();
@@ -199,7 +197,6 @@ TEST_F(TransportManagerTest, ScanDeviceFailed) {
 
 TEST_F(TransportManagerTest, ScanDeviceNoFound) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(1);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
@@ -210,7 +207,6 @@ TEST_F(TransportManagerTest, ScanDeviceNoFound) {
 
 TEST_F(TransportManagerTest, ScanDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
 
@@ -222,7 +218,6 @@ TEST_F(TransportManagerTest, ScanDeviceDone) {
 
 TEST_F(TransportManagerTest, ScanManyDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnNoDeviceFound()).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(2);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
   mock_adapter->get_device_scanner()->AddDevice("TestDevice1", "MA:CA:DR:ES:S1");

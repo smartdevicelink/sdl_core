@@ -1,5 +1,7 @@
 package com.ford.syncV4.util;
 
+import android.util.Log;
+
 import java.io.IOException;
 
 /**
@@ -1298,7 +1300,7 @@ public class Base64
 
                 }   // end try
                 catch( java.io.IOException e ) {
-                    e.printStackTrace();
+                    Log.e("SyncProxyTester", e.toString());
                     // Just return originally-decoded bytes
                 }   // end catch
                 finally {

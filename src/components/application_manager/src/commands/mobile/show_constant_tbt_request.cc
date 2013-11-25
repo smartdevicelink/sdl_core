@@ -43,7 +43,8 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ : CommandRequestImpl(message),
+   result_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -61,23 +62,46 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  MessageHelper::AddSoftButtonsDefaultSystemAction(
-      (*message_)[strings::msg_params]);
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params = (*message_)[strings::msg_params];
+
+  // TODO(DK): Missing mandatory param
+  if (!msg_params.keyExists(strings::soft_buttons)) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    return;
+  }
+
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    if (mobile_apis::Result::INVALID_DATA == processing_result) {
+      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+      SendResponse(false, processing_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+      result_ = processing_result;
+    }
+  }
 
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
+      result_ = verification_result;
+    }
   }
-
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
 
   msg_params[strings::app_id] = app->app_id();
 
@@ -121,9 +145,46 @@ void ShowConstantTBTRequest::Run() {
         (*message_)[strings::msg_params][strings::total_distance];
   }
 
+  if (msg_params.keyExists(strings::time_to_destination)) {
+      // erase useless param
+      msg_params.erase(strings::time_to_destination);
+      msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+          hmi_apis::Common_TextFieldName::timeToDestination;
+      msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+          (*message_)[strings::msg_params][strings::time_to_destination];
+  }
+
   app->set_tbt_show_command(msg_params);
-  CreateHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, msg_params,
-                   true, 1);
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
+                   true);
+}
+
+
+void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
+      LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      if (mobile_apis::Result::INVALID_ENUM != result_) {
+        result_code = result_;
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
 }
 
 }  // namespace commands

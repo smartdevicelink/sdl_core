@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/generic_response.h"
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_conversion.h"
 #include "application_manager/application_impl.h"
 
 namespace application_manager {

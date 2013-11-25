@@ -116,6 +116,15 @@ void SetGlobalPropertiesRequest::Run() {
     msg_params[strings::vr_help_title] = (*app->vr_help_title());
     msg_params[strings::vr_help] = (*app->vr_help());
     msg_params[strings::app_id] = app->app_id();
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_title)) {
+      msg_params[hmi_request::menu_title] = (*message_)[strings::msg_params][hmi_request::menu_title].asString();
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_icon)) {
+      msg_params[hmi_request::menu_icon] = (*message_)[strings::msg_params][hmi_request::menu_icon];
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::keyboard_properties)) {
+      msg_params[hmi_request::keyboard_properties] = (*message_)[strings::msg_params][hmi_request::keyboard_properties];
+    }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
                      true, chaining_counter);
@@ -144,6 +153,15 @@ void SetGlobalPropertiesRequest::Run() {
     msg_params[strings::vr_help_title] = (*app->vr_help_title());
     msg_params[strings::vr_help] = (*app->vr_help());
     msg_params[strings::app_id] = app->app_id();
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_title)) {
+      msg_params[hmi_request::menu_title] = (*message_)[strings::msg_params][hmi_request::menu_title].asString();
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::menu_icon)) {
+      msg_params[hmi_request::menu_icon] = (*message_)[strings::msg_params][hmi_request::menu_icon];
+    }
+    if ((*message_)[strings::msg_params].keyExists(hmi_request::keyboard_properties)) {
+      msg_params[hmi_request::keyboard_properties] = (*message_)[strings::msg_params][hmi_request::keyboard_properties];
+    }
 
     CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
                      true, chaining_counter);
@@ -181,7 +199,11 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
   const smart_objects::SmartObject vr_help = (*message_)[strings::msg_params]
       .getElement(strings::vr_help);
 
-  if (1 != vr_help.getElement(0).getElement(strings::position).asInt()) {
+  //vr help item start position must be 1
+  const unsigned int vr_help_item_start_position = 1;
+
+  if (vr_help_item_start_position !=
+      vr_help.getElement(0).getElement(strings::position).asUInt()) {
     LOG4CXX_ERROR(logger_, "VR help items start position is wrong");
     return false;
   }

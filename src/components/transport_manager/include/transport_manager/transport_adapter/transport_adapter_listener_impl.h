@@ -55,7 +55,8 @@ class TransportManagerImpl;
 /**
  * @brief Implementation of TransportAdapterListener class.
  */
-class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterListener {
+class TransportAdapterListenerImpl :
+    public transport_adapter::TransportAdapterListener {
  public:
 
   /**
@@ -64,6 +65,7 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
   enum EventTypeEnum {
     ON_SEARCH_DONE = 0,
     ON_SEARCH_FAIL,
+    ON_DEVICE_LIST_UPDATED,
     ON_CONNECT_DONE,
     ON_CONNECT_FAIL,
     ON_DISCONNECT_DONE,
@@ -81,7 +83,8 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
    *
    * @param tm Pointer to the transport manager implementation class.
    */
-  explicit TransportAdapterListenerImpl(transport_manager::TransportManagerImpl *tm);
+  explicit TransportAdapterListenerImpl(
+      transport_manager::TransportManagerImpl *tm);
 
   /**
    * @brief Dectructor.
@@ -105,6 +108,13 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
    */
   virtual void OnSearchDeviceFailed(const TransportAdapter* transport_adapter,
                                     const SearchDeviceError& error);
+
+  /**
+   * @brief Passes notification to TransportManagerImpl
+   *
+   * @param transport_adapter Transport adapter that sent notification
+   */
+  virtual void OnDeviceListUpdated(const TransportAdapter* transport_adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
@@ -215,8 +225,8 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
    */
   virtual void OnDataReceiveDone(
       const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device,
-      const ApplicationHandle& app_id, const RawMessageSptr data_container);
+      const DeviceUID& device, const ApplicationHandle& app_id,
+      const RawMessageSptr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data receive error,
@@ -229,8 +239,8 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
    */
   virtual void OnDataReceiveFailed(
       const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device,
-      const ApplicationHandle& app_id, const DataReceiveError& error);
+      const DeviceUID& device, const ApplicationHandle& app_id,
+      const DataReceiveError& error);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create error,
@@ -266,8 +276,7 @@ class TransportAdapterListenerImpl : public transport_adapter::TransportAdapterL
    */
   virtual void OnCommunicationError(
       const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device,
-      const ApplicationHandle& app_id);
+      const DeviceUID& device, const ApplicationHandle& app_id);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available.

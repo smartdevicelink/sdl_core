@@ -81,9 +81,10 @@ HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
 }
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~OnMessageReceived()");
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnMessageReceived()");
+  DCHECK(message);
   if (!observer_) {
-    // TODO(PV): WARNING
+    LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
   }
   messages_from_hmi_.push(message);
@@ -95,27 +96,28 @@ void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
 }
 
 void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver* observer) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~SetMessageObserver()");
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::SetMessageObserver()");
   observer_ = observer;
 }
 
 void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~OnErrorSending()");
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnErrorSending()");
   if (!observer_) {
-    // TODO(PV): WARNING
+    LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
   }
   observer_->OnErrorSending(message);
 }
 
 void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~AddHMIMessageAdapter()");
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::AddHMIMessageAdapter()");
   message_adapters_.insert(adapter);
 }
 
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~removeHMIMessageAdapter()");
+  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::RemoveHMIMessageAdapter()");
+  DCHECK(adapter);
   message_adapters_.erase(adapter);
 }
 

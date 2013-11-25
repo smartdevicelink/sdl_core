@@ -44,6 +44,16 @@ public class ShowConstantTBT extends RPCRequest {
     public String getEta() {
         return (String) parameters.get(Names.eta);
     }
+    public void setTimeToDestination(String timeToDestination) {
+        if (timeToDestination != null) {
+            parameters.put(Names.timeToDestination, timeToDestination);
+        } else {
+        	parameters.remove(Names.timeToDestination);
+        }
+    }
+    public String getTimeToDestination() {
+        return (String) parameters.get(Names.timeToDestination);
+    }
     public void setTotalDistance(String totalDistance) {
         if (totalDistance != null) {
             parameters.put(Names.totalDistance, totalDistance);
@@ -63,6 +73,25 @@ public class ShowConstantTBT extends RPCRequest {
     }
     public Image getTurnIcon() {
         Object obj = parameters.get(Names.turnIcon);
+        if (obj instanceof Image) {
+            return (Image) obj;
+        } else {
+        	return new Image((Hashtable) obj);
+        }
+    }
+    public void setNextTurnIcon(Image nextTurnIcon) {
+        if (nextTurnIcon != null) {
+            parameters.put(Names.nextTurnIcon, nextTurnIcon);
+        } else {
+        	parameters.remove(Names.nextTurnIcon);
+        }
+    }
+    public Image getNextTurnIcon() {
+        Object obj = parameters.get(Names.nextTurnIcon);
+        if (obj == null) {
+            // TODO: add this if to all messages' getters?
+            return null;
+        }
         if (obj instanceof Image) {
             return (Image) obj;
         } else {

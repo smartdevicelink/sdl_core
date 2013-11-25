@@ -69,6 +69,23 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text="@string/showconstanttbt_timeToDestination"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/showconstanttbt_txtTimeToDestination"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="time"
+            android:maxLength="500"
+            android:text="@string/showconstanttbt_timeToDestinationDefault"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/showconstanttbt_totalDistance"
             android:textStyle="bold" />
 
@@ -108,6 +125,33 @@
             android:ems="10"
             android:inputType="text"
             android:text="@string/showconstanttbt_turnIconValue" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <CheckBox
+                android:id="@+id/showconstanttbt_nextTurnIconCheck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:checked="true"
+                android:text="@string/showconstanttbt_nextTurnIconCheck" />
+
+            <Spinner
+                android:id="@+id/showconstanttbt_nextTurnIconType"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/showconstanttbt_nextTurnIconValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:text="@string/showconstanttbt_nextTurnIconValue" />
 
         <TextView
             android:layout_width="fill_parent"

@@ -46,6 +46,7 @@ struct RequestInfo {
   int connectionID_;
   int correlationID_;
   int customTimeout_;
+  bool delayed_delete_;
 
   friend bool operator==(const RequestInfo& left, const RequestInfo& right);
 

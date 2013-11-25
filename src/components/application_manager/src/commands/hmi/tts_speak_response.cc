@@ -30,7 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/tts_speak_response.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -46,9 +48,14 @@ TTSSpeakResponse::~TTSSpeakResponse() {
 void TTSSpeakResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSSpeakResponse::Run");
 
+  event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
+  event.set_smart_object(*message_);
+  event.raise();
+
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SpeakID;
 
+  //TODO(VS): Should be removed after we will shift to Event engine usage completely
   SendResponseToMobile(message_);
 }
 

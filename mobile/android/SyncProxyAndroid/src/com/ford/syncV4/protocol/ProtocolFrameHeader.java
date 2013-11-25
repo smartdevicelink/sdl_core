@@ -52,7 +52,7 @@ public class ProtocolFrameHeader {
 		return msg;
 	}
 	
-	protected byte[] assembleHeaderBytes() {
+	public byte[] assembleHeaderBytes() {
 		// important notice here: the '& 0xFF' expressions below added because
 		// if byte is negative, it corrupts more significant bits when cast to
 		// int
@@ -89,7 +89,7 @@ public class ProtocolFrameHeader {
 	public String toString() {
 		String ret = "";
 		ret += "version " + version + ", " + (compressed ? "compressed" : "uncompressed") + "\n";
-		ret += "frameType " + frameType + ", serviceType " + sessionType;
+		ret += "frameType " + frameType.getName() + ", serviceType " + sessionType.getName();
 		ret += "\nframeData " + frameData;
 		ret += ", sessionID " + sessionID;
 		ret += ", dataSize " + dataSize;

@@ -128,8 +128,8 @@ FFW.Navigation = FFW.RPCObserver.create( {
         Em.Logger.log("FFW.Navigation.onRPCNotification");
         this._super();
 
-        if (notification.method == this.onShowNotificationNotification) {
-            // to do
+        if (notification.method == this.onStopStreamNotification) {
+            SDL.SDLModel.onStopStream(notification.params);
         }
     },
 
@@ -144,53 +144,73 @@ FFW.Navigation = FFW.RPCObserver.create( {
             var resultCode = null;
 
             switch (request.method) {
-            case "Navigation.IsReady": {
+                case "Navigation.IsReady": {
 
-                Em.Logger.log("FFW." + request.method + "Response");
+                    Em.Logger.log("FFW." + request.method + "Response");
 
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": request.id,
-                    "result": {
-                        "available": this.get('isReady'),
-                        "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method": "Navigation.IsReady"
-                    }
-                };
+                    // send repsonse
+                    var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "available": this.get('isReady'),
+                            "code": SDL.SDLModel.resultCode["SUCCESS"],
+                            "method": "Navigation.IsReady"
+                        }
+                    };
 
-                this.client.send(JSONMessage);
+                    this.client.send(JSONMessage);
 
-                break;
-            }
-            case "Navigation.ShowConstantTBT": {
+                    break;
+                }
+                case "Navigation.ShowConstantTBT": {
 
-                SDL.SDLModel.tbtActivate(request.params);
-                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                    request.id,
-                    request.method);
+                    SDL.SDLModel.tbtActivate(request.params);
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "Navigation.UpdateTurnList": {
+                    break;
+                }
+                case "Navigation.UpdateTurnList": {
 
-                SDL.SDLModel.tbtTurnListUpdate(request.params);
-                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                    request.id,
-                    request.method);
+                    SDL.SDLModel.tbtTurnListUpdate(request.params);
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
-            case "Navigation.AlertManeuver": {
+                    break;
+                }
+                case "Navigation.AlertManeuver": {
 
-                SDL.SDLModel.onNavigationAlertManeuver(request.params);
+                    SDL.SDLModel.onNavigationAlertManeuver(request.params);
 
-                this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                    request.id,
-                    request.method);
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
 
-                break;
-            }
+                    break;
+                }
+                case "Navigation.StartStream": {
+
+                    SDL.SDLModel.startStream(request.params);
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
+                case "Navigation.StopStream": {
+
+                    SDL.SDLModel.stopStream(request.params);
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
             }
         }
     },

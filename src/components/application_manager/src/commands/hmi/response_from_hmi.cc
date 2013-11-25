@@ -40,6 +40,11 @@ namespace commands {
 
 ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
+  //If it is error response, shift info
+  if ((*message)[strings::params].keyExists(hmi_response::message)) {
+    (*message)[strings::msg_params][strings::info] =
+        (*message)[strings::params][hmi_response::message];
+  }
 }
 
 ResponseFromHMI::~ResponseFromHMI() {
@@ -58,6 +63,7 @@ void ResponseFromHMI::Run() {
 
 void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
+
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
 }
 

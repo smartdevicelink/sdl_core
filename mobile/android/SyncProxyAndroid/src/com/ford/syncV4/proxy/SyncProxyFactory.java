@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 
 public class SyncProxyFactory {
@@ -9,7 +11,7 @@ public class SyncProxyFactory {
 		try {
 			ret = new SyncProxy(listener);
 		} catch (SyncException e) {
-			e.printStackTrace();
+            Log.e("SyncProxyTester", e.toString());
 		}
 		return ret;
 	}

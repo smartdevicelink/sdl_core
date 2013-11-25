@@ -4,9 +4,6 @@ add_subdirectory(./interfaces)
 # --- TransportManager
 add_subdirectory(./transport_manager)
 
-# --- AppMgr
-#add_subdirectory(./AppMgr)
-
 # --- formatters
 add_subdirectory(./formatters)
 
@@ -38,4 +35,4 @@ add_subdirectory(./hmi_message_handler)
 add_subdirectory(./config_profile)
 
 # --- AudioManager
-#add_subdirectory(./audio_manager)
+#add_subdirectory(./media_manager)

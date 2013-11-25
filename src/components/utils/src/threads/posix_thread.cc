@@ -40,7 +40,7 @@
 namespace {
 static void* threadFunc(void* closure) {
   threads::ThreadDelegate* delegate =
-      static_cast<threads::ThreadDelegate*>(closure);
+    static_cast<threads::ThreadDelegate*>(closure);
   delegate->threadMain();
   return NULL;
 }
@@ -49,15 +49,15 @@ static void* threadFunc(void* closure) {
 namespace threads {
 size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
 log4cxx::LoggerPtr Thread::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger( "threads::Thread"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::Thread"));
 
 Thread::Thread(const char* name, ThreadDelegate* delegate)
-    : name_("undefined"),
-      delegate_(delegate),
-      thread_handle_(0),
-      thread_id_(0),
-      thread_options_(),
-      isThreadRunning_(false){
+  : name_("undefined"),
+    delegate_(delegate),
+    thread_handle_(0),
+    thread_id_(0),
+    thread_options_(),
+    isThreadRunning_(false) {
   if (name) {
     name_ = name;
   }
@@ -91,8 +91,9 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   // 0 - default value
   if (thread_options_.stack_size() > 0
-      && thread_options_.stack_size() >= Thread::kMinStackSize)
+      && thread_options_.stack_size() >= Thread::kMinStackSize) {
     pthread_attr_setstacksize(&attributes, thread_options_.stack_size());
+  }
 
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
@@ -108,8 +109,10 @@ void Thread::stop() {
     return;
   }
 
-  if(NULL != delegate_) {
-    delegate_->exitThreadMain();
+  if (NULL != delegate_) {
+    if (!delegate_->exitThreadMain()) {
+      pthread_cancel(thread_handle_);
+    }
   }
 
   // Wait for the thread to exit.  It should already have terminated but make

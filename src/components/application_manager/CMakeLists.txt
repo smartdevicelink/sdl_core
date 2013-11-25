@@ -14,11 +14,10 @@ include_directories (
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../mobile_message_handler/include
-  ../audio_manager/include
+  ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../audio_manager/include/
   ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
@@ -37,7 +36,6 @@ set (SOURCES
 ./src/mobile_command_factory.cc
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
-./src/message_conversion.cc
 ./src/hmi_capabilities.cc
 ./src/from_mobile_thread_impl.cc
 ./src/to_mobile_thread_impl.cc
@@ -151,6 +149,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/sync_pdata_request.cc
 ./src/commands/mobile/sync_pdata_response.cc
 ./src/commands/mobile/on_sync_pdata_notification.cc
+./src/commands/mobile/on_keyboard_input_notification.cc
+./src/commands/mobile/on_touch_event_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES
@@ -191,6 +191,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vr_get_supported_languages_response.cc
 ./src/commands/hmi/vr_get_language_request.cc
 ./src/commands/hmi/vr_get_language_response.cc
+./src/commands/hmi/vr_get_capabilities_request.cc
+./src/commands/hmi/vr_get_capabilities_response.cc
 ./src/commands/hmi/tts_is_ready_request.cc
 ./src/commands/hmi/tts_is_ready_response.cc
 ./src/commands/hmi/tts_change_registration_request.cc
@@ -287,6 +289,13 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 ./src/commands/hmi/on_find_applications.cc
+./src/commands/hmi/on_ui_keyboard_input_notification.cc
+./src/commands/hmi/on_ui_touch_event_notification.cc
+./src/commands/hmi/on_ui_reset_timeout_notification.cc
+./src/commands/hmi/navi_start_stream_request.cc
+./src/commands/hmi/navi_start_stream_response.cc
+./src/commands/hmi/navi_stop_stream_request.cc
+./src/commands/hmi/navi_stop_stream_response.cc
 )
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})

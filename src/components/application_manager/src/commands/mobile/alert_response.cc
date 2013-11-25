@@ -51,24 +51,7 @@ AlertResponse::~AlertResponse() {
 void AlertResponse::Run() {
   LOG4CXX_INFO(logger_, "AlertResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  if (!IsPendingResponseExist()) {
-    const int code = (*message_)[strings::params][hmi_response::code].asInt();
-
-    if (hmi_apis::Common_Result::SUCCESS == code) {
-      SendResponse(true);
-    } else {
-      SendResponse(false);
-    }
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

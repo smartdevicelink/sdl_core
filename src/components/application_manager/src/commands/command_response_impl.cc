@@ -64,11 +64,6 @@ void CommandResponseImpl::SendResponse(
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::msg_params][strings::success] = success;
 
-  if ((*message_)[strings::params].keyExists(hmi_response::message)) {
-    (*message_)[strings::msg_params][strings::info] =
-        (*message_)[strings::params][hmi_response::message];
-  }
-
   if (!(*message_)[strings::msg_params].keyExists(strings::result_code)) {
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
       (*message_)[strings::msg_params][strings::result_code] = result_code;
@@ -101,19 +96,18 @@ bool CommandResponseImpl::IsPendingResponseExist() {
   int connection_key = 0;
   if (msg_chain) {
     connection_key = msg_chain->connection_key();
+
+    if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
+        correlation_id, mobile_correlation_id)) {
+      result = false;
+      // change correlation id to mobile
+      (*message_)[strings::params][strings::correlation_id] =
+          mobile_correlation_id;
+
+      (*message_)[strings::params][strings::connection_key] = connection_key;
+    }
   } else {
-    LOG4CXX_INFO(logger_, "There is no pending response.");
-    return false;
-  }
-
-  if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      correlation_id, mobile_correlation_id)) {
-    result = false;
-    // change correlation id to mobile
-    (*message_)[strings::params][strings::correlation_id] =
-        mobile_correlation_id;
-
-    (*message_)[strings::params][strings::connection_key] = connection_key;
+    LOG4CXX_INFO(logger_, "Request doesn't require response.");
   }
 
   return result;

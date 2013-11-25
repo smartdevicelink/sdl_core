@@ -42,10 +42,23 @@ namespace application_manager {
 namespace commands {
 
 SliderRequest::SliderRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ : CommandRequestImpl(message) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
 SliderRequest::~SliderRequest() {
+}
+
+bool SliderRequest::Init() {
+
+  /* Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.*/
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
+    default_timeout_ =
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
+  }
+
+  return true;
 }
 
 void SliderRequest::Run() {
@@ -86,10 +99,29 @@ void SliderRequest::Run() {
   msg_params[strings::app_id] = application_impl->app_id();
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    msg_params[strings::timeout] = 10000;
+    msg_params[strings::timeout] = default_timeout_;
   }
 
   CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);
+}
+
+void SliderRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SliderRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+          correlation_id(),
+          default_timeout());
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      break;
+    }
+  }
 }
 
 }  // namespace commands

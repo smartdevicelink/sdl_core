@@ -35,15 +35,17 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
-#include "utils/shared_ptr.h"
 #include "protocol_handler/raw_message.h"
-#include "transport_manager/common.h"
+#include "utils/shared_ptr.h"
 
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
+typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
+class ProtocolObserver;
+
 /**
  * \class ProtocolHandler
  * \brief Interface for component parsing protocol header
@@ -51,18 +53,40 @@ namespace protocol_handler {
  */
 class ProtocolHandler {
   public:
+    /**
+     * \brief Adds pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver
+     */
+    virtual void AddProtocolObserver(ProtocolObserver* observer) = 0;
+
+    /**
+     * \brief Removes pointer to higher layer handler for message exchange
+     * \param observer Pointer to object of the class implementing
+     * IProtocolObserver.
+     */
+    virtual void RemoveProtocolObserver(ProtocolObserver* observer) = 0;
 
     /**
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
      */
-    virtual void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) = 0;
+    virtual void SendMessageToMobileApp(const RawMessagePtr& message) = 0;
 
     /**
      * \brief Returns size of frame to be formed from raw bytes.
      * expects first bytes of message which will be treated as frame header.
      */
-    virtual unsigned int GetPacketSize(unsigned int size, unsigned char* data) = 0;
+    virtual unsigned int GetPacketSize(
+      unsigned int size, unsigned char* data) = 0;
+
+    /**
+     * \brief Sends number of processed frames in case of binary nav streaming
+     * \param connection_key Id of connection over which message is to be sent
+     * \param number_of_frames Number of frames processed by
+     * streaming server and displayed to user.
+     */
+    virtual void SendFramesNumber(int connection_key, int number_of_frames) = 0;
 
   protected:
     /**
@@ -71,7 +95,6 @@ class ProtocolHandler {
     virtual ~ProtocolHandler() {
     }
 };
-}
+}  //  namespace protocol_handler
 
-
-#endif // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
+#endif  //  SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER

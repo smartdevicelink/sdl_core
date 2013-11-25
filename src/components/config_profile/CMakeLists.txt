@@ -1,6 +1,8 @@
 include_directories (
   ./include
   ../utils/include/
+  ../media_manager/include/
+  ../protocol_handler/include
 )
 
 set (SOURCES

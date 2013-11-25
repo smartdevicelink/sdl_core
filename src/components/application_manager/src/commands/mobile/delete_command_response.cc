@@ -105,7 +105,8 @@ void DeleteCommandResponse::Run() {
 
         SendResponse(true);
       } else {
-        SendResponse(false);
+        SendResponse(false, static_cast<mobile_apis::Result::eType>(
+            std::max(result_ui, result_vr)));
       }
     } else {
       // TODO(VS): check ui and vr response code

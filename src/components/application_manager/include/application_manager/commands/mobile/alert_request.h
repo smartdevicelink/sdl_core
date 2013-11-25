@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -59,9 +60,23 @@ class AlertRequest : public CommandRequestImpl {
   virtual ~AlertRequest();
 
   /**
+   * @brief Initialize request params
+   **/
+  virtual bool Init();
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
+ protected:
 
  private:
   /*
@@ -86,6 +101,11 @@ class AlertRequest : public CommandRequestImpl {
   void SendPlayToneNotification(int app_id);
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
+
+  bool                        is_ui_alert_send_;
+  mobile_apis::Result::eType  ui_alert_result_;
+  bool                        is_tts_speak_send_;
+  bool                        is_tts_speak_received_;
 };
 
 }  // namespace commands
