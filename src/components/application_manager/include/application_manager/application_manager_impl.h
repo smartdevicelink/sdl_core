@@ -502,6 +502,12 @@ class ApplicationManagerImpl : public ApplicationManager,
         unsigned int connection_key);
 
     /**
+     * @brief Unregister application in SDL
+     */
+    void UnregisterAppInterface(const unsigned int& app_id);
+
+    // members
+    /**
      * @brief Map of connection keys and associated applications
      */
     std::map<int, Application*> applications_;

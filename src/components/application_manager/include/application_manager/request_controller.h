@@ -86,6 +86,14 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    */
   void terminateRequest(unsigned int mobile_correlation_id);
 
+  /*
+   * @brief Removes all requests from queue for specified application
+   *
+   * @param app_id Mobile application ID
+   *
+   */
+  void terminateAppRequests(unsigned int app_id);
+
   /**
    * @ Updates request timeout
    *

@@ -396,6 +396,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
 }
 
 bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
+  LOG4CXX_INFO(logger_,"UnregisterApplication " << app_id);
+
   std::map<int, Application*>::iterator it = applications_.find(app_id);
   if (applications_.end() == it) {
     return false;
@@ -403,6 +405,7 @@ bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
   Application* app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
+  request_ctrl.terminateAppRequests(app_id);
   delete app_to_remove;
   return true;
 }
@@ -1044,15 +1047,7 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
   switch (type) {
     case connection_handler::ServiceType::kRPCSession: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      std::map<int, Application*>::iterator it = applications_.find(
-            first_session_key);
-      if (it == applications_.end()) {
-        LOG4CXX_INFO(logger_, "Application is already unregistered.");
-        return;
-      }
-      MessageHelper::RemoveAppDataFromHMI(it->second);
-      MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-      UnregisterApplication(first_session_key);
+      UnregisterAppInterface(first_session_key);
       break;
     }
     case connection_handler::ServiceType::kNaviSession: {
@@ -1200,8 +1195,16 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
     if ((*message)[strings::params][strings::message_type].asInt() ==
         mobile_apis::messageType::request) {
+
       if (false == request_ctrl.addRequest(command)) {
         LOG4CXX_ERROR_EXT(logger_, "Unable to add request");
+        unsigned int app_id =
+            (*message)[strings::params][strings::connection_key].asUInt();
+
+        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        app_id, mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+
+        UnregisterAppInterface(app_id);
       }
     }
 
@@ -1594,6 +1597,18 @@ void ApplicationManagerImpl::set_application_id(const int correlation_id,
                                                 const unsigned int app_id) {
   appID_list_.insert(std::pair<const int, const unsigned int>
   (correlation_id, app_id));
+}
+
+void ApplicationManagerImpl::UnregisterAppInterface(
+    const unsigned int& app_id) {
+  std::map<int, Application*>::const_iterator it = applications_.find(app_id);
+  if (it == applications_.end()) {
+    LOG4CXX_INFO(logger_, "Application is already unregistered.");
+    return;
+  }
+  MessageHelper::RemoveAppDataFromHMI(it->second);
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
+  UnregisterApplication(app_id);
 }
 
 }  // namespace application_manager

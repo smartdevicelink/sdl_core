@@ -116,6 +116,25 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   list_mutex_.unlock();
 }
 
+void RequestController::terminateAppRequests(unsigned int app_id) {
+  LOG4CXX_INFO(logger_, "RequestController::terminateAppRequests()");
+
+  list_mutex_.lock();
+
+  std::list<Request>::iterator it = request_list_.begin();
+  for (; request_list_.end() != it; ++it) {
+    const commands::CommandRequestImpl* request_impl =
+      (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+    if (request_impl->connection_key() == app_id) {
+      watchdog_->removeRequest(
+        request_impl->connection_key(), request_impl->correlation_id());
+      it = request_list_.erase(it);
+    }
+  }
+
+  list_mutex_.unlock();
+}
+
 void RequestController::updateRequestTimeout(unsigned int connection_key,
                                              unsigned int mobile_correlation_id,
                                              unsigned int new_timeout) {
