@@ -89,9 +89,9 @@ FFW.RevSDL = FFW.RPCObserver.create({
         this._super();
 
         switch (response.id) {
-//            case this.GrantAccessRequestId:
-//                MFT.MediaController.GrantAccessResult(response.result);
-//                break;
+            case this.GrantAccessRequestId:
+                MFT.AppController.changeAccessStatus(response.result);
+                break;
 //            case this.StartScanRequestId:
 //                MFT.MediaController.set('isFrequencyScan', response.result.success);
 //                break;
@@ -127,8 +127,7 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         switch (notification.method) {
             case this.OnControlChangedProperty:
-                MFT.MediaController.set('sdlAccessStatus', false);
-//                MFT.MediaController.set('sdlControlStatusIco', 1);
+                MFT.AppController.driverFocus();
                 break;
             case this.OnRadioDetailsProperty:
                 MFT.MediaController.setSDLDirectTuneStation(notification.params);

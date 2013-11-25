@@ -1339,6 +1339,13 @@ MFT.eng = {
 
     view_appSettings_errorSendMailPopup_title: 'Sorry, this email cannot be sent',
     view_appSettings_errorSendMailPopup_text: 'Unable to open the default email application.',
-    view_appSettings_errorSendMailPopup_ok: 'OK'
+    view_appSettings_errorSendMailPopup_ok: 'OK',
+
+    view_sdl_messages_popup_granted: 'Access has been granted',
+    view_sdl_messages_popup_denied: 'Driver has denied your request',
+    view_sdl_messages_popup_driverControl: 'Driver in Control',
+    view_sdl_grantAccess_message_popup_label: 'Do you wish to control vehicle subsystems from your mobile device?',
+    view_sdl_grantAccess_message_popup_makeRequest: 'Make Request',
+    view_sdl_grantAccess_message_popup_close: 'Close'
 
 };

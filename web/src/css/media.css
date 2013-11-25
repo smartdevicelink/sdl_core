@@ -436,6 +436,32 @@
 #tagStorePopup .popup-window {
     min-width: 260px;
 }
+#SDLMessagesPopup {
+    top: 0;
+    left: 0;
+    z-index: 6;
+}
+#SDLMessagesPopupFormLabel{
+    margin-bottom: 20px;
+    line-height: 1.4em;
+}
+#SDLMessagesPopup .popup-window {
+    min-width: 260px;
+}
+#SDLGrantAccessPopup {
+    top: 0;
+    left: 0;
+    z-index: 6;
+}
+#SDLGrantAccessPopup .popup-window {
+    width: 376px;
+}
+#SDLGrantAccessPopup .label {
+    margin-bottom: 16px;
+}
+#SDLGrantAccessPopup .popup-window .ffw-button {
+    line-height: 46px;
+}
 
 /* Media options PTY Category view*/
 .media_options_PTYCategory_view {
@@ -2173,13 +2199,4 @@
 /* cancel scrollbar animation */
 .cancelBarAnimation {
     -webkit-transition: none !important;
-}
-#media_fm_sendRequestButton {
-    background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
-}
-#media_fm_sendRequestButton {
-    background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
-}
-#media_fm_sendRequestButton.pressed {
-    background: url(../images/media/bcs-item_bg_act.png) repeat !important;
 }

@@ -53,7 +53,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
                     }
 
                     return list;
-                }.property('this.controler.currentActiveData'),
+                }.property('this.controler.currentActiveData.HDChannels'),
                 template:  Em.Handlebars.compile(
                     '<div class="hdInfo hidden_display" {{bindAttr class="view.controler.currentActiveData.isHd:visible_display"}}>'+
                         '<div class="HDChannels">' +
@@ -174,7 +174,6 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
                     '{{/if}}'
             )
         })
-
     }),
 
     rightmenu: Em.ContainerView.create({
@@ -282,36 +281,21 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
         sendRequestButton: MFT.Button.extend({
             elementId:	'media_fm_sendRequestButton',
             classNames:			['rs-item'],
-            target:				'MFT.MediaController',
+            target:				'MFT.AppController',
             action:				'sendAccessRequest',
             onDown: false,
-            text: MFT.locale.label.view_media_grantAccess,
-            icon: 'images/media/passiv_horiz_led.png',
-            // Change Icon for HD State
-            onIconChange: function(){
-                if(MFT.MediaController.sdlAccessStatus){
-                    this.set('icon', 'images/media/active_horiz_led.png');
+            templateName: 'text',
+            text: function(){
+                if(MFT.AppController.sdlAccessStatus){
+                    return MFT.locale.label.view_media_cancelAccess;
                 } else {
-                    this.set('icon', 'images/media/passiv_horiz_led.png');
+                    return MFT.locale.label.view_media_grantAccess;
                 }
-            }.observes('MFT.MediaController.sdlAccessStatus')
+            }.property('MFT.AppController.sdlAccessStatus'),
+            disabled: function() {
+                return (MFT.AppController.sdlControlStatus == 2);
+            }.property('MFT.AppController.sdlControlStatus')
         })
-
-//        sendRequestButton: MFT.Button.extend({
-//            elementId:	'media_fm_sendRequestButton',
-//            classNames:			['rs-item'],
-//            target:				'MFT.MediaController',
-//            action:				'sendAccessRequest',
-//            onDown: false,
-//            templateName: 'text',
-//            text: function(){
-//                if(MFT.MediaController.sdlAccessStatus){
-//                    return MFT.locale.label.view_media_cancelAccess;
-//                } else {
-//                    return MFT.locale.label.view_media_grantAccess;
-//                }
-//            }.property('MFT.MediaController.sdlAccessStatus')
-//        })
     })
 
 });

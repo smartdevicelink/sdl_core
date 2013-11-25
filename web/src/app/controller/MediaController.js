@@ -14,19 +14,6 @@ MFT.MediaController = Em.Object.create({
 	/** Initial substate */
 	activeState: 'media.radio.am',
 
-    /** Reverse SDL functionality **/
-    sdlAccessStatus: false,
-
-    /**
-     * Reverse SDL control status icon
-     *
-     * 1 - Driver control
-     * 2 - Waiting passenger control
-     * 3 - Passenger control rejected
-     * 4 - Passenger control
-     */
-    sdlControlStatusIco: 1,
-
 	/** Visibility of Home Media Status */
 	isHomeMediaStatusHidden: false,
 	isHomeMediaStatusInfoHidden: false,
@@ -301,8 +288,8 @@ MFT.MediaController = Em.Object.create({
 
         if(!isNaN(closeTime)){
             this[elementId+'TimerId'] = setTimeout(function() {
-                self.hidePopup('tagStorePopup');
-            }, closeTime, callback);
+                self.hidePopup(elementId, callback);
+            }, closeTime);
         }
     },
 
@@ -312,7 +299,9 @@ MFT.MediaController = Em.Object.create({
             'opacity': 0
         }).hide();
 
-        callback();
+        if (typeof (callback) != 'undefined') {
+            callback();
+        }
     },
 
 	/**
@@ -1263,24 +1252,5 @@ MFT.MediaController = Em.Object.create({
 		if ( MFT.helpMode ) {
 			MFT.VideoPlayerController.start('ent_HD_radio');
 		}
-	},
-
-    sendAccessRequest: function() {
-        if(MFT.MediaController.sdlAccessStatus){
-            FFW.RevSDL.sendCancelAccessRequest();
-            this.set('sdlControlStatusIco', 1);
-        } else {
-            FFW.RevSDL.sendGrantAccessRequest();
-            this.set('sdlControlStatusIco', 2);
-        }
-    },
-
-    GrantAccessResult: function(data) {
-        if (data.success) {
-            this.set('sdlAccessStatus', true);
-            this.set('sdlControlStatusIco', 4);
-        } else {
-            this.showPopup('')
-        }
-    }
+	}
 });

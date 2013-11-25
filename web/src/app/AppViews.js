@@ -39,6 +39,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.WOInfoView,
 		MFT.RatingNetworkWarningView,
 		MFT.RatingNoRespondWarningView,
+        MFT.SDLPopupsView,
 		'activeAview'
 	],
 	
