@@ -88,20 +88,23 @@ Item {
 
     function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
         console.debug("enter: " + helpPrompt + ", " + timeoutPrompt + ", " + appID)
+
         var newHelpPropmt = helpPrompt ?
                     helpPrompt.map(
                         function (structure) {
                             return structure.text
                         }
                      ).join(", ") :
-                    ""
+                    dataContainer.globalProperties.helpPrompt
+
         var newTimeoutPrompt = timeoutPrompt ?
                     timeoutPrompt.map(
                         function (structure) {
                             return structure.text
                         }
                      ).join(", ") :
-                    ""
+                    dataContainer.globalProperties.timeoutPrompt
+
         dataContainer.globalProperties = {
             "helpPrompt": newHelpPropmt,
             "timeoutPrompt": newTimeoutPrompt

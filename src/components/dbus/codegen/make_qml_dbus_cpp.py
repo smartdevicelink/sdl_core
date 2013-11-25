@@ -609,9 +609,9 @@ class Impl(FordXmlParser):
 
 
 
-arg_parser = ArgumentParser()
-arg_parser.add_argument('--infile', required=True)
-arg_parser.add_argument('--outdir', required=True)
+arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
+arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
+arg_parser.add_argument('--outdir', required=True, help="path to directory where output files qml_dbus.cc, qml_dbus.h will be saved")
 args = arg_parser.parse_args()
 
 header_name = 'qml_dbus.h'

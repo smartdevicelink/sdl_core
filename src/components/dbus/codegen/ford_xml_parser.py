@@ -39,7 +39,6 @@
 from xml.etree import ElementTree
 from collections import OrderedDict
 
-
 node_name = '/com/ford/hmi'
 
 class ParamDesc:
