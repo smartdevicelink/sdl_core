@@ -444,7 +444,7 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnControlChanged(OnControlChanged notification) {
-        final String msg = "onControlChanged " + notification.getReason();
+        final String msg = "onControlChanged " + notification;
         SafeToast.showToastAnyThread(msg);
     }
 
