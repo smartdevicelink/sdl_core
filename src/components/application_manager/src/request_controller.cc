@@ -38,6 +38,7 @@
 namespace application_manager {
 
 namespace request_controller {
+using namespace sync_primitives;
 
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestController"));
@@ -45,7 +46,6 @@ log4cxx::LoggerPtr logger_ =
 RequestController::RequestController()
   : watchdog_(NULL) {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
-  list_mutex_.init();
   watchdog_ = request_watchdog::RequestWatchdog::instance();
   watchdog_->AddListener(this);
 }
@@ -63,35 +63,35 @@ RequestController::~RequestController() {
 bool RequestController::addRequest(const Request& request) {
   LOG4CXX_INFO(logger_, "RequestController::addRequest()");
 
-  list_mutex_.lock();
-
   bool result = true;
-  const commands::CommandRequestImpl* request_impl =
-    (static_cast<commands::CommandRequestImpl*>(&(*request)));
+  {
+    AutoLock auto_lock(request_list_lock_);
 
-  if (true ==
-      watchdog_->timeScaleMaxRequestExceed(request_impl->connection_key())) {
-    LOG4CXX_ERROR(logger_, "Application requests count exceed limit");
-    result = false;
-    // remove all app request
-  } else {
+    const commands::CommandRequestImpl* request_impl =
+      (static_cast<commands::CommandRequestImpl*>(&(*request)));
 
-    request_list_.push_back(request);
+    if (true ==
+        watchdog_->timeScaleMaxRequestExceed(request_impl->connection_key())) {
+      LOG4CXX_ERROR(logger_, "Application requests count exceed limit");
+      result = false;
+      // remove all app request
+    } else {
 
-    LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-                 << request_impl->default_timeout());
+      request_list_.push_back(request);
 
-    watchdog_->addRequest(new request_watchdog::RequestInfo(
-                            request_impl->function_id(),
-                            request_impl->connection_key(),
-                            request_impl->correlation_id(),
-                            request_impl->default_timeout()));
+      LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+                   << request_impl->default_timeout());
 
-    LOG4CXX_INFO(logger_, "Added request to watchdog.");
-    LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
+      watchdog_->addRequest(new request_watchdog::RequestInfo(
+                              request_impl->function_id(),
+                              request_impl->connection_key(),
+                              request_impl->correlation_id(),
+                              request_impl->default_timeout()));
+
+      LOG4CXX_INFO(logger_, "Added request to watchdog.");
+      LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
+    }
   }
-
-  list_mutex_.unlock();
 
   return result;
 }
@@ -99,21 +99,20 @@ bool RequestController::addRequest(const Request& request) {
 void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   LOG4CXX_INFO(logger_, "RequestController::terminateRequest()");
 
-  list_mutex_.lock();
-
-  std::list<Request>::iterator it = request_list_.begin();
-  for (; request_list_.end() != it; ++it) {
-    const commands::CommandRequestImpl* request_impl =
-      (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
-    if (request_impl->correlation_id() == mobile_correlation_id) {
-      watchdog_->removeRequest(
-        request_impl->connection_key(), request_impl->correlation_id());
-      request_list_.erase(it);
-      break;
+  {
+    AutoLock auto_lock(request_list_lock_);
+    std::list<Request>::iterator it = request_list_.begin();
+    for (; request_list_.end() != it; ++it) {
+      const commands::CommandRequestImpl* request_impl =
+        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+      if (request_impl->correlation_id() == mobile_correlation_id) {
+        watchdog_->removeRequest(
+          request_impl->connection_key(), request_impl->correlation_id());
+        request_list_.erase(it);
+        break;
+      }
     }
   }
-
-  list_mutex_.unlock();
 }
 
 void RequestController::terminateAppRequests(unsigned int app_id) {
@@ -148,27 +147,25 @@ void RequestController::updateRequestTimeout(unsigned int connection_key,
 void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
   LOG4CXX_INFO(logger_, "RequestController::onTimeoutExpired()");
 
-  list_mutex_.lock();
-
   commands::CommandRequestImpl* request_impl = NULL;
-  std::list<Request>::iterator it = request_list_.begin();
-  for (; request_list_.end() != it; ++it) {
-    request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
-    if (request_impl->correlation_id() == info.correlationID_ &&
-        request_impl->connection_key() == info.connectionID_) {
-      LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_ <<
-                   " of application " << info.connectionID_ << " expired");
-      break;
+  {
+    AutoLock auto_lock(request_list_lock_);
+    std::list<Request>::iterator it = request_list_.begin();
+    for (; request_list_.end() != it; ++it) {
+      request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+      if (request_impl->correlation_id() == info.correlationID_ &&
+          request_impl->connection_key() == info.connectionID_) {
+        LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_ <<
+                     " of application " << info.connectionID_ << " expired");
+        break;
+      }
     }
   }
-
-  list_mutex_.unlock();
 
   if (request_impl) {
     request_impl->onTimeOut();
   }
 }
-
 
 }  //  namespace request_controller
 

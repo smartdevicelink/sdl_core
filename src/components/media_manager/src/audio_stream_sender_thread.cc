@@ -48,6 +48,7 @@
 #include "application_manager/message.h"
 
 namespace media_manager {
+using namespace sync_primitives;
 
 const int AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
@@ -56,9 +57,9 @@ log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, unsigned int session_key)
   : session_key_(session_key),
+    shouldBeStoped_(false),
     fileName_(fileName) {
   LOG4CXX_TRACE_ENTER(logger_);
-  stopFlagMutex_.init();
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
@@ -69,27 +70,16 @@ void AudioStreamSenderThread::threadMain() {
 
   offset_ = 0;
 
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = false;
-  stopFlagMutex_.unlock();
+  setShouldBeStopped(false);
 
   while (true) {
-
-    stopFlagMutex_.lock();
-    bool shouldBeStoped = shouldBeStoped_;
-    stopFlagMutex_.unlock();
-
-    if (shouldBeStoped) {
+    if (getShouldBeStopped()) {
       break;
     }
 
     sendAudioChunkToMobile();
 
-    stopFlagMutex_.lock();
-    shouldBeStoped = shouldBeStoped_;
-    stopFlagMutex_.unlock();
-
-    if (shouldBeStoped) {
+    if (getShouldBeStopped()) {
       break;
     }
 
@@ -133,12 +123,19 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   }
 }
 
+bool AudioStreamSenderThread::getShouldBeStopped() {
+  AutoLock auto_lock(shouldBeStoped_lock_);
+  return shouldBeStoped_;
+}
+
+void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
+  AutoLock auto_lock(shouldBeStoped_lock_);
+  shouldBeStoped_ = should_stop;
+}
+
 bool AudioStreamSenderThread::exitThreadMain() {
   LOG4CXX_INFO(logger_, "AudioStreamSenderThread::exitThreadMain");
-
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = true;
-  stopFlagMutex_.unlock();
+  setShouldBeStopped(true);
   return true;
 }
 

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 
 #include <list>
-#include "utils/synchronisation_primitives.h"
+#include "utils/lock.h"
 #include "request_watchdog/request_watchdog.h"
 #include "application_manager/commands/command.h"
 #include "request_watchdog/watchdog_subscriber.h"
@@ -118,7 +118,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
  private:
 
   std::list<Request>                          request_list_;
-  sync_primitives::SynchronisationPrimitives  list_mutex_;
+  sync_primitives::Lock                       request_list_lock_;
   request_watchdog::Watchdog*                 watchdog_;
 
   DISALLOW_COPY_AND_ASSIGN(RequestController);

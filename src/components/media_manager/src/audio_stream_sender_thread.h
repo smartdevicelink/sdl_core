@@ -36,8 +36,7 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
-#include "utils/timer.h"
+#include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -116,11 +115,14 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     void FactoryCreateCommand(
       NsSmartDeviceLink::NsSmartObjects::SmartObject* cmd);
 
+    bool getShouldBeStopped();
+    void setShouldBeStopped(bool should_stop);
+
     unsigned int session_key_;
     const std::string fileName_;
     int offset_;
     bool shouldBeStoped_;
-    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+    sync_primitives::Lock shouldBeStoped_lock_;
 
     static const int kAudioPassThruTimeout;
     static log4cxx::LoggerPtr logger_;

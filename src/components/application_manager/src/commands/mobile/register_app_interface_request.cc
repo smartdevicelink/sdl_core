@@ -45,25 +45,14 @@ namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
   const MessageSharedPtr& message)
-  : CommandRequestImpl(message),
-    timer_(NULL) {
+  : CommandRequestImpl(message) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
-  if (timer_) {
-    delete timer_;
-  }
 }
 
 bool RegisterAppInterfaceRequest::Init() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Init");
-
-  synchronisation_.init();
-  timer_ = new sync_primitives::Timer(&synchronisation_);
-  if (!timer_) {
-    LOG4CXX_ERROR_EXT(logger_, "Init NULL pointer");
-    return false;
-  }
   return true;
 }
 

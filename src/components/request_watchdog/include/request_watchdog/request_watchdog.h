@@ -43,7 +43,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/date_time.h"
-#include "utils/synchronisation_primitives.h"
+#include "utils/lock.h"
 
 namespace request_watchdog {
 
@@ -110,20 +110,17 @@ class RequestWatchdog : public Watchdog {
     static const int DEFAULT_CYCLE_TIMEOUT = 250000;
     static log4cxx::LoggerPtr logger_;
 
-
-    sync_primitives::SynchronisationPrimitives instanceMutex_;
-
     void notifySubscribers(const RequestInfo& requestInfo);
 
     void startDispatcherThreadIfNeeded();
     void stopDispatcherThreadIfNeeded();
 
     std::list<WatchdogSubscriber*> subscribers_;
-    sync_primitives::SynchronisationPrimitives subscribersListMutex_;
+    sync_primitives::Lock subscribersLock_;
 
     std::map<RequestInfo*, TimevalStruct> requests_;
+    sync_primitives::Lock requestsLock_;
 
-    sync_primitives::SynchronisationPrimitives requestsMapMutex_;
     friend class QueueDispatcherThreadDelegate;
 
     class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {

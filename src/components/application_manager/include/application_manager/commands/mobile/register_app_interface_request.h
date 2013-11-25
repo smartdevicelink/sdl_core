@@ -35,8 +35,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "utils/synchronisation_primitives.h"
-#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -81,11 +79,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
-
-  // members
-  sync_primitives::SynchronisationPrimitives synchronisation_;
-  sync_primitives::Timer* timer_;
-
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
