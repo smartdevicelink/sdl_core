@@ -57,7 +57,9 @@ Profile::Profile()
   , space_available_(104857600)
   , app_time_scale_max_requests_(100)
   , app_requests_time_scale_(10)
-  , put_file_in_none_(5) {
+  , put_file_in_none_(5)
+  , delete_file_in_none_(5)
+  , list_files_in_none_(5) {
   UpdateValues();
 }
 
@@ -157,6 +159,16 @@ const unsigned int Profile::put_file_in_none() const {
   return put_file_in_none_;
 }
 
+const unsigned int Profile::delete_file_in_none() const {
+  return delete_file_in_none_;
+}
+
+
+const unsigned int Profile::list_files_in_none() const {
+  return list_files_in_none_;
+}
+
+
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
@@ -253,14 +265,38 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "GLOBAL PROPERTIES", "PutFileRequest", value))
+                           "FILESYSTEM RESTRICTIONS", "PutFileRequest", value))
       && ('\0' != *value)) {
     put_file_in_none_ = atoi(value);
-    if (max_cmd_id_ < 0) {
-      max_cmd_id_ = 5;
+    if (put_file_in_none_ < 0) {
+      put_file_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of PutFile requests for one "
         "application in NONE to " << put_file_in_none_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "FILESYSTEM RESTRICTIONS", "DeleteFileRequest", value))
+      && ('\0' != *value)) {
+    delete_file_in_none_ = atoi(value);
+    if (delete_file_in_none_ < 0) {
+      delete_file_in_none_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Max allowed number of DeleteFile requests for one "
+        "application in NONE to " << delete_file_in_none_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "FILESYSTEM RESTRICTIONS", "ListFilesRequest", value))
+      && ('\0' != *value)) {
+    list_files_in_none_ = atoi(value);
+    if (list_files_in_none_ < 0) {
+      list_files_in_none_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Max allowed number of ListFiles requests for one "
+        "application in NONE to " << list_files_in_none_);
   }
 
   *value = '\0';

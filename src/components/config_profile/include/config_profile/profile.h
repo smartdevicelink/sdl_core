@@ -166,6 +166,16 @@ class Profile {
      */
     const unsigned int put_file_in_none() const;
 
+    /**
+     * @brief Returns Max allowed number of DeleteFile requests for one application in NONE
+     */
+    const unsigned int delete_file_in_none() const;
+
+    /**
+     * @brief Returns Max allowed number of ListFiles requests for one application in NONE
+     */
+    const unsigned int list_files_in_none() const;
+
     // Members section
 
   protected:
@@ -236,6 +246,8 @@ class Profile {
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
     unsigned int                    put_file_in_none_;
+    unsigned int                    delete_file_in_none_;
+    unsigned int                    list_files_in_none_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

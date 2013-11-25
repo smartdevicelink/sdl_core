@@ -49,6 +49,8 @@ ApplicationImpl::ApplicationImpl(unsigned int app_id)
       allowed_support_navigation_(false),
       hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
+      delete_file_in_none_count_(0),
+      list_files_in_none_count_(0),
       system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       is_app_allowed_(true),
@@ -132,6 +134,14 @@ const unsigned int ApplicationImpl::put_file_in_none_count() const {
   return put_file_in_none_count_;
 }
 
+const unsigned int ApplicationImpl::delete_file_in_none_count() const {
+  return delete_file_in_none_count_;
+}
+
+const unsigned int ApplicationImpl::list_files_in_none_count() const {
+  return list_files_in_none_count_;
+}
+
 const mobile_api::SystemContext::eType&
 ApplicationImpl::system_context() const {
   return system_context_;
@@ -166,6 +176,8 @@ void ApplicationImpl::set_hmi_level(
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
       mobile_api::HMILevel::HMI_NONE == hmi_level) {
     put_file_in_none_count_ = 0;
+    delete_file_in_none_count_ = 0;
+    list_files_in_none_count_ = 0;
   }
 
   hmi_level_ = hmi_level;
@@ -173,6 +185,14 @@ void ApplicationImpl::set_hmi_level(
 
 void ApplicationImpl::increment_put_file_in_none_count() {
   ++put_file_in_none_count_;
+}
+
+void ApplicationImpl::increment_delete_file_in_none_count() {
+  ++delete_file_in_none_count_;
+}
+
+void ApplicationImpl::increment_list_files_in_none_count() {
+  ++list_files_in_none_count_;
 }
 
 void ApplicationImpl::set_system_context(
