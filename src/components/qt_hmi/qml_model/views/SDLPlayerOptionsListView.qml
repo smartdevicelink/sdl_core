@@ -101,7 +101,7 @@ GeneralView {
                     pressedColor: type === Internal.MenuItemType.MI_PARENT ?
                                       Constants.inactiveButtonTextColorPressed :
                                       Constants.primaryColorPressed
-                    font.pixelSize: 40
+                    font.pixelSize: Constants.titleFontSize
 
                     onClicked: {
                         console.debug("enter")

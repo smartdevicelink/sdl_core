@@ -36,7 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -58,7 +58,7 @@ Rectangle {
         id: dataContainer
 
         onSystemContextChanged: {
-            sdlUIProxy.onSystemContext(systemContext)
+            sdlUI.onSystemContext(systemContext)
         }
 
         // Please note that applicationContext is changed only after setting currentApplication
@@ -259,7 +259,7 @@ Rectangle {
             objectName: "VehicleInfo"
         }
         HmiApi.UIProxy {
-            id: sdlUIProxy
+            id: sdlUI
             objectName: "UI"
         }
     }
@@ -332,7 +332,7 @@ Rectangle {
     }
 
     function getUIProxy(){
-        return sdlUIProxy
+        return sdlUI
     }
 
     function getMainScreen(){
