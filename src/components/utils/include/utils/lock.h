@@ -58,6 +58,7 @@ class Lock {
 #endif
 
  private:
+  friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
 
@@ -65,13 +66,29 @@ class Lock {
 class AutoLock {
  public:
   explicit AutoLock(Lock& lock)
-   : lock_(lock) { lock_.Ackquire(); }
-  ~AutoLock()    { lock_.Release();  }
+    : lock_(lock) { lock_.Ackquire(); }
+  ~AutoLock()     { lock_.Release();  }
+ private:
+  Lock& GetLock(){ return lock_;     }
+  Lock& lock_;
+
+ private:
+  friend class AutoUnlock;
+  friend class ConditionalVariable;
+  DISALLOW_COPY_AND_ASSIGN(AutoLock);
+};
+
+// This class is used to temporarly unlock autolocked lock
+class AutoUnlock {
+ public:
+  explicit AutoUnlock(AutoLock& lock)
+    : lock_(lock.GetLock()) { lock_.Release(); }
+  ~AutoUnlock()             { lock_.Ackquire();  }
  private:
   Lock& lock_;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(AutoLock);
+  DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
 
 } // sync_primitives
