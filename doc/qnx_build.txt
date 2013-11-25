@@ -8,7 +8,7 @@ Set target IP in ini file and change target IP in src/components/HMI/ffw/RPCClie
 Currently we don't have any configuration file for HMI.
 
 Change server IP in configuration file to qnx target IP.
-Copy executable, logger.properties and configuration file to qnx target.
+Copy executable, logger.properties, policy_table.json and configuration file to qnx target.
 You can copy it using scp. Example:
 scp user_name@linux_pc_ip:/full_path/to/file .
 
