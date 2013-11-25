@@ -100,14 +100,6 @@ function setListeners() {
     });
 }
 
-function startDump() {
-    sendCommand("dump_start");
-}
-
-function stopDump() {
-    sendCommand("dump_stop");
-}
-
 function sendCommand(command) {
     if (socket) {
         socket.send(command);
