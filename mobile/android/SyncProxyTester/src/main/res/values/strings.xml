@@ -15,6 +15,7 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_soft_buttons_list">SoftButtons List</string>
     <string name="title_activity_soft_button_edit">Edit SoftButton</string>
+    <string name="title_activity_choice_list">Choice List</string>
     <string name="delete_icon_desc">Delete icon</string>
     <string name="softbutton_id">Id:</string>
     <string name="updateturnlist_turnList">Turn List (comma-separated)</string>

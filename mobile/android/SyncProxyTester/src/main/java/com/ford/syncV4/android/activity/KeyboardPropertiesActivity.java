@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.StringUtils;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
@@ -21,7 +22,6 @@ import java.util.Vector;
 
 
 public class KeyboardPropertiesActivity extends Activity {
-    private static final String JOIN_STRING = ",";
     //
     private KeyboardProperties kbdProp;
     //
@@ -99,11 +99,10 @@ public class KeyboardPropertiesActivity extends Activity {
                     keypressModeAdapter.getPosition(keypressMode));
         }
 
-
         Vector<String> charListValue = kbdProperties.getLimitedCharacterList();
         charListCheck.setChecked(charListValue != null);
         if (charListValue != null) {
-            charList.setText(joinStrings(charListValue));
+            charList.setText(StringUtils.joinStrings(charListValue));
         }
 
         String autocompleteTextValue = kbdProperties.getAutoCompleteText();
@@ -111,19 +110,6 @@ public class KeyboardPropertiesActivity extends Activity {
         if (autocompleteTextValue != null) {
             autocompleteText.setText(autocompleteTextValue);
         }
-    }
-
-    private String joinStrings(Iterable<String> strings) {
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for (String string : strings) {
-            if (i != 0) {
-                sb.append(JOIN_STRING);
-            }
-            sb.append(string);
-            ++i;
-        }
-        return sb.toString();
     }
 
     private void setupUI() {
@@ -196,7 +182,7 @@ public class KeyboardPropertiesActivity extends Activity {
 
         if (charListCheck.isChecked()) {
             Vector<String> charListValue = new Vector<String>(Arrays.asList(
-                    charList.getText().toString().split(JOIN_STRING)));
+                    charList.getText().toString().split(StringUtils.DEFAULT_JOIN_STRING)));
             kbdProperties.setLimitedCharacterList(charListValue);
         }
 

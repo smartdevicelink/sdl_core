@@ -62,8 +62,6 @@ public class Const {
 	// Keys to pass values via Intent
 	public static final String INTENT_KEY_OBJECTS_MAXNUMBER = "MaxObjectsNumber";
 
-	// Request id for SoftButtonsListActivity
-	public static final int REQUEST_LIST_SOFTBUTTONS = 43;
-	// Request id for KeyboardPropertiesActivity
+    // Request id for KeyboardPropertiesActivity
 	public static final int REQUEST_EDIT_KBDPROPERTIES = 44;
 }

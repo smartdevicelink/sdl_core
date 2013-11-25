@@ -174,6 +174,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+    private static final int CREATECHOICESET_MAXCHOICES = 100;
     private static final int REQUEST_FILE_OPEN = 50;
     private final static int REQUEST_CHOOSE_XML_TEST = 51;
     private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
@@ -187,6 +188,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
+    /**
+     * Autoincrementing id for new choices.
+     */
+    private static int autoIncChoiceId = 9000;
     /**
      * In onCreate() specifies if it is the first time the activity is created
      * during this app launch.
@@ -282,6 +287,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
+    // Request id for SoftButtonsListActivity
+    static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    // Request id for ChoiceListActivity
+    static final int REQUEST_LIST_CHOICES = 45;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -297,6 +306,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public static int getNewSoftButtonId() {
         return autoIncSoftButtonId++;
+    }
+
+    public static int getNewChoiceId() {
+        return autoIncChoiceId++;
     }
 
     /**
@@ -1390,7 +1403,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                         intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 SCROLLABLEMESSAGE_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                     }
                                 });
 
@@ -1719,7 +1732,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                         intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 ALERTMANEUVER_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                     }
                                 });
 
@@ -1829,7 +1842,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2410,7 +2423,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2474,7 +2487,42 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Opens the dialog for CreateInteractionChoiceSet message and sends it.
                          */
                         private void sendCreateInteractionChoiceSet() {
-                            Context mContext = adapter.getContext();
+                            Choice choice1 = new Choice();
+                            choice1.setChoiceID(getNewChoiceId());
+                            choice1.setMenuName("super");
+                            Vector<String> vrCommands = new Vector<String>();
+                            vrCommands.add("super");
+                            vrCommands.add("best");
+                            choice1.setVrCommands(vrCommands);
+                            Image image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("turn_left.png");
+                            choice1.setImage(image);
+                            choice1.setSecondaryText("42");
+                            choice1.setTertiaryText("The Cat");
+
+                            Choice choice2 = new Choice();
+                            choice2.setChoiceID(getNewChoiceId());
+                            choice2.setMenuName("awesome");
+                            image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("action.png");
+                            choice2.setImage(image);
+                            choice2.setTertiaryText("Schrödinger's cat");
+
+                            Vector<Choice> choices = new Vector<Choice>();
+                            choices.add(choice1);
+                            choices.add(choice2);
+
+                            IntentHelper.addObjectForKey(choices,
+                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                            Intent intent = new Intent(adapter.getContext(),
+                                    ChoiceListActivity.class);
+                            intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                    CREATECHOICESET_MAXCHOICES);
+                            startActivityForResult(intent, REQUEST_LIST_CHOICES);
+
+/*
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
                             View layout = inflater.inflate(R.layout.createinteractionchoices,
@@ -2637,7 +2685,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             });
                             builder.setView(layout);
                             builder.show();
-                        }
+*/                        }
 
                         /**
                          * Opens the dialog for Show message and sends it.
@@ -2722,7 +2770,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -3000,7 +3048,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             UPDATETURNLIST_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -4043,16 +4091,43 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         _msgAdapter.logMessage("Disconnected", true);
     }
 
+    void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
+        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
+        msg.setCorrelationID(autoIncCorrId++);
+        int choiceSetID = autoIncChoiceSetId++;
+        msg.setInteractionChoiceSetID(choiceSetID);
+        msg.setChoiceSet(choices);
+        try {
+            _msgAdapter.logMessage(msg, true);
+            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+                Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
+            }
+            _latestCreateChoiceSetId = choiceSetID;
+        } catch (SyncException e) {
+            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case Const.REQUEST_LIST_SOFTBUTTONS:
+            case REQUEST_LIST_SOFTBUTTONS:
                 if (resultCode == RESULT_OK) {
                     currentSoftButtons = (Vector<SoftButton>) IntentHelper.
                             getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                     if (chkIncludeSoftButtons != null) {
                         chkIncludeSoftButtons.setChecked(true);
                     }
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                break;
+
+            case REQUEST_LIST_CHOICES:
+                if (resultCode == RESULT_OK) {
+                    Vector<Choice> choices = (Vector<Choice>) IntentHelper.
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                    sendCreateInteractionChoiceSet(choices);
                 }
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                 break;
