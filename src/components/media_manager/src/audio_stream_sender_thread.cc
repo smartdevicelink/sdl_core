@@ -42,7 +42,6 @@
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
-#include "utils/timer.h"
 
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
