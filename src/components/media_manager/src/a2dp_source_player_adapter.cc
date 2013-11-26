@@ -36,8 +36,8 @@
 #include <utility>
 #include "utils/threads/thread.h"
 #include "media_manager/a2dp_source_player_adapter.h"
+#include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
 #include "connection_handler/connection_handler_impl.h"
 
 namespace media_manager {
@@ -63,7 +63,7 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDel
     pa_simple* s_in, *s_out;
     std::string device_;
     bool shouldBeStoped_;
-    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+    sync_primitives::Lock shouldBeStopedLock_;
 
     void freeStreams();
 
@@ -188,18 +188,18 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
 }
 
 bool A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::exitThreadMain() {
-  stopFlagMutex_.lock();
+  sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
   shouldBeStoped_ = true;
-  stopFlagMutex_.unlock();
   return true;
 }
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
   LOG4CXX_INFO(logger_, "Main thread of A2DPSourcePlayerThread.");
 
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = false;
-  stopFlagMutex_.unlock();
+  {
+    sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
+    shouldBeStoped_ = false;
+  }
 
   int error;
 
@@ -260,9 +260,11 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
       break;
     }
 
-    stopFlagMutex_.lock();
-    bool shouldBeStoped = shouldBeStoped;
-    stopFlagMutex_.unlock();
+    bool shouldBeStoped;
+    {
+      sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
+      shouldBeStoped = shouldBeStoped_;
+    }
 
     if (shouldBeStoped) {
       break;

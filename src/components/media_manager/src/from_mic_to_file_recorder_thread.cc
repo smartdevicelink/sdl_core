@@ -48,7 +48,6 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     sleepThread_(NULL),
     outputFileName_(output_file) {
   LOG4CXX_TRACE_ENTER(logger_);
-  stopFlagMutex_.init();
   set_record_duration(duration);
 }
 
@@ -88,9 +87,10 @@ void FromMicToFileRecorderThread::initArgs() {
 void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = false;
-  stopFlagMutex_.unlock();
+  {
+    sync_primitives::AutoLock auto_lock(stopFlagLock_);
+    shouldBeStoped_ = false;
+  }
 
   initArgs();
 
@@ -184,9 +184,11 @@ void FromMicToFileRecorderThread::threadMain() {
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
     LOG4CXX_TRACE(logger_, "GST_STATE(pipeline) != GST_STATE_PLAYING");
 
-    stopFlagMutex_.lock();
-    bool shouldBeStoped = shouldBeStoped_;
-    stopFlagMutex_.unlock();
+    bool shouldBeStoped;
+    {
+      sync_primitives::AutoLock auto_lock(stopFlagLock_);
+      shouldBeStoped = shouldBeStoped_;
+    }
 
     if (shouldBeStoped) {
       return;
@@ -257,9 +259,10 @@ bool FromMicToFileRecorderThread::exitThreadMain() {
   }
 
   LOG4CXX_TRACE(logger_, "Set should be stopped flag\n");
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = true;
-  stopFlagMutex_.unlock();
+  {
+    sync_primitives::AutoLock auto_lock(stopFlagLock_);
+    shouldBeStoped_ = true;
+  }
 
   return true;
 }
