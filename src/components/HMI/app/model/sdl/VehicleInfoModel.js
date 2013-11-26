@@ -98,7 +98,27 @@ SDL.SDLVehicleInfoModel = Em.Object
             'fuelLevel': 0.2,
             'fuelLevel_State': "UNKNOWN",
             'instantFuelConsumption': 2.2,
-            'tirePressure': "UNKNOWN",
+            'tirePressure': {
+                'pressureTelltale': 'OFF',
+                'leftFront': {
+                    'status': 'UNKNOWN'
+                },
+                'rightFront': {
+                    'status': 'UNKNOWN'
+                },
+                'leftRear': {
+                    'status': 'UNKNOWN'
+                },
+                'rightRear': {
+                    'status': 'UNKNOWN'
+                },
+                'innerLeftRear': {
+                    'status': 'UNKNOWN'
+                },
+                'innerRightRear': {
+                    'status': 'UNKNOWN'
+                }
+            },
             'beltStatus': {
                 'driverBeltDeployed': "NOT_SUPPORTED",
                 'passengerBeltDeployed': "NOT_SUPPORTED",
@@ -138,10 +158,11 @@ SDL.SDLVehicleInfoModel = Em.Object
             'wiperStatus': "NO_DATA_EXISTS",
             'headLampStatus': {
                 "lowBeamsOn": false,
-                "highBeamsOn": false
+                "highBeamsOn": false,
+                "ambientLightSensorStatus": "NIGHT"
             },
             'engineTorque': 2.5,
-            'accPedalPosition': 0.5,
+            'accPedalPosition': 10.5,
             'steeringWheelAngle': 1.2,
             'myKey': {
                 "e911Override": "NO_DATA_EXISTS"

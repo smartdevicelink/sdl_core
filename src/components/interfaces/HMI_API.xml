@@ -1415,7 +1415,7 @@
   <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.</description>
   </param>
-  <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="true">
+  <param name="ambientLightSensorStatus" type="Common.AmbientLightStatus" mandatory="true">
     <description>Status of the ambient light sensor.</description>
   </param>
 </struct>
