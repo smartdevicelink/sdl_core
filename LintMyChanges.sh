@@ -11,6 +11,7 @@ else
 fi
 
 find ./src/ -type d -name "*include*" | awk '{print "--i../." $0}'  > ./tools/FlexeLint/sdl-include-path.lnt
+cpp -xc++ -v < /dev/null 2>&1 |sed -n '\#<...> search starts here:#,\#End of search list.#p'|sed '1d;$d'|sed 's/^ \(.*\)/--i"\1"/' > ./tools/FlexeLint/gcc-include-path.lnt
 
 (git diff --name-only HEAD ; git ls-files --other --exclude-standard) | grep '.cc\|.cpp' | grep 'src/components\|src/appMain' | awk '{print "../../" $0}' > ./tools/FlexeLint/sdl-changed-modules.lnt
 
