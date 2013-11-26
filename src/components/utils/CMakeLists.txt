@@ -9,7 +9,6 @@ set (SOURCES
     ./src/conditional_variable_posix.cc
     ./src/file_system.cc
     ./src/threads/posix_thread.cc
-    ./src/synchronisation_primitives_posix.cc
     ./src/lock_posix.cc
     ./src/date_time.cc
     ./src/signals_linux.cc
