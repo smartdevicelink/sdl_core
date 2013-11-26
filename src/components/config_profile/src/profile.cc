@@ -57,6 +57,7 @@ Profile::Profile()
   , space_available_(104857600)
   , app_time_scale_max_requests_(100)
   , app_requests_time_scale_(10)
+  , pending_requests_amount_(1000)
   , put_file_in_none_(5)
   , delete_file_in_none_(5)
   , list_files_in_none_(5) {
@@ -103,11 +104,11 @@ const std::vector<std::string>& Profile::vr_commands() const {
   return vr_commands_;
 }
 
-const unsigned int Profile::max_cmd_id() const {
+const unsigned int& Profile::max_cmd_id() const {
   return max_cmd_id_;
 }
 
-const unsigned int Profile::default_timeout() const {
+const unsigned int& Profile::default_timeout() const {
   return default_timeout_;
 }
 
@@ -131,7 +132,7 @@ bool Profile::is_mixing_audio_supported() const {
   return is_mixing_audio_supported_;
 }
 
-const unsigned int Profile::space_available() const {
+const unsigned int& Profile::space_available() const {
   return space_available_;
 }
 
@@ -147,27 +148,29 @@ const std::string& Profile::named_pipe_path() const {
   return named_pipe_path_;
 }
 
-const unsigned int Profile::app_time_scale() const {
+const unsigned int& Profile::app_time_scale() const {
   return app_requests_time_scale_;
 }
 
-const unsigned int Profile::app_time_scale_max_requests() const {
+const unsigned int& Profile::app_time_scale_max_requests() const {
   return app_time_scale_max_requests_;
 }
 
-const unsigned int Profile::put_file_in_none() const {
+const unsigned int& Profile::pending_requests_amount() const {
+  return pending_requests_amount_;
+}
+
+const unsigned int& Profile::put_file_in_none() const {
   return put_file_in_none_;
 }
 
-const unsigned int Profile::delete_file_in_none() const {
+const unsigned int& Profile::delete_file_in_none() const {
   return delete_file_in_none_;
 }
 
-
-const unsigned int Profile::list_files_in_none() const {
+const unsigned int& Profile::list_files_in_none() const {
   return list_files_in_none_;
 }
-
 
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
@@ -388,6 +391,18 @@ void Profile::UpdateValues() {
     app_requests_time_scale_ = atoi(value);
     LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
                  " of requests " << app_requests_time_scale_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "PendingRequestsAmount", value))
+      && ('\0' != *value)) {
+    pending_requests_amount_ = atoi(value);
+    if (space_available_ <= 0) {
+      pending_requests_amount_ = 1000;
+    }
+    LOG4CXX_INFO(logger_, "Set system pending requests amount " <<
+                 pending_requests_amount_);
   }
 
 }

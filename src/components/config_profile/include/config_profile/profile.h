@@ -108,12 +108,12 @@ class Profile {
     /**
      * @brief Maximum command id available for mobile app
      */
-    const unsigned int max_cmd_id() const;
+    const unsigned int& max_cmd_id() const;
 
     /**
      * @brief Default timeout for waiting for response to mobile app
      */
-    const unsigned int default_timeout() const;
+    const unsigned int& default_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -138,7 +138,7 @@ class Profile {
     /**
       * @brief Returns space for app
       */
-    const unsigned int space_available() const;
+    const unsigned int& space_available() const;
 
     /**
       * @brief Returns the video server type
@@ -153,28 +153,36 @@ class Profile {
     /**
      * @brief Returns application time scale for max amount of requests per it.
      */
-    const unsigned int app_time_scale() const;
+    const unsigned int& app_time_scale() const;
 
     /**
      * @brief Returns allowable max amount of requests per application
      * time scale
      */
-    const unsigned int app_time_scale_max_requests() const;
+    const unsigned int& app_time_scale_max_requests() const;
 
     /**
-     * @brief Returns Max allowed number of PutFile requests for one application in NONE
+     * @brief Returns allowable amount of the system pending requests
      */
-    const unsigned int put_file_in_none() const;
+    const unsigned int& pending_requests_amount() const;
 
     /**
-     * @brief Returns Max allowed number of DeleteFile requests for one application in NONE
+     * @brief Returns Max allowed number of PutFile requests for one
+     * application in NONE
      */
-    const unsigned int delete_file_in_none() const;
+    const unsigned int& put_file_in_none() const;
 
     /**
-     * @brief Returns Max allowed number of ListFiles requests for one application in NONE
+     * @brief Returns Max allowed number of DeleteFile requests for one
+     * application in NONE
      */
-    const unsigned int list_files_in_none() const;
+    const unsigned int& delete_file_in_none() const;
+
+    /**
+     * @brief Returns Max allowed number of ListFiles requests for one
+     * application in NONE
+     */
+    const unsigned int& list_files_in_none() const;
 
     // Members section
 
@@ -206,7 +214,8 @@ class Profile {
      * @param pSection   The section to read the value in
      * @param pKey       The key whose value needs to be read out
      *
-     * @return FALSE if could not read the value out of the profile (then the value is not changed)
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
      */
     bool ReadValue(bool* value,
                    const char* const pSection,
@@ -219,7 +228,8 @@ class Profile {
      * @param pSection   The section to read the value in
      * @param pKey       The key whose value needs to be read out
      *
-     * @return FALSE if could not read the value out of the profile (then the value is not changed)
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
      */
     bool ReadValue(std::string* value,
                    const char* const pSection,
@@ -245,6 +255,7 @@ class Profile {
     std::string                     named_pipe_path_;
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
+    unsigned int                    pending_requests_amount_;
     unsigned int                    put_file_in_none_;
     unsigned int                    delete_file_in_none_;
     unsigned int                    list_files_in_none_;
