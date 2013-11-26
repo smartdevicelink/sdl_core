@@ -366,6 +366,10 @@ SDL.SDLModel = Em.Object.create({
 
             for(var i = 0; i < changedTouches; i++){
 
+                if (event.originalEvent.changedTouches[i].pageX > 800 || event.originalEvent.changedTouches[i].pageY > 480) {
+                    return;
+                }
+
                 info.id = event.originalEvent.changedTouches[i].identifier;
                 info.point.xCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
                 info.point.yCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;

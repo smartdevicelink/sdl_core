@@ -41,7 +41,7 @@ FLAGS = Em.Object.create( {
      */
     SET_LOCALIZATION: 'eng',
 
-    WEBSOCKET_URL: "ws://10.10.0.1:8087",
+    WEBSOCKET_URL: "ws://127.0.0.1:8087",
 
     TOUCH_EVENT_STARTED: false
 
