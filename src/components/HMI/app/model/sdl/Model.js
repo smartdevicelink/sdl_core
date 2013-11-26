@@ -364,13 +364,16 @@ SDL.SDLModel = Em.Object.create({
 
         if (FLAGS.TOUCH_EVENT_STARTED ) {
 
+
+
             for(var i = 0; i < changedTouches; i++){
 
-                if (event.originalEvent.changedTouches[i].pageX > 800 || event.originalEvent.changedTouches[i].pageY > 480) {
+                if (event.originalEvent.changedTouches && (event.originalEvent.changedTouches[i].pageX > 800 || event.originalEvent.changedTouches[i].pageY > 480)) {
                     return;
                 }
 
-                info.id = event.originalEvent.changedTouches[i].identifier;
+                var fingers = event.originalEvent.changedTouches ? event.originalEvent.changedTouches : event.originalEvent;
+                info.id = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
                 info.point.xCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
                 info.point.yCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
 
