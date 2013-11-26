@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -236,6 +237,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * successful AddSubMenuResponse comes.
      */
     private SyncSubMenu _latestAddSubmenu = null;
+    private Pair<Integer, Integer> _latestAddCommand = null;
+    private Integer _latestDeleteCommandCmdID = null;
     private int autoIncCorrId = 101;
     private int autoIncChoiceSetId = 1;
     private int autoIncChoiceSetIdCmdId = 1;
@@ -1248,26 +1251,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which) == Names.AddCommand) {
                                 sendAddCommand();
                             } else if (adapter.getItem(which) == Names.DeleteCommand) {
-                                //something
-                                AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                                builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
-
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        DeleteCommand msg = new DeleteCommand();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        int cmdID = _commandAdapter.getItem(which);
-                                        msg.setCmdID(cmdID);
-                                        try {
-                                            _msgAdapter.logMessage(msg, true);
-                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                        } catch (SyncException e) {
-                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                        removeCommandFromList(cmdID);
-                                    }
-                                });
-                                AlertDialog dlg = builder.create();
-                                dlg.show();
+                                sendDeleteCommand();
                             } else if (adapter.getItem(which) == Names.AddSubMenu) {
                                 sendAddSubmenu();
                             } else if (adapter.getItem(which) == Names.DeleteSubMenu) {
@@ -1799,6 +1783,36 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         /**
+                         * Opens the UI for DeleteCommand and sends it.
+                         */
+                        private void sendDeleteCommand() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
+                            builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    DeleteCommand msg = new DeleteCommand();
+                                    msg.setCorrelationID(autoIncCorrId++);
+                                    int cmdID = _commandAdapter.getItem(which);
+                                    msg.setCmdID(cmdID);
+                                    try {
+                                        _msgAdapter.logMessage(msg, true);
+                                        ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                    } catch (SyncException e) {
+                                        _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                    }
+
+                                    if (_latestDeleteCommandCmdID != null) {
+                                        Log.w(logTag,
+                                                "Latest deleteCommand should be null, but it is " +
+                                                        _latestDeleteCommandCmdID);
+                                    }
+                                    _latestDeleteCommandCmdID = cmdID;
+                                }
+                            });
+                            builder.show();
+                        }
+
+                        /**
                          * Sends Alert message.
                          */
                         private void sendAlert() {
@@ -2288,7 +2302,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
 
-                                    addCommandToList(cmdID, menuParams.getParentID());
+                                    if (_latestAddCommand != null) {
+                                        Log.w(logTag,
+                                                "Latest addCommand should be null, but it is " +
+                                                        _latestAddCommand.first +
+                                                        " / " +
+                                                        _latestAddCommand.second);
+                                    }
+                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, menuParams.getParentID());
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -3762,6 +3783,37 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             _latestAddSubmenu = null;
         } else {
             Log.w(logTag, "Latest addSubMenu is unset");
+        }
+    }
+
+    /**
+     * Called when a AddCommandResponse comes. If successful, add it to the
+     * adapter.
+     */
+    public void onAddCommandResponse(boolean success) {
+        if (_latestAddCommand != null) {
+            if (success) {
+                addCommandToList(_latestAddCommand.first,
+                        _latestAddCommand.second);
+            }
+            _latestAddCommand = null;
+        } else {
+            Log.w(logTag, "Latest addCommand is unset");
+        }
+    }
+
+    /**
+     * Called when a DeleteCommandResponse comes. If successful, remove it from
+     * the adapter.
+     */
+    public void onDeleteCommandResponse(boolean success) {
+        if (_latestDeleteCommandCmdID != null) {
+            if (success) {
+                removeCommandFromList(_latestDeleteCommandCmdID);
+            }
+            _latestDeleteCommandCmdID = null;
+        } else {
+            Log.w(logTag, "Latest deleteCommand is unset");
         }
     }
 

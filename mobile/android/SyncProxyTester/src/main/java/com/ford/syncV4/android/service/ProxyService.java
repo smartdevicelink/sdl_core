@@ -810,7 +810,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        final boolean success = response.getSuccess();
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onDeleteCommandResponse(success);
+            }
+        });
+
 		if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
@@ -1026,8 +1035,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
-		if (isModuleTesting()) {
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        final boolean success = response.getSuccess();
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onAddCommandResponse(success);
+            }
+        });
+
+        if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
