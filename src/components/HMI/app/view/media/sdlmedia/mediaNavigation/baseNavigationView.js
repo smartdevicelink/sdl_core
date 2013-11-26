@@ -109,7 +109,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                             isHighlighted: naviParams.softButtons[i].isHighlighted ? true : false,
                             softButtonID: naviParams.softButtons[i].softButtonID,
                             systemAction: naviParams.softButtons[i].systemAction,
-                            classNames: 'softButton softButton'  + (i + 1),
+                            classNames: 'navButton softButton softButton'  + (i + 1),
                             appID: appID
                         }));
                 }
@@ -160,7 +160,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     }),
 
     optionsBtn: SDL.Button.extend({
-        classNames: 'naviOptionsBtn',
+        classNames: 'naviOptionsBtn navButton',
         text : "Options",
         action: 'openCommandsList',
         target: 'SDL.SDLAppController'

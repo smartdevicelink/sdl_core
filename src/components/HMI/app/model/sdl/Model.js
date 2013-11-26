@@ -323,9 +323,13 @@ SDL.SDLModel = Em.Object.create({
      */
     onTouchEvent: function(event){
 
+        if (event.target.parentElement.className.indexOf("navButton") >= 0) {
+            return;
+        }
+
         var type = "",
             touches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
-            changedTouches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
+            changedTouches = event.originalEvent.changedTouches ? event.originalEvent.changedTouches.length : 1,
             touchLists = {"touches": touches, "changedTouches": changedTouches},
             info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
 
@@ -358,18 +362,20 @@ SDL.SDLModel = Em.Object.create({
             }
         }
 
-        if (FLAGS.TOUCH_EVENT_STARTED) {
+        if (FLAGS.TOUCH_EVENT_STARTED ) {
 
-            for(var i = 0; i < touches; i++){
+            for(var i = 0; i < changedTouches; i++){
 
-                info.id = i;
-                info.point.xCoord = event.originalEvent.touches ? event.originalEvent.touches[i].pageX : event.originalEvent.pageX;
-                info.point.yCoord = event.originalEvent.touches ? event.originalEvent.touches[i].pageY : event.originalEvent.pageY;
+                info.id = event.originalEvent.changedTouches[i].identifier;
+                info.point.xCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
+                info.point.yCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+
+                FFW.UI.onTouchEvent(type, touchLists, info);
             }
-            FFW.UI.onTouchEvent(type, touchLists, info);
+            //FFW.UI.onTouchEvent(type, touchLists, info);
         }
 
-        if (type == "TOUCHEND") {
+        if (event.originalEvent.type == "mouseup") {
             FLAGS.TOUCH_EVENT_STARTED = false;
         }
     },
