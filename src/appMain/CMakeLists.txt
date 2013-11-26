@@ -57,7 +57,6 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
-  ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/

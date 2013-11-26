@@ -23,7 +23,6 @@ include_directories (
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/thirdPartyLibs/jsoncpp/include/
-  ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
