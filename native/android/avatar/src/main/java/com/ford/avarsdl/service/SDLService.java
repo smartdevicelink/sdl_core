@@ -443,7 +443,14 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnControlChanged(OnControlChanged notification) {
-        SafeToast.showToastAnyThread("onControlChanged " + notification);
+        //SafeToast.showToastAnyThread("onControlChanged " + notification);
+        NotificationCommand command = commandsHashTable.get(Names.OnControlChanged);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnControlChanged;
+            command.execute(method, notification);
+        } else {
+            Logger.w(getClass().getSimpleName() + " NotificationCommand NULL");
+        }
     }
 
     @Override
@@ -518,5 +525,6 @@ public class SDLService extends Service implements IProxyListenerALM {
     private void initializeCommandsHashTable() {
         NotificationCommand command = new NotificationCommandImpl();
         commandsHashTable.put(Names.OnRadioDetails, command);
+        commandsHashTable.put(Names.OnControlChanged, command);
     }
 }
