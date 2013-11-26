@@ -61,8 +61,6 @@ SDL.MenuList = Em.ContainerView
                             appID: appID
                         }));
                 }
-            } else {
-                this.deleteItems();
             }
         },
 

@@ -751,7 +751,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("nextTurnIcon" in params
-                        && params.turnIcon.imageType !== "DYNAMIC") {
+                        && params.nextTurnIcon.imageType !== "DYNAMIC") {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
