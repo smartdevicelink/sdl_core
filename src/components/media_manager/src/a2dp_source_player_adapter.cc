@@ -173,7 +173,6 @@ A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
   : threads::ThreadDelegate(),
     device_(device),
     BUFSIZE_(32) {
-  stopFlagMutex_.init();
 }
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
