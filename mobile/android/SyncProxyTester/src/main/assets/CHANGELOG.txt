@@ -1,3 +1,6 @@
+[CW48]
+* Brand new CreateInteractionChoiceSet dialog. The user can now set an arbitrary number of Choice objects.
+
 [CW47]
 * SyncProxyTester uploads and sets the icon after it's received a first OnHMIStatus.
 * SyncProxyAndroid SDK: Bluetooth transport: Attempt to fix a bug when sending a lot of data for a while on Android prior to 4.2. The transport artificially drops the speed after sent packet.

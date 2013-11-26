@@ -174,6 +174,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+    private static final int CREATECHOICESET_MAXCHOICES = 100;
     private static final int REQUEST_FILE_OPEN = 50;
     private final static int REQUEST_CHOOSE_XML_TEST = 51;
     private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
@@ -187,6 +188,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
+    /**
+     * Autoincrementing id for new choices.
+     */
+    private static int autoIncChoiceId = 9000;
     /**
      * In onCreate() specifies if it is the first time the activity is created
      * during this app launch.
@@ -282,6 +287,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
+    // Request id for SoftButtonsListActivity
+    static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    // Request id for ChoiceListActivity
+    static final int REQUEST_LIST_CHOICES = 45;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -297,6 +306,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public static int getNewSoftButtonId() {
         return autoIncSoftButtonId++;
+    }
+
+    public static int getNewChoiceId() {
+        return autoIncChoiceId++;
     }
 
     /**
@@ -1386,11 +1399,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     @Override
                                     public void onClick(View v) {
                                         IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 SCROLLABLEMESSAGE_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                     }
                                 });
 
@@ -1715,11 +1728,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     @Override
                                     public void onClick(View v) {
                                         IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 ALERTMANEUVER_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                     }
                                 });
 
@@ -1826,10 +1839,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(View v) {
                                     IntentHelper
                                             .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2406,11 +2419,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2474,169 +2487,44 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Opens the dialog for CreateInteractionChoiceSet message and sends it.
                          */
                         private void sendCreateInteractionChoiceSet() {
-                            Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.createinteractionchoices,
-                                    (ViewGroup) findViewById(R.id.createcommands_Root));
+                            Choice choice1 = new Choice();
+                            choice1.setChoiceID(getNewChoiceId());
+                            choice1.setMenuName("super");
+                            Vector<String> vrCommands = new Vector<String>();
+                            vrCommands.add("super");
+                            vrCommands.add("best");
+                            choice1.setVrCommands(vrCommands);
+                            Image image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("turn_left.png");
+                            choice1.setImage(image);
+                            choice1.setSecondaryText("42");
+                            choice1.setTertiaryText("The Cat");
 
-                            final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
-                            final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
-                            final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
-                            final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
-                            final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
-                            final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
+                            Choice choice2 = new Choice();
+                            choice2.setChoiceID(getNewChoiceId());
+                            choice2.setMenuName("awesome");
+                            vrCommands = new Vector<String>();
+                            vrCommands.add("magnificent");
+                            vrCommands.add("incredible");
+                            choice2.setVrCommands(vrCommands);
+                            image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("action.png");
+                            choice2.setImage(image);
+                            choice2.setTertiaryText("Schrödinger's cat");
 
-                            final EditText secondary_text1 = (EditText) layout.findViewById(R.id.createcommands_secondary_text1);
-                            final EditText secondary_text2 = (EditText) layout.findViewById(R.id.createcommands_secondary_text2);
-                            final EditText secondary_text3 = (EditText) layout.findViewById(R.id.createcommands_secondary_text3);
+                            Vector<Choice> choices = new Vector<Choice>();
+                            choices.add(choice1);
+                            choices.add(choice2);
 
-                            final EditText tertiary_text1 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text1);
-                            final EditText tertiary_text2 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text2);
-                            final EditText tertiary_text3 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text3);
-
-                            final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
-                            final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
-                            final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
-                            final CheckBox image1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image1Check);
-                            final CheckBox image2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image2Check);
-                            final CheckBox image3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image3Check);
-
-                            final CheckBox secondaryImage1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Check);
-                            final CheckBox secondaryImage2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Check);
-                            final CheckBox secondaryImage3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Check);
-
-                            final Spinner image1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image1Type);
-                            final Spinner image2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image2Type);
-                            final Spinner image3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image3Type);
-
-                            final Spinner secondaryImage1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Type);
-                            final Spinner secondaryImage2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Type);
-                            final Spinner secondaryImage3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Type);
-
-                            final EditText image1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image1Value);
-                            final EditText image2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image2Value);
-                            final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
-
-                            final EditText secondaryImage1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Value);
-                            final EditText secondaryImage2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Value);
-                            final EditText secondaryImage3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Value);
-
-                            Spinner[] spinners = {image1Type, image2Type, image3Type, secondaryImage1Type, secondaryImage2Type, secondaryImage3Type};
-                            for (Spinner spinner : spinners) {
-                                spinner.setAdapter(imageTypeAdapter);
-                                spinner.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
-                            }
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<Choice> commands = new Vector<Choice>();
-
-                                    if (choice1.isChecked()) {
-                                        Choice one = new Choice();
-                                        one.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        one.setMenuName(command1.getText().toString());
-                                        one.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr1.getText().toString().split(JOIN_STRING))));
-                                        one.setSecondaryText(secondary_text1.getText().toString());
-                                        one.setTertiaryText(tertiary_text1.getText().toString());
-                                        if (image1Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image1Type.getSelectedItemPosition()));
-                                            image.setValue(image1Value.getText().toString());
-                                            one.setImage(image);
-                                        }
-
-                                        if (secondaryImage1Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage1Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage1Value.getText().toString());
-                                            one.setSecondaryImage(image);
-                                        }
-
-                                        commands.add(one);
-                                    }
-
-                                    if (choice2.isChecked()) {
-                                        Choice two = new Choice();
-                                        two.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        two.setMenuName(command2.getText().toString());
-                                        two.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr2.getText().toString().split(JOIN_STRING))));
-                                        two.setSecondaryText(secondary_text2.getText().toString());
-                                        two.setTertiaryText(tertiary_text2.getText().toString());
-                                        if (image2Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image2Type.getSelectedItemPosition()));
-                                            image.setValue(image2Value.getText().toString());
-                                            two.setImage(image);
-                                        }
-
-                                        if (secondaryImage2Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage2Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage2Value.getText().toString());
-                                            two.setSecondaryImage(image);
-                                        }
-
-
-                                        commands.add(two);
-                                    }
-
-                                    if (choice3.isChecked()) {
-                                        Choice three = new Choice();
-                                        three.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        three.setMenuName(command3.getText().toString());
-                                        three.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr3.getText().toString().split(JOIN_STRING))));
-                                        three.setSecondaryText(secondary_text3.getText().toString());
-                                        three.setTertiaryText(tertiary_text3.getText().toString());
-                                        if (image3Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image3Type.getSelectedItemPosition()));
-                                            image.setValue(image3Value.getText().toString());
-                                            three.setImage(image);
-                                        }
-
-                                        if (secondaryImage3Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage3Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage3Value.getText().toString());
-                                            three.setSecondaryImage(image);
-                                        }
-
-                                        commands.add(three);
-                                    }
-
-                                    if (!commands.isEmpty()) {
-                                        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        int choiceSetID = autoIncChoiceSetId++;
-                                        msg.setInteractionChoiceSetID(choiceSetID);
-                                        msg.setChoiceSet(commands);
-                                        try {
-                                            _msgAdapter.logMessage(msg, true);
-                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
-                                                Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
-                                            }
-                                            _latestCreateChoiceSetId = choiceSetID;
-                                        } catch (SyncException e) {
-                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "No commands to set", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
+                            IntentHelper.addObjectForKey(choices,
+                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                            Intent intent = new Intent(adapter.getContext(),
+                                    ChoiceListActivity.class);
+                            intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                    CREATECHOICESET_MAXCHOICES);
+                            startActivityForResult(intent, REQUEST_LIST_CHOICES);
                         }
 
                         /**
@@ -2719,10 +2607,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper
-                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2996,11 +2884,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             UPDATETURNLIST_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -4043,18 +3931,45 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         _msgAdapter.logMessage("Disconnected", true);
     }
 
+    void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
+        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
+        msg.setCorrelationID(autoIncCorrId++);
+        int choiceSetID = autoIncChoiceSetId++;
+        msg.setInteractionChoiceSetID(choiceSetID);
+        msg.setChoiceSet(choices);
+        try {
+            _msgAdapter.logMessage(msg, true);
+            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+                Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
+            }
+            _latestCreateChoiceSetId = choiceSetID;
+        } catch (SyncException e) {
+            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case Const.REQUEST_LIST_SOFTBUTTONS:
+            case REQUEST_LIST_SOFTBUTTONS:
                 if (resultCode == RESULT_OK) {
                     currentSoftButtons = (Vector<SoftButton>) IntentHelper.
-                            getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                     if (chkIncludeSoftButtons != null) {
                         chkIncludeSoftButtons.setChecked(true);
                     }
                 }
-                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                break;
+
+            case REQUEST_LIST_CHOICES:
+                if (resultCode == RESULT_OK) {
+                    Vector<Choice> choices = (Vector<Choice>) IntentHelper.
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                    sendCreateInteractionChoiceSet(choices);
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                 break;
 
             case REQUEST_FILE_OPEN:
