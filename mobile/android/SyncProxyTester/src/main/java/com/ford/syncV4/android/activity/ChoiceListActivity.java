@@ -31,6 +31,10 @@ public class ChoiceListActivity extends RPCStructListActivity<Choice> {
         choice.setMenuName("The Show");
         choice.setSecondaryText("Must");
         choice.setTertiaryText("Go On");
+        Vector<String> vrCommands = new Vector<String>();
+        vrCommands.add("something");
+        vrCommands.add("else");
+        choice.setVrCommands(vrCommands);
 
         Image image = new Image();
         image.setImageType(ImageType.DYNAMIC);

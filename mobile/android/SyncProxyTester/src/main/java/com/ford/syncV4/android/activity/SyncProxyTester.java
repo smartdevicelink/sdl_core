@@ -2504,6 +2504,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             Choice choice2 = new Choice();
                             choice2.setChoiceID(getNewChoiceId());
                             choice2.setMenuName("awesome");
+                            vrCommands = new Vector<String>();
+                            vrCommands.add("magnificent");
+                            vrCommands.add("incredible");
+                            choice2.setVrCommands(vrCommands);
                             image = new Image();
                             image.setImageType(ImageType.DYNAMIC);
                             image.setValue("action.png");
