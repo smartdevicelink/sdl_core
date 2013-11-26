@@ -115,8 +115,7 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         // FIXME: the old code with new SDK crashes with
         // android.os.NetworkOnMainThreadException
         // this hotfix is a bad idea. Don't try this at home!
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().
-                permitAll().build();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
         if (isFirstStart()) {

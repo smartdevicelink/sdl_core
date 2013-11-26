@@ -1,5 +1,6 @@
 package com.ford.avarsdl.jsoncontroller;
 
+import com.ford.avarsdl.requests.CancelAccessCommand;
 import com.ford.avarsdl.requests.GrantAccessCommand;
 import com.ford.avarsdl.requests.RequestCommand;
 import com.ford.avarsdl.requests.StartScanCommand;
@@ -44,6 +45,9 @@ public class JSONRevSDLController extends JSONController {
     private void initializeCommandsTable() {
         GrantAccessCommand grantAccessCommand = new GrantAccessCommand();
         commandsHashTable.put(Names.GrantAccess, grantAccessCommand);
+
+        CancelAccessCommand cancelAccessCommand = new CancelAccessCommand();
+        commandsHashTable.put(Names.CancelAccess, cancelAccessCommand);
 
         StartScanCommand startScanCommand = new StartScanCommand();
         commandsHashTable.put(Names.StartScan, startScanCommand);

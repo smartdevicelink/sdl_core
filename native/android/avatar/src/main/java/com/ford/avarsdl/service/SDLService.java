@@ -9,7 +9,6 @@ import com.ford.avarsdl.activity.SafeToast;
 import com.ford.avarsdl.notifications.NotificationCommand;
 import com.ford.avarsdl.notifications.NotificationCommandImpl;
 import com.ford.avarsdl.responses.ResponseCommand;
-import com.ford.avarsdl.util.APIObjectsSimulator;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
@@ -107,7 +106,8 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Logger.d("onStartCommand " + intent + ", " + flags + ", " + startId);
+        Logger.d(getClass().getSimpleName() + " onStartCommand " + intent + ", " + flags + ", " +
+                startId);
 
         initializeCommandsHashTable();
         startProxy();
@@ -124,8 +124,7 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Logger.d("onBind unsupported");
-        // binding is not supported
+        Logger.d(getClass().getSimpleName() + " onBind, hash: " + hashCode());
         return mBinder;
     }
 
@@ -444,8 +443,7 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnControlChanged(OnControlChanged notification) {
-        final String msg = "onControlChanged " + notification;
-        SafeToast.showToastAnyThread(msg);
+        SafeToast.showToastAnyThread("onControlChanged " + notification);
     }
 
     @Override
