@@ -94,7 +94,7 @@ MFT.AppController = Em.Object.create({
      * Show popup and close it after closeTime, if it exists
      * @param {number} closeTime time, after which the popup will close
      * @param {string} message, displaying message popup
-     * @param {string} callback function
+     * @param {function} callback function
      */
     showPopup: function(elementId, closeTime, message, callback){
         var self = this;
@@ -138,6 +138,7 @@ MFT.AppController = Em.Object.create({
     sendAccessRequest: function() {
         if(MFT.AppController.sdlAccessStatus){
             FFW.RevSDL.sendCancelAccessRequest();
+            this.set('sdlAccessStatus', false);
         } else if (!this.SDLGrantAccessPopupVisible) {
             this.showSDLGrantAccessPopup();
         } else {
