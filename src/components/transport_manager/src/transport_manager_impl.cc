@@ -753,7 +753,7 @@ void TransportManagerImpl::EventListenerThread(void) {
                 "Connection ('" << device_id << ", " << app_handle << ") not found");
             break;
           }
-          RaiseEvent(&TransportManagerListener::OnTMMessageSend);
+          RaiseEvent(&TransportManagerListener::OnTMMessageSend, data);
           this->RemoveMessage(data);
           if (connection->shutDown && --connection->messages_count == 0) {
             connection->timer.Stop();
