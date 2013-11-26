@@ -44,7 +44,7 @@ SDL.MenuList = Em.ContainerView
 
             this.deleteItems();
 
-            if (buttons.length) {
+            if (buttons) {
                 for ( var i = 0; i < buttons.length; i++) {
                     this.get('content.childViews').pushObject(SDL.Button
                         .create(SDL.PresetEventsCustom, {
