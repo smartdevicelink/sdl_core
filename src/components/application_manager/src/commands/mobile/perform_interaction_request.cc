@@ -430,7 +430,7 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
     Application* const app) {
-  smart_objects::SmartObject& choice_list =
+  smart_objects::SmartObject& choice_set_id_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -447,16 +447,19 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   msg_params[strings::choice_set] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
 
-  for (size_t i = 0; i < choice_list.length(); ++i) {
+  for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
     smart_objects::SmartObject* choice_set = app->FindChoiceSet(
-        choice_list[i].asInt());
+        choice_set_id_list[i].asInt());
     if (choice_set) {
       // save perform interaction choice set
-      app->AddPerformInteractionChoiceSet(choice_list[i].asInt(), *choice_set);
+      app->AddPerformInteractionChoiceSet(choice_set_id_list[i].asInt(), *choice_set);
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-        int index = msg_params[strings::choice_set].length();
-        msg_params[strings::choice_set][index] =
-            (*choice_set)[strings::choice_set][j];
+
+        size_t index = msg_params[strings::choice_set].length();
+        msg_params[strings::choice_set][index] = (*choice_set)[strings::choice_set][j];
+
+        // vrCommands should be added via VR.AddCommand only
+        msg_params[strings::choice_set][index].erase(strings::vr_commands);
       }
     }
   }
