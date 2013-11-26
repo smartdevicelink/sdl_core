@@ -2205,6 +2205,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     (ViewGroup) findViewById(R.id.itemRoot));
 
                             final EditText editCmdID = (EditText) layout.findViewById(R.id.addcommand_commandID);
+                            final CheckBox chkUseCommandName = (CheckBox) layout.findViewById(R.id.addcommand_useCommandName);
                             final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
                             final CheckBox chkUseVrSynonyms = (CheckBox) layout.findViewById(R.id.addcommand_useVRSynonyms);
                             final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
@@ -2252,9 +2253,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCorrelationID(autoIncCorrId++);
                                     msg.setCmdID(cmdID);
 
-                                    String itemText = er.getText().toString();
                                     MenuParams menuParams = new MenuParams();
-                                    menuParams.setMenuName(itemText);
+                                    if (chkUseCommandName.isChecked()) {
+                                        String itemText = er.getText().toString();
+                                        menuParams.setMenuName(itemText);
+                                    }
                                     if (chkUseMenuPos.isChecked()) {
                                         menuParams.setPosition(pos);
                                     }

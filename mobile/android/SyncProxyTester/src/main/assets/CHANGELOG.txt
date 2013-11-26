@@ -1,4 +1,5 @@
 [CW48]
+* AddCommand dialog: allow to uncheck commandName parameter.
 * Brand new CreateInteractionChoiceSet dialog. The user can now set an arbitrary number of Choice objects.
 
 [CW47]
