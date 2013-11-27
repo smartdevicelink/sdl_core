@@ -31,9 +31,9 @@
 */
 
 #include "utils/logger.h"
-
-#include "application_manager/commands/command_request_impl.h"
+#include "config_profile/profile.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
 
@@ -60,21 +60,34 @@ RequestController::~RequestController() {
   }
 }
 
-bool RequestController::addRequest(const Request& request) {
+RequestController::TResult RequestController::addRequest(
+    const Request& request) {
   LOG4CXX_INFO(logger_, "RequestController::addRequest()");
 
-  bool result = true;
+  RequestController::TResult result = RequestController::SUCCESS;
   {
     AutoLock auto_lock(request_list_lock_);
 
     const commands::CommandRequestImpl* request_impl =
       (static_cast<commands::CommandRequestImpl*>(&(*request)));
 
-    if (true ==
-        watchdog_->timeScaleMaxRequestExceed(request_impl->connection_key())) {
-      LOG4CXX_ERROR(logger_, "Application requests count exceed limit");
-      result = false;
-      // remove all app request
+    const unsigned int app_time_scale =
+        profile::Profile::instance()->app_time_scale();
+
+    const unsigned int max_request_per_time_scale =
+        profile::Profile::instance()->app_time_scale_max_requests();
+
+    const unsigned int pending_requests_amount =
+        profile::Profile::instance()->pending_requests_amount();
+
+    if (false ==
+        watchdog_->checkTimeScaleMaxRequest(request_impl->connection_key(),
+            app_time_scale, max_request_per_time_scale)) {
+      LOG4CXX_ERROR(logger_, "Too many application requests");
+      result = RequestController::TOO_MANY_REQUESTS;
+    } else if (pending_requests_amount == request_list_.size()) {
+      LOG4CXX_ERROR(logger_, "Too many pending request");
+      result = RequestController::TOO_MANY_PENDING_REQUESTS;
     } else {
 
       request_list_.push_back(request);
@@ -104,7 +117,7 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
     std::list<Request>::iterator it = request_list_.begin();
     for (; request_list_.end() != it; ++it) {
       const commands::CommandRequestImpl* request_impl =
-        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+        static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->correlation_id() == mobile_correlation_id) {
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
@@ -123,7 +136,7 @@ void RequestController::terminateAppRequests(unsigned int app_id) {
     std::list<Request>::iterator it = request_list_.begin();
     for (; request_list_.end() != it; ++it) {
       const commands::CommandRequestImpl* request_impl =
-        (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+          static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->connection_key() == app_id) {
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
@@ -151,11 +164,11 @@ void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
     AutoLock auto_lock(request_list_lock_);
     std::list<Request>::iterator it = request_list_.begin();
     for (; request_list_.end() != it; ++it) {
-      request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));
+      request_impl = static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->correlation_id() == info.correlationID_ &&
           request_impl->connection_key() == info.connectionID_) {
-        LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_ <<
-                     " of application " << info.connectionID_ << " expired");
+        LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_
+                     << " of application " << info.connectionID_ << " expired");
         break;
       }
     }

@@ -35,19 +35,14 @@
 
 #include <list>
 #include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "request_watchdog/request_watchdog.h"
-#include "application_manager/commands/command.h"
 #include "request_watchdog/watchdog_subscriber.h"
+#include "application_manager/commands/command.h"
 
 namespace application_manager {
 
 namespace request_controller {
-
-/*
- * @brief Typedef for active mobile request
- *
- */
-typedef utils::SharedPtr<commands::Command> Request;
 
 /*
  * @brief RequestController class is used to control currently active mobile
@@ -56,6 +51,25 @@ typedef utils::SharedPtr<commands::Command> Request;
 class RequestController: public request_watchdog::WatchdogSubscriber  {
  public:
 
+  // Data types
+
+  /*
+   * @brief Typedef for active mobile request
+   *
+   */
+  typedef utils::SharedPtr<commands::Command> Request;
+
+  /**
+   * @brief Synchronizing state identifiers
+   */
+  enum TResult
+  {
+    SUCCESS = 0,
+    TOO_MANY_REQUESTS,
+    TOO_MANY_PENDING_REQUESTS,
+  };
+
+  // Methods
   /*
    * @brief Class constructor
    *
@@ -69,14 +83,14 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
   virtual ~RequestController();
 
   /*
-   * @brief Adds request to queue
+   * @brief Check if max request amount wasn't exceed and adds request to queue.
    *
    * @param request Active mobile request
    *
-   * @return TRUE on success, otherwise false
+   * @return Result code
    *
    */
-  bool addRequest(const Request& request);
+  TResult addRequest(const Request& request);
 
   /*
    * @brief Removes request from queue

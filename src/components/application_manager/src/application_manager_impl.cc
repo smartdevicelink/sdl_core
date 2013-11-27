@@ -1097,8 +1097,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
   utils::SharedPtr<Message> message_to_send(new Message);
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
-    LOG4CXX_WARN(logger_,
-                 "Cannot send message to Mobile: failed to create string");
+    LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
 
@@ -1125,8 +1124,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   MessageHelper::PrintSmartObject(*message);
 #endif
 
-  //check requestcontroller
-
   LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
@@ -1139,45 +1136,38 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asInt());
 
-  if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id)
-       && ((*message)[strings::params][strings::protocol_type]
-           == commands::CommandImpl::mobile_protocol_type_))
-      && (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
-    unsigned int app_id = (*message)[strings::params][strings::connection_key]
-                          .asUInt();
+  unsigned int correlation_id =
+    (*message)[strings::params][strings::correlation_id].asUInt();
 
-    mobile_apis::FunctionID::eType function_id =
-      static_cast<mobile_apis::FunctionID::eType>(
-        (*message)[strings::params][strings::function_id].asInt());
+  unsigned int connection_key =
+    (*message)[strings::params][strings::connection_key].asUInt();
 
-    unsigned int correlation_id =
-      (*message)[strings::params][strings::correlation_id].asUInt();
+  unsigned int protocol_type =
+      (*message)[strings::params][strings::protocol_type].asUInt();
 
-    unsigned int connection_key =
-      (*message)[strings::params][strings::connection_key].asUInt();
+  if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
+       (protocol_type == commands::CommandImpl::mobile_protocol_type_)) &&
+       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
 
-    Application* app = ApplicationManagerImpl::instance()->application(app_id);
+    Application* app =
+        ApplicationManagerImpl::instance()->application(connection_key);
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
-        MessageHelper::CreateNegativeResponse(
-          connection_key, function_id, correlation_id,
-          mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+          MessageHelper::CreateNegativeResponse(connection_key, function_id,
+          correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
     }
 
     if (!policies_manager_.IsValidHmiStatus(function_id, app->hmi_level())) {
-      LOG4CXX_WARN(
-        logger_,
-        "Request blocked by policies. " << "FunctionID: "
+      LOG4CXX_WARN(logger_, "Request blocked by policies. " << "FunctionID: "
         << static_cast<int>(function_id) << " Application HMI status: "
         << static_cast<int>(app->hmi_level()));
 
       smart_objects::SmartObject* response =
-        MessageHelper::CreateBlockedByPoliciesResponse(
-          function_id, mobile_apis::Result::REJECTED, correlation_id,
-          connection_key);
+        MessageHelper::CreateBlockedByPoliciesResponse(function_id,
+            mobile_apis::Result::REJECTED, correlation_id, connection_key);
 
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return true;
@@ -1185,28 +1175,44 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   }
 
   if (command->Init()) {
-
     if ((*message)[strings::params][strings::message_type].asInt() ==
         mobile_apis::messageType::request) {
 
-      if (false == request_ctrl.addRequest(command)) {
-        LOG4CXX_ERROR_EXT(logger_, "Unable to add request");
-        unsigned int app_id =
-            (*message)[strings::params][strings::connection_key].asUInt();
+      request_controller::RequestController::TResult result =
+          request_ctrl.addRequest(command);
+
+      if (result == request_controller::RequestController::SUCCESS) {
+        LOG4CXX_INFO(logger_, "Perform request");
+      } else if (result ==
+        request_controller::RequestController::TOO_MANY_PENDING_REQUESTS) {
+        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                          "TOO_MANY_PENDING_REQUESTS");
+        smart_objects::SmartObject* response =
+            MessageHelper::CreateNegativeResponse(connection_key, function_id,
+            correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+        return false;
+      } else if (result ==
+                 request_controller::RequestController::TOO_MANY_REQUESTS) {
+        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                          "TOO_MANY_REQUESTS");
 
         MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-        app_id, mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+            connection_key,
+            mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
 
-        UnregisterAppInterface(app_id);
+        UnregisterAppInterface(connection_key);
+        return false;
+      } else {
+        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
+        return false;
       }
     }
 
     command->Run();
-    if (command->CleanUp()) {
-      return true;
-    }
   }
-  return false;
+
+  return true;
 }
 
 void ApplicationManagerImpl::SendMessageToHMI(

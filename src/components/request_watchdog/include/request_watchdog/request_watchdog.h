@@ -66,9 +66,17 @@ class RequestWatchdog : public Watchdog {
      * @brief Check if amount of requests during time scale for application
      * doesn't exceed limit.
      *
+     * @brief connection_key Application ID
+     * @brief app_time_scale Configured time scale for application
+     * @brief max_request_per_time_scale Configured max request amount for
+     * application time scale
+     *
      * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
      */
-    virtual bool timeScaleMaxRequestExceed(int connection_key);
+    virtual bool checkTimeScaleMaxRequest(
+                                const int& connection_key,
+                                const unsigned int& app_time_scale,
+                                const unsigned int& max_request_per_time_scale);
 
     virtual void removeAllRequests();
 

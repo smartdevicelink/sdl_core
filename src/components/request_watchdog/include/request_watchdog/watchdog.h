@@ -54,7 +54,10 @@ class Watchdog {
                                       int correlation_id,
                                       int new_timeout_value) = 0;
 
-    virtual bool timeScaleMaxRequestExceed(int connection_key) = 0;
+    virtual bool checkTimeScaleMaxRequest(
+                            const int& connection_key,
+                            const unsigned int& app_time_scale,
+                            const unsigned int& max_request_per_time_scale) = 0;
 
     virtual void removeAllRequests() = 0;
 
