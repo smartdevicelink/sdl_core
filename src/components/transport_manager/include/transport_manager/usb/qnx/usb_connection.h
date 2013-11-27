@@ -1,6 +1,6 @@
 /**
- * \file usb_connection_factory.h
- * \brief UsbConnectionFactory class header file.
+ * \file usb_connection.h
+ * \brief UsbConnection class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,35 +33,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_
 
-#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include <pthread.h>
+
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbConnectionFactory : public ServerConnectionFactory {
+class UsbConnection : public Connection {
+  static const uint32_t kInBufferSize = 2048;
  public:
-  UsbConnectionFactory(TransportAdapterController* controller);
-  void SetUsbHandler(const UsbHandlerSptr& usb_handler);
+  UsbConnection(const DeviceUID& device_uid,
+                const ApplicationHandle& app_handle,
+                TransportAdapterController* controller,
+                const UsbHandlerSptr& libusb_handler,
+                PlatformUsbDevice* device);
 
+  bool Init();
+
+  virtual ~UsbConnection();
  protected:
-  virtual TransportAdapter::Error Init();
-  virtual TransportAdapter::Error CreateConnection(
-      const DeviceUID& device_uid, const ApplicationHandle& app_handle);
-  virtual void Terminate();
-  virtual bool IsInitialised() const;
-  virtual ~UsbConnectionFactory();
-
+  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error Disconnect();
  private:
+  friend void InTransferCallback(usbd_urb* urb, usbd_pipe*, void*);
+  friend void OutTransferCallback(usbd_urb* urb, usbd_pipe*, void*);
+  bool OpenEndpoints();
+  void PopOutMessage();
+  bool PostInTransfer();
+  bool PostOutTransfer();
+  void OnInTransfer(usbd_urb* urb);
+  void OnOutTransfer(usbd_urb* urb);
+  void CheckAllTransfersComplete();
+
+  const DeviceUID device_uid_;
+  const ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
-  UsbHandlerSptr usb_handler_;
+  UsbHandlerSptr libusb_handler_;
+  usbd_device* usbd_device_;
+
+  usbd_pipe* in_pipe_;
+  usbd_pipe* out_pipe_;
+
+  unsigned char* in_buffer_;
+  void* out_buffer_;
+  
+  usbd_urb* in_urb_;
+  usbd_urb* out_urb_;
+
+  std::list<RawMessageSptr> out_messages_;
+  RawMessageSptr current_out_message_;
+  pthread_mutex_t out_messages_mutex_;
+  size_t bytes_sent_;
+  bool disconnecting_;
+  bool pending_in_transfer_;
+  bool pending_out_transfer_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_

@@ -37,7 +37,7 @@
 
 #include <libusb/libusb.h>
 
-#include "transport_manager/usb/usb_connection.h"
+#include "transport_manager/usb/libusb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -46,14 +46,14 @@ namespace transport_adapter {
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
                              TransportAdapterController* controller,
-                             const LibusbHandlerSptr& libusb_handler,
-                             libusb_device* device)
+                             const UsbHandlerSptr& usb_handler,
+                             PlatformUsbDevice* device)
     : device_uid_(device_uid),
       app_handle_(app_handle),
       controller_(controller),
-      libusb_handler_(libusb_handler),
-      libusb_device_(device),
-      device_handle_(0),
+      usb_handler_(usb_handler),
+      libusb_device_(device->GetLibusbDevice()),
+      device_handle_(device->GetLibusbHandle()),
       in_endpoint_(0),
       in_endpoint_max_packet_size_(0),
       out_endpoint_(0),
@@ -72,12 +72,6 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
 }
 
 UsbConnection::~UsbConnection() {
-  if (device_handle_) {
-    libusb_release_interface(device_handle_, 0);
-    if (libusb_handler_) {
-      libusb_handler_->CloseDeviceHandle(device_handle_);
-    }
-  }
   if (in_transfer_) {
     libusb_free_transfer(in_transfer_);
   }
@@ -87,11 +81,11 @@ UsbConnection::~UsbConnection() {
   pthread_mutex_destroy(&out_messages_mutex_);
 }
 
-void InTransferCallback(libusb_transfer *transfer) {
+void InTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnInTransfer(transfer);
 }
 
-void OutTransferCallback(libusb_transfer *transfer) {
+void OutTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnOutTransfer(transfer);
 }
 
@@ -101,30 +95,27 @@ bool UsbConnection::PostInTransfer() {
                             InTransferCallback, this, 0);
   const int libusb_ret = libusb_submit_transfer(in_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(
-        logger_,
-        "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
+    LOG4CXX_ERROR(logger_, "libusb_submit_transfer failed: "
+                               << libusb_error_name(libusb_ret));
     return false;
   }
   return true;
 }
 
-void UsbConnection::OnInTransfer(libusb_transfer *transfer) {
+void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     if (logger_->isTraceEnabled()) {
       std::ostringstream hexdata;
       for (int i = 0; i < transfer->actual_length; ++i) {
         hexdata << " " << std::hex << std::setw(2) << std::setfill('0')
-            << (int) transfer->buffer[i];
+                << (int)transfer->buffer[i];
       }
-      LOG4CXX_TRACE(
-          logger_,
-          "USB incoming transfer, size:" << transfer->actual_length << ", data:"
-              << hexdata.str());
+      LOG4CXX_TRACE(logger_, "USB incoming transfer, size:"
+                                 << transfer->actual_length
+                                 << ", data:" << hexdata.str());
     }
-    RawMessageSptr data(
-        new protocol_handler::RawMessage(0, 0, in_buffer_,
-                                         transfer->actual_length));
+    RawMessageSptr data(new protocol_handler::RawMessage(
+        0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOG4CXX_ERROR(logger_, "USB transfer failed: " << transfer->status);
@@ -168,9 +159,8 @@ bool UsbConnection::PostOutTransfer() {
                             OutTransferCallback, this, 0);
   const int libusb_ret = libusb_submit_transfer(out_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(
-        logger_,
-        "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
+    LOG4CXX_ERROR(logger_, "libusb_submit_transfer failed: "
+                               << libusb_error_name(libusb_ret));
     controller_->ConnectionAborted(device_uid_, app_handle_,
                                    CommunicationError());
     Disconnect();
@@ -179,14 +169,13 @@ bool UsbConnection::PostOutTransfer() {
   return true;
 }
 
-void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
+void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   pthread_mutex_lock(&out_messages_mutex_);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
     if (bytes_sent_ == current_out_message_->data_size()) {
-      LOG4CXX_INFO(
-          logger_,
-          "USB out transfer, data sent: " << current_out_message_.get());
+      LOG4CXX_INFO(logger_, "USB out transfer, data sent: "
+                                << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
     }
@@ -237,7 +226,7 @@ TransportAdapter::Error UsbConnection::Disconnect() {
     }
   }
   for (std::list<RawMessageSptr>::iterator it = out_messages_.begin();
-      it != out_messages_.end(); it = out_messages_.erase(it)) {
+       it != out_messages_.end(); it = out_messages_.erase(it)) {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }
   pthread_mutex_unlock(&out_messages_mutex_);
@@ -250,28 +239,10 @@ bool UsbConnection::Init() {
     return false;
   }
 
-  int libusb_ret;
-  libusb_ret = libusb_open(libusb_device_, &device_handle_);
-  if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(logger_,
-                  "libusb_open failed: " << libusb_error_name(libusb_ret));
-    return false;
-  }
-
-  libusb_ret = libusb_claim_interface(device_handle_, 0);
-  if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(
-        logger_,
-        "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));
-    return false;
-  }
-
   in_buffer_ = new unsigned char[in_endpoint_max_packet_size_];
   if (0 == in_buffer_) {
-    LOG4CXX_ERROR(
-        logger_,
-        "in buffer allocation failed (size " << in_endpoint_max_packet_size_
-            << ")");
+    LOG4CXX_ERROR(logger_, "in buffer allocation failed (size "
+                               << in_endpoint_max_packet_size_ << ")");
     return false;
   }
 
@@ -292,14 +263,12 @@ bool UsbConnection::Init() {
 }
 
 bool UsbConnection::FindEndpoints() {
-  struct libusb_config_descriptor *config;
-  const int libusb_ret = libusb_get_active_config_descriptor(libusb_device_,
-                                                             &config);
+  struct libusb_config_descriptor* config;
+  const int libusb_ret =
+      libusb_get_active_config_descriptor(libusb_device_, &config);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(
-        logger_,
-        "libusb_get_active_config_descriptor failed: "
-            << libusb_error_name(libusb_ret));
+    LOG4CXX_ERROR(logger_, "libusb_get_active_config_descriptor failed: "
+                               << libusb_error_name(libusb_ret));
     return false;
   }
 
@@ -311,10 +280,11 @@ bool UsbConnection::FindEndpoints() {
     for (int i = 0; i < interface.num_altsetting; ++i) {
       const libusb_interface_descriptor& iface_desc = interface.altsetting[i];
       for (int i = 0; i < iface_desc.bNumEndpoints; ++i) {
-        const libusb_endpoint_descriptor& endpoint_desc = iface_desc.endpoint[i];
+        const libusb_endpoint_descriptor& endpoint_desc =
+            iface_desc.endpoint[i];
 
-        const uint8_t endpoint_dir = endpoint_desc.bEndpointAddress
-            & LIBUSB_ENDPOINT_DIR_MASK;
+        const uint8_t endpoint_dir =
+            endpoint_desc.bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
         if (find_in_endpoint && endpoint_dir == LIBUSB_ENDPOINT_IN) {
           in_endpoint_ = endpoint_desc.bEndpointAddress;
           in_endpoint_max_packet_size_ = endpoint_desc.wMaxPacketSize;

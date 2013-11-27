@@ -3,8 +3,9 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include
   ../connection_handler/include
-  ../../thirdPartyLibs/libusbx-1.0.16
 )
+
+ADD_DEFINITIONS(-DUSB_QNX)
 
 set (SOURCES
 	./src/transport_manager_impl.cc
@@ -25,13 +26,12 @@ set (SOURCES
 	#./src/bluetooth/bluetooth_device.cc
 	#./src/tcp/dnssd_service_browser.cc
 	./src/tcp/tcp_connection_factory.cc
-	#./src/usb/libusb_handler.cc
-	#./src/usb/usb_aoa_adapter.cc
-	#./src/usb/usb_connection_factory.cc
-	#./src/usb/usb_connection.cc
-	#./src/usb/usb_device_scanner.cc
+	./src/usb/qnx/usb_handler.cc
+	./src/usb/qnx/usb_connection.cc
+	./src/usb/usb_aoa_adapter.cc
+	./src/usb/usb_connection_factory.cc
+	./src/usb/usb_device_scanner.cc
 )
 
 add_library("TransportManager" ${SOURCES})
-#target_link_libraries ("TransportManager" log4cxx )
-#bluetooth avahi-common
+target_link_libraries ("TransportManager" usbdi )

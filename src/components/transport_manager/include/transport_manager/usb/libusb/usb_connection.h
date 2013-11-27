@@ -33,14 +33,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
 
 #include <pthread.h>
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/usb/libusb_handler.h"
+#include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -50,17 +50,17 @@ class UsbConnection : public Connection {
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
                 TransportAdapterController* controller,
-                const LibusbHandlerSptr& libusb_handler,
-                libusb_device* device);
+                const UsbHandlerSptr& usb_handler, PlatformUsbDevice* device);
 
   bool Init();
 
   virtual ~UsbConnection();
+
  protected:
   virtual TransportAdapter::Error SendData(RawMessageSptr message);
   virtual TransportAdapter::Error Disconnect();
- private:
 
+ private:
   friend void InTransferCallback(struct libusb_transfer*);
   friend void OutTransferCallback(struct libusb_transfer*);
   bool FindEndpoints();
@@ -74,7 +74,7 @@ class UsbConnection : public Connection {
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
-  LibusbHandlerSptr libusb_handler_;
+  UsbHandlerSptr usb_handler_;
   libusb_device* libusb_device_;
   libusb_device_handle* device_handle_;
   uint8_t in_endpoint_;
@@ -97,4 +97,4 @@ class UsbConnection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_

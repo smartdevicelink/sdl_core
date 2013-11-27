@@ -1,6 +1,6 @@
 /**
- * \file usb_device_scanner.h
- * \brief UsbDeviceScanner class header file.
+ * \file common.h
+ * \brief TM USB adapter common definitions
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,46 +33,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_
 
-#include <list>
+#include <cstdint>
 
-#include <pthread.h>
+#include "utils/shared_ptr.h"
 
-#include "transport_manager/transport_adapter/device_scanner.h"
-#include "transport_manager/usb/common.h"
+#ifdef USB_LIBUSB
+#include "transport_manager/usb/libusb/usb_handler.h"
+#endif
+
+#ifdef USB_QNX
+#include "transport_manager/usb/qnx/usb_handler.h"
+#endif
 
 namespace transport_manager {
 
 namespace transport_adapter {
 
-class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
- public:
-  UsbDeviceScanner(class TransportAdapterController* controller);
-  virtual ~UsbDeviceScanner();
+static const uint16_t kAoaVid = 0x18d1;
+static const uint16_t kAoaPid1 = 0x2d00;
+static const uint16_t kAoaPid2 = 0x2d01;
+static const uint8_t kAoaInterfaceSubclass = 0xff;
 
- protected:
-  virtual TransportAdapter::Error Init();
-  virtual TransportAdapter::Error Scan();
-  virtual void Terminate();
-  virtual bool IsInitialised() const;
-  virtual void OnDeviceArrived(PlatformUsbDevice* device);
-  virtual void OnDeviceLeft(PlatformUsbDevice* device);
+typedef utils::SharedPtr<UsbHandler> UsbHandlerSptr;
+
+class UsbDeviceListener {
+ public:
+  virtual ~UsbDeviceListener() {}
+
+  UsbHandlerSptr GetUsbHandler() { return usb_handler_; }
+
+  void SetUsbHandler(UsbHandlerSptr usb_handler) {
+    usb_handler_ = usb_handler;
+    usb_handler_->usb_device_listeners_.push_back(this);
+  }
+
+  virtual void OnDeviceArrived(PlatformUsbDevice* device) = 0;
+  virtual void OnDeviceLeft(PlatformUsbDevice* device) = 0;
 
  private:
-  void UpdateList();
-  void TurnIntoAccessoryMode(PlatformUsbDevice* device);
-  void GoogleAccessoryFound(PlatformUsbDevice* device);
-
-  TransportAdapterController* controller_;
-
-  typedef std::list<PlatformUsbDevice*> Devices;
-  Devices devices_;
-  pthread_mutex_t devices_mutex_;
+  UsbHandlerSptr usb_handler_;
 };
 
 }  // namespace
 }  // namespace
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_
