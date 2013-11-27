@@ -69,5 +69,4 @@ class UsbDevice : public Device {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // #ifndef \
-        // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
