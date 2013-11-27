@@ -1,3 +1,4 @@
+var socketURL = "localhost:9092";
 var socket;
 var Socket = {
     webSocket: null,
@@ -7,10 +8,12 @@ var Socket = {
 
         ws.onopen = function () {
             console.log('Socket opened at ' + url);
+            $("#server_status_label").html("running ...");
         };
 
         ws.onclose = function () {
             console.log('Socket close at ' + url);
+            $("#server_status_label").html("stopped");
         };
 
         ws.onmessage = function (e) {
@@ -20,7 +23,7 @@ var Socket = {
         };
 
         this.webSocket = ws;
-    }
+    },
 };
 
 function parseMessage(message) {
@@ -57,11 +60,20 @@ function updateDumpTextArea(message) {
 
 function init() {
     setListeners();
-    Socket.init("localhost:9092");
+    Socket.init(socketURL);
     socket = Socket.webSocket;
 }
 
 function setListeners() {
+    $('#server_start_btn').on('click', function() {
+        console.info("Start server");
+        Socket.init(socketURL);
+        socket = Socket.webSocket;
+    });
+    $('#server_stop_btn').on('click', function() {
+        console.info("Stop server");
+        sendCommand("stop_server");
+    });
     $('#station_up_btn_id').on('click', function() {
         console.info("Station +");
         sendCommand("station_up");
@@ -105,6 +117,11 @@ function sendCommand(command) {
         socket.send(command);
     }
 }
+
+window.onbeforeunload = function() {
+    Socket.onclose = function () {}; // disable onclose handler first
+    Socket.close()
+};
 
 $(document).ready(function() {
     init();
