@@ -66,27 +66,18 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
   }
 }
 
-void UsbDeviceScanner::OnDeviceLeft(libusb_device* device) {
-  LOG4CXX_INFO(
-    logger_,
-    "libusb device left (bus number " << static_cast<int>(libusb_get_bus_number(device)) << ", address " << static_cast<int>(libusb_get_device_address(device)) << ")");
-
+void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
   bool list_changed = false;
-  pthread_mutex_lock(&device_descriptions_mutex_);
-  for (DeviceDescriptions::iterator it = device_descriptions_.begin();
-       it != device_descriptions_.end();) {
-    const UsbDeviceDescription& description = *it;
-    if (libusb_get_bus_number(device) == description.bus_number
-        && libusb_get_device_address(device) == description.address) {
-      it = device_descriptions_.erase(it);
+  pthread_mutex_lock(&devices_mutex_);
+  for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
+    if (device == *it) {
+      devices_.erase(it);
       list_changed = true;
-    } else {
-      ++it;
+      break;
     }
   }
-  pthread_mutex_unlock(&device_descriptions_mutex_);
-  if (list_changed)
-    UpdateList();
+  pthread_mutex_unlock(&devices_mutex_);
+  if (list_changed) UpdateList();
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
