@@ -85,7 +85,7 @@ void ConnectionHandlerImpl::OnTMMessageSendFailed(
   const transport_manager::DataSendError& error,
   const transport_manager::RawMessageSptr message) {
 }
-void ConnectionHandlerImpl::OnTMMessageSend() {
+void ConnectionHandlerImpl::OnTMMessageSend(const transport_manager::RawMessageSptr message) {
 }
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(

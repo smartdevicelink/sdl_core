@@ -253,7 +253,7 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
   }
 }
 
-void ProtocolHandlerImpl::OnTMMessageSend() {
+void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   // TODO(PV): implement if needed.
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
