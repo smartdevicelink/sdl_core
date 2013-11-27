@@ -364,11 +364,9 @@ SDL.SDLModel = Em.Object.create({
 
         if (FLAGS.TOUCH_EVENT_STARTED ) {
 
-
-
             for(var i = 0; i < changedTouches; i++){
 
-                if (event.originalEvent.changedTouches && (event.originalEvent.changedTouches[i].pageX > 800 || event.originalEvent.changedTouches[i].pageY > 480)) {
+                if (event.originalEvent.changedTouches && (event.originalEvent.changedTouches[i].pageX > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.width || event.originalEvent.changedTouches[i].pageY > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.height)) {
                     return;
                 }
 

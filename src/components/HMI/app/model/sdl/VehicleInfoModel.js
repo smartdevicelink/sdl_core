@@ -94,6 +94,10 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Object}
          */
         vehicleData: {
+            'displayResolution':{
+                'width': 800,
+                'height': 480
+            },
             'speed': 80.0,
             'fuelLevel': 0.2,
             'fuelLevel_State': "UNKNOWN",
