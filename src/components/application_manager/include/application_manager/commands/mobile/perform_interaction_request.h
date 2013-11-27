@@ -147,6 +147,22 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void SendUIPerformInteractionRequest(Application* const app);
 
   /*
+   * @brief Sends TTS PerformInteraction request to HMI
+   *
+   * @param app_id Application ID
+   *
+   */
+  void SendTTSPerformInteractionRequest(Application* const app);
+
+  /*
+   * @brief Prepare request for sending to HMI
+   *
+   * @param array of structure of TTS
+   *
+   */
+  void DeleteParameterFromTTSChunk(smart_objects::SmartObject& array_tts_chunk);
+
+  /*
    * @brief Sends TTS Speak request to HMI
    *
    * @param app_id Application ID

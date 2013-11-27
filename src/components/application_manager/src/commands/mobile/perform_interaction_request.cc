@@ -73,10 +73,12 @@ bool PerformInteractionRequest::Init() {
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::timeout].asUInt();
-  } else {
-    default_timeout_ = 10000;
   }
-
+  int mode =
+      (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+  if (InteractionMode::BOTH == mode || InteractionMode::MANUAL_ONLY == mode) {
+      default_timeout_ *= 2;
+    }
   return true;
 }
 
@@ -129,6 +131,7 @@ void PerformInteractionRequest::Run() {
       (*message_)[strings::msg_params][strings::interaction_mode].asInt();
   app->set_perform_interaction_mode(mode);
 
+
   switch (mode) {
     case InteractionMode::BOTH: {
       LOG4CXX_INFO(logger_, "Interaction Mode: BOTH");
@@ -146,6 +149,7 @@ void PerformInteractionRequest::Run() {
 
       app->set_perform_interaction_active(correlation_id);
       SendVRAddCommandRequest(app);
+      SendTTSPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -156,6 +160,7 @@ void PerformInteractionRequest::Run() {
       }
 
       app->set_perform_interaction_active(correlation_id);
+      SendTTSPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -171,6 +176,7 @@ void PerformInteractionRequest::Run() {
 
       // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(correlation_id);
+      SendTTSPerformInteractionRequest(app);
       SendVRAddCommandRequest(app);
       break;
     }
@@ -441,7 +447,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   msg_params[hmi_request::initial_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][hmi_request::initial_text];
 
-  msg_params[strings::timeout] = default_timeout_;
+  msg_params[strings::timeout] = default_timeout_/2;
   msg_params[strings::app_id] = app->app_id();
 
   msg_params[strings::choice_set] = smart_objects::SmartObject(
@@ -476,6 +482,62 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
     const smart_objects::SmartObject& msg_params, Application* const app) {
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                      &msg_params, true);
+}
+
+void PerformInteractionRequest::SendTTSPerformInteractionRequest(
+    Application* const app) {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+  if ((*message_)[strings::msg_params].keyExists(strings::help_promt)) {
+    msg_params[strings::help_promt] =
+        (*message_)[strings::msg_params][strings::help_promt];
+    DeleteParameterFromTTSChunk(msg_params[strings::help_promt]);
+  } else {
+    smart_objects::SmartObject& choice_list =
+          (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+    msg_params[strings::help_promt] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+    int index = 0;
+    for (int i = 0; i < choice_list.length(); ++i) {
+      smart_objects::SmartObject* choice_set = app->FindChoiceSet(
+          choice_list[i].asInt());
+      if (choice_set) {
+        for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+          smart_objects::SmartObject& vr_commands =
+              (*choice_set)[strings::choice_set][j][strings::vr_commands];
+          if (0 < vr_commands.length()) {
+            // copy only first synonym
+            smart_objects::SmartObject item(smart_objects::SmartType_Map);
+            item[strings::text] = vr_commands[0].asString();
+            msg_params[strings::help_promt][index++] = item;
+          }
+        }
+      }
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout_promt)) {
+    msg_params[strings::timeout_promt] =
+            (*message_)[strings::msg_params][strings::timeout_promt];
+    DeleteParameterFromTTSChunk(msg_params[strings::timeout_promt]);
+  } else {
+    msg_params[strings::timeout_promt] = msg_params[strings::help_promt];
+  }
+  int mode =
+        (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+  if (InteractionMode::BOTH == mode || InteractionMode::MANUAL_ONLY == mode) {
+    msg_params[strings::timeout] = default_timeout_/2;
+  } else {
+    msg_params[strings::timeout] = default_timeout_;
+  }
+  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params);
+}
+
+void PerformInteractionRequest::DeleteParameterFromTTSChunk
+(smart_objects::SmartObject& array_tts_chunk) {
+  int length = array_tts_chunk.length();
+  for (int i = 0; i < length; ++i) {
+    array_tts_chunk[i].erase(strings::type);
+  }
 }
 
 void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
