@@ -190,4 +190,17 @@ GeneralView {
             }
         }
     }
+    /**
+      * Test Support Section
+      *
+      */
+    function getTimer(){
+        return timer
+    }
+    function getSoftButtonsListView(){
+        return softButtons
+    }
+    /**
+      * Test Support Section End
+      */
 }
