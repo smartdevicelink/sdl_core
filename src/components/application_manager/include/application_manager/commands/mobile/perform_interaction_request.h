@@ -163,13 +163,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void DeleteParameterFromTTSChunk(smart_objects::SmartObject& array_tts_chunk);
 
   /*
-   * @brief Sends TTS Speak request to HMI
-   *
-   * @param app_id Application ID
-   */
-  void SendTTSSpeakRequest(Application* const app);
-
-  /*
    * @brief Sends UI Show VR help request to HMI
    *
    * @param app_id Application ID

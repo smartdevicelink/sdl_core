@@ -186,8 +186,6 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  SendTTSSpeakRequest(app);
-
   // TODO(DK): need to implement timeout TTS speak request.
 }
 
@@ -538,17 +536,6 @@ void PerformInteractionRequest::DeleteParameterFromTTSChunk
   for (int i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
   }
-}
-
-void PerformInteractionRequest::SendTTSSpeakRequest(Application* const app) {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
-  msg_params[strings::tts_chunks] =
-      (*message_)[strings::msg_params][strings::initial_prompt];
-  msg_params[strings::app_id] = app->app_id();
-
-  CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
 }
 
 void PerformInteractionRequest::SendUIShowVRHelpRequest(
