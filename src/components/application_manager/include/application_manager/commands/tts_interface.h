@@ -38,13 +38,33 @@
 namespace application_manager {
 namespace commands {
 
+/*
+ * @brief Common class for HMI TTS feature
+ * Intended to do common feature tasks
+ */
 class TTSInterface {
 
 public:
+  /*
+   * @brief Class constructor
+   */
   TTSInterface();
+
+  /*
+   * @brief Class destructor
+   */
   virtual ~TTSInterface();
 
+  /*
+   * @brief Change AudioStreamState to NOT_AUDIBLE/ATTENUATED for applications
+   * according to system capabilities and sends notification to mobile
+   */
   void Mute();
+
+  /*
+   * @brief Change AudioStreamState to AUDIBLE for applications and
+   * sends notification to mobile
+   */
   void Unmute();
 
 private:
