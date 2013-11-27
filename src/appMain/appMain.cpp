@@ -172,6 +172,7 @@ int main(int argc, char** argv) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   LOG4CXX_INFO(logger, " Application started!");
+  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(DEFAULT_MEDIA)

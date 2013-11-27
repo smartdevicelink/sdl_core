@@ -31,6 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <unistd.h>
+
 #include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/register_app_interface_request.h"

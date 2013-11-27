@@ -32,6 +32,7 @@
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
+#include <unistd.h>
 #endif
 
 #include <string>
