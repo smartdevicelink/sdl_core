@@ -294,7 +294,7 @@ class DynamicApplicationData {
      *
      * @return mode of PerformInteraction
      */
-    virtual inline int perform_interaction_mode() const = 0;
+    virtual int perform_interaction_mode() const = 0;
 
     /*
      * @brief Sets reset global properties state

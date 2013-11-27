@@ -261,7 +261,7 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     max_cmd_id_ = atoi(value);
     if (max_cmd_id_ < 0) {
-      max_cmd_id_ = 20000000000;
+      max_cmd_id_ = 2000000000;
     }
     LOG4CXX_INFO(logger_, "Set Maximum Command ID to " << max_cmd_id_);
   }
