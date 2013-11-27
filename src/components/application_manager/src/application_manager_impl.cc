@@ -238,13 +238,6 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   return result;
 }
 
-const std::set<connection_handler::Device>&
-ApplicationManagerImpl::device_list() {
-  // TODO(PV): add updating functionality - request to TM.
-  std::set<connection_handler::Device> devices;
-  return devices;
-}
-
 Application* ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {

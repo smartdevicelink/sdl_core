@@ -127,8 +127,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
     std::vector<Application*> applications_with_navi();
 
-    const std::set<connection_handler::Device>& device_list();
-
     /////////////////////////////////////////////////////
 
     /**

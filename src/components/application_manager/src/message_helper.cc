@@ -40,8 +40,34 @@
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
+
+namespace {
+
+log4cxx::LoggerPtr g_logger =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+
+hmi_apis::Common_Language::eType ToCommonLanguage(
+    mobile_apis::Language::eType mobile_language) {
+  // Update this check if mobile_api::Language
+  // or hmi_apis::Common_Language changes.
+  // Or, better, generate functions like this from XML
+  long lang_val =  long(mobile_language);
+  long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
+  long max_mobile_lang = long(mobile_apis::Language::NO_NO);
+  if (max_common_lang_val != max_mobile_lang) {
+    LOG4CXX_ERROR(g_logger, "Mapping between Common_Language and Language"
+                            " has changed! Please update converter function");
+  }
+  if (lang_val > max_common_lang_val) {
+    LOG4CXX_ERROR(g_logger, "Non-convertable language ID");
+  }
+  return hmi_apis::Common_Language::eType(lang_val);
+}
+
+}
 
 namespace application_manager {
 
@@ -672,9 +698,11 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
 }
 
 void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
+  hmi_apis::Common_Language::eType app_common_language =
+      ToCommonLanguage(app->language());
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_vr_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
           app->app_id());
@@ -687,7 +715,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_tts_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
@@ -700,7 +728,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_ui_language()
-      != app->ui_language()) {
+      != app_common_language) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
