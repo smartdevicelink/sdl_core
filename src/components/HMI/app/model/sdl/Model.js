@@ -734,19 +734,14 @@ SDL.SDLModel = Em.Object.create({
      * @param {Object}
      * @param {Number}
      */
-    onPrompt: function (ttsChunks, id) {
-
-        if (SDL.TTSPopUp.active) {
-            FFW.TTS.sendError(SDL.SDLModel.resultCode["REJECTED"], id, "TTS.Speak", "TTS in progress. Rejected.");
-            return;
-        }
+    onPrompt: function (ttsChunks) {
 
         var message = '';
         if (ttsChunks) {
             for (var i = 0; i < ttsChunks.length; i++) {
                 message += ttsChunks[i].text + '\n';
             }
-            SDL.TTSPopUp.ActivateTTS(message, id);
+            SDL.TTSPopUp.ActivateTTS(message);
         }
     },
 
@@ -763,7 +758,8 @@ SDL.SDLModel = Em.Object.create({
      */
     TTSStopSpeaking: function () {
         //true parameter makes send error response ABORTED
-        SDL.TTSPopUp.DeactivateTTS(true);
+        SDL.TTSPopUp.DeactivateTTS();
+        FFW.TTS.set('aborted', true);
     },
 
     /**
