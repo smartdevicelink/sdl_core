@@ -456,6 +456,18 @@ class ApplicationManagerImpl : public ApplicationManager,
     void set_application_id(const int correlation_id,
                             const unsigned int app_id);
 
+    /*
+     * @brief Change AudioStreamingState for all application according to
+     * system audio-mixing capabilities (NOT_AUDIBLE/ATTENUATED) and
+     * send notification for this changes
+     */
+    void Mute();
+
+    /*
+     * @brief Change AudioStreamingState for all application to AUDIBLE and
+     * send notification for this changes
+     */
+    void Unmute();
 
 
   private:
