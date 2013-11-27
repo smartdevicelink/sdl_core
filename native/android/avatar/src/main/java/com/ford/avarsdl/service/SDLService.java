@@ -45,6 +45,7 @@ import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnPresetsChanged;
 import com.ford.syncV4.proxy.rpc.OnRadioDetails;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
@@ -479,6 +480,11 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
+    public void onOnPresetsChanged(OnPresetsChanged notification) {
+        SafeToast.showToastAnyThread("OnPresetsChanged: " + notification);
+    }
+
+    @Override
     public void onOnRadioDetails(OnRadioDetails notification) {
         // TODO: Expand notification information here
         final RadioStation radioStation = notification.getRadioStation();
@@ -523,8 +529,16 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     private void initializeCommandsHashTable() {
-        NotificationCommand command = new NotificationCommandImpl();
-        commandsHashTable.put(Names.OnRadioDetails, command);
-        commandsHashTable.put(Names.OnControlChanged, command);
+        // TODO: Probably in the future version there will be differences between notification
+        // objects, but up to now they contain general information structure
+
+        NotificationCommand onRadioDetailsNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnRadioDetails, onRadioDetailsNotification);
+
+        NotificationCommand onControlChangedNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnControlChanged, onControlChangedNotification);
+
+        NotificationCommand onPresetsChangedNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnPresetsChanged, onPresetsChangedNotification);
     }
 }
