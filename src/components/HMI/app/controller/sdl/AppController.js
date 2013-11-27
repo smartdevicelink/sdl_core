@@ -68,6 +68,7 @@ SDL.SDLAppController = Em.Object.create({
         }
 
         FFW.UI.onCommand(element.commandID, this.model.appID);
+        SDL.OptionsView.deactivate();
     },
 
     /**
