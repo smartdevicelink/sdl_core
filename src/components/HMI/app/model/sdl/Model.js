@@ -328,56 +328,56 @@ SDL.SDLModel = Em.Object.create({
         }
 
         var type = "",
-            touches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
-            changedTouches = event.originalEvent.changedTouches ? event.originalEvent.changedTouches.length : 1,
-            touchLists = {"touches": touches, "changedTouches": changedTouches},
-            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+            changedTouches = event.originalEvent.changedTouches ? event.originalEvent.changedTouches.length : 1;
 
         switch (event.originalEvent.type) {
             case "touchstart": {
                 FLAGS.TOUCH_EVENT_STARTED = true;
-                type = "TOUCHSTART";
+                type = "BEGIN";
                 break;
             }
             case "touchmove": {
-                type = "TOUCHMOVE";
+                type = "MOVE";
                 break;
             }
             case "touchend": {
-                type = "TOUCHEND";
+                type = "END";
                 break;
             }
             case "mousedown": {
                 FLAGS.TOUCH_EVENT_STARTED = true;
-                type = "TOUCHSTART";
+                type = "BEGIN";
                 break;
             }
             case "mousemove": {
-                type = "TOUCHMOVE";
+                type = "MOVE";
                 break;
             }
             case "mouseup": {
-                type = "TOUCHEND";
+                type = "END";
                 break;
             }
         }
 
         if (FLAGS.TOUCH_EVENT_STARTED ) {
 
+            var events = [];
             for(var i = 0; i < changedTouches; i++){
 
                 if (event.originalEvent.changedTouches && (event.originalEvent.changedTouches[i].pageX > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.width || event.originalEvent.changedTouches[i].pageY > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.height)) {
                     return;
                 }
 
-                var fingers = event.originalEvent.changedTouches ? event.originalEvent.changedTouches : event.originalEvent;
-                info.id = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
-                info.point.xCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
-                info.point.yCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+                events[i] = {};
+                events[i].c = {};
+                events[i].id  = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
+                events[i].c.x = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
+                events[i].c.y = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+                events[i].ts  = [event.timeStamp];
 
-                FFW.UI.onTouchEvent(type, touchLists, info);
+
             }
-            //FFW.UI.onTouchEvent(type, touchLists, info);
+            FFW.UI.onTouchEvent(type, events);
         }
 
         if (event.originalEvent.type == "mouseup") {

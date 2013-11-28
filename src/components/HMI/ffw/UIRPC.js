@@ -40,7 +40,7 @@ FFW.UI = FFW.RPCObserver.create({
      *
      * @type {Boolean}
      */
-    isReady: true,
+    isReady: false,
 
     /**
      * access to basic RPC functionality
@@ -644,7 +644,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {Object} touchLists
      * @param {Object} info
      */
-    onTouchEvent: function (type, touchLists, info) {
+    onTouchEvent: function (type, event) {
 
         Em.Logger.log("FFW.UI.OnTouchEvent");
 
@@ -652,9 +652,8 @@ FFW.UI = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "UI.OnTouchEvent",
             "params": {
-                "eventType": type,
-                "touchLists": touchLists,
-                "info": info
+                "type": type,
+                "event": event
             }
         };
         this.client.send(JSONMessage);
