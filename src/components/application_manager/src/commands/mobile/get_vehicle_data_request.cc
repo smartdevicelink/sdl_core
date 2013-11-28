@@ -208,6 +208,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 
   bool all_complete = true;
+  bool any_arg_success = false;
   mobile_api::Result::eType status = mobile_api::Result::eType::SUCCESS;
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
       it != hmi_requests_.end(); ++it) {
@@ -223,12 +224,14 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
       LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status << ", so response status become " << status);
+    } else {
+    	any_arg_success = true;
     }
   }
 
   if (all_complete) {
     smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
-    if (mobile_api::Result::eType::SUCCESS == status) {
+    if (any_arg_success) {
       for (HmiRequests::const_iterator it = hmi_requests_.begin();
           it != hmi_requests_.end(); ++it) {
         response_params[it->str] = it->value;
@@ -236,8 +239,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse(status == mobile_apis::Result::SUCCESS, status, NULL,
-                 &response_params);
+    SendResponse( any_arg_success, status, NULL, &response_params);
   }
 }
 #endif // #ifdef QT_HMI

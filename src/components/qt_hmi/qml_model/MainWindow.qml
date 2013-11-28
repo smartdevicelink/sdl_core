@@ -155,7 +155,7 @@ Rectangle {
                         else {
                             dataContainer.applicationSavedContext = item.applicationContext
                         }
-                        if (viewTransitionStack) {
+                        if (viewTransitionStack && viewTransitionStack.length) {
                             viewTransitionStack[viewTransitionStack.length - 1].applicationContext = item.applicationContext
                         }
                         dataContainer.setSystemContext()

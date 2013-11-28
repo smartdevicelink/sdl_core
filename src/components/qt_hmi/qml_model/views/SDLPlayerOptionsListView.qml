@@ -72,7 +72,7 @@ GeneralView {
                             console.debug("enter")
                             switch (type) {
                                 case Internal.MenuItemType.MI_NODE:
-                                    sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                    sdlUIProxy.onCommand(model.id, dataContainer.currentApplication.appId)
                                     break;
                                 case Internal.MenuItemType.MI_SUBMENU:
                                 case Internal.MenuItemType.MI_PARENT:
@@ -107,7 +107,7 @@ GeneralView {
                         console.debug("enter")
                         switch (type) {
                             case Internal.MenuItemType.MI_NODE:
-                                sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                sdlUIProxy.onCommand(model.id, dataContainer.currentApplication.appId)
                                 break;
                             case Internal.MenuItemType.MI_SUBMENU:
                             case Internal.MenuItemType.MI_PARENT:
