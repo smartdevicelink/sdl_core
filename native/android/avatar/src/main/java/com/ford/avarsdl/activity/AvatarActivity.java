@@ -75,7 +75,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
  * Title: AvatarActivity.java<br>
  * Description: Main application activity, responsible for webview content load
  * and video handling<br>
- * 
+ *
  * @author vsaenko/Eugene Sagan
  * @co-author Yuriy Chernyshov
  */
@@ -85,14 +85,14 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     private final SDLServiceConnectionProxy mSDLServiceConnectionProxy = new SDLServiceConnectionProxy(this);
     private IProxyListenerALM mBoundSDLService;
 
-	// for monkey testing
-	// adb shell monkey -p com.ford.avarsdl -v 100
+    // for monkey testing
+    // adb shell monkey -p com.ford.avarsdl -v 100
 
-	public static Boolean fullscreenPreferenceChanged = false;
-	public static Boolean vehiclePreferenceChanged = false;
-	public static Boolean navigationPreferenceChanged = false;
+    public static Boolean fullscreenPreferenceChanged = false;
+    public static Boolean vehiclePreferenceChanged = false;
+    public static Boolean navigationPreferenceChanged = false;
 
-	public static Boolean ratePreferenceEnabled;
+    public static Boolean ratePreferenceEnabled;
 
     @Override
     public void onStart() {
@@ -107,10 +107,10 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Logger.i(getClass().getSimpleName() + " onCreate, hash:" + hashCode());
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Logger.i(getClass().getSimpleName() + " onCreate, hash:" + hashCode());
 
         // FIXME: the old code with new SDK crashes with
         // android.os.NetworkOnMainThreadException
@@ -119,42 +119,43 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         StrictMode.setThreadPolicy(policy);
 
         if (isFirstStart()) {
-			Intent intent = new Intent(this, EulaActivity.class);
-			startActivityForResult(intent, Const.REQUESTCODE_EULA);
-		} else {
-			startAvatarActivity();
-		}
-	}
+            Intent intent = new Intent(this, EulaActivity.class);
+            startActivityForResult(intent, Const.REQUESTCODE_EULA);
+        } else {
+            startAvatarActivity();
+        }
+    }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == RESULT_OK && requestCode == Const.REQUESTCODE_EULA) {
-			startAvatarActivity();
-			resumeAvatarActivity();
-		} else {
-			finish();
-		}
-	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == Const.REQUESTCODE_EULA) {
+            startAvatarActivity();
+            resumeAvatarActivity();
+        } else {
+            finish();
+        }
+    }
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
-	@Override
-	public void onBackPressed() {
-		// do something on back.
-		this.moveTaskToBack(true);
-	}
+    @Override
+    public void onBackPressed() {
+        // do something on back.
+        this.moveTaskToBack(true);
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.optionsmenu, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.optionsmenu, menu);
+        return true;
+    }
+
     public void bindSDLService(Context context, SDLServiceConnectionProxy connectionProxy) {
         Logger.i("BindStorageService(), connection proxy: " + connectionProxy);
         context.bindService(new Intent(context, SDLService.class), connectionProxy, BIND_AUTO_CREATE);
@@ -178,17 +179,17 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
     }
 
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		final int itemId = item.getItemId();
-		switch (itemId) {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int itemId = item.getItemId();
+        switch (itemId) {
             case R.id.mnuQuit:
                 exitApp();
                 break;
             default:
                 break;
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
     private void exitApp() {
         Logger.d("Exiting application");
@@ -204,386 +205,385 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         }, 2000);
     }
 
-	public boolean isFirstStart() {
-		SharedPreferences prefs = getSharedPreferences(Const.SHPREF_FIRST_LAUNCH, 0);
-		int previousCodeVersion = prefs.getInt(Const.SHPREF_PREVIOUS_CODE_VERSION, 0);
-		int currentCodeVersion = Utils.getAppVersionCode(this);
-		if (previousCodeVersion < currentCodeVersion) {
-			return true;
-		}
-		return false;
-	}
+    public boolean isFirstStart() {
+        // Commit according to REVSDL-116
 
-	public void surfaceCreated(SurfaceHolder holder) {
-		Logger.i("surface created");
-		playVideo(holder);
+        /*SharedPreferences prefs = getSharedPreferences(Const.SHPREF_FIRST_LAUNCH, 0);
+        int previousCodeVersion = prefs.getInt(Const.SHPREF_PREVIOUS_CODE_VERSION, 0);
+        int currentCodeVersion = Utils.getAppVersionCode(this);
+        return previousCodeVersion < currentCodeVersion;*/
 
-	}
+        return false;
+    }
 
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		Logger.i("surface destroyed");
-	}
+    public void surfaceCreated(SurfaceHolder holder) {
+        Logger.i("surface created");
+        playVideo(holder);
+    }
 
-	// =============================================================
-	// GETTERS
-	// =============================================================
-	public WebView getWebView() {
-		return mWebView;
-	}
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        Logger.i("surface destroyed");
+    }
 
-	public MediaPlayer getMediaPlayer() {
-		return mMediaPlayer;
-	}
+    // =============================================================
+    // GETTERS
+    // =============================================================
+    public WebView getWebView() {
+        return mWebView;
+    }
 
-	// get value from application settings
-	public Boolean getFullscreenStatus() {
-		return mPreferences.getBoolean("FULLSCREEN", true);
-	}
+    public MediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
+    }
 
-	// get value from application settings
-	public Boolean getMapsStatus() {
-		return mPreferences.getBoolean("MAPS", true);
-	}
+    // get value from application settings
+    public Boolean getFullscreenStatus() {
+        return mPreferences.getBoolean("FULLSCREEN", true);
+    }
 
-	// get value from application settings
-	public String getVehicleStatus() {
-		return mPreferences.getString("VEHICLES", "Ford");
-	}
+    // get value from application settings
+    public Boolean getMapsStatus() {
+        return mPreferences.getBoolean("MAPS", true);
+    }
 
-	// get value from application settings
-	public Boolean getRateStatus() {
-		return mPreferences.getBoolean("RATE", true);
-	}
+    // get value from application settings
+    public String getVehicleStatus() {
+        return mPreferences.getString("VEHICLES", "Ford");
+    }
 
-	// set value to application settings
-	public Boolean setMapsStatus(boolean value) {
-		SharedPreferences.Editor editor = mPreferences.edit();
-		editor.putBoolean("MAPS", value);
-		editor.commit();
-		return true;
-	}
+    // get value from application settings
+    public Boolean getRateStatus() {
+        return mPreferences.getBoolean("RATE", true);
+    }
 
-	// set value to application settings
-	public boolean setVehicleStatus(String value) {
-		SharedPreferences.Editor editor = mPreferences.edit();
-		editor.putString("VEHICLES", value);
-		editor.commit();
-		return true;
-	}
+    // set value to application settings
+    public Boolean setMapsStatus(boolean value) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean("MAPS", value);
+        editor.commit();
+        return true;
+    }
 
-	public double audioGetPosition() {
-		return mediaGetPosition();
-	}
+    // set value to application settings
+    public boolean setVehicleStatus(String value) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString("VEHICLES", value);
+        editor.commit();
+        return true;
+    }
 
-	public String getPathToDownloadedAudioFile(String fileName) {
-		final File file = new File(getExternalFilesDir(null), fileName + ".mp3");
-		return file.getAbsolutePath();
-	}
+    public double audioGetPosition() {
+        return mediaGetPosition();
+    }
 
-	public Handler getMainHandler() {
-		return handler;
-	}
+    public String getPathToDownloadedAudioFile(String fileName) {
+        final File file = new File(getExternalFilesDir(null), fileName + ".mp3");
+        return file.getAbsolutePath();
+    }
 
-	public int getVideoPausedPosition() {
-		return mVideoPauseTime;
-	}
+    public Handler getMainHandler() {
+        return handler;
+    }
 
-	public double videoGetPosition() {
-		return mediaGetPosition();
-	}
+    public int getVideoPausedPosition() {
+        return mVideoPauseTime;
+    }
 
-	public boolean videoWasPaused() {
-		return mVideoWasPaused;
-	}
+    public double videoGetPosition() {
+        return mediaGetPosition();
+    }
 
-	public boolean getVideoPlayed() {
-		return mVideoPlayed;
-	}
+    public boolean videoWasPaused() {
+        return mVideoWasPaused;
+    }
 
-	public JSONVideoController getVideoController() {
-		return mVideoController;
-	}
+    public boolean getVideoPlayed() {
+        return mVideoPlayed;
+    }
 
-	public boolean getVideoPrepared() {
-		return mVideoPrepared;
-	}
+    public JSONVideoController getVideoController() {
+        return mVideoController;
+    }
 
-	public JSONBackendController getBEController() {
-		return mBEController;
-	}
+    public boolean getVideoPrepared() {
+        return mVideoPrepared;
+    }
 
-	// setters
+    public JSONBackendController getBEController() {
+        return mBEController;
+    }
 
-	public void setVideoPlayed(boolean value) {
-		mVideoPlayed = value;
-	}
+    // setters
 
-	public void setVideoPrepared(boolean value) {
-		mVideoPrepared = value;
-	}
+    public void setVideoPlayed(boolean value) {
+        mVideoPlayed = value;
+    }
 
-	// ==============================================================
-	// OTHER METHODS
-	// ==============================================================
+    public void setVideoPrepared(boolean value) {
+        mVideoPrepared = value;
+    }
 
-	public void startVideoTimer() {
-		// start timer to send every N ms current time position of video
-		Logger.i("Start Timer");
-		int N = 500;
+    // ==============================================================
+    // OTHER METHODS
+    // ==============================================================
 
-		stopVideoTimer();
+    public void startVideoTimer() {
+        // start timer to send every N ms current time position of video
+        Logger.i("Start Timer");
+        int N = 500;
 
-		mVideoTimer = new Timer();
-		TimerTask timerTask = new TimerTask() {
-			@Override
-			public void run() {
-				// current position in MP never reaches duration value
-				// check difference on 500 msec
-				if (mVideoPrepared) {
-					if ((mMediaPlayer.getDuration() - mMediaPlayer.getCurrentPosition()) < 500)
-						mVideoController.sendPositionNotification(mMediaPlayer.getDuration());
-					else
-						mVideoController.sendPositionNotification(mMediaPlayer.getCurrentPosition());
-				}
-			}
-		};
-		mVideoTimer.schedule(timerTask, N, N);
-	}
+        stopVideoTimer();
 
-	public void setProgresbarVisibility(boolean value) {
-		int v = value ? ProgressBar.VISIBLE : ProgressBar.GONE;
-		mProgressBar.setVisibility(v);
-	}
+        mVideoTimer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                // current position in MP never reaches duration value
+                // check difference on 500 msec
+                if (mVideoPrepared) {
+                    if ((mMediaPlayer.getDuration() - mMediaPlayer.getCurrentPosition()) < 500)
+                        mVideoController.sendPositionNotification(mMediaPlayer.getDuration());
+                    else
+                        mVideoController.sendPositionNotification(mMediaPlayer.getCurrentPosition());
+                }
+            }
+        };
+        mVideoTimer.schedule(timerTask, N, N);
+    }
 
-	// =====================================================================
-	// private section
-	// =====================================================================
+    public void setProgresbarVisibility(boolean value) {
+        int v = value ? ProgressBar.VISIBLE : ProgressBar.GONE;
+        mProgressBar.setVisibility(v);
+    }
 
-	// private Context ctx;
+    // =====================================================================
+    // private section
+    // =====================================================================
 
-	private MediaPlayer mMediaPlayer;
+    // private Context ctx;
 
-	private SharedPreferences mPreferences;
-	private WebView mWebView;
-	private SurfaceView mPreview;
-	private SurfaceHolder mHolder;
-	private ProgressBar mProgressBar;
-	private RelativeLayout mVideoLayout;
-	private ImageView mLogo;
+    private MediaPlayer mMediaPlayer;
 
-	private int mSeekTo;
+    private SharedPreferences mPreferences;
+    private WebView mWebView;
+    private SurfaceView mPreview;
+    private SurfaceHolder mHolder;
+    private ProgressBar mProgressBar;
+    private RelativeLayout mVideoLayout;
+    private ImageView mLogo;
 
-	private int mVideoWidth;
-	private int mVideoHeight;
-	private int mLeftMargin;
-	private int mTopMargin;
+    private int mSeekTo;
 
-	private String mPath;
+    private int mVideoWidth;
+    private int mVideoHeight;
+    private int mLeftMargin;
+    private int mTopMargin;
 
-	private Animation mAnimationShow;
+    private String mPath;
 
-	// for JSON communication
-	private JSONServer mServerThread;
-	private JSONBackendController mBEController;
-	private JSONVideoController mVideoController;
+    private Animation mAnimationShow;
+
+    // for JSON communication
+    private JSONServer mServerThread;
+    private JSONBackendController mBEController;
+    private JSONVideoController mVideoController;
 
     // for video time visualization
-	private Timer mVideoTimer;// timer to send notifications about current video
-								// time
-	private boolean mVideoWasPaused = false;// indicate if video was on paused
-											// before starting activity
-	private int mVideoPauseTime = 0;// time in msec when video was paused before
-									// starting activity
-	private boolean mVideoPlayed = false;// indicate if video played before
-											// starting activity
-	// to measure 5 seconds for splash screen;
-	private long mStartTime;
-	private boolean mVideoPrepared = false; // indicate that video in MP is
-											// prepared and timer can be started
+    private Timer mVideoTimer;// timer to send notifications about current video
+    // time
+    private boolean mVideoWasPaused = false;// indicate if video was on paused
+    // before starting activity
+    private int mVideoPauseTime = 0;// time in msec when video was paused before
+    // starting activity
+    private boolean mVideoPlayed = false;// indicate if video played before
+    // starting activity
+    // to measure 5 seconds for splash screen;
+    private long mStartTime;
+    private boolean mVideoPrepared = false; // indicate that video in MP is
+    // prepared and timer can be started
 
-	private AppRater mAppRater;
+    private AppRater mAppRater;
 
-	private ZipResourceFile apkExpansionZipFile = null;
-	private Context mContext;
+    private ZipResourceFile apkExpansionZipFile = null;
+    private Context mContext;
 
-	private final Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
+    private final Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
 
-			super.handleMessage(msg);
+            super.handleMessage(msg);
 
-			switch (msg.what) {
+            switch (msg.what) {
 
-			// /// VIDEO
-			case Const.VIDEO_START:
-				Logger.i("mMediaPlayer.play handler");
-				Object[] obj = (Object[]) msg.obj;
-				String videoFile = (String) obj[0];
-				Double scale = (Double) obj[1];
-				int x = (Integer) obj[2];
-				int y = (Integer) obj[3];
-				videoViewResize(scale, y, x);
-				mPath = videoFile;
-				initVideoSurface();
-				break;
-			case Const.VIDEO_PAUSE:
-				Logger.i("mMediaPlayer.pause handler");
-				stopVideoTimer();
-				if (mMediaPlayer != null)
-					mMediaPlayer.pause();
-				mVideoWasPaused = true;
-				mVideoPauseTime = mMediaPlayer.getCurrentPosition();
-				break;
-			case Const.VIDEO_SET_POSITION:
-				Double newPos = (Double) msg.obj * 1000;
-				newPos = newPos == 0 ? 1 : newPos; // because media player can
-													// not set zero value
-				if (mMediaPlayer != null)
-					mediaSetPosition(newPos);
-				break;
-			case Const.VIDEO_SET_POSITION_PAUSED:
-				newPos = (Double) msg.obj * 1000;
-				newPos = newPos == 0 ? 1 : newPos; // because media player can
-													// not set zero value
-				if (mMediaPlayer != null)
-					mediaSetPositionPaused(newPos);
-				break;
-			case Const.VIDEO_PLAY:
-				startVideoTimer();
-				mVideoWasPaused = false;
-				Logger.i("mMediaPlayer.start case Const.VIDEO_PLAY");
-				if (null != mMediaPlayer) {
-					mMediaPlayer.start();
-				} else {
-					Logger.i("mMediaPlayer == null");
-				}
-				break;
-			case Const.VIDEO_STOP:
-				mVideoLayout.setVisibility(View.INVISIBLE);
-				stopVideoTimer();
-				releaseMediaPlayer();
-				mVideoWidth = 0;
-				mVideoHeight = 0;
-				mLeftMargin = 0;
-				mTopMargin = 0;
-				mPath = null;
-				mVideoWasPaused = false;
-				mVideoPlayed = false;
-				mVideoPauseTime = 0;
-				break;
-			case Const.VIDEO_PLAY_AFTER_SCALE:
-				Logger.i("mMediaPlayer.play after scale handler");
-				obj = (Object[]) msg.obj;
-				scale = (Double) obj[0];
-				int left = (Integer) obj[1];
-				int top = (Integer) obj[2];
-				videoViewResize(scale, top, left);
-				initVideoSurface();
-				break;
+                // /// VIDEO
+                case Const.VIDEO_START:
+                    Logger.i("mMediaPlayer.play handler");
+                    Object[] obj = (Object[]) msg.obj;
+                    String videoFile = (String) obj[0];
+                    Double scale = (Double) obj[1];
+                    int x = (Integer) obj[2];
+                    int y = (Integer) obj[3];
+                    videoViewResize(scale, y, x);
+                    mPath = videoFile;
+                    initVideoSurface();
+                    break;
+                case Const.VIDEO_PAUSE:
+                    Logger.i("mMediaPlayer.pause handler");
+                    stopVideoTimer();
+                    if (mMediaPlayer != null)
+                        mMediaPlayer.pause();
+                    mVideoWasPaused = true;
+                    mVideoPauseTime = mMediaPlayer.getCurrentPosition();
+                    break;
+                case Const.VIDEO_SET_POSITION:
+                    Double newPos = (Double) msg.obj * 1000;
+                    newPos = newPos == 0 ? 1 : newPos; // because media player can
+                    // not set zero value
+                    if (mMediaPlayer != null)
+                        mediaSetPosition(newPos);
+                    break;
+                case Const.VIDEO_SET_POSITION_PAUSED:
+                    newPos = (Double) msg.obj * 1000;
+                    newPos = newPos == 0 ? 1 : newPos; // because media player can
+                    // not set zero value
+                    if (mMediaPlayer != null)
+                        mediaSetPositionPaused(newPos);
+                    break;
+                case Const.VIDEO_PLAY:
+                    startVideoTimer();
+                    mVideoWasPaused = false;
+                    Logger.i("mMediaPlayer.start case Const.VIDEO_PLAY");
+                    if (null != mMediaPlayer) {
+                        mMediaPlayer.start();
+                    } else {
+                        Logger.i("mMediaPlayer == null");
+                    }
+                    break;
+                case Const.VIDEO_STOP:
+                    mVideoLayout.setVisibility(View.INVISIBLE);
+                    stopVideoTimer();
+                    releaseMediaPlayer();
+                    mVideoWidth = 0;
+                    mVideoHeight = 0;
+                    mLeftMargin = 0;
+                    mTopMargin = 0;
+                    mPath = null;
+                    mVideoWasPaused = false;
+                    mVideoPlayed = false;
+                    mVideoPauseTime = 0;
+                    break;
+                case Const.VIDEO_PLAY_AFTER_SCALE:
+                    Logger.i("mMediaPlayer.play after scale handler");
+                    obj = (Object[]) msg.obj;
+                    scale = (Double) obj[0];
+                    int left = (Integer) obj[1];
+                    int top = (Integer) obj[2];
+                    videoViewResize(scale, top, left);
+                    initVideoSurface();
+                    break;
 
-			case Const.CONTENT_CHECKER_START:
-				verifyContent();
-				break;
+                case Const.CONTENT_CHECKER_START:
+                    verifyContent();
+                    break;
 
-			case Const.WEBVIEW_SHOW:
-				hideSplashScreen();
-				setProgresbarVisibility(false);
-				mWebView.startAnimation(mAnimationShow);
-				mWebView.setVisibility(View.VISIBLE);
-				if (Const.DEBUG) {
-					long currTime = System.currentTimeMillis();
-					String str = "Application loading time = "
-							+ String.valueOf(currTime - mStartTime);
-					Toast.makeText(getApplicationContext(), str,
-							Toast.LENGTH_LONG).show();
-					Logger.i(str);
-				}
-                showSDLSetupDialog();
-                break;
+                case Const.WEBVIEW_SHOW:
+                    hideSplashScreen();
+                    setProgresbarVisibility(false);
+                    mWebView.startAnimation(mAnimationShow);
+                    mWebView.setVisibility(View.VISIBLE);
+                    if (Const.DEBUG) {
+                        long currTime = System.currentTimeMillis();
+                        String str = "Application loading time = "
+                                + String.valueOf(currTime - mStartTime);
+                        Toast.makeText(getApplicationContext(), str,
+                                Toast.LENGTH_LONG).show();
+                        Logger.i(str);
+                    }
+                    showSDLSetupDialog();
+                    break;
 
-			default:
-				break;
-			}
-		}
+                default:
+                    break;
+            }
+        }
 
-	};
+    };
 
-	private void verifyContent() {
+    private void verifyContent() {
 
-		removeOldVideoFiles();
+        removeOldVideoFiles();
 
-		// check main expansion file
-		int mainVersionCode = expFileIsDelivered(true);
+        // check main expansion file
+        int mainVersionCode = expFileIsDelivered(true);
 
-		SharedPreferences prefs = getSharedPreferences(
-				Const.SHPREF_DOWNLOADER_PREFS, 0);
-		boolean mainMD5IsCalculated = prefs.getBoolean(
-				Const.SHPREF_MAIN_EXPFILE_VALID, false);
+        SharedPreferences prefs = getSharedPreferences(
+                Const.SHPREF_DOWNLOADER_PREFS, 0);
+        boolean mainMD5IsCalculated = prefs.getBoolean(
+                Const.SHPREF_MAIN_EXPFILE_VALID, false);
 
-		// check patch expansion file
-		int patchVersionCode = expFileIsDelivered(false);
+        // check patch expansion file
+        int patchVersionCode = expFileIsDelivered(false);
 
-		boolean patchMD5IsCalculated = prefs.getBoolean(
-				Const.SHPREF_PATCH_EXPFILE_VALID, false);
+        boolean patchMD5IsCalculated = prefs.getBoolean(
+                Const.SHPREF_PATCH_EXPFILE_VALID, false);
 
-		if (mainVersionCode > 0 && mainMD5IsCalculated
-				&& (patchVersionCode > 0 || Const.PATCH_EXP_FILE_SIZE == 0)
-				&& patchMD5IsCalculated) {
-			try {
-				apkExpansionZipFile = APKExpansionSupport
-						.getAPKExpansionZipFile(this, mainVersionCode,
-								patchVersionCode);
-			} catch (IOException e) {
-				Logger.e(e.getMessage(), e);
-			}
+        if (mainVersionCode > 0 && mainMD5IsCalculated
+                && (patchVersionCode > 0 || Const.PATCH_EXP_FILE_SIZE == 0)
+                && patchMD5IsCalculated) {
+            try {
+                apkExpansionZipFile = APKExpansionSupport
+                        .getAPKExpansionZipFile(this, mainVersionCode,
+                                patchVersionCode);
+            } catch (IOException e) {
+                Logger.e(e.getMessage(), e);
+            }
 
-		} else {
-			// no expansion file
-			SharedPreferences.Editor editor = prefs.edit();
-			if (editor != null) {
-				editor.putBoolean(Const.SHPREF_MAIN_EXPFILE_VALID, false);
-				editor.putBoolean(Const.SHPREF_PATCH_EXPFILE_VALID, false);
-			}
-			editor.commit();
-			// create downloader client
-			new DownloaderClient(this, mainVersionCode, mainMD5IsCalculated,
-					patchVersionCode, patchMD5IsCalculated);
+        } else {
+            // no expansion file
+            SharedPreferences.Editor editor = prefs.edit();
+            if (editor != null) {
+                editor.putBoolean(Const.SHPREF_MAIN_EXPFILE_VALID, false);
+                editor.putBoolean(Const.SHPREF_PATCH_EXPFILE_VALID, false);
+            }
+            editor.commit();
+            // create downloader client
+            new DownloaderClient(this, mainVersionCode, mainMD5IsCalculated,
+                    patchVersionCode, patchMD5IsCalculated);
 
-		}
+        }
 
-		Utils.sendMessageToHandler(Const.WEBVIEW_SHOW,
-				MessageConst.NET_DOWNLOAD_FINISHED_SUCC, handler);
-	}
+        Utils.sendMessageToHandler(Const.WEBVIEW_SHOW,
+                MessageConst.NET_DOWNLOAD_FINISHED_SUCC, handler);
+    }
 
-	/**
-	 * checks if expansion file was downloaded previously
-	 * 
-	 * @param isMain
-	 *            - is a main expansion file or a patch
-	 * @return version code if file exists or 0
-	 */
+    /**
+     * checks if expansion file was downloaded previously
+     *
+     * @param isMain - is a main expansion file or a patch
+     * @return version code if file exists or 0
+     */
 
-	private int expFileIsDelivered(boolean isMain) {
-		int codeVersion = Utils.getAppVersionCode(getApplicationContext());
-		long size = isMain ? Const.MAIN_EXP_FILE_SIZE
-				: Const.PATCH_EXP_FILE_SIZE;
-		while (codeVersion > 0) {
-			XAPKFile xFile = new XAPKFile(isMain, codeVersion, size);
-			if (ExtStorageUtils.expansionFilesDelivered(mContext, xFile)) {
-				return codeVersion;
-			}
-			codeVersion--;
-		}
-		return codeVersion;
-	}
+    private int expFileIsDelivered(boolean isMain) {
+        int codeVersion = Utils.getAppVersionCode(getApplicationContext());
+        long size = isMain ? Const.MAIN_EXP_FILE_SIZE
+                : Const.PATCH_EXP_FILE_SIZE;
+        while (codeVersion > 0) {
+            XAPKFile xFile = new XAPKFile(isMain, codeVersion, size);
+            if (ExtStorageUtils.expansionFilesDelivered(mContext, xFile)) {
+                return codeVersion;
+            }
+            codeVersion--;
+        }
+        return codeVersion;
+    }
 
-	public void setExpantionFile(ZipResourceFile file) {
-		apkExpansionZipFile = file;
-	}
+    public void setExpantionFile(ZipResourceFile file) {
+        apkExpansionZipFile = file;
+    }
 
-	/**
-	 * removes video files of MFTG 2, that is apart of expansion file
-	 */
+    /**
+     * removes video files of MFTG 2, that is apart of expansion file
+     */
     private boolean removeOldVideoFiles() {
         File oldVideoFilesDirectory = getExternalFilesDir(null);
         if ((oldVideoFilesDirectory != null) &&
@@ -601,88 +601,88 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         return false;
     }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
+    @Override
+    protected void onPause() {
+        super.onPause();
         Logger.i(getClass().getSimpleName() + " onPause, hash:" + hashCode());
-		if (!isFirstStart()) {
-			ActivityUtils.setAppIsForeground(false);
-			// switch of timer
-			stopVideoTimer();
-			// remember last video position
-			if (mMediaPlayer != null)
-				mVideoPauseTime = mMediaPlayer.getCurrentPosition();
-			// delete media player
-			releaseMediaPlayer();
-			mVideoLayout.removeAllViews();
-		}
-	}
+        if (!isFirstStart()) {
+            ActivityUtils.setAppIsForeground(false);
+            // switch of timer
+            stopVideoTimer();
+            // remember last video position
+            if (mMediaPlayer != null)
+                mVideoPauseTime = mMediaPlayer.getCurrentPosition();
+            // delete media player
+            releaseMediaPlayer();
+            mVideoLayout.removeAllViews();
+        }
+    }
 
-	protected void onResume() {
-		super.onResume();
+    protected void onResume() {
+        super.onResume();
         Logger.i(getClass().getSimpleName() + " onResume, hash:" + hashCode());
-		if (!isFirstStart()) {
-			resumeAvatarActivity();
-		}
-	}
+        if (!isFirstStart()) {
+            resumeAvatarActivity();
+        }
+    }
 
-	private void startAvatarActivity() {
-		mStartTime = System.currentTimeMillis();
-		mContext = this;
-		// Possible work around for market launches. See
-		// http://code.google.com/p/android/issues/detail?id=2373
-		// for more details. Essentially, the market launches the main activity
-		// on top of other activities.
-		// we never want this to happen. Instead, we check if we are the root
-		// and if not, we finish.
-		if (!isTaskRoot()) {
-			final Intent intent = getIntent();
-			final String intentAction = intent.getAction();
-			if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && intentAction != null
-					&& intentAction.equals(Intent.ACTION_MAIN)) {
-				Logger.w("Main Activity is not the root. Finishing Main Activity instead of launching.");
-				finish();
-				return;
-			}
-		}
+    private void startAvatarActivity() {
+        mStartTime = System.currentTimeMillis();
+        mContext = this;
+        // Possible work around for market launches. See
+        // http://code.google.com/p/android/issues/detail?id=2373
+        // for more details. Essentially, the market launches the main activity
+        // on top of other activities.
+        // we never want this to happen. Instead, we check if we are the root
+        // and if not, we finish.
+        if (!isTaskRoot()) {
+            final Intent intent = getIntent();
+            final String intentAction = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && intentAction != null
+                    && intentAction.equals(Intent.ACTION_MAIN)) {
+                Logger.w("Main Activity is not the root. Finishing Main Activity instead of launching.");
+                finish();
+                return;
+            }
+        }
 
-		mAppRater = new AppRater(this);
-		startRPCComponents();
-		prepareMainView();
-		WebViewUtils.initWebView(this);
-		initVideoSurface();
-	}
+        mAppRater = new AppRater(this);
+        startRPCComponents();
+        prepareMainView();
+        WebViewUtils.initWebView(this);
+        initVideoSurface();
+    }
 
-	private void resumeAvatarActivity() {
-		ActivityUtils.setAppIsForeground(true);
+    private void resumeAvatarActivity() {
+        ActivityUtils.setAppIsForeground(true);
 
-		if (!fullscreenPreferenceChanged && !vehiclePreferenceChanged)
-			initVideoSurface(); // to init video after resuming but not
-								// after FullScreen or Vehicle changing
+        if (!fullscreenPreferenceChanged && !vehiclePreferenceChanged)
+            initVideoSurface(); // to init video after resuming but not
+        // after FullScreen or Vehicle changing
 
-		if (mPreferences != null) {
-			if (fullscreenPreferenceChanged) {
-				fullscreenPreferenceChanged = false;
-				mBEController.sendFullScreenRequest(getFullscreenStatus());
-			}
+        if (mPreferences != null) {
+            if (fullscreenPreferenceChanged) {
+                fullscreenPreferenceChanged = false;
+                mBEController.sendFullScreenRequest(getFullscreenStatus());
+            }
 
-			if (vehiclePreferenceChanged) {
-				vehiclePreferenceChanged = false;
-				mBEController.sendVehicleNotification(getVehicleStatus());
-			}
+            if (vehiclePreferenceChanged) {
+                vehiclePreferenceChanged = false;
+                mBEController.sendVehicleNotification(getVehicleStatus());
+            }
 
-			if (navigationPreferenceChanged) {
-				navigationPreferenceChanged = false;
-				mBEController.sendHasMapsNotification(getMapsStatus());
-			}
+            if (navigationPreferenceChanged) {
+                navigationPreferenceChanged = false;
+                mBEController.sendHasMapsNotification(getMapsStatus());
+            }
 
-			if (mWebView.getUrl() == null) {
-				if (!loadContent()) {
+            if (mWebView.getUrl() == null) {
+                if (!loadContent()) {
                     Toast.makeText(this, R.string.toast_index_not_found, Toast.LENGTH_LONG).show();
                 }
             }
-		}
-	}
+        }
+    }
 
     private void showSDLSetupDialog() {
         LayoutInflater inflater = getLayoutInflater();
@@ -704,57 +704,57 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(dialogView)
-               .setTitle("Please provide SDL address")
-               .setPositiveButton(android.R.string.ok,
-                       new DialogInterface.OnClickListener() {
-                           @Override
-                           public void onClick(DialogInterface dialog, int which) {
-                               String ipAddressString = ipAddressText.getText().toString();
-                               int tcpPortInt;
-                               try {
-                                   tcpPortInt = Integer.parseInt(tcpPortText.getText().toString());
-                               } catch (NumberFormatException e) {
-                                   Logger.i("Couldn't parse port number", e);
-                                   tcpPortInt = Const.PREFS_DEFAULT_TCPPORT;
-                               }
+                .setTitle("Please provide SDL address")
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String ipAddressString = ipAddressText.getText().toString();
+                                int tcpPortInt;
+                                try {
+                                    tcpPortInt = Integer.parseInt(tcpPortText.getText().toString());
+                                } catch (NumberFormatException e) {
+                                    Logger.i("Couldn't parse port number", e);
+                                    tcpPortInt = Const.PREFS_DEFAULT_TCPPORT;
+                                }
 
-                               SharedPreferences.Editor prefsEditor =
-                                       getSharedPreferences(Const.PREFS_NAME, 0).edit();
-                               prefsEditor.putString(Const.PREFS_KEY_IPADDR, ipAddressString);
-                               prefsEditor.putInt(Const.PREFS_KEY_TCPPORT, tcpPortInt);
-                               prefsEditor.commit();
+                                SharedPreferences.Editor prefsEditor =
+                                        getSharedPreferences(Const.PREFS_NAME, 0).edit();
+                                prefsEditor.putString(Const.PREFS_KEY_IPADDR, ipAddressString);
+                                prefsEditor.putInt(Const.PREFS_KEY_TCPPORT, tcpPortInt);
+                                prefsEditor.commit();
 
-                               Intent intent = new Intent(getApplicationContext(), SDLService.class);
-                               //intent.putExtra()
-                               startService(intent);
-                           }
-                       })
-               .show();
+                                Intent intent = new Intent(getApplicationContext(), SDLService.class);
+                                //intent.putExtra()
+                                startService(intent);
+                            }
+                        })
+                .show();
     }
 
     @Override
-	protected void onDestroy() {
+    protected void onDestroy() {
         Logger.i(getClass().getSimpleName() + " onDestroy, hash:" + hashCode());
 
         unbindSDLService(getBaseContext(), mSDLServiceConnectionProxy);
         stopService(new Intent(this, SDLService.class));
 
-		if (!isFirstStart()) {
-			// switch of timer
-			stopVideoTimer();
+        if (!isFirstStart()) {
+            // switch of timer
+            stopVideoTimer();
 
-			releaseMediaPlayer();
-			doCleanUp();
-			// close JSON server
-			try {
-				if (mServerThread != null)
-					mServerThread.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+            releaseMediaPlayer();
+            doCleanUp();
+            // close JSON server
+            try {
+                if (mServerThread != null)
+                    mServerThread.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         super.onDestroy();
-	}
+    }
 
     /**
      * Checks if the filename exists in the assets.
@@ -782,351 +782,356 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         return successful;
     }
 
-	private void startRPCComponents() {
-		Logger.i(getClass().getSimpleName() + " Start RPC Components");
+    private void startRPCComponents() {
+        Logger.i(getClass().getSimpleName() + " Start RPC Components");
 
-		mServerThread = new JSONServer();
-		mServerThread.setName("ServerThread");
-		mServerThread.start();
+        mServerThread = new JSONServer();
+        mServerThread.setName("ServerThread");
+        mServerThread.start();
 
-		// wait for a while
-		while (!mServerThread.isReady()) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+        // wait for a while
+        while (!mServerThread.isReady()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-		mBEController = new JSONBackendController(this);
-		mBEController.register(27);
-		// wait for a while
-		while (!mBEController.isRegistered()) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+        mBEController = new JSONBackendController(this);
+        mBEController.register(27);
+        // wait for a while
+        while (!mBEController.isRegistered()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-		mVideoController = new JSONVideoController(this);
-		mVideoController.register(28);
-		// wait for a while
-		while (!mVideoController.isRegistered()) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+        mVideoController = new JSONVideoController(this);
+        mVideoController.register(28);
+        // wait for a while
+        while (!mVideoController.isRegistered()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         JSONRateController mRateController = new JSONRateController(mAppRater);
-		mRateController.register(29);
-		// wait for a while
-		while (!mRateController.isRegistered()) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+        mRateController.register(29);
+        // wait for a while
+        while (!mRateController.isRegistered()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         JSONRevSDLController mRevSDLController = new JSONRevSDLController();
-		mRevSDLController.register(30);
-		// wait for a while
-		while (!mRevSDLController.isRegistered()) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        mRevSDLController.register(30);
+        // wait for a while
+        while (!mRevSDLController.isRegistered()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private void prepareMainView() {
-		Logger.i("prepareMainView");
-		setContentView(R.layout.main);
+    private void prepareMainView() {
+        Logger.i("prepareMainView");
+        setContentView(R.layout.main);
 
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		Boolean fullScreen = getFullscreenStatus();
-		mLogo = (ImageView) findViewById(R.id.logo);
-		Logger.i("mFullScreen is " + fullScreen.toString());
-		if (fullScreen) {
-			RelativeLayout.LayoutParams params = new LayoutParams(
-					LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-			mLogo.setLayoutParams(params);
-			// mLogo.setLayoutParams(params);
-		} else {
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean fullScreen = getFullscreenStatus();
+        mLogo = (ImageView) findViewById(R.id.logo);
+        Logger.i("mFullScreen is " + fullScreen.toString());
+        if (fullScreen) {
+            RelativeLayout.LayoutParams params = new LayoutParams(
+                    LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            mLogo.setLayoutParams(params);
+            // mLogo.setLayoutParams(params);
+        } else {
 
-			RelativeLayout.LayoutParams params = new LayoutParams(800, 480);
-			params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-			params.addRule(RelativeLayout.CENTER_VERTICAL);
-			mLogo.setLayoutParams(params);
-		}
-		mWebView = (WebView) findViewById(R.id.webView1);
-		mWebView.setWebChromeClient(new WebChromeClient());
-		mWebView.getSettings().setRenderPriority(RenderPriority.HIGH);
-		// mWebView.getSettings().setLoadWithOverviewMode(true);
-		// mWebView.getSettings().setUseWideViewPort(true);
-		// mWebView.setInitialScale(10);
+            RelativeLayout.LayoutParams params = new LayoutParams(800, 480);
+            params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            params.addRule(RelativeLayout.CENTER_VERTICAL);
+            mLogo.setLayoutParams(params);
+        }
+        mWebView = (WebView) findViewById(R.id.webView1);
+        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.getSettings().setRenderPriority(RenderPriority.HIGH);
+        // mWebView.getSettings().setLoadWithOverviewMode(true);
+        // mWebView.getSettings().setUseWideViewPort(true);
+        // mWebView.setInitialScale(10);
 
-		mVideoLayout = (RelativeLayout) findViewById(R.id.videoLayout);
-		// set progress bar
-		mProgressBar = (ProgressBar) findViewById(R.id.pbProgress);
-		LayoutParams progressParams = (LayoutParams) mProgressBar
-				.getLayoutParams();
-		double loaderHeight = Const.WEB_HEIGHT * getScale() * 0.07 * getWindowDensity();
-		progressParams.height = (int) loaderHeight;
-		progressParams.width = progressParams.height;
-		double loaderVerticalCenter = getWindowHeight() * 0.5;
-		double loaderVerticalShift = Const.WEB_HEIGHT * getScale() * 0.5 * 0.41 * getWindowDensity();
-		double top = (loaderVerticalCenter - 0.5 * loaderHeight) + loaderVerticalShift;
-		progressParams.topMargin = (int) Math.round(top);
-		mProgressBar.setLayoutParams(progressParams);
+        mVideoLayout = (RelativeLayout) findViewById(R.id.videoLayout);
+        // set progress bar
+        mProgressBar = (ProgressBar) findViewById(R.id.pbProgress);
+        LayoutParams progressParams = (LayoutParams) mProgressBar
+                .getLayoutParams();
+        double loaderHeight = Const.WEB_HEIGHT * getScale() * 0.07 * getWindowDensity();
+        progressParams.height = (int) loaderHeight;
+        progressParams.width = progressParams.height;
+        double loaderVerticalCenter = getWindowHeight() * 0.5;
+        double loaderVerticalShift = Const.WEB_HEIGHT * getScale() * 0.5 * 0.41 * getWindowDensity();
+        double top = (loaderVerticalCenter - 0.5 * loaderHeight) + loaderVerticalShift;
+        progressParams.topMargin = (int) Math.round(top);
+        mProgressBar.setLayoutParams(progressParams);
 
-		mAnimationShow = AnimationUtils.loadAnimation(this, R.anim.show);
-	}
+        mAnimationShow = AnimationUtils.loadAnimation(this, R.anim.show);
+    }
 
-	private double getScale() {
-		double res = 1;
-		if (isFullScreen()) {
-			/** Calculate Scale Point */
-			double scalePointW = (double) getWindowWidth()
+    private double getScale() {
+        double res = 1;
+        if (isFullScreen()) {
+            /** Calculate Scale Point */
+            double scalePointW = (double) getWindowWidth()
                     / (double) Const.WEB_WIDTH / getWindowDensity();
-			double scalePointH = (double) getWindowHeight()
-					/ (double) Const.WEB_HEIGHT / getWindowDensity();
-			/** Set calculated ScalePoint */
-			res = (scalePointW >= scalePointH) ? scalePointH : scalePointW;
-		} else {
-			res /= getWindowDensity();
-		}
-		return res;
-	}
+            double scalePointH = (double) getWindowHeight()
+                    / (double) Const.WEB_HEIGHT / getWindowDensity();
+            /** Set calculated ScalePoint */
+            res = (scalePointW >= scalePointH) ? scalePointH : scalePointW;
+        } else {
+            res /= getWindowDensity();
+        }
+        return res;
+    }
 
-	private boolean isFullScreen() {
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(this.getApplicationContext());
-		return preferences.getBoolean("FULLSCREEN", true);
-	}
+    private boolean isFullScreen() {
+        SharedPreferences preferences = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+        return preferences.getBoolean("FULLSCREEN", true);
+    }
 
-	private Integer getWindowHeight() {
-		Integer height;
-		if ((Build.VERSION.SDK_INT > 10)/* && (Build.VERSION.SDK_INT < 14) */) {
-			// return height without tabs bar
-			Rect rectgle = new Rect();
-			Window window = this.getWindow();
-			window.getDecorView().getWindowVisibleDisplayFrame(rectgle);
-			height = rectgle.bottom; // height = - panel height
-		} else {
-			DisplayMetrics dm = new DisplayMetrics();
-			this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-			if (dm.heightPixels > dm.widthPixels) {
-				height = dm.widthPixels;
-			} else {
-				height = dm.heightPixels;
-			}
-		}
-		return height;
-	}
+    private Integer getWindowHeight() {
+        Integer height;
+        if ((Build.VERSION.SDK_INT > 10)/* && (Build.VERSION.SDK_INT < 14) */) {
+            // return height without tabs bar
+            Rect rectgle = new Rect();
+            Window window = this.getWindow();
+            window.getDecorView().getWindowVisibleDisplayFrame(rectgle);
+            height = rectgle.bottom; // height = - panel height
+        } else {
+            DisplayMetrics dm = new DisplayMetrics();
+            this.getWindowManager().getDefaultDisplay().getMetrics(dm);
+            if (dm.heightPixels > dm.widthPixels) {
+                height = dm.widthPixels;
+            } else {
+                height = dm.heightPixels;
+            }
+        }
+        return height;
+    }
 
-	private Integer getWindowWidth() {
-		Integer width;
-		DisplayMetrics dm = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		if (dm.heightPixels > dm.widthPixels) {
-			width = dm.heightPixels;
-		} else {
-			width = dm.widthPixels;
-		}
-		return width;
-	}
+    private Integer getWindowWidth() {
+        Integer width;
+        DisplayMetrics dm = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        if (dm.heightPixels > dm.widthPixels) {
+            width = dm.heightPixels;
+        } else {
+            width = dm.widthPixels;
+        }
+        return width;
+    }
 
-	private void initVideoSurface() {
-		Logger.i("init surface");
+    private void initVideoSurface() {
+        Logger.i("init surface");
 
-		mVideoLayout.setVisibility(View.INVISIBLE);
-		mVideoLayout.removeAllViews();
+        mVideoLayout.setVisibility(View.INVISIBLE);
+        mVideoLayout.removeAllViews();
 
-		LayoutParams params = (LayoutParams) mVideoLayout.getLayoutParams();
+        LayoutParams params = (LayoutParams) mVideoLayout.getLayoutParams();
 
-		params.height = mVideoHeight;
-		params.width = mVideoWidth;
-		params.leftMargin = mLeftMargin;
-		params.topMargin = mTopMargin;
+        params.height = mVideoHeight;
+        params.width = mVideoWidth;
+        params.leftMargin = mLeftMargin;
+        params.topMargin = mTopMargin;
 
-		mVideoLayout.setLayoutParams(params);
-		mPreview = new SurfaceView(this);
+        mVideoLayout.setLayoutParams(params);
+        mPreview = new SurfaceView(this);
 
-		mVideoLayout.addView(mPreview);
-		mHolder = mPreview.getHolder();
-		mHolder.addCallback(this);
-		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		mVideoLayout.forceLayout();
-		mVideoLayout.setVisibility(View.VISIBLE);
+        mVideoLayout.addView(mPreview);
+        mHolder = mPreview.getHolder();
+        mHolder.addCallback(this);
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        mVideoLayout.forceLayout();
+        mVideoLayout.setVisibility(View.VISIBLE);
 
-	}
+    }
 
-	private void hideSplashScreen() {
-		Logger.i("hide screen ");
-		mVideoLayout.setVisibility(View.VISIBLE);
-		mLogo.setVisibility(View.INVISIBLE);
-	}
+    private void hideSplashScreen() {
+        Logger.i("hide screen ");
+        mVideoLayout.setVisibility(View.VISIBLE);
+        mLogo.setVisibility(View.INVISIBLE);
+    }
 
-	private double mediaGetPosition() {
-		// setIsGetPosition(true);
-		Logger.i("mediaGetPosition");
-		// isDoubleSeek = true;
-		if (mMediaPlayer == null) {
-			return -1;
-		}
-		try {
-			return Utils
-					.getShortDouble(mMediaPlayer.getCurrentPosition() / 1000.0);
-		} catch (IllegalStateException e) {
-			Logger.e(e.getMessage(), e);
-			return -1;
-		}
-	}
+    private double mediaGetPosition() {
+        // setIsGetPosition(true);
+        Logger.i("mediaGetPosition");
+        // isDoubleSeek = true;
+        if (mMediaPlayer == null) {
+            return -1;
+        }
+        try {
+            return Utils
+                    .getShortDouble(mMediaPlayer.getCurrentPosition() / 1000.0);
+        } catch (IllegalStateException e) {
+            Logger.e(e.getMessage(), e);
+            return -1;
+        }
+    }
 
-	private void mediaSetPosition(double position) {
+    private void mediaSetPosition(double position) {
+        /* convert to milliseconds */
+        // setIsGetPosition(false);
+        // position *= 1000;
+        mSeekTo = (int) position;
+        Logger.i("mediaSetPosition=" + position);
+
+        try {
+            if (mSeekTo != 0)
+                mMediaPlayer.seekTo(mSeekTo);
+        } catch (IllegalStateException e) {
+            Logger.e(e.getMessage(), e);
+        }
+    }
+
+    private void mediaSetPositionPaused(double position) {
 		/* convert to milliseconds */
-		// setIsGetPosition(false);
-		// position *= 1000;
-		mSeekTo = (int) position;
-		Logger.i("mediaSetPosition=" + position);
+        mSeekTo = (int) position;
 
-		try {
-			if (mSeekTo != 0)
-				mMediaPlayer.seekTo(mSeekTo);
-		} catch (IllegalStateException e) {
-			Logger.e(e.getMessage(), e);
-		}
-	}
+        Logger.i("mediaSetPositionPaused=" + position);
 
-	private void mediaSetPositionPaused(double position) {
-		/* convert to milliseconds */
-		mSeekTo = (int) position;
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+        try {
+            mMediaPlayer.seekTo(mSeekTo);
+        } catch (IllegalStateException e) {
+            Logger.e(e.getMessage(), e);
+        }
+    }
 
-		Logger.i("mediaSetPositionPaused=" + position);
+    private void releaseMediaPlayer() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.reset();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        mVideoPrepared = false;
+    }
 
-		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-		audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-		try {
-			mMediaPlayer.seekTo(mSeekTo);
-		} catch (IllegalStateException e) {
-			Logger.e(e.getMessage(), e);
-		}
-	}
+    private void videoViewResize(double scale, int top, int left) {
+        mVideoWidth = (int) (Const.ORIG_VIDEO_WIDTH * scale * getWindowDensity() - 1);
+        mVideoHeight = (int) (Const.ORIG_VIDEO_HEIGHT * scale * getWindowDensity() - 1);
+        mLeftMargin = (int) Math.round(left * getWindowDensity());
+        mTopMargin = (int) Math.round(top * getWindowDensity());
+    }
 
-	private void releaseMediaPlayer() {
-		if (mMediaPlayer != null) {
-			mMediaPlayer.reset();
-			mMediaPlayer.release();
-			mMediaPlayer = null;
-		}
-		mVideoPrepared = false;
-	}
+    private double getWindowDensity() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        return dm.density;
+    }
 
-	private void videoViewResize(double scale, int top, int left) {
-		mVideoWidth = (int) (Const.ORIG_VIDEO_WIDTH * scale * getWindowDensity() - 1);
-		mVideoHeight = (int) (Const.ORIG_VIDEO_HEIGHT * scale * getWindowDensity() - 1);
-		mLeftMargin = (int) Math.round(left * getWindowDensity());
-		mTopMargin = (int) Math.round(top * getWindowDensity());
-	}
+    private void playVideo(SurfaceHolder holder) {
+        Logger.i("playVideo");
+        if (mPath != null) {
+            try {
+                if (mMediaPlayer != null) {
+                    releaseMediaPlayer();
+                }
+                // TODO : optimize MP instantiation
+                // Create a new media player and set the listeners
+                mMediaPlayer = new MediaPlayer();
 
-	private double getWindowDensity() {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		return dm.density;
-	}
+                initDatasourceWith(mPath);
 
-	private void playVideo(SurfaceHolder holder) {
-		Logger.i("playVideo");
-		if (mPath != null) {
-			try {
-				if (mMediaPlayer != null) {
-					releaseMediaPlayer();
-				}
-				// TODO : optimize MP instantiation
-				// Create a new media player and set the listeners
-				mMediaPlayer = new MediaPlayer();
+                Logger.i("video file path : " + mPath);
 
-				initDatasourceWith(mPath);
+                mMediaPlayer.setDisplay(holder);
 
-				Logger.i("video file path : " + mPath);
+                mMediaPlayer.setOnPreparedListener(new AvatarOnPreparedListener(this));
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-				mMediaPlayer.setDisplay(holder);
+                mMediaPlayer.prepare();
+            } catch (Exception e) {
+                Logger.e("error: " + e.getMessage(), e);
+                // set duration of video
+                mVideoController.setVideoDuration(-1);
+            }
+        } else {
+            Logger.i("No video to play");
+        }
+    }
 
-				mMediaPlayer.setOnPreparedListener(new AvatarOnPreparedListener(this));
-				mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+    private void stopVideoTimer() {
+        if (mVideoTimer != null) {
+            mVideoTimer.cancel();
+            mVideoTimer.purge();
+        }
+        mVideoTimer = null;
+    }
 
-				mMediaPlayer.prepare();
-			} catch (Exception e) {
-				Logger.e("error: " + e.getMessage(), e);
-				// set duration of video
-				mVideoController.setVideoDuration(-1);
-			}
-		} else {
-			Logger.i("No video to play");
-		}
-	}
+    private void doCleanUp() {
+        mVideoWidth = 0;
+        mVideoHeight = 0;
+        if (mVideoLayout != null)
+            mVideoLayout.removeAllViews();
+        mHolder = null;
+        mPreview = null;
+        mVideoWasPaused = false;
+        mVideoPauseTime = 0;
+        mVideoPlayed = false;
+    }
 
-	private void stopVideoTimer() {
-		if (mVideoTimer != null) {
-			mVideoTimer.cancel();
-			mVideoTimer.purge();
-		}
-		mVideoTimer = null;
-	}
+    private void initDatasourceWith(String fileName)
+            throws ExtensionFileException, MediaPlayerException {
 
-	private void doCleanUp() {
-		mVideoWidth = 0;
-		mVideoHeight = 0;
-		if (mVideoLayout != null)
-			mVideoLayout.removeAllViews();
-		mHolder = null;
-		mPreview = null;
-		mVideoWasPaused = false;
-		mVideoPauseTime = 0;
-		mVideoPlayed = false;
-	}
+        AssetFileDescriptor assetFileDescriptor;
+        // welcome orientation video is in raw resources
+        if (fileName.toLowerCase().compareTo(Const.WELCOME_VIDEO_FILE_NAME) == 0) {
 
-	private void initDatasourceWith(String fileName)
-			throws ExtensionFileException, MediaPlayerException {
+            // Commit according to REVSDL-116
+            //assetFileDescriptor = getResources().openRawResourceFd(R.raw.faq_welcome_orientation);
+            Logger.w("Welcome Video is disabled in current version");
+            return;
 
-		AssetFileDescriptor assetFileDescriptor;
-		// welcome orientation video is in raw resources
-		if (fileName.toLowerCase().compareTo(Const.WELCOME_VIDEO_FILE_NAME) == 0) {
-			assetFileDescriptor = getResources().openRawResourceFd(R.raw.faq_welcome_orientation);
-		} else {
-			// get file from expansion archive
-			if (apkExpansionZipFile == null) {
-				throw new ExtensionFileException("Expansion zip file variable is not initialized");
-			}
-			assetFileDescriptor = apkExpansionZipFile.getAssetFileDescriptor(fileName);
-		}
+        } else {
+            // get file from expansion archive
+            if (apkExpansionZipFile == null) {
+                throw new ExtensionFileException("Expansion zip file variable is not initialized");
+            }
+            assetFileDescriptor = apkExpansionZipFile.getAssetFileDescriptor(fileName);
+        }
 
-		if (assetFileDescriptor == null) {
-			throw new ExtensionFileException("Assert file descriptor for file: " + fileName +
+        if (assetFileDescriptor == null) {
+            throw new ExtensionFileException("Assert file descriptor for file: " + fileName +
                     " not found");
-		}
+        }
 
-		try {
-			mMediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
-					assetFileDescriptor.getStartOffset(),
-					assetFileDescriptor.getLength());
-		} catch (IllegalArgumentException e) {
-			throw new MediaPlayerException(e);
-		} catch (IllegalStateException e) {
-			throw new MediaPlayerException(e);
-		} catch (IOException e) {
-			throw new MediaPlayerException(e);
-		}
-	}
+        try {
+            mMediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
+                    assetFileDescriptor.getStartOffset(),
+                    assetFileDescriptor.getLength());
+        } catch (IllegalArgumentException e) {
+            throw new MediaPlayerException(e);
+        } catch (IllegalStateException e) {
+            throw new MediaPlayerException(e);
+        } catch (IOException e) {
+            throw new MediaPlayerException(e);
+        }
+    }
 
-	@Override
-	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-	}
+    @Override
+    public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
+    }
 
     @Override
     public void onSDLServiceConnected(SDLServiceBinder service) {

@@ -166,18 +166,15 @@ public class JSONBackendController extends JSONController {
 	 * @return
 	 */
 	private String isFirstStart() {
-		
 		boolean firstStart = mActivity.isFirstStart();
 		if (firstStart) {
 			firstStart = true;
 			// set new code version
-			SharedPreferences prefs = mActivity.getSharedPreferences(
-					Const.SHPREF_FIRST_LAUNCH, 0);
+			SharedPreferences prefs = mActivity.getSharedPreferences(Const.SHPREF_FIRST_LAUNCH, 0);
 			SharedPreferences.Editor editor = prefs.edit();
 			if (editor != null) {
 				int currentCodeVersion = Utils.getAppVersionCode(mActivity);
-				editor.putInt(Const.SHPREF_PREVIOUS_CODE_VERSION,
-						currentCodeVersion);
+				editor.putInt(Const.SHPREF_PREVIOUS_CODE_VERSION, currentCodeVersion);
 			}
 			editor.commit();
 			// set redownload counter to 0
