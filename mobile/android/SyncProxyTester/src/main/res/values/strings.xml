@@ -28,6 +28,7 @@
     <string name="addcommand_iconFilename">action.png</string>
     <string name="addcommand_commandID">Command ID</string>
     <string name="addcommand_commandIDDefault">42</string>
+    <string name="addcommand_useMenuParams">Menu Params</string>
     <string name="addcommand_useCommandName">Command to add to menu</string>
     <string name="addcommand_commandNameDefault">Item To Add</string>
     <string name="addcommand_vrSynonym">VR Synonyms (comma-separated)</string>
@@ -127,6 +128,7 @@
     <string name="showconstanttbt_distanceToManeuverDefault">50</string>
     <string name="showconstanttbt_distanceToManeuverScale">Distance To Maneuver Scale</string>
     <string name="showconstanttbt_distanceToManeuverScaleDefault">100</string>
+    <string name="showconstanttbt_useManeuverComplete">Send</string>
     <string name="showconstanttbt_isManeuverComplete">Maneuver Complete?</string>
     <string name="encodedsyncpdata_filename">Local File Name</string>
     <string name="encodedsyncpdata_selectFileButton">…</string>
@@ -197,7 +199,7 @@
     <string name="alert_line2Default">Alert Line 2</string>
     <string name="alert_line3">Line 3</string>
     <string name="alert_line3Default">Alert Line 3</string>
-    <string name="alert_duration">Duration</string>
+    <string name="alert_useDuration">Duration</string>
     <string name="alert_durationDefault">5000</string>
     <string name="alert_usePlayTone">Play Tone</string>
     <string name="alert_useProgressIndicator">Progress Indicator</string>
@@ -233,5 +235,10 @@
     <string name="choice_useTertiaryText">Tertiary Text</string>
     <string name="choice_useImage">Image</string>
     <string name="choice_useSecondaryImage">Secondary Image</string>
+
+    <string name="slider_useTimeout">Timeout</string>
+
+    <string name="alertManeuver_ttsChunks">TTSChunks (comma-separated)</string>
+    <string name="alertManeuver_ttsChunksDefault">TTSChunk1,TTSChunk2,AnotherTTSChunk</string>
 
 </resources>
