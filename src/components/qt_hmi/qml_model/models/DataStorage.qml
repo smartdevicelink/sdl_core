@@ -301,7 +301,6 @@ QtObject {
         var index = 0
 
         if ((menuParams) && (menuParams.parentID)) { // Work with sub menu
-            console.debug("1")
             var parentNotFound = true
             for (var optionIndex = 0; optionIndex < app.options.count; ++optionIndex) {
                 if ((app.options.get(optionIndex).type === Internal.MenuItemType.MI_SUBMENU) && (app.options.get(optionIndex).id === menuParams.parentID)) {
