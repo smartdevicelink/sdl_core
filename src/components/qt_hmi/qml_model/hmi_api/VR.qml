@@ -17,6 +17,7 @@ Item {
                                                appID: appID === undefined ? 0 : appID,
                                            });
         }
+        console.log("exit")
     }
 
     function deleteCommand(cmdID, appID) {
@@ -29,6 +30,7 @@ Item {
             }
             ++i;
         }
+        console.log("exit")
     }
 
     function getLanguage() {
