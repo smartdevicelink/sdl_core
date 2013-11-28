@@ -3223,6 +3223,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
                             final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
                             final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+                            final CheckBox useVRHelpItemImage = (CheckBox) layout.findViewById(R.id.setglobalproperties_useVRHelpItemImage);
                             final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
                             final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
                             final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
@@ -3323,10 +3324,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 item.setPosition(1);
                                             }
 
-                                            Image image = new Image();
-                                            image.setValue(itemImageArray[i]);
-                                            image.setImageType(ImageType.DYNAMIC);
-                                            item.setImage(image);
+                                            if (useVRHelpItemImage.isChecked()) {
+                                                Image image = new Image();
+                                                image.setValue(
+                                                        itemImageArray[i]);
+                                                image.setImageType(
+                                                        ImageType.DYNAMIC);
+                                                item.setImage(image);
+                                            }
 
                                             vrHelpItems.add(item);
                                         }
