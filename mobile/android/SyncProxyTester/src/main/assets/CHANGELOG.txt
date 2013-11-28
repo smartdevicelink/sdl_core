@@ -1,4 +1,5 @@
 [CW48]
+* Make some parameters optional in AddCommand, Alert, AlertManeuver, SetGlobalProperties, ShowConstantTBT, Slider, and UpdateTurnList dialogs.
 * Fix: SPT didn't send all the activation requests when it had been closed with Back button.
 * SyncProxyAndroid SDK: Fix sending GetVehicleData with steeringWheelAngle parameter.
 * Fix: don't add/remove command until a successful response comes.
