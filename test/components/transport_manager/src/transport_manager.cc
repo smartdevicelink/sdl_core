@@ -97,9 +97,6 @@ class TransportManagerTest : public ::testing::Test {
     TransportManagerAttr cfg {0};
 
     tm = new TransportManagerImpl(cfg);
-    protocol_handler::ProtocolHandlerImpl* protocol_handler =
-        new protocol_handler::ProtocolHandlerImpl(tm);  // FIXME this is a temporary workaround
-    tm->SetProtocolHandler(protocol_handler);
 
     tm_listener = new MockTransportManagerListener();
     tm->AddEventListener(tm_listener);

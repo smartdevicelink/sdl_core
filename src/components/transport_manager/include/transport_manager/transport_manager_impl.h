@@ -42,7 +42,6 @@
 #include <memory>
 
 #include "utils/logger.h"
-#include "protocol_handler/protocol_handler.h"//TODO(YK): temp solution until B1.0 release
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -227,13 +226,6 @@ class TransportManagerImpl : public TransportManager {
   void UpdateDeviceList(TransportAdapterSptr ta);
 
   /**
-   * @brief Establish protocom handler.
-   *
-   * @param ph Pointer to the handler of protocol.
-   */
-  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler* ph);  //TODO(YK): temp solution until B1.0 release
-
-  /**
    * @brief Return container that hold connections.
    *
    * @return Container that hold connections.
@@ -409,6 +401,14 @@ class TransportManagerImpl : public TransportManager {
  private:
 
   /**
+   * @brief Returns size of frame to be formed from raw bytes.
+   * expects first bytes of message which will be treated as frame header.
+   */
+  // TODO this function should be moved outside of TM to protocol handler or
+  // somewhere else
+  unsigned int GetPacketSize(unsigned int size, unsigned char* data);
+
+  /**
    * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
    */
   struct Handle2GUIDConverter {
@@ -491,7 +491,6 @@ class TransportManagerImpl : public TransportManager {
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);
 
-  protocol_handler::ProtocolHandler* protocol_handler_;  //TODO(YK): temp solution until B1.0 release
   void AddDataToContainer(
       ConnectionUID id,
       std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >& container,

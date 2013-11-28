@@ -42,6 +42,7 @@
 #include <sstream>
 #include "utils/macro.h"
 #include "protocol_handler/raw_message.h"
+#include "protocol_handler/protocol_packet.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -94,7 +95,7 @@ class TransportManagerImpl::IncomingDataHandler {
         logger_,
         "Total data size for connection " << connection_id << " is " << connection_data.size());
     while (connection_data.size() >= kBytesForSizeDetection) {
-      const uint32_t packet_size = tm_impl_->protocol_handler_->GetPacketSize(
+      const uint32_t packet_size = tm_impl_->GetPacketSize(
           kBytesForSizeDetection, &connection_data[0]);
       if (0 == packet_size) {
         LOG4CXX_ERROR(logger_, "Failed to get packet size");
@@ -143,8 +144,7 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
       is_initialized_(false),
       connection_id_counter_(0),
       config_(config),
-      incoming_data_handler_(new IncomingDataHandler(this)),
-      protocol_handler_(NULL) {
+      incoming_data_handler_(new IncomingDataHandler(this)) {
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, NULL);
   pthread_cond_init(&message_queue_cond, NULL);
@@ -645,6 +645,42 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
   return NULL;
 }
 
+// TODO this function should be moved outside of TM to protocol handler or
+// somewhere else
+unsigned int TransportManagerImpl::GetPacketSize(
+  unsigned int data_size, unsigned char* first_bytes) {
+  DCHECK(first_bytes);
+  unsigned char offset = sizeof(uint32_t);
+  if (data_size < 2 * offset) {
+    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
+    return 0;
+  }
+
+  unsigned char* received_bytes = first_bytes;
+  DCHECK(received_bytes);
+
+  unsigned char version = received_bytes[0] >> 4u;
+  uint32_t frame_body_size = received_bytes[offset++] << 24u;
+  frame_body_size |= received_bytes[offset++] << 16u;
+  frame_body_size |= received_bytes[offset++] << 8u;
+  frame_body_size |= received_bytes[offset++];
+
+  unsigned int required_size = frame_body_size;
+  switch (version) {
+    case protocol_handler::PROTOCOL_VERSION_1:
+      required_size += protocol_handler::PROTOCOL_HEADER_V1_SIZE;
+      break;
+    case protocol_handler::PROTOCOL_VERSION_2:
+      required_size += protocol_handler::PROTOCOL_HEADER_V2_SIZE;
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
+      return 0;
+  }
+
+  return required_size;
+}
+
 void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
   const transport_adapter::DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_INFO(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
@@ -910,14 +946,6 @@ void TransportManagerImpl::MessageQueueThread(void) {
 
   message_queue_.clear();
   LOG4CXX_INFO(logger_, "Message queue thread finished");
-}
-
-void TransportManagerImpl::SetProtocolHandler(
-    protocol_handler::ProtocolHandler* ph) {
-  //YK: temp solution until B1.0 release
-  if (ph) {
-    protocol_handler_ = ph;
-  }
 }
 
 }  // namespace transport_manager

@@ -88,10 +88,6 @@ class MobileMessageHandlerTester :
      */
     void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) {}
 
-    unsigned int GetPacketSize(unsigned int size, unsigned char* data) {
-      return 0;
-    }
-
     void SendFramesNumber(int connection_key, int number_of_frames) {}
 
     MobileMessageHandlerTester()
