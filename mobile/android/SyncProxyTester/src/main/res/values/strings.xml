@@ -234,4 +234,6 @@
     <string name="choice_useImage">Image</string>
     <string name="choice_useSecondaryImage">Secondary Image</string>
 
+    <string name="slider_useTimeout">Timeout</string>
+
 </resources>

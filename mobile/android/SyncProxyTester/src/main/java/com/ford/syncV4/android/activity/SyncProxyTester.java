@@ -3008,6 +3008,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
                             final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
                             final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
+                            final CheckBox useTimeout = (CheckBox) layout.findViewById(R.id.slider_useTimeout);
                             final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
 
                             final CheckBox chkDynamicFooter = (CheckBox) layout.findViewById(R.id.slider_chkDynamicFooter);
@@ -3028,7 +3029,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         Slider msg = new Slider();
-                                        msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        if (useTimeout.isChecked()) {
+                                            msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        }
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
                                         msg.setSliderHeader(txtSliderHeader.getText().toString());
 
