@@ -192,7 +192,8 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             'scanButton',
             'optionsButton',
             'directTuneButton',
-            'sendRequestButton'
+            'sendRequestButton',
+            'tuneButtons'
         ],
 
         hdButton:  MFT.Button.extend({
@@ -295,6 +296,33 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             disabled: function() {
                 return (MFT.AppController.sdlControlStatus == 2);
             }.property('MFT.AppController.sdlControlStatus')
+        }),
+
+        tuneButtons: Em.ContainerView.extend({
+            elementId: 'media_fm_tuneButtons',
+
+            childViews: [
+                'tuneDown',
+                'tuneUp'
+            ],
+
+            tuneUp: MFT.Button.extend({
+                elementId:	'media_fm_tuneUpButton',
+                target:				'MFT.MediaController',
+                action:				'tuneUp',
+                onDown: false,
+                templateName: 'text',
+                text: '+'
+            }),
+
+            tuneDown: MFT.Button.extend({
+                elementId:	'media_fm_tuneDownButton',
+                target:				'MFT.MediaController',
+                action:				'tuneDown',
+                onDown: false,
+                templateName: 'text',
+                text: '-'
+            })
         })
     })
 

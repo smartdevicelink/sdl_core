@@ -2200,3 +2200,25 @@
 .cancelBarAnimation {
     -webkit-transition: none !important;
 }
+
+#media_fm_tuneButtons {
+    margin: 4px 5px 0 5px;
+}
+
+#media_fm_tuneButtons .ffw-button {
+    width: 60px;
+    height: 40px;
+    font-size: 36px;
+    text-align: center;
+    line-height: 40px;
+    display: inline-block;
+    vertical-align: top;
+    border: 1px solid #333;
+    border-radius: 3px;
+    position: relative;
+    margin: 0 4px;
+}
+
+#media_fm_tuneButtons #media_fm_tuneDownButton {
+    line-height: 36px;
+}
