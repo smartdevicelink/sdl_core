@@ -2906,6 +2906,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.updateturnlist, null);
                             final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
                             final EditText txtIconList = (EditText) layout.findViewById(R.id.updateturnlist_txtIconList);
+                            final CheckBox useTurnList = (CheckBox) layout.findViewById(R.id.updateturnlist_useTurnList);
+                            final CheckBox useIconList = (CheckBox) layout.findViewById(R.id.updateturnlist_useIconList);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.updateturnlist_chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2937,6 +2940,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
 								 */
+                                    boolean turnListEnabled = useTurnList.isChecked();
+                                    boolean iconListEnabled = useIconList.isChecked();
                                     String turnListString = txtTurnList.getText().toString();
                                     String iconListString = txtIconList.getText().toString();
                                     if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
@@ -2948,20 +2953,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         for (int i = 0; i < turnCount; ++i) {
                                             Turn t = new Turn();
-                                            t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
-                                            Image ti = new Image();
-                                            ti.setValue((i < iconNames.length) ? iconNames[i] : "");
-                                            ti.setImageType(ImageType.DYNAMIC);
-                                            t.setTurnIcon(ti);
+                                            if (turnListEnabled) {
+                                                t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
+                                            }
+
+                                            if (iconListEnabled) {
+                                                Image ti = new Image();
+                                                ti.setValue((i < iconNames.length) ? iconNames[i] : "");
+                                                ti.setImageType(ImageType.DYNAMIC);
+                                                t.setTurnIcon(ti);
+                                            }
                                             tarray.add(t);
                                         }
                                         UpdateTurnList msg = new UpdateTurnList();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setTurnList(tarray);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(
+                                                        currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(
+                                                        new Vector<SoftButton>());
+                                            }
                                         }
                                         currentSoftButtons = null;
 
