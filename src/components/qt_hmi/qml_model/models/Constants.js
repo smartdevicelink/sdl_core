@@ -238,4 +238,4 @@ var menuRowCount = 2
 var menuColumnCount = 3
 
 // Position for element that came without position value (should be always at the end)
-var positionOfElementWithoutPosition
+var positionOfElementWithoutPosition = 1001
