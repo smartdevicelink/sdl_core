@@ -1,4 +1,4 @@
-package com.ford.avarsdl.activity;
+package com.ford.avarsdl.views;
 
 import com.ford.avarsdl.R;
 
