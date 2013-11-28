@@ -90,7 +90,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
-            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
+            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
+                NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false)); // Default value = false
 
         obj = 5;
         ASSERT_EQ(5, obj.asInt());
@@ -125,7 +126,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
         utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
-            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(false); // Default value = false
+            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
+                NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false)); // Default value = false
 
         obj["aa"] = true;
         ASSERT_TRUE(obj["aa"].asBool());
