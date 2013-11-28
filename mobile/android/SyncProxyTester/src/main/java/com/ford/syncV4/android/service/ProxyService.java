@@ -159,6 +159,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			Intent i = new Intent(this, SyncProxyTester.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(i);
+
+            // quite a few things downstream depend on the main activity and its
+            // fields being alive, so wait for a while here
+            int numTries = 9;
+            while ((SyncProxyTester.getInstance() == null) && (numTries-- >= 0)) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG, "created " + SyncProxyTester.getInstance());
 		}		
 	}
 	

@@ -1,4 +1,5 @@
 [CW48]
+* Fix: SPT didn't send all the activation requests when it had been closed with Back button.
 * SyncProxyAndroid SDK: Fix sending GetVehicleData with steeringWheelAngle parameter.
 * Fix: don't add/remove command until a successful response comes.
 * AddCommand dialog: allow to uncheck commandName parameter.

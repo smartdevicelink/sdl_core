@@ -352,6 +352,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(logTag, "onCreate");
 
         _activity = this;
 
@@ -758,6 +759,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(logTag, "onDestroy");
         //endSyncProxyInstance();
         saveMessageSelectCount();
         _activity = null;
