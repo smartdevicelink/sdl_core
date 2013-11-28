@@ -38,11 +38,30 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
 
         classNames: 'TurnByTurnView',
 
+//        classNameBindings: [
+//            'active:active'
+//        ],
+
         classNameBindings: [
-            'active:active'
+            'this.activeState:active_state:inactive_state',
+           // 'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
         ],
 
+        activeState: function(){
+            if (SDL.TurnByTurnView.activeTBT) {
+                if (SDL.States.media.sdlmedia.active || SDL.States.info.nonMedia.active || SDL.States.media.sdlmedia.mediaNavigation.active) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }.property('SDL.States.media.sdlmedia.active', 'SDL.States.info.nonMedia.active', 'SDL.TurnByTurnView.activeTBT', 'SDL.States.media.sdlmedia.mediaNavigation.active'),
+
         active: false,
+
+        activeTBT: false,
 
         childViews: [
             'captionText',
@@ -123,7 +142,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
                 this.set('distanceToManeuverScale', naviParams.distanceToManeuverScale);
                 this.set('timeToDestination', naviParams.timeToDestination);
 
-                this.set('active', true);
+                this.set('activeTBT', true);
             }
         },
 
@@ -132,7 +151,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
          */
         deactivate: function() {
 
-            this.set('active', false);
+            this.set('activeTBT', false);
         },
 
         totalDistanceLabel: SDL.Label.extend( {

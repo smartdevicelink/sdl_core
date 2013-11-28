@@ -84,8 +84,7 @@ SDL.SDLController = Em.Object
 
             for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
                 if (SDL.SDLModel.registeredComponents[i].type == component) {
-                    SDL.SDLModel.set('registeredComponents.' + i + '.state',
-                        true);
+                    SDL.SDLModel.set('registeredComponents.' + i + '.state',  true);
                     return;
                 }
             }

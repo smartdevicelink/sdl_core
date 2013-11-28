@@ -37,7 +37,7 @@ FFW.TTS = FFW.RPCObserver.create( {
      *
      * @type {Boolean}
      */
-    isReady: false,
+    isReady: true,
 
     /**
      * Request id of current running Speak request

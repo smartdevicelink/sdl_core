@@ -37,8 +37,8 @@ SDL.SDLAppController = Em.Object.create({
 
         this._super();
 
-        FFW.UI.set('isReady', true);
-        FFW.Navigation.set('isReady', true);
+        //FFW.UI.set('isReady', true);
+        //FFW.Navigation.set('isReady', true);
     },
 
     /**

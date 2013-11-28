@@ -98,6 +98,6 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
         this._super();
 
-        FFW.TTS.set('isReady', true);
+        //FFW.TTS.set('isReady', true);
     }
 });

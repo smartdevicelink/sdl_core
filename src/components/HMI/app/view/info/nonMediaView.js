@@ -47,14 +47,14 @@ SDL.InfoNonMedia = Em.ContainerView
         ],
 
         activeState: function(){
-            if (SDL.TurnByTurnView.active) {
+            if (SDL.TurnByTurnView.activeTBT) {
                 return false;
             } else if (SDL.States.info.nonMedia.active) {
                 return true;
             } else {
                 return false;
             }
-        }.property('SDL.States.info.nonMedia.active', 'SDL.TurnByTurnView.active'),
+        }.property('SDL.States.info.nonMedia.active', 'SDL.TurnByTurnView.activeTBT'),
 
         content: Em.ContainerView
             .extend( {
