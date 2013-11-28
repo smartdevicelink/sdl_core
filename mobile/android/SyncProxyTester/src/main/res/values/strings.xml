@@ -28,6 +28,7 @@
     <string name="addcommand_iconFilename">action.png</string>
     <string name="addcommand_commandID">Command ID</string>
     <string name="addcommand_commandIDDefault">42</string>
+    <string name="addcommand_useMenuParams">Menu Params</string>
     <string name="addcommand_useCommandName">Command to add to menu</string>
     <string name="addcommand_commandNameDefault">Item To Add</string>
     <string name="addcommand_vrSynonym">VR Synonyms (comma-separated)</string>

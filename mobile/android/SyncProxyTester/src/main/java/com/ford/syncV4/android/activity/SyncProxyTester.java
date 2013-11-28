@@ -2236,6 +2236,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
                             final CheckBox chkUseVrSynonyms = (CheckBox) layout.findViewById(R.id.addcommand_useVRSynonyms);
                             final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
+                            final CheckBox chkUseMenuParams = (CheckBox) layout.findViewById(R.id.addcommand_useMenuParams);
                             final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                             final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
                             s.setAdapter(_submenuAdapter);
@@ -2280,21 +2281,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCorrelationID(autoIncCorrId++);
                                     msg.setCmdID(cmdID);
 
-                                    MenuParams menuParams = new MenuParams();
-                                    if (chkUseCommandName.isChecked()) {
-                                        String itemText = er.getText().toString();
-                                        menuParams.setMenuName(itemText);
-                                    }
-                                    if (chkUseMenuPos.isChecked()) {
-                                        menuParams.setPosition(pos);
-                                    }
-                                    if (chkUseParentID.isChecked()) {
-                                        SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
-                                        if (sm != null) {
-                                            menuParams.setParentID(sm.getSubMenuId());
+                                    if (chkUseMenuParams.isChecked()) {
+                                        MenuParams menuParams = new MenuParams();
+                                        if (chkUseCommandName.isChecked()) {
+                                            String itemText = er.getText().toString();
+                                            menuParams.setMenuName(itemText);
                                         }
+                                        if (chkUseMenuPos.isChecked()) {
+                                            menuParams.setPosition(pos);
+                                        }
+                                        if (chkUseParentID.isChecked()) {
+                                            SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
+                                            if (sm != null) {
+                                                menuParams.setParentID(sm.getSubMenuId());
+                                            }
+                                        }
+                                        msg.setMenuParams(menuParams);
                                     }
-                                    msg.setMenuParams(menuParams);
 
                                     if (chkUseVrSynonyms.isChecked()) {
                                         msg.setVrCommands(new Vector<String>(Arrays.asList(
@@ -2322,7 +2325,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                         " / " +
                                                         _latestAddCommand.second);
                                     }
-                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, menuParams.getParentID());
+                                    Integer parentID = null;
+                                    if (msg.getMenuParams() != null) {
+                                        parentID = msg.getMenuParams().getParentID();
+                                    }
+                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, parentID);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
