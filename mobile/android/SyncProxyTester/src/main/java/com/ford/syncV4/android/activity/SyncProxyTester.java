@@ -2421,10 +2421,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.showconstanttbt,
                                     (ViewGroup) findViewById(R.id.showconstanttbt_Root));
 
+                            final CheckBox useNavigationText1 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText1);
                             final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
+                            final CheckBox useNavigationText2 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText2);
                             final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
+                            final CheckBox useETA = (CheckBox) layout.findViewById(R.id.showconstanttbt_useETA);
                             final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+                            final CheckBox useTimeToDestination = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTimeToDestination);
                             final EditText txtTimeToDestination = (EditText) layout.findViewById(R.id.showconstanttbt_txtTimeToDestination);
+                            final CheckBox useTotalDistance = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTotalDistance);
                             final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
                             final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
                             final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
@@ -2432,9 +2437,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkUseNextTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_nextTurnIconCheck);
                             final Spinner spnNextTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_nextTurnIconType);
                             final EditText txtNextTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_nextTurnIconValue);
+                            final CheckBox useDistanceToManeuver = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuver);
                             final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
+                            final CheckBox useDistanceToManeuverScale = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuverScale);
                             final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
+                            final CheckBox useManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_useManeuverComplete);
                             final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.showconstanttbt_useSoftButtons);
 
                             spnTurnIconType.setAdapter(imageTypeAdapter);
                             spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
@@ -2476,11 +2485,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         ShowConstantTBT msg = new ShowConstantTBT();
-                                        msg.setNavigationText1(txtNavigationText1.getText().toString());
-                                        msg.setNavigationText2(txtNavigationText2.getText().toString());
-                                        msg.setEta(txtEta.getText().toString());
-                                        msg.setTimeToDestination(txtTimeToDestination.getText().toString());
-                                        msg.setTotalDistance(txtTotalDistance.getText().toString());
+
+                                        if (useNavigationText1.isChecked()) {
+                                            msg.setNavigationText1(txtNavigationText1.getText().toString());
+                                        }
+                                        if (useNavigationText2.isChecked()) {
+                                            msg.setNavigationText2(txtNavigationText2.getText().toString());
+                                        }
+                                        if (useETA.isChecked()) {
+                                            msg.setEta(txtEta.getText().toString());
+                                        }
+                                        if (useTimeToDestination.isChecked()) {
+                                            msg.setTimeToDestination(txtTimeToDestination.getText().toString());
+                                        }
+                                        if (useTotalDistance.isChecked()) {
+                                            msg.setTotalDistance(txtTotalDistance.getText().toString());
+                                        }
 
                                         if (chkUseTurnIcon.isChecked()) {
                                             Image image = new Image();
@@ -2498,14 +2518,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setNextTurnIcon(image);
                                         }
 
-                                        msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
-                                        msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
-                                        msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        if (useDistanceToManeuver.isChecked()) {
+                                            msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
+                                        }
+                                        if (useDistanceToManeuverScale.isChecked()) {
+                                            msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
+                                        }
+                                        if (useManeuverComplete.isChecked()) {
+                                            msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        }
                                         msg.setCorrelationID(autoIncCorrId++);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(new Vector<SoftButton>());
+                                            }
                                         }
                                         _msgAdapter.logMessage(msg, true);
                                         ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
