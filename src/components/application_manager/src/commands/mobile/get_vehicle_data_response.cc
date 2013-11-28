@@ -51,7 +51,7 @@ void GetVehicleDataResponse::Run() {
 
 #ifdef QT_HMI
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
-#endif // #ifdef QT_HMI
+#endif // QT_HMI
 
 #ifdef WEB_HMI
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -74,7 +74,7 @@ void GetVehicleDataResponse::Run() {
       SendResponse(false);
     }
   }
-#endif #ifdef WEB_HMI
+#endif // WEB_HMI
 }
 
 }  // namespace commands
