@@ -1829,6 +1829,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
+                            final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
@@ -1871,7 +1872,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setAlertText1(txtAlertField1.getText().toString());
                                         msg.setAlertText2(txtAlertField2.getText().toString());
                                         msg.setAlertText3(txtAlertField3.getText().toString());
-                                        msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        if (useDuration.isChecked()) {
+                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        }
                                         msg.setPlayTone(chkPlayTone.isChecked());
                                         msg.setProgressIndicator(useProgressIndicator.isChecked());
 

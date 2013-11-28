@@ -197,7 +197,7 @@
     <string name="alert_line2Default">Alert Line 2</string>
     <string name="alert_line3">Line 3</string>
     <string name="alert_line3Default">Alert Line 3</string>
-    <string name="alert_duration">Duration</string>
+    <string name="alert_useDuration">Duration</string>
     <string name="alert_durationDefault">5000</string>
     <string name="alert_usePlayTone">Play Tone</string>
     <string name="alert_useProgressIndicator">Progress Indicator</string>
