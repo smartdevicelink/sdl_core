@@ -1,4 +1,5 @@
 [CW48]
+* SyncProxyAndroid SDK: Fix sending GetVehicleData with steeringWheelAngle parameter.
 * Fix: don't add/remove command until a successful response comes.
 * AddCommand dialog: allow to uncheck commandName parameter.
 * Brand new CreateInteractionChoiceSet dialog. The user can now set an arbitrary number of Choice objects.
