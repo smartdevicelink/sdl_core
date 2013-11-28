@@ -113,10 +113,10 @@ Rectangle {
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
-                        onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
+                        onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
-                            alertWindow.complete(Common.Result.ABORTED);
+                            alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
                     SoftButton {
@@ -128,10 +128,10 @@ Rectangle {
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
-                        onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
+                        onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
-                            alertWindow.complete(Common.Result.ABORTED);
+                            alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
                 }
@@ -148,10 +148,10 @@ Rectangle {
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
-                        onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
+                        onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
-                            alertWindow.complete(Common.Result.ABORTED);
+                            alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
                     SoftButton {
@@ -163,10 +163,10 @@ Rectangle {
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
                         onKeepContext: { alertWindow.restart(); }
-                        onDefaultAction: { alertWindow.complete(Common.Result.ABORTED); }
+                        onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
-                            alertWindow.complete(Common.Result.ABORTED);
+                            alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
                 }
