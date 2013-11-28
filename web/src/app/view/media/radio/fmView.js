@@ -212,13 +212,13 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
             onDown: false,
             icon: 'images/media/passiv_horiz_led.png',
             // Change Icon for HD State
-            onIconChange: function(){
-                if(MFT.MediaController.get('isHDActive') && MFT.SettingsModel.isEnglish){
-                    this.set('icon', 'images/media/active_horiz_led.png');
-                }else{
-                    this.set('icon', 'images/media/passiv_horiz_led.png');
-                }
-            }.observes('MFT.MediaController.isHDActive'),
+//            onIconChange: function(){
+//                if(MFT.MediaController.get('isHDActive') && MFT.SettingsModel.isEnglish){
+//                    this.set('icon', 'images/media/active_horiz_led.png');
+//                }else{
+//                    this.set('icon', 'images/media/passiv_horiz_led.png');
+//                }
+//            }.observes('MFT.MediaController.isHDActive'),
 
             disabledBinding: 'MFT.MediaController.isHDButtonActive'
 
