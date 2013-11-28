@@ -236,4 +236,7 @@
 
     <string name="slider_useTimeout">Timeout</string>
 
+    <string name="alertManeuver_ttsChunks">TTSChunks (comma-separated)</string>
+    <string name="alertManeuver_ttsChunksDefault">TTSChunk1,TTSChunk2,AnotherTTSChunk</string>
+
 </resources>
