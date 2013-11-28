@@ -6,9 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
@@ -24,7 +23,6 @@ import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -36,12 +34,10 @@ import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import android.widget.Toast;
 
 import com.android.vending.expansion.zipfile.APKExpansionSupport;
 import com.android.vending.expansion.zipfile.ZipResourceFile;
@@ -82,6 +78,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
         ISDLServiceConnection {
 
+    private final static String APP_SETUP_DIALOG_TAG = "AppSetupDialogTag";
     private final SDLServiceConnectionProxy mSDLServiceConnectionProxy = new SDLServiceConnectionProxy(this);
     private IProxyListenerALM mBoundSDLService;
 
@@ -493,20 +490,19 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
                     mWebView.setVisibility(View.VISIBLE);
                     if (Const.DEBUG) {
                         long currTime = System.currentTimeMillis();
-                        String str = "Application loading time = "
-                                + String.valueOf(currTime - mStartTime);
-                        Toast.makeText(getApplicationContext(), str,
-                                Toast.LENGTH_LONG).show();
+                        String str = "Application loading time = " + String.valueOf(currTime - mStartTime);
                         Logger.i(str);
+                        SafeToast.showToastAnyThread(str);
                     }
-                    showSDLSetupDialog();
+                    DialogFragment appSetupDialogFragment = AppSetupDialog.newInstance(R.string.app_setup_dialog_title);
+                    appSetupDialogFragment.show(getFragmentManager(), APP_SETUP_DIALOG_TAG);
+                    appSetupDialogFragment.setCancelable(false);
                     break;
 
                 default:
                     break;
             }
         }
-
     };
 
     private void verifyContent() {
@@ -678,58 +674,10 @@ public class AvatarActivity extends Activity implements SurfaceHolder.Callback,
 
             if (mWebView.getUrl() == null) {
                 if (!loadContent()) {
-                    Toast.makeText(this, R.string.toast_index_not_found, Toast.LENGTH_LONG).show();
+                    SafeToast.showToastAnyThread(getString(R.string.toast_index_not_found));
                 }
             }
         }
-    }
-
-    private void showSDLSetupDialog() {
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.sdl_settings, null);
-
-        if (dialogView == null) {
-            return;
-        }
-
-        final EditText ipAddressText = (EditText) dialogView.findViewById(R.id.sdl_ipAddr);
-        final EditText tcpPortText = (EditText) dialogView.findViewById(R.id.sdl_tcpPort);
-
-        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
-        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
-
-        ipAddressText.setText(ipAddressString);
-        tcpPortText.setText(String.valueOf(tcpPortInt));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(dialogView)
-                .setTitle("Please provide SDL address")
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String ipAddressString = ipAddressText.getText().toString();
-                                int tcpPortInt;
-                                try {
-                                    tcpPortInt = Integer.parseInt(tcpPortText.getText().toString());
-                                } catch (NumberFormatException e) {
-                                    Logger.i("Couldn't parse port number", e);
-                                    tcpPortInt = Const.PREFS_DEFAULT_TCPPORT;
-                                }
-
-                                SharedPreferences.Editor prefsEditor =
-                                        getSharedPreferences(Const.PREFS_NAME, 0).edit();
-                                prefsEditor.putString(Const.PREFS_KEY_IPADDR, ipAddressString);
-                                prefsEditor.putInt(Const.PREFS_KEY_TCPPORT, tcpPortInt);
-                                prefsEditor.commit();
-
-                                Intent intent = new Intent(getApplicationContext(), SDLService.class);
-                                //intent.putExtra()
-                                startService(intent);
-                            }
-                        })
-                .show();
     }
 
     @Override

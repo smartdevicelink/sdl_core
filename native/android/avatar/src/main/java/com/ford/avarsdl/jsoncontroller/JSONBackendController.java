@@ -8,9 +8,9 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.Window;
 
-import com.ford.avarsdl.activity.AvatarActivity;
-import com.ford.avarsdl.activity.EulaActivity;
-import com.ford.avarsdl.activity.SafeToast;
+import com.ford.avarsdl.views.AvatarActivity;
+import com.ford.avarsdl.views.EulaActivity;
+import com.ford.avarsdl.views.SafeToast;
 import com.ford.avarsdl.jsonparser.EBEMethods;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.Logger;

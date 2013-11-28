@@ -1,6 +1,6 @@
 package com.ford.avarsdl.jsoncontroller;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
 

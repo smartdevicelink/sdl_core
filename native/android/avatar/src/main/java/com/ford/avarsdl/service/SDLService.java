@@ -1,11 +1,13 @@
 package com.ford.avarsdl.service;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.util.Log;
 
-import com.ford.avarsdl.activity.SafeToast;
+import com.ford.avarsdl.views.SafeToast;
 import com.ford.avarsdl.notifications.NotificationCommand;
 import com.ford.avarsdl.notifications.NotificationCommandImpl;
 import com.ford.avarsdl.responses.ResponseCommand;
@@ -111,7 +113,7 @@ public class SDLService extends Service implements IProxyListenerALM {
                 startId);
 
         initializeCommandsHashTable();
-        startProxy();
+        startProxyIfNetworkConnected();
         return START_STICKY;
     }
 
@@ -129,12 +131,43 @@ public class SDLService extends Service implements IProxyListenerALM {
         return mBinder;
     }
 
-    private void startProxy() {
-        Logger.d("starting proxy");
+    private void startProxyIfNetworkConnected() {
+        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+                MODE_PRIVATE);
+        final int transportType = prefs.getInt(
+                Const.PREFS_KEY_TRANSPORT_TYPE,
+                Const.PREFS_DEFAULT_TRANSPORT_TYPE);
 
-        SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
-        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
+        if (transportType == Const.KEY_BLUETOOTH) {
+            Logger.d(getClass().getSimpleName() + " ProxyService. onStartCommand(). Transport = Bluetooth.");
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter != null) {
+                if (bluetoothAdapter.isEnabled()) {
+                    startProxy();
+                }
+            }
+        } else {
+            //TODO: This code is commented out for simulator purposes
+			/*
+			Log.d(TAG, "ProxyService. onStartCommand(). Transport = WiFi.");
+			if (hasWiFiConnection() == true) {
+				Log.d(TAG, "ProxyService. onStartCommand(). WiFi enabled.");
+				startProxy();
+			} else {
+				Log.w(TAG,
+						"ProxyService. onStartCommand(). WiFi is not enabled.");
+			}
+			*/
+            startProxy();
+        }
+    }
+
+    private void startProxy() {
+        Logger.d(getClass().getSimpleName() + " Starting proxy ...");
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Const.PREFS_NAME, 0);
+        String ipAddressString = sharedPreferences.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = sharedPreferences.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
 
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
@@ -143,11 +176,23 @@ public class SDLService extends Service implements IProxyListenerALM {
         Vector<AppHMIType> appHMIType = new Vector<AppHMIType>();
         appHMIType.add(AppHMIType.RADIO);
 
+        int transportType = sharedPreferences.getInt(
+                Const.PREFS_KEY_TRANSPORT_TYPE,
+                Const.PREFS_DEFAULT_TRANSPORT_TYPE);
+
         try {
-            mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
-                    appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
-                    null, false, false, 2,
-                    new TCPTransportConfig(tcpPortInt, ipAddressString));
+            if (transportType == Const.KEY_BLUETOOTH) {
+                Logger.i(getClass().getSimpleName() + " Start Bluetooth Proxy");
+                mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
+                        appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                        null, false, false, 2);
+            } else {
+                Logger.i(getClass().getSimpleName() + " Start WiFi Proxy");
+                mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
+                        appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                        null, false, false, 2,
+                        new TCPTransportConfig(tcpPortInt, ipAddressString));
+            }
         } catch (SyncException e) {
             Logger.e("Failed to start proxy", e);
             if (mSyncProxy == null) {

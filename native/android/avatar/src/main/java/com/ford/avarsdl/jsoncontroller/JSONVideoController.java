@@ -5,7 +5,7 @@ import java.io.File;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.downloader.DownloaderClient;
 import com.ford.avarsdl.exception.SDCardException;
 import com.ford.avarsdl.jsonparser.EVideoMethods;
