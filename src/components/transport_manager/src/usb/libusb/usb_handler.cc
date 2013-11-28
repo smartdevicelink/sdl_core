@@ -42,41 +42,26 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-PlatformUsbDevice::PlatformUsbDevice(
-    uint8_t bus_number, uint8_t address,
-    const libusb_device_descriptor& device_descriptor,
-    libusb_device* device_libusb, libusb_device_handle* device_handle_libusb)
-    : bus_number_(bus_number),
-      address_(address),
-      vendor_id_(device_descriptor.idVendor),
-      product_id_(device_descriptor.idProduct),
-      device_descriptor_(device_descriptor),
-      libusb_device_handle_(device_handle_libusb),
-      libusb_device_(device_libusb) {}
+class UsbHandler::ControlTransferSequenceState {
+ public:
+  ControlTransferSequenceState(class UsbHandler* usb_handler,
+                               UsbControlTransferSequence* sequence,
+                               PlatformUsbDevice* device);
+  ~ControlTransferSequenceState();
+  void Finish();
+  bool Finished() const { return finished_; }
+  UsbControlTransfer* CurrentTransfer();
+  UsbControlTransfer* Next();
+  UsbHandler* usb_handler() const { return usb_handler_; }
+  PlatformUsbDevice* device() const { return device_; }
 
-std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
-  unsigned char buf[128];
-  const int libusb_ret = libusb_get_string_descriptor_ascii(
-      libusb_device_handle_, index, buf, sizeof(buf));
-  if (libusb_ret < 0) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor: "
-                              << libusb_error_name(libusb_ret));
-    return "";
-  }
-  return std::string(reinterpret_cast<char*>(buf));
-}
-
-std::string PlatformUsbDevice::GetManufacturer() const {
-  return GetDescString(device_descriptor_.iManufacturer);
-}
-
-std::string PlatformUsbDevice::GetProductName() const {
-  return GetDescString(device_descriptor_.iProduct);
-}
-
-std::string PlatformUsbDevice::GetSerialNumber() const {
-  return GetDescString(device_descriptor_.iSerialNumber);
-}
+ private:
+  UsbHandler* usb_handler_;
+  PlatformUsbDevice* device_;
+  bool finished_;
+  UsbControlTransferSequence* sequence_;
+  UsbControlTransferSequence::Transfers::const_iterator current_transfer_;
+};
 
 UsbHandler::UsbHandler()
     : shutdown_requested_(false),
@@ -179,7 +164,7 @@ void UsbHandler::StartControlTransferSequence(
     UsbControlTransferSequence* sequence, PlatformUsbDevice* device) {
   TransferSequences::iterator it = transfer_sequences_.insert(
       transfer_sequences_.end(),
-      new UsbControlTransferSequenceState(this, sequence, device));
+      new ControlTransferSequenceState(this, sequence, device));
   SubmitControlTransfer(*it);
 }
 
@@ -272,7 +257,7 @@ void UsbHandler::Thread() {
 
     for (TransferSequences::iterator it = transfer_sequences_.begin();
          it != transfer_sequences_.end();) {
-      UsbControlTransferSequenceState* sequence_state = *it;
+      ControlTransferSequenceState* sequence_state = *it;
       if (sequence_state->Finished()) {
         delete *it;
         it = transfer_sequences_.erase(it);
@@ -291,13 +276,13 @@ void UsbHandler::Thread() {
 }
 
 void UsbTransferSequenceCallback(libusb_transfer* transfer) {
-  UsbControlTransferSequenceState* sequence_state =
-      static_cast<UsbControlTransferSequenceState*>(transfer->user_data);
+  UsbHandler::ControlTransferSequenceState* sequence_state =
+      static_cast<UsbHandler::ControlTransferSequenceState*>(transfer->user_data);
   sequence_state->usb_handler()->ControlTransferCallback(transfer);
 }
 
 void UsbHandler::SubmitControlTransfer(
-    UsbControlTransferSequenceState* sequence_state) {
+    ControlTransferSequenceState* sequence_state) {
   UsbControlTransfer* transfer = sequence_state->CurrentTransfer();
   if (NULL == transfer) return;
 
@@ -355,8 +340,8 @@ void UsbHandler::SubmitControlTransfer(
 }
 
 void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
-  UsbControlTransferSequenceState* sequence_state =
-      static_cast<UsbControlTransferSequenceState*>(transfer->user_data);
+  ControlTransferSequenceState* sequence_state =
+      static_cast<ControlTransferSequenceState*>(transfer->user_data);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     LOG4CXX_INFO(logger_, "USB control transfer completed");
     UsbControlTransfer* current_transfer = sequence_state->CurrentTransfer();
@@ -369,8 +354,6 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
     }
 
     sequence_state->Next();
-    LOG4CXX_INFO(logger_, "XXX " << submit_next << " "
-                                 << sequence_state->Finished());
     if (submit_next && !sequence_state->Finished()) {
       SubmitControlTransfer(sequence_state);
     } else {
@@ -383,7 +366,7 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
   libusb_free_transfer(transfer);
 }
 
-UsbControlTransferSequenceState::UsbControlTransferSequenceState(
+UsbHandler::ControlTransferSequenceState::ControlTransferSequenceState(
     UsbHandler* usb_handler, UsbControlTransferSequence* sequence,
     PlatformUsbDevice* device)
     : usb_handler_(usb_handler),
@@ -392,12 +375,11 @@ UsbControlTransferSequenceState::UsbControlTransferSequenceState(
       sequence_(sequence),
       current_transfer_(sequence->transfers().begin()) {}
 
-UsbControlTransferSequenceState::~UsbControlTransferSequenceState() {
-    LOG4CXX_INFO(logger_, "destuc");
+UsbHandler::ControlTransferSequenceState::~ControlTransferSequenceState() {
   delete sequence_;
 }
 
-UsbControlTransfer* UsbControlTransferSequenceState::Next() {
+UsbControlTransfer* UsbHandler::ControlTransferSequenceState::Next() {
   if (finished_) return NULL;
   if (++current_transfer_ == sequence_->transfers().end()) {
     Finish();
@@ -407,11 +389,11 @@ UsbControlTransfer* UsbControlTransferSequenceState::Next() {
   }
 }
 
-UsbControlTransfer* UsbControlTransferSequenceState::CurrentTransfer() {
+UsbControlTransfer* UsbHandler::ControlTransferSequenceState::CurrentTransfer() {
   return finished_ ? NULL : *current_transfer_;
 }
 
-void UsbControlTransferSequenceState::Finish() { finished_ = true; }
+void UsbHandler::ControlTransferSequenceState::Finish() { finished_ = true; }
 
 }  // namespace
 }  // namespace

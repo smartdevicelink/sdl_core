@@ -1,6 +1,6 @@
 /**
- * \file usb_handler.h
- * \brief QNX USB handler class header file.
+ * \file platform_usb_device.h
+ * \brief libusb PlatformUsbDevice class header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,53 +33,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_HANDLER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_HANDLER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 
-#include <sys/usbdi.h>
-
-#include "transport_manager/transport_adapter/transport_adapter.h"
-#include "transport_manager/usb/usb_control_transfer.h"
-#include "transport_manager/usb/qnx/platform_usb_device.h"
+#include <string>
+#include <libusb/libusb.h>
 
 namespace transport_manager {
 
 namespace transport_adapter {
 
-class UsbHandler {
+class PlatformUsbDevice {
  public:
-  UsbHandler();
-  ~UsbHandler();
-  void StartControlTransferSequence(UsbControlTransferSequence* sequence,
-                                    PlatformUsbDevice* device);
-  TransportAdapter::Error Init();
+  uint8_t bus_number() const { return bus_number_; }
+  uint8_t address() const { return address_; }
+  uint16_t vendor_id() const { return vendor_id_; }
+  uint16_t product_id() const { return product_id_; }
+  std::string GetManufacturer() const;
+  std::string GetProductName() const;
+  std::string GetSerialNumber() const;
+  PlatformUsbDevice(uint8_t bus, uint8_t address,
+                    const libusb_device_descriptor& device_descriptor,
+                    libusb_device* device_libusb,
+                    libusb_device_handle* device_handle_libusb);
+  libusb_device_handle* GetLibusbHandle() { return libusb_device_handle_; }
+  libusb_device* GetLibusbDevice() { return libusb_device_; }
 
  private:
-  void DeviceArrived(usbd_connection* connection,
-                     usbd_device_instance_t* instance);
-  void DeviceLeft(usbd_device_instance_t* instance);
+  std::string GetDescString(uint8_t index) const;
 
  private:
-  friend class UsbDeviceListener;
-  std::list<class UsbDeviceListener*> usb_device_listeners_;
-
-  typedef std::vector<PlatformUsbDevice*> Devices;
-  Devices devices_;
-
-  struct usbd_connection* usbd_general_connection_;
-  struct usbd_connection* usbd_aoa_connection_;
-
-  friend void ArrivedCallback(usbd_connection* connection,
-                              usbd_device_instance_t* instance);
-  friend void LeftCallback(usbd_connection* connection,
-                           usbd_device_instance_t* instance);
-  friend void ArrivedAoaCallback(usbd_connection* connection,
-                                 usbd_device_instance_t* instance);
-  friend void LeftAoaCallback(usbd_connection* connection,
-                              usbd_device_instance_t* instance);
+  uint8_t bus_number_;
+  uint8_t address_;
+  uint16_t vendor_id_;
+  uint16_t product_id_;
+  libusb_device_descriptor device_descriptor_;
+  libusb_device_handle* libusb_device_handle_;
+  libusb_device* libusb_device_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_HANDLER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_

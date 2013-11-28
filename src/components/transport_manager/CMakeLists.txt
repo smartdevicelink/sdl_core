@@ -5,7 +5,7 @@ include_directories (
   ../connection_handler/include
 )
 
-ADD_DEFINITIONS(-DUSB_QNX)
+ADD_DEFINITIONS(-DUSB_LIBUSB)
 
 set (SOURCES
 	./src/transport_manager_impl.cc
@@ -26,8 +26,9 @@ set (SOURCES
 	#./src/bluetooth/bluetooth_device.cc
 	#./src/tcp/dnssd_service_browser.cc
 	./src/tcp/tcp_connection_factory.cc
-	./src/usb/qnx/usb_handler.cc
-	./src/usb/qnx/usb_connection.cc
+	./src/usb/libusb/usb_handler.cc
+	./src/usb/libusb/usb_connection.cc
+	./src/usb/libusb/platform_usb_device.cc
 	./src/usb/usb_aoa_adapter.cc
 	./src/usb/usb_connection_factory.cc
 	./src/usb/usb_device_scanner.cc

@@ -42,60 +42,11 @@
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/usb_control_transfer.h"
+#include "transport_manager/usb/libusb/platform_usb_device.h"
 
 namespace transport_manager {
 
 namespace transport_adapter {
-
-class PlatformUsbDevice {
- public:
-  uint8_t bus_number() const { return bus_number_; }
-  uint8_t address() const { return address_; }
-  uint16_t vendor_id() const { return vendor_id_; }
-  uint16_t product_id() const { return product_id_; }
-  std::string GetManufacturer() const;
-  std::string GetProductName() const;
-  std::string GetSerialNumber() const;
-  PlatformUsbDevice(uint8_t bus, uint8_t address,
-                    const libusb_device_descriptor& device_descriptor,
-                    libusb_device* device_libusb,
-                    libusb_device_handle* device_handle_libusb);
-  libusb_device_handle* GetLibusbHandle() { return libusb_device_handle_; }
-  libusb_device* GetLibusbDevice() { return libusb_device_; }
-
- private:
-  std::string GetDescString(uint8_t index) const;
-
- private:
-  uint8_t bus_number_;
-  uint8_t address_;
-  uint16_t vendor_id_;
-  uint16_t product_id_;
-  libusb_device_descriptor device_descriptor_;
-  libusb_device_handle* libusb_device_handle_;
-  libusb_device* libusb_device_;
-};
-
-class UsbControlTransferSequenceState {
- public:
-  UsbControlTransferSequenceState(class UsbHandler* usb_handler,
-                                  UsbControlTransferSequence* sequence,
-                                  PlatformUsbDevice* device);
-  ~UsbControlTransferSequenceState();
-  void Finish();
-  bool Finished() const { return finished_; }
-  UsbControlTransfer* CurrentTransfer();
-  UsbControlTransfer* Next();
-  UsbHandler* usb_handler() const { return usb_handler_; }
-  PlatformUsbDevice* device() const { return device_; }
-
- private:
-  UsbHandler* usb_handler_;
-  PlatformUsbDevice* device_;
-  bool finished_;
-  UsbControlTransferSequence* sequence_;
-  UsbControlTransferSequence::Transfers::const_iterator current_transfer_;
-};
 
 class UsbHandler {
  public:
@@ -109,12 +60,14 @@ class UsbHandler {
   void CloseDeviceHandle(libusb_device_handle* device_handle);
 
  private:
+  class ControlTransferSequenceState;
+
   void Thread();
   void DeviceArrived(libusb_device* device);
   void DeviceLeft(libusb_device* device);
 
   void ControlTransferCallback(libusb_transfer* transfer);
-  void SubmitControlTransfer(UsbControlTransferSequenceState* sequence_state);
+  void SubmitControlTransfer(ControlTransferSequenceState* sequence_state);
   friend void UsbTransferSequenceCallback(libusb_transfer* transfer);
 
  private:
@@ -127,7 +80,7 @@ class UsbHandler {
   typedef std::vector<PlatformUsbDevice*> Devices;
   Devices devices_;
 
-  typedef std::list<UsbControlTransferSequenceState*> TransferSequences;
+  typedef std::list<ControlTransferSequenceState*> TransferSequences;
   TransferSequences transfer_sequences_;
   std::list<libusb_device_handle*> device_handles_to_close_;
   libusb_context* libusb_context_;
@@ -141,7 +94,7 @@ class UsbHandler {
                           libusb_hotplug_event event, void* data);
 };
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
