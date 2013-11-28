@@ -609,6 +609,10 @@
   </element>
   <element name="SIXTH">
   </element>
+  <element name="SEVENTH">
+  </element>
+  <element name="EIGTH">
+  </element>
 </enum>
 
 <enum name="VehicleDataEventStatus">
