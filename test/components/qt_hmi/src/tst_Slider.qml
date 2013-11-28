@@ -53,7 +53,7 @@ Item {
         when: windowShown
         property var mainWindowComponent : Qt.createComponent("./../../../../src/components/qt_hmi/qml_model/MainWindow.qml")
         property var mainObject
-        property var sdlUIProxy
+        property var sldUI
         property var dataContainer
         property var sliderPopup
         property var timer
@@ -62,7 +62,7 @@ Item {
             mainObject      = mainWindowComponent.createObject(parent)
             var mainScreen = mainObject.getMainScreen()
             mainScreen.visible = true
-            sdlUIProxy      = mainObject.getUIProxy()
+            sldUI = mainObject.getUIProxy()
             dataContainer   = mainObject.getDataStorage()
             sliderPopup     = mainObject.getSlider()
             timer           = sliderPopup.getTimer()
@@ -78,7 +78,7 @@ Item {
             var initData = {numTicks:9, position:4, sliderHeader:"header", sliderFooter:["footer"], timeout:0, appID:1}
             createSlider()
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
-            var actualResult = sdlUIProxy.slider(initData)
+            var actualResult = sldUI.slider(initData)
             try {
                 compare(actualResult.sliderPosition, initData.position, "slider position")
             } catch(e){}
@@ -94,7 +94,7 @@ Item {
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
             sliderPopup.onReady.connect(function simulateUserAction(){sliderPopup.position = expectedResult.position})
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
 
             timer.onTriggered()
             try {
@@ -112,7 +112,7 @@ Item {
             createSlider()
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
 
             timer.onTriggered()
             try {
@@ -132,7 +132,7 @@ Item {
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
             sliderPopup.onReady.connect(function simulateUserAction(){sliderPopup.position = expectedResult.position})
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
             sliderPopup.getBackButton().clicked()
 
             try {
@@ -151,9 +151,9 @@ Item {
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
             sliderPopup.onReady.connect(function simulateUserAction(){sliderPopup.position = expectedResult.position})
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
             initData.position = 5
-            var actualResult = sdlUIProxy.slider(initData)
+            var actualResult = sldUI.slider(initData)
 
             try {
                 compare(actualResult.sliderPosition, expectedResult.position, "slider position")
@@ -170,7 +170,7 @@ Item {
             createSlider()
             dataContainer.addApplication({appName:"TestAppName", appId:initData.appID})
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
 
             try {
                 compare(sliderPopup.getFooterText().text, expectedResult.footers[expectedResult.position - 1], "current footer")
@@ -191,7 +191,7 @@ Item {
                 mouseClick(rect, rect.width / initData.numTicks * expectedResult.position, 1)
             })
 
-            sdlUIProxy.slider(initData)
+            sldUI.slider(initData)
 
             try {
                 compare(sliderPopup.getFooterText().text, expectedResult.footers[expectedResult.position - 1], "current footer")
