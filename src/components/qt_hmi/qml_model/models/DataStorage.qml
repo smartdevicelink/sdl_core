@@ -294,51 +294,51 @@ QtObject {
                       ", " +
                       appID
         )
-        if ((menuParams !== undefined) && (menuParams.parentID !== undefined)) {
+        var commandToAddPosition
+        var app = getApplication(appID)
+        var currentMenu = app.options
+        var maximumCommands = Constants.maximumCommandsPerSubmenu
+        var index = 0
+
+        if ((menuParams) && (menuParams.parentID)) { // Work with sub menu
+            console.debug("1")
             var parentNotFound = true
-            for (var optionIndex = 0; optionIndex < getApplication(appID).options.count; ++optionIndex) {
-                var option = getApplication(appID).options.get(optionIndex)
-                if ((option.type === Internal.MenuItemType.MI_SUBMENU) && (option.id === menuParams.parentID)) {
+            for (var optionIndex = 0; optionIndex < app.options.count; ++optionIndex) {
+                if ((app.options.get(optionIndex).type === Internal.MenuItemType.MI_SUBMENU) && (app.options.get(optionIndex).id === menuParams.parentID)) {
+                    currentMenu = app.options.get(optionIndex).subMenu
                     parentNotFound = false
-                    var count = option.subMenu.count - 1 // decremented because of "back" item
-                    if (count < Constants.maximumCommandsPerSubmenu) {
-                        var index
-                        if ((menuParams.position !== undefined) && (menuParams.position < count)) {
-                            index = menuParams.position
-                        }
-                        else {
-                            index = count
-                        }
-                        ++index // incremented because of "back" item with index 0
-                        option.subMenu.insert(index, {"id": cmdID, "name": menuParams.menuName, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
-                    }
-                    else {
-                        console.log("addCommand(): too many commands in submenu id = " + option.id + ", rejecting")
-                        throw Common.Result.REJECTED
-                    }
-                    break
+                    maximumCommands += 1
                 }
             }
             if (parentNotFound) {
                 console.log("UI::addCommand(): parentID " + menuParams.parentID + " not found")
             }
         }
-        else {
-            count = getApplication(appID).options.count
-            if (count < Constants.maximumCommandsPerSubmenu) {
-                if ((menuParams.position !== undefined) && (menuParams.position < count)) {
-                    index = menuParams.position
-                }
-                else {
-                    index = count
-                }
-                var name = menuParams ? menuParams.menuName : "cmdID = " + cmdID
-                getApplication(appID).options.insert(index, {"id": cmdID, "name": name, "type": Internal.MenuItemType.MI_NODE, "icon": cmdIcon ? cmdIcon : {}, "subMenu": []})
+
+        if (currentMenu.count < maximumCommands) {
+            if (menuParams && (menuParams.position !== undefined)) {
+                commandToAddPosition = menuParams.position
+            } else {
+                commandToAddPosition = Constants.positionOfElementWithoutPosition
             }
-            else {
-                console.log("addCommand(): too many commands in root menu, rejecting")
-                throw Common.Result.REJECTED
+            for (var i = 0; i < currentMenu.count; i++) {
+                if (commandToAddPosition >= currentMenu.get(i).position) {
+                    index = i + 1
+                } else {
+                    break
+                }
             }
+            currentMenu.insert( index,
+                               { id: cmdID,
+                                 name: menuParams.menuName,
+                                 type: Internal.MenuItemType.MI_NODE,
+                                 position: commandToAddPosition,
+                                 icon: cmdIcon ? cmdIcon : {},
+                                 subMenu: []
+                               })
+        } else {
+            console.log("addCommand(): too many commands in menu: ", menuParams.parentID, " rejecting")
+            throw Common.Result.REJECTED
         }
         console.debug("exit")
     }
@@ -379,23 +379,34 @@ QtObject {
 
     function addSubMenu (menuID, menuParams, appID) {
         console.debug("enter: " + menuID + ", {" + menuParams.parentID + ", " + menuParams.position + ", " + menuParams.menuName + "}, " + appID)
-        var count = getApplication(appID).options.count
+        var app = getApplication(appID)
+        var index = 0
+        var count = app.options.count
+        var subMenuToAddPosition
+
         if (count < Constants.maximumSubmenus) {
-            var index
-            if ((menuParams.position !== undefined) && (menuParams.position < count)) {
-                index = menuParams.position
+            if (menuParams.position !== undefined) {
+                subMenuToAddPosition = menuParams.position
+            } else {
+                subMenuToAddPosition = Constants.positionOfElementWithoutPosition
             }
-            else {
-                index = count
+            for (var i = 0; i < count; i++) {
+                if (subMenuToAddPosition >= app.options.get(i).position) {
+                    index = i + 1
+                } else {
+                    break
+                }
             }
-            getApplication(appID).options.insert(index, {
+            app.options.insert(index, {
                 "id": menuID,
                 "name": menuParams.menuName,
+                "position": subMenuToAddPosition,
                 "type": Internal.MenuItemType.MI_SUBMENU,
                 "icon": undefined,
                 "subMenu": [{
                     "id": -1,
                     "name": menuParams.menuName,
+                    "position": -1,
                     "type": Internal.MenuItemType.MI_PARENT,
                     "icon": {
                         "imageType": Common.ImageType.DYNAMIC,
