@@ -44,7 +44,7 @@ SDL.MenuList = Em.ContainerView
 
             this.deleteItems();
 
-            if (buttons) {
+            if (buttons.length) {
                 for ( var i = 0; i < buttons.length; i++) {
                     this.get('content.childViews').pushObject(SDL.Button
                         .create(SDL.PresetEventsCustom, {
@@ -61,6 +61,8 @@ SDL.MenuList = Em.ContainerView
                             appID: appID
                         }));
                 }
+            } else {
+                this.deleteItems();
             }
         },
 
@@ -69,8 +71,8 @@ SDL.MenuList = Em.ContainerView
          */
         deleteItems: function() {
 
-            this.get('content.childViews').removeObjects(this
-                .get('content.childViews').filterProperty('softButtonID'));
+            this.get('content.childViews').removeObjects(this.get('content.childViews').filterProperty('softButtonID'));
+            this.get('content.childViews').removeObjects(this.get('content.childViews').filterProperty('softButtonID', 0));
         },
 
         classNames: [

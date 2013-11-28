@@ -194,8 +194,8 @@ void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
   LOG4CXX_INFO(
     logger_,
-    "Delete Connection:" << static_cast<int>(connection_id)
-    << "from the list.");
+    "Delete Connection: " << static_cast<int>(connection_id)
+    << " from the list.");
   ConnectionListIterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");
@@ -416,23 +416,28 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
 
 int ConnectionHandlerImpl::GetDataOnDeviceID(
   DeviceHandle device_handle, std::string* device_name,
-  std::list<unsigned int>* applications_list) {
-  DCHECK(device_name);
-  DCHECK(applications_list);
-
+  std::list<unsigned int>* applications_list,
+  std::string* mac_address) {
   LOG4CXX_INFO(logger_, "CConnectionHandler::GetDataOnDeviceID()");
   int result = -1;
   DeviceListIterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Device not found!");
   } else {
-    *device_name = (*it).second.user_friendly_name();
-    applications_list->clear();
-    for (ConnectionListIterator itr = connection_list_.begin();
-         itr != connection_list_.end(); ++itr) {
-      if (device_handle == (*itr).second.connection_device_handle()) {
-        applications_list->push_back((*itr).second.GetFirstSessionID());
+    if (device_name) {
+      *device_name = (*it).second.user_friendly_name();
+    }
+    if (applications_list) {
+      applications_list->clear();
+      for (ConnectionListIterator itr = connection_list_.begin();
+           itr != connection_list_.end(); ++itr) {
+        if (device_handle == (*itr).second.connection_device_handle()) {
+          applications_list->push_back((*itr).second.GetFirstSessionID());
+        }
       }
+    }
+    if (mac_address) {
+      *mac_address = it->second.mac_address();
     }
     result = 0;
   }

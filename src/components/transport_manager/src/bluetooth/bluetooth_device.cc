@@ -33,29 +33,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/bluetooth/bluetooth_device.h"
+
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <iomanip>
-#include <set>
-#include <bluetooth/bluetooth.h>
-
-#include "transport_manager/bluetooth/bluetooth_device.h"
+#include <algorithm>
+#include <limits>
 
 namespace transport_manager {
 namespace transport_adapter {
 
 bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
-  RfcommChannels::const_iterator it = rfcomm_channels_.find(app_handle);
-  if (it != rfcomm_channels_.end()) {
-    *channel_out = it->second;
-    return true;
-  } else {
+  if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max())
     return false;
-  }
+  const uint8_t channel = static_cast<uint8_t>(app_handle);
+  RfcommChannelVector::const_iterator it = std::find(rfcomm_channels_.begin(),
+                                                     rfcomm_channels_.end(),
+                                                     channel);
+  if (it == rfcomm_channels_.end())
+    return false;
+  *channel_out = channel;
+  return true;
 }
 
 std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
@@ -68,11 +70,7 @@ BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
                                  const RfcommChannelVector& rfcomm_channels)
     : Device(name, GetUniqueDeviceId(address)),
       address_(address),
-      next_application_handle_(1) {
-  for (RfcommChannelVector::const_iterator it = rfcomm_channels.begin();
-      it != rfcomm_channels.end(); ++it) {
-    rfcomm_channels_[next_application_handle_++] = *it;
-  }
+      rfcomm_channels_(rfcomm_channels) {
 }
 
 bool BluetoothDevice::IsSameAs(const Device* other) const {
@@ -93,11 +91,7 @@ bool BluetoothDevice::IsSameAs(const Device* other) const {
 }
 
 ApplicationList BluetoothDevice::GetApplicationList() const {
-  ApplicationList result;
-  for (RfcommChannels::const_iterator it = rfcomm_channels_.begin();
-      it != rfcomm_channels_.end(); ++it)
-    result.push_back(it->first);
-  return result;
+  return ApplicationList(rfcomm_channels_.begin(), rfcomm_channels_.end());
 }
 
 }  // namespace transport_adapter

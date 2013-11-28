@@ -36,6 +36,7 @@
 
 #include <pulse/simple.h>
 #include <pulse/error.h>
+#include <net/if.h>
 #include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/threads/thread.h"
@@ -48,9 +49,9 @@ namespace media_manager_test {
 log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("media_manager_impl"));
 
 class MediaManagerTest : public ::testing::Test {
- protected:
-  virtual void SetUp();
-  virtual void TearDown();
+  protected:
+    virtual void SetUp();
+    virtual void TearDown();
 };
 
 void MediaManagerTest::SetUp() {
@@ -61,24 +62,24 @@ void MediaManagerTest::TearDown() {
 
 TEST_F(MediaManagerTest, RecordMicrophoneStream) {
   media_manager::MediaManager* mediaManager =
-      media_manager::MediaManagerImpl::getMediaManager();
+    media_manager::MediaManagerImpl::instance();
 
   //mediaManager->startMicrophoneRecording(std::string("record.wav"),
   //                   mobile_apis::SamplingRate::SamplingRate_44KHZ,
   //                                                               5,
   //                mobile_apis::BitsPerSample::BitsPerSample_16_BIT);
 
-  usleep(40000000);
+  /*usleep(40000000);
 
   // Sleep for 15 sec
   usleep(15000000);
 
-  mediaManager->stopMicrophoneRecording();
+  mediaManager->stopMicrophoneRecording();*/
 }
 
 TEST_F(MediaManagerTest, AddAndPlayStream) {
   media_manager::MediaManager* mediaManager =
-      media_manager::MediaManagerImpl::getMediaManager();
+    media_manager::MediaManagerImpl::instance();
 
   sockaddr device, device_one, device_two;
 
@@ -89,17 +90,17 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
   device_one.sa_data[4] = 0xb4;
   device_one.sa_data[5] = 0x5d;
 
-  device_two.sa_data[0] = 0x38;
-  device_two.sa_data[1] = 0xe7;
-  device_two.sa_data[2] = 0xd8;
-  device_two.sa_data[3] = 0x45;
-  device_two.sa_data[4] = 0x48;
-  device_two.sa_data[5] = 0x27;
+  device_two.sa_data[0] = 0x18;
+  device_two.sa_data[1] = 0x87;
+  device_two.sa_data[2] = 0x96;
+  device_two.sa_data[3] = 0x05;
+  device_two.sa_data[4] = 0xe4;
+  device_two.sa_data[5] = 0x08;
 
   device = device_two;
 
-  mediaManager->addA2DPSource(device);
-  mediaManager->playA2DPSource(device);
+  mediaManager->PlayA2DPSource(1);
+  // mediaManager->playA2DPSource(1);
 
   LOG4CXX_TRACE(logger, ".Playing stream");
   while (true) {
@@ -109,28 +110,28 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   usleep(10000000);
 
-  mediaManager->removeA2DPSource(device);
+  mediaManager->StopA2DPSource(1);
 
   usleep(10000000);
 
-  mediaManager->addA2DPSource(device);
-  mediaManager->playA2DPSource(device);
+  mediaManager->PlayA2DPSource(1);
+  // mediaManager->playA2DPSource(1);
 
   usleep(10000000);
 
-  mediaManager->stopA2DPSource(device);
+  mediaManager->StopA2DPSource(1);
 
   usleep(10000000);
 
-  mediaManager->playA2DPSource(device);
+  mediaManager->PlayA2DPSource(1);
 
   usleep(10000000);
 
-  mediaManager->stopA2DPSource(device);
+  mediaManager->StopA2DPSource(1);
 
   usleep(10000000);
 
-  mediaManager->removeA2DPSource(device);
+  mediaManager->StopA2DPSource(1);
 }
 
 }  //  namespace media_manager_test

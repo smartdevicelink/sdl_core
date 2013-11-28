@@ -281,8 +281,8 @@ namespace NsSmartDeviceLink
             if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;
             if(false == object[strings::S_PARAMS].keyExists(strings::S_FUNCTION_ID)) return false;
 
-            MessageTypeEnum msgtype((MessageTypeEnum)(int)object[strings::S_PARAMS][strings::S_MESSAGE_TYPE]);
-            FunctionIdEnum fid((FunctionIdEnum)(int)object[strings::S_PARAMS][strings::S_FUNCTION_ID]);
+            MessageTypeEnum msgtype((MessageTypeEnum)object[strings::S_PARAMS][strings::S_MESSAGE_TYPE].asInt());
+            FunctionIdEnum fid((FunctionIdEnum)object[strings::S_PARAMS][strings::S_FUNCTION_ID].asInt());
 
             SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(fid, msgtype);
 

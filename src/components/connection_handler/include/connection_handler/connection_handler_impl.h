@@ -194,7 +194,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id = 0,
-                                    std::list<int>* sessions_list = 0,
+                                    std::list<int>* sessions_list = NULL,
                                     unsigned int* device_id = 0);
 
     /**
@@ -206,8 +206,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
-                                  std::string* device_name,
-                                  std::list<unsigned int>* applications_list);
+                                  std::string* device_name = NULL,
+                                  std::list<unsigned int>* applications_list = NULL,
+                                  std::string* mac_address = NULL);
 
     /**
      * \brief Sets pointer to TransportManager.

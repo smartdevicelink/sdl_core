@@ -5,6 +5,15 @@ cmake_policy(SET CMP0015 NEW)
 link_directories(../thirdPartyLibs/libusbx)
 cmake_policy(POP)
 
+if (DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+${GSTREAMER_gst_INCLUDE_DIR}
+)
+else(DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+)
+endif()
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -36,11 +45,6 @@ set(LIBRARIES
   aprutil-1
 )
 
-# required to find 'glibconfig.h'
-#find_package(PkgConfig)
-#pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-#add_definitions(${GLIB2_CFLAGS})
-
 include_directories (
   ./
   ../components/protocol_handler/include/
@@ -62,8 +66,8 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   #/usr/lib/i386-linux-gnu/glib-2.0/include
   #/usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  #${GSTREAMER_gst_INCLUDE_DIR}
   #${GLIB_glib_2_INCLUDE_DIR}
+  ${default_media_inc}
 )
 
 set (SOURCES

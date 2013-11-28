@@ -2613,5 +2613,10 @@ public class SyncProxyALMManager {
         public void onRegisterAppRequest(RegisterAppInterface msg) {
 
         }
+
+        @Override
+        public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+
+        }
     }
 }

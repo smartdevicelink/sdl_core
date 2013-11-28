@@ -54,7 +54,7 @@ void ShowConstantTBTRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -74,7 +74,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+      MessageHelper::ProcessSoftButtons(msg_params, app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     if (mobile_apis::Result::INVALID_DATA == processing_result) {
@@ -89,7 +89,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+      MessageHelper::VerifyImageFiles(msg_params, app);
 
   if (mobile_apis::Result::SUCCESS != verification_result) {
     if (mobile_apis::Result::INVALID_DATA == verification_result) {

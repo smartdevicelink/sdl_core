@@ -45,74 +45,36 @@
 
 namespace application_manager {
 
-const VehicleData MessageHelper::vehicle_data_ = { {
-    strings::gps,
-    VehicleDataType::GPS
-  }, { strings::speed, VehicleDataType::SPEED }, {
-    strings::rpm, VehicleDataType::RPM
-  }, {
-    strings::fuel_level,
-    VehicleDataType::FUELLEVEL
-  }, {
-    strings::fuel_level_state,
-    VehicleDataType::FUELLEVEL_STATE
-  }, {
-    strings::instant_fuel_consumption,
-    VehicleDataType::FUELCONSUMPTION
-  }, {
-    strings::external_temp,
-    VehicleDataType::EXTERNTEMP
-  }, { strings::vin, VehicleDataType::VIN }, {
-    strings::prndl, VehicleDataType::PRNDL
-  }, {
-    strings::tire_pressure,
-    VehicleDataType::TIREPRESSURE
-  }, {
-    strings::odometer,
-    VehicleDataType::ODOMETER
-  }, {
-    strings::belt_status,
-    VehicleDataType::BELTSTATUS
-  }, {
-    strings::body_information,
-    VehicleDataType::BODYINFO
-  }, {
-    strings::device_status,
-    VehicleDataType::DEVICESTATUS
-  }, {
-    strings::e_call_info,
-    VehicleDataType::ECALLINFO
-  }, {
-    strings::airbag_status,
-    VehicleDataType::AIRBAGSTATUS
-  }, {
-    strings::emergency_event,
-    VehicleDataType::EMERGENCYEVENT
-  }, {
-    strings::cluster_mode_status,
-    VehicleDataType::CLUSTERMODESTATUS
-  }, {
-    strings::my_key,
-    VehicleDataType::MYKEY
-  }, {
-    strings::driver_braking,
-    VehicleDataType::BRAKING
-  }, {
-    strings::wiper_status,
-    VehicleDataType::WIPERSTATUS
-  }, {
-    strings::head_lamp_status,
-    VehicleDataType::HEADLAMPSTATUS
-  },
+const VehicleData MessageHelper::vehicle_data_ =
+{ {strings::gps, VehicleDataType::GPS},
+  {strings::speed, VehicleDataType::SPEED },
+  {strings::rpm, VehicleDataType::RPM},
+  {strings::fuel_level, VehicleDataType::FUELLEVEL},
+  {strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE},
+  {strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION},
+  {strings::external_temp, VehicleDataType::EXTERNTEMP},
+  {strings::vin, VehicleDataType::VIN },
+  {strings::prndl, VehicleDataType::PRNDL},
+  {strings::tire_pressure, VehicleDataType::TIREPRESSURE},
+  {strings::odometer, VehicleDataType::ODOMETER},
+  {strings::belt_status, VehicleDataType::BELTSTATUS},
+  {strings::body_information, VehicleDataType::BODYINFO},
+  {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::e_call_info, VehicleDataType::ECALLINFO},
+  {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
+  {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
+  {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
+  {strings::my_key, VehicleDataType::MYKEY},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},
    */
-  { strings::engine_torque, VehicleDataType::ENGINETORQUE }, {
-    strings::acc_pedal_pos, VehicleDataType::ACCPEDAL
-  }, {
-    strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL
-  },
+  {strings::engine_torque, VehicleDataType::ENGINETORQUE },
+  {strings::acc_pedal_pos, VehicleDataType::ACCPEDAL},
+  {strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL},
 };
 
 void MessageHelper::SendHMIStatusNotification(
@@ -481,7 +443,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
       if ((*it_app)->vr_synonyms()) {
         smart_objects::SmartObject item(smart_objects::SmartType_Map);
         item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(0);
-        item[strings::position] = index;
+        item[strings::position] = index + 1;
         vr_help[strings::vr_help][index++] = item;
       }
     }
@@ -494,7 +456,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
       item[strings::text] =
         (*it->second)[strings::vr_commands][0].asString();
-      item[strings::position] = index;
+      item[strings::position] = index + 1;
       vr_help[strings::vr_help][index++] = item;
     }
   }
@@ -528,7 +490,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
     for (int i = 0; i < help_size; ++i) {
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
       item[strings::text] = (*vr_commands_array).getElement(i);
-      item[strings::position] = i;
+      item[strings::position] = i + 1;
 
       ui_msg_params[strings::vr_help][i++] = item;
     }
@@ -542,7 +504,7 @@ void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
       if ((*it)->vr_synonyms()) {
         smart_objects::SmartObject item(smart_objects::SmartType_Map);
         item[strings::text] = (*((*it)->vr_synonyms())).getElement(0);
-        item[strings::position] = i;
+        item[strings::position] = i + 1;
         ui_msg_params[strings::vr_help][i++] = item;
       }
     }
@@ -1153,7 +1115,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image, const Application* app) {
-  const std::string& file_name = image[strings::value];
+  const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
   str.erase(remove(str.begin(), str.end(), ' '), str.end());
@@ -1184,15 +1146,13 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
 
 bool MessageHelper::VerifySoftButtonText
 (smart_objects::SmartObject& soft_button) {
-  if (soft_button.keyExists(strings::text)) {
-    std::string text = soft_button[strings::text].asString();
-    text.erase(remove(text.begin(), text.end(), ' '), text.end());
-    text.erase(remove(text.begin(), text.end(), '\n'), text.end());
-    if (text.size()) {
-      return true;
-    } else {
-      soft_button.erase(strings::text);
-    }
+  std::string text = soft_button[strings::text].asString();
+  text.erase(remove(text.begin(), text.end(), ' '), text.end());
+  text.erase(remove(text.begin(), text.end(), '\n'), text.end());
+  if (text.size()) {
+    return true;
+  } else {
+    soft_button.erase(strings::text);
   }
 
   return false;
@@ -1243,13 +1203,21 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
+        if (!request_soft_buttons[i].keyExists(strings::text)) {
+          return mobile_apis::Result::INVALID_DATA;
+        }
+
         if (!VerifySoftButtonText(request_soft_buttons[i])) {
           continue;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+        bool text_exist = false;
+
+        if (request_soft_buttons[i].keyExists(strings::text)) {
+          text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+        }
 
         bool image_exist = false;
         if (image_supported) {
@@ -1305,13 +1273,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 // TODO(VS): change printf to logger
 bool MessageHelper::VerifyApplicationName(
   smart_objects::SmartObject& msg_params) {
-  for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-    const std::string& tts_name = msg_params[strings::tts_name][i].asString();
-    if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-        ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-      printf("Invalid characters in tts name.\n");
-      return false;
-    }
+
+  if (msg_params.keyExists(strings::tts_name)) {
+    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
+        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
+        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
+            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+          printf("Invalid characters in tts name.\n");
+          return false;
+        }
+      }
   }
 
   const std::string& name = msg_params[strings::app_name].asString();

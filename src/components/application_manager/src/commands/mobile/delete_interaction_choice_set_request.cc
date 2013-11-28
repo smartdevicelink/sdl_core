@@ -53,7 +53,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");

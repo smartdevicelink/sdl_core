@@ -35,7 +35,7 @@
 #endif
 
 #include <string>
-#include "media_manager/audio_stream_sender_thread.h"
+#include "./audio_stream_sender_thread.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
@@ -54,10 +54,8 @@ log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("AudioPassThruThread"));
 
 AudioStreamSenderThread::AudioStreamSenderThread(
-  const std::string fileName, unsigned int session_key,
-  unsigned int correlation_id)
+  const std::string fileName, unsigned int session_key)
   : session_key_(session_key),
-    correlation_id_(correlation_id),
     fileName_(fileName) {
   LOG4CXX_TRACE_ENTER(logger_);
   stopFlagMutex_.init();
@@ -129,7 +127,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     offset_ = offset_ + to - from;
 
     application_manager::ApplicationManagerImpl::instance()->
-    SendAudioPassThroughNotification(session_key_, correlation_id_,
+    SendAudioPassThroughNotification(session_key_,
                                      std::vector<unsigned char>(from, to));
     binaryData.clear();
   }
@@ -146,10 +144,6 @@ bool AudioStreamSenderThread::exitThreadMain() {
 
 unsigned int AudioStreamSenderThread::session_key() const {
   return session_key_;
-}
-
-unsigned int AudioStreamSenderThread::correlation_id() const {
-  return correlation_id_;
 }
 
 }  // namespace media_manager

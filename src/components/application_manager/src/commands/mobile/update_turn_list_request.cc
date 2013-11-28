@@ -55,7 +55,7 @@ void UpdateTurnListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateTurnListRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -151,6 +151,7 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
   if (!(*message_)[strings::msg_params].keyExists(strings::turn_list)) {
     return false;
   }
+
   int length = (*message_)[strings::msg_params][strings::turn_list].length();
   if (0 == length) {
     return false;

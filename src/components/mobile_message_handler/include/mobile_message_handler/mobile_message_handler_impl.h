@@ -56,6 +56,7 @@ class MobileMessageHandlerImpl : public MobileMessageHandler,
 
     void set_protocol_handler(protocol_handler::ProtocolHandler* protocolHandler);
     void OnMessageReceived(const protocol_handler::RawMessagePtr& message);
+    void OnMobileMessageSent(const protocol_handler::RawMessagePtr& message);
     void SendMessageToMobileApp(const MobileMessage& message);
 
     void AddMobileMessageListener(MobileMessageObserver* listener);

@@ -43,6 +43,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @param transportConfig Transport configuration for this connection.
      */
     public SyncConnection(ISyncConnectionListener listener, BaseTransportConfig transportConfig) {
+        this(listener, transportConfig, null);
+    }
+
+    public SyncConnection(ISyncConnectionListener listener,
+                          BaseTransportConfig transportConfig,
+                          SyncTransport transport) {
         _connectionListener = listener;
 
         // Initialize the transport
@@ -55,20 +61,24 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _transport = null;
             }
 
-            switch (transportConfig.getTransportType()) {
-                case BLUETOOTH:
-                    _transport = new BTTransport(this);
-                    break;
+            if (transport != null) {
+                _transport = transport;
+            } else {
+                switch (transportConfig.getTransportType()) {
+                    case BLUETOOTH:
+                        _transport = new BTTransport(this);
+                        break;
 
-                case TCP:
-                    _transport = new TCPTransport(
-                            (TCPTransportConfig) transportConfig, this);
-                    break;
+                    case TCP:
+                        _transport = new TCPTransport(
+                                (TCPTransportConfig) transportConfig, this);
+                        break;
 
-                case USB:
-                    _transport = new USBTransport(
-                            (USBTransportConfig) transportConfig, this);
-                    break;
+                    case USB:
+                        _transport = new USBTransport(
+                                (USBTransportConfig) transportConfig, this);
+                        break;
+                }
             }
         }
 
@@ -93,24 +103,28 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void closeConnection(byte rpcSessionID) {
+    public void closeConnection(byte rpcSessionID, boolean keepConnection) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (_transport != null && _transport.getIsConnected()) {
                     _protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
                 }
-                _protocol = null;
+                if (!keepConnection) {
+                    _protocol = null;
+                }
             } // end-if
         }
 
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             stopH264();
 
-            if (_transport != null) {
-                _transport.disconnect();
+            if (!keepConnection) {
+                if (_transport != null) {
+                    _transport.disconnect();
+                }
+                _transport = null;
             }
-            _transport = null;
         }
     }
 

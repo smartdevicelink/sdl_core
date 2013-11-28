@@ -82,7 +82,6 @@ TransportManagerDefault* TransportManagerDefault::Instance() {
     pthread_mutex_lock(&tm_default_instance_mutex);
     if (tm_default_instance == NULL) {
       tm_default_instance = new TransportManagerDefault(default_config_);
-      tm_default_instance->Init();
     }
     pthread_mutex_unlock(&tm_default_instance_mutex);
   }

@@ -113,7 +113,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
-  MessageBrokerController::subscribeTo("UI.OnTBTClientState");
+  MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 

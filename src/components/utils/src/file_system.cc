@@ -175,13 +175,18 @@ bool file_system::Write(
 }
 
 std::string file_system::FullPath(const std::string& file) {
-  char currentAppPath[FILENAME_MAX];
-  memset(currentAppPath, 0, FILENAME_MAX);
-  getcwd(currentAppPath, FILENAME_MAX);
+  // FILENAME_MAX defined stdio_lim.h was replaced with less value
+  // since it seems, that is caused overflow in some cases
+  // TODO(AO): Will be checked during release testing
 
-  char path[FILENAME_MAX];
-  memset(path, 0, FILENAME_MAX);
-  snprintf(path, FILENAME_MAX - 1, "%s/%s", currentAppPath, file.c_str());
+  size_t filename_max_lenght = 1024;
+  char currentAppPath[filename_max_lenght];
+  memset(currentAppPath, 0, filename_max_lenght);
+  getcwd(currentAppPath, filename_max_lenght);
+
+  char path[filename_max_lenght];
+  memset(path, 0, filename_max_lenght);
+  snprintf(path, filename_max_lenght - 1, "%s/%s", currentAppPath, file.c_str());
   return std::string(path);
 }
 
@@ -317,4 +322,37 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
   ss << file.rdbuf();
   result = ss.str();
   return true;
+}
+
+const std::string file_system::ConvertPathForURL(const std::string& path) {
+  std::string::const_iterator it_path = path.begin();
+  std::string::const_iterator it_path_end = path.end();
+
+  const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
+  std::string::const_iterator it_sym = reserved_symbols.begin();
+  std::string::const_iterator it_sym_end = reserved_symbols.end();
+
+  std::string converted_path;
+  while(it_path != it_path_end) {
+
+    it_sym = reserved_symbols.begin();
+    for (; it_sym != it_sym_end; ++it_sym) {
+
+      if (*it_path == *it_sym) {
+        char c = *it_path;
+        int value = static_cast<int>(c);
+        std::stringstream ss;
+        ss << std::hex << value;
+        std::string percent_value = "%" + ss.str();
+        converted_path += percent_value;
+        ++it_path;
+        continue;
+      }
+   }
+
+    converted_path += *it_path;
+    ++it_path;
+  }
+
+  return converted_path;
 }

@@ -5,7 +5,7 @@
 add_subdirectory(./transport_manager)
 
 # --- JSONHandler
-# add_subdirectory(./formatters)
+add_subdirectory(./json_handler)
 
 # --- SmartObjects
 add_subdirectory(./smart_objects)
@@ -20,7 +20,7 @@ add_subdirectory(./smart_objects)
 #add_subdirectory(./utils)
 
 # --- Mobile Message Handler
-#add_subdirectory(./mobile_message_handler)
+# add_subdirectory(./mobile_message_handler)
 
 # --- Audio Manager
 #add_subdirectory(./media_manager)

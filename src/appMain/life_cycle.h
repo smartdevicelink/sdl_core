@@ -54,7 +54,6 @@ class LifeCycle {
   public:
     static LifeCycle* instance();
     bool StartComponents();
-
     /**
     * Initialize MessageBroker component
     * @return true if success otherwise false.

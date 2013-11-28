@@ -51,10 +51,12 @@ PerformInteractionRequest::PerformInteractionRequest(
 : CommandRequestImpl(message),
   timer_(this, &PerformInteractionRequest::onTimer),
   is_keyboard_trigger_source_(false),
-  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM){
+  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM),
+  is_vr_help_item_(false) {
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
+  subscribe_on_event(hmi_apis::FunctionID::UI_ShowVrHelp);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -84,7 +86,7 @@ void PerformInteractionRequest::Run() {
   //timer_.start(2);
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -170,7 +172,6 @@ void PerformInteractionRequest::Run() {
       // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(correlation_id);
       SendVRAddCommandRequest(app);
-      SendUIShowVRHelpRequest(app);
       break;
     }
     default: {
@@ -200,12 +201,28 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_,"Received UI_PerformInteraction event");
-      if(is_keyboard_trigger_source_) {
+      if (is_keyboard_trigger_source_) {
         trigger_source_ = mobile_apis::TriggerSource::TS_KEYBOARD;
       } else {
         trigger_source_ = mobile_apis::TriggerSource::TS_MENU;
       }
       ProcessPerformInteractionResponse(event.smart_object());
+      break;
+    }
+    case hmi_apis::FunctionID::UI_ShowVrHelp: {
+      LOG4CXX_INFO(logger_,"Received UI_ShowVrHelp event");
+      int mode =
+          (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+      Application* app = ApplicationManagerImpl::instance()->application(
+          connection_key());
+      if (app && (InteractionMode::BOTH == mode
+          || InteractionMode::VR_ONLY == mode)) {
+        is_vr_help_item_ = true;
+        SendUIShowVRHelpRequest(app);
+      } else if (app) {
+        is_vr_help_item_ = true;
+        MessageHelper::SendShowVrHelpToHMI(app);
+      }
       break;
     }
     default: {
@@ -215,12 +232,21 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void PerformInteractionRequest::onTimeOut() const {
+void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
   Application* app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key]);
+        (*message_)[strings::params][strings::connection_key].asUInt());
   if (app) {
+    if(is_vr_help_item_) {
+      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
+      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+    }
+    SendVrDeleteCommand(app);
     app->set_perform_interaction_active(0);
+    app->set_perform_interaction_mode(-1);
+    app->DeletePerformInteractionChoiceSetMap();
   }
   CommandRequestImpl::onTimeOut();
 }
@@ -255,10 +281,11 @@ void PerformInteractionRequest::ProcessVRNotification(
     }
     if (choice_id_chosen) {
       LOG4CXX_INFO(logger_, "Command was choice id!");
-      SendVrDeleteCommand (app);
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-                smart_objects::SmartType_Map);
+          smart_objects::SmartType_Map);
+      c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
       SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+      SendVrDeleteCommand (app);
       app->set_perform_interaction_mode(-1);
       app->DeletePerformInteractionChoiceSetMap();
       app->set_perform_interaction_active(0);
@@ -316,12 +343,18 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
   Application* app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key]);
+        (*message_)[strings::params][strings::connection_key].asUInt());
     if (NULL == app) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
     if (app->is_perform_interaction_active()) {
+      if(is_vr_help_item_) {
+        smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+        c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
+        SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+      }
       if (mobile_apis::InteractionMode::MANUAL_ONLY
           != app->perform_interaction_mode()) {
         SendVrDeleteCommand (app);
@@ -476,7 +509,7 @@ void PerformInteractionRequest::SendUIShowVRHelpRequest(
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
             item[strings::text] = vr_commands[0].asString();
-            item[strings::position] = index;
+            item[strings::position] = index + 1;
             msg_params[strings::vr_help][index++] = item;
           }
         }

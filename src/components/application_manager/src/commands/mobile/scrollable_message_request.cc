@@ -72,7 +72,7 @@ void ScrollabelMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
 
   Application* app = application_manager::ApplicationManagerImpl::instance()
-      ->application((*message_)[strings::params][strings::connection_key]);
+      ->application((*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");

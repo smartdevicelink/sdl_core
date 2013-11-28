@@ -46,7 +46,7 @@
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 //#include "media_manager/media_manager_impl.h"
-
+#include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 
@@ -65,6 +65,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -110,6 +111,7 @@ typedef std::map<unsigned int, MobileRequest> MessageChain;
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public mobile_message_handler::MobileMessageObserver,
+  public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
   public HMICapabilities {
   public:
@@ -220,18 +222,18 @@ class ApplicationManagerImpl : public ApplicationManager,
       const unsigned int& hmi_correlation_id) const;
 
     /*
-     * @brief Retrieves flag for audio pass thru request
+     * @brief Starts audio passthru process
      *
-     * @return Current state of the audio pass thru request flag
+     * @return true on success, false if passthru is already in process
      */
-    bool audio_pass_thru_flag() const;
+    bool begin_audio_pass_thru();
 
     /*
-     * @brief Sets flag for audio pass thru request
+     * @brief Finishes already started audio passthru process
      *
-     * @param flag New state to be set
+     * @return true on success, false if passthru is not active
      */
-    void set_audio_pass_thru_flag(bool flag);
+    bool end_audio_pass_thru();
 
     /*
      * @brief Retrieves driver distraction state
@@ -341,11 +343,12 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /*
      * @brief Terminates audio pass thru thread
+     * @param application_key Id of application for which
+     * audio pass thru should be stopped
      */
-    void StopAudioPassThru();
+    void StopAudioPassThru(int application_key);
 
     void SendAudioPassThroughNotification(unsigned int session_key,
-                                          unsigned int correlation_id,
                                           std::vector<unsigned char> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
@@ -383,6 +386,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      */
     virtual void OnMobileMessageReceived(const MobileMessage& message);
+
+
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
+    virtual void OnMessageReceived(const protocol_handler::
+                                   RawMessagePtr& message);
+
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
+    virtual void OnMobileMessageSent(const protocol_handler::
+                                     RawMessagePtr& message);
 
     void OnMessageReceived(
       utils::SharedPtr<application_manager::Message> message);
@@ -481,7 +497,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::list<CommandSharedPtr> notification_list_;
 
     MessageChain message_chaining_;
-    bool audio_pass_thru_flag_;
+    bool audio_pass_thru_active_;
+    sync_primitives::Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
     bool is_vr_session_strated_;
     bool hmi_cooperating_;

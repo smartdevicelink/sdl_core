@@ -94,29 +94,20 @@ bool LifeCycle::StartComponents() {
   mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
-  //media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
+//media_manager_ = media_manager::MediaManagerImpl::instance();
 
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(mmh_);
   //protocol_handler_->AddProtocolObserver(media_manager_);
-  // media_manager_->SetProtocolHandler(protocol_handler_);
-
-  // media_manager::MediaManagerImpl::getMediaManager()->setVideoRedecoder(NULL);
-
+  protocol_handler_->AddProtocolObserver(app_manager_);
 /*
-  if ("socket" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
-       new media_manager::video_stream_producer_consumer::SocketVideoServer());
-  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
-       new media_manager::video_stream_producer_consumer::PipeVideoServer());
-  }
   */
-
-  // TODO(PV): add media manager
-
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
+
+  // It's important to initialise TM after setting up listener chain
+  // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  transport_manager_->Init();
 
   app_manager_->set_mobile_message_handler(mmh_);
   mmh_->AddMobileMessageListener(app_manager_);
@@ -226,11 +217,12 @@ void LifeCycle::StopComponents(int params) {
   instance()->transport_manager_->SetProtocolHandler(NULL);
   instance()->transport_manager_->RemoveEventListener(
     instance()->protocol_handler_);
-  // instance()->media_manager_->SetProtocolHandler(NULL);
-  delete instance()->protocol_handler_;
-  // delete instance()->media_manager_;
 
-  LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
+  delete instance()->protocol_handler_;
+  //instance()->media_manager_->~MediaManagerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");

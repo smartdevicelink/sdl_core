@@ -71,15 +71,9 @@ void SliderResponse::Run() {
     const int code = (*message_)[strings::params][hmi_response::code].asInt();
     if ((mobile_apis::Result::SUCCESS == code) ||
         (mobile_apis::Result::ABORTED == code)) {
+
       SendResponse(true);
     } else {
-      const unsigned int correlation_id =
-          (*message_)[strings::params][strings::correlation_id].asUInt();
-
-      MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-          ->GetMessageChain(correlation_id);
-
-      const smart_objects::SmartObject& request_params = msg_chain->data();
 
       (*message_)[strings::msg_params][strings::slider_position] =
           request_params.getElement(

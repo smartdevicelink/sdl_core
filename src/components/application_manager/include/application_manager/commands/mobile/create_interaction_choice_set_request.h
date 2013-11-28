@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -68,31 +69,55 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
  private:
 
   /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
+   * @brief Checks incoming choiseSet params.
+   * @param app Registred mobile application
    *
-   * return Return TRUE if there are no similar menu names in choice set,
-   * otherwise FALSE
+   * @return Mobile result code
    */
-  bool CheckChoiceSetMenuNames();
+  mobile_apis::Result::eType CheckChoiceSet(const Application* app);
+
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare with ChoiceSetID
+  *
+  * return TRUE if there is coincidence of choice set ID, otherwise FALSE
+  */
+  struct CoincidencePredicateChoiceSetID {
+    explicit CoincidencePredicateChoiceSetID(const unsigned int newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::choice_id].asInt() == newItem_;
+    };
+
+    const unsigned int newItem_;
+  };
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
    *
-   * return Return TRUE if there are no similar VR synonyms in choice set,
+   * @param choice1  Choice to compare
+   * @param choice2  Choice to compare
+   *
+   * return Return TRUE if there are similar VR synonyms in choice set,
    * otherwise FALSE
-   */
-  bool CheckChoiceSetVRSynonyms();
+  */
+  bool compareSynonyms(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2);
 
   /*
-   * @brief Checks if incoming choiceSet doesn't have duplicated choice ID's
-   * and Choice ID doesn't exist in application choiceSet map
+   * @brief Checks VR synonyms ignoring differences in case.
    *
-   *@param app Registred mobile application
+   * @param str1 VR synonym to compare
+   * @param str2 VR synonym to compare
    *
-   * return Return TRUE if there are no similar choice ID in choice set,
+   * return Return TRUE if there are similar VR synonyms in choice set,
    * otherwise FALSE
-   */
-  bool CheckChoiceID(const Application* app);
+  */
+  static bool compareStr(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };

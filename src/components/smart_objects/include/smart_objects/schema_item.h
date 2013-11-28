@@ -91,6 +91,8 @@ namespace NsSmartDeviceLink
             virtual void BuildObjectBySchema(
               const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
               NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+
+            virtual ~ISchemaItem() {}
         };
     }
 }

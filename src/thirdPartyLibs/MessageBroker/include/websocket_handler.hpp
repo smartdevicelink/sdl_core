@@ -122,6 +122,14 @@ namespace NsMessageBroker
       rawBytes handshake_hybi00(const std::string &key1, const std::string &key2, const rawBytes &key3);
 
       /**
+      * \brief Parses WebSocket data header to retrieve packet size
+      * \param Buffer input buffer
+      * \param b_size buffer size
+      * \return Packet size
+      */
+      unsigned int parseWebSocketDataLength(const char* Buffer, unsigned int& b_size);
+
+      /**
       * \brief Parses WebSocket data
       * \param Buffer input buffer
       * \param b_size buffer size
@@ -135,7 +143,7 @@ namespace NsMessageBroker
       * \param b_size buffer size
       * \return -1 in case of issues, data length in case of success
       */
-      int prepareWebSocketDataHeader(char* Buffer, unsigned long b_size);
+      int prepareWebSocketDataHeader(unsigned char* Buffer, unsigned long b_size);
    private:
       /**
       * \brief SHA1 hash calculator.

@@ -31,7 +31,6 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
@@ -181,14 +180,6 @@ class SmartObject {
   explicit SmartObject(int InitialValue);
 
   /**
-   * @brief Conversion operator to type: int
-   *
-   * @return int Value of the object converted to int type or invalid_int_value if
-   *         conversion is not possible
-   **/
-  operator int() const;
-
-  /**
    * @brief Returns current object converted to int
    *
    * @return int
@@ -218,14 +209,6 @@ class SmartObject {
    * @param InitialValue Initial object value
    **/
   explicit SmartObject(unsigned int InitialValue);
-
-  /**
-   * @brief Conversion operator to type: int
-   *
-   * @return unsigned int Value of the object converted to int type or invalid_int_value if
-   *         conversion is not possible
-   **/
-  operator unsigned int(void) const;
 
   /**
    * @brief Returns current object converted to unsigned int int
@@ -264,14 +247,6 @@ class SmartObject {
   explicit SmartObject(double InitialValue);
 
   /**
-   * @brief Conversion operator to type: double
-   *
-   * @return double Value of the object converted to double type or invalid_double_value if
-   *         conversion is not possible
-   **/
-  operator double() const;
-
-  /**
    * @brief Returns current object converted to double
    *
    * @return double
@@ -305,14 +280,6 @@ class SmartObject {
    * @param InitialValue Initial object value
    **/
   explicit SmartObject(bool InitialValue);
-
-  /**
-   * @brief Conversion operator to type: bool
-   *
-   * @return bool Value of the object converted to bool type or invalid_bool_value if
-   *         conversion is not possible
-   **/
-  operator bool() const;
 
   /**
    * @brief Returns current object converted to bool
@@ -355,8 +322,7 @@ class SmartObject {
    * @return char Value of the object converted to bool type or invalid_char_value if
    *         conversion is not possible
    **/
-  operator char() const;
-
+  // operator char() const;
   /**
    * @brief Returns current object converted to char
    *
@@ -405,8 +371,7 @@ class SmartObject {
    * @return std::string Value of the object converted to bool type or invalid_string_value if
    *         conversion is not possible
    **/
-  operator std::string(void) const;
-
+  // operator std::string(void) const;
   /**
    * @brief Returns current object converted to string
    *
@@ -464,14 +429,20 @@ class SmartObject {
    * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
    *         conversion is not possible
    **/
-  operator SmartBinary(void) const;
-
+  // operator SmartBinary(void) const;
   /**
    * @brief Returns current object converted to binary
    *
    * @return SmartBinary
    **/
   SmartBinary asBinary() const;
+
+  /**
+   * @brief Returns current object converted to array
+   *
+   * @return SmartArray
+   **/
+  SmartArray* asArray() const;
 
   /**
    * @brief Assignment operator for type: binary
@@ -675,14 +646,14 @@ class SmartObject {
    *
    * @return int Converted value or invalid_int_value if conversion not possible
    **/
-  inline int convert_int(void) const;
+  inline int convert_int() const;
 
   /**
    * @brief Converts object to int type
    *
    * @return int Converted value or invalid_int_value if conversion not possible
    **/
-  inline unsigned int convert_unsigned_int(void) const;
+  inline unsigned int convert_unsigned_int() const;
   /** @} */
 
   /**
@@ -704,7 +675,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_char_value if conversion not possible
    **/
-  inline char convert_char(void) const;
+  inline char convert_char() const;
   /** @} */
 
   /**
@@ -726,7 +697,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_double_value if conversion not possible
    **/
-  inline double convert_double(void) const;
+  inline double convert_double() const;
   /** @} */
 
   /**
@@ -748,7 +719,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_bool_value if conversion not possible
    **/
-  inline bool convert_bool(void) const;
+  inline bool convert_bool() const;
   /** @} */
 
   /**
@@ -780,7 +751,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_string_value if conversion not possible
    **/
-  inline std::string convert_string(void) const;
+  inline std::string convert_string() const;
   /** @} */
 
   /**
@@ -802,7 +773,7 @@ class SmartObject {
    *
    * @return int Converted value or invalid_binary_value if conversion not possible
    **/
-  inline SmartBinary convert_binary(void) const;
+  inline SmartBinary convert_binary() const;
   /** @} */
 
   /**
@@ -898,8 +869,8 @@ class SmartObject {
     double double_value;
     bool bool_value;
     char char_value;
-    // int int_value;
-    unsigned int unsigned_int_value;
+    int int_value;
+    // unsigned int unsigned_int_value;
     std::string* str_value;
     SmartArray* array_value;
     SmartMap* map_value;
@@ -926,6 +897,7 @@ static const bool invalid_bool_value = false;
  * @brief Value that is used as invalid value for int type
  **/
 static const int invalid_int_value = -1;
+static const int invalid_unsigned_int_value = 0;
 
 /**
  * @brief Value that is used as invalid value for char type
@@ -956,6 +928,8 @@ static SmartObject invalid_object_value(SmartType_Invalid);
  * @brief Value that is used as invalid value for object type
  **/
 static const SmartBinary invalid_binary_value;
-}
-}
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_

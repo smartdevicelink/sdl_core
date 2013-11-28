@@ -23,8 +23,17 @@ set (LIBRARIES
     gmock
     gmock_main
     MediaManager
+    ApplicationManager
+    connectionHandler
+    SmartObjects
+    Utils
     ${GSTREAMER_gstreamer_LIBRARY}
+    pulse-simple
+    ConfigProfile
+    formatters
+    jsoncpp
+    log4cxx
 )
 
-#create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
-add_library("test_MediaManagerTest" "${SOURCES}")
+create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
+#add_library("test_MediaManagerTest" "${SOURCES}")

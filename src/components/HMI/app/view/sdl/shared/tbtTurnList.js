@@ -83,7 +83,8 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
                 this.get('tbtTurnListList.list.childViews').pushObject(SDL.Label.create({
                         icon        : turnListArray[i].turnIcon ? turnListArray[i].turnIcon.value : "",
                         content     : turnListArray[i].navigationText ? turnListArray[i].navigationText.fieldText : "",
-                        classNames  : 'list-item'
+                        classNames  : 'list-item',
+                        templateName: turnListArray[i].turnIcon ? 'icon' : ''
                     }));
             }
             if (SDL.SDLController.getApplicationModel(appID).turnListSoftButtons) {

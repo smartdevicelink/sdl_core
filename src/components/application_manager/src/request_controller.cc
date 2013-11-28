@@ -119,7 +119,7 @@ void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
 
   list_mutex_.lock();
 
-  const commands::CommandRequestImpl* request_impl = NULL;
+  commands::CommandRequestImpl* request_impl = NULL;
   std::list<Request>::iterator it = request_list_.begin();
   for (; request_list_.end() != it; ++it) {
     request_impl = (static_cast<commands::CommandRequestImpl*>(&(*(*it))));

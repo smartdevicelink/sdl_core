@@ -33,12 +33,13 @@
 
 #include <string.h>
 #include <string>
+#include <algorithm>
+#include <vector>
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -57,7 +58,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -81,125 +82,118 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
   }
 
-  const int choise_set_id =
-      (*message_)[strings::msg_params]
-                  [strings::interaction_choice_set_id].asInt();
+  const int choice_set_id = (*message_)[strings::msg_params]
+      [strings::interaction_choice_set_id].asInt();
 
-  if (app->FindChoiceSet(choise_set_id) || false == CheckChoiceID(app)) {
+  if (app->FindChoiceSet(choice_set_id)) {
     LOG4CXX_ERROR(logger_, "Invalid ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
-  if ((false == CheckChoiceSetMenuNames()) ||
-      (false == CheckChoiceSetVRSynonyms())) {
-    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+  mobile_apis::Result::eType result = CheckChoiceSet(app);
+  if (mobile_apis::Result::SUCCESS != result) {
+    SendResponse(false, result);
     return;
   }
-
-  const int choice_set_id = (*message_)[strings::msg_params]
-      [strings::interaction_choice_set_id].asInt();
 
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
 
   SendResponse(true, result_);
 }
 
-bool CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames() {
-  LOG4CXX_INFO(logger_,
-               "CreateInteractionChoiceSetRequest::CheckChoiceSetMenuNames");
+mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
+    const Application* app) {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSet");
+
   smart_objects::SmartObject& choice_set =
       (*message_)[strings::msg_params][strings::choice_set];
+  size_t length = choice_set.length();
 
-  for (size_t i = 0; i < choice_set.length(); ++i) {
-    for (size_t j = i + 1; j < choice_set.length(); ++j) {
+  for (size_t i = 0; i < length; ++i) {
+    for (size_t j = i + 1; j < length; ++j) {
+
+      /* Checks if incoming choice set doesn't has similar menu names. */
       if (choice_set[i][strings::menu_name].asString()
           == choice_set[j][strings::menu_name].asString()) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Incoming choiceset has duplicated menu name "
-                << choice_set[i][strings::menu_name].asString() << " "
-                << choice_set[j][strings::menu_name].asString());
-        return false;
+        LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated menu name "
+                      << choice_set[i][strings::menu_name].asString() << " "
+                      << choice_set[j][strings::menu_name].asString());
+        return mobile_apis::Result::DUPLICATE_NAME;
       }
-    }
-  }
-  return true;
-}
 
-bool CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms() {
-  LOG4CXX_INFO(logger_,
-               "CreateInteractionChoiceSetRequest::CheckChoiceSetVRSynonyms");
-  smart_objects::SmartObject& choice_set =
-      (*message_)[strings::msg_params][strings::choice_set];
-
-  for (size_t i = 0; i < choice_set.length(); ++i) {
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      for (size_t ii = 0; ii < choice_set[i][strings::vr_commands].length();
-          ++ii) {
-        for (size_t jj = 0; jj < choice_set[j][strings::vr_commands].length();
-            ++jj) {
-          if ((i == j) && (ii == jj)) {
-            // skip check the same element
-            continue;
-          }
-          std::string vr_cmd_i = choice_set[i][strings::vr_commands][ii]
-              .asString();
-          std::string vr_cmd_j = choice_set[j][strings::vr_commands][jj]
-              .asString();
-          if (0 == strcasecmp(vr_cmd_i.c_str(), vr_cmd_j.c_str())) {
-            LOG4CXX_ERROR(
-                logger_,
-                "Choice set has duplicated VR synonym " << vr_cmd_i << " and "
-                    << vr_cmd_j);
-            return false;
-          }
-        }
-      }
-    }
-  }
-  return true;
-}
-
-bool CreateInteractionChoiceSetRequest::CheckChoiceID(const Application* app) {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceID");
-  smart_objects::SmartObject& choice_set =
-      (*message_)[strings::msg_params][strings::choice_set];
-
-  // check inside incoming request
-  for (size_t i = 0; i < choice_set.length(); ++i) {
-    for (size_t j = i + 1; j < choice_set.length(); ++j) {
+      /* Checks if incoming choiceSet doesn't have duplicated choice ID's */
       if (choice_set[i][strings::choice_id].asInt()
           == choice_set[j][strings::choice_id].asInt()) {
         LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated choice ID");
-        return false;
+        return mobile_apis::Result::INVALID_ID;
+      }
+
+      if (!compareSynonyms(choice_set[i], choice_set[j])) {
+        return mobile_apis::Result::DUPLICATE_NAME;
       }
     }
-  }
 
-  // check inside SDL application
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return false;
-  }
+    /* Check for the same choice ID along with already registered sets*/
+    const ChoiceSetMap& app_choice_set_map = app->choice_set_map();
+    ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
+    ChoiceSetMap::const_iterator itEnd = app_choice_set_map.end();
+    for (; it != itEnd; ++it) {
+      const smart_objects::SmartObject* app_choice_set = it->second;
+      if (NULL != app_choice_set) {
+        const std::vector<smart_objects::SmartObject>* curr_choice_set
+          = (*app_choice_set)[strings::choice_set].asArray();
 
-  const ChoiceSetMap& choice_set_map = app->choice_set_map();
-  ChoiceSetMap::const_iterator it = choice_set_map.begin();
-
-  for (; choice_set_map.end() != it; ++it) {
-    for (size_t i = 0; i < (*it->second)[strings::choice_set].length(); ++i) {
-      for (size_t j = 0; j < choice_set.length(); ++j) {
-        if ((*it->second)[strings::choice_set][i][strings::choice_id].asInt()
-            == choice_set[j][strings::choice_id].asInt()) {
+        CoincidencePredicateChoiceSetID p(choice_set[i][strings::choice_id].asInt());
+        if ( std::any_of(curr_choice_set->begin(), curr_choice_set->end(), p)) {
           LOG4CXX_ERROR(logger_, "Incoming choice ID already exist");
-          return false;
+          return mobile_apis::Result::INVALID_ID;
         }
       }
     }
+ }
+
+ return  mobile_apis::Result::SUCCESS;
+}
+
+bool CreateInteractionChoiceSetRequest::compareSynonyms(
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
+
+  if (choice1[strings::choice_id].asInt() ==
+      choice2[strings::choice_id].asInt()) {
+    return false;
+  }
+
+  smart_objects::SmartArray* vr_cmds_1 =
+      choice1[strings::vr_commands].asArray();
+  DCHECK(vr_cmds_1);
+  smart_objects::SmartArray* vr_cmds_2 =
+      choice2[strings::vr_commands].asArray();
+  DCHECK(vr_cmds_2);
+
+  smart_objects::SmartArray::iterator it;
+  it = std::find_first_of(vr_cmds_1->begin(), vr_cmds_1->end(),
+                          vr_cmds_2->begin(), vr_cmds_2->end(),
+                          CreateInteractionChoiceSetRequest::compareStr);
+
+
+  if (it != vr_cmds_1->end()) {
+    LOG4CXX_INFO(logger_, "Incoming choice set has duplicated VR synonyms "
+                 << it->asString());
+    return false;
   }
 
   return true;
 }
+
+bool CreateInteractionChoiceSetRequest::compareStr(
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
+    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
+
+  return 0 == strcasecmp(str1.asString().c_str(), str2.asString().c_str());
+}
+
 
 }  // namespace commands
 

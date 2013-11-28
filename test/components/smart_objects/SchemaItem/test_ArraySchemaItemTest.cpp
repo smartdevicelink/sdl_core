@@ -57,12 +57,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[3][1] = false;
         obj[3][2] = "Another String";
 
-        EXPECT_EQ(38, (int)obj[0]);
-        EXPECT_TRUE((bool)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
-        EXPECT_EQ(39, (int)obj[3][0]);
-        EXPECT_FALSE((bool)obj[3][1]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj[3][2]);
+        EXPECT_EQ(38, obj[0].asInt());
+        EXPECT_TRUE(obj[1].asBool());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
+        EXPECT_EQ(39, obj[3][0].asInt());
+        EXPECT_FALSE(obj[3][1].asBool());
+        EXPECT_EQ(std::string("Another String"), obj[3][2].asString());
 
 
         int resultType = item->validate(obj);
@@ -89,16 +89,16 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj[3]);
         EXPECT_EQ(Errors::OK, resultType);
 
-        EXPECT_EQ(38, (int)obj[0]);
-        EXPECT_TRUE((bool)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
-        EXPECT_EQ(39, (int)obj[3][0]);
-        EXPECT_FALSE((bool)obj[3][1]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj[3][2]);
+        EXPECT_EQ(38, obj[0].asInt());
+        EXPECT_TRUE(obj[1].asBool());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
+        EXPECT_EQ(39, obj[3][0].asInt());
+        EXPECT_FALSE(obj[3][1].asBool());
+        EXPECT_EQ(std::string("Another String"), obj[3][2].asString());
 
         //Object - valid string
         obj = "New valid string";
-        ASSERT_EQ(std::string("New valid string"), (std::string)obj);
+        ASSERT_EQ(std::string("New valid string"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
@@ -127,16 +127,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
-            CStringSchemaItem::create(TSchemaItemParameter<size_t>(25))); // No min and max size
+        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(); // No min and max size
 
         obj[0] = "Some String";
         obj[1] = "true";
         obj[2] = "New String";
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
+        EXPECT_EQ(std::string("Some String"), obj[0].asString());
+        EXPECT_EQ(std::string("true"), obj[1].asString());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -158,27 +157,27 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj[2]);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
+        EXPECT_EQ(std::string("Some String"), obj[0].asString());
+        EXPECT_EQ(std::string("true"), obj[1].asString());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
 
         obj[3][0] = "39";
         obj[3][1] = "false";
         obj[3][2] = "Another String";
 
-        EXPECT_EQ(std::string("39"), (std::string)obj[3][0]);
-        EXPECT_EQ(std::string("false"), (std::string)obj[3][1]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj[3][2]);
+        EXPECT_EQ(std::string("39"), obj[3][0].asString());
+        EXPECT_EQ(std::string("false"), obj[3][1].asString());
+        EXPECT_EQ(std::string("Another String"), obj[3][2].asString());
 
         resultType = item->validate(obj);
-        EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(Errors::OK, resultType);
         resultType = item->validate(obj[3]);
         EXPECT_EQ(Errors::OK, resultType);
 
         obj[3][3] = "Another very very loooooong String";
 
         resultType = item->validate(obj[3]);
-        EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+        EXPECT_EQ(Errors::OK, resultType);
     }
 
     /**
@@ -206,11 +205,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[2] = "New String";
 
         resultType = item->validate(obj);
-        EXPECT_EQ(Errors::OK, resultType);
+        EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
+        EXPECT_EQ(std::string("Some String"), obj[0].asString());
+        EXPECT_EQ(std::string("true"), obj[1].asString());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
     }
 
     /**
@@ -222,7 +221,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         SmartObject obj;
 
         utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
-                CStringSchemaItem::create(TSchemaItemParameter<size_t>(25)),
+                CStringSchemaItem::create(
+                    TSchemaItemParameter<size_t>(),
+                    TSchemaItemParameter<size_t>(25)),
             TSchemaItemParameter<size_t>(),
             TSchemaItemParameter<size_t>(3)); // No min size
 
@@ -246,10 +247,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj[3]);
+        EXPECT_EQ(std::string("Some String"), obj[0].asString());
+        EXPECT_EQ(std::string("true"), obj[1].asString());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
+        EXPECT_EQ(std::string("Another String"), obj[3].asString());
     }
 
     /**
@@ -261,7 +262,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         SmartObject obj;
 
         utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
-                CStringSchemaItem::create(TSchemaItemParameter<size_t>(25)),
+                CStringSchemaItem::create(
+                    TSchemaItemParameter<size_t>(),
+                    TSchemaItemParameter<size_t>(25)),
             TSchemaItemParameter<size_t>(2),
             TSchemaItemParameter<size_t>(4));
 
@@ -290,11 +293,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj[0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj[1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj[2]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj[3]);
-        EXPECT_EQ(std::string("Out of array"), (std::string)obj[4]);
+        EXPECT_EQ(std::string("Some String"), obj[0].asString());
+        EXPECT_EQ(std::string("true"), obj[1].asString());
+        EXPECT_EQ(std::string("New String"), obj[2].asString());
+        EXPECT_EQ(std::string("Another String"), obj[3].asString());
+        EXPECT_EQ(std::string("Out of array"), obj[4].asString());
     }
 
     TEST(test_map_validate, test_ArraySchemaItemTest)
@@ -303,7 +306,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         SmartObject obj;
 
         utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
-                CStringSchemaItem::create(TSchemaItemParameter<size_t>(25)),
+                CStringSchemaItem::create(
+                    TSchemaItemParameter<size_t>(),
+                    TSchemaItemParameter<size_t>(25)),
             TSchemaItemParameter<size_t>(2),
             TSchemaItemParameter<size_t>(4));
 
@@ -334,11 +339,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-        EXPECT_EQ(std::string("Some String"), (std::string)obj["array"][0]);
-        EXPECT_EQ(std::string("true"), (std::string)obj["array"][1]);
-        EXPECT_EQ(std::string("New String"), (std::string)obj["array"][2]);
-        EXPECT_EQ(std::string("Another String"), (std::string)obj["array"][3]);
-        EXPECT_EQ(std::string("Out of array"), (std::string)obj["array"][4]);
+        EXPECT_EQ(std::string("Some String"), obj["array"][0].asString());
+        EXPECT_EQ(std::string("true"), obj["array"][1].asString());
+        EXPECT_EQ(std::string("New String"), obj["array"][2].asString());
+        EXPECT_EQ(std::string("Another String"), obj["array"][3].asString());
+        EXPECT_EQ(std::string("Out of array"), obj["array"][4].asString());
     }
 }}}}}
 

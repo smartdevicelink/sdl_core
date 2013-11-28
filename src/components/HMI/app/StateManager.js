@@ -45,6 +45,7 @@ Em.State.reopen({
     exit: function () {
 
         this.set('active', false);
+        SDL.SDLController.triggerState();
     }
 });
 
@@ -175,33 +176,32 @@ var StateManager = Em.StateManager.extend({
 
         sdlmedia: Em.State.create({
 
-            enter: function () {
+            mediaNavigation: Em.State.create({
 
-                this._super();
+                baseNavigation: Em.State.create({
 
-                SDL.SDLMediaController.restoreCurrentApp();
-            },
+                    enter: function () {
 
-            exit: function () {
+                        this._super();
 
-                this._super();
+                        SDL.SDLController.navigationAppUpdate();
+                    }
 
-                SDL.SDLAppController.deactivateApp();
-            }
-
-        }),
-
-        mediaNavigation: Em.State.create({
-
-            baseNavigation: Em.State.create({
+                }),
 
                 enter: function () {
 
                     this._super();
 
-                    SDL.SDLController.navigationAppUpdate();
-                }
+                    SDL.SDLMediaController.restoreCurrentApp();
+                },
 
+                exit: function () {
+
+                    this._super();
+
+                    SDL.SDLAppController.deactivateApp();
+                }
             }),
 
             enter: function () {
@@ -217,6 +217,7 @@ var StateManager = Em.StateManager.extend({
 
                 SDL.SDLAppController.deactivateApp();
             }
+
         })
     }),
 

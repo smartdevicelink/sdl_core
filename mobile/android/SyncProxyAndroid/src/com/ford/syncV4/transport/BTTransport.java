@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.os.Build;
 import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
@@ -43,8 +44,11 @@ public class BTTransport extends SyncTransport {
 	
 	// Boolean to monitor if the transport is in a disconnecting state
     private boolean _disconnecting = false;
-	
-	public BTTransport(ITransportListener transportListener) {
+
+    static final boolean ANDROID_PRIOR_TO_42 =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1;
+
+    public BTTransport(ITransportListener transportListener) {
 		super(transportListener);
 
         // turn on verbose transport logging
@@ -213,6 +217,8 @@ public class BTTransport extends SyncTransport {
 		boolean sendResult = false;
 		try {
 			_output.write(msgBytes, offset, length);
+            _output.flush();
+            decreaseSpeed();
 			sendResult = true;
 		} catch (Exception ex) {
 			DebugTool.logError("Error writing to Bluetooth socket: " + ex.toString(), ex);
@@ -221,10 +227,29 @@ public class BTTransport extends SyncTransport {
 		} // end-catch
 		return sendResult;
 	} // end-method
-	
-	
-	
-	private class TransportReaderThread extends Thread {
+
+    /**
+     * Sleeps for a while after transmitting some data on Android prior to 4.2.
+     *
+     * The OS before 4.2 has an old Bluetooth stack, which behaves very odd in
+     * some cases when sending a lot of data for a while. It's not reproducible
+     * when the smartphone is connected to the debugger, probably because it
+     * generates a lot of logs, and thus decreases the speed.
+     *
+     * An ugly hack is to drop the speed artificially by sleeping for some time.
+     * The magic number in the method is discovered experimentally, and may not
+     * work for all devices.
+     *
+     * @throws InterruptedException if sleep is interrupted
+     */
+    void decreaseSpeed() throws InterruptedException {
+        if (ANDROID_PRIOR_TO_42) {
+            Thread.sleep(30);
+        }
+    }
+
+
+    private class TransportReaderThread extends Thread {
 		
 		byte[] buf = new byte[4096];
 		private Boolean isHalted = false;

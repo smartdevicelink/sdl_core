@@ -51,7 +51,7 @@ void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -87,6 +87,11 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
+
+    if (!(*it->second).keyExists(strings::menu_params)) {
+      continue;
+    }
+
     if ((*message_)[strings::msg_params][strings::menu_id].asInt()
         == (*it->second)[strings::menu_params]
                          [hmi_request::parent_id].asInt()) {
@@ -107,6 +112,11 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
+
+    if (!(*it->second).keyExists(strings::menu_params)) {
+      continue;
+    }
+
     if ((*message_)[strings::msg_params][strings::menu_id].asInt()
         == (*it->second)[strings::menu_params]
                          [hmi_request::parent_id].asInt()) {

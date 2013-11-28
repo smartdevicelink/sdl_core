@@ -112,6 +112,7 @@
 	top: 90px;
 	width: 600px;
 	height: 300px;
+    overflow: hidden;
 }
 
 #info_nonMedia .app_title {
@@ -718,6 +719,20 @@
 	position: relative;
 	text-overflow: ellipsis;
 	overflow: hidden;
+}
+
+#baseNavigation .naviOptionsBtn{
+    border: 1px solid #393939;
+    border-radius: 3px;
+    height: 42px;
+    line-height: 42px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    top: 283px;
+    right: 6px;
+    width: 105px;
+    position: absolute;
 }
 
 #AlertManeuverPopUp .closeButton {
