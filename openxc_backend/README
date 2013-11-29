@@ -1,2 +1,7 @@
+Dependency libraries:
+- python 2.7
+- pip (http://www.pip-installer.org/en/latest/installing.html)
+- openxc (http://python.openxcplatform.com/en/latest/installation.html)
+
 1.Run Server.py with next parameter:
 PYTHONUNBUFFERED=1 python ~/<path_to_file>/Server.py
