@@ -35,6 +35,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
+#include "utils/threads/thread.h"
 
 namespace utils {
 
@@ -48,19 +49,23 @@ namespace utils {
  */
 class Backtrace {
  public:
-  static const int kDefaultDepth = 5;
-  Backtrace(int depth = kDefaultDepth);
+  // Inspect stack up to 128 calls back
+  static const int kDefaultDepth = 128;
+  static const int kSkipTop = 0;
+  /* Capture backtrace and store. Limit captured stack length to
+   * count symbols and remove first skip_top elements from it
+   * (to avoid polluting stack trace with debugging function names)
+   */
+  Backtrace(int count = kDefaultDepth, int skip_top = kSkipTop);
   ~Backtrace();
 
   // Captured symbols in order from topmost stack frame to last captured
-  std::vector<std::string> Symbols() const;
+  std::vector<std::string> CallStack() const;
+  threads::Thread::Id ThreadId() const;
 
-  // Raw symbol chars pointer and symbol count, must not be stored by caller
-  char*const*const RawSymbols() const;
-  int RawSymbolCount() const;
  private:
-  char** symbols_;
-  int symbol_count_;
+  threads::Thread::Id thread_id_;
+  std::vector<void*> backtrace_;
 };
 
 std::ostream& operator<< (std::ostream& os, const Backtrace& bt);

@@ -32,40 +32,73 @@
 
 #include "utils/back_trace.h"
 
+#include <algorithm>
 #include <vector>
+#include <sstream>
 
+#include <cxxabi.h>
 #include <execinfo.h>
 
-using std::vector;
+#include "utils/macro.h"
+
+using std::ostream;
 using std::string;
+using std::vector;
+using threads::Thread;
 
 namespace utils {
 
-Backtrace::Backtrace(int depth) {
-  std::vector<void*> buffer(depth);
-  symbol_count_ = backtrace(&buffer.front(), depth);
-  symbols_ = backtrace_symbols(&buffer.front(), symbol_count_);
+namespace {
+string demangle(const char* symbol) {
+  char temp[2048];
+  if (1 == sscanf(symbol, "%*[^(]%*[^_]%2047[^)+]", temp)) {
+    size_t size;
+    int status;
+    char* demangled = abi::__cxa_demangle(temp, NULL, &size, &status);
+    if (demangled != NULL) {
+      string result(demangled);
+      free(demangled);
+      return result;
+    }
+  }
+  return symbol;
+}
+}
+
+Backtrace::Backtrace(int count, int skip_top)
+    : thread_id_(threads::Thread::CurrentId()) {
+  int skip = skip_top + 1; // Skip this constructor
+  vector<void*> full_trace (count + skip);
+  int captured = backtrace(&full_trace.front(), count + skip);
+  int first_call = std::min(captured, skip);
+  int last_call = std::min(first_call + count, captured);
+  backtrace_.assign(full_trace.begin() + first_call, full_trace.begin() + last_call);
 }
 
 Backtrace::~Backtrace() {
-  free(symbols_);
 }
 
-vector<string> Backtrace::Symbols() const {
-  return vector<string>(symbols_, symbols_ + symbol_count_);
+vector<string> Backtrace::CallStack() const {
+  vector<string> callstack;
+  callstack.reserve(backtrace_.size());
+  char** mangled = backtrace_symbols(&backtrace_.front(), backtrace_.size());
+  for (size_t i = 0; i != backtrace_.size(); ++i) {
+    callstack.push_back(demangle(mangled[i]));
+  }
+  free(mangled);
+  return callstack;
 }
 
-char*const*const Backtrace::RawSymbols() const {
-  return symbols_;
+Thread::Id Backtrace::ThreadId() const {
+  return thread_id_;
 }
 
-int Backtrace::RawSymbolCount() const {
-  return symbol_count_;
-}
-
-std::ostream& operator<< (std::ostream& os, const Backtrace& bt) {
-  const vector<string> symbols = bt.Symbols();
-  for (size_t i = 0; i < symbols.size(); ++i) {
+ostream& operator<< (ostream& os, const Backtrace& bt) {
+  const vector<string> symbols = bt.CallStack();
+  os<<"Stack trace ("<<bt.ThreadId()<<")\n";
+  if (symbols.empty()) {
+    os<<"Not available"<<std::endl;
+  } else for (size_t i = 0; i < symbols.size(); ++i) {
     os<<symbols[i]<<std::endl;
   }
   return os;

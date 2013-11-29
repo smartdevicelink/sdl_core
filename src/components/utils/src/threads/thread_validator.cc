@@ -32,6 +32,7 @@
 #include "utils/threads/thread_validator.h"
 
 #include "utils/logger.h"
+#include "utils/back_trace.h"
 
 namespace threads {
 
@@ -53,7 +54,8 @@ void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
     LOG4CXX_ERROR(g_logger, "Single-threaded object created at thread "
                           << creation_thread_id_
                           <<" is accessed from thread "
-                          << current_id);
+                          << current_id << "\n"
+                          << utils::Backtrace());
   }
 }
 
@@ -75,7 +77,8 @@ void SingleThreadValidator::AssertRunningOnValidThread() const {
     LOG4CXX_ERROR(g_logger, "Single-threaded object owned by thread "
                          << owning_thread_id_
                          << " is accessed from thread "
-                         << current_id);
+                         << current_id << "\n"
+                         << utils::Backtrace());
   }
 }
 
