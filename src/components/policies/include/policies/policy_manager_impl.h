@@ -65,7 +65,7 @@ class PolicyManagerImpl : public PolicyManager {
     * @param config PolicyManager configuration
     * 
     */
-    virtual InitResult::eType Init(const PolicyConfiguration& config);
+    virtual InitResult Init(const PolicyConfiguration& config);
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.
@@ -117,7 +117,7 @@ class PolicyManagerImpl : public PolicyManager {
     /**
      * @brief Result of call of public method Init()
      */
-    InitResult::eType init_result_;
+    InitResult init_result_;
 };
 
 }  // namespace policies

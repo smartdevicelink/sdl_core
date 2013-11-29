@@ -80,10 +80,10 @@ class TestWP1Integration: public ::testing::Test {
       policy_config_.set_pt_file_name("wp1_policy_table.json");
       policy_manager_ = new PolicyManagerTest();
 
-      ::policies::InitResult::eType init_result =
+      ::policies::InitResult init_result =
         policy_manager_->Init(policy_config_);
 
-      ASSERT_EQ(::policies::InitResult::INIT_OK, init_result);
+      ASSERT_EQ(::policies::INIT_OK, init_result);
     }
 
     virtual void TearDown() {
@@ -105,12 +105,10 @@ class TestWP1Integration: public ::testing::Test {
         policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
 
       if (allowed) {
-        ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED,
-                  result.result) <<
+        ASSERT_EQ(::policies::PERMISSION_ALLOWED, result.result) <<
           "Failed at rpc: " << rpc;
       } else {
-        ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED,
-                  result.result) <<
+        ASSERT_EQ(::policies::PERMISSION_DISALLOWED, result.result) <<
           "Failed at rpc: " << rpc;
       }
       ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
@@ -134,12 +132,10 @@ class TestWP1Integration: public ::testing::Test {
         policy_manager_->CheckPermission(1, rpc_obj, hmi_level);
 
       if (allowed) {
-        ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED,
-                  result.result) <<
+        ASSERT_EQ(::policies::PERMISSION_ALLOWED, result.result) <<
           "Failed at rpc: " << rpc_id;
       } else {
-        ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED,
-                  result.result) <<
+        ASSERT_EQ(::policies::PERMISSION_DISALLOWED, result.result) <<
           "Failed at rpc: " << rpc_id;
       }
       ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);

@@ -38,11 +38,9 @@
 #include "mobile_message_handler/mobile_message_handler.h"
 #include "connection_handler/connection_handler.h"
 
-//namespace NsSmartDeviceLink {
 namespace policies {
   class PolicyManager;
 }  // namespace policies
-//}  // namespace NsSmartDeviceLink
 
 namespace application_manager {
 
