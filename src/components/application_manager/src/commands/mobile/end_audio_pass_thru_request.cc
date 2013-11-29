@@ -59,7 +59,7 @@ void EndAudioPassThruRequest::Run() {
       (*message_)[strings::params][strings::connection_key].asInt();
     ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
   } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "No PerformAudioPassThru is now active");
   }
 }
