@@ -6,6 +6,7 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/back_trace.cc
     ./src/conditional_variable_posix.cc
     ./src/file_system.cc
     ./src/threads/posix_thread.cc
