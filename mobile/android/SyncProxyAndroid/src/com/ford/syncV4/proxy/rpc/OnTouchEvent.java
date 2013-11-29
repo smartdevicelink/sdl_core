@@ -2,10 +2,11 @@ package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.TouchEvent;
+import com.ford.syncV4.proxy.rpc.enums.TouchType;
 import com.ford.syncV4.util.DebugTool;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 public class OnTouchEvent extends RPCNotification {
     public OnTouchEvent() {
@@ -15,69 +16,47 @@ public class OnTouchEvent extends RPCNotification {
         super(hash);
     }
     
-    public void setEventType(TouchEvent eventType) {
-    	if (eventType != null) {
-    		parameters.put(Names.eventType, eventType);
+    public void setType(TouchType type) {
+    	if (type != null) {
+    		parameters.put(Names.type, type);
     	} else {
-    		parameters.remove(Names.eventType);
+    		parameters.remove(Names.type);
     	}
     }
     
-    public TouchEvent getEventType() {
-        Object obj = parameters.get(Names.eventType);
-        if (obj instanceof TouchEvent) {
-            return (TouchEvent) obj;
+    public TouchType getType() {
+        Object obj = parameters.get(Names.type);
+        if (obj instanceof TouchType) {
+            return (TouchType) obj;
         } else if (obj instanceof String) {
-        	TouchEvent theCode = null;
+        	TouchType theCode = null;
             try {
-                theCode = TouchEvent.valueForString((String) obj);
+                theCode = TouchType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.eventType, e);
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.type, e);
             }
             return theCode;
         }
         return null;
     }
     
-    public void setTouchLists(TouchLists touchLists) {
-        if (touchLists != null) {
-            parameters.put(Names.touchLists, touchLists);
+    public void setEvent(Vector<TouchEvent> event) {
+        if (event != null) {
+            parameters.put(Names.event, event);
         } else {
-        	parameters.remove(Names.touchLists);
+        	parameters.remove(Names.event);
         }
     }
     
-    public TouchLists getTouchLists() {
-    	Object obj = parameters.get(Names.touchLists);
-        if (obj instanceof TouchLists) {
-            return (TouchLists) obj;
-        } else if (obj instanceof Hashtable) {
-        	try {
-        		return new TouchLists((Hashtable) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.touchLists, e);
-            }
-        }
-        return null;
-    }
-    
-    public void setInfo(TouchEventInfo info) {
-        if (info != null) {
-            parameters.put(Names.info, info);
-        } else {
-        	parameters.remove(Names.info);
-        }
-    }
-    
-    public TouchEventInfo getInfo() {
-    	Object obj = parameters.get(Names.info);
-        if (obj instanceof TouchEventInfo) {
-            return (TouchEventInfo) obj;
-        } else if (obj instanceof Hashtable) {
-        	try {
-        		return new TouchEventInfo((Hashtable) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.info, e);
+    public Vector<TouchEvent> getEvent() {
+        Object objList = parameters.get(Names.event);
+        if (objList instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>)objList;
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof TouchEvent) {
+                    return (Vector<TouchEvent>)list;
+                }
             }
         }
         return null;

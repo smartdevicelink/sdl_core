@@ -1,4 +1,5 @@
 [CW48]
+* SyncProxyAndroid SDK: Update touch-related messages and structures to protocol version 3.0.K.
 * Make some parameters optional in AddCommand, Alert, AlertManeuver, SetGlobalProperties, ShowConstantTBT, Slider, and UpdateTurnList dialogs.
 * Fix: SPT didn't send all the activation requests when it had been closed with Back button.
 * SyncProxyAndroid SDK: Fix sending GetVehicleData with steeringWheelAngle parameter.
