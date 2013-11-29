@@ -37,8 +37,6 @@
 
 #include "policies/policy_table_schema.h"
 
-
-namespace NsSmartDeviceLink {
 namespace policies {
 
 class PreloadedPTSchema : public PolicyTableSchema {
@@ -73,6 +71,5 @@ class PreloadedPTSchema : public PolicyTableSchema {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_PRELOADED_PT_SCHEMA_H_

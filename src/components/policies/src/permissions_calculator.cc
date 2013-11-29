@@ -38,11 +38,11 @@
 #include "formatters/CSmartFactory.hpp"
 #include "smart_objects/enum_schema_item.h"
 
-namespace NsSmartDeviceLink {
+
 namespace policies {
 
-namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
-namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace jsonhandler = NsSmartDeviceLink::NsJSONHandler;
 
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
 using ::NsSmartDeviceLink::NsSmartObjects::SmartType;
@@ -53,9 +53,8 @@ log4cxx::LoggerPtr PermissionsCalculator::logger_ = log4cxx::LoggerPtr(
 //----------------------------------------------------------------------------
 
 const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
-  const SmartObject& pt_object,
-  const uint32_t app_id) {
-
+    const SmartObject& pt_object,
+    const uint32_t app_id) {
   const uint8_t kBuffSize = 16;
   char app_id_string[kBuffSize];
   snprintf(app_id_string, kBuffSize, "%d", app_id);
@@ -66,7 +65,6 @@ const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
 
   // look for <app_id> section within app_policies
   if ((true == app_policies.keyExists(std::string(app_id_string)))) {
-
     const SmartObject& pt_app_id =
       app_policies.getElement(app_id_string);
 
@@ -78,7 +76,6 @@ const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
     }  // look for default section within app_policies
   } else if (SmartType::SmartType_Map ==
       app_policies.getElement(PolicyTableSchema::kStrDefault).getType()) {
-
     // returning "default" section of "app_policies"
     return app_policies.getElement(PolicyTableSchema::kStrDefault);
   } else {
@@ -86,7 +83,7 @@ const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
       "Section app_policies|default neither exists nor is a map");
   }
 
-  return so_ns::invalid_object_value;
+  return smart_objects::invalid_object_value;
 }
 
 //----------------------------------------------------------------------------
@@ -96,7 +93,6 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
     const uint32_t app_id,
     const SmartObject& rpc,
     const mobile_apis::HMILevel::eType hmi_status) {
-
   std::vector<std::string> rpc_groups;
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
 
@@ -104,7 +100,6 @@ PermissionResult::eType PermissionsCalculator::CalcPermissions(
     pt_app_id.getElement(PolicyTableSchema::kStrGroups);
 
   if (SmartType::SmartType_Array == pt_groups.getType()) {
-
     ConvertSmartArray2VectorStrings(pt_groups, rpc_groups);
   } else {
     LOG4CXX_ERROR(logger_,
@@ -152,8 +147,8 @@ PermissionResult::eType
   rpc_object.getSchema().unapplySchema(rpc_object);
 
   const SmartObject &function_id =
-      rpc_object.getElement(jsonhandler_ns::strings::S_PARAMS)
-                .getElement(jsonhandler_ns::strings::S_FUNCTION_ID);
+      rpc_object.getElement(jsonhandler::strings::S_PARAMS)
+                .getElement(jsonhandler::strings::S_FUNCTION_ID);
   if (function_id.asString().length() == 0) {
     return PermissionResult::PERMISSION_DISALLOWED;
   }
@@ -161,7 +156,7 @@ PermissionResult::eType
   const SmartObject& functional_groupings_object =
      pt_object.getElement(PolicyTableSchema::kStrPolicyTable)
               .getElement(PolicyTableSchema::kStrFunctionalGroupings);
-  if (so_ns::SmartType::SmartType_Map !=
+  if (smart_objects::SmartType::SmartType_Map !=
       functional_groupings_object.getType()) {
     return PermissionResult::PERMISSION_DISALLOWED;
   }
@@ -169,20 +164,19 @@ PermissionResult::eType
   for (std::vector<std::string>::const_iterator it = rpc_groups.begin() ;
       it != rpc_groups.end(); ++it) {
     if (functional_groupings_object.keyExists(*it)) {
-
       const SmartObject& fgroup = functional_groupings_object.getElement(*it);
       if (fgroup.getElement(PolicyTableSchema::kStrRpcs)
                 .keyExists(function_id.asString())) {
-
         std::string hmi_status_string;
         ConvertHMILevel2String(hmi_status, hmi_status_string);
 
-        so_ns::SmartObject hmi_levels =
+        smart_objects::SmartObject hmi_levels =
             fgroup.getElement(PolicyTableSchema::kStrRpcs)
                   .getElement(function_id.asString())
                   .getElement(PolicyTableSchema::kStrHmiLevels);
         for (uint16_t n = 0; n < hmi_levels.length(); n++) {
-          if (hmi_levels[n].getType() == so_ns::SmartType::SmartType_String) {
+          if (hmi_levels[n].getType() ==
+              smart_objects::SmartType::SmartType_String) {
             if (hmi_status_string.compare(hmi_levels[n].asString()) == 0) {
               return PermissionResult::PERMISSION_ALLOWED;
             }
@@ -205,7 +199,7 @@ void PermissionsCalculator::ConvertHMILevel2String(
 
   const std::map<mobile_apis::HMILevel::eType, std::string>
     elementsStringRepresentation =
-      so_ns::TEnumSchemaItem<mobile_apis::HMILevel::eType>::
+      smart_objects::TEnumSchemaItem<mobile_apis::HMILevel::eType>::
         getEnumElementsStringRepresentation();
 
   std::map<mobile_apis::HMILevel::eType, std::string>::const_iterator i =
@@ -222,10 +216,10 @@ void PermissionsCalculator::ConvertSmartArray2VectorStrings(
     const SmartObject& object,
     std::vector<std::string>& v_strings) {
 
-  if (object.getType() == so_ns::SmartType::SmartType_Array) {
+  if (object.getType() == smart_objects::SmartType::SmartType_Array) {
     for (uint32_t i = 0; i < object.length(); i++) {
       const SmartObject & item = object.getElement(i);
-      if (item.getType() == so_ns::SmartType::SmartType_String) {
+      if (item.getType() == smart_objects::SmartType::SmartType_String) {
         v_strings.push_back(item.asString());
       }
     }
@@ -233,4 +227,3 @@ void PermissionsCalculator::ConvertSmartArray2VectorStrings(
 }
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink

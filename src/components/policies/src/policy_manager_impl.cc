@@ -33,13 +33,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "policies/policy_manager_impl.h"
-#include "policies/policy_table_schema.h"
 #include "policies/permissions_calculator.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "utils/file_system.h"
 
 
-namespace NsSmartDeviceLink {
 namespace policies {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -53,7 +50,7 @@ PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager()
   , policy_config_()
   , policy_table_(0)
-  , init_result_(InitResult::INIT_FAILED){
+  , init_result_(InitResult::INIT_FAILED) {
 }
 
 //---------------------------------------------------------------
@@ -121,7 +118,7 @@ CheckPermissionResult
 
   if (init_result_ == InitResult::INIT_FAILED) {
     result.result = PermissionResult::PERMISSION_INIT_FAILED;
-  }else if (0 != pt
+  } else if (0 != pt
             && PTValidationResult::VALIDATION_OK == pt->Validate()) {
     smart_objects::SmartObject& pt_object = pt->AsSmartObject();
 
@@ -166,4 +163,3 @@ policies::PolicyTable* policies::PolicyManagerImpl::policy_table() const {
 }
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink

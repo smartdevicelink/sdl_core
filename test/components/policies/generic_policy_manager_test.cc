@@ -45,13 +45,10 @@ namespace components {
 namespace policies {
 namespace policy_manager_generic_test {
 
-using ::NsSmartDeviceLink::policies::PolicyConfiguration;
-using ::NsSmartDeviceLink::policies::PolicyManagerImpl;
-using ::NsSmartDeviceLink::policies::CheckPermissionResult;
+using ::policies::PolicyConfiguration;
+using ::policies::PolicyManagerImpl;
+using ::policies::CheckPermissionResult;
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
-namespace InitResult = NsSmartDeviceLink::policies::InitResult;
-namespace PermissionResult = NsSmartDeviceLink::policies::PermissionResult;
-namespace Priority = NsSmartDeviceLink::policies::Priority;
 namespace ns_str = NsSmartDeviceLink::NsJSONHandler::strings;
 
 
@@ -60,7 +57,8 @@ class PolicyManagerTest : public PolicyManagerImpl {
     PolicyManagerTest() :
       PolicyManagerImpl() {}
 
-    virtual ~PolicyManagerTest() {};
+    virtual ~PolicyManagerTest() {
+    };
 };
 
 
@@ -70,8 +68,8 @@ TEST(policy_manager_generic_test, test_straight_forward) {
 
   PolicyManagerTest policy_manager;
 
-  InitResult::eType init_result = policy_manager.Init(config);
-  ASSERT_EQ(InitResult::INIT_OK, init_result);
+  ::policies::InitResult::eType init_result = policy_manager.Init(config);
+  ASSERT_EQ(::policies::InitResult::INIT_OK, init_result);
 
   SmartObject rpc;
 
@@ -81,24 +79,24 @@ TEST(policy_manager_generic_test, test_straight_forward) {
                                    rpc,
                                    mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Speak";
   result = policy_manager.CheckPermission(1,            // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
   result = policy_manager.CheckPermission(789,            // existing app
                                          rpc,
                                          mobile_apis::HMILevel::HMI_BACKGROUND);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
 }
 
 // ----------------------------------------------------------------------------
@@ -109,8 +107,8 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
 
   PolicyManagerTest policy_manager;
 
-  InitResult::eType init_result = policy_manager.Init(config);
-  ASSERT_EQ(InitResult::INIT_OK, init_result);
+  ::policies::InitResult::eType init_result = policy_manager.Init(config);
+  ASSERT_EQ(::policies::InitResult::INIT_OK, init_result);
 
   SmartObject rpc;
 
@@ -120,40 +118,40 @@ TEST(policy_manager_generic_test, test_straight_forward_deny) {
                                    rpc,
                                    mobile_apis::HMILevel::HMI_BACKGROUND);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "Alert";
   result = policy_manager.CheckPermission(123456,              // existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_ALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_ALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "GetVehicleData";
   result = policy_manager.CheckPermission(234234,          // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "UnknownRPC";
   result = policy_manager.CheckPermission(234234,          // non existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_FULL);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_EMERGENCY, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_EMERGENCY, result.priority);
 
   rpc[ns_str::S_PARAMS][ns_str::S_FUNCTION_ID] = "SubscribeVehicleData";
   result = policy_manager.CheckPermission(123456,              // existing app
                                           rpc,
                                           mobile_apis::HMILevel::HMI_NONE);
 
-  ASSERT_EQ(PermissionResult::PERMISSION_DISALLOWED, result.result);
-  ASSERT_EQ(Priority::PRIORITY_NORMAL, result.priority);
+  ASSERT_EQ(::policies::PermissionResult::PERMISSION_DISALLOWED, result.result);
+  ASSERT_EQ(::policies::Priority::PRIORITY_NORMAL, result.priority);
 }
 
 }  // namespace policy_manager_generic_test

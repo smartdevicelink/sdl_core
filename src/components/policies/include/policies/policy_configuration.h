@@ -39,7 +39,6 @@
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 
-namespace NsSmartDeviceLink {
 namespace policies {
 
 /**
@@ -93,7 +92,5 @@ class PolicyConfiguration {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
-
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_CONFIGURATION_H_

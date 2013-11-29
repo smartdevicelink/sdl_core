@@ -39,9 +39,6 @@
 #include "policies/policy_configuration.h"
 #include "smart_objects/smart_object.h"
 
-
-
-namespace NsSmartDeviceLink {
 namespace policies {
 
  /**
@@ -56,7 +53,7 @@ enum eType {
   /**
   * @brief Initialization of Policy Manager failed.
   */ 
-  PERMISSION_INIT_FAILED,  
+  PERMISSION_INIT_FAILED,
   /**
    * @brief Verification of Policy Table failed.
    *
@@ -167,7 +164,6 @@ class PolicyManager {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
 
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_H_

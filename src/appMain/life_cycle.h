@@ -72,7 +72,7 @@ class LifeCycle {
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
-    NsSmartDeviceLink::policies::PolicyManagerImpl* policy_manager_;
+    policies::PolicyManagerImpl* policy_manager_;
 
     NsMessageBroker::CMessageBroker* message_broker_;
     NsMessageBroker::TcpServer* message_broker_server_;

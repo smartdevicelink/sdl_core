@@ -41,7 +41,6 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/logger.h"
 
-namespace NsSmartDeviceLink {
 namespace policies {
 
 class PermissionsCalculator {
@@ -71,7 +70,7 @@ class PermissionsCalculator {
     * @return priority for app_id
     */
     static Priority::eType GetPriority(
-        const NsSmartObjects::SmartObject& pt_object,
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
         const uint32_t app_id);
 
   private:
@@ -135,6 +134,5 @@ class PermissionsCalculator {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_PERMISSIONS_CALCULATOR_H_

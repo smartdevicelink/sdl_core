@@ -64,7 +64,6 @@ const unsigned int ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
-namespace policies = NsSmartDeviceLink::policies;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
   : audio_pass_thru_active_(false),

@@ -45,16 +45,16 @@ namespace components {
 namespace policies {
 namespace policies_draft_test {
 
-  namespace pn = NsSmartDeviceLink::policies;
   namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
-  class PolicyManagerTest: public pn::PolicyManagerImpl {
+  class PolicyManagerTest: public ::policies::PolicyManagerImpl {
   public:
-    explicit PolicyManagerTest(const pn::PolicyConfiguration& policy_config):
+    explicit PolicyManagerTest(
+  const ::policies::PolicyConfiguration& policy_config):
       PolicyManagerImpl() {
         init_result = Init(policy_config);
       }
-    pn::PolicyTable* getPolicyTable() {
+    ::policies::PolicyTable* getPolicyTable() {
       return PolicyManagerImpl::policy_table();
     }
 
@@ -62,7 +62,7 @@ namespace policies_draft_test {
       PolicyManagerImpl::StorePolicyTable();
     }
 
-    pn::InitResult::eType init_result;
+    ::policies::InitResult::eType init_result;
   };
 
   class Policies_test: public ::testing::Test {
@@ -82,7 +82,7 @@ namespace policies_draft_test {
 
 
   TEST_F(Policies_test, test_policies_modify_write_verify_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("PT4test.json");
 
     {
@@ -121,7 +121,7 @@ namespace policies_draft_test {
 
 
   TEST_F(Policies_test, test_policies_read_write_compare_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("PT4test.json");
 
     std::string initial_json;
@@ -141,66 +141,68 @@ namespace policies_draft_test {
   }
 
   TEST_F(Policies_test, test_policies_no_PT_no_Preload_files_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("missing_file_for_sure.json");
     policy_config.set_preload_pt_file_name("missing_too.json");
     PolicyManagerTest policy_manager(policy_config);
     ASSERT_TRUE(NULL == policy_manager.getPolicyTable());
-    ASSERT_EQ(pn::InitResult::INIT_FAILED,
+    ASSERT_EQ(::policies::InitResult::INIT_FAILED,
               policy_manager.init_result);
 
-    pn::CheckPermissionResult perm_result =  policy_manager.CheckPermission(
+    ::policies::CheckPermissionResult perm_result =
+    policy_manager.CheckPermission(
         789,  // some app
         so_ns::SmartObject(),
         mobile_apis::HMILevel::HMI_BACKGROUND);
-    ASSERT_EQ(pn::PermissionResult::PERMISSION_INIT_FAILED, perm_result.result);
+    ASSERT_EQ(::policies::PermissionResult::PERMISSION_INIT_FAILED,
+              perm_result.result);
   }
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("bad.json");
     policy_config.set_preload_pt_file_name("PT4test.json");
     PolicyManagerTest policy_manager(policy_config);
 
-    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
+    ASSERT_EQ(::policies::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
               policy_manager.getPolicyTable()->Validate());
-    ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
   }
 
   TEST_F(Policies_test, test_policies_Preload_bad_json_file_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("missing_file.json");
     policy_config.set_preload_pt_file_name("bad.json");
     PolicyManagerTest policy_manager(policy_config);
 
-    ASSERT_EQ(pn::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
+    ASSERT_EQ(::policies::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
               policy_manager.getPolicyTable()->Validate());
-    ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
   }
 
   TEST_F(Policies_test, test_policies_reInit_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("PT4test.json");
     policy_config.set_preload_pt_file_name("bad.json");
     PolicyManagerTest policy_manager(policy_config);
 
-    ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
 
     policy_config.set_pt_file_name("nofile");
     policy_config.set_preload_pt_file_name("nofile");
 
     policy_manager.Init(policy_config);
 
-    ASSERT_EQ(pn::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
     ASSERT_FALSE(NULL == policy_manager.getPolicyTable());
   }
 
   TEST_F(Policies_test, test_policies_json_validate_test) {
-    pn::PolicyConfiguration policy_config;
+    ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("SDLPolicyTable_basic.json");
     PolicyManagerTest policy_manager(policy_config);
 
-    ASSERT_TRUE(pn::PTValidationResult::VALIDATION_OK ==
+    ASSERT_TRUE(::policies::PTValidationResult::VALIDATION_OK ==
       policy_manager.getPolicyTable()->Validate());
   }
 
