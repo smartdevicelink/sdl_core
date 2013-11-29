@@ -38,19 +38,13 @@
 #include <string>
 
 #include "policies/policy_manager.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/object_optional_schema_item.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
-#include "utils/shared_ptr.h"
 
 
-namespace NsSmartDeviceLink {
 namespace policies {
-
-namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
 
 using ::NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem;
 using ::NsSmartDeviceLink::NsSmartObjects::CSmartSchema;
@@ -230,14 +224,13 @@ SchemaItemPtr PolicyTableSchema::CreateAppPolicies(void) {
 }  // namespace policies
 
 //-------------- String to value enum mapping ----------------
-
+namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 template <>
 const std::map<policies::Priority::eType, std::string>&
   TEnumSchemaItem<policies::Priority::eType>::
     getEnumElementsStringRepresentation() {
-  // NOLINT
   static bool is_initialized = false;
   static std::map<policies::Priority::eType, std::string>
     enum_string_representation;

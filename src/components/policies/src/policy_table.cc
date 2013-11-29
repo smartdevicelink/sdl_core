@@ -33,24 +33,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "policies/policy_table.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "formatters/generic_json_formatter.h"
 #include "policies/policy_table_schema.h"
 
-namespace policies_ns = NsSmartDeviceLink::policies;
-namespace so_ns = NsSmartDeviceLink::NsSmartObjects;
-namespace formatters_ns = NsSmartDeviceLink::NsJSONHandler::Formatters;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 //---------------------------------------------------------------------------
 
-policies_ns::PolicyTable::PolicyTable(
+policies::PolicyTable::PolicyTable(
     const std::string policy_table_string, PolicyTableType pt_type)
   : is_pt_valid_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
-  , schema_(policies_ns::PolicyTableSchema::Create())
+  , schema_(policies::PolicyTableSchema::Create())
   , pt_smart_object_() {
-//{
-  if (false == formatters_ns::GenericJsonFormatter::FromString(
+// {
+  if (false == formatters::GenericJsonFormatter::FromString(
       policy_table_string, pt_smart_object_)) {
     is_pt_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
   } else {
@@ -62,34 +60,34 @@ policies_ns::PolicyTable::PolicyTable(
 
 //---------------------------------------------------------------------------
 
-policies_ns::PolicyTable::~PolicyTable() {
+policies::PolicyTable::~PolicyTable() {
 }
 
 //---------------------------------------------------------------------------
 
-so_ns::SmartObject& policies_ns::PolicyTable::AsSmartObject() {
+smart_objects::SmartObject& policies::PolicyTable::AsSmartObject() {
   return pt_smart_object_;
 }
 
 //---------------------------------------------------------------------------
 
-const std::string policies_ns::PolicyTable::AsString() {
+const std::string policies::PolicyTable::AsString() {
   std::string ret_val;
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON != is_pt_valid_) {
-    formatters_ns::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
+    formatters::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
   }
   return ret_val;
 }
 
 //---------------------------------------------------------------------------
 
-policies_ns::PTValidationResult policies_ns::PolicyTable::Validate() {
+policies::PTValidationResult policies::PolicyTable::Validate() {
   // TODO(_): distinct between PT and Preload PolicyTable types (use pt_type_)
   if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_pt_valid_) {
     return is_pt_valid_;
   }
 
-  if (so_ns::Errors::OK == schema_.validate(pt_smart_object_)) {
+  if (smart_objects::Errors::OK == schema_.validate(pt_smart_object_)) {
     is_pt_valid_ = PTValidationResult::VALIDATION_OK;
     return is_pt_valid_;
   }
@@ -100,7 +98,7 @@ policies_ns::PTValidationResult policies_ns::PolicyTable::Validate() {
 
 //---------------------------------------------------------------------------
 
-bool policies_ns::PolicyTable::IsPTPreload() {
+bool policies::PolicyTable::IsPTPreload() {
   // evaluate 'preloaded_pt' in 'module_config'
   return false;
 }

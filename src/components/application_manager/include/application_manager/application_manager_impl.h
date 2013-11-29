@@ -364,7 +364,7 @@ class ApplicationManagerImpl : public ApplicationManager,
       mobile_message_handler::MobileMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
     virtual void set_policy_manager(
-      NsSmartDeviceLink::policies::PolicyManager* policy_manager);
+      policies::PolicyManager* policy_manager);
 
     ///////////////////////////////////////////////////////
 
@@ -514,7 +514,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler* connection_handler_;
 
-    NsSmartDeviceLink::policies::PolicyManager* policy_manager_;
+    policies::PolicyManager* policy_manager_;
 
     // TODO(YS): Remove old implementation
     policies_manager::PoliciesManager policies_manager_;

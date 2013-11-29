@@ -36,17 +36,10 @@
 #define SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_IMPL_H_
 
 #include "policies/policy_manager.h"
-#include "interfaces/MOBILE_API.h"
-#include "policies/policy_configuration.h"
 #include "policies/policy_table.h"
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
 #include "utils/logger.h"
 
-
-namespace NsSmartDeviceLink {
 namespace policies {
-
 
 /**
  * @brief Interface implementation class of Policy Manager.
@@ -128,7 +121,5 @@ class PolicyManagerImpl : public PolicyManager {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
-
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_MANAGER_IMPL_H_

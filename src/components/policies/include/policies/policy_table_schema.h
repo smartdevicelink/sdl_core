@@ -41,8 +41,6 @@
 #include "smart_objects/schema_item.h"
 #include "utils/shared_ptr.h"
 
-
-namespace NsSmartDeviceLink {
 namespace policies {
 
 class PolicyTableSchema {
@@ -174,6 +172,5 @@ class PolicyTableSchema {
 };
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
 
 #endif  // SRC_COMPONENTS_POLICIES_INCLUDE_POLICIES_POLICY_TABLE_SCHEMA_H_

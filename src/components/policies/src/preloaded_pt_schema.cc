@@ -37,15 +37,11 @@
 #include <map>
 #include <string>
 
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/object_optional_schema_item.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/string_schema_item.h"
-#include "utils/shared_ptr.h"
 
 
-namespace NsSmartDeviceLink {
 namespace policies {
 
 using ::NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem;
@@ -94,4 +90,3 @@ SchemaItemPtr PreloadedPTSchema::CreateAppPolicies(void) {
 }
 
 }  // namespace policies
-}  // namespace NsSmartDeviceLink

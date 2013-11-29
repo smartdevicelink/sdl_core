@@ -38,11 +38,11 @@
 #include "mobile_message_handler/mobile_message_handler.h"
 #include "connection_handler/connection_handler.h"
 
-namespace NsSmartDeviceLink {
+//namespace NsSmartDeviceLink {
 namespace policies {
   class PolicyManager;
 }  // namespace policies
-}  // namespace NsSmartDeviceLink
+//}  // namespace NsSmartDeviceLink
 
 namespace application_manager {
 
@@ -63,7 +63,7 @@ class ApplicationManager {
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
   virtual void set_policy_manager(
-      NsSmartDeviceLink::policies::PolicyManager* policy_manager) = 0;
+      policies::PolicyManager* policy_manager) = 0;
 
  protected:
   virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;

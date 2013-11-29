@@ -89,7 +89,7 @@ bool LifeCycle::StartComponents() {
   DCHECK(hmi_handler_);
 
   policy_manager_ =
-    NsSmartDeviceLink::policies::PolicyManagerImpl::instance();
+    policies::PolicyManagerImpl::instance();
   DCHECK(policy_manager_);
 
   transport_manager_->SetProtocolHandler(protocol_handler_);
@@ -125,7 +125,7 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
-  NsSmartDeviceLink::policies::PolicyConfiguration policy_config;
+  policies::PolicyConfiguration policy_config;
   policy_config.set_pt_file_name("wp1_policy_table.json");
   policy_manager_->Init(policy_config);
 

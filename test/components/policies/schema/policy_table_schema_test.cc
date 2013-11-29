@@ -47,7 +47,7 @@ namespace policies {
 namespace policy_table_schema_test {
 
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
-using ::NsSmartDeviceLink::policies::PolicyTableSchema;
+using ::policies::PolicyTableSchema;
 using ::NsSmartDeviceLink::NsSmartObjects::CSmartSchema;
 
 namespace Errors = NsSmartDeviceLink::NsSmartObjects::Errors;
