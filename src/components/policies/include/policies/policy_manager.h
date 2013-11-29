@@ -56,7 +56,7 @@ enum eType {
   /**
   * @brief Initialization of Policy Manager failed.
   */ 
-  PERMISSION_INIT_FAILED,  
+  PERMISSION_INIT_FAILED,
   /**
    * @brief Verification of Policy Table failed.
    *
@@ -129,9 +129,42 @@ enum eType {
 };
 }  // namespace InitResult
 
+/**
+ * @brief Enumeration for state wich reflects states of User consent procedure
+ *        @TODO (anyone) for future use
+ */
+enum eType {
+  /**
+   * @brief User was not asked for consent
+   */
+  STATE_IDLE = 0,
+  /**
+   * @brief User was asked just now for consent
+   */
+  STATE_PENDING_CONSENT,
+  /**
+   * @brief User answered 'YES' just now
+   */
+  STATE_CONSENT_YES,
+  /**
+   * @brief User answered 'NO' just now
+   */
+  STATE_CONSENT_NO
+};
+
+/**
+ * @biref Struct contains data of result to return when Policy Manager
+ *        is requested for CheckPermission()
+ */
 struct CheckPermissionResult {
-      PermissionResult::eType result;
-      Priority::eType priority;
+  /**
+   * @brief Permission result
+  */
+  PermissionResult::eType result;
+  /**
+   * @brief Stored priority for current application
+   */
+  Priority::eType priority;
 };
 
 /**
