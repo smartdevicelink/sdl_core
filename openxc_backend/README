@@ -1,0 +1,2 @@
+1.Run Server.py with next parameter:
+PYTHONUNBUFFERED=1 python ~/<path_to_file>/Server.py

@@ -22,6 +22,7 @@ public class CancelAccessCommand implements RequestCommand {
             CancelAccess msg = new CancelAccess();
             msg.setCorrelationID(id);
             try {
+                //Logger.d(getClass().getSimpleName() + " Sending Cancel Access: " + jsonParameters);
                 proxy.sendRPCRequest(msg);
             } catch (Throwable e) {
                 Logger.e(getClass().getSimpleName() + " can't send message", e);

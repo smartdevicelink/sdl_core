@@ -24,7 +24,7 @@ class MainHandler(WebSocketHandler):
         print "Socket message: " + message
         openxc_command = ""
         if message.startswith("stop_server"):
-            self.finish()
+            return
         if message.startswith("set_preset_"):
             #print ("Set Preset", message[11:])
             openxc_command = 'openxc-control write --name tune --value preset --event ' + message[11:]

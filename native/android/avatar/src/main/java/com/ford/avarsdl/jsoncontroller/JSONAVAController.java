@@ -25,7 +25,7 @@ public class JSONAVAController extends JSONController {
     }
 
     protected String processNotification(String notification) {
-        Logger.d(getClass().getSimpleName() + " Process notification");
+        Logger.d(getClass().getSimpleName() + " Process notification: " + notification);
         mJSONParser.putJSONObject(notification);
         final String func = "FFW.WebSocketSimulator.receive('" + mJSComponentName
                 + "','" + notification + "')";
@@ -54,7 +54,7 @@ public class JSONAVAController extends JSONController {
     }
 
     public void sendJSMessage(String cName, String jsonMsg) {
-        Logger.d(getClass().getSimpleName() + " SendJSMessage : " + jsonMsg);
+        //Logger.d(getClass().getSimpleName() + " SendJSMessage : " + jsonMsg);
         mJSONParser.putJSONObject(jsonMsg);
         if (mJSONParser.getId() >= 0 &&
                 mJSONParser.getResult() == null &&

@@ -22,6 +22,7 @@ public class GrantAccessCommand implements RequestCommand {
             GrantAccess msg = new GrantAccess();
             msg.setCorrelationID(id);
             try {
+                //Logger.d(getClass().getSimpleName() + " Sending Grant Access: " + jsonParameters);
                 proxy.sendRPCRequest(msg);
             } catch (Throwable e) {
                 Logger.e(getClass().getSimpleName() + " can't send message", e);

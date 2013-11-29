@@ -23,6 +23,7 @@ import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
+import com.ford.syncV4.proxy.rpc.CancelAccessResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
@@ -488,8 +489,22 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
+    public void onCancelAccessResponse(CancelAccessResponse response) {
+        ResponseCommand command = new com.ford.avarsdl.responses.CancelAccessResponse();
+        try {
+            byte serializeMethod = 2;
+            command.execute(response.getCorrelationID(),
+                    response.serializeJSON(serializeMethod).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Logger.e(getClass().getSimpleName() + " onCancelAccessResponse " + e);
+        }
+    }
+
+    @Override
     public void onOnControlChanged(OnControlChanged notification) {
         //SafeToast.showToastAnyThread("onControlChanged " + notification);
+        Logger.d(getClass().getSimpleName() + " onControlChanged " + notification);
         NotificationCommand command = commandsHashTable.get(Names.OnControlChanged);
         if (command != null) {
             String method = RPCConst.CN_REVSDL + "." + Names.OnControlChanged;
@@ -526,7 +541,15 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public void onOnPresetsChanged(OnPresetsChanged notification) {
-        SafeToast.showToastAnyThread("OnPresetsChanged: " + notification);
+        //SafeToast.showToastAnyThread("OnPresetsChanged: " + notification);
+
+        NotificationCommand command = commandsHashTable.get(Names.OnPresetsChanged);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnPresetsChanged;
+            command.execute(method, notification);
+        } else {
+            Logger.w(getClass().getSimpleName() + " NotificationCommand NULL");
+        }
     }
 
     @Override

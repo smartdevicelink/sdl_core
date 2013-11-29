@@ -24,6 +24,7 @@ public class TuneUpCommand implements RequestCommand {
             msg.setCorrelationID(id);
 
             try {
+                //Logger.d(getClass().getSimpleName() + "Sending Tune Up: " + jsonParameters);
                 proxy.sendRPCRequest(msg);
             } catch (SyncException e) {
                 Logger.e(getClass().getSimpleName() + " can't send message", e);
