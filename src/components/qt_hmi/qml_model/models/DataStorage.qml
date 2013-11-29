@@ -471,14 +471,14 @@ QtObject {
 
     function setSystemContext () {
         console.debug("enter")
-        if (activeVR) {
-            systemContext = Common.SystemContext.SYSCTXT_VRSESSION
+        if (popups > 0) {
+            systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
         }
         else if (activeAlert) {
             systemContext = Common.SystemContext.SYSCTXT_ALERT
         }
-        else if (popups > 0) {
-            systemContext = Common.SystemContext.SYSCTXT_HMI_OBSCURED
+        else if (activeVR) {
+            systemContext = Common.SystemContext.SYSCTXT_VRSESSION
         }
         else if (contentLoader.item !== null) {
             systemContext = contentLoader.item.systemContext

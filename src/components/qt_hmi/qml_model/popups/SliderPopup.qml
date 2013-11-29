@@ -95,7 +95,7 @@ ContextPopup {
         Timer {
             id: timer
             interval: dataContainer.uiSlider.timeout
-            triggeredOnStart:true
+            triggeredOnStart:false
             onTriggered: {
                 console.debug("triggered")
                 complete(Common.Result.SUCCESS)
