@@ -44,6 +44,7 @@ GeneralView {
         anchors.fill: parent
 
         playerState: dataContainer.btPlayerState
+        image: playerState.albumImage
 
         buttons: [
             OvalButton {

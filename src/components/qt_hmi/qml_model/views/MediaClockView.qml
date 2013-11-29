@@ -37,6 +37,7 @@ import "../models/Constants.js" as Constants
 import "../models/Internal.js" as Internal
 
 Item {
+    property alias time: time.text
     Text {
         id: time
         anchors.left: parent.left
@@ -44,8 +45,6 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         horizontalAlignment: Text.AlignRight
         color: "white"
-        text: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
-                                                     : "02:36" //TODO {Aleshin}: get track time for all players except SDL
         font.pixelSize: 18
     }
 

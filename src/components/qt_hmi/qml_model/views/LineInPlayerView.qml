@@ -42,6 +42,7 @@ GeneralView {
         id: lineInPlayer
         playerName: "LineIn"
         anchors.fill: parent
+        image: playerState.albumImage
         playerState: dataContainer.linePlayerState
 
         buttons: [
