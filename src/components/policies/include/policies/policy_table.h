@@ -101,6 +101,7 @@ class PolicyTable {
     /**
      * @brief is Policy Table valid
      **/
+    // TODO(YS): 'is' is a bool
     PTValidationResult is_pt_valid_;
 
     /**

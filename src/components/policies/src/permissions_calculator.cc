@@ -88,7 +88,7 @@ const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
 
 //----------------------------------------------------------------------------
 
-PermissionResult::eType PermissionsCalculator::CalcPermissions(
+PermissionResult PermissionsCalculator::CalcPermissions(
     const SmartObject& pt_object,
     const uint32_t app_id,
     const SmartObject& rpc,
@@ -135,7 +135,7 @@ Priority::eType PermissionsCalculator::GetPriority(
 
 //----------------------------------------------------------------------------
 
-PermissionResult::eType
+PermissionResult
   PermissionsCalculator::CalcPermissionsByGroups(
     const SmartObject& pt_object,
     const std::vector<std::string> rpc_groups,

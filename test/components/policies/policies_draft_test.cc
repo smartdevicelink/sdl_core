@@ -62,7 +62,7 @@ namespace policies_draft_test {
       PolicyManagerImpl::StorePolicyTable();
     }
 
-    ::policies::InitResult::eType init_result;
+    ::policies::InitResult init_result;
   };
 
   class Policies_test: public ::testing::Test {
@@ -146,16 +146,14 @@ namespace policies_draft_test {
     policy_config.set_preload_pt_file_name("missing_too.json");
     PolicyManagerTest policy_manager(policy_config);
     ASSERT_TRUE(NULL == policy_manager.getPolicyTable());
-    ASSERT_EQ(::policies::InitResult::INIT_FAILED,
-              policy_manager.init_result);
+    ASSERT_EQ(::policies::INIT_FAILED, policy_manager.init_result);
 
     ::policies::CheckPermissionResult perm_result =
     policy_manager.CheckPermission(
         789,  // some app
         so_ns::SmartObject(),
         mobile_apis::HMILevel::HMI_BACKGROUND);
-    ASSERT_EQ(::policies::PermissionResult::PERMISSION_INIT_FAILED,
-              perm_result.result);
+    ASSERT_EQ(::policies::PERMISSION_INIT_FAILED, perm_result.result);
   }
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
@@ -166,7 +164,7 @@ namespace policies_draft_test {
 
     ASSERT_EQ(::policies::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
               policy_manager.getPolicyTable()->Validate());
-    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::INIT_OK, policy_manager.init_result);
   }
 
   TEST_F(Policies_test, test_policies_Preload_bad_json_file_test) {
@@ -177,7 +175,7 @@ namespace policies_draft_test {
 
     ASSERT_EQ(::policies::PTValidationResult::VALIDATION_FAILED_BAD_JSON,
               policy_manager.getPolicyTable()->Validate());
-    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::INIT_OK, policy_manager.init_result);
   }
 
   TEST_F(Policies_test, test_policies_reInit_test) {
@@ -186,14 +184,14 @@ namespace policies_draft_test {
     policy_config.set_preload_pt_file_name("bad.json");
     PolicyManagerTest policy_manager(policy_config);
 
-    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::INIT_OK, policy_manager.init_result);
 
     policy_config.set_pt_file_name("nofile");
     policy_config.set_preload_pt_file_name("nofile");
 
     policy_manager.Init(policy_config);
 
-    ASSERT_EQ(::policies::InitResult::INIT_OK, policy_manager.init_result);
+    ASSERT_EQ(::policies::INIT_OK, policy_manager.init_result);
     ASSERT_FALSE(NULL == policy_manager.getPolicyTable());
   }
 

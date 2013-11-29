@@ -49,17 +49,17 @@ log4cxx::LoggerPtr PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
 PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager()
   , policy_config_()
-  , policy_table_(0)
-  , init_result_(InitResult::INIT_FAILED) {
+  , policy_table_(NULL)
+  , init_result_(InitResult::INIT_FAILED){
 }
 
 //---------------------------------------------------------------
 
 PolicyManagerImpl::~PolicyManagerImpl() {
   StorePolicyTable();
-  if (0 != policy_table_) {
+  if (NULL != policy_table_) {
     delete policy_table_;
-    policy_table_ = 0;
+    policy_table_ = NULL;
   }
 }
 
@@ -72,14 +72,14 @@ PolicyManagerImpl* PolicyManagerImpl::instance() {
 
 //---------------------------------------------------------------
 
-InitResult::eType PolicyManagerImpl::Init(
+InitResult PolicyManagerImpl::Init(
   const PolicyConfiguration& config) {
   // TODO(anyone): Provide some mechanism for recovery (from Preload???)
   // if PT file corrupted (e.g. bad json)
   policy_config_ = config;
 
   std::string pt_string;
-  if (0 == policy_table_) {
+  if (NULL == policy_table_) {
     if (true == file_system::ReadFile(policy_config_.pt_file_name(),
                                       pt_string)) {
       policy_table_ = new PolicyTable(pt_string,
@@ -118,7 +118,7 @@ CheckPermissionResult
 
   if (init_result_ == InitResult::INIT_FAILED) {
     result.result = PermissionResult::PERMISSION_INIT_FAILED;
-  } else if (0 != pt
+  } else if (NULL != pt
             && PTValidationResult::VALIDATION_OK == pt->Validate()) {
     smart_objects::SmartObject& pt_object = pt->AsSmartObject();
 
@@ -138,7 +138,7 @@ CheckPermissionResult
 //---------------------------------------------------------------
 
 void PolicyManagerImpl::StorePolicyTable() {
-  if (0 != policy_table_) {
+  if (NULL != policy_table_) {
     if (smart_objects::SmartType_Null !=
         policy_table_->AsSmartObject().getType()) {
       const std::string pt_string = policy_table_->AsString();
@@ -155,8 +155,8 @@ void PolicyManagerImpl::StorePolicyTable() {
 
 //---------------------------------------------------------------
 
-policies::PolicyTable* policies::PolicyManagerImpl::policy_table() const {
-  if (0 == policy_table_) {
+PolicyTable* PolicyManagerImpl::policy_table() const {
+  if (NULL == policy_table_) {
     LOG4CXX_ERROR(logger_, "Accessing not initialized policy table.");
   }
   return policy_table_;

@@ -77,12 +77,12 @@ enum eType {
 
 namespace Priority {
 enum eType {
+  INVALID_ENUM = -1,
   PRIORITY_NONE = 0,
   PRIORITY_NORMAL,
   PRIORITY_COMMUNICATION,
   PRIORITY_NAVIGATION,
   PRIORITY_EMERGENCY,
-  INVALID_ENUM,
 };
 }  // namespace Priority
 

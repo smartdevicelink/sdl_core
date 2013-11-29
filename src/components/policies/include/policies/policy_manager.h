@@ -44,8 +44,7 @@ namespace policies {
  /**
  * @brief enumeration of result for asking permissions by application
  **/
-namespace PermissionResult {
-enum eType {
+enum PermissionResult {
   /**
    * @brief RPC is allowed.
    */
@@ -73,12 +72,15 @@ enum eType {
    */
   PERMISSION_PENDING_USER_CONSENT
 };
-}  // namespace PermissionResult
 
 // Namespace is neseccary because it is used for automatic string<->enum
 // convertion using schema
 namespace Priority {
 enum eType {
+  /**
+   * @brief Mandatory item. Used for enum<->string convertion
+   */
+  INVALID_ENUM = -1,
   /**
    * @brief NONE
    */
@@ -99,19 +101,13 @@ enum eType {
    * @brief EMERGENCY
    */
   PRIORITY_EMERGENCY,
-  /**
-   * @brief Mandatory item. Used for enum<->string convertion
-   */
-  INVALID_ENUM,
 };
 }  // namespace Priority
-
 
 /**
  * @brief Init() result enumeration
  **/
-namespace InitResult {
-enum eType {
+enum InitResult {
   /**
    * @brief PT file loaded successfully
    **/
@@ -124,10 +120,9 @@ enum eType {
    **/
   INIT_FAILED
 };
-}  // namespace InitResult
 
 struct CheckPermissionResult {
-      PermissionResult::eType result;
+      PermissionResult result;
       Priority::eType priority;
 };
 
@@ -147,7 +142,7 @@ class PolicyManager {
     *
     * @param config PolicyManager configuration
     */
-    virtual InitResult::eType Init(const PolicyConfiguration& config) = 0;
+    virtual InitResult Init(const PolicyConfiguration& config) = 0;
 
     /**
      * @brief Checking permissions for application whether rpc is allowed.
