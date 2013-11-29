@@ -70,9 +70,12 @@ Item {
         property var timer
 
         property var softButtonsListExample : [
-            {softButtonID:0, isHighlighted:true,  systemAction:Common.SystemAction.DEFAULT_ACTION,type:Common.SoftButtonType.SBT_TEXT ,text:"Default Action"},
-            {softButtonID:1, isHighlighted:false, systemAction:Common.SystemAction.STEAL_FOCUS,   type:Common.SoftButtonType.SBT_IMAGE,text:"Steal Focus"},
-            {softButtonID:2, isHighlighted:false, systemAction:Common.SystemAction.KEEP_CONTEXT,  type:Common.SoftButtonType.SBT_BOTH, text:"Keep context"}]
+            {softButtonID:0, isHighlighted:true,  systemAction:Common.SystemAction.DEFAULT_ACTION,
+                type:Common.SoftButtonType.SBT_TEXT ,text:"Default Action"},
+            {softButtonID:1, isHighlighted:false, systemAction:Common.SystemAction.STEAL_FOCUS,
+                type:Common.SoftButtonType.SBT_IMAGE,text:"Steal Focus"},
+            {softButtonID:2, isHighlighted:false, systemAction:Common.SystemAction.KEEP_CONTEXT,
+                type:Common.SoftButtonType.SBT_BOTH, text:"Keep context"}]
 
         //initialization for each test
         function createMessageView(appID) {
@@ -101,6 +104,7 @@ Item {
 
         //cleanup for each test
         function destroyView() {
+            //Clear Loader with MainWindow, which delete own models and views
             mainWindowLoader.source = ""
         }
 
@@ -124,7 +128,9 @@ Item {
         //Create ScrollableMessageView and check data
         function test_01_create() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:2000, messageText:{fieldText:"Simple ScrollableMessage text"},   softButtons:softButtonsListExample}
+            var initData  = {appID:1, timeout:2000,
+                messageText:{fieldText:"Simple ScrollableMessage text"},
+                softButtons:softButtonsListExample}
             createMessageView(initData.appID)
 
             var result = sdlUIProxy.scrollableMessage(initData)
@@ -137,23 +143,25 @@ Item {
             //check button equals to init data
             if (messageModel.softButtons.count === initData.softButtons.length) {
                 for (var i = 0, len = messageModel.softButtons.count; i < len; i++) {
-                    if (!qtest_compareInternal(messageModel.softButtons.get(i).softButtonID, initData.softButtons[i].softButtonID))
+                    var act = messageModel.softButtons.get(i)
+                    var exp = initData.softButtons[i]
+                    if (!act.softButtonID === exp.softButtonID)
                         fail("wrong softButtonID in button")
-                    if (!qtest_compareInternal(messageModel.softButtons.get(i).isHighlighted,initData.softButtons[i].isHighlighted))
+                    if (!act.isHighlighted === exp.isHighlighted)
                         fail("wrong isHighlighted in button")
-                    if (!qtest_compareInternal(messageModel.softButtons.get(i).systemAction, initData.softButtons[i].systemAction))
+                    if (!act.systemAction ===  exp.systemAction)
                         fail("wrong systemAction in button")
-                    if (!qtest_compareInternal(messageModel.softButtons.get(i).text,         initData.softButtons[i].text))
+                    if (!act.text === exp.text)
                         fail("wrong text in button")
                 }
             } else {
                 fail("wrong buttons count created")
             }
             //check model data equals to init data
-            compare(messageModel.running, true)
-            compare(messageModel.longMessageText, initData.messageText.fieldText)
-            compare(messageModel.appId, initData.appID)
-            compare(messageModel.timeout, initData.timeout)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
+            compare(messageModel.longMessageText, initData.messageText.fieldText, "wrong messageText")
+            compare(messageModel.appId, initData.appID, "wrong application ID")
+            compare(messageModel.timeout,initData.timeout, "wrong timeout")
             verify(messageModel.async !== undefined, "async in undefined")
             destroyView()
             console.debug("exit")
@@ -172,10 +180,10 @@ Item {
                 fail("ScrollableMessage return error state")
             //NOTE: don't check timer - it has been triggered immediately (timeout is 0)
             //MessageView call @complete immediately
-            compare(messageModel.running, false)
-            compare(messageModel.softButtons.count, initData.softButtons.length)
-            compare(messageModel.longMessageText, initData.messageText.fieldText)
-            compare(messageModel.timeout, initData.timeout)
+            compare(messageModel.running, false, "ScrollableMessage didn't stop")
+            compare(messageModel.softButtons.count, initData.softButtons.length, "wrong buttons count")
+            compare(messageModel.longMessageText, initData.messageText.fieldText, "wrong messageText")
+            compare(messageModel.timeout, initData.timeout, "wrong timeout")
             destroyView()
             console.debug("exit")
         }
@@ -183,8 +191,10 @@ Item {
         //call @scrollableMessage twice (after first view has closed)
         function test_03_doubleCreate() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:0,    messageText:{fieldText:"Simple text"},   softButtons:softButtonsListExample}
-            var initData2 = {appID:1, timeout:10000,messageText:{fieldText:"Simple text 2"}, softButtons:[]}
+            var initData  = {appID:1, timeout:0,    messageText:{fieldText:"Simple text"},
+                softButtons:softButtonsListExample}
+            var initData2 = {appID:1, timeout:10000,messageText:{fieldText:"Simple text 2"},
+                softButtons:[]}
             createMessageView(initData.appID)
 
             //create view
@@ -199,10 +209,10 @@ Item {
                 fail("ScrollableMessage return error state")
             if(actualResult2.__errno !== undefined)
                 fail("ScrollableMessage return error state")
-            compare(messageModel.running, true)
-            compare(messageModel.longMessageText, initData2.messageText.fieldText)
-            compare(messageModel.timeout,initData2.timeout)
-            compare(messageModel.appId, initData2.appID)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
+            compare(messageModel.longMessageText, initData2.messageText.fieldText, "wrong messageText")
+            compare(messageModel.timeout,initData2.timeout, "wrong timeout")
+            compare(messageModel.appId, initData2.appID, "wrong application ID")
             verify(messageModel.async !== undefined, "async in undefined")
             destroyView()
             console.debug("exit")
@@ -211,8 +221,10 @@ Item {
         //call @scrollableMessage twice (before first view is closed)
         function test_04_doubleCreateError() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple text"},   softButtons:softButtonsListExample}
-            var initData2 = {appID:1, timeout:10000, messageText:{fieldText:"Simple text 2"}, softButtons:[]}
+            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple text"},
+                softButtons:softButtonsListExample}
+            var initData2 = {appID:1, timeout:10000, messageText:{fieldText:"Simple text 2"},
+                softButtons:[]}
             createMessageView(initData.appID)
 
             //create view
@@ -227,11 +239,11 @@ Item {
                 fail("ScrollableMessage return error state")
             if(actualResult2.__errno === undefined)
                 fail("ScrollableMessage don't return error state")
-            compare(messageModel.running, true)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
             compare(messageView, firstView, "creating new view insteed stay first")
-            compare(messageModel.longMessageText, initData.messageText.fieldText)
-            compare(messageModel.appId, initData.appID)
-            compare(messageModel.timeout, initData.timeout)
+            compare(messageModel.longMessageText, initData.messageText.fieldText, "wrong messageText")
+            compare(messageModel.timeout, initData.timeout, "wrong timeout")
+            compare(messageModel.appId, initData.appID, "wrong application ID")
             verify(messageModel.async !== undefined, "async in undefined")
             destroyView()
             console.debug("exit")
@@ -240,13 +252,15 @@ Item {
         //call @scrollableMessage and check close
         function test_05_ClickDefaultAction() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},   softButtons:softButtonsListExample}
+            var initData  = {appID:1, timeout:20000,
+                messageText:{fieldText:"Simple ScrollableMessage text"},
+                softButtons:softButtonsListExample}
             createMessageView(initData.appID)
 
             var result = sdlUIProxy.scrollableMessage(initData)
             getMessageViewModel()
 
-            compare(messageModel.running, true)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
             if(result.__errno !== undefined)
                 fail("ScrollableMessage return error state")
             //look for DEFAULT_ACTION button
@@ -255,9 +269,11 @@ Item {
             //wait rendering for correct click position
             waitForRendering(mainWindowLoader)
             //Press default button
-            mouseClick(defaultActionButton, defaultActionButton.width/2, defaultActionButton.height/2, Qt.LeftButton, Qt.NoModifier, 0)
+            mouseClick(defaultActionButton, defaultActionButton.width/2, defaultActionButton.height/2,
+                       Qt.LeftButton, Qt.NoModifier, 0)
             //check that MessageView (in contentLoader) is unloaded and deleted
-            verify(contentLoader.source.toString().indexOf("ScrollableMessageView.qml") < 0, "MessageView should be unloaded")
+            var isLoaded = (contentLoader.source.toString().indexOf("ScrollableMessageView.qml") > 0)
+            verify(!isLoaded, "MessageView should be unloaded")
             //wait for delete messageView by GC
             wait(0);
             verify(messageView === null, "MessageView should be deleted")
@@ -268,14 +284,15 @@ Item {
         //call @scrollableMessage and check restart timer
         function test_06_ClickStealFocus() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},   softButtons:softButtonsListExample}
+            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},
+                softButtons:softButtonsListExample}
             createMessageView(initData.appID)
 
             var result = sdlUIProxy.scrollableMessage(initData)
             getMessageViewModel()
 
             //check
-            compare(messageModel.running, true)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
             if(result.__errno !== undefined)
                 fail("ScrollableMessage return error state")
             //look for STEAL_FOCUS button
@@ -283,10 +300,13 @@ Item {
             verify(stealFocusButton !== undefined, "Not created button with STEAL_FOCUS")
             //wait rendering for correct buttons size for correct click position
             waitForRendering(mainWindowLoader)
-            mouseClick(stealFocusButton, stealFocusButton.width/2, stealFocusButton.height/2, Qt.LeftButton, Qt.NoModifier, 0)
+            mouseClick(stealFocusButton, stealFocusButton.width/2, stealFocusButton.height/2,
+                       Qt.LeftButton, Qt.NoModifier, 0)
             //check that MediaView loaded in loade
-            var viewQMlFileName = dataContainer.currentApplication.isMediaApplication ? "SDLPlayerView.qml" : "SDLNonMediaView.qml"
-            verify(contentLoader.source.toString().indexOf(viewQMlFileName) > 0, "SDLPlayerView should be loaded")
+            var viewQMlFileName = dataContainer.currentApplication.isMediaApplication ?
+                        "SDLPlayerView.qml" : "SDLNonMediaView.qml"
+            var isLoaded = (contentLoader.source.toString().indexOf(viewQMlFileName) > 0)
+            verify(isLoaded, "SDLPlayerView/SDLNonMediaView should be loaded")
             destroyView()
             console.debug("exit")
         }
@@ -294,14 +314,15 @@ Item {
         //call @scrollableMessage and check restart timer
         function test_07_ClickKeepContex() {
             console.debug("enter")
-            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},   softButtons:softButtonsListExample}
+            var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},
+                softButtons:softButtonsListExample}
             createMessageView(initData.appID)
 
             var result = sdlUIProxy.scrollableMessage(initData)
             getMessageViewModel()
 
             //check
-            compare(messageModel.running, true)
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
             if(result.__errno !== undefined)
                 fail("ScrollableMessage return error state")
             //look for KEEP_CONTEXT button
@@ -310,9 +331,11 @@ Item {
             //wait rendering for correct click position
             waitForRendering(mainWindowLoader)
             //Press button
-            mouseClick(keepContexButton, keepContexButton.width/2, keepContexButton.height/2, Qt.LeftButton, Qt.NoModifier, 0)
+            mouseClick(keepContexButton, keepContexButton.width/2, keepContexButton.height/2,
+                       Qt.LeftButton, Qt.NoModifier, 0)
             //check that MessageView is still unloaded loaded
-            verify(contentLoader.source.toString().indexOf("ScrollableMessageView.qml") > 0, "MessageView should be loaded")
+            var isLoaded = (contentLoader.source.toString().indexOf("ScrollableMessageView.qml") > 0)
+            verify(isLoaded, "MessageView should be loaded")
             //verify restarted timer
             timer = messageView.getTimer()
             verify(timer.running === true, "Timer is not restarted by KEEP_CONTEXT button")
