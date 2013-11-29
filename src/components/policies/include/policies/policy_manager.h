@@ -121,9 +121,42 @@ enum InitResult {
   INIT_FAILED
 };
 
+/**
+ * @brief Enumeration for state wich reflects states of User consent procedure
+ *        @TODO (anyone) for future use
+ */
+enum eType {
+  /**
+   * @brief User was not asked for consent
+   */
+  STATE_IDLE = 0,
+  /**
+   * @brief User was asked just now for consent
+   */
+  STATE_PENDING_CONSENT,
+  /**
+   * @brief User answered 'YES' just now
+   */
+  STATE_CONSENT_YES,
+  /**
+   * @brief User answered 'NO' just now
+   */
+  STATE_CONSENT_NO
+};
+
+/**
+ * @biref Struct contains data of result to return when Policy Manager
+ *        is requested for CheckPermission()
+ */
 struct CheckPermissionResult {
-      PermissionResult result;
-      Priority::eType priority;
+  /**
+   * @brief Permission result
+  */
+  PermissionResult result;
+  /**
+   * @brief Stored priority for current application
+   */
+  Priority::eType priority;
 };
 
 /**
