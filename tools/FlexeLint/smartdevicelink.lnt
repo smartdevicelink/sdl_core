@@ -9,6 +9,8 @@
 // html report
 // env-html.lnt
 
+env-xml.lnt
+
 // misra rules
 // au-misra-cpp.lnt
 
