@@ -1049,7 +1049,8 @@ void MessageHelper::SendNaviStartStream(
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1094,7 +1095,8 @@ void MessageHelper::SendNaviStopStream(int connection_key) {
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1304,7 +1306,10 @@ bool MessageHelper::VerifyApplicationName(
 
   if (msg_params.keyExists(strings::tts_name)) {
     for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
+
+      const std::string& tts_name =
+            msg_params[strings::tts_name][i][strings::text].asString();
+
         if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
             ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
           printf("Invalid characters in tts name.\n");
@@ -1315,7 +1320,20 @@ bool MessageHelper::VerifyApplicationName(
 
   const std::string& name = msg_params[strings::app_name].asString();
 
-  if ((name[0] == '\n') || (name[0] == ' ') ||
+  // Expecting for some chars different from newlines and spaces in the appName
+  std::string name_copy = name;
+  std::string::iterator name_copy_new_end =
+      std::remove_if(
+          name_copy.begin(),
+          std::remove(name_copy.begin(), name_copy.end(), ' '),
+          [](char c){return 13 == static_cast<int>(c);});
+
+  if (std::string(name_copy.begin(), name_copy_new_end).empty()) {
+    printf("Application name is empty.\n");
+    return false;
+  }
+
+  if ((name[0] == '\n') ||
       ((name[0] == '\\') && (name[1] == 'n'))) {
     printf("Invalid characters in application name.\n");
     return false;
