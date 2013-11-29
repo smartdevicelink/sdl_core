@@ -197,6 +197,64 @@ SDL.SDLModel = Em.Object.create({
         "USER_DISALLOWED"           : 23
     },
 
+
+
+    /**
+     * Info navigation data for ShowConstantTBT request
+     *
+     * @type: {Object}
+     */
+    constantTBTParams: {
+        "navigationTexts":[
+            {
+                "fieldName": "navigationText1",
+                "fieldText": "mainField1"
+            },
+            {
+                "fieldName": "navigationText2",
+                "fieldText": "mainField2"
+            },
+            {
+                "fieldName": "ETA",
+                "fieldText": "mainField3"
+            },
+            {
+                "fieldName": "totalDistance",
+                "fieldText": "mainField4"
+            },
+            {
+                "fieldName": "navigationText",
+                "fieldText": "mainField5"
+            },
+            {
+                "fieldName": "timeToDestination",
+                "fieldText": "mainField6"
+            }
+        ],
+        "softButtons": [
+            {
+                "text" : "Menu",
+                "isHighlighted" : true,
+                "softButtonID" : 1
+            },
+            {
+                "text" : "Custom button",
+                "isHighlighted" : false,
+                "softButtonID" : 2
+            },
+            {
+                "text" : "+",
+                "isHighlighted" : true,
+                "softButtonID" : 3
+            },
+            {
+                "text" : "-",
+                "isHighlighted" : false,
+                "softButtonID" : 4
+            }
+        ]
+    },
+
     /**
      * List of registered applications, To prevent errors without registered
      * application "-1" used as test appID
@@ -323,7 +381,7 @@ SDL.SDLModel = Em.Object.create({
      */
     onTouchEvent: function(event){
 
-        if (event.target.parentElement.className.indexOf("navButton") >= 0) {
+        if (event.target.parentElement.className.indexOf("navButton") >= 0 || event.target.className.indexOf("navButton") >= 0) {
             return;
         }
 

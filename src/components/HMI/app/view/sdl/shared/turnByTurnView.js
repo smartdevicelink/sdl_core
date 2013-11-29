@@ -38,13 +38,8 @@ SDL.TurnByTurnView = SDL.SDLAbstractView
 
         classNames: 'TurnByTurnView',
 
-//        classNameBindings: [
-//            'active:active'
-//        ],
-
         classNameBindings: [
-            'this.activeState:active_state:inactive_state',
-           // 'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
+            'this.activeState:active_state:inactive_state'
         ],
 
         activeState: function(){
