@@ -193,19 +193,16 @@ bool LifeCycle::InitMessageBroker() {
       *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
       NULL));
   mb_server_thread_->Start(false);
-  NameMessageBrokerThread(*mb_thread_, "MessageBrokerTCPServerThread");
+  NameMessageBrokerThread(*mb_server_thread_, "MessageBrokerTCPServerThread");
 
   LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
   mb_adapter_thread_  = new System::Thread(
     new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
       *mb_adapter_,
-      &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
+      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
       NULL));
   mb_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_thread_, "MessageBrokerAdapterThread");
-
-  mb_adapter_->registerController();
-  mb_adapter_->SubscribeTo();
+  NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
 
   return true;
 }

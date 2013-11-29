@@ -31,6 +31,7 @@
  */
 
 #include <string>
+
 #include "hmi_message_handler/messagebroker_adapter.h"
 
 namespace hmi_message_handler {
@@ -114,6 +115,13 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
   MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
+}
+
+void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
+  PassToThread(threads::Thread::CurrentId());
+  registerController();
+  SubscribeTo();
+  return MethodForReceiverThread(param);
 }
 
 void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {

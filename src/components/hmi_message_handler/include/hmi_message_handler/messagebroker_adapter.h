@@ -34,14 +34,17 @@
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MESSAGEBROKER_ADAPTER_H_
 
 #include <string>
+
 #include "mb_controller.hpp"
 #include "hmi_message_handler/hmi_message_adapter.h"
 #include "utils/logger.h"
+#include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {
 
 class MessageBrokerAdapter : public HMIMessageAdapter,
-    public NsMessageBroker::CMessageBrokerController {
+    public NsMessageBroker::CMessageBrokerController,
+    public threads::SingleThreadValidator {
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler, const std::string&
                                 server_address, uint16_t port);
@@ -69,6 +72,8 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
   void processNotification(Json::Value& root);
 
   void SubscribeTo();
+
+  void* SubscribeAndBeginReceiverThread(void* param);
 
  protected:
   void ProcessRecievedFromMB(Json::Value& root);
