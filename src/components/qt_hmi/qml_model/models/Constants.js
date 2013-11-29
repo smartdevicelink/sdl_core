@@ -175,7 +175,7 @@ var animationDuration = 500
 var warningScreenDuration = 1000
 
 // Timer to check how long preset button is pressed.
-var presetButtonTimer = 400
+var presetButtonTimer = 800
 
 // Spacing between icon and item in list
 var iconItemListSpacing = 20

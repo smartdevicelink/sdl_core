@@ -253,32 +253,29 @@ Item {
 
             Timer {
                 id: timer
-                interval: Constants.presetButtonTimer
+                interval: 800;//Constants.presetButtonTimer
                 repeat: false
                 triggeredOnStart: false
+                onTriggered: {
+                    console.log("preset button hold")
+                    presetsRow.clickProcessed = true
+                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + presetsRow.selectedIndex, Common.ButtonPressMode.LONG, undefined)
+                }
             }
 
             onPresetButtonPressed: {
+                console.log("preset button pressed")
                 timer.start()
                 clickProcessed  = false
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONDOWN, undefined)
             }
 
             onPresetButtonReleased: {
+                console.log("preset button released")
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
                 timer.stop()
                 if (!clickProcessed) {
                     sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
-                }
-            }
-
-            Connections {
-                target: timer
-                onTriggered: {
-                    if(!clickProcessed) {
-                        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
-                        clickProcessed = true
-                    }
                 }
             }
         }
