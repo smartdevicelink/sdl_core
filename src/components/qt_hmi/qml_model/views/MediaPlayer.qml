@@ -253,7 +253,7 @@ Item {
 
             Timer {
                 id: timer
-                interval: 800;//Constants.presetButtonTimer
+                interval: Constants.presetButtonTimer
                 repeat: false
                 triggeredOnStart: false
                 onTriggered: {
