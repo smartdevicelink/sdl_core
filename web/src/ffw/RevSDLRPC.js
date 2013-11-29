@@ -90,7 +90,10 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         switch (response.id) {
             case this.GrantAccessRequestId:
-                MFT.AppController.changeAccessStatus(response.result);
+                MFT.AppController.changeAccessStatus('grant', response.result);
+                break;
+            case this.CancelAccessRequestId:
+                MFT.AppController.changeAccessStatus('cancel', response.result);
                 break;
             case this.StartScanRequestId:
                 if (!response.result.success) {
