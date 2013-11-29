@@ -46,7 +46,7 @@ using namespace sync_primitives;
 
 namespace {
 
-const char* kUnknownName = "_UnknownThread";
+const char* kUnknownName = "UnknownThread";
 
 log4cxx::LoggerPtr g_logger =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
@@ -125,7 +125,9 @@ string ThreadManager::GetName(PlatformThreadHandle id) const {
     return found->second;
   } else {
     LOG4CXX_WARN(g_logger, "Thread doesn't have associated name");
-    return kUnknownName;
+    stringstream ss;
+    ss<<kUnknownName<<id;
+    return ss.str();
   }
 }
 

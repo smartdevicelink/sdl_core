@@ -36,9 +36,20 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
+using threads::Thread;
+
 namespace main_namespace {
 log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("appMain"));
+
+namespace {
+
+void NameMessageBrokerThread(const System::Thread& thread,
+                             const std::string& name) {
+  Thread::SetNameForId(Thread::Id(thread.GetId()), name);
+}
+
+} // namespace
 
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
@@ -172,6 +183,9 @@ bool LifeCycle::InitMessageBroker() {
       *message_broker_, &NsMessageBroker::CMessageBroker::MethodForThread,
       NULL));
   mb_thread_->Start(false);
+  // Thread can be named only when started because before that point
+  // thread doesn't have valid Id to associate name with
+  NameMessageBrokerThread(*mb_thread_, "MessageBrokerThread");
 
   LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
   mb_server_thread_  = new System::Thread(
@@ -179,6 +193,7 @@ bool LifeCycle::InitMessageBroker() {
       *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
       NULL));
   mb_server_thread_->Start(false);
+  NameMessageBrokerThread(*mb_thread_, "MessageBrokerTCPServerThread");
 
   LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
   mb_adapter_thread_  = new System::Thread(
@@ -187,6 +202,7 @@ bool LifeCycle::InitMessageBroker() {
       &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
       NULL));
   mb_adapter_thread_->Start(false);
+  NameMessageBrokerThread(*mb_thread_, "MessageBrokerAdapterThread");
 
   mb_adapter_->registerController();
   mb_adapter_->SubscribeTo();
