@@ -56,73 +56,73 @@ class PolicyTableSchema {
     /**
      * @brief String constant for "policy_table" section.
      */
-    static const std::string kStrPolicyTable;
+    static const char* kStrPolicyTable;
 
     /**
      * @brief String constant for "module_config" section.
      */
-    static const std::string kStrModuleConfig;
+    static const char* kStrModuleConfig;
 
     /**
      * @brief String constant for "functional_groupings" section.
      */
-    static const std::string kStrFunctionalGroupings;
+    static const char* kStrFunctionalGroupings;
 
     /**
      * @brief String constant for "app_policies" section.
      */
-    static const std::string kStrAppPolicies;
+    static const char* kStrAppPolicies;
 
     /**
      * @brief String constant for "endpoints" section.
      */
-    static const std::string kStrEndpoints;
+    static const char* kStrEndpoints;
 
     /**
      * @brief String constant for "default" section.
      */
-    static const std::string kStrDefault;
+    static const char* kStrDefault;
 
     /**
      * @brief String constant for "user_consent_prompt" section.
      */
-    static const std::string kStrUserConsentPrompt;
+    static const char* kStrUserConsentPrompt;
 
     /**
      * @brief String constant for "rpcs" section.
      */
-    static const std::string kStrRpcs;
+    static const char* kStrRpcs;
 
     /**
      * @brief String constant for "hmi_levels" section.
      */
-    static const std::string kStrHmiLevels;
+    static const char* kStrHmiLevels;
 
     /**
      * @brief String constant for "parameters" section.
      */
-    static const std::string kStrParameters;
+    static const char* kStrParameters;
 
     /**
      * @brief String constant for "groups" section.
      */
-    static const std::string kStrGroups;
+    static const char* kStrGroups;
 
     /**
      * @brief String constant for "nicknames" section.
      */
-    static const std::string kStrNicknames;
+    static const char* kStrNicknames;
 
     /**
      * @brief String constant for "priority" section.
      */
-    static const std::string kStrPriority;
+    static const char* kStrPriority;
 
   protected:
     /**
      * @brief Hidden constructor to prevent missuse. Only called from inside.
      */
-    PolicyTableSchema(void) {}
+    PolicyTableSchema(void);
 
     /**
      * @brief Virtual destructor.
@@ -130,9 +130,23 @@ class PolicyTableSchema {
     virtual ~PolicyTableSchema(void) {}
 
     /**
-     * @brief Creates schema for Policy Table
+     * @brief Returns a schema.
+     *
+     * If schema hasn't been created yet the method creates it and returns
+     * a newly created schema.
+     *
+     * @return If the schema has already been created just returns it,
+     *  otherwise creates it and returns it.
      */
-    virtual NsSmartDeviceLink::NsSmartObjects::CSmartSchema CreateSchema(void);
+    virtual NsSmartDeviceLink::NsSmartObjects::CSmartSchema GetSchema(void);
+
+    /**
+     * @brief Creates schema for Policy Table
+     *
+     * @brief Root schema item of the newly created schema.
+     */
+    virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
+      CreateSchema(void);
 
     /**
      * @brief Creates "module_config" schema item
@@ -169,6 +183,12 @@ class PolicyTableSchema {
      */
     virtual utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem>
       CreateAppPoliciesDefault(void);
+
+  private:
+    /**
+     * @brief Contains a schema if it is already been created
+     */
+    utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> schema_;
 };
 
 }  // namespace policies

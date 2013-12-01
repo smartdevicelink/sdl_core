@@ -60,7 +60,8 @@ class PolicyTable {
      * @param policy_table_string String containing policy table 
      * @param pt_type PolicyTable type (PT or Preload)
      **/
-    PolicyTable(const std::string policy_table_string, PolicyTableType pt_type);
+    PolicyTable(const std::string& policy_table_string,
+                const PolicyTableType pt_type);
 
     /**
      * @brief Destructor
@@ -101,8 +102,7 @@ class PolicyTable {
     /**
      * @brief is Policy Table valid
      **/
-    // TODO(YS): 'is' is a bool
-    PTValidationResult is_pt_valid_;
+    PTValidationResult pt_validation_result_;
 
     /**
      * @brief PolicyTable type

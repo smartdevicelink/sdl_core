@@ -88,10 +88,6 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_);
 
-  policy_manager_ =
-    policies::PolicyManagerImpl::instance();
-  DCHECK(policy_manager_);
-
   transport_manager_->SetProtocolHandler(protocol_handler_);
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -124,6 +120,9 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
+
+  policy_manager_ = policies::PolicyManagerImpl::instance();
+  DCHECK(policy_manager_);
 
   policies::PolicyConfiguration policy_config;
   policy_config.set_pt_file_name("wp1_policy_table.json");

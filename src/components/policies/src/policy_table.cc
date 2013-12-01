@@ -42,17 +42,18 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 //---------------------------------------------------------------------------
 
 policies::PolicyTable::PolicyTable(
-    const std::string policy_table_string, PolicyTableType pt_type)
-  : is_pt_valid_(PTValidationResult::VALIDATION_FAILED)
+    const std::string& policy_table_string,
+    const PolicyTableType pt_type)
+  : pt_validation_result_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
   , schema_(policies::PolicyTableSchema::Create())
   , pt_smart_object_() {
-// {
+//
   if (false == formatters::GenericJsonFormatter::FromString(
       policy_table_string, pt_smart_object_)) {
-    is_pt_valid_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
+    pt_validation_result_ = PTValidationResult::VALIDATION_FAILED_BAD_JSON;
   } else {
-    // By applying schema the enums converts from strings into ints
+    // By applying schema the enums are converted from strings into ints
     pt_smart_object_.setSchema(schema_);
     schema_.applySchema(pt_smart_object_);
   }
@@ -73,7 +74,7 @@ smart_objects::SmartObject& policies::PolicyTable::AsSmartObject() {
 
 const std::string policies::PolicyTable::AsString() {
   std::string ret_val;
-  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON != is_pt_valid_) {
+  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON != pt_validation_result_) {
     formatters::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
   }
   return ret_val;
@@ -83,17 +84,17 @@ const std::string policies::PolicyTable::AsString() {
 
 policies::PTValidationResult policies::PolicyTable::Validate() {
   // TODO(_): distinct between PT and Preload PolicyTable types (use pt_type_)
-  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == is_pt_valid_) {
-    return is_pt_valid_;
+  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == pt_validation_result_) {
+    return pt_validation_result_;
   }
 
   if (smart_objects::Errors::OK == schema_.validate(pt_smart_object_)) {
-    is_pt_valid_ = PTValidationResult::VALIDATION_OK;
-    return is_pt_valid_;
+    pt_validation_result_ = PTValidationResult::VALIDATION_OK;
+    return pt_validation_result_;
   }
 
-  is_pt_valid_ = PTValidationResult::VALIDATION_FAILED;
-  return is_pt_valid_;
+  pt_validation_result_ = PTValidationResult::VALIDATION_FAILED;
+  return pt_validation_result_;
 }
 
 //---------------------------------------------------------------------------

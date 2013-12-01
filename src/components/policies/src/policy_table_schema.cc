@@ -60,33 +60,47 @@ typedef utils::SharedPtr<ISchemaItem> SchemaItemPtr;
 
 //-----------------------------------------------------------------------------
 
-const std::string PolicyTableSchema::kStrPolicyTable("policy_table");
-const std::string PolicyTableSchema::kStrModuleConfig("module_config");
-const std::string PolicyTableSchema::kStrFunctionalGroupings(
-  "functional_groupings");
-const std::string PolicyTableSchema::kStrAppPolicies("app_policies");
-const std::string PolicyTableSchema::kStrEndpoints("endpoints");
-const std::string PolicyTableSchema::kStrDefault("default");
-const std::string PolicyTableSchema::kStrUserConsentPrompt(
-  "user_consent_prompt");
-const std::string PolicyTableSchema::kStrRpcs("rpcs");
-const std::string PolicyTableSchema::kStrHmiLevels("hmi_levels");
-const std::string PolicyTableSchema::kStrParameters("parameters");
-const std::string PolicyTableSchema::kStrGroups("groups");
-const std::string PolicyTableSchema::kStrNicknames("nicknames");
-const std::string PolicyTableSchema::kStrPriority("priority");
+const char* PolicyTableSchema::kStrPolicyTable = "policy_table";
+const char* PolicyTableSchema::kStrModuleConfig = "module_config";
+const char* PolicyTableSchema::kStrFunctionalGroupings = "functional_groupings";
+const char* PolicyTableSchema::kStrAppPolicies = "app_policies";
+const char* PolicyTableSchema::kStrEndpoints = "endpoints";
+const char* PolicyTableSchema::kStrDefault = "default";
+const char* PolicyTableSchema::kStrUserConsentPrompt = "user_consent_prompt";
+const char* PolicyTableSchema::kStrRpcs = "rpcs";
+const char* PolicyTableSchema::kStrHmiLevels = "hmi_levels";
+const char* PolicyTableSchema::kStrParameters = "parameters";
+const char* PolicyTableSchema::kStrGroups = "groups";
+const char* PolicyTableSchema::kStrNicknames = "nicknames";
+const char* PolicyTableSchema::kStrPriority = "priority";
+
+//-----------------------------------------------------------------------------
+
+PolicyTableSchema::PolicyTableSchema(void)
+  : schema_() {
+}
 
 //-----------------------------------------------------------------------------
 
 CSmartSchema PolicyTableSchema::Create(void) {
   static PolicyTableSchema schema;
 
-  return schema.CreateSchema();
+  return schema.GetSchema();
 }
 
 //-----------------------------------------------------------------------------
 
-CSmartSchema PolicyTableSchema::CreateSchema(void) {
+CSmartSchema PolicyTableSchema::GetSchema(void) {
+  if (false == schema_.valid()) {
+    schema_ = CreateSchema();
+  }
+
+  return CSmartSchema(schema_);
+}
+
+//-----------------------------------------------------------------------------
+
+SchemaItemPtr PolicyTableSchema::CreateSchema(void) {
   SchemaItemPtr root_schema_item;
   std::map<std::string, CObjectSchemaItem::SMember> root_member_map;
   std::map<std::string, CObjectSchemaItem::SMember> policy_table_member_map;
@@ -108,7 +122,7 @@ CSmartSchema PolicyTableSchema::CreateSchema(void) {
 
   root_schema_item = CObjectSchemaItem::create(root_member_map);
 
-  return CSmartSchema(root_schema_item);
+  return root_schema_item;
 }
 
 //-----------------------------------------------------------------------------
