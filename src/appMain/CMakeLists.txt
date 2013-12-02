@@ -18,6 +18,7 @@ set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
+  v4_protocol_v1_2_no_extra
   SmartObjects
   formatters
   ProtocolHandler
