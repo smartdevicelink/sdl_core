@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.StackTraceUtils
+
 buildscript {
     repositories {
         mavenCentral()
@@ -28,13 +30,20 @@ int[] sdksAvailable() {
 }
 
 int highestSdkAvailable(int defaultSdk) {
-    def sdks = sdksAvailable()
-    def highestSdk = sdks[0]
-    if (highestSdk != null) {
-        println "Using highest found SDK " + highestSdk
-        highestSdk
-    } else {
-        println "No installed SDKs found. Using default SDK " + defaultSdk
+    try {
+        def sdks = sdksAvailable()
+        def highestSdk = sdks[0]
+        if (highestSdk != null) {
+            println "Using highest found SDK " + highestSdk
+            highestSdk
+        } else {
+            println "No installed SDKs found. Using default SDK " + defaultSdk
+            defaultSdk
+        }
+    } catch (any) {
+        println "Exception while determining highest SDK. Using default SDK " +
+                defaultSdk
+        StackTraceUtils.sanitize(any).printStackTrace()
         defaultSdk
     }
 }
@@ -58,14 +67,21 @@ String[] buildToolsAvailable() {
 }
 
 String latestBuildToolsAvailable(String defaultBuildTools) {
-    def buildToolsVersions = buildToolsAvailable()
-    def latestBuildTools = buildToolsVersions[0]
-    if (latestBuildTools != null) {
-        println "Using latest found build tools " + latestBuildTools
-        latestBuildTools
-    } else {
-        println "No installed build tools found. Using default build tools " +
+    try {
+        def buildToolsVersions = buildToolsAvailable()
+        def latestBuildTools = buildToolsVersions[0]
+        if (latestBuildTools != null) {
+            println "Using latest found build tools " + latestBuildTools
+            latestBuildTools
+        } else {
+            println "No installed build tools found. Using default build tools " +
+                    defaultBuildTools
+            defaultBuildTools
+        }
+    } catch (any) {
+        println "Exception while determining latest build tools. Using default build tools " +
                 defaultBuildTools
+        StackTraceUtils.sanitize(any).printStackTrace()
         defaultBuildTools
     }
 }
