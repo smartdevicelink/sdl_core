@@ -72,10 +72,10 @@ while read line
 do
 	name=$(echo "$line" | awk '{print $1}') 
 		
-	touch ./developers/$name
+	touch ./developers/$name.txt
 
 	for alias in $(echo "$line" | awk '{$1=""; print $0}'); do
-		awk -v a=$alias '$1 == a {$1=""; $2=""; print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' >> ./developers/$name
+		awk -v a=$alias '$1 == a {$1=""; $2=""; print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' >> ./developers/$name.txt
         done
 
 done < names_and_aliases.txt
