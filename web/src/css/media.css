@@ -2208,7 +2208,7 @@
 #media_fm_tuneButtons .ffw-button {
     width: 60px;
     height: 40px;
-    font-size: 36px;
+    font-size: 22px;
     text-align: center;
     line-height: 40px;
     display: inline-block;
@@ -2217,8 +2217,4 @@
     border-radius: 3px;
     position: relative;
     margin: 0 4px;
-}
-
-#media_fm_tuneButtons #media_fm_tuneDownButton {
-    line-height: 36px;
 }

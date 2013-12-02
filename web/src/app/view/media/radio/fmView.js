@@ -312,7 +312,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
                 action:				'tuneUp',
                 onDown: false,
                 templateName: 'text',
-                text: '+'
+                text: '>>'
             }),
 
             tuneDown: MFT.Button.extend({
@@ -321,7 +321,7 @@ MFT.FMView = Em.ContainerView.create(MFT.LoadableView,{
                 action:				'tuneDown',
                 onDown: false,
                 templateName: 'text',
-                text: '-'
+                text: '<<'
             })
         })
     })
