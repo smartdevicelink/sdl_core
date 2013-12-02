@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import android.util.Log;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.jsoncontroller.JSONAVAController;
 import com.ford.avarsdl.util.Const;
 

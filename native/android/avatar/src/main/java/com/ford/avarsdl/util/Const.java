@@ -93,6 +93,12 @@ public class Const {
 
     public static final String PREFS_KEY_IPADDR = "ipAddr";
     public static final String PREFS_KEY_TCPPORT = "tcpPort";
+    public static final String PREFS_KEY_TRANSPORT_TYPE = "TransportType";
+    public static final String TCP = "WiFi";
+    public static final String BLUETOOTH = "Bluetooth";
+    public static final int KEY_TCP = 1;
+    public static final int KEY_BLUETOOTH = 2;
+    public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_TCP;
 
     public static final String PREFS_DEFAULT_IPADDR = "10.10.0.1";
     public static final Integer PREFS_DEFAULT_TCPPORT = 12345;

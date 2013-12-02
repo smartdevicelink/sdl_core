@@ -33,7 +33,7 @@ import android.widget.Toast;
 import com.android.vending.expansion.zipfile.APKExpansionSupport;
 import com.android.vending.expansion.zipfile.ZipResourceFile;
 import com.ford.avarsdl.R;
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.util.ActivityUtils;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.LogUtils;

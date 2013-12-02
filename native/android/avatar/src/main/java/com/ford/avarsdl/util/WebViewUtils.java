@@ -16,7 +16,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.jssupport.AvatarWebViewClient;
 import com.ford.avarsdl.jssupport.JavaScriptFacade;
 

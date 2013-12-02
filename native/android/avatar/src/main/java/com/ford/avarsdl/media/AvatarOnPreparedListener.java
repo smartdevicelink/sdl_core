@@ -4,7 +4,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.util.Log;
 
-import com.ford.avarsdl.activity.AvatarActivity;
+import com.ford.avarsdl.views.AvatarActivity;
 import com.ford.avarsdl.util.Const;
 
 public class AvatarOnPreparedListener implements OnPreparedListener {

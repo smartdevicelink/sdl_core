@@ -1,15 +1,16 @@
 package com.ford.avarsdl.service;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.util.Log;
 
-import com.ford.avarsdl.activity.SafeToast;
+import com.ford.avarsdl.views.SafeToast;
 import com.ford.avarsdl.notifications.NotificationCommand;
 import com.ford.avarsdl.notifications.NotificationCommandImpl;
 import com.ford.avarsdl.responses.ResponseCommand;
-import com.ford.avarsdl.util.APIObjectsSimulator;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
@@ -22,6 +23,7 @@ import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
+import com.ford.syncV4.proxy.rpc.CancelAccessResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
@@ -46,6 +48,7 @@ import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnPresetsChanged;
 import com.ford.syncV4.proxy.rpc.OnRadioDetails;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
@@ -107,10 +110,11 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Logger.d("onStartCommand " + intent + ", " + flags + ", " + startId);
+        Logger.d(getClass().getSimpleName() + " onStartCommand " + intent + ", " + flags + ", " +
+                startId);
 
         initializeCommandsHashTable();
-        startProxy();
+        startProxyIfNetworkConnected();
         return START_STICKY;
     }
 
@@ -124,17 +128,47 @@ public class SDLService extends Service implements IProxyListenerALM {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Logger.d("onBind unsupported");
-        // binding is not supported
+        Logger.d(getClass().getSimpleName() + " onBind, hash: " + hashCode());
         return mBinder;
     }
 
-    private void startProxy() {
-        Logger.d("starting proxy");
+    private void startProxyIfNetworkConnected() {
+        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+                MODE_PRIVATE);
+        final int transportType = prefs.getInt(
+                Const.PREFS_KEY_TRANSPORT_TYPE,
+                Const.PREFS_DEFAULT_TRANSPORT_TYPE);
 
-        SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        String ipAddressString = prefs.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
-        int tcpPortInt = prefs.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
+        if (transportType == Const.KEY_BLUETOOTH) {
+            Logger.d(getClass().getSimpleName() + " ProxyService. onStartCommand(). Transport = Bluetooth.");
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter != null) {
+                if (bluetoothAdapter.isEnabled()) {
+                    startProxy();
+                }
+            }
+        } else {
+            //TODO: This code is commented out for simulator purposes
+			/*
+			Log.d(TAG, "ProxyService. onStartCommand(). Transport = WiFi.");
+			if (hasWiFiConnection() == true) {
+				Log.d(TAG, "ProxyService. onStartCommand(). WiFi enabled.");
+				startProxy();
+			} else {
+				Log.w(TAG,
+						"ProxyService. onStartCommand(). WiFi is not enabled.");
+			}
+			*/
+            startProxy();
+        }
+    }
+
+    private void startProxy() {
+        Logger.d(getClass().getSimpleName() + " Starting proxy ...");
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Const.PREFS_NAME, 0);
+        String ipAddressString = sharedPreferences.getString(Const.PREFS_KEY_IPADDR, Const.PREFS_DEFAULT_IPADDR);
+        int tcpPortInt = sharedPreferences.getInt(Const.PREFS_KEY_TCPPORT, Const.PREFS_DEFAULT_TCPPORT);
 
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
@@ -143,11 +177,23 @@ public class SDLService extends Service implements IProxyListenerALM {
         Vector<AppHMIType> appHMIType = new Vector<AppHMIType>();
         appHMIType.add(AppHMIType.RADIO);
 
+        int transportType = sharedPreferences.getInt(
+                Const.PREFS_KEY_TRANSPORT_TYPE,
+                Const.PREFS_DEFAULT_TRANSPORT_TYPE);
+
         try {
-            mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
-                    appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
-                    null, false, false, 2,
-                    new TCPTransportConfig(tcpPortInt, ipAddressString));
+            if (transportType == Const.KEY_BLUETOOTH) {
+                Logger.i(getClass().getSimpleName() + " Start Bluetooth Proxy");
+                mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
+                        appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                        null, false, false, 2);
+            } else {
+                Logger.i(getClass().getSimpleName() + " Start WiFi Proxy");
+                mSyncProxy = new SyncProxyALM(this, null, APPNAME, null, null, true,
+                        appHMIType, syncMsgVersion, Language.EN_US, Language.EN_US, APPID,
+                        null, false, false, 2,
+                        new TCPTransportConfig(tcpPortInt, ipAddressString));
+            }
         } catch (SyncException e) {
             Logger.e("Failed to start proxy", e);
             if (mSyncProxy == null) {
@@ -443,9 +489,29 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     @Override
+    public void onCancelAccessResponse(CancelAccessResponse response) {
+        ResponseCommand command = new com.ford.avarsdl.responses.CancelAccessResponse();
+        try {
+            byte serializeMethod = 2;
+            command.execute(response.getCorrelationID(),
+                    response.serializeJSON(serializeMethod).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Logger.e(getClass().getSimpleName() + " onCancelAccessResponse " + e);
+        }
+    }
+
+    @Override
     public void onOnControlChanged(OnControlChanged notification) {
-        final String msg = "onControlChanged " + notification.getReason();
-        SafeToast.showToastAnyThread(msg);
+        //SafeToast.showToastAnyThread("onControlChanged " + notification);
+        Logger.d(getClass().getSimpleName() + " onControlChanged " + notification);
+        NotificationCommand command = commandsHashTable.get(Names.OnControlChanged);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnControlChanged;
+            command.execute(method, notification);
+        } else {
+            Logger.w(getClass().getSimpleName() + " NotificationCommand NULL");
+        }
     }
 
     @Override
@@ -471,6 +537,19 @@ public class SDLService extends Service implements IProxyListenerALM {
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
 
+    }
+
+    @Override
+    public void onOnPresetsChanged(OnPresetsChanged notification) {
+        //SafeToast.showToastAnyThread("OnPresetsChanged: " + notification);
+
+        NotificationCommand command = commandsHashTable.get(Names.OnPresetsChanged);
+        if (command != null) {
+            String method = RPCConst.CN_REVSDL + "." + Names.OnPresetsChanged;
+            command.execute(method, notification);
+        } else {
+            Logger.w(getClass().getSimpleName() + " NotificationCommand NULL");
+        }
     }
 
     @Override
@@ -518,7 +597,16 @@ public class SDLService extends Service implements IProxyListenerALM {
     }
 
     private void initializeCommandsHashTable() {
-        NotificationCommand command = new NotificationCommandImpl();
-        commandsHashTable.put(Names.OnRadioDetails, command);
+        // TODO: Probably in the future version there will be differences between notification
+        // objects, but up to now they contain general information structure
+
+        NotificationCommand onRadioDetailsNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnRadioDetails, onRadioDetailsNotification);
+
+        NotificationCommand onControlChangedNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnControlChanged, onControlChangedNotification);
+
+        NotificationCommand onPresetsChangedNotification = new NotificationCommandImpl();
+        commandsHashTable.put(Names.OnPresetsChanged, onPresetsChangedNotification);
     }
 }

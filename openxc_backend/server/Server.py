@@ -23,6 +23,8 @@ class MainHandler(WebSocketHandler):
 
         print "Socket message: " + message
         openxc_command = ""
+        if message.startswith("stop_server"):
+            return
         if message.startswith("set_preset_"):
             #print ("Set Preset", message[11:])
             openxc_command = 'openxc-control write --name tune --value preset --event ' + message[11:]
@@ -59,8 +61,13 @@ class MainHandler(WebSocketHandler):
         print "Socket close"
 
     def line_from_net_tail(self, data):
-        self.write_message(data)
-        self.stream.read_until("\n", self.line_from_net_tail)
+        try:
+            self.write_message(data)
+            self.stream.read_until("\n", self.line_from_net_tail)
+        except Exception:
+            self.p.terminate()
+            self.stream.close()
+            pass
 
     def open_dump_stream(self):
         self.p = subprocess.Popen(["openxc-dump"], stdout=subprocess.PIPE)

@@ -126,7 +126,7 @@ public class JSONController {
 
 	protected void sendJSONMsg(String jsonMsg) {
 		mTCPClient.sendMsg(jsonMsg);
-		Logger.i(getClass().getSimpleName() + " sent: " + jsonMsg);
+		Logger.i(getClass().getSimpleName() + " JSON Msg sent: " + jsonMsg);
 	}
 
 	/**

@@ -90,17 +90,34 @@ FFW.RevSDL = FFW.RPCObserver.create({
 
         switch (response.id) {
             case this.GrantAccessRequestId:
-                MFT.AppController.changeAccessStatus(response.result);
+                MFT.AppController.changeAccessStatus('grant', response.result);
                 break;
-//            case this.StartScanRequestId:
-//                MFT.MediaController.set('isFrequencyScan', response.result.success);
-//                break;
-//            case this.StopScanRequestId:
-//                MFT.MediaController.set('isFrequencyScan', !response.result.success);
-//                break;
-            case this.GetRadioDetailsRequestId:
-                MFT.MediaController.setSDLDirectTuneStation(response.result);
-                this.sendShowRequest();
+            case this.CancelAccessRequestId:
+                MFT.AppController.changeAccessStatus('cancel', response.result);
+                break;
+            case this.StartScanRequestId:
+                if (!response.result.success) {
+                    Em.Logger.error("Error StartScan request:" + response.result.resultCode);
+                } else {
+                    MFT.MediaController.set('isFrequencyScan', response.result.success);
+                }
+                break;
+            case this.StopScanRequestId:
+                if (!response.result.success) {
+                    Em.Logger.error("Error StopScan request:" + response.result.resultCode);
+                } else {
+                    MFT.MediaController.set('isFrequencyScan', !response.result.success);
+                }
+                break;
+            case this.TuneUpRequestId:
+                if (!response.result.success) {
+                    Em.Logger.error("Error TuneUp request:" + response.result.resultCode);
+                }
+                break;
+            case this.TuneDownRequestId:
+                if (!response.result.success) {
+                    Em.Logger.error("Error TuneDown request:" + response.result.resultCode);
+                }
                 break;
         }
     },
@@ -147,6 +164,8 @@ FFW.RevSDL = FFW.RPCObserver.create({
     StartScanRequestId: -1,
     StopScanRequestId: -1,
     GetRadioDetailsRequestId: -1,
+    TuneUpRequestId: -1,
+    TuneDownRequestId: -1,
 
     /**
      * Sends a request for access to the management of HMI, through SDL interface
@@ -227,13 +246,27 @@ FFW.RevSDL = FFW.RPCObserver.create({
     /**
      * Stop frequency scan on head unit, through SDL interface
      **/
-    sendGetRadioDetailsRequest: function(){
-        this.GetRadioDetailsRequestId = this.client.generateId();
+    tuneUp: function(){
+        this.TuneUpRequestId = this.client.generateId();
 
         var JSONMessage = {
             "jsonrpc":	"2.0",
-            "id": 		this.GetRadioDetailsRequestId,
-            "method":	"RevSDL.GetRadioDetails"
+            "id": 		this.TuneUpRequestId,
+            "method":	"RevSDL.TuneUp"
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Stop frequency scan on head unit, through SDL interface
+     **/
+    tuneDown: function(){
+        this.TuneDownRequestId = this.client.generateId();
+
+        var JSONMessage = {
+            "jsonrpc":	"2.0",
+            "id": 		this.TuneDownRequestId,
+            "method":	"RevSDL.TuneDown"
         };
         this.client.send(JSONMessage);
     },

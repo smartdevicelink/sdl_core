@@ -8,7 +8,15 @@
 </head>
 <body>
     <div style="width: 100%; height: 100%">
-        <div style="width: 38%; height: 400px;float: left; background-color: gainsboro; padding: 10px">
+        <div style="width: 10%; height: 400px;float: left; background-color: aliceblue; padding: 10px">
+            <label>Server status:</label>
+            <label id="server_status_label">stopped</label>
+            <div style="margin-top: 10px">
+                <button id="server_start_btn">Start</button>
+                <button id="server_stop_btn">Stop</button>
+            </div>
+        </div>
+        <div style="width: 28%; height: 400px;float: left; background-color: gainsboro; padding: 10px">
             <div>
                 <label>Tuner Band:</label>
                 <select id="tuner_band_select">

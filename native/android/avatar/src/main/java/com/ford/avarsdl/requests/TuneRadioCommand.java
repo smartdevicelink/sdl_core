@@ -1,6 +1,5 @@
 package com.ford.avarsdl.requests;
 
-import com.ford.avarsdl.business.MainApp;
 import com.ford.avarsdl.service.SDLService;
 import com.ford.avarsdl.util.Logger;
 import com.ford.syncV4.exception.SyncException;

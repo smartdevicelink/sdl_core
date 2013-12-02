@@ -18,7 +18,7 @@
 }
 
 #media_directTune {
-    z-index: 503;
+    z-index: 5;
     position: absolute;
     top: 290px;
     left: 165px;
@@ -2199,4 +2199,22 @@
 /* cancel scrollbar animation */
 .cancelBarAnimation {
     -webkit-transition: none !important;
+}
+
+#media_fm_tuneButtons {
+    margin: 4px 5px 0 5px;
+}
+
+#media_fm_tuneButtons .ffw-button {
+    width: 60px;
+    height: 40px;
+    font-size: 22px;
+    text-align: center;
+    line-height: 40px;
+    display: inline-block;
+    vertical-align: top;
+    border: 1px solid #333;
+    border-radius: 3px;
+    position: relative;
+    margin: 0 4px;
 }

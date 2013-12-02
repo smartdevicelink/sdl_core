@@ -94,7 +94,7 @@ MFT.AppController = Em.Object.create({
      * Show popup and close it after closeTime, if it exists
      * @param {number} closeTime time, after which the popup will close
      * @param {string} message, displaying message popup
-     * @param {string} callback function
+     * @param {function} callback function
      */
     showPopup: function(elementId, closeTime, message, callback){
         var self = this;
@@ -155,13 +155,19 @@ MFT.AppController = Em.Object.create({
         this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_driverControl);
     },
 
-    changeAccessStatus: function(data) {
+    changeAccessStatus: function(method, data) {
         var self = this;
 
         if (data.success) {
-            this.set('sdlAccessStatus', true);
-            this.set('sdlControlStatus', 4);
-            this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_granted);
+            if (method == 'grant') {
+                this.set('sdlAccessStatus', true);
+                this.set('sdlControlStatus', 4);
+                this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_granted);
+            } else if (method == 'cancel') {
+                this.set('sdlAccessStatus', false);
+                this.set('sdlControlStatus', 1);
+                this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_driverControl);
+            }
         } else if(data.resultCode == 'REJECTED') {
             this.set('sdlControlStatus', 3);
             this.showPopup('SDLMessagesPopup', 2000, MFT.locale.label.view_sdl_messages_popup_denied, function () {

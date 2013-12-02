@@ -1,10 +1,13 @@
 package com.ford.avarsdl.jsoncontroller;
 
+import com.ford.avarsdl.requests.CancelAccessCommand;
 import com.ford.avarsdl.requests.GrantAccessCommand;
 import com.ford.avarsdl.requests.RequestCommand;
 import com.ford.avarsdl.requests.StartScanCommand;
 import com.ford.avarsdl.requests.StopScanCommand;
+import com.ford.avarsdl.requests.TuneDownCommand;
 import com.ford.avarsdl.requests.TuneRadioCommand;
+import com.ford.avarsdl.requests.TuneUpCommand;
 import com.ford.avarsdl.util.Logger;
 import com.ford.avarsdl.util.RPCConst;
 import com.ford.syncV4.proxy.constants.Names;
@@ -45,6 +48,9 @@ public class JSONRevSDLController extends JSONController {
         GrantAccessCommand grantAccessCommand = new GrantAccessCommand();
         commandsHashTable.put(Names.GrantAccess, grantAccessCommand);
 
+        CancelAccessCommand cancelAccessCommand = new CancelAccessCommand();
+        commandsHashTable.put(Names.CancelAccess, cancelAccessCommand);
+
         StartScanCommand startScanCommand = new StartScanCommand();
         commandsHashTable.put(Names.StartScan, startScanCommand);
 
@@ -53,5 +59,11 @@ public class JSONRevSDLController extends JSONController {
 
         TuneRadioCommand tuneRadioCommand = new TuneRadioCommand();
         commandsHashTable.put(Names.TuneRadio, tuneRadioCommand);
+
+        TuneUpCommand tuneUpCommand = new TuneUpCommand();
+        commandsHashTable.put(Names.TuneUp, tuneUpCommand);
+
+        TuneDownCommand tuneDownCommand = new TuneDownCommand();
+        commandsHashTable.put(Names.TuneDown, tuneDownCommand);
     }
 }

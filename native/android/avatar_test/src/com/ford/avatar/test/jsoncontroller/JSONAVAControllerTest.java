@@ -56,7 +56,7 @@ public class JSONAVAControllerTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#JSONAVAController(com.ford.avarsdl.activity.AvatarActivity, java.lang.String)}.
+	 * Test method for {@link com.ford.avarsdl.jsoncontroller.JSONAVAController#JSONAVAController(com.ford.avarsdl.views.AvatarActivity, java.lang.String)}.
 	 */
 	public final void testJSONAVAController() {
 		JSONAVAController controller = new JSONAVAController(RPCConst.CN_AVATAR, mTcpStub);

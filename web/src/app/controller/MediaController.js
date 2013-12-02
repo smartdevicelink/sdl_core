@@ -931,8 +931,7 @@ MFT.MediaController = Em.Object.create({
         }
 
         MFT.FmModel.fm1.set('items', items);
-
-        FFW.RevSDL.sendGetRadioDetailsRequest();
+        FFW.RevSDL.sendShowRequest();
     },
 
 	/** Player Next track event*/
@@ -1197,6 +1196,14 @@ MFT.MediaController = Em.Object.create({
             FFW.RevSDL.sendStartScanRequest();
         }
 	},
+
+    tuneUp: function() {
+        FFW.RevSDL.tuneUp();
+    },
+
+    tuneDown: function() {
+        FFW.RevSDL.tuneDown();
+    },
 
 	turnReplayHelpVideoOn: function(){
 		if ( MFT.helpMode ) {

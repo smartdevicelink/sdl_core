@@ -8,9 +8,9 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.Window;
 
-import com.ford.avarsdl.activity.AvatarActivity;
-import com.ford.avarsdl.activity.EulaActivity;
-import com.ford.avarsdl.activity.SafeToast;
+import com.ford.avarsdl.views.AvatarActivity;
+import com.ford.avarsdl.views.EulaActivity;
+import com.ford.avarsdl.views.SafeToast;
 import com.ford.avarsdl.jsonparser.EBEMethods;
 import com.ford.avarsdl.util.Const;
 import com.ford.avarsdl.util.Logger;
@@ -166,18 +166,15 @@ public class JSONBackendController extends JSONController {
 	 * @return
 	 */
 	private String isFirstStart() {
-		
 		boolean firstStart = mActivity.isFirstStart();
 		if (firstStart) {
 			firstStart = true;
 			// set new code version
-			SharedPreferences prefs = mActivity.getSharedPreferences(
-					Const.SHPREF_FIRST_LAUNCH, 0);
+			SharedPreferences prefs = mActivity.getSharedPreferences(Const.SHPREF_FIRST_LAUNCH, 0);
 			SharedPreferences.Editor editor = prefs.edit();
 			if (editor != null) {
 				int currentCodeVersion = Utils.getAppVersionCode(mActivity);
-				editor.putInt(Const.SHPREF_PREVIOUS_CODE_VERSION,
-						currentCodeVersion);
+				editor.putInt(Const.SHPREF_PREVIOUS_CODE_VERSION, currentCodeVersion);
 			}
 			editor.commit();
 			// set redownload counter to 0

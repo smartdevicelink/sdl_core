@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.avarsdl"
     android:installLocation="preferExternal"
-    android:versionCode="1"
-    android:versionName="E4" >
+    android:versionCode="2"
+    android:versionName="E5" >
 
     <!-- Required to access Android Market Licensing -->
     <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
@@ -18,6 +18,9 @@
     <!-- Required to read and write the expansion files on shared storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- Required to pair Bluetooth devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <uses-sdk
         android:minSdkVersion="12"
@@ -29,7 +32,7 @@
         android:name=".business.MainApp"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         <activity
-            android:name=".activity.AvatarActivity"
+            android:name=".views.AvatarActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
@@ -39,7 +42,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.EulaActivity"
+            android:name=".views.EulaActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape" />
 
