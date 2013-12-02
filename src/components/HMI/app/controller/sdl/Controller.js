@@ -113,6 +113,7 @@ SDL.SDLController = Em.Object
                 if (!SDL.SDLModel.registeredComponents[i].state) { return; }
             }
             FFW.BasicCommunication.onReady();
+            SDL.SDLModel.timeStamp = new Date().getTime();
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
 
         /**
