@@ -201,7 +201,8 @@ char ini_write_value(const char *fname,
   for (int i = 0; i < strlen (tag); i++)
     tag[i] = toupper(tag[i]);
 
-  wr_result = 1; cr_count = 0;
+  wr_result = 1;
+  int cr_count = 0;
   while ((NULL != fgets(line, INI_LINE_LEN, rd_fp)) && (0 < wr_result)) {
     // Now start the line parsing
     result = ini_parse_line(line, tag, val);
@@ -300,7 +301,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     line_ptr++;
 
     /* cut leading stuff */
-    len = strlen(line_ptr);
+    int len = strlen(line_ptr);
     for (int i = 0; i < len; i++) {
       if ((*line_ptr == ' ') ||
           (*line_ptr ==   9) ||  // TAB
@@ -365,7 +366,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
-      len = strlen(line_ptr);
+      int len = strlen(line_ptr);
       /* cut trailing stuff */
       for (int i = 0; i < len; i++) {
         if ((*line_ptr == ' ') ||
