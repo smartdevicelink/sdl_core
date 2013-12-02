@@ -34,9 +34,16 @@
 SDL.SDLModel = Em.Object.create({
 
     /**
-     * TimeStamp of current started HMI session
+     * IScroll object to manage scroll on PerformInteraction view
      *
      * @type {Object}
+     */
+    interactionListWrapper: null,
+
+    /**
+     * TimeStamp of current started HMI session
+     *
+     * @type {Number}
      */
     timeStamp: null,
 
