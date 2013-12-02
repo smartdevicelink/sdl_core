@@ -60,8 +60,6 @@ Item {
     TestCase {
         name: "ScrollableMessageView"
         when: windowShown
-        property var mainWindowComponent : Qt.createComponent("../../../../src/components/qt_hmi/qml_model/MainWindow.qml")
-        property var mainWindowObject
         property var dataContainer
         property var sdlUIProxy
         property var contentLoader
@@ -81,7 +79,7 @@ Item {
         function createMessageView(appID) {
             mainWindowLoader.source = ""
             mainWindowLoader.source = "../../../../src/components/qt_hmi/qml_model/MainWindow.qml"
-            mainWindowObject = mainWindowLoader.item
+            var mainWindowObject = mainWindowLoader.item
             console.assert(mainWindowObject !== undefined, "mainWindowObject is undefined");
             var mainScreen = mainWindowObject.getMainScreen()
             mainScreen.visible = true
@@ -339,6 +337,34 @@ Item {
             //verify restarted timer
             timer = messageView.getTimer()
             verify(timer.running === true, "Timer is not restarted by KEEP_CONTEXT button")
+            destroyView()
+            console.debug("exit")
+        }
+
+
+        //add long text to model and check scrollBar visibility
+        function test_08_ScrollBarShown() {
+            console.debug("enter")
+            //generate string with (10!) lines
+            var longText = "It is very long text!\n"
+            for(var i = 1; i < 10; ++i)
+                longText += longText
+            var initData = {appID:1, timeout:20000, messageText:{fieldText:longText}, softButtons:[]}
+            createMessageView(initData.appID)
+
+            var result = sdlUIProxy.scrollableMessage(initData)
+            getMessageViewModel()
+
+            //check
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
+            if(result.__errno !== undefined)
+                fail("ScrollableMessage return error state")
+
+            //wait rendering
+            waitForRendering(mainWindowLoader)
+            var scrollBar = messageView.getScrollbar()
+            verify(scrollBar.visible === true, "ScrollBar is not shown for long text")
+
             destroyView()
             console.debug("exit")
         }

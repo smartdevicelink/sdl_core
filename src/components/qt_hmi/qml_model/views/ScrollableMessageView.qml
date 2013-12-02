@@ -200,6 +200,9 @@ GeneralView {
     function getSoftButtonsListView(){
         return softButtons
     }
+    function getScrollbar(){
+        return scrollbar
+    }
     /**
       * Test Support Section End
       */
