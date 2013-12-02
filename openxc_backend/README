@@ -1,7 +1,20 @@
-Dependency libraries:
+Dependency libraries (need to install first and check their successfull installation):
 - python 2.7
 - pip (http://www.pip-installer.org/en/latest/installing.html)
 - openxc (http://python.openxcplatform.com/en/latest/installation.html)
 
-1.Run Server.py with next parameter:
-PYTHONUNBUFFERED=1 python ~/<path_to_file>/Server.py
+1. It is necessary to have appropriate firmware for the OpenXC (the one Chris creates with the name "vi-firmware-FORDBOARD-radiocontrols-20-11-13.bin")
+
+2. Once OpenXC connected to the USB need to be sure that all data transferring well (cammand "openxc-dump" http://python.openxcplatform.com/en/latest/tools/dump.html)
+   Be sure that only one connection with OpenXC via USB exists! (after successfull command line test close all terminals)
+
+3. Run Server.py with next parameter:
+   PYTHONUNBUFFERED=1 python ~/<path_to_file>/Server.py
+   
+   To be sure that OpenXC server works navigate to "openxc_backend/web_console" and run index.html
+   You should see "Server status:" panel at the left side and "Dump:" panel at rigth side with a data flow.
+   If there are no data flow, please be sure that at the terminal window where server was launched there are no errors (is there are errors - restart server)
+   
+   When server run with success please press "Stop" and close index.html page (as pointed in N2 it occupies connection)
+
+4. When HMI simulator run it automatically create connection to the server
