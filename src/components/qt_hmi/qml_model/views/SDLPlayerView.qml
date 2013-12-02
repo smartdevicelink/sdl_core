@@ -45,6 +45,7 @@ GeneralView {
         onPause: { sdlButtons.onButtonPress(Common.ButtonName.OK, Common.ButtonPressMode.SHORT, undefined) }
         playerName: "SDL music"
         playerType: "SDL"
+        image: dataContainer.currentApplication.hmiUIText.image
         anchors.fill: parent
 
         buttons: [
