@@ -33,7 +33,6 @@
 
 #include <unistd.h>
 
-#include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
@@ -229,13 +228,13 @@ bool RegisterAppInterfaceRequest::CheckCoincidence() {
 
     const std::set<Application*>& applications = app_manager->applications();
     std::set<Application*>::const_iterator it = applications.begin();
+    const std::string app_name = msg_params[strings::app_name].asString();
 
     for (; applications.end() != it; ++it) {
 
       // name check
       const std::string &cur_name = (*it)->name();
-      const std::string app_name = msg_params[strings::app_name].asString();
-      if (app_name == cur_name) {
+      if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return true;
       }
@@ -275,7 +274,8 @@ bool RegisterAppInterfaceRequest::CheckCoincidence() {
         std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_tts->end();
 
         for (; it != itEnd; ++it) {
-          if (cur_name == (*it)[strings::text].asString()) {
+          std::string text = (*it)[strings::text].asString();
+          if (!strcasecmp(cur_name.c_str(), text.c_str())) {
             LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
             return true;
           }
@@ -305,7 +305,8 @@ bool RegisterAppInterfaceRequest::CheckCoincidence() {
         std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_vr->end();
 
         for (; it != itEnd; ++it) {
-          if (cur_name == it->asString()) {
+          std::string vr_synonym = it->asString();
+          if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
             LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
             return true;
           }
