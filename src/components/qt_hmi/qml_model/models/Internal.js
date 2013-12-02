@@ -88,7 +88,7 @@ function hmsTime (hours, minutes, seconds) {
 
 function hmsTimeToString (hmsTime) {
     if (hmsTime === -1) {
-        return ""
+        return "0:00:00"
     }
 
     var _time = hmsTime

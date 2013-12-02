@@ -103,23 +103,19 @@ QtObject {
                 if (application.hmiUITextAlignment !== undefined) {
                     currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
                 }
-
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
-                console.debug("in SET CURRENT APP")
                 currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
                 currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
+                currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
                 if (application.mediaClock.startTime !== undefined) {
                     currentApplication.mediaClock.startTime = application.mediaClock.startTime
                 }
-                console.debug("in SET CURRENT UP pered endTime")
                 if (application.mediaClock.endTime !== undefined) {
                     currentApplication.mediaClock.endTime = application.mediaClock.endTime
                 }
-                console.debug("in SET CURRENT APP 2")
-                //currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
