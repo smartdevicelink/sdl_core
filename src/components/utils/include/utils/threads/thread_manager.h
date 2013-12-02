@@ -46,6 +46,27 @@ namespace threads {
 namespace impl {
 
 /*
+ * Generates short and unique names for unnamed threads
+ * and remembers association between thread handle and that short name
+ */
+class UnnamedThreadRegistry {
+ public:
+  UnnamedThreadRegistry();
+  ~UnnamedThreadRegistry();
+  /*
+   * Returns a name for given unnamed thread id.
+   * If id is first seen, new name is generated and memorized
+   * If id is already known, previously generated name is returned
+   */
+  std::string GetUniqueName(PlatformThreadHandle id);
+ private:
+  typedef std::map<PlatformThreadHandle, std::string> IdNameMap;
+  IdNameMap id_number_;
+  int last_thread_number_;
+  sync_primitives::Lock state_lock_;
+};
+
+/*
  * This class is here currently to remember names associated to threads.
  * It manages raw impl::PlatformHandles because Thread::Id's do not provide
  * comparison operator. Current linux implementation relies on fact that
@@ -82,6 +103,10 @@ class ThreadManager {
   // Map from system handle to the thread name
   IdNamesMap id_names_;
   mutable sync_primitives::Lock state_lock_;
+
+  // Generator of shorter sequental names for unnamed threads
+  // Has to memorize every generated name this is why it is mutable
+  mutable UnnamedThreadRegistry unnamed_thread_namer_;
 
   // Singleton instance
   static ThreadManager* instance_;

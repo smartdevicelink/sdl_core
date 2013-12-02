@@ -46,7 +46,7 @@ using namespace sync_primitives;
 
 namespace {
 
-const char* kUnknownName = "UnknownThread";
+const char* kUnknownName = "UnnamedThread";
 
 log4cxx::LoggerPtr g_logger =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
@@ -75,6 +75,27 @@ void SetSystemThreadName(PlatformThreadHandle  thread, const std::string& thread
 #endif
 
 } // namespace
+
+UnnamedThreadRegistry::UnnamedThreadRegistry() {
+
+}
+
+UnnamedThreadRegistry::~UnnamedThreadRegistry() {
+
+}
+
+std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
+  AutoLock auto_lock(state_lock_);
+  IdNameMap::iterator found = id_number_.find(id);
+  if (found != id_number_.end()) {
+    return found->second;
+  } else {
+    ++last_thread_number_;
+    std::stringstream namestream;
+    namestream<<kUnknownName<<last_thread_number_;
+    return id_number_[id] = namestream.str();
+  }
+}
 
 //static
 ThreadManager* ThreadManager::instance_ = 0;
@@ -125,9 +146,7 @@ string ThreadManager::GetName(PlatformThreadHandle id) const {
     return found->second;
   } else {
     LOG4CXX_WARN(g_logger, "Thread doesn't have associated name");
-    stringstream ss;
-    ss<<kUnknownName<<id;
-    return ss.str();
+    return unnamed_thread_namer_.GetUniqueName(id);
   }
 }
 
