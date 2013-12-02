@@ -44,7 +44,7 @@
 
 #include "utils/logger.h"
 #include "utils/macro.h"
-#include "transport_manager/transport_manager_listener_impl.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -62,7 +62,7 @@ namespace connection_handler {
  * \brief SmartDeviceLink connection_handler main class
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
-  public transport_manager::TransportManagerListenerImpl,
+  public transport_manager::TransportManagerListenerEmpty,
   public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
   public:
     /**

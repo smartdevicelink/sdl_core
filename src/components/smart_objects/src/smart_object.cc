@@ -1,3 +1,7 @@
+/**
+ * @file SmartObject.cpp
+ * @brief SmartObject source file.
+ */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //

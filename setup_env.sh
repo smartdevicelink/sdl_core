@@ -1,25 +1,75 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2013, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided with the
+# distribution.
+#
+# Neither the name of the Ford Motor Company nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 set -e
 
+echo "Detecting machine architecture"
+uname_result=`uname -i`
+if [ ${uname_result} = "i386" ] || [ ${uname_result} = "i686" ]; then
+  echo "x86 machine detected"
+  ARCH="i386"
+elif [ ${uname_result} = "x86_64" ]; then
+  echo "x64 machine detected"
+  ARCH="x64"
+else
+  echo "unknown architecture - exit"
+  exit
+fi
+echo
+
 CMAKE_BUILD_SYSTEM="cmake"
+SUBVERSION="subversion"
+GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
 LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
+LIBXML2_DEV="libxml2-dev"
 UPDATE_SOURCES=false
+OPENGL_DEV="libgl1-mesa-dev"
+APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
+CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
+CMAKE_DEB_DST="/tmp/cmake"
+CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
+QT5_RUNFILE_DST="/tmp/qt5"
 INSTALL_ALL=false
-LIB_UDEV="libudev-dev"
-AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
+QT_HMI=false
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev "
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
 BLUEZ_TOOLS="bluez-tools"
-ICECAST="icecast2"
-GSTREAMER="gstreamer1.0*"
-USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
@@ -42,12 +92,17 @@ while test $# -gt 0; do
                         echo " "
                         echo "options:"
                         echo "-h, --help                show brief help"
-                        echo "-a, --all                 all mandatory and optional packages will be install"
+                        echo "-a, --all                 all mandatory and optional packages will be installed"
+                        echo "-q                        install additional packages for Qt HMI"
 			
                         exit 0
                         ;;
                 -a)
 			INSTALL_ALL=true
+			shift
+                        ;;
+                -q)
+			QT_HMI=true
 			shift
                         ;;
         esac
@@ -60,7 +115,7 @@ function apt-install() {
         return 1;
     fi
     set -x #Show install command to user"
-    sudo apt-get install --yes ${APT_INSTALL_FLAGS} $*
+    sudo apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
     set +x
 }
 
@@ -88,12 +143,14 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
+if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ] then
+echo "Installing CMake build system"
+apt-install ${CMAKE_BUILD_SYSTEM}
+echo $OK
+fi
+
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
-echo $OK
-
-echo "Installng CMake build system"
-apt-install ${CMAKE_BUILD_SYSTEM}
 echo $OK
 
 echo "Installng GNU C++ compiler"
@@ -144,10 +201,81 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
+if $QT_HMI || $INSTALL_ALL; then
+	echo "Installing Subversion"
+	apt-install ${SUBVERSION}
+	echo $OK
+
+	echo "Checking out CMake packages, please be patient"
+	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+	echo $OK
+
+	echo "Installing gdebi"
+	apt-install ${GDEBI}
+	echo $OK
+
+	if dpkg -s cmake | grep installed > /dev/null; then		
+		echo "Checking for installed cmake"
+		CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
+		CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
+		case ${CMAKE_COMPARE_RESULT} in
+		"equal"|"1 > 2");;
+		"2 > 1") echo "Removing CMake build system"
+		   sudo apt-get remove -y cmake cmake-data
+		   echo "Installing CMake build system"
+		   if [ ${ARCH} == "i386" ]; then
+		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+		   elif [ ${ARCH} == "x64" ]; then
+		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+		   fi
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+		   ;;
+		esac
+	fi
+	echo $OK
+
+	if [ ${ARCH} = "i386" ]; then
+		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
+		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
+	elif [ ${ARCH} = "x64" ]; then
+		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
+		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
+	fi
+	echo "Checking whether Qt5 with QML support is installed"
+	qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+	if [ -n "$qmlscene_binary" ]; then
+	  echo "Found Qt5 in "`dirname $qmlscene_binary`
+	  NEED_QT5_INSTALL=false
+	else
+	  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
+	  NEED_QT5_INSTALL=true
+	fi
+	echo $OK
+
+	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
+
+	if $NEED_QT5_INSTALL; then
+
+		echo "Checking out Qt5 installation runfile, please be patient"
+		svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
+		echo $OK
+
+		echo "Installing Qt5 libraries"
+		chmod +x ${QT5_RUNFILE_BIN}
+		sudo ${QT5_RUNFILE_BIN}
+		echo $OK
+	fi
+	
+	echo "Installing OpenGL development files"
+	apt-install ${OPENGL_DEV}
+	echo $OK
+fi
+
 if $INSTALL_ALL; then
 	echo " "	
 	echo "Installing optional packages..."
-	echo " "	
+	echo " "
 
 	echo "Installing Doxygen"
 	apt-install ${DOXYGEN}
@@ -161,4 +289,5 @@ if $INSTALL_ALL; then
 	apt-install ${MSCGEN}
 	echo $OK
 fi
+echo "Environment configuration successfully done!"
 

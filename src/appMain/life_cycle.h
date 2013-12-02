@@ -37,7 +37,12 @@
 
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "hmi_message_handler/messagebroker_adapter.h"
+#ifdef QT_HMI
+#  include "hmi_message_handler/dbus_message_adapter.h"
+#endif  // QT_HMI
+#ifdef WEB_HMI
+#  include "hmi_message_handler/messagebroker_adapter.h"
+#endif  // WEB_HMI
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
@@ -45,8 +50,11 @@
 #include "transport_manager/transport_manager_default.h"
 //#include "media_manager/media_manager_impl.h"
 
-#include "CMessageBroker.hpp"
-#include "mb_tcpserver.hpp"
+#ifdef WEB_HMI
+#  include "CMessageBroker.hpp"
+#  include "mb_tcpserver.hpp"
+#  include "networking.h"  // cpplint: Include the directory when naming .h files
+#endif  // WEB_HMI
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
 namespace main_namespace {
@@ -54,11 +62,12 @@ class LifeCycle {
   public:
     static LifeCycle* instance();
     bool StartComponents();
+
     /**
     * Initialize MessageBroker component
     * @return true if success otherwise false.
     */
-    bool InitMessageBroker();
+    bool InitMessageSystem();
     static void StopComponents(int params);
 
   private:
@@ -69,14 +78,24 @@ class LifeCycle {
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+#ifdef QT_HMI
+    hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
+#endif  // QT_HMI
+#ifdef WEB_HMI
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
+#endif  // WEB_HMI
     //media_manager::MediaManagerImpl* media_manager_;
 
+#ifdef WEB_HMI
     NsMessageBroker::CMessageBroker* message_broker_;
     NsMessageBroker::TcpServer* message_broker_server_;
     System::Thread* mb_thread_;
     System::Thread* mb_server_thread_;
     System::Thread* mb_adapter_thread_;
+#endif  // WEB_HMI
+#ifdef QT_HMI
+    System::Thread* dbus_adapter_thread_;
+#endif  // QT_HMI
 
     static log4cxx::LoggerPtr logger_;
 };

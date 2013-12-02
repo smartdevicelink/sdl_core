@@ -70,54 +70,11 @@ const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
 
-/**
- * Initialize HTML based HMI.
- * @return true if success otherwise false.
- */
-bool InitHmi() {
+bool Execute(std::string file, const char * const * argv) {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-
-  pid_t pid_hmi = 0;
-  struct stat sb;
-  if (stat("hmi_link", &sb) == -1) {
-    LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
-    return false;
-  }
-
-  std::ifstream file_str;
-  file_str.open("hmi_link");
-
-  if (!file_str.is_open()) {
-    LOG4CXX_INFO(logger, "File with HMI link was not opened!");
-    return false;
-  }
-
-  file_str.seekg(0, std::ios::end);
-  int length = file_str.tellg();
-  file_str.seekg(0, std::ios::beg);
-
-  char* raw_data = new char[length + 1];
-  if (!raw_data) {
-    LOG4CXX_INFO(logger, "Memory allocation failed.");
-    return false;
-  }
-
-  memset(raw_data, 0, length + 1);
-  file_str.getline(raw_data, length + 1);
-  std::string hmi_link = std::string(raw_data, strlen(raw_data));
-  delete[] raw_data;
-
-  LOG4CXX_INFO(logger,
-               "Input string:" << hmi_link << " length = " << hmi_link.size());
-  file_str.close();
-
-  if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
-    return false;
-  }
+      log4cxx::Logger::getLogger("appMain"));
   // Create a child process.
-  pid_hmi = fork();
+  pid_t pid_hmi = fork();
 
   switch (pid_hmi) {
     case -1: {  // Error
@@ -141,9 +98,10 @@ bool InitHmi() {
       dup2(fd_dev0, STDERR_FILENO);
 
       // Execute the program.
-      execlp(kBrowser, kBrowserName, kBrowserParams, hmi_link.c_str(),
-             reinterpret_cast<char*>(0));
-      LOG4CXX_WARN(logger, "execl() failed! Install chromium-browser!");
+      if (execvp(file.c_str(), const_cast<char* const *>(argv)) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execvp() failed! Can't start HMI!");
+        _exit(EXIT_FAILURE);
+      }
 
       return true;
     }
@@ -153,6 +111,80 @@ bool InitHmi() {
     }
   }
 }
+
+#ifdef WEB_HMI
+/**
+ * Initialize HTML based HMI.
+ * @return true if success otherwise false.
+ */
+bool InitHmi() {
+log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+                              log4cxx::Logger::getLogger("appMain"));
+
+struct stat sb;
+if (stat("hmi_link", &sb) == -1) {
+  LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
+  return false;
+}
+
+std::ifstream file_str;
+file_str.open("hmi_link");
+
+if (!file_str.is_open()) {
+  LOG4CXX_INFO(logger, "File with HMI link was not opened!");
+  return false;
+}
+
+file_str.seekg(0, std::ios::end);
+int length = file_str.tellg();
+file_str.seekg(0, std::ios::beg);
+
+char* raw_data = new char[length + 1];
+if (!raw_data) {
+  LOG4CXX_INFO(logger, "Memory allocation failed.");
+  return false;
+}
+
+memset(raw_data, 0, length + 1);
+file_str.getline(raw_data, length + 1);
+std::string hmi_link = std::string(raw_data, strlen(raw_data));
+delete[] raw_data;
+
+LOG4CXX_INFO(logger,
+             "Input string:" << hmi_link << " length = " << hmi_link.size());
+file_str.close();
+
+if (stat(hmi_link.c_str(), &sb) == -1) {
+  LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
+  return false;
+}
+
+  std::string kBin = kBrowser;
+  const char* const kParams[4] = {kBrowserName, kBrowserParams,
+      hmi_link.c_str(), NULL};
+
+  return Execute(kBin, kParams);
+}
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+/**
+ * Initialize HTML based HMI.
+ * @return true if success otherwise false.
+ */
+bool InitHmi() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("appMain"));
+  std::string kStartHmi = "./start_hmi.sh";
+  struct stat sb;
+  if (stat(kStartHmi.c_str(), &sb) == -1) {
+    LOG4CXX_INFO(logger, "HMI start script doesn't exist!");
+    return false;
+  }
+
+  return Execute(kStartHmi, NULL);
+}
+#endif  // QT_HMI
 }
 
 /**
@@ -165,6 +197,7 @@ int main(int argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization
+
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                                 log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
@@ -175,14 +208,6 @@ int main(int argc, char** argv) {
 #if defined(DEFAULT_MEDIA)
 //  gst_init(&argc, &argv);
 #endif
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
-    LOG4CXX_INFO(logger, "InitMessageBroker failed");
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -190,6 +215,14 @@ int main(int argc, char** argv) {
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   main_namespace::LifeCycle::instance()->StartComponents();
+
+  // --------------------------------------------------------------------------
+  // Third-Party components initialization.
+
+  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->server_address() ==
       std::string(kLocalHostAddress)) {

@@ -159,4 +159,12 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
+NsSmartDeviceLink::NsSmartObjects::SmartObject& Message::smart_object() {
+  return object_;
+}
+
+void Message::set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object) {
+  object_ = object;
+}
 }  // namespace application_manager
+

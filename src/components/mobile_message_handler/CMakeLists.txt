@@ -4,6 +4,7 @@ include_directories (
   ../application_manager/include/
   ../protocol_handler/include/
   ../transport_manager/include/
+  ../smart_objects/include/
 )
 
 set (SOURCES

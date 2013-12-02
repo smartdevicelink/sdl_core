@@ -2054,7 +2054,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2368,7 +2368,7 @@
     <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
       <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="true">
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
       <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
@@ -2387,8 +2387,11 @@
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
     </param>
-    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
@@ -2441,8 +2444,9 @@
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA
-          totalDistance.
+          ETA	  
+          totalDistance
+	  timeToDestination.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">

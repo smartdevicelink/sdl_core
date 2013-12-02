@@ -74,7 +74,7 @@ namespace NsSmartDeviceLink
              *
              * @return Result of validation.
              */
-            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
+            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& Object) const;
 
             /**
              * @brief Set new root schema item.
