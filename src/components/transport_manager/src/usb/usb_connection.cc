@@ -72,6 +72,7 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
 }
 
 UsbConnection::~UsbConnection() {
+  Finalise();
   if (device_handle_) {
     libusb_release_interface(device_handle_, 0);
     if (libusb_handler_) {
@@ -132,10 +133,7 @@ void UsbConnection::OnInTransfer(libusb_transfer *transfer) {
                                    DataReceiveError());
   }
   if (disconnecting_) {
-    if (waiting_in_transfer_cancel_) {
-      waiting_in_transfer_cancel_ = false;
-      CheckAllTransfersComplete();
-    }
+    waiting_in_transfer_cancel_ = false;
   } else {
     if (!PostInTransfer()) {
       controller_->ConnectionAborted(device_uid_, app_handle_,
@@ -199,10 +197,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer *transfer) {
   libusb_free_transfer(transfer);
   out_transfer_ = 0;
   pthread_mutex_unlock(&out_messages_mutex_);
-  if (waiting_out_transfer_cancel_) {
-    waiting_out_transfer_cancel_ = false;
-    CheckAllTransfersComplete();
-  }
+  waiting_out_transfer_cancel_ = false;
 }
 
 TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
@@ -223,17 +218,20 @@ TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
   return TransportAdapter::OK;
 }
 
-TransportAdapter::Error UsbConnection::Disconnect() {
+void UsbConnection::Finalise() {
+  LOG4CXX_INFO(logger_, "Finalise USB connection " << device_uid_);
   pthread_mutex_lock(&out_messages_mutex_);
   disconnecting_ = true;
   if (out_transfer_) {
-    if (LIBUSB_SUCCESS == libusb_cancel_transfer(out_transfer_)) {
-      waiting_out_transfer_cancel_ = true;
+    waiting_out_transfer_cancel_ = true;
+    if (LIBUSB_SUCCESS != libusb_cancel_transfer(out_transfer_)) {
+      waiting_out_transfer_cancel_ = false;
     }
   }
   if (in_transfer_) {
-    if (LIBUSB_SUCCESS == libusb_cancel_transfer(in_transfer_)) {
-      waiting_in_transfer_cancel_ = true;
+    waiting_in_transfer_cancel_ = true;
+    if (LIBUSB_SUCCESS != libusb_cancel_transfer(in_transfer_)) {
+      waiting_in_transfer_cancel_ = false;
     }
   }
   for (std::list<RawMessageSptr>::iterator it = out_messages_.begin();
@@ -241,7 +239,16 @@ TransportAdapter::Error UsbConnection::Disconnect() {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }
   pthread_mutex_unlock(&out_messages_mutex_);
-  CheckAllTransfersComplete();
+
+  while (waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_) {
+    pthread_yield();
+  }
+}
+
+TransportAdapter::Error UsbConnection::Disconnect() {
+  Finalise();
+  LOG4CXX_INFO(logger_, "USB disconnect done " << device_uid_);
+  controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
 }
 
@@ -330,13 +337,6 @@ bool UsbConnection::FindEndpoints() {
   libusb_free_config_descriptor(config);
 
   return !(find_in_endpoint || find_out_endpoint);
-}
-
-void UsbConnection::CheckAllTransfersComplete() {
-  if (!(waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_)) {
-    LOG4CXX_INFO(logger_, "usb disconnect done " << device_uid_);
-    controller_->DisconnectDone(device_uid_, app_handle_);
-  }
 }
 
 }  // namespace transport_adapter

@@ -60,6 +60,7 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error SendData(RawMessageSptr message);
   virtual TransportAdapter::Error Disconnect();
  private:
+  void Finalise();
 
   friend void InTransferCallback(struct libusb_transfer*);
   friend void OutTransferCallback(struct libusb_transfer*);
@@ -69,7 +70,6 @@ class UsbConnection : public Connection {
   bool PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
-  void CheckAllTransfersComplete();
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
