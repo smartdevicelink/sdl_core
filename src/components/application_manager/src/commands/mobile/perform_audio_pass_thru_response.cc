@@ -66,10 +66,8 @@ void PerformAudioPassThruResponse::Run() {
     if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
       int session_key =
         (*message_)[strings::params][strings::connection_key].asInt();
-      LOG4CXX_ERROR_EXT(logger_, "PerformAudioPassThruResponse connection key: %d" << session_key);
       ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
     }
-    LOG4CXX_ERROR_EXT(logger_, "PerformAudioPassThruResponse connection key 2: %d" << (*message_)[strings::params][strings::connection_key].asInt());
     SendResponse(true);
   }
 }
