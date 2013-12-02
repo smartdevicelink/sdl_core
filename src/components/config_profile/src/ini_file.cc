@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdint.h>
 
 #ifndef _WIN32
 #include <unistd.h>
