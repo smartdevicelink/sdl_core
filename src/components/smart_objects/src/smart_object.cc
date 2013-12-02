@@ -975,7 +975,7 @@ bool SmartObject::erase(const std::string & Key) {
   return (1 == m_data.map_value->erase(Key));
 }
 
-bool SmartObject::isValid() {
+bool SmartObject::isValid() const {
   return (Errors::OK == m_schema.validate(*this));
 }
 
