@@ -434,11 +434,13 @@ SDL.SDLModel = Em.Object.create({
                 }
 
                 events[i] = {};
-                events[i].c = {};
+                events[i].c = [{}];
+
                 events[i].id  = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
-                events[i].c.x = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
-                events[i].c.y = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+                events[i].c[0].x = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
+                events[i].c[0].y = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
                 events[i].ts  = [event.timeStamp - SDL.SDLModel.timeStamp];
+
 
 
             }
