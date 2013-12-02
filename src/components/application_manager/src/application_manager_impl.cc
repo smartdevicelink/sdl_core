@@ -281,17 +281,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  if (!MessageHelper::VerifyApplicationName(message[strings::msg_params])) {
-
-    utils::SharedPtr<smart_objects::SmartObject> response(
-      MessageHelper::CreateNegativeResponse(
-        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id].asUInt(),
-        mobile_apis::Result::INVALID_DATA));
-    ManageMobileCommand(response);
-    return NULL;
-  }
-
   const std::string& name =
     message[strings::msg_params][strings::app_name].asString();
 
