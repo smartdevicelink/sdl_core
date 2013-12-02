@@ -36,83 +36,116 @@ import QtQuick 2.0
 import "Internal.js" as Internal
 
 QtObject {
+    id: clock
     property int hmsTime
-    property real magic // either difference or sum with current time - depends on update mode
-    property int total
+ //   property real magic // either difference or sum with current time - depends on update mode
+  //  property int total
 
     property int updateMode
+    property int runningMode
+    property int startTime
+    property int endTime
+    property int secondsInDay: 24 * 60 * 60 - 1
 
     property real progress: 0
 
     property Timer timer: Timer {
+        id: timer
         interval: 1000
         repeat: true
         onTriggered: onTimer()
     }
+    onRunningModeChanged: {
+        if (runningMode === Internal.MediaClockRunningMode.MCR_STOPPED) {
+            timer.stop()
+        } else {
+            timer.start()
+        }
+    }
 
     function onTimer () {
+        console.debug("!!!!!!!!!!!", clock.startTime, "!!!", endTime)
         switch (updateMode) {
             case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                ++hmsTime
+                console.debug("count up")
+                if (clock.endTime !== -1) {
+                    if (clock.startTime < clock.endTime) {
+                        clock.startTime++
+                    } else {
+                        timer.stop()
+                        console.debug("count Up timer stopped")
+                    }
+                } else {
+                    if (clock.startTime < clock.secondsInDay) {
+                        clock.startTime++
+                    } else {
+                        clock.startTime = 0
+                    }
+                }
+                progress = (clock.endTime !== -1) ? (clock.startTime / clock.endTime) : (clock.startTime / clock.secondsInDay)
                 break
             case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                if (--hmsTime === 0) {
+                console.debug("count down")
+                if (--clock.startTime === 0) {
                     timer.stop()
-                    console.log("countdown timer stopped")
+                    console.debug("count Down timer stopped")
                 }
-                progress = hmsTime / total
+                progress = (clock.endTime !== -1) ? (clock.endTime / clock.startTime) : (1)
                 break
         }
+        setApplicationProperties(dataContainer.currentApplication.appId, {
+                                     "mediaClock": {"startTime": clock.startTime}
+                                 })
     }
 
-    function restore (updateMode, runningMode, magic, total) {
-        console.debug("enter: " +
-                      Internal.mediaClockUpdateModeToString(updateMode) + ", " +
-                      Internal.mediaClockRunningModeToString(runningMode) + ", " +
-                      magic + ", " +
-                      total)
-        timer.stop()
-        var date = new Date()
-        var secondsSinceEpoch = date.getTime() / 1000
-        this.updateMode = updateMode
-        this.magic = magic
-        this.total = total
-        var toStart
-        switch (runningMode) {
-            case Internal.MediaClockRunningMode.MCR_RUNNING:
-                switch (updateMode) {
-                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        hmsTime = Math.round(secondsSinceEpoch - magic)
-                        toStart = true
-                        break
-                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        hmsTime = Math.round(magic - secondsSinceEpoch)
-                        if (hmsTime > 0) {
-                            toStart = true
-                        }
-                        else {
-                            console.log("MediaClockModel::restore(): countdown timer overdue")
-                            hmsTime = 0
-                            toStart = false
-                        }
-                        break
-                }
-                if (toStart) {
-                    timer.start()
-                }
-                break
-            case Internal.MediaClockRunningMode.MCR_STOPPED:
-                hmsTime = magic
-                break
-        }
-        switch (updateMode) {
-            case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                progress = 0
-                break
-            case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                progress = hmsTime / total
-                break
-        }
-        console.debug("exit")
-    }
+//    function restore (updateMode, runningMode, magic, total) {
+//        console.debug("enter: " +
+//                      Internal.mediaClockUpdateModeToString(updateMode) + ", " +
+//                      Internal.mediaClockRunningModeToString(runningMode) + ", " +
+//                      magic + ", " +
+//                      total)
+//        timer.stop()
+//        var date = new Date()
+//        var secondsSinceEpoch = date.getTime() / 1000
+//        this.updateMode = updateMode
+//        this.magic = magic
+//        this.total = total
+//        var toStart
+//        switch (runningMode) {
+//            case Internal.MediaClockRunningMode.MCR_RUNNING:
+//                switch (updateMode) {
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+//                        hmsTime = Math.round(secondsSinceEpoch - magic)
+//                        toStart = true
+//                        break
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+//                        hmsTime = Math.round(magic - secondsSinceEpoch)
+//                        if (hmsTime > 0) {
+//                            toStart = true
+//                        }
+//                        else {
+//                            console.log("MediaClockModel::restore(): countdown timer overdue")
+//                            hmsTime = 0
+//                            toStart = false
+//                        }
+//                        break
+//                }
+//                if (toStart) {
+//                    timer.start()
+//                }
+//                break
+//            case Internal.MediaClockRunningMode.MCR_STOPPED:
+//                hmsTime = magic
+//                break
+//        }
+//        switch (updateMode) {
+//            case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+//                progress = 0
+//                break
+//            case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+//                progress = hmsTime / total
+//                break
+//        }
+//        console.debug("exit")
+//    }
 }

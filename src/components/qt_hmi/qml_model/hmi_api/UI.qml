@@ -166,78 +166,182 @@ Item {
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: {" +
+        console.debug("enter: { {" +
                           startTime.hours + ", " +
                           startTime.minutes + ", " +
                           startTime.seconds +
                       "}, " +
                       endTime + ", " +
                       updateMode + ", " +
-                      appID)
-        var date = new Date()
-        var secondsSinceEpoch = date.getTime() / 1000
-        var hmsTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+                      appID + "}")
+
+        var app = dataContainer.getApplication(appID)
+ //       var date = new Date()
+ //       var currentTime = date.getTime() / 1000
+        var newStartTime
+        var newEndTime
         var newUpdateMode
         var newRunningMode
-        var newMagic
-        var newTotal
+        var resultCode
+        var sendErrorResponce = false
+        console.debug("1")
+
         switch (updateMode) {
             case Common.ClockUpdateMode.COUNTUP:
+                console.debug("2")
+                if (startTime === undefined) {
+                    console.debug("11")
+                    resultCode = Common.Result.INVALID_DATA
+                    sendErrorResponce = true
+                    break
+                }
+                console.debug("12")
+                newStartTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+                console.debug("13")
+                newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : -1
+                console.debug("14")
                 newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                console.debug("15")
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
-                newMagic = secondsSinceEpoch - hmsTime
-                newTotal = 0
+                resultCode = Common.Result.SUCCESS
+                console.debug("3")
                 break
+
             case Common.ClockUpdateMode.COUNTDOWN:
+                if (startTime === undefined) {
+                    resultCode = Common.Result.INVALID_DATA
+                    sendErrorResponce = true
+                    break
+                }
+                newStartTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
+                newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : -1
                 newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTDOWN
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
-                newMagic = secondsSinceEpoch + hmsTime
-                newTotal = hmsTime
+                resultCode = Common.Result.SUCCESS
                 break
+
             case Common.ClockUpdateMode.PAUSE:
-                var mediaClockMagic = dataContainer.getApplication(appID).mediaClock.magic
-                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
-                switch (newUpdateMode) {
-                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        newMagic = secondsSinceEpoch - mediaClockMagic
-                        break
-                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        newMagic = mediaClockMagic - secondsSinceEpoch
-                        break
+                // Already paused or cleared
+                console.debug("PAUSE")
+                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_STOPPED) || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                    resultCode = Common.Result.IGNORED
+                    sendErrorResponce = true
+                    break
                 }
+                console.debug("PAUSE 5")
+                console.debug(app.mediaClock.startTime, newStartTime)
+                newStartTime = app.mediaClock.startTime
+                newEndTime = app.mediaClock.endTime
                 newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
-                newTotal = dataContainer.getApplication(appID).mediaClock.total
+                newUpdateMode = app.mediaClock.updateMode
+                resultCode = Common.Result.SUCCESS
+                console.debug(app.mediaClock.startTime, newStartTime)
                 break
+
             case Common.ClockUpdateMode.RESUME:
-                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
-                var mediaClockTime = dataContainer.getApplication(appID).mediaClock.magic
-                switch (newUpdateMode) {
-                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                        newMagic = secondsSinceEpoch - mediaClockTime
-                        break
-                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
-                        newMagic = secondsSinceEpoch + mediaClockTime
-                        break
+                // Already resumed or cleared
+                console.debug("RESUMED !!")
+                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING) || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                    resultCode = Common.Result.IGNORED
+                    sendErrorResponce = true
+                    break
                 }
+                newStartTime = app.mediaClock.startTime
+                newEndTime = app.mediaClock.endTime
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
-                newTotal = dataContainer.getApplication(appID).mediaClock.total
+                newUpdateMode = app.mediaClock.updateMode
+                resultCode = Common.Result.SUCCESS
                 break
+
             case Common.ClockUpdateMode.CLEAR:
-                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+                newStartTime = -1
+                newEndTime = -1
                 newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
-                newMagic = 0
-                newTotal = 0
+                newUpdateMode = app.mediaClock.updateMode
+                resultCode = Common.Result.SUCCESS
                 break
         }
+
+        console.debug("4")
+        if (sendErrorResponce) {
+            console.debug("send error code!!!!")
+            console.debug("exit with result code: ", resultCode)
+            return { __retCode: resultCode }
+        }
+
+        console.debug("5")
         dataContainer.setApplicationProperties(appID, {
             "mediaClock": {
                 "updateMode": newUpdateMode,
                 "runningMode": newRunningMode,
-                "magic": newMagic,
-                "total": newTotal
+                "startTime": newStartTime,
+                "endTime": newEndTime
             }
         })
+
+        console.debug(newUpdateMode, newRunningMode, newStartTime, newEndTime)
+        console.debug("6")
         console.debug("exit")
+        return { __retCode: resultCode }
+
+
+
+
+
+
+
+
+
+
+//        switch (updateMode) {
+//            case Common.ClockUpdateMode.COUNTUP:
+//                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+//                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+//                diffWithCurrentTime = currentTime - hmsTime
+//                newTotal = 0
+//                break
+//            case Common.ClockUpdateMode.COUNTDOWN:
+//                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTDOWN
+//                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+//                diffWithCurrentTime = currentTime + hmsTime
+//                newTotal = hmsTime
+//                break
+//            case Common.ClockUpdateMode.PAUSE:
+//                var mediaClockMagic = dataContainer.getApplication(appID).mediaClock.magic
+//                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+//                switch (newUpdateMode) {
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+//                        diffWithCurrentTime = currentTime - mediaClockMagic
+//                        break
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+//                        diffWithCurrentTime = mediaClockMagic - currentTime
+//                        break
+//                }
+//                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+//                newTotal = dataContainer.getApplication(appID).mediaClock.total
+//                break
+//            case Common.ClockUpdateMode.RESUME:
+//                newUpdateMode = dataContainer.getApplication(appID).mediaClock.updateMode
+//                var mediaClockTime = dataContainer.getApplication(appID).mediaClock.magic
+//                switch (newUpdateMode) {
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTUP:
+//                        diffWithCurrentTime = currentTime - mediaClockTime
+//                        break
+//                    case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
+//                        diffWithCurrentTime = currentTime + mediaClockTime
+//                        break
+//                }
+//                newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
+//                newTotal = dataContainer.getApplication(appID).mediaClock.total
+//                break
+//            case Common.ClockUpdateMode.CLEAR:
+//                newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
+//                newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+//                diffWithCurrentTime = 0
+//                newTotal = 0
+//                break
+//    }
+
     }
 
     function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {

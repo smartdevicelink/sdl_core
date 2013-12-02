@@ -87,6 +87,10 @@ function hmsTime (hours, minutes, seconds) {
 }
 
 function hmsTimeToString (hmsTime) {
+    if (hmsTime === -1) {
+        return ""
+    }
+
     var _time = hmsTime
     var seconds = _time % 60
     _time -= seconds
@@ -96,10 +100,12 @@ function hmsTimeToString (hmsTime) {
     _time /= 60
     var hours = _time
     var string = ""
-    if (hours > 0) {
-        string += hours
-        string += ":"
-    }
+//    if (hours > 0) {
+//        string += hours
+//        string += ":"
+//    }
+    string += hours
+    string += ":"
     string += pad(minutes, 2)
     string += ":"
     string += pad(seconds, 2)

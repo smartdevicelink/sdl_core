@@ -108,7 +108,18 @@ QtObject {
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
-                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
+                console.debug("in SET CURRENT APP")
+                currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
+                currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
+                if (application.mediaClock.startTime !== undefined) {
+                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
+                }
+                console.debug("in SET CURRENT UP pered endTime")
+                if (application.mediaClock.endTime !== undefined) {
+                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
+                }
+                console.debug("in SET CURRENT APP 2")
+                //currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -450,6 +461,7 @@ QtObject {
     property NavigationModel navigationModel: NavigationModel { }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
+    //property MediaClockModel mediaClock: MediaClockModel {}
     property bool activeVR: false
 
     property InteractionModel interactionModel: InteractionModel {
