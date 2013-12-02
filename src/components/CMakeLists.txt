@@ -66,3 +66,11 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 #add_subdirectory(./media_manager)
+
+IF (${QT_HMI})
+# --- DBus
+    add_subdirectory(./dbus)
+# --- Qt HMI
+#    add_subdirectory(./qt_hmi)
+ENDIF (${QT_HMI})
+

@@ -651,6 +651,10 @@ SmartObject& SmartObject::operator[](int Index) {
   return handle_array_access(Index);
 }
 
+const SmartObject& SmartObject::operator[](int Index) const {
+  return getElement(Index);
+}
+
 inline SmartObject& SmartObject::handle_array_access(int Index) {
   if (m_type == SmartType_Invalid) {
     return *this;
@@ -689,9 +693,18 @@ SmartObject& SmartObject::operator[](const std::string Key) {
   return handle_map_access(Key);
 }
 
+const SmartObject& SmartObject::operator[] (const std::string Key) const {
+  return getElement(Key);
+}
+
 SmartObject& SmartObject::operator[](char* Key) {
   std::string str(Key);
   return handle_map_access(str);
+}
+ 
+const SmartObject& SmartObject::operator[](char* Key) const {
+  std::string str(Key);
+  return getElement(str);
 }
 
 SmartObject& SmartObject::operator[](const char* Key) {

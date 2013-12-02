@@ -104,7 +104,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
