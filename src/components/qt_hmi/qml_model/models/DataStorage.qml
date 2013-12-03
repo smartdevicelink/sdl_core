@@ -457,7 +457,6 @@ QtObject {
     property NavigationModel navigationModel: NavigationModel { }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
-    //property MediaClockModel mediaClock: MediaClockModel {}
     property bool activeVR: false
 
     property InteractionModel interactionModel: InteractionModel {

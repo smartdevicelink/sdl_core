@@ -36,7 +36,6 @@ import QtQuick 2.0
 import "Internal.js" as Internal
 
 QtObject {
-    property int hmsTime
     property int updateMode
     property int runningMode
     property int startTime
@@ -66,7 +65,8 @@ QtObject {
             if (updateMode === Internal.MediaClockUpdateMode.MCU_COUNTUP) {
                 progress = (endTime !== -1) ? (startTime / endTime) : (startTime / upperTimeLimit)
             } else {
-                progress = (endTime !== -1) ? (endTime / startTime) : (startTime / startTimeForProgress)
+                progress = (endTime !== -1) ? ( (startTime - endTime) / (startTimeForProgress - endTime) )
+                                            : (startTime / startTimeForProgress)
             }
         }
     }

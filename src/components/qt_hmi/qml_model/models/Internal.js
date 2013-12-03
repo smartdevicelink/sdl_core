@@ -100,10 +100,6 @@ function hmsTimeToString (hmsTime) {
     _time /= 60
     var hours = _time
     var string = ""
-//    if (hours > 0) {
-//        string += hours
-//        string += ":"
-//    }
     string += hours
     string += ":"
     string += pad(minutes, 2)

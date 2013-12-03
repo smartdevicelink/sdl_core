@@ -166,14 +166,8 @@ Item {
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: { {" +
-                          startTime.hours + ", " +
-                          startTime.minutes + ", " +
-                          startTime.seconds +
-                      "}, " +
-                      endTime + ", " +
-                      updateMode + ", " +
-                      appID + "}")
+        console.debug("enter: { {", startTime.hours, ", ", startTime.minutes, ", ", startTime.seconds, "}, ",
+                      endTime,", ", updateMode, ", ", appID, "}")
 
         var app = dataContainer.getApplication(appID)
         var newStartTime
@@ -215,7 +209,8 @@ Item {
 
             case Common.ClockUpdateMode.PAUSE:
                 // Already paused or cleared
-                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_STOPPED) || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_STOPPED)
+                        || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
                     resultCode = Common.Result.IGNORED
                     sendErrorResponce = true
                     break
@@ -230,7 +225,8 @@ Item {
 
             case Common.ClockUpdateMode.RESUME:
                 // Already resumed or cleared
-                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING) || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING)
+                        || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
                     resultCode = Common.Result.IGNORED
                     sendErrorResponce = true
                     break
