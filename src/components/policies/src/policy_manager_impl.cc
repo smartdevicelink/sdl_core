@@ -35,6 +35,7 @@
 #include "policies/policy_manager_impl.h"
 #include "policies/permissions_calculator.h"
 #include "utils/file_system.h"
+#include "utils/macro.h"
 
 
 namespace policies {
@@ -139,22 +140,24 @@ CheckPermissionResult
 
 //---------------------------------------------------------------
 
-void PolicyManagerImpl::StorePolicyTable() {
+bool PolicyManagerImpl::StorePolicyTable() {
   if (NULL == policy_table_) {
-    LOG4CXX_WARN(logger_, "PolicyTable is NULL. Nothing to store");
-    return;
+    LOG4CXX_WARN(logger_, "PolicyTable is NULL."
+                          "It seems like Init hasn't been called");
+    NOTREACHED();
+    return false;
   }
 
   if (smart_objects::SmartType_Map !=
         policy_table_->AsSmartObject().getType()) {
     LOG4CXX_WARN(logger_, "PolicyTable is empty. Nothing to store");
-    return;
+    return false;
   }
 
   std::string pt_string;
   if (false == policy_table_->AsString(&pt_string)) {
     LOG4CXX_ERROR(logger_, "Can't convert PolicyTable to string.");
-    return;
+    return false;
   }
 
   const std::vector<unsigned char> char_vector_pdata(
@@ -164,7 +167,9 @@ void PolicyManagerImpl::StorePolicyTable() {
                                   char_vector_pdata)) {
     LOG4CXX_ERROR(logger_, "Can't write policy table file "
       << policy_config_.pt_file_name());
+    return false;
   }
+  return true;
 }
 
 //---------------------------------------------------------------

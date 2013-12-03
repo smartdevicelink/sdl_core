@@ -88,8 +88,10 @@ class PolicyManagerImpl : public PolicyManager {
 
     /**
      * @brief Store policy table to filesystem
+     *
+     * @return true if PolicyTable is successfully saved, false - othewise.
      */
-    void StorePolicyTable();
+    bool StorePolicyTable();
 
     /**
      * @brief Get PolicyTable pointer (for testing purposes)

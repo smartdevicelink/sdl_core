@@ -146,16 +146,17 @@ namespace policies_draft_test {
     ::policies::PolicyConfiguration policy_config;
     policy_config.set_pt_file_name("missing_file_for_sure.json");
     policy_config.set_preload_pt_file_name("missing_too.json");
-    PolicyManagerTest policy_manager(policy_config);
-    ASSERT_TRUE(NULL == policy_manager.getPolicyTable());
-    ASSERT_EQ(::policies::INIT_FAILED, policy_manager.init_result);
+    PolicyManagerTest* policy_manager = new PolicyManagerTest(policy_config);
+    ASSERT_TRUE(NULL == policy_manager->getPolicyTable());
+    ASSERT_EQ(::policies::INIT_FAILED, policy_manager->init_result);
 
     ::policies::CheckPermissionResult perm_result =
-    policy_manager.CheckPermission(
+    policy_manager->CheckPermission(
         789,  // some app
         so_ns::SmartObject(),
         mobile_apis::HMILevel::HMI_BACKGROUND);
     ASSERT_EQ(::policies::PERMISSION_INIT_FAILED, perm_result.result);
+    ASSERT_DEATH({delete policy_manager;}, "");
   }
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {
