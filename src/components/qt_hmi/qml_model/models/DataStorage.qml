@@ -103,6 +103,13 @@ QtObject {
                 if (application.hmiUITextAlignment !== undefined) {
                     currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
                 }
+                if (application.helpPrompt !== undefined) {
+                    currentApplication.helpPrompt = application.helpPrompt
+                }
+                if (application.timeoutPrompt !== undefined) {
+                    currentApplication.timeoutPrompt = application.timeoutPrompt
+                }
+                // Check fields with mandatory = false
 
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
@@ -258,11 +265,6 @@ QtObject {
     property ListModel vrCommands: ListModel {}
 
     property ListModel vrHelp: ListModel {}
-
-    property var globalProperties: {
-        "helpPrompt": "",
-        "timeoutPrompt": ""
-    }
 
     function reset () {
         console.log("dataContainer reset enter");
