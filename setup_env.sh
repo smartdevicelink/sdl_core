@@ -109,7 +109,7 @@ while test $# -gt 0; do
 done
 
 function apt-install() {
-    if [ -z "$1" ]
+    if [ -z "$1" ];
     then
         echo "warning: apt-install() function called without parameters"
         return 1;
@@ -143,7 +143,7 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
-if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ] then
+if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ]; then
 echo "Installing CMake build system"
 apt-install ${CMAKE_BUILD_SYSTEM}
 echo $OK
