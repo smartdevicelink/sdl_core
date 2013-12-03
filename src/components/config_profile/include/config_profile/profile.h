@@ -155,6 +155,9 @@ class Profile {
      * in hmi level none.
      */
     const unsigned int& app_hmi_level_none_time_scale() const;
+      * @brief Returns path to testing file to which redirects video stream
+      */
+    const std::string& video_stream_file() const;
 
     /**
      * @brief Returns allowable max amount of requests per time scale for
@@ -268,6 +271,7 @@ class Profile {
     std::string                     named_pipe_path_;
     unsigned int                    app_hmi_level_none_time_scale_max_requests_;
     unsigned int                    app_hmi_level_none_requests_time_scale_;
+    std::string                     video_stream_file_;
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
     unsigned int                    pending_requests_amount_;

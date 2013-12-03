@@ -30,38 +30,29 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_VIDEO_STREAM_TO_FILE_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_VIDEO_STREAM_TO_FILE_ADAPTER_H_
 
-#include <map>
-#include "protocol_handler/raw_message.h"
+#include <string>
+#include <fstream>
 #include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
-
-namespace threads {
-class Thread;
-}
 
 namespace media_manager {
 
-class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
+class VideoStreamToFileAdapter : public MediaAdapterImpl {
   public:
-    A2DPSourcePlayerAdapter();
-    ~A2DPSourcePlayerAdapter();
-    void SendData(int application_key,
-                  const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int application_key);
-    void StopActivity(int application_key);
-    bool is_app_performing_activity(int application_key);
-
+    explicit VideoStreamToFileAdapter(const std::string& file_name);
+    virtual ~VideoStreamToFileAdapter();
+    virtual void SendData(int application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int application_key);
+    virtual void StopActivity(int application_key);
+    virtual bool is_app_performing_activity(int application_key);
   private:
-    class A2DPSourcePlayerThread;
-
-    std::map<int, threads::Thread*> sources_;
-    static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
+    void CloseCurrent();
+    std::string file_name_;
+    std::ofstream* file_stream_;
 };
+}  //  namespace media_manager
 
-}  // namespace media_manager
-
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_VIDEO_STREAM_TO_FILE_ADAPTER_H_

@@ -55,7 +55,6 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
     void set_duration(int duration);
   private:
     threads::Thread* recorder_thread_;
-    int current_application_;
     std::string output_file_;
     int duration_;
     const int kDefaultDuration;

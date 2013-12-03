@@ -26,6 +26,7 @@ else(DEFAULT_MEDIA_FLAG)
 set(default_includes
 )
 set(default_sources
+  ./src/video_stream_to_file_adapter.cc
 )
 set(LIBRARIES
 )

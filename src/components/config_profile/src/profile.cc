@@ -159,6 +159,10 @@ const unsigned int& Profile::app_hmi_level_none_time_scale_max_requests() const
   return app_hmi_level_none_time_scale_max_requests_;
 }
 
+const std::string& Profile::video_stream_file() const {
+  return video_stream_file_;
+}
+
 const unsigned int& Profile::app_time_scale() const {
   return app_requests_time_scale_;
 }
@@ -258,6 +262,14 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "VideoStreamFile", value))
+      && ('\0' != *value)) {
+    video_stream_file_ = value;
+    LOG4CXX_INFO(logger_, "Set video stream file to " << video_stream_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "MixingAudioSupported", value))
       && ('\0' != *value)) {
     if (0 == strcmp("true", value)) {
@@ -286,7 +298,7 @@ void Profile::UpdateValues() {
       put_file_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of PutFile requests for one "
-        "application in NONE to " << put_file_in_none_);
+                 "application in NONE to " << put_file_in_none_);
   }
 
   *value = '\0';
@@ -298,7 +310,7 @@ void Profile::UpdateValues() {
       delete_file_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of DeleteFile requests for one "
-        "application in NONE to " << delete_file_in_none_);
+                 "application in NONE to " << delete_file_in_none_);
   }
 
   *value = '\0';
@@ -310,7 +322,7 @@ void Profile::UpdateValues() {
       list_files_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of ListFiles requests for one "
-        "application in NONE to " << list_files_in_none_);
+                 "application in NONE to " << list_files_in_none_);
   }
 
   *value = '\0';

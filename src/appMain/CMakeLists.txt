@@ -61,9 +61,6 @@ include_directories (
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
-  #/usr/lib/i386-linux-gnu/glib-2.0/include
-  #/usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  #${GLIB_glib_2_INCLUDE_DIR}
   ${default_media_inc}
 )
 

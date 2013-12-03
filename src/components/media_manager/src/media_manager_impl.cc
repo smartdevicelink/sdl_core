@@ -32,12 +32,16 @@
 
 #include "config_profile/profile.h"
 #include "media_manager/media_manager_impl.h"
-#include "media_manager/a2dp_source_player_adapter.h"
-#include "media_manager/from_mic_recorder_adapter.h"
 #include "media_manager/from_mic_recorder_listener.h"
 #include "media_manager/video_streamer_listener.h"
+#if defined(DEFAULT_MEDIA)
+#include "media_manager/a2dp_source_player_adapter.h"
+#include "media_manager/from_mic_recorder_adapter.h"
 #include "./socket_video_streamer_adapter.h"
 #include "./pipe_video_streamer_adapter.h"
+#else
+#include "./video_stream_to_file_adapter.h"
+#endif
 
 namespace media_manager {
 
@@ -90,13 +94,15 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new PipeVideoStreamerAdapter();
   }
+#else
+  video_streamer_ = new VideoStreamToFileAdapter(
+    profile::Profile::instance()->video_stream_file());
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
-#if defined(DEFAULT_MEDIA)
+
   if (NULL != video_streamer_) {
     video_streamer_->AddListener(video_streamer_listener_);
   }
-#endif
 }
 
 void MediaManagerImpl::PlayA2DPSource(int application_key) {
@@ -117,7 +123,8 @@ void MediaManagerImpl::StartMicrophoneRecording(
   int application_key,
   const std::string& output_file,
   int duration) {
-  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording");
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
+               << output_file);
   from_mic_listener_ = new FromMicRecorderListener(output_file);
 #if defined(DEFAULT_MEDIA)
   if (from_mic_recorder_) {

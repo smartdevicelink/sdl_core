@@ -45,7 +45,8 @@ namespace media_manager {
 log4cxx::LoggerPtr A2DPSourcePlayerAdapter::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("A2DPSourcePlayerAdapter"));
 
-class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDelegate {
+class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
+    : public threads::ThreadDelegate {
   public:
     explicit A2DPSourcePlayerThread(const std::string& device);
 
@@ -70,8 +71,7 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDel
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
-A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter()
-  : current_application_(0) {
+A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter() {
 }
 
 A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {

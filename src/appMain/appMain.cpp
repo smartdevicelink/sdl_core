@@ -98,16 +98,8 @@ bool InitHmi() {
   int length = file_str.tellg();
   file_str.seekg(0, std::ios::beg);
 
-  char* raw_data = new char[length + 1];
-  if (!raw_data) {
-    LOG4CXX_INFO(logger, "Memory allocation failed.");
-    return false;
-  }
-
-  memset(raw_data, 0, length + 1);
-  file_str.getline(raw_data, length + 1);
-  std::string hmi_link = std::string(raw_data, strlen(raw_data));
-  delete[] raw_data;
+  std::string hmi_link;
+  std::getline(file_str, hmi_link);
 
   LOG4CXX_INFO(logger,
                "Input string:" << hmi_link << " length = " << hmi_link.size());

@@ -37,7 +37,8 @@ namespace media_manager {
 log4cxx::LoggerPtr MediaAdapterImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaAdapterImpl"));
 
-MediaAdapterImpl::MediaAdapterImpl() {
+MediaAdapterImpl::MediaAdapterImpl()
+  : current_application_(0) {
 }
 
 MediaAdapterImpl::~MediaAdapterImpl() {

@@ -88,19 +88,19 @@ unsigned int SizeDirectory(const std::string& path) {
 
 unsigned int file_system::AvailableSpaceApp(const std::string& name) {
   unsigned int available_space_app = profile::Profile::instance()
-  ->space_available();
+                                     ->space_available();
   std::string full_path;
   unsigned int size_of_directory = 0;
   unsigned int available_space = 0;
-  if(DirectoryExists(name)) {
+  if (DirectoryExists(name)) {
     full_path = FullPath(name);
     size_of_directory = SizeDirectory(full_path);
-    if(available_space_app < size_of_directory) {
+    if (available_space_app < size_of_directory) {
       return 0;
     }
     available_space_app -= size_of_directory;
     available_space = AvailableSpace();
-    if(available_space_app > available_space) {
+    if (available_space_app > available_space) {
       return available_space;
     } else {
       return available_space_app;
@@ -162,6 +162,33 @@ bool file_system::Write(
     return true;
   }
   return false;
+}
+
+std::ofstream* file_system::Open(const std::string& file_name,
+                                 std::ios_base::openmode mode) {
+  std::ofstream* file = new std::ofstream(file_name.c_str(),
+                                          std::ios_base::binary | mode);
+  if (file->is_open()) {
+    return file;
+  }
+  return NULL;
+}
+
+std::ofstream* file_system::Write(std::ofstream* file_stream,
+                                  const unsigned char* data,
+                                  unsigned int data_size) {
+  if (file_stream) {
+    for (size_t i = 0; i < data_size; ++i) {
+      (*file_stream) << data[i];
+    }
+  }
+  return file_stream;
+}
+
+void file_system::Close(std::ofstream* file_stream) {
+  if (file_stream) {
+    file_stream->close();
+  }
 }
 
 std::string file_system::FullPath(const std::string& file) {
@@ -305,7 +332,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   std::string::const_iterator it_sym_end = reserved_symbols.end();
 
   std::string converted_path;
-  while(it_path != it_path_end) {
+  while (it_path != it_path_end) {
 
     it_sym = reserved_symbols.begin();
     for (; it_sym != it_sym_end; ++it_sym) {
@@ -320,7 +347,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
         ++it_path;
         continue;
       }
-   }
+    }
 
     converted_path += *it_path;
     ++it_path;
