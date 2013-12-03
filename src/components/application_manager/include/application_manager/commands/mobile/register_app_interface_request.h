@@ -81,6 +81,13 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
  private:
 
   /*
+   * @brief Check new ID along with known mobile application ID
+   *
+   * return TRUE if ID is known already, otherwise - FALSE
+   */
+  bool IsApplicationRegistered();
+
+  /*
    * @brief Check for some request param. names restrictions, e.g. for
    * newline characters
    *
