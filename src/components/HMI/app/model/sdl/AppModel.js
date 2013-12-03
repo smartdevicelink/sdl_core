@@ -197,7 +197,7 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length < 999) {
+            if (commands.length <= 999) {
 
                 commands[commands.length] = {
                     commandID: request.params.cmdID,
@@ -212,6 +212,7 @@ SDL.SDLAppModel = Em.Object.extend({
                     SDL.OptionsView.commands.refreshItems();
                 }
 
+                console.log(commands.length);
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
                 FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
@@ -253,7 +254,7 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length < 999) {
+            if (commands.length <= 999) {
 
                 this.commandsList[request.params.menuID] = [];
                 commands[commands.length] = {
