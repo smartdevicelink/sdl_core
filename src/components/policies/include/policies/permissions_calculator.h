@@ -88,7 +88,7 @@ class PermissionsCalculator {
      */
     static PermissionResult CalcPermissionsByGroups(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
-        const std::vector<std::string> rpc_groups,
+        const std::vector<std::string>& rpc_groups,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
         const mobile_apis::HMILevel::eType hmi_status);
 
@@ -112,21 +112,23 @@ class PermissionsCalculator {
      * @brief Convert HMI level value (as number) to string
      *
      * @param hmi_status        HMI level status
-     * @param hmi_level_string  String convert to
+     * @param hmi_level_string  Pointer to a string where the result is
+     *  retunred.
      */
     static void ConvertHMILevel2String(
         const mobile_apis::HMILevel::eType hmi_status,
-        std::string& hmi_level_string);
+        std::string* hmi_level_string);
 
     /**
      * @breif Convert smart object to vector of strings
      *
      * @param object Smart object
-     * @param v_strings Vector of strings
+     * @param v_strings Pointer to a verctor of strings where result is
+     *  returned.
      */
     static void ConvertSmartArray2VectorStrings(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-        std::vector<std::string>& v_strings);
+        std::vector<std::string>* v_strings);
     /**
      * @brief Logger
      */

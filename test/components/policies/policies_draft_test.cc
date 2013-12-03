@@ -129,12 +129,14 @@ namespace policies_draft_test {
 
     {
       PolicyManagerTest policy_manager(policy_config);
-      initial_json = policy_manager.getPolicyTable()->AsString();
+      bool result = policy_manager.getPolicyTable()->AsString(&initial_json);
+      ASSERT_TRUE(result);
     }
 
     {
       PolicyManagerTest policy_manager(policy_config);
-      stored_json = policy_manager.getPolicyTable()->AsString();
+      bool result = policy_manager.getPolicyTable()->AsString(&stored_json);
+      ASSERT_TRUE(result);
     }
 
     ASSERT_EQ(md5(initial_json), md5(stored_json));

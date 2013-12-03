@@ -47,6 +47,9 @@ class PolicyTableSchema {
   public:
     /**
      * @brief Creates schema for Policy Table
+     *
+     * @note CSmartSchema is a lightweith wrapper around
+     *  "SharedPtr<ISchemaItem>". There's no overhead in returning it by value.
      */
     static NsSmartDeviceLink::NsSmartObjects::CSmartSchema Create(void);
 
@@ -134,6 +137,9 @@ class PolicyTableSchema {
      *
      * If schema hasn't been created yet the method creates it and returns
      * a newly created schema.
+     *
+     * @note CSmartSchema is a lightweith wrapper around
+     *  "SharedPtr<ISchemaItem>". There's no overhead in returning it by value.
      *
      * @return If the schema has already been created just returns it,
      *  otherwise creates it and returns it.
