@@ -58,7 +58,9 @@ LifeCycle::LifeCycle()
   , connection_handler_(NULL)
   , app_manager_(NULL)
   , hmi_handler_(NULL)
+#ifdef MEDIA_MANAGER
   , media_manager_(NULL)
+#endif
   , mb_adapter_(NULL)
   , message_broker_(NULL)
   , message_broker_server_(NULL)
@@ -105,13 +107,17 @@ bool LifeCycle::StartComponents() {
   mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
+#ifdef MEDIA_MANAGER
   media_manager_ = media_manager::MediaManagerImpl::instance();
+#endif
 
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(mmh_);
+#ifdef MEDIA_MANAGER
   protocol_handler_->AddProtocolObserver(media_manager_);
-  protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
+#endif
+  protocol_handler_->AddProtocolObserver(app_manager_);
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
@@ -231,9 +237,11 @@ void LifeCycle::StopComponents(int params) {
     instance()->protocol_handler_);
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
+#ifdef MEDIA_MANAGER
   instance()->media_manager_->SetProtocolHandler(NULL);
-  delete instance()->protocol_handler_;
   instance()->media_manager_->~MediaManagerImpl();
+#endif
+  delete instance()->protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;

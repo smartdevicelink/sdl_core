@@ -1323,10 +1323,10 @@ bool MessageHelper::VerifyApplicationName(
   // Expecting for some chars different from newlines and spaces in the appName
   std::string name_copy = name;
   std::string::iterator name_copy_new_end =
-      std::remove_if(
+      std::remove(
           name_copy.begin(),
           std::remove(name_copy.begin(), name_copy.end(), ' '),
-          [](char c){return 13 == static_cast<int>(c);});
+	  '\n');
 
   if (std::string(name_copy.begin(), name_copy_new_end).empty()) {
     printf("Application name is empty.\n");

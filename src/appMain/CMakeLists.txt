@@ -30,17 +30,30 @@ set(LIBRARIES
   Utils
   encryption
   jsoncpp
-  bluetooth
-  pthread
-  rt
-  avahi-client
-  avahi-common
+  #rt
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-  MediaManager
-  Libusb-1.0.16
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
+endif()
+
+
+if (BUILD_MEDIA_MANAGER)
+	LIST(APPEND LIBRARIES MediaManager)
+endif()
+
+if (BUILD_BT_SUPPORT)
+	list(APPEND LIBRARIES bluetooth)
+endif()
+if (BUILD_AVAHI_SUPPORT)
+	list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+if (BUILD_USB_SUPPORT)
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 
 include_directories (
   ./
@@ -88,3 +101,4 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/com
 
 install (TARGETS ${PROJECT} DESTINATION bin)
 
+# vim: set ts=2 sw=2 et:

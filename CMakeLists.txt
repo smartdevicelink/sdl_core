@@ -15,11 +15,48 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
-option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
+option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" ON)
+option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
+option(BUILD_MEDIA_MANAGER "Build media_manager component" ON)
+option(BUILD_BT_SUPPORT "Bluetooth support" ON)
+option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
+option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOS_LINUX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  add_definitions(-DOS_QNX)
+  SET(BUILD_MEDIA_MANAGER ON)
+  SET(BUILD_USB_SUPPORT OFF)
+  SET(BUILD_BT_SUPPORT OFF)
+  SET(BUILD_AVAHI_SUPPORT OFF)
+  SET(BUILD_BACKTRACE_SUPPORT OFF)
+  SET(DEFAULT_MEDIA_FLAG OFF)
+endif()
+
+if (BUILD_MEDIA_MANAGER)
+  add_definitions(-DMEDIA_MANAGER)
+endif()
+
+if (BUILD_USB_SUPPORT)
+  add_definitions(-DUSB_SUPPORT)
+endif()
+
+if (BUILD_BT_SUPPORT)
+  add_definitions(-DBLUETOOTH_SUPPORT)
+endif()
+
+if (BUILD_AVAHI_SUPPORT)
+  add_definitions(-DAVAHI_SUPPORT)
+endif()
+
+if (BUILD_BACKTRACE_SUPPORT)
+  add_definitions(-DBACKTRACE_SUPPORT)
+endif()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
-add_definitions(-DOS_LINUX)
 
 IF(CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
@@ -29,13 +66,13 @@ ELSE (CMAKE_C_FLAGS_DEBUG)
     add_definitions(-DRELEASE)
 ENDIF(CMAKE_C_FLAGS_DEBUG)
 
-option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" ON)
 if (DEFAULT_MEDIA_FLAG)
 add_definitions(-DDEFAULT_MEDIA)
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
+find_package(Gstreamer-1.0)
 endif()
 
 # --- Interface generator
@@ -132,4 +169,4 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
 
-
+# vim: set sw=2 ts=2 et :

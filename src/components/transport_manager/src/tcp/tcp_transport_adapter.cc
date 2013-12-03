@@ -40,14 +40,23 @@
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
+
+#ifdef AVAHI_SUPPORT
 #include "transport_manager/tcp/dnssd_service_browser.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
 
 TcpTransportAdapter::TcpTransportAdapter()
-    : TransportAdapterImpl(new DnssdServiceBrowser(this), new TcpConnectionFactory(this),
-                        new TcpClientListener(this, default_port)) {
+    : TransportAdapterImpl(
+#ifdef AVAHI_SUPPORT
+    new DnssdServiceBrowser(this)
+#else
+    NULL
+#endif
+    , new TcpConnectionFactory(this)
+    , new TcpClientListener(this, default_port)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {
@@ -60,3 +69,4 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
+// vim: set ts=2 sw=2 et:

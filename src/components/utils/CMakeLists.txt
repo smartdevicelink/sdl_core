@@ -6,7 +6,6 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/back_trace.cc
     ./src/conditional_variable_posix.cc
     ./src/file_system.cc
     ./src/threads/posix_thread.cc
@@ -17,5 +16,13 @@ set (SOURCES
     ./src/signals_linux.cc
 )
 
+if (BUILD_BACKTRACE_SUPPORT)
+    list(APPEND SOURCES
+    ./src/back_trace.cc
+    )
+endif()
+
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx rt)
+target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
+
+# vim: set sw=2 ts=2 et:

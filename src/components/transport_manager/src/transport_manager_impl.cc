@@ -136,8 +136,8 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
       incoming_data_handler_(new IncomingDataHandler(this)),
       protocol_handler_(NULL) {
   LOG4CXX_INFO(logger_, "==============================================");
-  pthread_mutex_init(&message_queue_mutex_, nullptr);
-  pthread_cond_init(&message_queue_cond, nullptr);
+  pthread_mutex_init(&message_queue_mutex_, NULL);
+  pthread_cond_init(&message_queue_cond, NULL);
   pthread_mutex_init(&event_queue_mutex_, 0);
   pthread_cond_init(&device_listener_thread_wakeup_, NULL);
   LOG4CXX_INFO(logger_, "TransportManager object created");
@@ -172,14 +172,7 @@ TransportManagerImpl::~TransportManagerImpl() {
 
 std::vector<TransportManagerImpl::Connection> TransportManagerImpl::GetConnectionList() {
   std::vector<TransportManagerImpl::Connection> rc(connections_.size());
-  std::transform(connections_.begin(), connections_.end(), rc.begin(),
-                 [&](ConnectionInternal & p) {
-                   Connection c;
-                   c.application = p.application;
-                   c.device = p.device;
-                   c.id = p.id;
-                   return c;
-                 });
+  std::copy(connections_.begin(), connections_.end(), std::back_inserter(rc));
   return rc;
 }
 
@@ -287,8 +280,10 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
 
   pthread_mutex_lock(&event_queue_mutex_);
   int messages_count = 0;
-  for (auto e : event_queue_) {
-    if (e.application_id() == cid) {
+  for (EventQueue::const_iterator it = event_queue_.begin();
+    it != event_queue_.end();
+    ++it) {
+    if (it->application_id() == cid) {
       ++messages_count;
     }
   }

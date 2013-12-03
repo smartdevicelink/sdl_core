@@ -612,6 +612,7 @@ class SmartObject {
   size_t length() const;
 
  protected:
+  static std::string OperatorToTransform(const SmartMap::value_type &pair) ;
   /**
    * @name Support of type: int (internal)
    * @{

@@ -87,6 +87,29 @@ class TransportManagerImpl : public TransportManager {
     ApplicationHandle application;
   };
 
+ private:
+  /**
+   * @brief Structure that contains internal connection parameters
+   */
+  struct ConnectionInternal: public Connection {
+    TransportAdapterSptr transport_adapter;
+    Timer timer;
+    bool shutDown;
+    int messages_count;
+
+    ConnectionInternal(TransportAdapterSptr transport_adapter,
+                       const ConnectionUID& id, const DeviceUID& dev_id,
+                       const ApplicationHandle& app_id)
+        : transport_adapter(transport_adapter),
+          shutDown(false),
+          messages_count(0) {
+            Connection::id = id;
+            Connection::device = dev_id;
+            Connection::application = app_id;
+    }
+  };
+ public:
+
   /**
    * @brief Destructor.
    **/
@@ -447,29 +470,6 @@ class TransportManagerImpl : public TransportManager {
    */
   Handle2GUIDConverter converter_;
 
-  /**
-   * @brief Structure that contains internal connection parameters
-   */
-  struct ConnectionInternal {
-    TransportAdapterSptr transport_adapter;
-    ConnectionUID id;
-    DeviceUID device;
-    ApplicationHandle application;
-    Timer timer;
-    bool shutDown;
-    int messages_count;
-
-    ConnectionInternal(TransportAdapterSptr transport_adapter,
-                       const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id)
-        : transport_adapter(transport_adapter),
-          id(id),
-          device(dev_id),
-          application(app_id),
-          shutDown(false),
-          messages_count(0) {
-    }
-  };
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;

@@ -81,8 +81,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     from_hmh_thread_(NULL),
     to_hmh_thread_(NULL),
     hmi_so_factory_(NULL),
-    request_ctrl(),
-    media_manager_(NULL) {
+    request_ctrl()
+#ifdef MEDIA_MANAGER
+    , media_manager_(NULL)
+#endif
+    {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   from_mobile_thread_ = new threads::Thread(
     "application_manager::FromMobileThreadImpl",
@@ -113,7 +116,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     return;
   }
 
+#ifdef MEDIA_MANAGER
   media_manager_ = media_manager::MediaManagerImpl::instance();
+#endif
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -169,9 +174,11 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   message_chaining_.clear();
 
+#ifdef MEDIA_MANAGER
   if (media_manager_) {
     media_manager_ = NULL;
   }
+#endif
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -747,12 +754,14 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int bits_per_sample,
     int audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
+#ifdef MEDIA_MANAGER
   if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       std::string("record.wav"),
       max_duration);
   }
+#endif
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
@@ -805,10 +814,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
 void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
-
+#ifdef MEDIA_MANAGER
   if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
   }
+#endif
 }
 
 std::string ApplicationManagerImpl::GetDeviceName(
@@ -1009,9 +1019,11 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
     application_manager::MessageHelper::SendNaviStartStream(
       url, session_key);
 
+#ifdef MEDIA_MANAGER
     if (media_manager_) {
       media_manager_->StartVideoStreaming(session_key);
     }
+#endif
 
     // !!!!!!!!!!!!!!!!!!!!!!!
     // TODO(DK): add check if navi streaming allowed for this app.
@@ -1035,7 +1047,9 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     case connection_handler::ServiceType::kNaviSession: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       application_manager::MessageHelper::SendNaviStopStream(session_key);
+#ifdef MEDIA_MANAGER
       media_manager_->StopVideoStreaming(session_key);
+#endif
       break;
     }
     default:
@@ -1570,7 +1584,7 @@ void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
 
 const unsigned int ApplicationManagerImpl::application_id
 (const int correlation_id) {
-  std::map<const int, const unsigned int>::const_iterator it =
+  std::map<const int, const unsigned int>::iterator it =
       appID_list_.find(correlation_id);
     if (appID_list_.end() != it) {
       const unsigned int app_id = it->second;

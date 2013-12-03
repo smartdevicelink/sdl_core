@@ -34,5 +34,7 @@ add_subdirectory(./hmi_message_handler)
 # --- Config
 add_subdirectory(./config_profile)
 
+if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
 add_subdirectory(./media_manager)
+endif()
