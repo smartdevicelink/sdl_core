@@ -125,8 +125,8 @@ void MediaManagerImpl::StartMicrophoneRecording(
   int duration) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
                << output_file);
-  from_mic_listener_ = new FromMicRecorderListener(output_file);
 #if defined(DEFAULT_MEDIA)
+  from_mic_listener_ = new FromMicRecorderListener(output_file);
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -135,6 +135,9 @@ void MediaManagerImpl::StartMicrophoneRecording(
     ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
   }
+#else
+  const char* predefined_rec_file = "audio.8bit.wav";
+  from_mic_listener_ = new FromMicRecorderListener(predefined_rec_file);
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }
