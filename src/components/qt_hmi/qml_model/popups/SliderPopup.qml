@@ -112,7 +112,7 @@ ContextPopup {
 
         Text {
             id: headerText
-            width: parent.width - x
+            width: borderRectangle.width
             elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: dataContainer.uiSlider.header
@@ -177,7 +177,7 @@ ContextPopup {
 
         Text {
             id:footerText
-            width: parent.width - x
+            width: borderRectangle.width
             elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: ""
