@@ -34,7 +34,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
-#include <string.h>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
@@ -118,8 +117,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
     {};
 
     bool operator()(smart_objects::SmartObject obj) {
-      const std::string text = obj[strings::text].asString();
-      return !(strcasecmp(text.c_str(), newItem_.c_str()));
+      return obj[strings::text] == newItem_;
     };
 
     const std::string &newItem_;
@@ -136,8 +134,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       {};
 
       bool operator()(smart_objects::SmartObject obj) {
-        const std::string vr_synonym = obj.asString();
-        return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
+        return obj == newItem_;
       };
 
       const std::string &newItem_;
