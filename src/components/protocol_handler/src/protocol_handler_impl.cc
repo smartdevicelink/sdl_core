@@ -242,7 +242,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(
 void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
   const transport_manager::DataReceiveError& error) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.")
+  LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.");
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {

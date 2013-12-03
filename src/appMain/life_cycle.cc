@@ -61,12 +61,18 @@ LifeCycle::LifeCycle()
 #ifdef MEDIA_MANAGER
   , media_manager_(NULL)
 #endif
+#ifdef QT_HMI
+  , dbus_adapter_(NULL)
+  , dbus_adapter_thread_(NULL) {
+#endif  // QT_HMI
+#ifdef WEB_HMI
   , mb_adapter_(NULL)
   , message_broker_(NULL)
   , message_broker_server_(NULL)
   , mb_thread_(NULL)
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL) {
+#endif  // WEB_HMI
 }
 
 LifeCycle* LifeCycle::instance() {
@@ -116,6 +122,8 @@ bool LifeCycle::StartComponents() {
 #ifdef MEDIA_MANAGER
   protocol_handler_->AddProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
+
+
 #endif
   protocol_handler_->AddProtocolObserver(app_manager_);
   connection_handler_->set_transport_manager(transport_manager_);
@@ -133,7 +141,8 @@ bool LifeCycle::StartComponents() {
   return true;
 }
 
-bool LifeCycle::InitMessageBroker() {
+#ifdef WEB_HMI
+bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
@@ -212,6 +221,40 @@ bool LifeCycle::InitMessageBroker() {
 
   return true;
 }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool LifeCycle::InitMessageSystem() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("appMain"));
+
+  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
+      hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+      dbus_adapter_);
+  if (!dbus_adapter_->Init()) {
+    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    return false;
+  }
+
+  dbus_adapter_->SubscribeTo();
+
+  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  dbus_adapter_thread_ = new System::Thread(
+      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+          *dbus_adapter_,
+          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+          NULL));
+  dbus_adapter_thread_->Start(false);
+
+  return true;
+}
+#endif  // QT_HMI
 
 void LifeCycle::StopComponents(int params) {
   utils::ResetSubscribeToTerminateSignal();
@@ -238,23 +281,31 @@ void LifeCycle::StopComponents(int params) {
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
 #ifdef MEDIA_MANAGER
-  instance()->media_manager_->SetProtocolHandler(NULL);
-  instance()->media_manager_->~MediaManagerImpl();
+  //instance()->media_manager_->~MediaManagerImpl();
 #endif
   delete instance()->protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;
 
-  LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+  LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and adapter.");
+#ifdef QT_HMI
+  instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->dbus_adapter_);
+  instance()->dbus_adapter_thread_->Stop();
+  instance()->dbus_adapter_thread_->Join();
+  delete instance()->dbus_adapter_;
+#endif  // QT_HMI
+#ifdef WEB_HMI
   instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->mb_adapter_);
   instance()->mb_adapter_->unregisterController();
   instance()->mb_adapter_thread_->Stop();
   instance()->mb_adapter_thread_->Join();
   instance()->mb_adapter_->Close();
   delete instance()->mb_adapter_;
+#endif  // WEB_HMI
   instance()->hmi_handler_->~HMIMessageHandlerImpl();
 
+#ifdef WEB_HMI
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   instance()->mb_server_thread_->Stop();
   instance()->mb_server_thread_->Join();
@@ -266,6 +317,7 @@ void LifeCycle::StopComponents(int params) {
   instance()->message_broker_->~CMessageBroker();
 
   networking::cleanup();
+#endif  // WEB_HMI
 
   utils::ForwardSignal();
 }

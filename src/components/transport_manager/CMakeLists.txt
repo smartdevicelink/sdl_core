@@ -6,9 +6,10 @@ include_directories (
 )
 if (BUILD_BT_SUPPORT)
   include_directories(
-  ../../thirdPartyLibs/libusbx-1.0.16
   )
 endif()
+
+ADD_DEFINITIONS(-DUSB_QNX)
 
 set (SOURCES
   ./src/transport_manager_impl.cc
@@ -41,14 +42,23 @@ if (BUILD_BT_SUPPORT)
 endif()
 
 if (BUILD_USB_SUPPORT)
-  list (APPEND SOURCES
-  ./src/usb/libusb_handler.cc
-  ./src/usb/usb_aoa_adapter.cc
-  ./src/usb/usb_connection_factory.cc
-  ./src/usb/usb_connection.cc
-  ./src/usb/usb_device_scanner.cc
-  )
-endif()
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list (APPEND SOURCES
+    ./src/usb/libusb_handler.cc
+    ./src/usb/usb_aoa_adapter.cc
+    ./src/usb/usb_connection_factory.cc
+    ./src/usb/usb_connection.cc
+    ./src/usb/usb_device_scanner.cc
+    )
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    list(APPEND SOURCES
+    ./src/usb/qnx/usb_handler.cc
+    ./src/usb/qnx/usb_connection.cc
+    ./src/usb/qnx/platform_usb_device.cc
+    )
+    target_link_libraries ("TransportManager" usbdi )
+  endif()
+endif(BUILD_USB_SUPPORT)
 
 add_library("TransportManager" ${SOURCES})
 if (BUILD_AVAHI_SUPPORT)

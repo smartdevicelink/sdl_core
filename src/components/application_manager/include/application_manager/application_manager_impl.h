@@ -45,14 +45,16 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-#include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
+
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-
 
 #include "formatters/CSmartFactory.hpp"
 

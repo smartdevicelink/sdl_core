@@ -18,10 +18,15 @@ set (LIBRARIES
     ProtocolHandler
     Utils
     jsoncpp
-    rt
-    avahi-client
-    Libusb-1.0.16
 )
+
+if (BUILD_AVAHI_SUPPORT)
+  list(APPEND LIBRARIES avahi-client)
+endif()
+
+if (BUILD_USB_SUPPORT)
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 
 set (SOURCES
    ./src/mock_connection.cc
@@ -42,8 +47,13 @@ create_test("test_TransportManagerTest" "${SOURCES}" "${LIBRARIES}")
 create_test("test_TcpTransportAdapter" "src/test_tcp_transport_adapter.cc" "${LIBRARIES}")
 #create_test("test_usb" "${TESTUSBSOURCES}" "${LIBRARIES}")
 
-add_executable("test_DnssdServiceDiscovery" "src/test_dnssd_service_browser.cc")
-target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})
-add_test(test_DnssdServiceDiscovery, ./test_DnssdServiceDiscovery.sh)
+#add_executable("test_DnssdServiceDiscovery" "src/test_dnssd_service_browser.cc")
+#target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})
+#add_test(test_DnssdServiceDiscovery, ./test_DnssdServiceDiscovery.sh)
 
-target_link_libraries("test_TransportManagerTest" TransportManager  Libusb-1.0.16)
+target_link_libraries("test_TransportManagerTest" TransportManager)
+
+if (BUILD_USB_SUPPORT)
+  target_link_libraries("test_TransportManagerTest" Libusb-1.0.16)
+endif()
+# vim: set ts=2 sw=2 et:

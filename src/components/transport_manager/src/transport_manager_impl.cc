@@ -39,12 +39,12 @@
 #include <algorithm>
 #include <limits>
 #include <functional>
-
+#include <sstream>
 #include "utils/macro.h"
 #include "protocol_handler/raw_message.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_manager_listener_impl.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/timer.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
@@ -54,10 +54,20 @@
 using ::transport_manager::transport_adapter::TransportAdapter;
 using ::transport_manager::transport_adapter::TransportAdapterSptr;
 
+
+
 namespace transport_manager {
 
 log4cxx::LoggerPtr TransportManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("TransportManager"));
+
+TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
+  TransportManagerImpl::Connection c;
+  c.application = p.application;
+  c.device = p.device;
+  c.id = p.id;
+  return c;
+}
 
 class TransportManagerImpl::IncomingDataHandler {
  public:

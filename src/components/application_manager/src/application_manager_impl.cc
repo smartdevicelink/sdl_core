@@ -815,9 +815,9 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef MEDIA_MANAGER
-  if (NULL != media_manager_) {
+/*if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
-  }
+  }*/
 #endif
 }
 
@@ -1244,11 +1244,18 @@ void ApplicationManagerImpl::SendMessageToHMI(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
+#ifdef WEB_HMI
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+  message_to_send->set_smart_object(*message);
+#endif  // QT_HMI
+
   messages_to_hmh_.push(message_to_send);
 }
 
@@ -1487,10 +1494,16 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
     return;
   }
 
+#ifdef WEB_HMI
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+  *smart_object = message->smart_object();
+#endif  // QT_HMI
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
   if (!ManageHMICommand(smart_object)) {

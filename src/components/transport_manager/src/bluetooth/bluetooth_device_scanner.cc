@@ -47,6 +47,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <vector>
+#include <sstream>
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
 
@@ -370,6 +371,8 @@ void BluetoothDeviceScanner::Thread() {
       DoInquiry();
       device_scan_requested_ = false;
       TimedWaitForDeviceScanRequest();
+            ((1u == discovered_devices.size()) ? "" : "s")
+            << " with SmartDeviceLink service:");
     }
   } else {  // search only on demand
     while (true) {

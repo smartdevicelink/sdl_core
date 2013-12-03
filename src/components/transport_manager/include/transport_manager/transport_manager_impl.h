@@ -503,6 +503,7 @@ class TransportManagerImpl : public TransportManager {
       ConnectionUID id, unsigned int frame_size, unsigned char** frame);
 
   void OnDeviceListUpdated(const TransportAdapterSptr& ta);
+  static Connection convert(ConnectionInternal& p);
 };
 //class ;
 
