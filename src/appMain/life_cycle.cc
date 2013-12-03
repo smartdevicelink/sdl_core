@@ -98,7 +98,6 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_)
 
-  transport_manager_->SetProtocolHandler(protocol_handler_);
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
@@ -226,7 +225,6 @@ void LifeCycle::StopComponents(int params) {
   delete instance()->mmh_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  instance()->transport_manager_->SetProtocolHandler(NULL);
   instance()->transport_manager_->RemoveEventListener(
     instance()->protocol_handler_);
 

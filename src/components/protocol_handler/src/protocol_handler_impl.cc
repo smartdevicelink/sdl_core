@@ -186,40 +186,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-unsigned int ProtocolHandlerImpl::GetPacketSize(
-  unsigned int data_size, unsigned char* first_bytes) {
-  DCHECK(first_bytes);
-  unsigned char offset = sizeof(uint32_t);
-  if (data_size < 2 * offset) {
-    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
-    return 0;
-  }
-
-  unsigned char* received_bytes = first_bytes;
-  DCHECK(received_bytes);
-
-  unsigned char version = received_bytes[0] >> 4u;
-  uint32_t frame_body_size = received_bytes[offset++] << 24u;
-  frame_body_size |= received_bytes[offset++] << 16u;
-  frame_body_size |= received_bytes[offset++] << 8u;
-  frame_body_size |= received_bytes[offset++];
-
-  unsigned int required_size = frame_body_size;
-  switch (version) {
-    case PROTOCOL_VERSION_1:
-      required_size += PROTOCOL_HEADER_V1_SIZE;
-      break;
-    case PROTOCOL_VERSION_2:
-      required_size += PROTOCOL_HEADER_V2_SIZE;
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
-      return 0;
-  }
-
-  return required_size;
-}
-
 void ProtocolHandlerImpl::OnTMMessageReceived(
   const RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
