@@ -66,7 +66,7 @@ add_subdirectory(./config_profile)
 
 if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
-#add_subdirectory(./media_manager)
+add_subdirectory(./media_manager)
 endif()
 
 IF (${QT_HMI})
