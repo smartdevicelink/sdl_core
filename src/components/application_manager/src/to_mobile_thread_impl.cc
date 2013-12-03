@@ -39,7 +39,7 @@ log4cxx::LoggerPtr ToMobileThreadImpl::logger_ = log4cxx::LoggerPtr(
 
 ToMobileThreadImpl::ToMobileThreadImpl(ApplicationManagerImpl* handler)
     : handler_(handler) {
-  DCHECK(handler);
+  DCHECK(handler != NULL);
 }
 
 ToMobileThreadImpl::~ToMobileThreadImpl() {

@@ -96,7 +96,7 @@ class MobileMessageHandlerTester :
     bool init(const MobileMessage& message) {
       message_ = message;
       mmh_ = mobile_message_handler::MobileMessageHandlerImpl::instance();
-      DCHECK(mmh_);
+      DCHECK(mmh_ != NULL);
 
       return true;
     }
@@ -133,7 +133,7 @@ class MobileMessageHandlerTestObserverThread : public threads::ThreadDelegate {
     void threadMain() {
       mobile_message_handler::MobileMessageHandlerImpl* mmh =
         mobile_message_handler::MobileMessageHandlerImpl::instance();
-      DCHECK(mmh);
+      DCHECK(mmh != NULL);
 
       mmh->SendMessageToMobileApp(message_);
       sync_primitives::AutoLock auto_lock(lock);
@@ -167,7 +167,7 @@ TEST(mobile_message_handler_test, component_test) {
 
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
     mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh);
+  DCHECK(mmh != NULL);
   mmh->set_protocol_handler(&observer);
   mmh->AddMobileMessageListener(&observer);
 

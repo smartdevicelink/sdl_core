@@ -190,7 +190,7 @@ template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
   : mObject(NULL),
     mReferenceCounter(new unsigned int(1)) {
-  DCHECK(Object);
+  DCHECK(Object != NULL);
   mObject = Object;
 }
 
@@ -264,8 +264,7 @@ utils::SharedPtr<ObjectType>::operator->(void) const {
 
 template<typename ObjectType> ObjectType&
 utils::SharedPtr<ObjectType>::operator*() const {
-  // TODO (PV) : change when decided upon DCHECK
-  assert(mObject);
+  DCHECK(mObject);
   return *mObject;
 }
 
@@ -281,7 +280,7 @@ utils::SharedPtr<ObjectType>::reset() {
 
 template<typename ObjectType> void
 utils::SharedPtr<ObjectType>::reset(ObjectType* other) {
-  DCHECK(other);
+  DCHECK(other != NULL);
   reset_impl(other);
 }
 

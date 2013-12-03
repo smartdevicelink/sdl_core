@@ -39,7 +39,7 @@ log4cxx::LoggerPtr FromHMIThreadImpl::logger_ = log4cxx::LoggerPtr(
 
 FromHMIThreadImpl::FromHMIThreadImpl(HMIMessageHandlerImpl* handler)
     : handler_(handler) {
-  DCHECK(handler_);
+  DCHECK(handler_ != NULL);
 }
 
 FromHMIThreadImpl::~FromHMIThreadImpl() {

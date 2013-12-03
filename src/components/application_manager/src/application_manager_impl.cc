@@ -242,7 +242,6 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
 Application* ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
-  DCHECK(request_for_registration);
   smart_objects::SmartObject& message = *request_for_registration;
   unsigned int connection_key =
     message[strings::params][strings::connection_key].asInt();
@@ -393,10 +392,9 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(Application* application) {
 }
 
 bool ApplicationManagerImpl::ActivateApplication(Application* application) {
-  DCHECK(application);
-
   if (!application) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
+    NOTREACHED();
     return false;
   }
 
@@ -791,7 +789,7 @@ void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
 
 std::string ApplicationManagerImpl::GetDeviceName(
   connection_handler::DeviceHandle handle) {
-  DCHECK(connection_handler_);
+  DCHECK(connection_handler_ != 0);
 
   std::string device_name = "";
   std::list<unsigned int> applications_list;
@@ -886,9 +884,9 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   const MobileMessage& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageReceived");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    NOTREACHED();
     return;
   }
 
@@ -930,9 +928,9 @@ void ApplicationManagerImpl::OnMessageReceived(
   utils::SharedPtr<application_manager::Message> message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    NOTREACHED();
     return;
   }
 
@@ -1046,9 +1044,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToMobile");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    NOTREACHED();
     return;
   }
 
@@ -1081,9 +1079,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageMobileCommand");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    NOTREACHED()
     return false;
   }
 
@@ -1207,9 +1205,9 @@ void ApplicationManagerImpl::SendMessageToHMI(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToHMI");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    NOTREACHED();
     return;
   }
 
@@ -1241,9 +1239,9 @@ bool ApplicationManagerImpl::ManageHMICommand(
   const utils::SharedPtr<smart_objects::SmartObject>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ManageHMICommand");
 
-  DCHECK(message);
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    NOTREACHED();
     return false;
   }
 
@@ -1507,7 +1505,7 @@ hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
     hmi_so_factory_ = new hmi_apis::HMI_API;
     if (!hmi_so_factory_) {
       LOG4CXX_ERROR(logger_, "Out of memory");
-      CHECK(hmi_so_factory_);
+      NOTREACHED();
     }
   }
   return *hmi_so_factory_;
@@ -1518,7 +1516,7 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
     mobile_so_factory_ = new mobile_apis::MOBILE_API;
     if (!mobile_so_factory_) {
       LOG4CXX_ERROR(logger_, "Out of memory.");
-      CHECK(mobile_so_factory_);
+      NOTREACHED();
     }
   }
   return *mobile_so_factory_;

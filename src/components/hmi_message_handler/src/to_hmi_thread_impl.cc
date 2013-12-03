@@ -37,7 +37,7 @@ namespace hmi_message_handler {
 
 ToHMIThreadImpl::ToHMIThreadImpl(HMIMessageHandlerImpl* handler)
     : handler_(handler) {
-  DCHECK(handler_);
+  DCHECK(handler_ != NULL);
 }
 
 ToHMIThreadImpl::~ToHMIThreadImpl() {

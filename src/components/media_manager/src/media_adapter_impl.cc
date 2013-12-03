@@ -47,13 +47,11 @@ MediaAdapterImpl::~MediaAdapterImpl() {
 
 void MediaAdapterImpl::AddListener(const MediaListenerPtr& listener) {
   LOG4CXX_INFO(logger_, "MediaAdapterImpl::AddListener");
-  DCHECK(listener);
   media_listeners_.insert(listener);
 }
 
 void MediaAdapterImpl::RemoveListener(const MediaListenerPtr& listener) {
   LOG4CXX_INFO(logger_, "MediaAdapterImpl::RemoveListener");
-  DCHECK(listener);
   media_listeners_.erase(listener);
 }
 

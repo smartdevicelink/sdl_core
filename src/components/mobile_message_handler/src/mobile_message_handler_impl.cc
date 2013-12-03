@@ -97,14 +97,13 @@ MobileMessageHandlerImpl* MobileMessageHandlerImpl::instance() {
 void MobileMessageHandlerImpl::set_protocol_handler(
   protocol_handler::ProtocolHandler* protocolHandler) {
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl set_protocol_handler()");
-  DCHECK(protocolHandler);
+  DCHECK(protocolHandler != NULL);
   protocol_handler_ = protocolHandler;
 }
 
 void MobileMessageHandlerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl onMessageReceived()");
-  DCHECK(message);
 
   if (!message) {
     return;

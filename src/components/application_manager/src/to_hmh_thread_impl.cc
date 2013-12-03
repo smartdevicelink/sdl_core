@@ -39,7 +39,7 @@ log4cxx::LoggerPtr ToHMHThreadImpl::logger_ = log4cxx::LoggerPtr(
 
 ToHMHThreadImpl::ToHMHThreadImpl(ApplicationManagerImpl* handler)
     : handler_(handler) {
-  DCHECK(handler);
+  DCHECK(handler != NULL);
 }
 
 ToHMHThreadImpl::~ToHMHThreadImpl() {

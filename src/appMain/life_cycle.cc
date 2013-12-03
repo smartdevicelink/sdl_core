@@ -76,27 +76,27 @@ bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
   transport_manager_ =
     transport_manager::TransportManagerDefault::Instance();
-  DCHECK(transport_manager_);
+  DCHECK(transport_manager_ != NULL);
 
   protocol_handler_ =
     new protocol_handler::ProtocolHandlerImpl(transport_manager_);
-  DCHECK(protocol_handler_);
+  DCHECK(protocol_handler_ != NULL);
 
   mmh_ =
     mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh_);
+  DCHECK(mmh_ != NULL);
 
   connection_handler_ =
     connection_handler::ConnectionHandlerImpl::instance();
-  DCHECK(connection_handler_);
+  DCHECK(connection_handler_ != NULL);
 
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager_);
+  DCHECK(app_manager_ != NULL);
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler_)
+  DCHECK(hmi_handler_ != NULL)
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
