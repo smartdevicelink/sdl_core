@@ -155,6 +155,8 @@ class Profile {
      * in hmi level none.
      */
     const unsigned int& app_hmi_level_none_time_scale() const;
+
+    /**
       * @brief Returns path to testing file to which redirects video stream
       */
     const std::string& video_stream_file() const;
