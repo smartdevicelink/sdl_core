@@ -44,6 +44,7 @@
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
@@ -280,17 +281,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  if (!MessageHelper::VerifyApplicationName(message[strings::msg_params])) {
-
-    utils::SharedPtr<smart_objects::SmartObject> response(
-      MessageHelper::CreateNegativeResponse(
-        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id].asUInt(),
-        mobile_apis::Result::INVALID_DATA));
-    ManageMobileCommand(response);
-    return NULL;
-  }
-
   const std::string& name =
     message[strings::msg_params][strings::app_name].asString();
 
@@ -307,14 +297,13 @@ Application* ApplicationManagerImpl::RegisterApplication(
       ManageMobileCommand(response);
       return NULL;
     }
-
     if ((*it)->name().compare(name) == 0) {
       LOG4CXX_ERROR(logger_, "Application with this name already registered.");
       utils::SharedPtr<smart_objects::SmartObject> response(
-        MessageHelper::CreateNegativeResponse(
-          connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id].asUInt(),
-          mobile_apis::Result::DUPLICATE_NAME));
+          MessageHelper::CreateNegativeResponse(
+              connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
+              message[strings::params][strings::correlation_id].asUInt(),
+              mobile_apis::Result::DUPLICATE_NAME));
       ManageMobileCommand(response);
       return NULL;
     }
@@ -1304,17 +1293,36 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
 
   switch (message.protocol_version()) {
     case ProtocolVersion::kV2: {
+      if (message.function_id() == 0 || message.type() == kUnknownType) {
+        LOG4CXX_ERROR( logger_, "Message received: UNSUPPORTED_VERSION");
+        int conversation_result =
+            formatters::CFormatterJsonSDLRPCv1::fromString<
+                NsSmartDeviceLinkRPC::V1::FunctionID::eType,
+                NsSmartDeviceLinkRPC::V1::messageType::eType>(
+                message.json_message(), output);
+        if (formatters::CFormatterJsonSDLRPCv1::kSuccess
+            == conversation_result) {
+          utils::SharedPtr<smart_objects::SmartObject> response(
+              MessageHelper::CreateNegativeResponse(
+                  message.connection_key(), message.function_id(),
+                  message.correlation_id(),
+                  mobile_apis::Result::UNSUPPORTED_VERSION));
+          ManageMobileCommand(response);
+          return false;
+        }
+      }
+
       if (!formatters::CFormatterJsonSDLRPCv2::fromString(
-            message.json_message(), output, message.function_id(), message.type(),
-            message.correlation_id()) || !mobile_so_factory().attachSchema(output)
-          || ((output.validate() != smart_objects::Errors::OK)
-              && (output.validate()
-                  != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
+          message.json_message(), output, message.function_id(), message.type(),
+          message.correlation_id()) || !mobile_so_factory().attachSchema(output)
+        || ((output.validate() != smart_objects::Errors::OK)
+            && (output.validate()
+                != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
-          MessageHelper::CreateNegativeResponse(
-            message.connection_key(), message.function_id(),
-            message.correlation_id(), mobile_apis::Result::INVALID_DATA));
+            MessageHelper::CreateNegativeResponse(
+                message.connection_key(), message.function_id(),
+                message.correlation_id(), mobile_apis::Result::INVALID_DATA));
         ManageMobileCommand(response);
         return false;
       }

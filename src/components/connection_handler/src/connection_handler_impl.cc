@@ -60,12 +60,12 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
-  LOG4CXX_INFO(logger_, "Desctructing ConnectionHandler.");
+  LOG4CXX_INFO(logger_, "Destructing ConnectionHandlerImpl.");
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
   ConnectionHandlerObserver* observer) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::setConnectionHandlerObserver()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_connection_handler_observer()");
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Null pointer to observer.");
     return;
@@ -124,7 +124,7 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
 
 void ConnectionHandlerImpl::OnDeviceFound(
   const transport_manager::DeviceInfo& device_info) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::onDeviceListUpdated()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceFound()");
 }
 
 bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
@@ -170,7 +170,7 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
 void ConnectionHandlerImpl::OnConnectionEstablished(
   const transport_manager::DeviceInfo& device_info,
   const transport_manager::ConnectionUID& connection_id) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::onApplicationConnected()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnConnectionEstablished()");
   DeviceListIterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");
@@ -239,7 +239,7 @@ void ConnectionHandlerImpl::OnDisconnectFailed(
 
 void ConnectionHandlerImpl::RemoveConnection(
   const ConnectionHandle connection_handle) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::DisconnectApplication()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::RemoveConnection()");
   LOG4CXX_INFO(
     logger_,
     "Delete Connection:" << static_cast<int>(connection_handle)
@@ -267,7 +267,7 @@ void ConnectionHandlerImpl::RemoveConnection(
 unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
   transport_manager::ConnectionUID connection_handle,
   unsigned char service_type) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::onSessionStartedCallback()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
   int new_session_id = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -309,7 +309,7 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
   unsigned int connection_handle, unsigned char sessionId,
   unsigned int hashCode,
   unsigned char service_type) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::onSessionEndedCallback()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
   int result = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -367,7 +367,7 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
     unsigned int* app_id,
     std::list<int>* sessions_list,
     unsigned int* device_id) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::GetDataOnSessionKey()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnSessionKey");
   int result = -1;
   transport_manager::ConnectionUID conn_handle = 0;
   unsigned char session_id = 0;
@@ -418,7 +418,7 @@ int ConnectionHandlerImpl::GetDataOnDeviceID(
   DeviceHandle device_handle, std::string* device_name,
   std::list<unsigned int>* applications_list,
   std::string* mac_address) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::GetDataOnDeviceID()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
   int result = -1;
   DeviceListIterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
@@ -446,7 +446,7 @@ int ConnectionHandlerImpl::GetDataOnDeviceID(
 
 void ConnectionHandlerImpl::set_transport_manager(
   transport_manager::TransportManager* transport_manager) {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::setTransportManager()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_transport_manager()");
   if (!transport_manager) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
@@ -454,7 +454,7 @@ void ConnectionHandlerImpl::set_transport_manager(
   transport_manager_ = transport_manager;
 }
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::startDevicesDiscovery()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::StartDevicesDiscovery()");
   if (NULL == transport_manager_) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
@@ -484,7 +484,7 @@ void ConnectionHandlerImpl::ConnectToDevice(
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {
-  LOG4CXX_INFO(logger_, "CConnectionHandler::startTransportManager()");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::StartTransportManager()");
   if (NULL == transport_manager_) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;

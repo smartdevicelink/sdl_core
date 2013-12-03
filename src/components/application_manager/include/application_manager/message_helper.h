@@ -268,17 +268,6 @@ class MessageHelper {
                                   smart_objects::SmartObject& message_params,
                                   const Application* app);
 
-    /*
-     * @brief Verify application and tts name in RefisterAppInterface request msg_params
-     *
-     * @param message msg_params
-     *
-     *
-     * @return verification result
-     *
-     */
-    static bool VerifyApplicationName(smart_objects::SmartObject& msg_params);
-
     static bool PrintSmartObject(smart_objects::SmartObject& object);
 
     template<typename From, typename To>

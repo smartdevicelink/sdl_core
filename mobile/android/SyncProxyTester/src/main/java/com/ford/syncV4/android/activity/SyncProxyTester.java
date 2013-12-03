@@ -1682,86 +1682,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which) == Names.ShowConstantTBT) {
                                 sendShowConstantTBT();
                             } else if (adapter.getItem(which) == Names.AlertManeuver) {
-                                //AlertManeuver
-                                AlertDialog.Builder builder;
-                                AlertDialog dlg;
-
-                                final Context mContext = adapter.getContext();
-                                LayoutInflater inflater = (LayoutInflater) mContext
-                                        .getSystemService(LAYOUT_INFLATER_SERVICE);
-                                View layout = inflater.inflate(R.layout.alertmaneuver, null);
-
-                                final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
-
-                                SoftButton sb1 = new SoftButton();
-                                sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                                sb1.setText("Reply");
-                                sb1.setType(SoftButtonType.SBT_TEXT);
-                                sb1.setIsHighlighted(false);
-                                sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-                                SoftButton sb2 = new SoftButton();
-                                sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                                sb2.setText("Close");
-                                sb2.setType(SoftButtonType.SBT_TEXT);
-                                sb2.setIsHighlighted(false);
-                                sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-                                currentSoftButtons = new Vector<SoftButton>();
-                                currentSoftButtons.add(sb1);
-                                currentSoftButtons.add(sb2);
-
-                                Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
-                                btnSoftButtons.setOnClickListener(new OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
-                                        Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
-                                                ALERTMANEUVER_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
-                                    }
-                                });
-
-                                builder = new AlertDialog.Builder(mContext);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
-                                        String ttsChunksString = txtTtsChunks.getText().toString();
-                                        for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            ttsChunks.add(chunk);
-                                        }
-
-                                        if (!ttsChunks.isEmpty()) {
-                                            try {
-                                                AlertManeuver msg = new AlertManeuver();
-                                                msg.setTtsChunks(ttsChunks);
-                                                msg.setCorrelationID(autoIncCorrId++);
-                                                if (currentSoftButtons != null) {
-                                                    msg.setSoftButtons(currentSoftButtons);
-                                                } else {
-                                                    msg.setSoftButtons(new Vector<SoftButton>());
-                                                }
-                                                currentSoftButtons = null;
-                                                _msgAdapter.logMessage(msg, true);
-                                                ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                            } catch (SyncException e) {
-                                                _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "No TTS Chunks entered", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        currentSoftButtons = null;
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.setView(layout);
-                                dlg = builder.create();
-                                dlg.show();
+                                sendAlertManeuver();
                             } else if (adapter.getItem(which) == Names.UpdateTurnList) {
                                 sendUpdateTurnList();
                             } else if (adapter.getItem(which) == Names.SetDisplayLayout) {
@@ -1782,6 +1703,93 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 curCount = 0;
                             }
                             messageSelectCount.put(function, curCount + 1);
+                        }
+
+                        private void sendAlertManeuver() {
+                            final Context mContext = adapter.getContext();
+                            LayoutInflater inflater = (LayoutInflater) mContext
+                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
+                            View layout = inflater.inflate(R.layout.alertmaneuver, null);
+
+                            final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.alertManeuver_chkIncludeSBs);
+
+                            SoftButton sb1 = new SoftButton();
+                            sb1.setSoftButtonID(
+                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setText("Reply");
+                            sb1.setType(SoftButtonType.SBT_TEXT);
+                            sb1.setIsHighlighted(false);
+                            sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+                            SoftButton sb2 = new SoftButton();
+                            sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+                            sb2.setText("Close");
+                            sb2.setType(SoftButtonType.SBT_TEXT);
+                            sb2.setIsHighlighted(false);
+                            sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+                            currentSoftButtons = new Vector<SoftButton>();
+                            currentSoftButtons.add(sb1);
+                            currentSoftButtons.add(sb2);
+
+                            Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
+                            btnSoftButtons.setOnClickListener(new OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    IntentHelper.addObjectForKey(
+                                            currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                            ALERTMANEUVER_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
+                                }
+                            });
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
+                                    String ttsChunksString = txtTtsChunks.getText().toString();
+                                    for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
+                                        TTSChunk chunk = TTSChunkFactory.createChunk(
+                                                SpeechCapabilities.TEXT,
+                                                ttsChunk);
+                                        ttsChunks.add(chunk);
+                                    }
+
+                                    if (!ttsChunks.isEmpty()) {
+                                        try {
+                                            AlertManeuver msg = new AlertManeuver();
+                                            msg.setTtsChunks(ttsChunks);
+                                            msg.setCorrelationID(autoIncCorrId++);
+                                            if (useSoftButtons.isChecked()) {
+                                                if (currentSoftButtons != null) {
+                                                    msg.setSoftButtons(currentSoftButtons);
+                                                } else {
+                                                    msg.setSoftButtons(new Vector<SoftButton>());
+                                                }
+                                            }
+                                            currentSoftButtons = null;
+                                            _msgAdapter.logMessage(msg, true);
+                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                        } catch (SyncException e) {
+                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                        }
+                                    } else {
+                                        Toast.makeText(mContext,
+                                                "No TTS Chunks entered",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    currentSoftButtons = null;
+                                    dialog.cancel();
+                                }
+                            });
+                            builder.setView(layout);
+                            builder.show();
                         }
 
                         /**
@@ -1829,6 +1837,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
+                            final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
@@ -1871,7 +1880,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setAlertText1(txtAlertField1.getText().toString());
                                         msg.setAlertText2(txtAlertField2.getText().toString());
                                         msg.setAlertText3(txtAlertField3.getText().toString());
-                                        msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        if (useDuration.isChecked()) {
+                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        }
                                         msg.setPlayTone(chkPlayTone.isChecked());
                                         msg.setProgressIndicator(useProgressIndicator.isChecked());
 
@@ -2225,6 +2236,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
                             final CheckBox chkUseVrSynonyms = (CheckBox) layout.findViewById(R.id.addcommand_useVRSynonyms);
                             final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
+                            final CheckBox chkUseMenuParams = (CheckBox) layout.findViewById(R.id.addcommand_useMenuParams);
                             final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                             final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
                             s.setAdapter(_submenuAdapter);
@@ -2269,21 +2281,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCorrelationID(autoIncCorrId++);
                                     msg.setCmdID(cmdID);
 
-                                    MenuParams menuParams = new MenuParams();
-                                    if (chkUseCommandName.isChecked()) {
-                                        String itemText = er.getText().toString();
-                                        menuParams.setMenuName(itemText);
-                                    }
-                                    if (chkUseMenuPos.isChecked()) {
-                                        menuParams.setPosition(pos);
-                                    }
-                                    if (chkUseParentID.isChecked()) {
-                                        SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
-                                        if (sm != null) {
-                                            menuParams.setParentID(sm.getSubMenuId());
+                                    if (chkUseMenuParams.isChecked()) {
+                                        MenuParams menuParams = new MenuParams();
+                                        if (chkUseCommandName.isChecked()) {
+                                            String itemText = er.getText().toString();
+                                            menuParams.setMenuName(itemText);
                                         }
+                                        if (chkUseMenuPos.isChecked()) {
+                                            menuParams.setPosition(pos);
+                                        }
+                                        if (chkUseParentID.isChecked()) {
+                                            SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
+                                            if (sm != null) {
+                                                menuParams.setParentID(sm.getSubMenuId());
+                                            }
+                                        }
+                                        msg.setMenuParams(menuParams);
                                     }
-                                    msg.setMenuParams(menuParams);
 
                                     if (chkUseVrSynonyms.isChecked()) {
                                         msg.setVrCommands(new Vector<String>(Arrays.asList(
@@ -2311,7 +2325,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                         " / " +
                                                         _latestAddCommand.second);
                                     }
-                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, menuParams.getParentID());
+                                    Integer parentID = null;
+                                    if (msg.getMenuParams() != null) {
+                                        parentID = msg.getMenuParams().getParentID();
+                                    }
+                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, parentID);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2403,10 +2421,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.showconstanttbt,
                                     (ViewGroup) findViewById(R.id.showconstanttbt_Root));
 
+                            final CheckBox useNavigationText1 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText1);
                             final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
+                            final CheckBox useNavigationText2 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText2);
                             final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
+                            final CheckBox useETA = (CheckBox) layout.findViewById(R.id.showconstanttbt_useETA);
                             final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+                            final CheckBox useTimeToDestination = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTimeToDestination);
                             final EditText txtTimeToDestination = (EditText) layout.findViewById(R.id.showconstanttbt_txtTimeToDestination);
+                            final CheckBox useTotalDistance = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTotalDistance);
                             final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
                             final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
                             final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
@@ -2414,9 +2437,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkUseNextTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_nextTurnIconCheck);
                             final Spinner spnNextTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_nextTurnIconType);
                             final EditText txtNextTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_nextTurnIconValue);
+                            final CheckBox useDistanceToManeuver = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuver);
                             final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
+                            final CheckBox useDistanceToManeuverScale = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuverScale);
                             final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
+                            final CheckBox useManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_useManeuverComplete);
                             final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.showconstanttbt_useSoftButtons);
 
                             spnTurnIconType.setAdapter(imageTypeAdapter);
                             spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
@@ -2458,11 +2485,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         ShowConstantTBT msg = new ShowConstantTBT();
-                                        msg.setNavigationText1(txtNavigationText1.getText().toString());
-                                        msg.setNavigationText2(txtNavigationText2.getText().toString());
-                                        msg.setEta(txtEta.getText().toString());
-                                        msg.setTimeToDestination(txtTimeToDestination.getText().toString());
-                                        msg.setTotalDistance(txtTotalDistance.getText().toString());
+
+                                        if (useNavigationText1.isChecked()) {
+                                            msg.setNavigationText1(txtNavigationText1.getText().toString());
+                                        }
+                                        if (useNavigationText2.isChecked()) {
+                                            msg.setNavigationText2(txtNavigationText2.getText().toString());
+                                        }
+                                        if (useETA.isChecked()) {
+                                            msg.setEta(txtEta.getText().toString());
+                                        }
+                                        if (useTimeToDestination.isChecked()) {
+                                            msg.setTimeToDestination(txtTimeToDestination.getText().toString());
+                                        }
+                                        if (useTotalDistance.isChecked()) {
+                                            msg.setTotalDistance(txtTotalDistance.getText().toString());
+                                        }
 
                                         if (chkUseTurnIcon.isChecked()) {
                                             Image image = new Image();
@@ -2480,14 +2518,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setNextTurnIcon(image);
                                         }
 
-                                        msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
-                                        msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
-                                        msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        if (useDistanceToManeuver.isChecked()) {
+                                            msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
+                                        }
+                                        if (useDistanceToManeuverScale.isChecked()) {
+                                            msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
+                                        }
+                                        if (useManeuverComplete.isChecked()) {
+                                            msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        }
                                         msg.setCorrelationID(autoIncCorrId++);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(new Vector<SoftButton>());
+                                            }
                                         }
                                         _msgAdapter.logMessage(msg, true);
                                         ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
@@ -2895,6 +2941,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.updateturnlist, null);
                             final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
                             final EditText txtIconList = (EditText) layout.findViewById(R.id.updateturnlist_txtIconList);
+                            final CheckBox useTurnList = (CheckBox) layout.findViewById(R.id.updateturnlist_useTurnList);
+                            final CheckBox useIconList = (CheckBox) layout.findViewById(R.id.updateturnlist_useIconList);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.updateturnlist_chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2926,6 +2975,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
 								 */
+                                    boolean turnListEnabled = useTurnList.isChecked();
+                                    boolean iconListEnabled = useIconList.isChecked();
                                     String turnListString = txtTurnList.getText().toString();
                                     String iconListString = txtIconList.getText().toString();
                                     if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
@@ -2937,20 +2988,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         for (int i = 0; i < turnCount; ++i) {
                                             Turn t = new Turn();
-                                            t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
-                                            Image ti = new Image();
-                                            ti.setValue((i < iconNames.length) ? iconNames[i] : "");
-                                            ti.setImageType(ImageType.DYNAMIC);
-                                            t.setTurnIcon(ti);
+                                            if (turnListEnabled) {
+                                                t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
+                                            }
+
+                                            if (iconListEnabled) {
+                                                Image ti = new Image();
+                                                ti.setValue((i < iconNames.length) ? iconNames[i] : "");
+                                                ti.setImageType(ImageType.DYNAMIC);
+                                                t.setTurnIcon(ti);
+                                            }
                                             tarray.add(t);
                                         }
                                         UpdateTurnList msg = new UpdateTurnList();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setTurnList(tarray);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(
+                                                        currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(
+                                                        new Vector<SoftButton>());
+                                            }
                                         }
                                         currentSoftButtons = null;
 
@@ -3008,6 +3068,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
                             final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
                             final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
+                            final CheckBox useTimeout = (CheckBox) layout.findViewById(R.id.slider_useTimeout);
                             final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
 
                             final CheckBox chkDynamicFooter = (CheckBox) layout.findViewById(R.id.slider_chkDynamicFooter);
@@ -3028,7 +3089,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         Slider msg = new Slider();
-                                        msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        if (useTimeout.isChecked()) {
+                                            msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        }
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
                                         msg.setSliderHeader(txtSliderHeader.getText().toString());
 
@@ -3195,6 +3258,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
                             final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
                             final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+                            final CheckBox useVRHelpItemImage = (CheckBox) layout.findViewById(R.id.setglobalproperties_useVRHelpItemImage);
                             final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
                             final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
                             final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
@@ -3295,10 +3359,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 item.setPosition(1);
                                             }
 
-                                            Image image = new Image();
-                                            image.setValue(itemImageArray[i]);
-                                            image.setImageType(ImageType.DYNAMIC);
-                                            item.setImage(image);
+                                            if (useVRHelpItemImage.isChecked()) {
+                                                Image image = new Image();
+                                                image.setValue(
+                                                        itemImageArray[i]);
+                                                image.setImageType(
+                                                        ImageType.DYNAMIC);
+                                                item.setImage(image);
+                                            }
 
                                             vrHelpItems.add(item);
                                         }

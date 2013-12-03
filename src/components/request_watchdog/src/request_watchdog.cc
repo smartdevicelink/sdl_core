@@ -33,6 +33,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <unistd.h>
+
 #include <iterator>
 #include <vector>
 #include <algorithm>

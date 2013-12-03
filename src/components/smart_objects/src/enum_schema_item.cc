@@ -1,7 +1,3 @@
-/**
- * @file TEnumSchemaItem.cpp
- * @brief TEnumSchemaItem source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //

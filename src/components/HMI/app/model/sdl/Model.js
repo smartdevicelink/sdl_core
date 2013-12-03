@@ -34,6 +34,20 @@
 SDL.SDLModel = Em.Object.create({
 
     /**
+     * IScroll object to manage scroll on PerformInteraction view
+     *
+     * @type {Object}
+     */
+    interactionListWrapper: null,
+
+    /**
+     * TimeStamp of current started HMI session
+     *
+     * @type {Number}
+     */
+    timeStamp: null,
+
+    /**
      * Video player object for navigation
      *
      * @type {Object}
@@ -197,6 +211,64 @@ SDL.SDLModel = Em.Object.create({
         "USER_DISALLOWED"           : 23
     },
 
+
+
+    /**
+     * Info navigation data for ShowConstantTBT request
+     *
+     * @type: {Object}
+     */
+    constantTBTParams: {
+        "navigationTexts":[
+            {
+                "fieldName": "navigationText1",
+                "fieldText": "mainField1"
+            },
+            {
+                "fieldName": "navigationText2",
+                "fieldText": "mainField2"
+            },
+            {
+                "fieldName": "ETA",
+                "fieldText": "mainField3"
+            },
+            {
+                "fieldName": "totalDistance",
+                "fieldText": "mainField4"
+            },
+            {
+                "fieldName": "navigationText",
+                "fieldText": "mainField5"
+            },
+            {
+                "fieldName": "timeToDestination",
+                "fieldText": "mainField6"
+            }
+        ],
+        "softButtons": [
+            {
+                "text" : "Menu",
+                "isHighlighted" : true,
+                "softButtonID" : 1
+            },
+            {
+                "text" : "Custom button",
+                "isHighlighted" : false,
+                "softButtonID" : 2
+            },
+            {
+                "text" : "+",
+                "isHighlighted" : true,
+                "softButtonID" : 3
+            },
+            {
+                "text" : "-",
+                "isHighlighted" : false,
+                "softButtonID" : 4
+            }
+        ]
+    },
+
     /**
      * List of registered applications, To prevent errors without registered
      * application "-1" used as test appID
@@ -323,61 +395,63 @@ SDL.SDLModel = Em.Object.create({
      */
     onTouchEvent: function(event){
 
-        if (event.target.parentElement.className.indexOf("navButton") >= 0) {
+        if (event.target.parentElement.className.indexOf("navButton") >= 0 || event.target.className.indexOf("navButton") >= 0) {
             return;
         }
 
         var type = "",
-            touches = event.originalEvent.touches ? event.originalEvent.touches.length : 1,
-            changedTouches = event.originalEvent.changedTouches ? event.originalEvent.changedTouches.length : 1,
-            touchLists = {"touches": touches, "changedTouches": changedTouches},
-            info = {"id": null, "point": {"xCoord": 0, "yCoord": 0}, "area": {"rotationAngle": 3.50, "radiusCoord": {"xCoord": 10, "yCoord": 10}}};
+            changedTouches = event.originalEvent.changedTouches ? event.originalEvent.changedTouches.length : 1;
 
         switch (event.originalEvent.type) {
             case "touchstart": {
                 FLAGS.TOUCH_EVENT_STARTED = true;
-                type = "TOUCHSTART";
+                type = "BEGIN";
                 break;
             }
             case "touchmove": {
-                type = "TOUCHMOVE";
+                type = "MOVE";
                 break;
             }
             case "touchend": {
-                type = "TOUCHEND";
+                type = "END";
                 break;
             }
             case "mousedown": {
                 FLAGS.TOUCH_EVENT_STARTED = true;
-                type = "TOUCHSTART";
+                type = "BEGIN";
                 break;
             }
             case "mousemove": {
-                type = "TOUCHMOVE";
+                type = "MOVE";
                 break;
             }
             case "mouseup": {
-                type = "TOUCHEND";
+                type = "END";
                 break;
             }
         }
 
         if (FLAGS.TOUCH_EVENT_STARTED ) {
 
+            var events = [];
             for(var i = 0; i < changedTouches; i++){
 
                 if (event.originalEvent.changedTouches && (event.originalEvent.changedTouches[i].pageX > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.width || event.originalEvent.changedTouches[i].pageY > SDL.SDLVehicleInfoModel.vehicleData.displayResolution.height)) {
                     return;
                 }
 
-                var fingers = event.originalEvent.changedTouches ? event.originalEvent.changedTouches : event.originalEvent;
-                info.id = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
-                info.point.xCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
-                info.point.yCoord = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+                events[i] = {};
+                events[i].c = [{}];
 
-                FFW.UI.onTouchEvent(type, touchLists, info);
+                events[i].id  = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].identifier : 0;
+                events[i].c[0].x = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageX : event.originalEvent.pageX;
+                events[i].c[0].y = event.originalEvent.changedTouches ? event.originalEvent.changedTouches[i].pageY : event.originalEvent.pageY;
+                events[i].ts  = [event.timeStamp - SDL.SDLModel.timeStamp];
+
+
+
             }
-            //FFW.UI.onTouchEvent(type, touchLists, info);
+            FFW.UI.onTouchEvent(type, events);
         }
 
         if (event.originalEvent.type == "mouseup") {

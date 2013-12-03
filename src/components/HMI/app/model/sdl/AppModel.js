@@ -81,13 +81,6 @@ SDL.SDLAppModel = Em.Object.extend({
         appInfo: null,
 
         /**
-         * Info navigation data for ShowConstantTBT request
-         *
-         * @type: {Object}
-         */
-        constantTBTParams: null,
-
-        /**
          * Current language of applications UI component
          *
          * @type {String}

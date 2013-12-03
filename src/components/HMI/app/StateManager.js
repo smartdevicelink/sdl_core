@@ -174,13 +174,6 @@ var StateManager = Em.StateManager.extend({
 
                 baseNavigation: Em.State.create({
 
-                    enter: function () {
-
-                        this._super();
-
-                        SDL.SDLController.navigationAppUpdate();
-                    }
-
                 }),
 
                 exit: function () {

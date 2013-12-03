@@ -71,6 +71,30 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
 
 namespace application_manager {
 
+namespace {
+
+bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
+  using namespace smart_objects;
+  for (size_t i = 0; i < soft_buttons.length(); ++i) {
+    SmartObject& button = soft_buttons[i];
+
+    // Check if image parameter is valid
+    if (button.keyExists(strings::image)) {
+      SmartObject& buttonImage = button[strings::image];
+
+      // Image name must not be empty
+      std::string file_name = buttonImage[strings::value].asString();
+      file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end());
+      if (file_name.empty()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+}
+
 const VehicleData MessageHelper::vehicle_data_ =
 { {strings::gps, VehicleDataType::GPS},
   {strings::speed, VehicleDataType::SPEED },
@@ -1049,7 +1073,8 @@ void MessageHelper::SendNaviStartStream(
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1094,7 +1119,8 @@ void MessageHelper::SendNaviStopStream(int connection_key) {
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1203,6 +1229,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject& request_soft_buttons =
       message_params[strings::soft_buttons];
 
+  // Check whether soft buttons request is well-formed
+  if (!ValidateSoftButtons(request_soft_buttons))
+    return mobile_apis::Result::INVALID_DATA;
+
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
 
@@ -1296,32 +1326,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   }
 
   return mobile_apis::Result::SUCCESS;
-}
-
-// TODO(VS): change printf to logger
-bool MessageHelper::VerifyApplicationName(
-  smart_objects::SmartObject& msg_params) {
-
-  if (msg_params.keyExists(strings::tts_name)) {
-    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
-        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-          printf("Invalid characters in tts name.\n");
-          return false;
-        }
-      }
-  }
-
-  const std::string& name = msg_params[strings::app_name].asString();
-
-  if ((name[0] == '\n') || (name[0] == ' ') ||
-      ((name[0] == '\\') && (name[1] == 'n'))) {
-    printf("Invalid characters in application name.\n");
-    return false;
-  }
-
-  return true;
 }
 
 // TODO(AK): change printf to logger

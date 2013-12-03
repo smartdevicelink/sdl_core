@@ -60,6 +60,9 @@
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "utils/macro.h"
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
