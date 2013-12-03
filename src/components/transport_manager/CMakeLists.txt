@@ -3,6 +3,7 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include
   ../connection_handler/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
 )
 if (BUILD_BT_SUPPORT)
   include_directories(
@@ -42,13 +43,16 @@ if (BUILD_BT_SUPPORT)
 endif()
 
 if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    list (APPEND SOURCES
-    ./src/usb/libusb_handler.cc
+  list (APPEND SOURCES
     ./src/usb/usb_aoa_adapter.cc
     ./src/usb/usb_connection_factory.cc
-    ./src/usb/usb_connection.cc
     ./src/usb/usb_device_scanner.cc
+  )
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list (APPEND SOURCES
+    ./src/usb/libusb/usb_handler.cc
+    ./src/usb/libusb/usb_connection.cc
+    ./src/usb/libusb/platform_usb_device.cc
     )
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
     list(APPEND SOURCES
