@@ -183,6 +183,15 @@ else (${HMI2})
     add_definitions(-DWEB_HMI)
 ENDIF (${HMI2})
 
+# --- Type HMI
+if (${HMI2})
+    set(QT_HMI ON)
+    add_definitions(-DQT_HMI)
+else (${HMI2})
+    set(WEB_HMI ON)
+    add_definitions(-DWEB_HMI)
+ENDIF (${HMI2})
+
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
 

@@ -39,6 +39,7 @@
 #include "utils/threads/thread.h"
 
 #include <stdlib.h>
+#include <stdlib.h>
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Profile"));
 

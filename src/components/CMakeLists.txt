@@ -66,13 +66,16 @@ add_subdirectory(./config_profile)
 
 if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
-add_subdirectory(./media_manager)
+#add_subdirectory(./media_manager)
 endif()
 
 IF (${QT_HMI})
 # --- DBus
     add_subdirectory(./dbus)
 # --- Qt HMI
-#    add_subdirectory(./qt_hmi)
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_subdirectory(./qt_hmi)
+  endif()
 ENDIF (${QT_HMI})
 
+# vim: set ts=2 sw=2 et:

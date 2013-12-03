@@ -371,6 +371,8 @@ void BluetoothDeviceScanner::Thread() {
       DoInquiry();
       device_scan_requested_ = false;
       TimedWaitForDeviceScanRequest();
+            ((1u == discovered_devices.size()) ? "" : "s")
+            << " with SmartDeviceLink service:");
     }
   } else {  // search only on demand
     while (true) {

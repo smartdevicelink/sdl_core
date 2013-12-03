@@ -551,7 +551,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::Common_Language::eType tts_language_;
     smart_objects::SmartObject* vehicle_type_;
 #ifdef MEDIA_MANAGER
-    media_manager::MediaManager* media_manager_;
+  media_manager::MediaManager* media_manager_;
 #endif
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;

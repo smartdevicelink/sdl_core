@@ -43,6 +43,8 @@
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
 
+#endif
+
 namespace transport_manager {
 namespace transport_adapter {
 

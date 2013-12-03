@@ -36,6 +36,7 @@ set(LIBRARIES
   jsoncpp
   #rt
   #avahi-common
+  #avahi-common
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog

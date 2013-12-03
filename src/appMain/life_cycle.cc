@@ -123,7 +123,6 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->AddProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
 
-
 #endif
   protocol_handler_->AddProtocolObserver(app_manager_);
   connection_handler_->set_transport_manager(transport_manager_);
@@ -256,6 +255,39 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // QT_HMI
 
+#ifdef QT_HMI
+/**
+ * Initialize DBus component
+ * @return true if success otherwise false.
+ */
+bool LifeCycle::InitMessageSystem() {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("appMain"));
+
+  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
+      hmi_message_handler::HMIMessageHandlerImpl::instance());
+
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+      dbus_adapter_);
+  if (!dbus_adapter_->Init()) {
+    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    return false;
+  }
+
+  dbus_adapter_->SubscribeTo();
+
+  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  dbus_adapter_thread_ = new System::Thread(
+      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+          *dbus_adapter_,
+          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+          NULL));
+  dbus_adapter_thread_->Start(false);
+
+  return true;
+}
+#endif  // QT_HMI
+
 void LifeCycle::StopComponents(int params) {
   utils::ResetSubscribeToTerminateSignal();
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
@@ -281,7 +313,8 @@ void LifeCycle::StopComponents(int params) {
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
 #ifdef MEDIA_MANAGER
-  //instance()->media_manager_->~MediaManagerImpl();
+  instance()->media_manager_->SetProtocolHandler(NULL);
+  instance()->media_manager_->~MediaManagerImpl();
 #endif
   delete instance()->protocol_handler_;
 

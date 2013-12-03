@@ -10,7 +10,6 @@ if (BUILD_BT_SUPPORT)
   )
 endif()
 
-ADD_DEFINITIONS(-DUSB_QNX)
 
 set (SOURCES
   ./src/transport_manager_impl.cc

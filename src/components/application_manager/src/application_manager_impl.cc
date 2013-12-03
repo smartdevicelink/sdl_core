@@ -1048,7 +1048,7 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       application_manager::MessageHelper::SendNaviStopStream(session_key);
 #ifdef MEDIA_MANAGER
-      media_manager_->StopVideoStreaming(session_key);
+    media_manager_->StopVideoStreaming(session_key);
 #endif
       break;
     }

@@ -58,6 +58,7 @@
 #endif
 
 #ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
 #endif
 // ----------------------------------------------------------------------------
 // Third-Party includes
