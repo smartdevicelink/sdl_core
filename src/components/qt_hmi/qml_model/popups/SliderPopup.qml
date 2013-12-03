@@ -66,7 +66,6 @@ ContextPopup {
         timer.stop()
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         dataContainer.uiSlider.running = false
-        hide()
         switch(reason) {
         case Common.Result.ABORTED:
             console.debug("aborted position is", dataContainer.uiSlider.position)
@@ -83,6 +82,7 @@ ContextPopup {
         default:
             break
         }
+        hide()
         position = 1
         console.debug("exit")
     }
