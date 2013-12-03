@@ -33,32 +33,16 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "request_watchdog/request_info.h"
+#include "request_watchdog/watchdog.h"
 
 namespace request_watchdog {
 
-RequestInfo::RequestInfo(const int& function_id, const int& connection_id,
-                         const int& correlation_id, const int& custom_timeout,
-                         const int& app_hmi_level)
-  : functionID_(function_id),
-    connectionID_(connection_id),
-    correlationID_(correlation_id),
-    customTimeout_(custom_timeout),
-    app_hmi_level_(app_hmi_level),
-    delayed_delete_(false)
-{}
+Watchdog::Watchdog() {
 
-bool operator==(const RequestInfo& left, const RequestInfo& right) {
-  return left.connectionID_ == right.connectionID_ &&
-         left.correlationID_ == right.correlationID_ ;
 }
 
-bool operator<(const RequestInfo& left, const RequestInfo& right) {
-  if (left.connectionID_ == right.connectionID_) {
-    return left.correlationID_ < right.correlationID_;
-  } else {
-    return left.connectionID_ < right.connectionID_;
-  }
+Watchdog::~Watchdog() {
+
 }
 
 }  // namespace request_watchdog

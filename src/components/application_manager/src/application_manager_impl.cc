@@ -1112,12 +1112,13 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   unsigned int protocol_type =
       (*message)[strings::params][strings::protocol_type].asUInt();
 
+  Application* app = NULL;
+
   if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
        (protocol_type == commands::CommandImpl::mobile_protocol_type_)) &&
        (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
 
-    Application* app =
-        ApplicationManagerImpl::instance()->application(connection_key);
+    app = ApplicationManagerImpl::instance()->application(connection_key);
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
@@ -1145,8 +1146,15 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     if ((*message)[strings::params][strings::message_type].asInt() ==
         mobile_apis::messageType::request) {
 
+      // get application hmi level
+      mobile_api::HMILevel::eType app_hmi_level =
+          mobile_api::HMILevel::INVALID_ENUM;
+      if (NULL != app) {
+        app_hmi_level = app->hmi_level();
+      }
+
       request_controller::RequestController::TResult result =
-          request_ctrl.addRequest(command);
+          request_ctrl.addRequest(command, app_hmi_level);
 
       if (result == request_controller::RequestController::SUCCESS) {
         LOG4CXX_INFO(logger_, "Perform request");
@@ -1154,9 +1162,11 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         request_controller::RequestController::TOO_MANY_PENDING_REQUESTS) {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
                           "TOO_MANY_PENDING_REQUESTS");
+
         smart_objects::SmartObject* response =
-            MessageHelper::CreateNegativeResponse(connection_key, function_id,
-            correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+          MessageHelper::CreateNegativeResponse(connection_key, function_id,
+          correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return false;
       } else if (result ==
@@ -1167,6 +1177,17 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
             connection_key,
             mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+
+        UnregisterAppInterface(connection_key);
+        return false;
+      } else if (result ==
+          request_controller::RequestController::NONE_HMI_LEVEL_MANY_REQUESTS) {
+        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                          "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
+
+        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+            connection_key, mobile_api::AppInterfaceUnregisteredReason::
+                                          REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
         UnregisterAppInterface(connection_key);
         return false;

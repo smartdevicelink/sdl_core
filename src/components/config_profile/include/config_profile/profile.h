@@ -151,6 +151,19 @@ class Profile {
     const std::string& named_pipe_path() const;
 
     /**
+     * @brief Returns time scale for max amount of requests for application
+     * in hmi level none.
+     */
+    const unsigned int& app_hmi_level_none_time_scale() const;
+
+    /**
+     * @brief Returns allowable max amount of requests per time scale for
+     * application in hmi level none
+     *
+     */
+    const unsigned int& app_hmi_level_none_time_scale_max_requests() const;
+
+    /**
      * @brief Returns application time scale for max amount of requests per it.
      */
     const unsigned int& app_time_scale() const;
@@ -253,6 +266,8 @@ class Profile {
     unsigned int                    space_available_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
+    unsigned int                    app_hmi_level_none_time_scale_max_requests_;
+    unsigned int                    app_hmi_level_none_requests_time_scale_;
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
     unsigned int                    pending_requests_amount_;

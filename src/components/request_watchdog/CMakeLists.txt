@@ -6,6 +6,7 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/watchdog.cc
     ./src/request_watchdog.cc
     ./src/request_info.cc
 )

@@ -43,28 +43,89 @@ namespace request_watchdog {
 
 class Watchdog {
   public:
+
+    /*
+     * @brief Default constructor
+     */
+    Watchdog();
+
+    /*
+     * @brief Destructor
+     */
+    virtual ~Watchdog();
+
     virtual void AddListener(WatchdogSubscriber* subscriber) = 0;
     virtual void RemoveListener(WatchdogSubscriber* listener) = 0;
     virtual void removeAllListeners() = 0;
 
+    /*
+     * @brief Adds request
+     *
+     * @brief requestInfo Request info (connection key, request correlation id,
+     * request id, watchdog timeout for request, current application hmi level
+     */
     virtual void addRequest(RequestInfo* requestInfo) = 0;
+
+    /*
+     * @brief Removes corresponding request
+     *
+     * @brief connection_key    Application connection key
+     * @brief correlation_id    Mobile request correlation ID
+     */
     virtual void removeRequest(int connection_key,
                                int correlation_id) = 0;
+
+    /*
+     * @brief Update request watchdog timeout
+     *
+     * @brief connection_key    Application connection key
+     * @brief correlation_id    Mobile request correlation ID
+     * @brief new_timeout_value New value of request watchdog timeout
+     */
     virtual void updateRequestTimeout(int connection_key,
                                       int correlation_id,
                                       int new_timeout_value) = 0;
 
+    /*
+     * @brief Check if amount of requests during time scale for application
+     * doesn't exceed limit.
+     *
+     * @brief connection_key Application ID
+     * @brief app_time_scale Configured time scale for application
+     * @brief max_request_per_time_scale Configured max request amount for
+     * application time scale
+     *
+     * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
+     */
     virtual bool checkTimeScaleMaxRequest(
                             const int& connection_key,
                             const unsigned int& app_time_scale,
                             const unsigned int& max_request_per_time_scale) = 0;
 
+    /*
+     * @brief Check if amount of requests during time scale for application in
+     * specified hmi level doesn't exceed limit.
+     *
+     * @brief hmi_level      Application hmi level(NONE)
+     * @brief connection_key Application ID
+     * @brief app_time_scale Configured time scale for application
+     * @brief max_request_per_time_scale Configured max request amount for
+     * application time scale
+     *
+     * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
+     */
+    virtual bool checkHMILevelTimeScaleMaxRequest(
+                            const int& hmi_level,
+                            const int& connection_key,
+                            const unsigned int& app_time_scale,
+                            const unsigned int& max_request_per_time_scale) = 0;
+
+    /*
+     * @brief Removes all requests
+     */
     virtual void removeAllRequests() = 0;
 
     virtual int getRegesteredRequestsNumber() = 0;
-
-    virtual ~Watchdog() {
-    }
 };
 
 }  //  namespace request_watchdog

@@ -55,6 +55,8 @@ Profile::Profile()
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
   , space_available_(104857600)
+  , app_hmi_level_none_time_scale_max_requests_(100)
+  , app_hmi_level_none_requests_time_scale_(10)
   , app_time_scale_max_requests_(100)
   , app_requests_time_scale_(10)
   , pending_requests_amount_(1000)
@@ -146,6 +148,15 @@ const std::string&  Profile::video_server_type() const {
 
 const std::string& Profile::named_pipe_path() const {
   return named_pipe_path_;
+}
+
+const unsigned int& Profile::app_hmi_level_none_time_scale() const {
+  return app_hmi_level_none_requests_time_scale_;
+}
+
+const unsigned int& Profile::app_hmi_level_none_time_scale_max_requests() const
+{
+  return app_hmi_level_none_time_scale_max_requests_;
 }
 
 const unsigned int& Profile::app_time_scale() const {
@@ -391,6 +402,24 @@ void Profile::UpdateValues() {
     app_requests_time_scale_ = atoi(value);
     LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
                  " of requests " << app_requests_time_scale_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                          "MAIN", "AppHMILevelNoneTimeScaleMaxRequests", value))
+      && ('\0' != *value)) {
+    app_hmi_level_none_time_scale_max_requests_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set max amount of requests per application"
+                " time scale " <<  app_hmi_level_none_time_scale_max_requests_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppHMILevelNoneRequestsTimeScale", value))
+      && ('\0' != *value)) {
+    app_hmi_level_none_requests_time_scale_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
+                 " of requests " << app_hmi_level_none_requests_time_scale_);
   }
 
   *value = '\0';
