@@ -116,7 +116,8 @@ request_watchdog::RequestInfo RequestWatchdogTest::generateRequestInfo() {
   return request_watchdog::RequestInfo(rand_r(&seed) % INT_MAX,
                                        rand_r(&seed) % INT_MAX,
                                        rand_r(&seed) % INT_MAX,
-                                       rand_r(&seed) % INT_MAX);
+                                       rand_r(&seed) % INT_MAX,
+                                       0);
 }
 
 RequestWatchdogSubscriber::RequestWatchdogSubscriber():
