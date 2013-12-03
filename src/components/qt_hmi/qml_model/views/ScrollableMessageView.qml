@@ -203,6 +203,9 @@ GeneralView {
     function getScrollbar(){
         return scrollbar
     }
+    function getTextArea(){
+        return middle
+    }
     /**
       * Test Support Section End
       */

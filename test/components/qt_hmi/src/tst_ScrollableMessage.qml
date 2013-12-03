@@ -80,7 +80,8 @@ Item {
             mainWindowLoader.source = ""
             mainWindowLoader.source = "../../../../src/components/qt_hmi/qml_model/MainWindow.qml"
             var mainWindowObject = mainWindowLoader.item
-            console.assert(mainWindowObject !== undefined, "mainWindowObject is undefined");
+            if(!mainWindowObject)
+                qtest_fail("mainWindowObject is undefined");
             var mainScreen = mainWindowObject.getMainScreen()
             mainScreen.visible = true
             var warningInfo = mainWindowObject.getWarningInfo()
@@ -95,9 +96,11 @@ Item {
         //get messageModel and messageView after call @scrollableMessage
         function getMessageViewModel() {
             messageModel    = dataContainer.scrollableMessageModel
-            console.assert(messageModel !== undefined, "messageModel is undefined");
+            if(!messageModel)
+                qtest_fail("messageModel is undefined");
             messageView = contentLoader.item
-            console.assert(messageView !== undefined, "messageView is undefined");
+            if(!messageView)
+                qtest_fail("messageView is undefined");
         }
 
         //cleanup for each test
@@ -137,7 +140,8 @@ Item {
             if(result.__errno !== undefined)
                 fail("ScrollableMessage return error state")
             timer = messageView.getTimer()
-            console.assert(timer !== undefined, "timer is undefined");
+            if(!timer)
+                qtest_fail("timer is undefined");
             //check button equals to init data
             if (messageModel.softButtons.count === initData.softButtons.length) {
                 for (var i = 0, len = messageModel.softButtons.count; i < len; i++) {
@@ -364,6 +368,41 @@ Item {
             waitForRendering(mainWindowLoader)
             var scrollBar = messageView.getScrollbar()
             verify(scrollBar.visible === true, "ScrollBar is not shown for long text")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        //compare text width with and without buttons at top of SrollableMessage
+        function test_09_MessageTextHeight() {
+            console.debug("enter")
+            var initData = {appID:1, timeout:500, messageText:{fieldText:"Simple text"}, softButtons:[]}
+            createMessageView(initData.appID)
+
+            var result = sdlUIProxy.scrollableMessage(initData)
+            getMessageViewModel()
+
+            //check
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
+            if(result.__errno !== undefined)
+                fail("ScrollableMessage return error state")
+
+
+            var textAreaHeight = messageView.getTextArea().height
+            wait(initData.timeout)
+
+            var initData2 = {appID:1, timeout:20000, messageText:{fieldText:"Simple text"},
+                softButtons:softButtonsListExample}
+            createMessageView(initData.appID)
+
+            var result2= sdlUIProxy.scrollableMessage(initData2)
+            getMessageViewModel()
+
+            //wait rendering
+            waitForRendering(mainWindowLoader)
+            var textAreaHeight2 = messageView.getTextArea().height
+            console.debug("messageTextH",textAreaHeight,textAreaHeight2)
+            verify(textAreaHeight2  <= textAreaHeight, "Height of text area shoud be less with buttons")
 
             destroyView()
             console.debug("exit")
