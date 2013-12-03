@@ -35,9 +35,11 @@
 #include "policies/policy_table.h"
 #include "formatters/generic_json_formatter.h"
 #include "policies/policy_table_schema.h"
+#include "utils/macro.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+
 
 //---------------------------------------------------------------------------
 
@@ -72,12 +74,17 @@ smart_objects::SmartObject& policies::PolicyTable::AsSmartObject() {
 
 //---------------------------------------------------------------------------
 
-const std::string policies::PolicyTable::AsString() {
-  std::string ret_val;
-  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON != pt_validation_result_) {
-    formatters::GenericJsonFormatter::ToString(pt_smart_object_, ret_val);
+bool policies::PolicyTable::AsString(std::string* policy_table_string) const {
+  DCHECK(policy_table_string);
+
+  if (PTValidationResult::VALIDATION_FAILED_BAD_JSON == pt_validation_result_) {
+    return false;
   }
-  return ret_val;
+
+  formatters::GenericJsonFormatter::ToString(pt_smart_object_,
+    *policy_table_string);
+
+  return true;
 }
 
 //---------------------------------------------------------------------------

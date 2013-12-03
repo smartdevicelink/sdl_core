@@ -77,10 +77,14 @@ class PolicyTable {
 
     /**
      * @brief Get policy table as a string
+     *
+     * @param policy_table_string pointer to the string where PolicyTable
+     *  will be written.
      * 
-     * @return Policy table as string
+     * @return true if PolicyTable correctly converted to string and the string
+     *  is returned in "policy_table_string"
      */
-    const std::string AsString();
+    bool AsString(std::string* policy_table_string) const;
 
     /**
     * @brief Validate policy table.

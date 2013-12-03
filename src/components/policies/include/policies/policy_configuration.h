@@ -56,28 +56,28 @@ class PolicyConfiguration {
     *
     * @param pt_file_path File path
     */
-    void set_pt_file_name(std::string pt_file_path);
+    void set_pt_file_name(const std::string& pt_file_path);
 
     /**
      * @brief set file path (with name) for preload policy table
      *
      * @param preload_pt_file_path File path
      **/
-    void set_preload_pt_file_name(std::string preload_pt_file_path);
+    void set_preload_pt_file_name(const std::string& preload_pt_file_path);
 
     /**
      * @brief Get file path of policy table
      *
      * @return File path
      */
-    std::string pt_file_name() const;
+    const std::string& pt_file_name() const;
 
     /**
      * @brief Get file path of preload policy table
      *
      * @return File path
      **/
-    std::string preload_pt_file_name() const;
+    const std::string& preload_pt_file_name() const;
 
   private:
     /**

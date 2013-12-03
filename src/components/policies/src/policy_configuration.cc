@@ -44,25 +44,25 @@ policies::PolicyConfiguration::PolicyConfiguration()
 //-----------------------------------------------------------------------------
 
 void policies::PolicyConfiguration::set_pt_file_name(
-    std::string pt_file_path) {
+    const std::string& pt_file_path) {
   pt_file_name_ = pt_file_path;
 }
 
 //-----------------------------------------------------------------------------
 
-std::string policies::PolicyConfiguration::pt_file_name() const {
+const std::string& policies::PolicyConfiguration::pt_file_name() const {
   return pt_file_name_;
 }
 
 //-----------------------------------------------------------------------------
 
 void policies::PolicyConfiguration::set_preload_pt_file_name(
-    std::string preload_pt_file_path) {
+    const std::string& preload_pt_file_path) {
   preload_pt_file_name_ = preload_pt_file_path;
 }
 
 //-----------------------------------------------------------------------------
 
-std::string policies::PolicyConfiguration::preload_pt_file_name() const {
+const std::string& policies::PolicyConfiguration::preload_pt_file_name() const {
   return preload_pt_file_name_;
 }

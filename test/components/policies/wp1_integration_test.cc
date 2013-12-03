@@ -166,7 +166,7 @@ TEST_F(TestWP1Integration, test_straight_forward_str_deny) {
   AssertRPC("UnknownRPCID", HMILevel::HMI_FULL, false);
   AssertRPC("OnCommandID", HMILevel::HMI_BACKGROUND, false);
   AssertRPC("DeleteSubMenuID", HMILevel::HMI_NONE, false);
-  AssertRPC("AlertID", HMILevel::HMI_BACKGROUND, false);
+  AssertRPC("AlertID", HMILevel::HMI_NONE, false);
   AssertRPC("DeleteInteractionChoiceSetID", HMILevel::HMI_NONE, false);
   AssertRPC("DeleteCommandID", HMILevel::HMI_NONE, false);
   AssertRPC("GetVehicleDataID", HMILevel::HMI_NONE, false);
@@ -231,7 +231,7 @@ TEST_F(TestWP1Integration, test_straight_forward_deny) {
             HMILevel::HMI_NONE, false);
 
   AssertRPC(func_ids::AlertID, msg_type::request,
-            HMILevel::HMI_BACKGROUND, false);
+            HMILevel::HMI_NONE, false);
 
   AssertRPC(func_ids::DeleteInteractionChoiceSetID, msg_type::response,
             HMILevel::HMI_NONE, false);

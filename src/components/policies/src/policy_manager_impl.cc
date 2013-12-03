@@ -35,6 +35,7 @@
 #include "policies/policy_manager_impl.h"
 #include "policies/permissions_calculator.h"
 #include "utils/file_system.h"
+#include "utils/macro.h"
 
 
 namespace policies {
@@ -50,7 +51,7 @@ PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager()
   , policy_config_()
   , policy_table_(NULL)
-  , init_result_(InitResult::INIT_FAILED){
+  , init_result_(InitResult::INIT_FAILED) {
 }
 
 //---------------------------------------------------------------
@@ -109,9 +110,11 @@ InitResult PolicyManagerImpl::Init(
 //---------------------------------------------------------------
 
 CheckPermissionResult
-  PolicyManagerImpl::CheckPermission(uint32_t app_id,
-                                     const smart_objects::SmartObject& rpc,
-                                     mobile_apis::HMILevel::eType hmi_status) {
+  PolicyManagerImpl::CheckPermission(
+    const uint32_t app_id,
+    const smart_objects::SmartObject& rpc,
+    const mobile_apis::HMILevel::eType hmi_status) {
+//
   CheckPermissionResult result =
     {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};
   PolicyTable* pt = policy_table();
@@ -137,20 +140,36 @@ CheckPermissionResult
 
 //---------------------------------------------------------------
 
-void PolicyManagerImpl::StorePolicyTable() {
-  if (NULL != policy_table_) {
-    if (smart_objects::SmartType_Null !=
-        policy_table_->AsSmartObject().getType()) {
-      const std::string pt_string = policy_table_->AsString();
-      const std::vector<unsigned char> char_vector_pdata(
-          pt_string.begin(), pt_string.end());
-      if (false == file_system::Write(
-          policy_config_.pt_file_name(), char_vector_pdata)) {
-        LOG4CXX_ERROR(logger_, "Can't write policy table file "
-            << policy_config_.pt_file_name());
-      }
-    }
+bool PolicyManagerImpl::StorePolicyTable() {
+  if (NULL == policy_table_) {
+    LOG4CXX_WARN(logger_, "PolicyTable is NULL."
+                          "It seems like Init hasn't been called");
+    NOTREACHED();
+    return false;
   }
+
+  if (smart_objects::SmartType_Map !=
+        policy_table_->AsSmartObject().getType()) {
+    LOG4CXX_WARN(logger_, "PolicyTable is empty. Nothing to store");
+    return false;
+  }
+
+  std::string pt_string;
+  if (false == policy_table_->AsString(&pt_string)) {
+    LOG4CXX_ERROR(logger_, "Can't convert PolicyTable to string.");
+    return false;
+  }
+
+  const std::vector<unsigned char> char_vector_pdata(
+    pt_string.begin(), pt_string.end());
+
+  if (false == file_system::Write(policy_config_.pt_file_name(),
+                                  char_vector_pdata)) {
+    LOG4CXX_ERROR(logger_, "Can't write policy table file "
+      << policy_config_.pt_file_name());
+    return false;
+  }
+  return true;
 }
 
 //---------------------------------------------------------------

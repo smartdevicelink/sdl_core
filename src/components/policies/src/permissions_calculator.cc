@@ -37,6 +37,7 @@
 #include "policies/policy_table_schema.h"
 #include "formatters/CSmartFactory.hpp"
 #include "smart_objects/enum_schema_item.h"
+#include "utils/macro.h"
 
 
 namespace policies {
@@ -55,6 +56,7 @@ log4cxx::LoggerPtr PermissionsCalculator::logger_ = log4cxx::LoggerPtr(
 const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
     const SmartObject& pt_object,
     const uint32_t app_id) {
+//
   const uint8_t kBuffSize = 16;
   char app_id_string[kBuffSize];
   snprintf(app_id_string, kBuffSize, "%d", app_id);
@@ -93,6 +95,7 @@ PermissionResult PermissionsCalculator::CalcPermissions(
     const uint32_t app_id,
     const SmartObject& rpc,
     const mobile_apis::HMILevel::eType hmi_status) {
+//
   std::vector<std::string> rpc_groups;
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
 
@@ -100,7 +103,7 @@ PermissionResult PermissionsCalculator::CalcPermissions(
     pt_app_id.getElement(PolicyTableSchema::kStrGroups);
 
   if (SmartType::SmartType_Array == pt_groups.getType()) {
-    ConvertSmartArray2VectorStrings(pt_groups, rpc_groups);
+    ConvertSmartArray2VectorStrings(pt_groups, &rpc_groups);
   } else {
     LOG4CXX_ERROR(logger_,
         "Section app_policies|<app_id>|groups either not exists or not array");
@@ -118,7 +121,7 @@ PermissionResult PermissionsCalculator::CalcPermissions(
 Priority::eType PermissionsCalculator::GetPriority(
     const SmartObject& pt_object,
     const uint32_t app_id) {
-
+//
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
 
   const SmartObject& priority =
@@ -138,10 +141,10 @@ Priority::eType PermissionsCalculator::GetPriority(
 PermissionResult
   PermissionsCalculator::CalcPermissionsByGroups(
     const SmartObject& pt_object,
-    const std::vector<std::string> rpc_groups,
+    const std::vector<std::string>& rpc_groups,
     const SmartObject& rpc,
     const mobile_apis::HMILevel::eType hmi_status) {
-
+//
   SmartObject rpc_object(rpc);
   // unapply schema to convert FunctionID from enum (number) to string
   rpc_object.getSchema().unapplySchema(rpc_object);
@@ -168,7 +171,7 @@ PermissionResult
       if (fgroup.getElement(PolicyTableSchema::kStrRpcs)
                 .keyExists(function_id.asString())) {
         std::string hmi_status_string;
-        ConvertHMILevel2String(hmi_status, hmi_status_string);
+        ConvertHMILevel2String(hmi_status, &hmi_status_string);
 
         smart_objects::SmartObject hmi_levels =
             fgroup.getElement(PolicyTableSchema::kStrRpcs)
@@ -195,7 +198,8 @@ PermissionResult
 
 void PermissionsCalculator::ConvertHMILevel2String(
     const mobile_apis::HMILevel::eType hmi_status,
-    std::string& hmi_level_string) {
+    std::string* hmi_level_string) {
+  DCHECK(hmi_level_string);
 
   const std::map<mobile_apis::HMILevel::eType, std::string>
     elementsStringRepresentation =
@@ -206,7 +210,7 @@ void PermissionsCalculator::ConvertHMILevel2String(
     elementsStringRepresentation.find(hmi_status);
 
   if (i != elementsStringRepresentation.end()) {
-      hmi_level_string = i->second;
+      *hmi_level_string = i->second;
   }
 }
 
@@ -214,13 +218,14 @@ void PermissionsCalculator::ConvertHMILevel2String(
 
 void PermissionsCalculator::ConvertSmartArray2VectorStrings(
     const SmartObject& object,
-    std::vector<std::string>& v_strings) {
+    std::vector<std::string>* v_strings) {
+  DCHECK(v_strings);
 
   if (object.getType() == smart_objects::SmartType::SmartType_Array) {
     for (uint32_t i = 0; i < object.length(); i++) {
       const SmartObject & item = object.getElement(i);
       if (item.getType() == smart_objects::SmartType::SmartType_String) {
-        v_strings.push_back(item.asString());
+        v_strings->push_back(item.asString());
       }
     }
   }

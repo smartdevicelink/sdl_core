@@ -105,7 +105,7 @@
                               "BACKGROUND",
                               "FULL",
                               "LIMITED",
-                              "NHMONE"
+                              "NONE"
                             ]
                         },
                         "OnButtonPressID":{
@@ -160,6 +160,7 @@
                         },
                         "AlertID":{
                             "hmi_levels":[
+                              "BACKGROUND",
                               "FULL",
                               "LIMITED"
                             ]

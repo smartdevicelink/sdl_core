@@ -76,7 +76,7 @@ class PolicyManagerImpl : public PolicyManager {
      *
      * @return result of check permission
      */
-    virtual CheckPermissionResult CheckPermission(uint32_t app_id,
+    virtual CheckPermissionResult CheckPermission(const uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
         const mobile_apis::HMILevel::eType hmi_status);
 
@@ -88,8 +88,10 @@ class PolicyManagerImpl : public PolicyManager {
 
     /**
      * @brief Store policy table to filesystem
+     *
+     * @return true if PolicyTable is successfully saved, false - othewise.
      */
-    void StorePolicyTable();
+    bool StorePolicyTable();
 
     /**
      * @brief Get PolicyTable pointer (for testing purposes)
