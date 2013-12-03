@@ -110,10 +110,13 @@ SDL.SDLController = Em.Object
         componentsReadiness: function(component) {
 
             for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
-                if (!SDL.SDLModel.registeredComponents[i].state) { return; }
+                if (!SDL.SDLModel.registeredComponents[i].state) {
+                    return;
+                }
             }
             FFW.BasicCommunication.onReady();
             SDL.SDLModel.timeStamp = new Date().getTime();
+            console.log(SDL.SDLModel.timeStamp);
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
 
         /**
