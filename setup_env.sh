@@ -213,6 +213,8 @@ if $QT_HMI || $INSTALL_ALL; then
 	echo "Installing gdebi"
 	apt-install ${GDEBI}
 	echo $OK
+	
+	INSTALL_CMAKE=false
 
 	if dpkg -s cmake | grep installed > /dev/null; then		
 		echo "Checking for installed cmake"
@@ -222,18 +224,24 @@ if $QT_HMI || $INSTALL_ALL; then
 		"equal"|"1 > 2");;
 		"2 > 1") echo "Removing CMake build system"
 		   sudo apt-get remove -y cmake cmake-data
-		   echo "Installing CMake build system"
-		   if [ ${ARCH} == "i386" ]; then
-		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-		   elif [ ${ARCH} == "x64" ]; then
-		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
-		   fi
-		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+		   INSTALL_CMAKE=true
 		   ;;
 		esac
+	else 
+		INSTALL_CMAKE=true
 	fi
 	echo $OK
+	
+	if ${INSTALL_CMAKE}; then
+		echo "Installing CMake build system"
+		if [ ${ARCH} == "i386" ]; then
+		      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+		elif [ ${ARCH} == "x64" ]; then
+		      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+		fi
+		sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+		sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	fi
 
 	if [ ${ARCH} = "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
