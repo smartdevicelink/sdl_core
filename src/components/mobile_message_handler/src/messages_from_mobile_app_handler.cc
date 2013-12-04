@@ -60,9 +60,10 @@ void MessagesFromMobileAppHandler::threadMain() {
           ->messages_from_mobile_app_.pop();
 
       application_manager::Message* outgoing_message =
-          new application_manager::Message;
+        new application_manager::Message;
       // TODO(AK): change this
-      if (message->is_fully_binary()) {
+      if (message->service_type()
+          == protocol_handler::ServiceTypes::MOBILE_NAV) {
         // skip this message, not under handling of MMH
         continue;
       }
