@@ -54,7 +54,6 @@ void NameMessageBrokerThread(const System::Thread& thread,
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
   , protocol_handler_(NULL)
-  , mmh_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
   , hmi_handler_(NULL)
@@ -82,10 +81,6 @@ bool LifeCycle::StartComponents() {
     new protocol_handler::ProtocolHandlerImpl(transport_manager_);
   DCHECK(protocol_handler_ != NULL);
 
-  mmh_ =
-    mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh_ != NULL);
-
   connection_handler_ =
     connection_handler::ConnectionHandlerImpl::instance();
   DCHECK(connection_handler_ != NULL);
@@ -101,13 +96,11 @@ bool LifeCycle::StartComponents() {
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
-  mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
   protocol_handler_->set_session_observer(connection_handler_);
-  protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
@@ -118,8 +111,7 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
-  app_manager_->set_mobile_message_handler(mmh_);
-  mmh_->AddMobileMessageListener(app_manager_);
+  app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
@@ -212,17 +204,14 @@ void LifeCycle::StopComponents(int params) {
   instance()->app_manager_->~ApplicationManagerImpl();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
-  instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
+  instance()->protocol_handler_->RemoveProtocolObserver(
+    instance()->app_manager_);
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   instance()->transport_manager_->RemoveEventListener(
     instance()->connection_handler_);
   instance()->protocol_handler_->set_session_observer(NULL);
   instance()->connection_handler_->~ConnectionHandlerImpl();
-
-  LOG4CXX_INFO(logger_, "Destroying Mobile Message Handler.");
-  instance()->protocol_handler_->RemoveProtocolObserver(instance()->mmh_);
-  delete instance()->mmh_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   instance()->transport_manager_->RemoveEventListener(

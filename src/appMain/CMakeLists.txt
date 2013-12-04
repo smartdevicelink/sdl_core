@@ -37,7 +37,6 @@ set(LIBRARIES
   avahi-client
   avahi-common
   ConfigProfile
-  MobileMessageHandler
   RequestWatchdog
   MediaManager
   Libusb-1.0.16
@@ -47,7 +46,6 @@ include_directories (
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
-  ../components/mobile_message_handler/include
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include

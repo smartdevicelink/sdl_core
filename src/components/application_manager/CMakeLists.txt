@@ -5,7 +5,6 @@ include_directories (
   ../protocol_handler/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
-  ../mobile_message_handler/include
   ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
@@ -31,6 +30,7 @@ set (SOURCES
 ./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/mobile_message_handler.cc
 )
 
 set (POLICIES_MANAGER

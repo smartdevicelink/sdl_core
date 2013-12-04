@@ -48,11 +48,9 @@
 #include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
-#include "mobile_message_handler/mobile_message_observer.h"
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-
 
 #include "formatters/CSmartFactory.hpp"
 
@@ -113,7 +111,6 @@ typedef std::map<unsigned int, MobileRequest> MessageChain;
 
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
-  public mobile_message_handler::MobileMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
   public HMICapabilities {
@@ -362,9 +359,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
-    void set_mobile_message_handler(
-      mobile_message_handler::MobileMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
+    void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////
 
@@ -379,16 +375,6 @@ class ApplicationManagerImpl : public ApplicationManager,
       const utils::SharedPtr<smart_objects::SmartObject>& message);
 
     /////////////////////////////////////////////////////////
-    /*
-     * @brief Overridden mobile message handler method
-     * for incoming mobile messages
-     *
-     * @param message Incoming mobile message
-     *
-     */
-    virtual void OnMobileMessageReceived(const MobileMessage& message);
-
-
     /*
      * @brief Overriden ProtocolObserver method
      */
@@ -559,9 +545,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     media_manager::MediaManager* media_manager_;
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
-    mobile_message_handler::MobileMessageHandler* mobile_handler_;
     connection_handler::ConnectionHandler* connection_handler_;
-
+    protocol_handler::ProtocolHandler* protocol_handler_;
 
     policies_manager::PoliciesManager policies_manager_;
 
