@@ -165,8 +165,6 @@ Item {
         MediaClockView {
             width: parent.width
             height: parent.height * 1/4
-            time: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
-                                                         : "02:36" //TODO {Aleshin}: get track time for all players except SDL
         }
     }
 

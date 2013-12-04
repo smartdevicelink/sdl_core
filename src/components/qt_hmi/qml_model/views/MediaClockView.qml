@@ -37,9 +37,9 @@ import "../models/Constants.js" as Constants
 import "../models/Internal.js" as Internal
 
 Item {
-    property alias time: time.text
+    property alias time: timeText.text
     Text {
-        id: time
+        id: timeText
         anchors.left: parent.left
         width: 1/10 * parent.width
         anchors.verticalCenter: parent.verticalCenter
