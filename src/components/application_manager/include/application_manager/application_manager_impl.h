@@ -519,6 +519,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAppInterface(const unsigned int& app_id);
 
+    /*
+     * @brief Save unregistered applications info to the file system
+     */
+    void SaveApplications();
+
     // members
     /**
      * @brief Map of connection keys and associated applications

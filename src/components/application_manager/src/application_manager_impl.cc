@@ -137,11 +137,9 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
-  LOG4CXX_INFO(logger_, "Desctructing ApplicationManager.");
+  LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
   UnregisterAllApplications();
-
-  message_chaining_.clear();
 
   if (vehicle_type_) {
     delete vehicle_type_;
@@ -373,6 +371,10 @@ bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
 }
 
 void ApplicationManagerImpl::UnregisterAllApplications(bool hmi_off) {
+
+  // Saving unregistered app.info to the file system before
+  SaveApplications();
+
   applications_.clear();
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
@@ -1636,6 +1638,85 @@ void ApplicationManagerImpl::Unmute() {
   for (; it != itEnd; ++it) {
     (*it)->set_audio_streaming_state(mobile_apis::AudioStreamingState::AUDIBLE);
     MessageHelper::SendHMIStatusNotification(*(*it));
+  }
+}
+
+void ApplicationManagerImpl::SaveApplications() {
+
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveApplications()");
+
+  std::map<int, Application*>::const_iterator it = applications_.begin();
+  std::map<int, Application*>::const_iterator it_end = applications_.end();
+
+  std::string app_data;
+  for (; it != it_end; ++it) {
+
+    const Application* app = it->second;
+
+    typedef std::map<std::string, std::string> Params;
+    Params application_params;
+
+    // Params to store - start
+    ///////////////////////////////////////////////////////////////////////
+
+    application_params[strings::connection_key] =
+        MessageHelper::NumberToString(it->first);
+
+    application_params[strings::app_id] =
+        MessageHelper::NumberToString(app->mobile_app_id()->asInt());
+
+    application_params[strings::hmi_level] =
+        MessageHelper::NumberToString(static_cast<int>(app->hmi_level()));
+
+
+    connection_handler::ConnectionHandlerImpl* conn_handler =
+        static_cast<connection_handler::ConnectionHandlerImpl*>(
+            connection_handler_
+            );
+
+    unsigned int device_id = 0;
+    if (-1 != conn_handler->GetDataOnSessionKey(
+        it->first,
+        NULL,
+        NULL,
+        &device_id) ) {
+
+      std::string mac_adddress;
+      if ( -1 != conn_handler->GetDataOnDeviceID(
+          device_id,
+          NULL,
+          NULL,
+          &mac_adddress) ) {
+
+        application_params["mac_address"] = mac_adddress;
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Params to store - end
+
+    Params::const_iterator it = application_params.begin();
+    Params::const_iterator it_end = application_params.end();
+
+    for (; it != it_end; ++it) {
+      app_data += it->first;
+      app_data += ":";
+      app_data += it->second;
+      app_data += ";";
+    }
+  } // end of app.list
+
+  const std::string& storage =
+      profile::Profile::instance()->app_info_storage();
+
+  if (!file_system::Write(
+      file_system::FullPath(storage),
+      std::vector<unsigned char>(app_data.begin(), app_data.end()),
+      std::ios::out
+      )) {
+
+    LOG4CXX_ERROR(logger_,
+                  "There is an error occurs during saving application info.");
   }
 }
 

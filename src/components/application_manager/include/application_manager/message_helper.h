@@ -270,6 +270,8 @@ class MessageHelper {
 
     static bool PrintSmartObject(smart_objects::SmartObject& object);
 
+    static std::string NumberToString(const int value);
+
     template<typename From, typename To>
     static To ConvertEnumAPINoCheck(const From& input) {
       return static_cast<To>(input);
