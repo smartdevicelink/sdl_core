@@ -69,7 +69,7 @@ class UsbConnection : public Connection {
   bool PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
-  void CheckAllTransfersComplete();
+  void Finalise();
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
