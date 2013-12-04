@@ -209,10 +209,10 @@ bool LifeCycle::InitMessageBroker() {
 void LifeCycle::StopComponents(int params) {
   utils::ResetSubscribeToTerminateSignal();
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  instance()->app_manager_->~ApplicationManagerImpl();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
   instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
-  instance()->app_manager_->~ApplicationManagerImpl();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   instance()->transport_manager_->RemoveEventListener(

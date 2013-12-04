@@ -138,6 +138,9 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Desctructing ApplicationManager.");
+
+  UnregisterAllApplications();
+
   message_chaining_.clear();
 
   if (vehicle_type_) {
@@ -374,6 +377,10 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool hmi_off) {
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
+
+    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+     (*it)->app_id(), mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET);
+
     delete(*it);
   }
   application_list_.clear();
@@ -435,7 +442,6 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
   }
   return true;
 }
-
 
 void ApplicationManagerImpl::DeactivateApplication(Application* application) {
   MessageHelper::SendDeleteCommandRequestToHMI(application);
@@ -707,8 +713,7 @@ void ApplicationManagerImpl::set_vehicle_type(
   vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
 }
 
-const smart_objects::SmartObject*
-ApplicationManagerImpl::vehicle_type() const {
+const smart_objects::SmartObject* ApplicationManagerImpl::vehicle_type() const {
   return vehicle_type_;
 }
 
@@ -717,12 +722,10 @@ void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
-    int correlation_id,
-    int max_duration,
-    int sampling_rate,
-    int bits_per_sample,
-    int audio_type) {
+    int correlation_id, int max_duration, int sampling_rate,
+    int bits_per_sample, int audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
+
   if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
@@ -893,28 +896,24 @@ void ApplicationManagerImpl::OnMobileMessageReceived(
   messages_from_mobile_.push(message);
 }
 
-void ApplicationManagerImpl::OnMessageReceived(const protocol_handler::
-                                   RawMessagePtr& message) {
+void ApplicationManagerImpl::OnMessageReceived(
+    const protocol_handler::RawMessagePtr& message) {
 }
 
-void ApplicationManagerImpl::OnMobileMessageSent(const protocol_handler::
-                             RawMessagePtr& message) {
+void ApplicationManagerImpl::OnMobileMessageSent(
+    const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
 
-  application_manager::Message app_mngr_message;
+  application_manager::Message app_msg;
 
   // TODO(PK): Convert RawMessage to application_manager::Message
 
   // Application connection should be closed if RegisterAppInterface failed and
   // RegisterAppInterfaceResponse with success == false was sent to the mobile
-  if (app_mngr_message.function_id() ==
-        mobile_apis::FunctionID::RegisterAppInterfaceID
-      && app_mngr_message.type() ==
-          MessageType::kResponse
-      // TODO(PK): Implement suscess() getter in application_manager::Message
-      /*&& app_mngr_message.success() == false*/) {
+  if (app_msg.function_id() == mobile_apis::FunctionID::RegisterAppInterfaceID
+      && app_msg.type() == MessageType::kResponse) {
 
-    unsigned int key = app_mngr_message.connection_key();
+    unsigned int key = app_msg.connection_key();
 
     if (NULL != connection_handler_) {
       static_cast<connection_handler::ConnectionHandlerImpl*>
@@ -922,7 +921,6 @@ void ApplicationManagerImpl::OnMobileMessageSent(const protocol_handler::
     }
   }
 }
-
 
 void ApplicationManagerImpl::OnMessageReceived(
   utils::SharedPtr<application_manager::Message> message) {
@@ -945,6 +943,7 @@ void ApplicationManagerImpl::OnErrorSending(
 void ApplicationManagerImpl::OnDeviceListUpdated(
   const connection_handler::DeviceList& device_list) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnDeviceListUpdated");
+
   smart_objects::SmartObject* update_list = new smart_objects::SmartObject;
   smart_objects::SmartObject& so_to_send = *update_list;
   so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
@@ -973,6 +972,7 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
   connection_handler::DeviceHandle device_handle, int session_key,
   int first_session_key, connection_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
+
   if (connection_handler::ServiceType::kNaviSession == type) {
     LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
 
