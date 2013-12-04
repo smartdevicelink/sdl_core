@@ -43,6 +43,7 @@ GeneralView {
         playerName: "USB"
         anchors.fill: parent
         playerState: dataContainer.usbPlayerState
+        image: playerState.albumImage
 
         buttons: [
             OvalButton {

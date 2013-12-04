@@ -44,6 +44,7 @@ GeneralView {
         id: cdPlayer
         playerName: "CD"
         anchors.fill: parent
+        image: playerState.albumImage
         playerState: dataContainer.cdPlayerState
 
         buttons: [

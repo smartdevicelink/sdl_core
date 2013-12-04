@@ -155,7 +155,6 @@ Item {
     HueSaturation {
         anchors.fill: background
         source: background
-        cached: true
         hue: main.hue()
         saturation: main.saturation()
         lightness: main.lightness()

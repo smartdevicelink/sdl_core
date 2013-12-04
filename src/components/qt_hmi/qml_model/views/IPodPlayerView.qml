@@ -42,6 +42,7 @@ GeneralView {
         id: ipodPlayer
         playerName: "iPod"
         anchors.fill: parent
+        image: playerState.albumImage
         playerState: dataContainer.ipodPlayerState
 
         buttons: [

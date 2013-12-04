@@ -55,6 +55,7 @@ Item {
 
     property alias buttons: buttonsRow.content
     property alias buttonsSpacing: buttonsRow.spacing
+    property alias image: image.source
 
     Item {
         // row of oval buttons
@@ -107,8 +108,6 @@ Item {
                 id: image
                 height: parent.height
                 width: height
-                source: (mediaPlayerView.playerType === "SDL") ? dataContainer.currentApplication.hmiUIText.image //TODO {ALeshin}: get picture correctly
-                                                               : playerState.albumImage
             }
 
             Column {
@@ -166,6 +165,8 @@ Item {
         MediaClockView {
             width: parent.width
             height: parent.height * 1/4
+            time: (mediaPlayerView.playerType === "SDL") ? Internal.hmsTimeToString(dataContainer.currentApplication.mediaClock.hmsTime)
+                                                         : "02:36" //TODO {Aleshin}: get track time for all players except SDL
         }
     }
 
@@ -255,29 +256,26 @@ Item {
                 interval: Constants.presetButtonTimer
                 repeat: false
                 triggeredOnStart: false
+                onTriggered: {
+                    console.log("preset button hold")
+                    presetsRow.clickProcessed = true
+                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + presetsRow.selectedIndex, Common.ButtonPressMode.LONG, undefined)
+                }
             }
 
             onPresetButtonPressed: {
+                console.log("preset button pressed")
                 timer.start()
                 clickProcessed  = false
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONDOWN, undefined)
             }
 
             onPresetButtonReleased: {
+                console.log("preset button released")
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
                 timer.stop()
                 if (!clickProcessed) {
                     sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
-                }
-            }
-
-            Connections {
-                target: timer
-                onTriggered: {
-                    if(!clickProcessed) {
-                        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
-                        clickProcessed = true
-                    }
                 }
             }
         }

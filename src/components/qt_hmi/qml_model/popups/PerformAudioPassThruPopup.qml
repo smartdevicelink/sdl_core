@@ -55,7 +55,7 @@ ContextPopup {
         console.debug("enter", reason)
         timer.stop()
         dataContainer.uiAudioPassThru.timeout = 0
-        visible = false
+        hide()
         dataContainer.uiAudioPassThru.running = false
         switch (reason) {
         case Common.Result.ABORTED:

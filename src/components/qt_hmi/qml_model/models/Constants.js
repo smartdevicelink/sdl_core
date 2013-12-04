@@ -175,7 +175,7 @@ var animationDuration = 500
 var warningScreenDuration = 1000
 
 // Timer to check how long preset button is pressed.
-var presetButtonTimer = 400
+var presetButtonTimer = 800
 
 // Spacing between icon and item in list
 var iconItemListSpacing = 20
@@ -236,3 +236,6 @@ var menuRowCount = 2
 
 // Count of columns for grid menu
 var menuColumnCount = 3
+
+// Position for element that came without position value (should be always at the end)
+var positionOfElementWithoutPosition = 1001

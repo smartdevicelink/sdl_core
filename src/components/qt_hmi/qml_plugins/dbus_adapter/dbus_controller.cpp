@@ -1,5 +1,6 @@
 #include <QDBusConnection>
 #include "dbus_controller.h"
+#include "interfaces/QT_HMI_API.h"
 
 DBusController::DBusController(QObject *parent)
     : QObject(parent) {
@@ -17,8 +18,11 @@ void DBusController::sendReply(QVariant asyncObject, QVariant data) {
     std::map<int, delayedReply>::iterator it = replies.find(uid);
     if (it != replies.end()) {
         QDBusMessage msg = it->second.message.createReply();
-        it->second.fill(msg, data.toMap());
-        QDBusConnection::sessionBus().send(msg);
+        if(!it->second.fill(msg, data.toMap())) {
+            QDBusConnection::sessionBus().send(it->second.message.createErrorReply(QDBusError::InternalError, QString::number(hmi_apis::Common_Result::INVALID_DATA)));
+        } else {
+            QDBusConnection::sessionBus().send(msg);
+        }
         replies.erase(it);
     }
 }
