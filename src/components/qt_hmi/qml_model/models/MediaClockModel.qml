@@ -95,6 +95,7 @@ QtObject {
                 if (--startTime === 0) {
                     timer.stop()
                     runningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                    startTime = endTime = -1
                     console.debug("count Down timer stopped")
                 }
                 break
