@@ -116,7 +116,9 @@ SDL.SDLController = Em.Object
             }
             FFW.BasicCommunication.onReady();
             SDL.SDLModel.timeStamp = new Date().getTime();
+
             console.log(SDL.SDLModel.timeStamp);
+
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
 
         /**

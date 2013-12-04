@@ -51,29 +51,6 @@ const char* kUnknownName = "UnnamedThread";
 log4cxx::LoggerPtr g_logger =
     log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
 
-#if defined(OS_LINUX)
-bool IsMainThread() {
-  return syscall(__NR_gettid) == getpid();
-}
-
-void SetSystemThreadName(PlatformThreadHandle thread, const std::string& thread_name) {
-  // Avoid renaming main thread because it renames whole process on linux
-  if (IsMainThread())
-     return;
-
-  // System thread names has a restriction of 16 chars plus zero terminator on linux
-  string sort_name = thread_name.length() < 16 ? thread_name
-                                               : thread_name.substr(0, 15);
-  int rv = pthread_setname_np(thread, sort_name.c_str());
-  if (rv != 0) {
-    LOG4CXX_ERROR(g_logger, "Failed to set system thread name for " << sort_name);
-  }
-}
-#else
-void SetSystemThreadName(PlatformThreadHandle  thread, const std::string& thread_name) {
-}
-#endif
-
 } // namespace
 
 UnnamedThreadRegistry::UnnamedThreadRegistry() {
@@ -127,9 +104,7 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
     names_.insert(name);
     pair<IdNamesMap::iterator, bool> inserted =
         id_names_.insert(make_pair(id, name));
-    if (inserted.second) {
-      SetSystemThreadName(id, name);
-    } else {
+    if (!inserted.second) {
       LOG4CXX_ERROR(g_logger, "Trying to register thread name " << name
                            <<", but it is already registered with name "
                            <<inserted.first->second);
