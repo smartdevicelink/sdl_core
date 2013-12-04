@@ -88,13 +88,12 @@
         android:visibility="visible" >
     </EditText>
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Timeout"
-        android:textStyle="bold" >
-    </TextView>
+    <CheckBox
+            android:id="@+id/slider_useTimeout"
+            android:checked="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_useTimeout"/>
 
     <EditText
         android:id="@+id/txtTimeout"

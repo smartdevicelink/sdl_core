@@ -93,7 +93,9 @@ void MediaManagerImpl::Init() {
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
 #if defined(DEFAULT_MEDIA)
-  video_streamer_->AddListener(video_streamer_listener_);
+  if (NULL != video_streamer_) {
+    video_streamer_->AddListener(video_streamer_listener_);
+  }
 #endif
 }
 

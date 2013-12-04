@@ -48,6 +48,7 @@ CommandImpl::CommandImpl(const MessageSharedPtr& message)
 }
 
 CommandImpl::~CommandImpl() {
+  CleanUp();
 }
 
 bool CommandImpl::Init() {

@@ -182,7 +182,7 @@ TransportManagerImpl::~TransportManagerImpl() {
 
 std::vector<TransportManagerImpl::Connection> TransportManagerImpl::GetConnectionList() {
   std::vector<TransportManagerImpl::Connection> rc(connections_.size());
-  std::transform(connections_.begin(), connections_.end(), rc.begin(), convert);
+  std::copy(connections_.begin(), connections_.end(), std::back_inserter(rc));
   return rc;
 }
 
@@ -290,9 +290,10 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
 
   pthread_mutex_lock(&event_queue_mutex_);
   int messages_count = 0;
-  for (std::vector<TransportAdapterEvent>::iterator e = event_queue_.begin();
-    e != event_queue_.end(); ++e) {
-    if (e->application_id() == cid) {
+  for (EventQueue::const_iterator it = event_queue_.begin();
+    it != event_queue_.end();
+    ++it) {
+    if (it->application_id() == cid) {
       ++messages_count;
     }
   }
@@ -486,12 +487,8 @@ int TransportManagerImpl::Init(void) {
   LOG4CXX_INFO(logger_, "Init is called");
   all_thread_active_ = true;
 
-  pthread_mutex_lock(&message_queue_mutex_);
   int error_code = pthread_create(&messsage_queue_thread_, 0,
                                   &MessageQueueStartThread, this);
-  // Wait while thread starts loop
-  pthread_mutex_lock(&message_queue_mutex_);
-  pthread_mutex_unlock(&message_queue_mutex_);
 
   if (0 != error_code) {
     LOG4CXX_ERROR(
@@ -500,12 +497,8 @@ int TransportManagerImpl::Init(void) {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  pthread_mutex_lock(&event_queue_mutex_);
   error_code = pthread_create(&event_queue_thread_, 0,
                               &EventListenerStartThread, this);
-  // Wait while thread starts loop
-  pthread_mutex_lock(&event_queue_mutex_);
-  pthread_mutex_unlock(&event_queue_mutex_);
 
   if (0 != error_code) {
     LOG4CXX_ERROR(
@@ -701,9 +694,10 @@ void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
 }
 
 void TransportManagerImpl::EventListenerThread(void) {
+  pthread_mutex_lock(&event_queue_mutex_);
+
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (all_thread_active_) {
-    pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
     while (event_queue_.size() > 0) {
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
       EventQueue::iterator current = event_queue_.begin();
@@ -793,7 +787,7 @@ void TransportManagerImpl::EventListenerThread(void) {
                 "Connection ('" << device_id << ", " << app_handle << ") not found");
             break;
           }
-          RaiseEvent(&TransportManagerListener::OnTMMessageSend);
+          RaiseEvent(&TransportManagerListener::OnTMMessageSend, data);
           this->RemoveMessage(data);
           if (connection->shutDown && --connection->messages_count == 0) {
             connection->timer.Stop();
@@ -876,6 +870,7 @@ void TransportManagerImpl::EventListenerThread(void) {
       delete error;
       pthread_mutex_lock(&event_queue_mutex_);
     }  // while (event_queue_.size() > 0)
+    pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
   }  // while (all_thread_active_)
 
   LOG4CXX_INFO(logger_, "Event listener thread finished");
@@ -889,10 +884,12 @@ void* TransportManagerImpl::MessageQueueStartThread(void* data) {
 
 void TransportManagerImpl::MessageQueueThread(void) {
   LOG4CXX_INFO(logger_, "Message queue thread started");
+
+  pthread_mutex_lock(&message_queue_mutex_);
+
   while (all_thread_active_) {
     // TODO(YK): add priority processing
 
-    pthread_cond_wait(&message_queue_cond, &message_queue_mutex_);
     while (message_queue_.size() > 0) {
       MessageQueue::iterator it = message_queue_.begin();
       while (it != message_queue_.end() && it->valid() && (*it)->IsWaiting()) {
@@ -942,6 +939,7 @@ void TransportManagerImpl::MessageQueueThread(void) {
       }
       pthread_mutex_lock(&message_queue_mutex_);
     }
+    pthread_cond_wait(&message_queue_cond, &message_queue_mutex_);
   }  //  while(true)
 
   message_queue_.clear();

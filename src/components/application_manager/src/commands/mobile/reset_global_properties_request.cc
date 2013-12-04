@@ -65,9 +65,9 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
+    (*message_)[strings::params][strings::correlation_id].asUInt();
   const unsigned int connection_key =
-      (*message_)[strings::params][strings::connection_key].asUInt();
+    (*message_)[strings::params][strings::connection_key].asUInt();
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
                       .length();
@@ -159,10 +159,10 @@ void ResetGlobalPropertiesRequest::Run() {
           Common_KeyboardLayout::QWERTY;
       key_board_properties[hmi_request::send_dynamic_entry] = false;
       smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(
-              smart_objects::SmartType_Array);
+            smart_objects::SmartType_Array);
       limited_character_list[0] = "";
       key_board_properties[hmi_request::limited_character_list] =
-          limited_character_list;
+        limited_character_list;
       key_board_properties[hmi_request::auto_complete_text] = "";
       msg_params[hmi_request::keyboard_properties] = key_board_properties;
     }
@@ -215,6 +215,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     helpPrompt[strings::text] = help_promt[i];
+    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_help_promt[i] = helpPrompt;
   }
 
@@ -240,6 +241,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
     smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_time_out_promt[i] = timeoutPrompt;
   }
 

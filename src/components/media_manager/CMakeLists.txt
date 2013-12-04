@@ -18,14 +18,11 @@ set(default_sources
 set(LIBRARIES
   ${GSTREAMER_gstreamer_LIBRARY}
   pulse-simple
+  pulse
+  gobject-2.0
+  glib-2.0
 )
 else(DEFAULT_MEDIA_FLAG)
-set(default_includes
-)
-set(default_sources
-)
-set(LIBRARIES
-)
 endif()
 
 include_directories (

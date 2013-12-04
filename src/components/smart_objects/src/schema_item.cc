@@ -1,7 +1,3 @@
-/**
- * @file ISchemaItem.cpp
- * @brief ISchemaItem source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -34,27 +30,26 @@
 
 #include "smart_objects/schema_item.h"
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::ISchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
-{
-    return NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+
+Errors::eType ISchemaItem::validate(const SmartObject& object) {
+  return Errors::ERROR;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::ISchemaItem::setDefaultValue(SmartObject & Object)
-{
-    return false;
+bool ISchemaItem::setDefaultValue(SmartObject& Object) {
+  return false;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
+void ISchemaItem::applySchema(SmartObject& Object) {
 }
 
-void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
+void ISchemaItem::unapplySchema(SmartObject& Object) {
 }
 
-
-void NsSmartDeviceLink::NsSmartObjects::ISchemaItem::BuildObjectBySchema(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
-
+void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
+                                      SmartObject& result_object) {
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

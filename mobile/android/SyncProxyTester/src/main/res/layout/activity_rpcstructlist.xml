@@ -7,7 +7,7 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/softbuttons_footer"
+        android:layout_above="@+id/rpcstructlist_footer"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" >
@@ -15,7 +15,7 @@
     </ListView>
 
     <LinearLayout
-        android:id="@+id/softbuttons_footer"
+        android:id="@+id/rpcstructlist_footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -23,14 +23,14 @@
         android:layout_alignParentRight="true" >
 
         <Button
-            android:id="@+id/softbuttons_ok"
+            android:id="@+id/rpcstructlist_ok"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@android:string/ok" />
 
         <Button
-            android:id="@+id/softbuttons_cancel"
+            android:id="@+id/rpcstructlist_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

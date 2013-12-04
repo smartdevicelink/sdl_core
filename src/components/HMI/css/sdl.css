@@ -52,6 +52,12 @@
 	color: gold;
 }
 
+.isHighlighted .ico{
+    border-style: solid;
+    border-color: #FFA300 #F7DA9C;
+    border-width: 1px;
+}
+
 .softButton .ico{
     width: 50px;
     height: 49px;

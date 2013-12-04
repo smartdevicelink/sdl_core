@@ -37,12 +37,10 @@
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
-#ifdef USB_LIBUSB
-#include "transport_manager/usb/libusb/usb_connection.h"
-#endif
-
-#ifdef USB_QNX
+#if defined(__QNX__) || defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
+#else
+#include "transport_manager/usb/libusb/usb_connection.h"
 #endif
 
 namespace transport_manager {

@@ -36,9 +36,10 @@
 #include <net/if.h>
 #include <gst/gst.h>
 #include <string>
+
+#include "utils/lock.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
 
 namespace media_manager {
 
@@ -66,7 +67,7 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
     static GMainLoop* loop;
     threads::Thread* sleepThread_;
     bool shouldBeStoped_;
-    sync_primitives::SynchronisationPrimitives stopFlagMutex_;
+    sync_primitives::Lock stopFlagLock_;
 
     std::string outputFileName_, durationString_;
 

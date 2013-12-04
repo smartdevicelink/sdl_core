@@ -33,9 +33,12 @@
 #include <limits.h>
 #include <stddef.h>
 
-
 #include "utils/threads/thread.h"
+#include "utils/threads/thread_manager.h"
 #include "utils/macro.h"
+
+using namespace std;
+using namespace threads::impl;
 
 namespace {
 static void* threadFunc(void* closure) {
@@ -51,11 +54,30 @@ size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
 log4cxx::LoggerPtr Thread::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::Thread"));
 
+bool Thread::Id::operator==(const Thread::Id other) const {
+  return pthread_equal(id_, other.id_) != 0;
+}
+
+// static
+Thread::Id Thread::CurrentId() {
+  return Id(pthread_self());
+}
+
+//static
+std::string Thread::NameFromId(Id thread_id) {
+  return ThreadManager::instance().GetName(thread_id.id_);
+}
+
+//static
+void Thread::SetNameForId(Id thread_id, const std::string& name) {
+  ThreadManager::instance().RegisterName(thread_id.id_, name);
+}
+
+
 Thread::Thread(const char* name, ThreadDelegate* delegate)
   : name_("undefined"),
     delegate_(delegate),
     thread_handle_(0),
-    thread_id_(0),
     thread_options_(),
     isThreadRunning_(false) {
   if (name) {
@@ -64,6 +86,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 }
 
 Thread::~Thread() {
+  ThreadManager::instance().Unregister(thread_handle_);
   if (delegate_) {
     delete delegate_;
   }
@@ -97,6 +120,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
+  ThreadManager::instance().RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
 
@@ -125,4 +149,9 @@ void Thread::join() {
   pthread_join(thread_handle_, NULL);
   isThreadRunning_ = false;
 }
+
+std::ostream& operator<<(std::ostream& os, Thread::Id thread_id) {
+  return os<<Thread::NameFromId(thread_id);
+}
+
 }  // namespace threads

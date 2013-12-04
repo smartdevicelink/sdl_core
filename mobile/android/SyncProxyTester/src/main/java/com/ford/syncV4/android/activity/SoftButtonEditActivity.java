@@ -43,7 +43,7 @@ public class SoftButtonEditActivity extends Activity {
 		setContentView(R.layout.softbutton);
 
 		softButton = (SoftButton) IntentHelper
-				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTON);
+				.getObjectForKey(Const.INTENTHELPER_KEY_OBJECT);
 
 		editId = (EditText) findViewById(R.id.softbutton_id);
 		editText = (EditText) findViewById(R.id.softbutton_text);
@@ -85,7 +85,7 @@ public class SoftButtonEditActivity extends Activity {
 				}
 
 				IntentHelper.addObjectForKey(result,
-						Const.INTENTHELPER_KEY_SOFTBUTTON);
+						Const.INTENTHELPER_KEY_OBJECT);
 				setResult(RESULT_OK);
 				finish();
 			}

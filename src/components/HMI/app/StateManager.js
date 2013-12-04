@@ -142,12 +142,6 @@ var StateManager = Em.StateManager.extend({
         }),
 
         nonMedia: Em.State.create({
-            enter: function () {
-
-                this._super();
-
-                SDL.NonMediaController.restoreCurrentApp();
-            },
 
             exit: function () {
 
@@ -180,21 +174,7 @@ var StateManager = Em.StateManager.extend({
 
                 baseNavigation: Em.State.create({
 
-                    enter: function () {
-
-                        this._super();
-
-                        SDL.SDLController.navigationAppUpdate();
-                    }
-
                 }),
-
-                enter: function () {
-
-                    this._super();
-
-                    SDL.SDLMediaController.restoreCurrentApp();
-                },
 
                 exit: function () {
 
@@ -203,13 +183,6 @@ var StateManager = Em.StateManager.extend({
                     SDL.SDLAppController.deactivateApp();
                 }
             }),
-
-            enter: function () {
-
-                this._super();
-
-                SDL.SDLMediaController.restoreCurrentApp();
-            },
 
             exit: function () {
 

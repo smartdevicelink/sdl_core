@@ -1,7 +1,3 @@
-/**
- * @file CAlwaysTrueSchemaItem.hpp
- * @brief CAlwaysTrueSchemaItem header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,67 +28,65 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_CALWAYSTRUEVALIDATOR_HPP__
-#define __SMARTOBJECT_CALWAYSTRUEVALIDATOR_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
 
 #include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        /**
-         * @brief Always true schema item.
-         **/
-        class CAlwaysTrueSchemaItem: public ISchemaItem
-        {
-        public:
-            /**
-             * @brief Create a new schema item.
-             *
-             * @return Shared pointer to a new schema item.
-             **/
-            static utils::SharedPtr<CAlwaysTrueSchemaItem> create(void);
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+/**
+ * @brief Always true schema item.
+ **/
+class CAlwaysTrueSchemaItem : public ISchemaItem {
+ public:
+  /**
+   * @brief Create a new schema item.
+   *
+   * @return Shared pointer to a new schema item.
+   **/
+  static utils::SharedPtr<CAlwaysTrueSchemaItem> create();
 
-            /**
-             * @brief Validate smart object.
-             *
-             * @param Object Object to validate.
-             *
-             * @return NsSmartObjects::Errors::eType
-             **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  virtual Errors::eType validate(const SmartObject& Object);
 
-            virtual ~CAlwaysTrueSchemaItem() {}
+  virtual ~CAlwaysTrueSchemaItem() {
+  }
 
-        private:
-            /**
-             * @brief Constructor.
-             **/
-            CAlwaysTrueSchemaItem(void);
+ private:
+  /**
+   * @brief Constructor.
+   **/
+  CAlwaysTrueSchemaItem();
 
-            /**
-             * @brief Copy constructor.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             **/
-            CAlwaysTrueSchemaItem(const CAlwaysTrueSchemaItem & Other);
+  /**
+   * @brief Copy constructor.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   **/
+  CAlwaysTrueSchemaItem(const CAlwaysTrueSchemaItem& Other);
 
-            /**
-             * @brief Assignment operator.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             *
-             * @return Not implemented.
-             **/
-            CAlwaysTrueSchemaItem & operator =(const CAlwaysTrueSchemaItem & Other);
-        };
-    }
-}
+  /**
+   * @brief Assignment operator.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   *
+   * @return Not implemented.
+   **/
+  CAlwaysTrueSchemaItem & operator =(const CAlwaysTrueSchemaItem& Other);
+};
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
-#endif
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_

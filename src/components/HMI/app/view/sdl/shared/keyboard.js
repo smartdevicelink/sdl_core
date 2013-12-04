@@ -209,6 +209,10 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
                     this.buttonsAreaAZERTY._childViews[i].set('disabled', false);
                 }
             }
+        } else if (SDL.SDLAppController.model && !list) {
+            for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
+                this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
+            }
         }
 
         return true;

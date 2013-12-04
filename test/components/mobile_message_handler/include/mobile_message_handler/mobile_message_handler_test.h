@@ -43,19 +43,18 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "utils/logger.h"
 
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-
-#include "utils/synchronisation_primitives.h"
-#include "utils/timer.h"
 
 //! ---------------------------------------------------------------------------
 
 log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
                               log4cxx::Logger::getLogger("mobile_message_handler_test"));
 
-sync_primitives::SynchronisationPrimitives synchronisation;
-sync_primitives::Timer* timer;
+sync_primitives::Lock lock;
+sync_primitives::ConditionalVariable cond_var;
 const unsigned int kTimeout = 2;
 bool flag = false;
 
@@ -106,7 +105,7 @@ class MobileMessageHandlerTester :
       ASSERT_TRUE(message_->operator ==(*message));
 
       flag = true;
-      synchronisation.signal();
+      cond_var.NotifyOne();
     }
 
     void sendMessageToMobileApp(const transport_manager::RawMessageSptr message) {
@@ -137,7 +136,8 @@ class MobileMessageHandlerTestObserverThread : public threads::ThreadDelegate {
       DCHECK(mmh);
 
       mmh->SendMessageToMobileApp(message_);
-      timer->StartWait(kTimeout);
+      sync_primitives::AutoLock auto_lock(lock);
+      cond_var.WaitFor(auto_lock, kTimeout * 1000);
       //ASSERT_TRUE(flag);
     }
 
@@ -149,11 +149,6 @@ class MobileMessageHandlerTestObserverThread : public threads::ThreadDelegate {
 //! ---------------------------------------------------------------------------
 
 TEST(mobile_message_handler_test, component_test) {
-  // Synchronization primitives initialization.
-  synchronisation.init();
-  timer = new sync_primitives::Timer(&synchronisation);
-  DCHECK(timer);
-
   // Example message
   MobileMessage message(new application_manager::Message);
   application_manager::BinaryData binary_data;

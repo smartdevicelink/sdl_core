@@ -35,7 +35,7 @@
 
 #include <list>
 #include <map>
-#include "utils/synchronisation_primitives.h"
+#include "utils/lock.h"
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -108,7 +108,7 @@ class EventDispatcher
   typedef std::map<Event::EventID, ObserversMap>      EventObserverMap;
 
   // Members section
-  sync_primitives::SynchronisationPrimitives          mutex_;
+  sync_primitives::Lock                               state_lock_;
   EventObserverMap                                    observers_;
 };
 

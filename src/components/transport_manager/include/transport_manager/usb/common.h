@@ -40,12 +40,10 @@
 
 #include "utils/shared_ptr.h"
 
-#ifdef USB_LIBUSB
-#include "transport_manager/usb/libusb/usb_handler.h"
-#endif
-
-#ifdef USB_QNX
+#if defined(__QNX__) || (__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_handler.h"
+#else
+#include "transport_manager/usb/libusb/usb_handler.h"
 #endif
 
 namespace transport_manager {

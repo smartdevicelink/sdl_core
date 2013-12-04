@@ -81,13 +81,6 @@ SDL.SDLAppModel = Em.Object.extend({
         appInfo: null,
 
         /**
-         * Info navigation data for ShowConstantTBT request
-         *
-         * @type: {Object}
-         */
-        constantTBTParams: null,
-
-        /**
          * Current language of applications UI component
          *
          * @type {String}
@@ -204,7 +197,8 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length <= 999) {
+            if (commands.length < 999) {
+
                 commands[commands.length] = {
                     commandID: request.params.cmdID,
                     name     : request.params.menuParams.menuName,
@@ -259,10 +253,9 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length <= 999) {
+            if (commands.length < 999) {
 
                 this.commandsList[request.params.menuID] = [];
-
                 commands[commands.length] = {
                     menuID  : request.params.menuID,
                     name    : request.params.menuParams.menuName ? request.params.menuParams.menuName : '',

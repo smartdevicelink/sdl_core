@@ -51,6 +51,13 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
+
+#ifndef TCP_KEEPIDLE
+#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
+#define TCP_KEEPINTVL  5  /* Interval between keepalives */
+#define TCP_KEEPCNT  6  /* Number of keepalives before death */
+#endif
+
 namespace transport_manager {
 namespace transport_adapter {
 

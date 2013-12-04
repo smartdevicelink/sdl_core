@@ -21,7 +21,8 @@ set (LIBRARIES
     SmartObjects
     formatters
     jsoncpp
-    rt
+    apr-1
+    aprutil-1
 )
 
 set (SOURCES
@@ -42,3 +43,4 @@ create_test("test_SmartObject_InvalidTest" "./SmartObjectInvalidTest.cc" "${LIBR
 create_test("test_SmartObject_ConvertionTimeTest" "./SmartObjectConvertionTimeTest.cc" "${LIBRARIES}")
 create_test("test_TSharedPtrTest" "./TSharedPtrTest.cc" "${LIBRARIES}")
 
+# vim: set ts=2 sw=2 et:

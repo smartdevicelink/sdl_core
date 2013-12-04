@@ -159,6 +159,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			Intent i = new Intent(this, SyncProxyTester.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(i);
+
+            // quite a few things downstream depend on the main activity and its
+            // fields being alive, so wait for a while here
+            int numTries = 9;
+            while ((SyncProxyTester.getInstance() == null) && (numTries-- >= 0)) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG, "created " + SyncProxyTester.getInstance());
 		}		
 	}
 	
@@ -404,7 +416,29 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			if (_msgAdapter != null) _msgAdapter.logMessage("Error adding AddCommands", Log.ERROR, e, true);
 			else Log.e(TAG, "Error adding AddCommands", e);
 		}
-	}
+    }
+
+    private void setAppIcon() {
+        try {
+            PutFile putFile = new PutFile();
+            putFile.setFileType(FileType.GRAPHIC_PNG);
+            putFile.setSyncFileName(ICON_SYNC_FILENAME);
+            putFile.setCorrelationID(nextCorrID());
+            putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+            _msgAdapter.logMessage(putFile, true);
+            getProxyInstance().sendRPCRequest(putFile);
+
+            if (getAutoSetAppIconFlag()) {
+                SetAppIcon setAppIcon = new SetAppIcon();
+                setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+                setAppIcon.setCorrelationID(nextCorrID());
+                _msgAdapter.logMessage(setAppIcon, true);
+                getProxyInstance().sendRPCRequest(setAppIcon);
+            }
+        } catch (SyncException e) {
+            Log.e(TAG, "Error setting app icon", e);
+        }
+    }
 
 	private void show(String mainField1, String mainField2) throws SyncException {
 		Show msg = new Show();
@@ -531,8 +565,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 			default:
 				return;
 		}
-		
-		HMILevel curHMILevel = notification.getHmiLevel();
+
+        final HMILevel curHMILevel = notification.getHmiLevel();
+        final Boolean appInterfaceRegistered =
+                _syncProxy.getAppInterfaceRegistered();
+
+        if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered &&
+                firstHMIStatusChange) {
+            setAppIcon();
+        }
+
 		if (prevHMILevel != curHMILevel) {
 			boolean hmiChange = false;
 			boolean hmiFull = false;
@@ -553,8 +595,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 					return;
 			}
 			prevHMILevel = curHMILevel;
-			
-			if (_syncProxy.getAppInterfaceRegistered()) {
+
+            if (appInterfaceRegistered) {
 				if (hmiFull) {
 					if (firstHMIStatusChange) {
 						showLockMain();
@@ -578,31 +620,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				if (hmiChange && firstHMIStatusChange) {
 					firstHMIStatusChange = false;
 
-                    InputStream is = null;
                     try {
-                        PutFile putFile = new PutFile();
-                        putFile.setFileType(FileType.GRAPHIC_PNG);
-                        putFile.setSyncFileName(ICON_SYNC_FILENAME);
-                        putFile.setCorrelationID(nextCorrID());
-                        putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-                        _msgAdapter.logMessage(putFile, true);
-                        getProxyInstance().sendRPCRequest(putFile);
-
-                        if (getAutoSetAppIconFlag()) {
-                            SetAppIcon setAppIcon = new SetAppIcon();
-                            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-                            setAppIcon.setCorrelationID(nextCorrID());
-                            _msgAdapter.logMessage(setAppIcon, true);
-                            getProxyInstance().sendRPCRequest(setAppIcon);
-                        }
-
                         // upload turn icons
                         sendIconFromResource(R.drawable.turn_left);
                         sendIconFromResource(R.drawable.turn_right);
                         sendIconFromResource(R.drawable.turn_forward);
                         sendIconFromResource(R.drawable.action);
                     } catch (SyncException e) {
-                        Log.w(TAG, "Failed to set app icon", e);
+                        Log.w(TAG, "Failed to put images", e);
                     }
 				}
 			}
@@ -797,7 +822,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        final boolean success = response.getSuccess();
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onDeleteCommandResponse(success);
+            }
+        });
+
 		if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
@@ -1013,8 +1047,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
-		if (isModuleTesting()) {
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        final boolean success = response.getSuccess();
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.onAddCommandResponse(success);
+            }
+        });
+
+        if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}

@@ -32,6 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/list_files_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -47,6 +50,24 @@ ListFilesRequest::~ListFilesRequest() {
 void ListFilesRequest::Run() {
   LOG4CXX_INFO(logger_, "ListFilesRequest::Run");
 
+  Application* application = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::params][strings::connection_key].asUInt());
+
+  if (!application) {
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    return;
+  }
+
+  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
+      profile::Profile::instance()->list_files_in_none() <= application->list_files_in_none_count()) {
+      // If application is in the HMI_NONE level the quantity of allowed
+      // DeleteFile request is limited by the configuration profile
+      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+  }
+
+  application->increment_list_files_in_none_count();
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

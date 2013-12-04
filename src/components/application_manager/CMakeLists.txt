@@ -48,6 +48,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
+./src/commands/tts_interface.cc
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -197,6 +198,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
+./src/commands/hmi/tts_perform_interaction_request.cc
+./src/commands/hmi/tts_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
