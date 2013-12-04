@@ -1509,7 +1509,7 @@
          If a touch event has type end, the id should be removed from the set of touches.
        </description>
     </param>
-    <param name="ts" type="Integer" mandatory="true" array="true" minvalue="0" maxvalue="65535" minsize="1" maxsize="1000">
+    <param name="ts" type="Integer" mandatory="true" array="true" minvalue="0" maxvalue="2147483647" minsize="1" maxsize="1000">
        <description>
          The time that the touch was recorded.  This number can the time since the beginning of the session or something else as long as the units are in milliseconds.
          The timestamp is used to determined the rate of change of position of a touch.

@@ -33,6 +33,7 @@
 
 #include <unistd.h>
 
+#include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/application_manager_impl.h"
@@ -69,9 +70,24 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (CheckCoincidence()) {
-    LOG4CXX_ERROR_EXT(logger_, "DUPLICATE_NAME");
-    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+  if (IsApplicationRegistered()) {
+    SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  mobile_apis::Result::eType restriction_result = CheckRestrictions();
+  if (mobile_apis::Result::SUCCESS != restriction_result) {
+    LOG4CXX_ERROR_EXT(logger_, "Param names restrictions check failed.");
+    SendResponse(false, restriction_result);
+    return;
+  }
+
+  mobile_apis::Result::eType coincidence_result =
+      CheckCoincidence();
+
+  if (mobile_apis::Result::SUCCESS != coincidence_result) {
+    LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    SendResponse(false, coincidence_result);
     return;
   }
 
@@ -87,7 +103,9 @@ void RegisterAppInterfaceRequest::Run() {
                       "  hasn't been registered!");
   } else {
     app->set_mobile_app_id(msg_params[strings::app_id]);
-    app->set_is_media_application(msg_params[strings::is_media_application].asBool());
+    app->set_is_media_application(
+        msg_params[strings::is_media_application].asBool()
+        );
 
     if (msg_params.keyExists(strings::vr_synonyms)) {
       app->set_vr_synonyms(msg_params[strings::vr_synonyms]);
@@ -135,9 +153,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     return;
   }
 
-  smart_objects::SmartObject& response_params = *params;
-
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+
+  smart_objects::SmartObject& response_params = *params;
 
   response_params[strings::sync_msg_version][strings::major_version] =
     APIVersion::kAPIV2;
@@ -148,67 +166,88 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::hmi_display_language] = app_manager
       ->active_ui_language();
 
-  if ((*message_)[strings::msg_params][strings::language_desired].asInt()
-      != app_manager->active_vr_language()
-      || (*message_)[strings::msg_params][strings::hmi_display_language_desired]
-      .asInt() != app_manager->active_ui_language()) {
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (msg_params[strings::language_desired].asInt() !=
+      app_manager->active_vr_language() ||
+      msg_params[strings::hmi_display_language_desired].asInt() !=
+      app_manager->active_ui_language()) {
+
     LOG4CXX_WARN_EXT(
       logger_,
       "Wrong language on registering application " << application_impl.name());
+
     LOG4CXX_ERROR_EXT(
       logger_,
-      "vr " << (*message_)[strings::msg_params] [strings::language_desired].asInt() << " - " << app_manager->active_vr_language() << "ui " << (*message_) [strings::msg_params][strings::hmi_display_language_desired].asInt() << " - " << app_manager->active_ui_language());
+      "vr "
+      << msg_params[strings::language_desired].asInt()
+      << " - "
+      << app_manager->active_vr_language()
+      << "ui "
+      << msg_params[strings::hmi_display_language_desired].asInt()
+      << " - "
+      << app_manager->active_ui_language());
+
     result = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (app_manager->display_capabilities()) {
+
     response_params[hmi_response::display_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+
     smart_objects::SmartObject& display_caps =
       response_params[hmi_response::display_capabilities];
 
     display_caps[hmi_response::display_type] =
       app_manager->display_capabilities()->getElement(
         hmi_response::display_type);
+
     display_caps[hmi_response::text_fields] =
       app_manager->display_capabilities()->getElement(
         hmi_response::text_fields);
+
     display_caps[hmi_response::media_clock_formats] = app_manager
         ->display_capabilities()->getElement(hmi_response::media_clock_formats);
+
     if (app_manager->display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
+
       display_caps[hmi_response::graphic_supported] = true;
     } else {
+
       display_caps[hmi_response::graphic_supported] = false;
     }
   }
 
   if (app_manager->button_capabilities()) {
-    response_params[hmi_response::button_capabilities] = *app_manager
-        ->button_capabilities();
+    response_params[hmi_response::button_capabilities] =
+        *app_manager->button_capabilities();
   }
   if (app_manager->soft_button_capabilities()) {
-    response_params[hmi_response::soft_button_capabilities] = *app_manager
-        ->soft_button_capabilities();
+    response_params[hmi_response::soft_button_capabilities] =
+        *app_manager->soft_button_capabilities();
   }
   if (app_manager->preset_bank_capabilities()) {
-    response_params[hmi_response::preset_bank_capabilities] = *app_manager
-        ->preset_bank_capabilities();
+    response_params[hmi_response::preset_bank_capabilities] =
+        *app_manager->preset_bank_capabilities();
   }
   if (app_manager->hmi_zone_capabilities()) {
-    response_params[hmi_response::hmi_zone_capabilities] = *app_manager
-        ->hmi_zone_capabilities();
+    response_params[hmi_response::hmi_zone_capabilities] =
+        *app_manager->hmi_zone_capabilities();
   }
   if (app_manager->speech_capabilities()) {
-    response_params[strings::speech_capabilities] = *app_manager
-        ->speech_capabilities();
+    response_params[strings::speech_capabilities] =
+        *app_manager->speech_capabilities();
   }
   if (app_manager->vr_capabilities()) {
-    response_params[strings::vr_capabilities] = *app_manager->vr_capabilities();
+    response_params[strings::vr_capabilities] =
+        *app_manager->vr_capabilities();
   }
   if (app_manager->audio_pass_thru_capabilities()) {
-    response_params[strings::audio_pass_thru_capabilities] = *app_manager
-        ->audio_pass_thru_capabilities();
+    response_params[strings::audio_pass_thru_capabilities] =
+        *app_manager->audio_pass_thru_capabilities();
   }
   if (app_manager->vehicle_type()) {
     response_params[hmi_response::vehicle_type] = *app_manager->vehicle_type();
@@ -217,120 +256,210 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   SendResponse(true, result, "", params);
 }
 
-bool RegisterAppInterfaceRequest::CheckCoincidence() {
+mobile_apis::Result::eType
+RegisterAppInterfaceRequest::CheckCoincidence() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckCoincidence ");
 
-    const smart_objects::SmartObject& msg_params =
-        (*message_)[strings::msg_params];
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
 
-    ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
-    const std::set<Application*>& applications = app_manager->applications();
-    std::set<Application*>::const_iterator it = applications.begin();
-    const std::string app_name = msg_params[strings::app_name].asString();
+  const std::set<Application*>& applications = app_manager->applications();
+  std::set<Application*>::const_iterator it = applications.begin();
+  const std::string app_name = msg_params[strings::app_name].asString();
 
-    for (; applications.end() != it; ++it) {
+  for (; applications.end() != it; ++it) {
 
-      // name check
-      const std::string &cur_name = (*it)->name();
-      if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
+    // name check
+    const std::string &cur_name = (*it)->name();
+    if (app_name == cur_name) {
+      LOG4CXX_ERROR(logger_, "Application name is known already.");
+      return mobile_apis::Result::DUPLICATE_NAME;
+    }
+
+    const smart_objects::SmartObject* tts = (*it)->tts_name();
+    std::vector<smart_objects::SmartObject>* curr_tts = NULL;
+    if (NULL != tts) {
+      curr_tts = tts->asArray();
+      CoincidencePredicateTTS t(app_name);
+
+      if (std::any_of((*curr_tts).begin(), (*curr_tts).end(), t) ) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
-        return true;
+        return mobile_apis::Result::DUPLICATE_NAME;
       }
+    }
 
-      const smart_objects::SmartObject* tts = (*it)->tts_name();
-      std::vector<smart_objects::SmartObject>* curr_tts = NULL;
-      if (NULL != tts) {
-        curr_tts = tts->asArray();
-        CoincidencePredicateTTS t(app_name);
+    const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
+    const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
+    if (NULL != vr) {
+      curr_vr = vr->asArray();
+      CoincidencePredicateVR v(app_name);
 
-        if (std::any_of((*curr_tts).begin(), (*curr_tts).end(), t) ) {
-          LOG4CXX_ERROR(logger_, "Application name is known already.");
-          return true;
+      if (std::any_of(curr_vr->begin(), curr_vr->end(), v )) {
+        LOG4CXX_ERROR(logger_, "Application name is known already.");
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }
+
+
+    // tts check
+    if (msg_params.keyExists(strings::tts_name)) {
+
+      const std::vector<smart_objects::SmartObject>* new_tts
+      = msg_params[strings::tts_name].asArray();
+
+      std::vector<smart_objects::SmartObject>::const_iterator it = new_tts->begin();
+      std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_tts->end();
+
+      for (; it != itEnd; ++it) {
+        if (cur_name == (*it)[strings::text].asString()) {
+          LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+
+        CoincidencePredicateTTS t((*it)[strings::text].asString());
+        if (NULL != curr_tts
+            &&  std::any_of(curr_tts->begin(), curr_tts->end(), t)) {
+          LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+
+        CoincidencePredicateVR v((*it)[strings::text].asString());
+        if (NULL != curr_vr
+            &&  std::any_of(curr_vr->begin(), curr_vr->end(), v)) {
+          LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
         }
       }
+    } // end tts check
 
-      const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
-      const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
-      if (NULL != vr) {
-        curr_vr = vr->asArray();
-        CoincidencePredicateVR v(app_name);
+    if (msg_params.keyExists(strings::vr_synonyms)) {
 
-        if (std::any_of(curr_vr->begin(), curr_vr->end(), v )) {
-          LOG4CXX_ERROR(logger_, "Application name is known already.");
-          return true;
+      const std::vector<smart_objects::SmartObject>* new_vr
+      = msg_params[strings::vr_synonyms].asArray();
+
+      std::vector<smart_objects::SmartObject>::const_iterator it = new_vr->begin();
+      std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_vr->end();
+
+      for (; it != itEnd; ++it) {
+        if (cur_name == it->asString()) {
+          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+
+        CoincidencePredicateTTS t(it->asString());
+        if (NULL !=curr_tts
+            &&  std::any_of(curr_tts->begin(), curr_tts->end(), t)){
+          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+
+        CoincidencePredicateVR v(it->asString());
+        if (NULL != curr_vr
+            &&  std::any_of(curr_vr->begin(), curr_vr->end(), v)) {
+          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
         }
       }
+    } // end vr check
 
+  }// application for end
 
-      // tts check
-      if (msg_params.keyExists(strings::tts_name)) {
-
-        const std::vector<smart_objects::SmartObject>* new_tts
-            = msg_params[strings::tts_name].asArray();
-
-        std::vector<smart_objects::SmartObject>::const_iterator it = new_tts->begin();
-        std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_tts->end();
-
-        for (; it != itEnd; ++it) {
-          std::string text = (*it)[strings::text].asString();
-          if (!strcasecmp(cur_name.c_str(), text.c_str())) {
-            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
-            return true;
-          }
-
-          CoincidencePredicateTTS t((*it)[strings::text].asString());
-          if (NULL != curr_tts
-              &&  std::any_of(curr_tts->begin(), curr_tts->end(), t)) {
-            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
-            return true;
-          }
-
-          CoincidencePredicateVR v((*it)[strings::text].asString());
-          if (NULL != curr_vr
-              &&  std::any_of(curr_vr->begin(), curr_vr->end(), v)) {
-            LOG4CXX_ERROR(logger_, "Some TTS parameters names are known already.");
-            return true;
-          }
-        }
-      } // end tts check
-
-      if (msg_params.keyExists(strings::vr_synonyms)) {
-
-        const std::vector<smart_objects::SmartObject>* new_vr
-            = msg_params[strings::vr_synonyms].asArray();
-
-        std::vector<smart_objects::SmartObject>::const_iterator it = new_vr->begin();
-        std::vector<smart_objects::SmartObject>::const_iterator itEnd = new_vr->end();
-
-        for (; it != itEnd; ++it) {
-          std::string vr_synonym = it->asString();
-          if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
-            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-            return true;
-          }
-
-          CoincidencePredicateTTS t(it->asString());
-          if (NULL !=curr_tts
-              &&  std::any_of(curr_tts->begin(), curr_tts->end(), t)){
-            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-            return true;
-          }
-
-          CoincidencePredicateVR v(it->asString());
-          if (NULL != curr_vr
-              &&  std::any_of(curr_vr->begin(), curr_vr->end(), v)) {
-            LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-            return true;
-          }
-        }
-      } // end vr check
-
-    }// application for end
-
-    return false;
+  return mobile_apis::Result::SUCCESS;
 } // method end
+
+mobile_apis::Result::eType
+RegisterAppInterfaceRequest::CheckRestrictions() const {
+
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckRestrictions");
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  const std::string& app_name = msg_params[strings::app_name].asString();
+
+  if (ClearParamName(app_name).empty()) {
+    printf("Application name is empty.\n");
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
+  if ((app_name[0] == '\n') ||
+      ((app_name[0] == '\\') && (app_name[1] == 'n'))) {
+
+    printf("Application name has invalid characters.");
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
+  if (msg_params.keyExists(strings::tts_name)) {
+
+    const smart_objects::SmartArray* tts =
+        msg_params[strings::tts_name].asArray();
+
+    smart_objects::SmartArray::const_iterator it = tts->begin();
+    smart_objects::SmartArray::const_iterator it_end = tts->end();
+
+    for (; it != it_end; ++it) {
+
+      const std::string& tts_name = (*it)[strings::text].asString();
+
+      if (ClearParamName(tts_name).empty()) {
+        printf("TTS value is empty.");
+        return mobile_apis::Result::INVALID_DATA;
+      }
+
+      if ((tts_name[0] == '\n') ||
+          ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+
+        printf("TTS value(s) has invalid characters.");
+        return mobile_apis::Result::INVALID_DATA;
+      }
+    }
+  }
+
+  return mobile_apis::Result::SUCCESS;
+}
+
+std::string
+RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
+
+  // Expecting for chars different from newlines and spaces in the appName
+  //
+  // There is an agreement, that "\n" is not allowed symbols, so we have to
+  // check for this case also
+
+  std::string newline = "\\n";
+  while (std::string::npos != param_name.find(newline)) {
+    param_name.erase(param_name.find(newline), newline.length());
+  }
+
+  std::string::iterator param_name_new_end =
+      std::remove_if(param_name.begin(), param_name.end(), ::isspace);
+
+  return std::string(param_name.begin(), param_name_new_end);
+}
+
+bool RegisterAppInterfaceRequest::IsApplicationRegistered() {
+
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
+
+  int mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+
+  const std::set<Application*>& applications =
+      ApplicationManagerImpl::instance()->applications();
+
+  std::set<Application*>::const_iterator it = applications.begin();
+  std::set<Application*>::const_iterator it_end = applications.end();
+
+  for (; it != it_end; ++it) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 
 }  // namespace commands

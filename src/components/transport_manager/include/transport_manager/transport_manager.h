@@ -156,14 +156,6 @@ class TransportManager {
    * @return Code error.
    */
   virtual int Visibility(const bool &on_off) const = 0;
-
-  /**
-   * @brief Establish protocom handler.
-   *
-   * @param ph Pointer to the handler of protocol.
-   */
-  virtual void SetProtocolHandler(protocol_handler::ProtocolHandler *ph) = 0;//YK: temp solution until B1.0 release
-
 };
 }
 

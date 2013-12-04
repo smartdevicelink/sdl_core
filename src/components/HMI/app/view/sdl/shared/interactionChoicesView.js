@@ -41,8 +41,13 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             'captionText',
             'listOfChoices',
             'input',
-            'naviChoises'
+            'listWrapper'
         ],
+
+        didInsertElement: function(){
+
+            SDL.SDLModel.interactionListWrapper = new iScroll('listWrapper', { hideScrollbar:false, hScrollbar: true, vScrollbar: true, hScroll: true, vScroll: true });
+        },
 
         backButton: SDL.Button.extend({
             classNames: [
@@ -68,11 +73,31 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             }
         }),
 
-        naviChoises: Em.ContainerView.extend({
-            classNameBindings: ['this.parentView.icon::hide'],
-            classNames: 'naviChoises',
-            childViews: []
+        listWrapper: Em.ContainerView.extend({
 
+            elementId: 'listWrapper',
+
+            classNames: 'listWrapper',
+
+            childViews: [
+                'naviChoises'
+            ],
+
+            naviChoises: Em.ContainerView.extend({
+                classNameBindings: ['this.parentView.icon::hide'],
+                classNames: 'naviChoises',
+                childViews: [
+                    'captionText'
+                ],
+
+                captionText: SDL.Label.extend({
+
+                    classNameBindings: ['this.parentView.search:hide'],
+                    classNames: ['caption-text'],
+                    contentBinding: 'this.parentView.caption'
+                })
+
+            })
         }),
 
         captionText: SDL.Label.extend({
@@ -254,9 +279,9 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             this.set('timeout', null);
             this.listOfChoices.items = [];
             this.listOfChoices.list.refresh();
-            var length = this.get('naviChoises.childViews').length;
+            var length = this.get('listWrapper.naviChoises.childViews').length;
             for (var i=0; i < length; i++) {
-                SDL.InteractionChoicesView.get('naviChoises.childViews').shiftObject();
+                SDL.InteractionChoicesView.get('listWrapper.naviChoises.childViews').shiftObject();
             }
         },
 
@@ -320,7 +345,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
                  // temp for testing
                  for (var i = 0; i < data.length; i++) {
-                     this.get('naviChoises.childViews').pushObject(SDL.Button.create({
+                     this.get('listWrapper.naviChoises.childViews').pushObject(SDL.Button.create({
                              text: data[i].menuName,
                              choiceID: data[i].choiceID,
                              action: 'onChoiceInteraction',
@@ -336,6 +361,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             }
 
             var self = this;
+
+            setTimeout(function(){
+
+                SDL.SDLModel.interactionListWrapper.refresh();
+            }, 0);
 
             clearTimeout(this.timer);
             this.timer = setTimeout(function () {

@@ -259,6 +259,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
     return NULL;
   }
 
+  // app_id is SDL "internal" ID
+  // original app_id can be gotten via ApplicationImpl::mobile_app_id()
   unsigned int app_id = 0;
   std::list<int> sessions_list;
   unsigned int device_id = 0;
@@ -281,35 +283,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  if (!MessageHelper::VerifyApplicationName(message[strings::msg_params])) {
-
-    utils::SharedPtr<smart_objects::SmartObject> response(
-      MessageHelper::CreateNegativeResponse(
-        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id].asUInt(),
-        mobile_apis::Result::INVALID_DATA));
-    ManageMobileCommand(response);
-    return NULL;
-  }
-
-  const std::string& name =
-    message[strings::msg_params][strings::app_name].asString();
-
-  for (std::set<Application*>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
-    if ((*it)->app_id() == app_id) {
-      LOG4CXX_ERROR(logger_, "Application has been registered already.");
-      utils::SharedPtr<smart_objects::SmartObject> response(
-        MessageHelper::CreateNegativeResponse(
-          connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id].asUInt(),
-          mobile_apis::Result::APPLICATION_REGISTERED_ALREADY));
-      ManageMobileCommand(response);
-      return NULL;
-    }
-  }
-
   Application* application = new ApplicationImpl(app_id);
   if (!application) {
     utils::SharedPtr<smart_objects::SmartObject> response(
@@ -321,12 +294,16 @@ Application* ApplicationManagerImpl::RegisterApplication(
     return NULL;
   }
 
+  const std::string& name =
+      message[strings::msg_params][strings::app_name].asString();
+
   application->set_name(name);
   application->set_device(device_id);
 
   application->set_language(
     static_cast<mobile_api::Language::eType>(
       message[strings::msg_params][strings::language_desired].asInt()));
+
   application->set_ui_language(
     static_cast<mobile_api::Language::eType>(
       message[strings::msg_params][strings::hmi_display_language_desired]

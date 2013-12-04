@@ -32,6 +32,8 @@
 
 #include "utils/lock.h"
 
+#include <errno.h>
+
 #include "utils/logger.h"
 
 namespace {

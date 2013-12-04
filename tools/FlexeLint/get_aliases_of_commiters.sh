@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-awk '/  Error / || /  Warning / || /  Info /' ./flexelint_result.txt > err_warn_inf.tmp
+awk '/Error / || /Warning / || /Info /' ./flexelint_result.txt > err_warn_inf.tmp
 awk '!/Error 309: #error/' ./err_warn_inf.tmp > ./err_warn_inf_filtered1.tmp
 awk '!/.lnt/' ./err_warn_inf_filtered1.tmp > ./err_warn_inf_filtered.tmp
 awk '{system("./get_code_author.sh " $1 " " $2); print " " $0}' ./err_warn_inf_filtered.tmp > ./err_warn_inf_names.tmp

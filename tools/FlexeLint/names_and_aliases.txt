@@ -10,7 +10,6 @@ akandul	 	KandulAlexander
 aoleynik 	AndreyOleynik
 dtrunov 	DmitriyTrunov
 vsemenyuk	VladislavSemenyuk
-enikolsky	EugeneNikolsky
 ykoropatnyuk	YevgeniyKoropatnyuk
 abevzyuk	AndreyBevzyuk
-akara		AlexandrKara
+unassigned	EugeneNikolsky		AlexandrKara
