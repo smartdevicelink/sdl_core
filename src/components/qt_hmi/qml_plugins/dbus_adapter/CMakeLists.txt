@@ -50,7 +50,7 @@ add_custom_command(
     ${api_xml} ..."
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/src/components)
 
 set(SOURCES
   dbus_plugin.cc

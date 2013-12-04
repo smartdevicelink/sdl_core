@@ -43,6 +43,8 @@ Item {
     signal presetSelected    
     signal presetButtonPressed()
     signal presetButtonReleased()
+    signal presetButtonClicked()
+    signal presetButtonHold()
 
     Image {
         id: circleButton
@@ -77,6 +79,11 @@ Item {
                             }
                             onClicked: {
                                 presetRow.selectedIndex = index
+                                presetButtonClicked()
+                            }
+                            onPressAndHold: {
+                                presetRow.selectedIndex = index;
+                                presetButtonHold()
                             }
                         }
                         Text {

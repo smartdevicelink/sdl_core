@@ -82,12 +82,14 @@ Item {
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
         console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
         var app = dataContainer.getApplication(appID);
-        app.softButtons.clear()
-        if (softButtons) {            
+
+        if (softButtons) {
+            app.softButtons.clear()
             softButtons.forEach(function(x) { app.softButtons.append(x); });
         }
-        app.customPresets.clear()
+
         if (customPresets) {
+            app.customPresets.clear()
             customPresets.forEach( function(x) { app.customPresets.append( {text: x} ); } )
         }
 
@@ -118,27 +120,25 @@ Item {
             Common.TextFieldName.mediaTrack
         ]
         var fieldSubstrings = filter(showStrings, showFields)
-        dataContainer.setApplicationProperties(
-            appID, {
-                "hmiUIText": {
-                    "mainField1": fieldSubstrings[Common.TextFieldName.mainField1],
-                    "mainField2": fieldSubstrings[Common.TextFieldName.mainField2],
-                    "mainField3": fieldSubstrings[Common.TextFieldName.mainField3],
-                    "mainField4": fieldSubstrings[Common.TextFieldName.mainField4],
-                    "statusBar": fieldSubstrings[Common.TextFieldName.statusBar] || "",
-                    "mediaTrack": fieldSubstrings[Common.TextFieldName.mediaTrack],
-                    "image": graphic ? graphic.value : ""
-                },
-                "hmiUITextAlignment": textAlignment,
-                "mediaClock": fieldSubstrings[Common.TextFieldName.mediaClock] !== undefined ? {
-                    "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
-                    "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
-                    "magic": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
-                    "total": 0
-                } :
-                undefined
+        var showData = { hmiUIText: {} }
+        if (fieldSubstrings[Common.TextFieldName.mainField1]) { showData.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField2]) { showData.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField3]) { showData.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField4]) { showData.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]; }
+        if (fieldSubstrings[Common.TextFieldName.statusBar]) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
+        if (fieldSubstrings[Common.TextFieldName.mediaTrack]) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
+        if (graphic) { showData.hmiUIText.image = graphic.value; }
+        if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
+        if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
+            showData.mediaClock = {
+                "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
+                "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
+                "magic": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
+                "total": 0
             }
-        )
+        }
+
+        dataContainer.setApplicationProperties(appID, showData);
         console.debug("exit")
     }
 

@@ -95,7 +95,7 @@ Item {
                             return structure.text
                         }
                      ).join(", ") :
-                    dataContainer.globalProperties.helpPrompt
+                    dataContainer.currentApplication.helpPrompt
 
         var newTimeoutPrompt = timeoutPrompt ?
                     timeoutPrompt.map(
@@ -103,12 +103,12 @@ Item {
                             return structure.text
                         }
                      ).join(", ") :
-                    dataContainer.globalProperties.timeoutPrompt
+                    dataContainer.currentApplication.timeoutPrompt
 
-        dataContainer.globalProperties = {
-            "helpPrompt": newHelpPropmt,
-            "timeoutPrompt": newTimeoutPrompt
-        }
+        dataContainer.setApplicationProperties(dataContainer.currentApplication.appId, {
+                                                   helpPrompt: newHelpPropmt,
+                                                   timeoutPrompt: newTimeoutPrompt
+                                               })
         console.debug("exit")
     }
 }
