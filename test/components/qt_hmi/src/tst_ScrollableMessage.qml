@@ -252,7 +252,38 @@ Item {
         }
 
         //call @scrollableMessage and check close
-        function test_05_ClickDefaultAction() {
+        function test_05_ClickBackButton() {
+            console.debug("enter")
+            var initData  = {appID:1, timeout:20000,
+                messageText:{fieldText:"Simple ScrollableMessage text"},
+                softButtons:softButtonsListExample}
+            createMessageView(initData.appID)
+
+            var result = sdlUIProxy.scrollableMessage(initData)
+            getMessageViewModel()
+
+            compare(messageModel.running, true, "ScrollableMessage didn't start")
+            if(result.__errno !== undefined)
+                fail("ScrollableMessage return error state")
+            //look for back button
+            var backButton  = messageView.getBackButton()
+            verify(backButton !== undefined, "Not created back button")
+            //wait rendering for correct click position
+            waitForRendering(mainWindowLoader)
+            //Press back button
+            mouseClick(backButton, backButton.width/2, backButton.height/2,
+                       Qt.LeftButton, Qt.NoModifier, 0)
+            //check that MessageView (in contentLoader) is unloaded and deleted
+            var isLoaded = (contentLoader.source.toString().indexOf("ScrollableMessageView.qml") > 0)
+            verify(!isLoaded, "MessageView should be unloaded")
+            //wait for delete messageView by GC
+            wait(0);
+            verify(messageView === null, "MessageView should be deleted")
+            destroyView()
+            console.debug("exit")
+        }
+        //call @scrollableMessage and check close
+        function test_06_ClickDefaultAction() {
             console.debug("enter")
             var initData  = {appID:1, timeout:20000,
                 messageText:{fieldText:"Simple ScrollableMessage text"},
@@ -284,7 +315,7 @@ Item {
         }
 
         //call @scrollableMessage and check restart timer
-        function test_06_ClickStealFocus() {
+        function test_07_ClickStealFocus() {
             console.debug("enter")
             var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},
                 softButtons:softButtonsListExample}
@@ -314,7 +345,7 @@ Item {
         }
 
         //call @scrollableMessage and check restart timer
-        function test_07_ClickKeepContex() {
+        function test_08_ClickKeepContex() {
             console.debug("enter")
             var initData  = {appID:1, timeout:20000, messageText:{fieldText:"Simple ScrollableMessage text"},
                 softButtons:softButtonsListExample}
@@ -347,7 +378,7 @@ Item {
 
 
         //add long text to model and check scrollBar visibility
-        function test_08_ScrollBarShown() {
+        function test_09_ScrollBarShown() {
             console.debug("enter")
             //generate string with (10!) lines
             var longText = "It is very long text!\n"
@@ -374,7 +405,7 @@ Item {
         }
 
         //compare text width with and without buttons at top of SrollableMessage
-        function test_09_MessageTextHeight() {
+        function test_10_MessageTextHeight() {
             console.debug("enter")
             var initData = {appID:1, timeout:500, messageText:{fieldText:"Simple text"}, softButtons:[]}
             createMessageView(initData.appID)
