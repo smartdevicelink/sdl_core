@@ -362,5 +362,33 @@ FFW.TTS = FFW.RPCObserver.create( {
             }
         };
         this.client.send(JSONMessage);
+    },
+
+    /**
+     * Initiated by TTS module to let SDL know that TTS session has started.
+     */
+    Started: function() {
+
+        Em.Logger.log("FFW.TTS.Started");
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "TTS.Started"
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Initiated by TTS module to let SDL know that TTS session has stopped.
+     */
+    Stopped: function() {
+
+        Em.Logger.log("FFW.TTS.Stopped");
+
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "TTS.Stopped"
+        };
+        this.client.send(JSONMessage);
     }
 })

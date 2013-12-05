@@ -1894,6 +1894,12 @@
     <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
     </param>
   </function>
+  <function name="Started" messagetype="notification">
+    <description>Must be initiated  by TTS module to let SDL know that TTS session has started.</description>
+  </function>
+  <function name="Stopped" messagetype="notification">
+    <description>Must be initiated by TTS module to let SDL know that TTS session has stopped.</description>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
