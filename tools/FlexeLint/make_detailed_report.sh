@@ -52,7 +52,7 @@ echo >> ./developers/total.txt
 echo -e ' \t 'Errors:   $total_error_quantity >> ./developers/total.txt
 echo -e ' \t 'Warnings: $total_warning_quantity >> ./developers/total.txt
 echo -e ' \t 'Infos:    $total_info_quantity >> ./developers/total.txt
-echo -e ' \t 'Notes:    $total_note_quantity >> ./developers/$name.txt
+echo -e ' \t 'Notes:    $total_note_quantity >> ./developers/total.txt
 
 rm ./*.tmp 
 
