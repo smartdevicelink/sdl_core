@@ -93,6 +93,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnCommand");
   MessageBrokerController::subscribeTo("VR.OnCommand");
   MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
