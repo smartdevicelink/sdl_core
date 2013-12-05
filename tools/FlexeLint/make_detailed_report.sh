@@ -21,7 +21,7 @@ do
 
 	error_quantity=$(awk -v val="Error" -v counter=0 '$3==val {counter++} END {print counter}' ./developers_report.tmp)
 	warning_quantity=$(awk -v val="Warning" -v counter=0 '$3==val {counter++} END {print counter}' ./developers_report.tmp)
-	info_quantity=$(awk -v val="Warning" -v counter=0 '$3==val {counter++} END {print counter}' ./developers_report.tmp)
+	info_quantity=$(awk -v val="Info" -v counter=0 '$3==val {counter++} END {print counter}' ./developers_report.tmp)
 	note_quantity=$(awk -v val="Note" -v counter=0 '$3==val {counter++} END {print counter}' ./developers_report.tmp)
 
 	touch ./developers/$name.txt
@@ -42,7 +42,7 @@ done < names_and_aliases.txt
 
 total_error_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Error" -v counter=0 '$5==val {counter++} END {print counter}')
 total_warning_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
-total_info_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
+total_info_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Info" -v counter=0 '$5==val {counter++} END {print counter}')
 total_note_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Note" -v counter=0 '$5==val {counter++} END {print counter}')
 
 awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' >> list_of_err_warn_inf_note.txt
