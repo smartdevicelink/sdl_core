@@ -453,7 +453,7 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "SHUTDOWN", "AppInfoStorage", value))
+                           "AppInfo", "AppInfoStorage", value))
       && ('\0' != *value)) {
     app_info_storage_ = value;
     LOG4CXX_INFO(logger_,

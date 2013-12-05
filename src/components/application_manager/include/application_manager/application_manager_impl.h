@@ -508,7 +508,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Save unregistered applications info to the file system
      */
-    void SaveApplications();
+    void SaveApplications() const;
 
     // members
     /**

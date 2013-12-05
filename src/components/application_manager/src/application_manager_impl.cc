@@ -32,6 +32,7 @@
 
 #include <climits>
 #include <string>
+#include <fstream>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
@@ -1663,8 +1664,7 @@ void ApplicationManagerImpl::Unmute() {
   }
 }
 
-void ApplicationManagerImpl::SaveApplications() {
-
+void ApplicationManagerImpl::SaveApplications() const {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveApplications()");
 
   std::map<int, Application*>::const_iterator it = applications_.begin();
@@ -1673,23 +1673,8 @@ void ApplicationManagerImpl::SaveApplications() {
   std::string app_data;
   for (; it != it_end; ++it) {
 
-    const Application* app = it->second;
-
-    typedef std::map<std::string, std::string> Params;
-    Params application_params;
-
-    // Params to store - start
-    ///////////////////////////////////////////////////////////////////////
-
-    application_params[strings::connection_key] =
-        MessageHelper::NumberToString(it->first);
-
-    application_params[strings::app_id] =
-        MessageHelper::NumberToString(app->mobile_app_id()->asInt());
-
-    application_params[strings::hmi_level] =
-        MessageHelper::NumberToString(static_cast<int>(app->hmi_level()));
-
+    size_t msg_size = 1024;
+    char message[msg_size];
 
     connection_handler::ConnectionHandlerImpl* conn_handler =
         static_cast<connection_handler::ConnectionHandlerImpl*>(
@@ -1697,49 +1682,60 @@ void ApplicationManagerImpl::SaveApplications() {
             );
 
     unsigned int device_id = 0;
+    std::string mac_adddress;
     if (-1 != conn_handler->GetDataOnSessionKey(
         it->first,
         NULL,
         NULL,
         &device_id) ) {
 
-      std::string mac_adddress;
       if ( -1 != conn_handler->GetDataOnDeviceID(
           device_id,
           NULL,
           NULL,
           &mac_adddress) ) {
 
-        application_params["mac_address"] = mac_adddress;
+        LOG4CXX_ERROR(logger_,
+                      "There is an error occurs during getting of device MAC.");
       }
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    // Params to store - end
+    const Application* app = it->second;
 
-    Params::const_iterator it = application_params.begin();
-    Params::const_iterator it_end = application_params.end();
+    snprintf(
+        message,
+        msg_size,
+        "%s:%d;"
+        "%s:%d;"
+        "%s:%d;"
+        "%s:%s;",
+        strings::app_id, app->mobile_app_id()->asInt(),
+        strings::connection_key, it->first,
+        strings::hmi_level, static_cast<int>(app->hmi_level()),
+        "mac_address", mac_adddress.c_str()
+        );
 
-    for (; it != it_end; ++it) {
-      app_data += it->first;
-      app_data += ":";
-      app_data += it->second;
-      app_data += ";";
-    }
+    app_data = message;
   } // end of app.list
 
   const std::string& storage =
       profile::Profile::instance()->app_info_storage();
 
-  if (!file_system::Write(
-      file_system::FullPath(storage),
-      std::vector<unsigned char>(app_data.begin(), app_data.end()),
-      std::ios::out
-      )) {
+  std::ofstream file(file_system::FullPath(storage).c_str(),
+                     std::ios::out);
 
+  if (file.is_open()) {
+    file_system::Write(
+          &file,
+          reinterpret_cast<const unsigned char*>(app_data.c_str()),
+          app_data.size()
+          );
+  } else {
     LOG4CXX_ERROR(logger_,
                   "There is an error occurs during saving application info.");
   }
+
+  file.close();
 }
 
 }  // namespace application_manager

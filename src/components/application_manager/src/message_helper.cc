@@ -1399,11 +1399,4 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
   return true;
 }
 
-std::string MessageHelper::NumberToString(const int value) {
-  char str[100];
-  snprintf(str, 100, "%d", value);
-
-  return str;
-}
-
 }  //  namespace application_manager
