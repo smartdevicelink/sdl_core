@@ -34,6 +34,16 @@
 SDL.SDLModel = Em.Object.create({
 
     /**
+     * Data came from UI.PerformInteractionRequest for ShowVRHelpItems popup
+     *
+     * @type {Object}
+     */
+    interactionData: {
+        'vrHelpTitle': null,
+        'vrHelp': null
+    },
+
+    /**
      * IScroll object to manage scroll on PerformInteraction view
      *
      * @type {Object}
@@ -521,20 +531,20 @@ SDL.SDLModel = Em.Object.create({
      */
     tbtTurnListUpdate: function(params) {
 
-    SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-    SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
-    SDL.TBTTurnList.updateList(params.appID);
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.TBTTurnList.updateList(params.appID);
     },
 
-        /**
-         * Method to VRHelpList on UI with request parameters
-         * It opens VrHelpList PopUp with current list of readable VR commands
-         *
-         * @param {Object}
-         */
-        ShowVrHelp: function(params) {
+    /**
+     * Method to VRHelpList on UI with request parameters
+     * It opens VrHelpList PopUp with current list of readable VR commands
+     *
+     * @param {Object}
+     */
+    ShowVrHelp: function(vrHelpTitle, vrHelp) {
 
-        SDL.VRHelpListView.showVRHelp(params);
+        SDL.VRHelpListView.showVRHelp(vrHelpTitle, vrHelp);
     },
 
     /**
@@ -735,16 +745,20 @@ SDL.SDLModel = Em.Object.create({
      * @param {Number}
      *            performInteractionRequestId Id of current handled request
      */
-    uiPerformInteraction: function (message, performInteractionRequestId) {
+    uiPerformInteraction: function (message) {
 
         if (!message) {
-            SDL.SDLAppController.model.onPreformInteraction(message, performInteractionRequestId);
+            SDL.SDLAppController.model.onPreformInteraction(message);
         } else {
 
+            if (message.vrHelpTitle && message.vrHelp) {
+                this.set('interactionData', {'vrHelpTitle': message.vrHelpTitle, 'vrHelp': message.vrHelp});
+            }
+
             if (!SDL.InteractionChoicesView.active) {
-                SDL.SDLController.getApplicationModel(message.appID).onPreformInteraction(message, performInteractionRequestId);
+                SDL.SDLController.getApplicationModel(message.appID).onPreformInteraction(message);
             } else {
-                SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"], performInteractionRequestId);
+                SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"]);
             }
         }
     },

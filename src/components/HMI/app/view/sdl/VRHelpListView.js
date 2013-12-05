@@ -72,36 +72,33 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
      * @param data:
      *            Array
      */
-    showVRHelp: function(params) {
+    showVRHelp: function(vrHelpTitle, vrHelp) {
 
         this.clean();
 
         this.set('active', true);
         
         SDL.SDLController.VRMove();
-        
-        if (params) {
 
-            if (params.vrHelpTitle) {
-                this.captionText.set('content', params.vrHelpTitle);
-            }
-    
-            if (params.vrHelp) {
-                for (i = 0; i < params.vrHelp.length; i++) {
-                    this.helpList.items.push( {
-                        type: SDL.Label,
-                        params: {
-                            content: params.vrHelp[i].text,
-                            icon: params.vrHelp[i].image
-                                ? params.vrHelp[i].image.value : null,
-                            templateName: params.vrHelp[i].image ? "icon" : null
-                        }
-                    });
-                }
-            }
-    
-            this.helpList.list.refresh();
+        if (vrHelpTitle) {
+            this.captionText.set('content', vrHelpTitle);
         }
+
+        if (vrHelp) {
+            for (i = 0; i < vrHelp.length; i++) {
+                this.helpList.items.push( {
+                    type: SDL.Label,
+                    params: {
+                        content: vrHelp[i].text,
+                        icon: vrHelp[i].image
+                            ? vrHelp[i].image.value : null,
+                        templateName: vrHelp[i].image ? "icon" : null
+                    }
+                });
+            }
+        }
+
+        this.helpList.list.refresh();
         SDL.SDLController.onSystemContextChange();
     }
 });

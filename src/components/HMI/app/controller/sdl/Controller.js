@@ -104,7 +104,7 @@ SDL.SDLController = Em.Object
 
         /**
          * Notify SDLCore that HMI is ready and all components are registered
-         * 
+         *
          * @type {String}
          */
         componentsReadiness: function(component) {
@@ -120,6 +120,23 @@ SDL.SDLController = Em.Object
             console.log(SDL.SDLModel.timeStamp);
 
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
+
+        /**
+         * Show VrHelpItems popup with necessary params
+         * if VRPopUp is active - show data from Global Properties
+         * if VRPopUp and InteractionChoicesView are active - show data from PerformInteraction request
+         *
+         */
+        showVRHelpItems: function() {
+
+            if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+
+                SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+            } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp) {
+
+                SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+            }
+        }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData'),
 
         /**
          * Notify SDLCore that TTS haas finished processing
@@ -316,9 +333,9 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result) {
 
-            FFW.UI.interactionResponse(result, performInteractionRequestID);
+            FFW.UI.interactionResponse(result);
         },
         /**
          * Method to sent notification for Alert

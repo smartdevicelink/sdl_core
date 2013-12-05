@@ -2109,15 +2109,18 @@
   </function>
   <function name="PerformInteraction" messagetype="request">
     <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-    <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
+    <param name="initialText" type="Common.TextFieldStruct" mandatory="false">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
-    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The list of choices to be used for the interaction with the user</description>
     </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
-      <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
-      <description>If omitted on supported displays, the default system-generated help items should be used.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
     </param>
     <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
       <description>Timeout in milliseconds.</description>
@@ -2186,21 +2189,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="ShowVrHelp" messagetype="request">
-    <description>Request from SDL to show help about available VR commands.</description>
-    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-      <description>VR Help Title text.</description>
-      <description>If omitted on supported displays, the default HU system help title should be used.</description>
-    </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that concerns this RPC.</description>
-    </param>
-  </function>
-  <function name="ShowVrHelp" messagetype="response">
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notification must be initiated by HMI on user choosing menu item.</description>
