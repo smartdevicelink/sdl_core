@@ -41,24 +41,17 @@
 #include "utils/logger.h"
 
 using transport_manager::transport_adapter::TransportAdapter;
-using transport_manager::transport_adapter::TransportAdapterSptr;
 
 namespace transport_manager {
-
-/**
- * @typedef Type definition of iterator to container(vector) that holds smart pointers to the device adapters.
- */
-typedef std::vector<TransportAdapterSptr>::const_iterator AdapterIterator;
 
 class TransportManagerImpl;
 
 /**
  * @brief Implementation of TransportAdapterListener class.
  */
-class TransportAdapterListenerImpl :
-    public transport_adapter::TransportAdapterListener {
+class TransportAdapterListenerImpl
+    : public transport_adapter::TransportAdapterListener {
  public:
-
   /**
    * @enum Available types of events.
    */
@@ -84,8 +77,8 @@ class TransportAdapterListenerImpl :
    * @param tm Pointer to the transport manager implementation class.
    * @param ta Pointer to the transport adapter associated with listener.
    */
-  TransportAdapterListenerImpl(
-      transport_manager::TransportManagerImpl *tm, TransportAdapterSptr ta);
+  TransportAdapterListenerImpl(transport_manager::TransportManagerImpl* tm,
+                               TransportAdapter* ta);
 
   /**
    * @brief Dectructor.
@@ -93,7 +86,8 @@ class TransportAdapterListenerImpl :
   virtual ~TransportAdapterListenerImpl();
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available,
    * launch event ON_SEARCH_DONE in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
@@ -101,11 +95,13 @@ class TransportAdapterListenerImpl :
   virtual void OnSearchDeviceDone(const TransportAdapter* transport_adapter);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create search device error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create search device error,
    * launch event ON_SEARCH_FAIL in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
-   * @param error Error class with information about possible reason of search device failure.
+   * @param error Error class with information about possible reason of search
+   *device failure.
    */
   virtual void OnSearchDeviceFailed(const TransportAdapter* transport_adapter,
                                     const SearchDeviceError& error);
@@ -118,7 +114,8 @@ class TransportAdapterListenerImpl :
   virtual void OnDeviceListUpdated(const TransportAdapter* transport_adapter);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available,
    * launch event ON_CONNECT_DONE in transport manager.
    *
    * @param device_adater Pointer to the device adapter.
@@ -130,13 +127,15 @@ class TransportAdapterListenerImpl :
                              const ApplicationHandle& app_id);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available,
    * launch event ON_CONNECT_FAIL in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of connect failure.
+   * @param error Error class with information about possible reason of connect
+   *failure.
    */
   virtual void OnConnectFailed(const TransportAdapter* transport_adapter,
                                const DeviceUID& device,
@@ -155,13 +154,15 @@ class TransportAdapterListenerImpl :
                                   const ApplicationHandle& app_handle);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available,
    * launch event ON_UNEXPECTED_DISCONNECT in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of unexpected Disconnect.
+   * @param error Error class with information about possible reason of
+   *unexpected Disconnect.
    */
   virtual void OnUnexpectedDisconnect(const TransportAdapter* transport_adapter,
                                       const DeviceUID& device,
@@ -169,7 +170,8 @@ class TransportAdapterListenerImpl :
                                       const CommunicationError& error);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available,
    * launch event ON_DISCONNECT_DONE in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
@@ -181,13 +183,15 @@ class TransportAdapterListenerImpl :
                                 const ApplicationHandle& app_id);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create Disconnect error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create Disconnect error,
    * launch event ON_DISCONNECT_FAIL in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of Disconnect failure.
+   * @param error Error class with information about possible reason of
+   *Disconnect failure.
    */
   virtual void OnDisconnectFailed(const TransportAdapter* transport_adapter,
                                   const DeviceUID& device,
@@ -209,14 +213,16 @@ class TransportAdapterListenerImpl :
    *
    * @param transport_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
-   * @param error Error class with information about possible reason of Disconnect from device failure.
+   * @param error Error class with information about possible reason of
+   *Disconnect from device failure.
    */
   virtual void OnDisconnectDeviceFailed(
       const transport_adapter::TransportAdapter* transport_adapter,
       const DeviceUID& device, const DisconnectDeviceError& error);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create error,
    * launch event ON_RECEIVED_DONE in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
@@ -230,13 +236,15 @@ class TransportAdapterListenerImpl :
       const RawMessageSptr data_container);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data receive error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create data receive error,
    * launch event ON_RECEIVED_DONE in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of data receive failure.
+   * @param error Error class with information about possible reason of data
+   *receive failure.
    */
   virtual void OnDataReceiveFailed(
       const transport_adapter::TransportAdapter* transport_adapter,
@@ -244,7 +252,8 @@ class TransportAdapterListenerImpl :
       const DataReceiveError& error);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create error,
    * launch event ON_SEND_DONE in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
@@ -258,7 +267,8 @@ class TransportAdapterListenerImpl :
                               const RawMessageSptr data_container);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data send error,
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available, create data send error,
    * launch event ON_SEND_FAIL in transport manager.
    */
   virtual void OnDataSendFailed(const TransportAdapter* transport_adapter,
@@ -268,7 +278,8 @@ class TransportAdapterListenerImpl :
                                 const DataSendError& error);
 
   /**
-   * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create error,
+   * @brief Search specified device adapter in the container of shared pointers
+   *to device adapters to be sure it is available, create error,
    * launch event ON_COMMUNICATION_ERROR in transport manager.
    *
    * @param transport_adapter Pointer to the device adapter.
@@ -284,10 +295,9 @@ class TransportAdapterListenerImpl :
    * \brief For logging.
    */
   static log4cxx::LoggerPtr logger_;
-  TransportManagerImpl *transport_manager_impl_;
-  TransportAdapterSptr transport_adapter_;
-
+  TransportManagerImpl* transport_manager_impl_;
+  TransportAdapter* transport_adapter_;
 };
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_LISTENER_IMPL_H
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_LISTENER_IMPL_H

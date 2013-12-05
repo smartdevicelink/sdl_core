@@ -38,8 +38,6 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
-using transport_manager::transport_adapter::TransportAdapterSptr;
-
 namespace transport_manager {
 
 class TransportAdapterEvent {
@@ -49,24 +47,23 @@ class TransportAdapterEvent {
    *
    * @param Other reference to the event of device adapter.
    */
-  bool operator ==(const TransportAdapterEvent &other);
+  bool operator==(const TransportAdapterEvent &other);
 
   /**
    * @brief Constructor.
    *
    * @param type Event type.
-   * @param transport_adapter Smart pointer to the device adapter.
+   * @param transport_adapter Transport adapter
    * @param device_handle Handle of device.
    * @param application_id Handle of application.
    * @param data Smart pointer to the raw message.
    * @param error Error class that contains details of this error situation.
    */
   TransportAdapterEvent(int type,
-                     TransportAdapterSptr transport_adapter,
-                     const DeviceUID &device_handle,
-                     const ApplicationHandle& application_id,
-                     RawMessageSptr data,
-                     BaseError *error);
+                        transport_adapter::TransportAdapter *transport_adapter,
+                        const DeviceUID &device_handle,
+                        const ApplicationHandle &application_id,
+                        RawMessageSptr data, BaseError *error);
 
   /**
    * @brief Destructor.
@@ -92,7 +89,8 @@ class TransportAdapterEvent {
    *
    * @param transport_adapter Smart pointer to the device adapter.
    */
-  void set_transport_adapter(TransportAdapterSptr transport_adapter);
+  void set_transport_adapter(
+      transport_adapter::TransportAdapter *transport_adapter);
 
   /**
    * @brief Set pointer to the data.
@@ -139,9 +137,9 @@ class TransportAdapterEvent {
   /**
    * @brief Return smart pointer to the device adapter.
    *
-   * @return Smart pointer to the device adapter.
+   * @return Transport adapter.
    */
-  TransportAdapterSptr transport_adapter(void) const;
+  transport_adapter::TransportAdapter *transport_adapter(void) const;
 
   /**
    * @brief Return smart pointer to the raw message.
@@ -158,15 +156,15 @@ class TransportAdapterEvent {
   BaseError *event_error(void) const;
 
  private:
-
-  DeviceUID device_uid_; /**< Device unique identifier. */
-  int event_type_; /**< Value that describe event type. */
+  DeviceUID device_uid_;             /**< Device unique identifier. */
+  int event_type_;                   /**< Value that describe event type. */
   ApplicationHandle application_id_; /**< Handle of application. */
-  TransportAdapterSptr transport_adapter_; /**< Smart pointer to the device adapter. */
+  transport_adapter::TransportAdapter *transport_adapter_;
   RawMessageSptr event_data_; /**< Smart pointer to the raw message. */
-  BaseError *event_error_; /** Pointer to the class that contain details of error */
+  BaseError *event_error_;    /** Pointer to the class that contain details of
+                              error */
 };
 
 }  // namespace
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_EVENT
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_EVENT
