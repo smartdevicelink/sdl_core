@@ -100,13 +100,13 @@ void OnSystemContextNotification::Run() {
       // update audio stream state
       if ((*it)->is_media_application()) {
         if (SYSCTXT_VRSESSION == system_context) {
-          MuteAudioStream(app_mgr, app);
+          MuteAudioStream(app_mgr, *it);
         } else {
-          UnmuteAudioStream(app);
+          UnmuteAudioStream(*it);
         }
       }
 
-      NotifyMobileApp(app);
+      NotifyMobileApp(*it);
     }
   }
 }
