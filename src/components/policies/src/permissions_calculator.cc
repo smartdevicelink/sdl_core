@@ -55,7 +55,7 @@ log4cxx::LoggerPtr PermissionsCalculator::logger_ = log4cxx::LoggerPtr(
 
 const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
     const SmartObject& pt_object,
-    const uint32_t app_id) {
+    uint32_t app_id) {
 //
   const uint8_t kBuffSize = 16;
   char app_id_string[kBuffSize];
@@ -92,9 +92,9 @@ const SmartObject& PermissionsCalculator::GetPolicyTableAppIdSection(
 
 PermissionResult PermissionsCalculator::CalcPermissions(
     const SmartObject& pt_object,
-    const uint32_t app_id,
+    uint32_t app_id,
     const SmartObject& rpc,
-    const mobile_apis::HMILevel::eType hmi_status) {
+    mobile_apis::HMILevel::eType hmi_status) {
 //
   std::vector<std::string> rpc_groups;
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
@@ -120,7 +120,7 @@ PermissionResult PermissionsCalculator::CalcPermissions(
 
 Priority::eType PermissionsCalculator::GetPriority(
     const SmartObject& pt_object,
-    const uint32_t app_id) {
+    uint32_t app_id) {
 //
   const SmartObject& pt_app_id = GetPolicyTableAppIdSection(pt_object, app_id);
 
@@ -143,7 +143,7 @@ PermissionResult
     const SmartObject& pt_object,
     const std::vector<std::string>& rpc_groups,
     const SmartObject& rpc,
-    const mobile_apis::HMILevel::eType hmi_status) {
+    mobile_apis::HMILevel::eType hmi_status) {
 //
   SmartObject rpc_object(rpc);
   // unapply schema to convert FunctionID from enum (number) to string
@@ -197,7 +197,7 @@ PermissionResult
 //----------------------------------------------------------------------------
 
 void PermissionsCalculator::ConvertHMILevel2String(
-    const mobile_apis::HMILevel::eType hmi_status,
+    mobile_apis::HMILevel::eType hmi_status,
     std::string* hmi_level_string) {
   DCHECK(hmi_level_string);
 

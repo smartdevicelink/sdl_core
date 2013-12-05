@@ -85,16 +85,16 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
     /**
      * @brief Apply schema.
      *
-     * @param Object Object to apply schema.
+     * @param object Object to apply schema.
      **/
-    virtual void applySchema(SmartObject & Object);
+    virtual void applySchema(SmartObject & object);
 
     /**
      * @brief Unapply schema.
      *
-     * @param Object Object to unapply schema.
+     * @param object Object to unapply schema.
      **/
-    virtual void unapplySchema(SmartObject & Object);
+    virtual void unapplySchema(SmartObject & object);
 
   private:
     /**
@@ -137,7 +137,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * @return Whether schema item with name may have any string value as name
       */
-    bool IsOptionalName(std::string name);
+    bool IsOptionalName(const std::string& name);
 
     /**
       * @brief Extracts a set of sub object keys from the root object that are
@@ -147,7 +147,7 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
       *
       * @return A set of keys of sub-objects that are optional.
       */
-    std::set<std::string> GetOptionalObjectKeys(SmartObject & root_obj);
+    std::set<std::string> GetOptionalObjectKeys(const SmartObject& root_obj);
 
     /**
      * @brief Method iterates over optional sub-objects.
@@ -156,11 +156,11 @@ class ObjectOptionalSchemaItem : public CObjectSchemaItem {
      *  and performs action on each object.
      *  The action is intended as either "applySchema" or "unapplySchema"
      *
-     *  @param object The root object.
+     *  @param object The root object. Can be modified by "action".
      *  @param action Pointer to the method of ISchemaItem. Either "applySchema"
      *                or "unapplySchema"
      */
-    void IterateOverOptionalItems(SmartObject & object,
+    void IterateOverOptionalItems(SmartObject* object,
       void (ISchemaItem:: *action)(SmartObject&) );
 };
 

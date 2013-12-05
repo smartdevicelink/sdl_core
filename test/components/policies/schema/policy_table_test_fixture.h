@@ -54,11 +54,11 @@ using ::NsSmartDeviceLink::NsJSONHandler::Formatters::GenericJsonFormatter;
 
 class SchemaTest: public ::testing::Test {
  protected:
-    void GetPolicyTable(const std::string &file_path, SmartObject &pt) {
+    void GetPolicyTable(const std::string &file_path, SmartObject* pt) {
       std::string pt_string;
 
       if (true == file_system::ReadFile(file_path, pt_string)) {
-        if (false == GenericJsonFormatter::FromString(pt_string, pt)) {
+        if (false == GenericJsonFormatter::FromString(pt_string, *pt)) {
           FAIL() << "Failed to make a smart object";
         }
       } else {

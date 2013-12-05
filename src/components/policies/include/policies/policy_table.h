@@ -61,7 +61,7 @@ class PolicyTable {
      * @param pt_type PolicyTable type (PT or Preload)
      **/
     PolicyTable(const std::string& policy_table_string,
-                const PolicyTableType pt_type);
+                PolicyTableType pt_type);
 
     /**
      * @brief Destructor

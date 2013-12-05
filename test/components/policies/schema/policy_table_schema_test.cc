@@ -56,7 +56,7 @@ namespace Errors = NsSmartDeviceLink::NsSmartObjects::Errors;
 TEST_F(SchemaTest, test_policy_table_schema) {
   SmartObject pt_object;
 
-  GetPolicyTable("valid_policy_table.json", pt_object);
+  GetPolicyTable("valid_policy_table.json", &pt_object);
 
   CSmartSchema schema = PolicyTableSchema::Create();
 

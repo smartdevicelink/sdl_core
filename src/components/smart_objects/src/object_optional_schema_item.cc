@@ -114,7 +114,8 @@ smart_objects::Errors::eType smart_objects::ObjectOptionalSchemaItem::validate(
 
 //----------------------------------------------------------------------------
 
-bool smart_objects::ObjectOptionalSchemaItem::IsOptionalName(std::string name) {
+bool smart_objects::ObjectOptionalSchemaItem::IsOptionalName(
+    const std::string& name) {
   return (0 == name.compare(kOptionalGenericFieldName));
 }
 
@@ -129,7 +130,7 @@ smart_objects::ObjectOptionalSchemaItem::ObjectOptionalSchemaItem(
 //----------------------------------------------------------------------------
 
 std::set<std::string>
-ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject & root_obj) {
+ObjectOptionalSchemaItem::GetOptionalObjectKeys(const SmartObject& root_obj) {
   std::set<std::string> optional_objects;
 
   const std::set<std::string> object_keys = root_obj.enumerate();
@@ -146,7 +147,7 @@ ObjectOptionalSchemaItem::GetOptionalObjectKeys(SmartObject & root_obj) {
 
 //----------------------------------------------------------------------------
 
-void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject & object,
+void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject* object,
   void (ISchemaItem::* action)(SmartObject&) ) {
   if (0 == mMembers.count(kOptionalGenericFieldName)) {
     return;             // There are no optional items
@@ -156,28 +157,28 @@ void ObjectOptionalSchemaItem::IterateOverOptionalItems(SmartObject & object,
     mMembers.at(kOptionalGenericFieldName).mSchemaItem;
 
   // Then apply schema for all the optional objects
-  std::set<std::string> optionals = GetOptionalObjectKeys(object);
+  std::set<std::string> optionals = GetOptionalObjectKeys(*object);
   typedef std::set<std::string>::const_iterator Iter;
   for (Iter key = optionals.begin(); key != optionals.end(); ++key) {
-    (schema.get()->*action)(object[*key]);
+    (schema.get()->*action)((*object)[*key]);
   }
 }
 
 //----------------------------------------------------------------------------
 
-void ObjectOptionalSchemaItem::applySchema(SmartObject & Object) {
+void ObjectOptionalSchemaItem::applySchema(SmartObject & object) {
   // At first apply schema for the regular objects
-  CObjectSchemaItem::applySchema(Object);
+  CObjectSchemaItem::applySchema(object);
 
-  IterateOverOptionalItems(Object, &ISchemaItem::applySchema);
+  IterateOverOptionalItems(&object, &ISchemaItem::applySchema);
 }
 
 //----------------------------------------------------------------------------
 
-void ObjectOptionalSchemaItem::unapplySchema(SmartObject & Object) {
-  CObjectSchemaItem::unapplySchema(Object);
+void ObjectOptionalSchemaItem::unapplySchema(SmartObject & object) {
+  CObjectSchemaItem::unapplySchema(object);
 
-  IterateOverOptionalItems(Object, &ISchemaItem::unapplySchema);
+  IterateOverOptionalItems(&object, &ISchemaItem::unapplySchema);
 }
 
 }  // namespace NsSmartObjects

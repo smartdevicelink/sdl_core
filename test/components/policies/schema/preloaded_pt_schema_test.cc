@@ -54,7 +54,7 @@ namespace Errors = NsSmartDeviceLink::NsSmartObjects::Errors;
 TEST_F(SchemaTest, test_preloaded_pt_schema_valid_1) {
   SmartObject pt_object;
 
-  GetPolicyTable("valid_preloaded_pt_1.json", pt_object);
+  GetPolicyTable("valid_preloaded_pt_1.json", &pt_object);
 
   CSmartSchema schema = PreloadedPTSchema::Create();
 
@@ -68,7 +68,7 @@ TEST_F(SchemaTest, test_preloaded_pt_schema_valid_1) {
 TEST_F(SchemaTest, test_preloaded_pt_schema_valid_2) {
   SmartObject pt_object;
 
-  GetPolicyTable("valid_preloaded_pt_2.json", pt_object);
+  GetPolicyTable("valid_preloaded_pt_2.json", &pt_object);
 
   CSmartSchema schema = PreloadedPTSchema::Create();
 

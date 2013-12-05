@@ -57,9 +57,9 @@ class PermissionsCalculator {
       */
     static PermissionResult CalcPermissions(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
-        const uint32_t app_id,
+        uint32_t app_id,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
-        const mobile_apis::HMILevel::eType hmi_status);
+        mobile_apis::HMILevel::eType hmi_status);
 
     /**
     * @brief Get priority for app_id
@@ -71,7 +71,7 @@ class PermissionsCalculator {
     */
     static Priority::eType GetPriority(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
-        const uint32_t app_id);
+        uint32_t app_id);
 
   private:
     /**
@@ -90,7 +90,7 @@ class PermissionsCalculator {
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
         const std::vector<std::string>& rpc_groups,
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& rpc,
-        const mobile_apis::HMILevel::eType hmi_status);
+        mobile_apis::HMILevel::eType hmi_status);
 
     /**
     * @brief Returns a smart object containing an <app_id> section of PolicyTable
@@ -106,7 +106,7 @@ class PermissionsCalculator {
     static const NsSmartDeviceLink::NsSmartObjects::SmartObject&
       GetPolicyTableAppIdSection(
         const NsSmartDeviceLink::NsSmartObjects::SmartObject& pt_object,
-        const uint32_t app_id);
+        uint32_t app_id);
 
     /**
      * @brief Convert HMI level value (as number) to string
@@ -116,7 +116,7 @@ class PermissionsCalculator {
      *  retunred.
      */
     static void ConvertHMILevel2String(
-        const mobile_apis::HMILevel::eType hmi_status,
+        mobile_apis::HMILevel::eType hmi_status,
         std::string* hmi_level_string);
 
     /**

@@ -111,9 +111,9 @@ InitResult PolicyManagerImpl::Init(
 
 CheckPermissionResult
   PolicyManagerImpl::CheckPermission(
-    const uint32_t app_id,
+    uint32_t app_id,
     const smart_objects::SmartObject& rpc,
-    const mobile_apis::HMILevel::eType hmi_status) {
+    mobile_apis::HMILevel::eType hmi_status) {
 //
   CheckPermissionResult result =
     {PermissionResult::PERMISSION_DISALLOWED, Priority::PRIORITY_NONE};

@@ -45,7 +45,7 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 policies::PolicyTable::PolicyTable(
     const std::string& policy_table_string,
-    const PolicyTableType pt_type)
+    PolicyTableType pt_type)
   : pt_validation_result_(PTValidationResult::VALIDATION_FAILED)
   , pt_type_(pt_type)
   , schema_(policies::PolicyTableSchema::Create())
