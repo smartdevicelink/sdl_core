@@ -25,7 +25,7 @@ find ./src/components/ ./src/appMain/  \( -name "*.cc" -o -name "*.cpp" \) | awk
 cd ./tools/FlexeLint/
 
 #./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ -dOS_POSIX ${WORDSIZE} smartdevicelink.lnt
-./${FLINT_BINARY}  -w1 -e830 -e831 -zero -u --i../../$1/src/components/ -os flexelint_result.txt -dOS_POSIX ${WORDSIZE} smartdevicelink.lnt  
+./${FLINT_BINARY}  $3 -e830 -e831 -zero -u --i../../$1/src/components/ -os flexelint_result.txt -dOS_POSIX ${WORDSIZE} $2 smartdevicelink.lnt
 
 rm ./sdl-include-path.lnt
 rm ./sdl-modules.lnt
