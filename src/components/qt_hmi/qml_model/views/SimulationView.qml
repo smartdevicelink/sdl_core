@@ -272,15 +272,15 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.margins: Constants.panelPadding / 4
                 Text {
-                    text: "HELP_PROMPT: " + dataContainer.globalProperties.helpPrompt
+                    text: "HELP_PROMPT: " + dataContainer.currentApplication.helpPrompt
                     color: Constants.panelTextColor
                 }
                 Text {
-                    text: "TIMEOUT_PROMPT: " + dataContainer.globalProperties.timeoutPrompt
+                    text: "TIMEOUT_PROMPT: " + dataContainer.currentApplication.timeoutPrompt
                     color: Constants.panelTextColor
                 }
                 Text {
-                    text: "AUTOCOMPLETE_TEXT: " + dataContainer.globalProperties.autocompleteText
+                    text: "AUTOCOMPLETE_TEXT: " // TODO(ALeshin): Function didn' realized yet
                     color: Constants.panelTextColor
                 }
             }

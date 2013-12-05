@@ -103,12 +103,27 @@ QtObject {
                 if (application.hmiUITextAlignment !== undefined) {
                     currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
                 }
+                if (application.helpPrompt !== undefined) {
+                    currentApplication.helpPrompt = application.helpPrompt
+                }
+                if (application.timeoutPrompt !== undefined) {
+                    currentApplication.timeoutPrompt = application.timeoutPrompt
+                }
+                // Check fields with mandatory = false
 
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
-                currentApplication.mediaClock.restore(application.mediaClock.updateMode, application.mediaClock.runningMode, application.mediaClock.magic, application.mediaClock.total)
+                currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
+                currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
+                currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
+                if (application.mediaClock.startTime !== undefined) {
+                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
+                }
+                if (application.mediaClock.endTime !== undefined) {
+                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
+                }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -258,11 +273,6 @@ QtObject {
     property ListModel vrCommands: ListModel {}
 
     property ListModel vrHelp: ListModel {}
-
-    property var globalProperties: {
-        "helpPrompt": "",
-        "timeoutPrompt": ""
-    }
 
     function reset () {
         console.log("dataContainer reset enter");

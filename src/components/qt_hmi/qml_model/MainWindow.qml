@@ -282,8 +282,9 @@ Rectangle {
                 mediaClock: {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                     "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
-                    "magic": 0,
-                    "total": 0
+                    "startTime": -1,
+                    "endTime": -1,
+                    "startTimeForProgress": -1
                 }
              });
         }
