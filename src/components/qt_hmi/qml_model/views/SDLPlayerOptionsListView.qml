@@ -95,6 +95,8 @@ GeneralView {
                 ClickableText {
                     id: text
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
+                    width: sdlPlayerOptionsListView.width - x
+                    elide: Text.ElideRight
                     defaultColor: type === Internal.MenuItemType.MI_PARENT ?
                                       Constants.inactiveButtonTextColor :
                                       Constants.primaryColor

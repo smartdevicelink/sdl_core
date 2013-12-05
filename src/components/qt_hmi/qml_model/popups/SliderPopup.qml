@@ -116,6 +116,8 @@ ContextPopup {
 
         Text {
             id: headerText
+            width: borderRectangle.width
+            elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: dataContainer.uiSlider.header
             color: Constants.sliderTextColor
@@ -179,6 +181,8 @@ ContextPopup {
 
         Text {
             id:footerText
+            width: borderRectangle.width
+            elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: ""
             color: Constants.sliderTextColor
