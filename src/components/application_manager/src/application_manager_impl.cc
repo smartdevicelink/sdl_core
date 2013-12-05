@@ -897,48 +897,29 @@ void ApplicationManagerImpl::OnMessageReceived(
     return;
   }
 
-  if (message->service_type() != protocol_handler::ServiceTypes::RPC
-      &&
-      message->service_type() != protocol_handler::ServiceTypes::BULK) {
-    // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
-    return;
-  }
-
-  utils::SharedPtr<Message> outgoing_message;
-  if (message->protocol_version() == 1) {
-    outgoing_message =
-      MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
-  } else if (message->protocol_version() == 2) {
-    outgoing_message =
-      MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+  utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
+  if (outgoing_message) {
+    messages_from_mobile_.push(outgoing_message);
   } else {
-    LOG4CXX_WARN(logger_, "Unknown protocol version.");
-    return;
-  }
-
-  if (!outgoing_message) {
     LOG4CXX_WARN(logger_, "Incorrect message received");
-    return;
   }
-
-  messages_from_mobile_.push(outgoing_message);
 }
 
 void ApplicationManagerImpl::OnMobileMessageSent(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
 
-  application_manager::Message app_msg;
-
-  // TODO(PK): Convert RawMessage to application_manager::Message
+  utils::SharedPtr<Message> app_msg = ConvertRawMsgToMessage(message);
+  if (!app_msg) {
+    LOG4CXX_WARN(logger_, "Incorrect message in callback OnMobileMessageSent");
+    return;
+  }
 
   // Application connection should be closed if RegisterAppInterface failed and
   // RegisterAppInterfaceResponse with success == false was sent to the mobile
-  if (app_msg.function_id() == mobile_apis::FunctionID::RegisterAppInterfaceID
-      && app_msg.type() == MessageType::kResponse) {
-
-    unsigned int key = app_msg.connection_key();
+  if (app_msg->function_id() == mobile_apis::FunctionID::RegisterAppInterfaceID
+      && app_msg->type() == MessageType::kResponse) {
+    unsigned int key = app_msg->connection_key();
 
     if (NULL != connection_handler_) {
       static_cast<connection_handler::ConnectionHandlerImpl*>
@@ -1481,6 +1462,40 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
+
+utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
+  const protocol_handler::RawMessagePtr& message) {
+  DCHECK(message);
+  utils::SharedPtr<Message> outgoing_message;
+
+  if (message->service_type() != protocol_handler::ServiceTypes::RPC
+      &&
+      message->service_type() != protocol_handler::ServiceTypes::BULK) {
+    // skip this message, not under handling of ApplicationManager
+    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    return outgoing_message;
+  }
+
+  Message* convertion_result = NULL;
+  if (message->protocol_version() == 1) {
+    convertion_result =
+      MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
+  } else if (message->protocol_version() == 2) {
+    convertion_result =
+      MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+  } else {
+    LOG4CXX_WARN(logger_, "Unknown protocol version.");
+    return outgoing_message;
+  }
+
+  if (convertion_result) {
+    outgoing_message = convertion_result;
+  } else {
+    LOG4CXX_ERROR(logger_, "Received invalid message");
+  }
+  return outgoing_message;
+}
+
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
@@ -1677,9 +1692,9 @@ void ApplicationManagerImpl::SaveApplications() const {
     char message[msg_size];
 
     connection_handler::ConnectionHandlerImpl* conn_handler =
-        static_cast<connection_handler::ConnectionHandlerImpl*>(
-            connection_handler_
-            );
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_
+      );
 
     unsigned int device_id = 0;
     std::string mac_adddress;
@@ -1719,7 +1734,7 @@ void ApplicationManagerImpl::SaveApplications() const {
   } // end of app.list
 
   const std::string& storage =
-      profile::Profile::instance()->app_info_storage();
+    profile::Profile::instance()->app_info_storage();
 
   std::ofstream file(file_system::FullPath(storage).c_str(),
                      std::ios::out);

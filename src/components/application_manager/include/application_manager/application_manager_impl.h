@@ -493,6 +493,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                             smart_objects::SmartObject& output);
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
+    utils::SharedPtr<Message> ConvertRawMsgToMessage(
+      const protocol_handler::RawMessagePtr& message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);

@@ -120,16 +120,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
-    virtual void OnTMMessageReceived(
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageReceiveFailed(
-      transport_manager::ConnectionUID connection_id,
-      const transport_manager::DataReceiveError& error);
-    virtual void OnTMMessageSendFailed(
-      const transport_manager::DataSendError& error,
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageSend(const transport_manager::RawMessageSptr message);
-
     /**
      * \brief Informs about failure during DisconnectDevice procedure of TM
      * \param device Information about disconnected device
