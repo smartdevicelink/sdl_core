@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
 
 #include "utils/macro.h"
+#include "utils/shared_ptr.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -44,6 +45,20 @@
  */
 
 namespace protocol_handler {
+
+// TODO(PV): maybe move this to some 'common' header file?
+// this is the same as in ConnectionHandler.
+/**
+  * \brief Enum describing possible types of sessions: RPC for API messages,
+  Navi for video streaming.
+  */
+enum ServiceTypes {
+  NONE = -1,
+  RPC = 0x07,
+  MOBILE_NAV = 0x0B,
+  BULK = 0x0F
+};
+
 /**
  * \class SmartDeviceLinkRawMessage
  * \brief Class-wraper for information about message for interchanging
@@ -60,7 +75,8 @@ class RawMessage {
      * \param dataSize Message size
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
-               unsigned char* data, unsigned int dataSize);
+               unsigned char* data, unsigned int dataSize,
+               unsigned char type = 0x07);
 
     /**
      * \brief Destructor
@@ -89,17 +105,14 @@ class RawMessage {
      */
     unsigned int protocol_version() const;
 
+    /**
+     * \brief Getter for service type
+     */
+    ServiceTypes service_type() const;
+
     bool IsWaiting() const;
 
     void set_waiting(bool v);
-
-    bool is_fully_binary() const {
-      return fully_binary_;
-    }
-
-    void set_fully_binary(bool is_binary) {
-      fully_binary_ = is_binary;
-    }
 
   private:
     /**
@@ -125,6 +138,11 @@ class RawMessage {
     unsigned int protocol_version_;
 
     /**
+     * \brief Type of service message belongs to
+     */
+    ServiceTypes service_type_;
+
+    /**
      * specifies current state of message in queue. if false message is "ready to be processed"
      * otherwise it is "waiting for response"
      *
@@ -144,6 +162,8 @@ class RawMessage {
 
     DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
+
+typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
 }  // namespace protocol_handler
 
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_

@@ -50,7 +50,11 @@ SDL.BottomControls = Em.ContainerView.extend( {
         actionDown: function(event) {
 
             if (!SDL.States.info.active) {
-                SDL.States.goToStates(SDL.InfoController.activeState);
+                if (SDL.InfoController.activeState === 'info.nonMedia') {
+                    SDL.NonMediaController.activateCurrentApp();
+                } else {
+                    SDL.States.goToStates(SDL.InfoController.activeState);
+                }
             }
         }
     }),

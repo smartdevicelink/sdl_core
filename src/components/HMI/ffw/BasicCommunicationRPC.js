@@ -205,6 +205,10 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.id,
                         request.method);
                 }
+                if (request.method == "BasicCommunication.ActivateApp") {
+                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL();
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+                }
             }
         },
 
@@ -285,8 +289,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Send request if application was activated
          * 
-         * @param {String}
-         *            appName
+         * @param {number} appID
          */
         OnAppActivated: function(appID) {
 
@@ -387,14 +390,13 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         ExitApplication: function(appID) {
 
-            Em.Logger.log("FFW.BasicCommunication.ExitApplication");
+            Em.Logger.log("FFW.BasicCommunication.OnExitApplication");
 
             // send request
 
             var JSONMessage = {
-                "id": this.client.idStart,
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.ExitApplication",
+                "method": "BasicCommunication.OnExitApplication",
                 "params": {
                     "appID": appID
                 }
@@ -409,14 +411,13 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         ExitAllApplications: function(reason) {
 
-            Em.Logger.log("FFW.BasicCommunication.ExitAllApplicationsResponse");
+            Em.Logger.log("FFW.BasicCommunication.OnExitAllApplications");
 
             // send request
 
             var JSONMessage = {
-                "id": this.getAppListRequestID,
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.ExitAllApplications",
+                "method": "BasicCommunication.OnExitAllApplications",
                 "params": {
                     "reason": reason
                 }

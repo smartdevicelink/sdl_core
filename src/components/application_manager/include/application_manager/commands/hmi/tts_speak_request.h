@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief TTSSpeakRequest command class
  **/
-class TTSSpeakRequest : public RequestToHMI {
+class TTSSpeakRequest
+    : public RequestToHMI {
  public:
   /**
    * @brief TTSSpeakRequest class constructor

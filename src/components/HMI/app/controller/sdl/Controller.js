@@ -84,8 +84,7 @@ SDL.SDLController = Em.Object
 
             for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
                 if (SDL.SDLModel.registeredComponents[i].type == component) {
-                    SDL.SDLModel.set('registeredComponents.' + i + '.state',
-                        true);
+                    SDL.SDLModel.set('registeredComponents.' + i + '.state',  true);
                     return;
                 }
             }
@@ -105,16 +104,57 @@ SDL.SDLController = Em.Object
 
         /**
          * Notify SDLCore that HMI is ready and all components are registered
-         * 
+         *
          * @type {String}
          */
         componentsReadiness: function(component) {
 
             for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
-                if (!SDL.SDLModel.registeredComponents[i].state) { return; }
+                if (!SDL.SDLModel.registeredComponents[i].state) {
+                    return;
+                }
             }
             FFW.BasicCommunication.onReady();
+            SDL.SDLModel.timeStamp = new Date().getTime();
+
+            console.log(SDL.SDLModel.timeStamp);
+
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
+
+        /**
+         * Show VrHelpItems popup with necessary params
+         * if VRPopUp is active - show data from Global Properties
+         * if VRPopUp and InteractionChoicesView are active - show data from PerformInteraction request
+         *
+         */
+        showVRHelpItems: function() {
+
+            if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+
+                SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+            } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp) {
+
+                SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+            }
+        }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData'),
+
+        /**
+         * Notify SDLCore that TTS haas finished processing
+         *
+         * @type {String}
+         */
+        TTSResponseHandler: function() {
+
+            if (FFW.TTS.requestId) {
+                if (FFW.TTS.aborted) {
+                    FFW.TTS.sendError(SDL.SDLModel.resultCode["ABORTED"], FFW.TTS.requestId, "TTS.Speak", "TTS Speak request aborted");
+                } else {
+                    FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], FFW.TTS.requestId, "TTS.Speak");
+                }
+                FFW.TTS.requestId = null;
+                FFW.TTS.aborted = false;
+            }
+        },
 
         /**
          * Move VR list to right side when VRHelpList was activated
@@ -180,16 +220,16 @@ SDL.SDLController = Em.Object
         stealFocusSoftButton: function(element) {
 
             switch (element.groupName) {
-            case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate();
-                this.getApplicationModel(element.appID).turnOnSDL();
-                break;
-            }
-            case "ScrollableMessage": {
-                SDL.ScrollableMessage.deactivate();
-                this.getApplicationModel(element.appID).turnOnSDL();
-                break;
-            }
+                case "AlertPopUp": {
+                    SDL.AlertPopUp.deactivate();
+                    this.getApplicationModel(element.appID).turnOnSDL();
+                    break;
+                }
+                case "ScrollableMessage": {
+                    SDL.ScrollableMessage.deactivate();
+                    this.getApplicationModel(element.appID).turnOnSDL();
+                    break;
+                }
             }
         },
         /**
@@ -293,9 +333,9 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result, performInteractionRequestID) {
+        interactionChoiseCloseResponse: function(result) {
 
-            FFW.UI.interactionResponse(result, performInteractionRequestID);
+            FFW.UI.interactionResponse(result);
         },
         /**
          * Method to sent notification for Alert
@@ -538,8 +578,7 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            // FFW.BasicCommunication.ActivateApp(element.appID);
-            this.getApplicationModel(element.activeAppId).turnOnSDL();
+            FFW.BasicCommunication.OnAppActivated(element.appID);
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC

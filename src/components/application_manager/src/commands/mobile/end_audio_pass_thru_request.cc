@@ -40,8 +40,8 @@ namespace application_manager {
 namespace commands {
 
 EndAudioPassThruRequest::EndAudioPassThruRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  const MessageSharedPtr& message)
+  : CommandRequestImpl(message) {
 }
 
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {
@@ -53,9 +53,11 @@ void EndAudioPassThruRequest::Run() {
 
   if (ended_successfully) {
     CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                             smart_objects::SmartObject(smart_objects::SmartType_Map),
-                             true, 1);
-    ApplicationManagerImpl::instance()->StopAudioPassThru();
+                     smart_objects::SmartObject(smart_objects::SmartType_Map),
+                     true, 1);
+    int session_key =
+      (*message_)[strings::params][strings::connection_key].asInt();
+    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
   } else {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "No PerformAudioPassThru is now active");

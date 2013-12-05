@@ -88,19 +88,19 @@ unsigned int SizeDirectory(const std::string& path) {
 
 unsigned int file_system::AvailableSpaceApp(const std::string& name) {
   unsigned int available_space_app = profile::Profile::instance()
-  ->space_available();
+                                     ->space_available();
   std::string full_path;
   unsigned int size_of_directory = 0;
   unsigned int available_space = 0;
-  if(DirectoryExists(name)) {
+  if (DirectoryExists(name)) {
     full_path = FullPath(name);
     size_of_directory = SizeDirectory(full_path);
-    if(available_space_app < size_of_directory) {
+    if (available_space_app < size_of_directory) {
       return 0;
     }
     available_space_app -= size_of_directory;
     available_space = AvailableSpace();
-    if(available_space_app > available_space) {
+    if (available_space_app > available_space) {
       return available_space;
     } else {
       return available_space_app;
@@ -164,14 +164,46 @@ bool file_system::Write(
   return false;
 }
 
-std::string file_system::FullPath(const std::string& file) {
-  char currentAppPath[FILENAME_MAX];
-  memset(currentAppPath, 0, FILENAME_MAX);
-  getcwd(currentAppPath, FILENAME_MAX);
+std::ofstream* file_system::Open(const std::string& file_name,
+                                 std::ios_base::openmode mode) {
+  std::ofstream* file = new std::ofstream(file_name.c_str(),
+                                          std::ios_base::binary | mode);
+  if (file->is_open()) {
+    return file;
+  }
+  return NULL;
+}
 
-  char path[FILENAME_MAX];
-  memset(path, 0, FILENAME_MAX);
-  snprintf(path, FILENAME_MAX - 1, "%s/%s", currentAppPath, file.c_str());
+std::ofstream* file_system::Write(std::ofstream* file_stream,
+                                  const unsigned char* data,
+                                  unsigned int data_size) {
+  if (file_stream) {
+    for (size_t i = 0; i < data_size; ++i) {
+      (*file_stream) << data[i];
+    }
+  }
+  return file_stream;
+}
+
+void file_system::Close(std::ofstream* file_stream) {
+  if (file_stream) {
+    file_stream->close();
+  }
+}
+
+std::string file_system::FullPath(const std::string& file) {
+  // FILENAME_MAX defined stdio_lim.h was replaced with less value
+  // since it seems, that is caused overflow in some cases
+  // TODO(AO): Will be checked during release testing
+
+  size_t filename_max_lenght = 1024;
+  char currentAppPath[filename_max_lenght];
+  memset(currentAppPath, 0, filename_max_lenght);
+  getcwd(currentAppPath, filename_max_lenght);
+
+  char path[filename_max_lenght];
+  memset(path, 0, filename_max_lenght);
+  snprintf(path, filename_max_lenght - 1, "%s/%s", currentAppPath, file.c_str());
   return std::string(path);
 }
 
@@ -300,7 +332,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   std::string::const_iterator it_sym_end = reserved_symbols.end();
 
   std::string converted_path;
-  while(it_path != it_path_end) {
+  while (it_path != it_path_end) {
 
     it_sym = reserved_symbols.begin();
     for (; it_sym != it_sym_end; ++it_sym) {
@@ -315,7 +347,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
         ++it_path;
         continue;
       }
-   }
+    }
 
     converted_path += *it_path;
     ++it_path;

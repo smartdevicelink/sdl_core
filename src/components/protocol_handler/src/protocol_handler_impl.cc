@@ -186,40 +186,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-unsigned int ProtocolHandlerImpl::GetPacketSize(
-  unsigned int data_size, unsigned char* first_bytes) {
-  DCHECK(first_bytes);
-  unsigned char offset = sizeof(uint32_t);
-  if (data_size < 2 * offset) {
-    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
-    return 0;
-  }
-
-  unsigned char* received_bytes = first_bytes;
-  DCHECK(received_bytes);
-
-  unsigned char version = received_bytes[0] >> 4u;
-  uint32_t frame_body_size = received_bytes[offset++] << 24u;
-  frame_body_size |= received_bytes[offset++] << 16u;
-  frame_body_size |= received_bytes[offset++] << 8u;
-  frame_body_size |= received_bytes[offset++];
-
-  unsigned int required_size = frame_body_size;
-  switch (version) {
-    case PROTOCOL_VERSION_1:
-      required_size += PROTOCOL_HEADER_V1_SIZE;
-      break;
-    case PROTOCOL_VERSION_2:
-      required_size += PROTOCOL_HEADER_V2_SIZE;
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
-      return 0;
-  }
-
-  return required_size;
-}
-
 void ProtocolHandlerImpl::OnTMMessageReceived(
   const RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -253,18 +219,13 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
   }
 }
 
-void ProtocolHandlerImpl::OnTMMessageSend() {
-  // TODO(PV): implement if needed.
+void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
-  // TODO(PK): Check if it RegisterAppInterfaceResponse with error was sent
-  if(false) {
-    for (ProtocolObservers::iterator it = protocol_observers_.begin();
-        protocol_observers_.end() != it;
-        ++it) {
-      // TODO(PK): Paste valid app_id taken from message
-      (*it)->OnMobileMessageSent(NULL /*Valid message*/);
-    }
+  for (ProtocolObservers::iterator it = protocol_observers_.begin();
+       protocol_observers_.end() != it;
+       ++it) {
+    (*it)->OnMobileMessageSent(message);
   }
 }
 
@@ -468,13 +429,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
                                   connection_key,
                                   packet->version(),
                                   packet->data(),
-                                  packet->data_size()));
-
-      if (SERVICE_TYPE_NAVI == packet->service_type()) {
-        LOG4CXX_INFO(logger_, "Streaming message received of size " <<
-                     packet->data_size() << " body: " << packet->data());
-        HandleStreamingMessage(connection_id, connection_key, raw_message);
-      }
+                                  packet->data_size(),
+                                  packet->service_type()));
 
       NotifySubscribers(raw_message);
       break;
@@ -652,15 +608,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
-  return RESULT_OK;
-}
-
-RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
-  ConnectionID connection_id ,
-  int connection_key,
-  RawMessagePtr recieved_msg) {
-  recieved_msg->set_fully_binary(true);
-
   return RESULT_OK;
 }
 

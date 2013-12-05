@@ -119,12 +119,6 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     void SendMessageToMobileApp(const RawMessagePtr& message);
 
     /**
-     * \brief Returns size of frame to be formed from raw bytes.
-     * expects first bytes of message which will be treated as frame header.
-     */
-    unsigned int GetPacketSize(unsigned int size, unsigned char* data);
-
-    /**
      * \brief Sends number of processed frames in case of binary nav streaming
      * \param connection_key Id of connection over which message is to be sent
      * \param number_of_frames Number of frames processed by
@@ -195,7 +189,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      * @brief Notifies about successfully sending message.
      *
      **/
-    virtual void OnTMMessageSend();
+    virtual void OnTMMessageSend(const RawMessagePtr message);
 
     /**
      * @brief Notifies about error occured during
@@ -310,16 +304,6 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     RESULT_CODE SendMobileNaviAck(
       ConnectionID connection_id ,
       int connection_key);
-
-    /**
-     * \brief Handles Map Streaming message
-     * \param original_message Message, recieved from TM as is
-     * \param connection_key Id of session over which message was received
-     * \param recieved_msg Parsed message
-     */
-    RESULT_CODE HandleStreamingMessage(ConnectionID connection_id ,
-                                       int connection_key,
-                                       RawMessagePtr recieved_msg);
 
     /**
      * \brief For logging.

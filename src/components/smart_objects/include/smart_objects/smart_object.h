@@ -1,7 +1,3 @@
-/**
- * @file SmartObject.hpp
- * @brief SmartObject header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //

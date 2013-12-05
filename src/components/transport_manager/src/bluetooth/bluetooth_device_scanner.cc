@@ -65,7 +65,7 @@ char* SplitToAddr(char* dev_list_entry) {
 }
 
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
-  DCHECK(result);
+  DCHECK(result != NULL);
 
   const char* cmd = "bt-device -l";
 
@@ -101,10 +101,10 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     shutdown_requested_(false),
     ready_(true),
     device_scan_requested_(false),
-    device_scan_requested_sync_(),
+    device_scan_requested_lock_(),
+    device_scan_requested_cv_(),
     auto_repeat_search_(auto_repeat_search),
     auto_repeat_pause_sec_(auto_repeat_pause_sec) {
-  device_scan_requested_sync_.init();
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
       0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8
                                                   };
@@ -373,11 +373,12 @@ void BluetoothDeviceScanner::Thread() {
     }
   } else {  // search only on demand
     while (true) {
-      device_scan_requested_sync_.lock();
-      while (!(device_scan_requested_ || shutdown_requested_)) {
-        device_scan_requested_sync_.wait();
+      {
+        sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
+        while (!(device_scan_requested_ || shutdown_requested_)) {
+          device_scan_requested_cv_.Wait(auto_lock);
+        }
       }
-      device_scan_requested_sync_.unlock();
       if (shutdown_requested_) {
         break;
       }
@@ -398,21 +399,17 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
     return;
   }
 
-  device_scan_requested_sync_.lock();
-  while (!(device_scan_requested_ || shutdown_requested_)) {
-    const sync_primitives::SynchronisationPrimitives::WaitStatus wait_status =
-      device_scan_requested_sync_.timedwait(auto_repeat_pause_sec_, 0);
-    if (wait_status == sync_primitives::SynchronisationPrimitives::TIMED_OUT) {
-      LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
-      device_scan_requested_ = true;
-    } else if (wait_status
-               == sync_primitives::SynchronisationPrimitives::FAILED) {
-      LOG4CXX_ERROR_WITH_ERRNO(
-        logger_,
-        "sync_primitives::SynchronisationPrimitives::timedwait failed");
+  {
+    sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
+    while (!(device_scan_requested_ || shutdown_requested_)) {
+      const sync_primitives::ConditionalVariable::WaitStatus wait_status =
+          device_scan_requested_cv_.WaitFor(auto_lock, auto_repeat_pause_sec_ * 1000);
+      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
+        LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
+        device_scan_requested_ = true;
+      }
     }
   }
-  device_scan_requested_sync_.unlock();
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -443,10 +440,11 @@ void BluetoothDeviceScanner::Terminate() {
   shutdown_requested_ = true;
 
   if (true == thread_started_) {
-    device_scan_requested_sync_.lock();
-    device_scan_requested_ = false;
-    device_scan_requested_sync_.signal();
-    device_scan_requested_sync_.unlock();
+    {
+      sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
+      device_scan_requested_ = false;
+      device_scan_requested_cv_.NotifyOne();
+    }
     LOG4CXX_INFO(logger_,
                  "Waiting for bluetooth device scanner thread termination");
     pthread_join(thread_, 0);
@@ -467,16 +465,17 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
   }
   TransportAdapter::Error ret = TransportAdapter::OK;
 
-  device_scan_requested_sync_.lock();
-  if (false == device_scan_requested_) {
-    LOG4CXX_INFO(logger_, "Requesting device Scan");
-    device_scan_requested_ = true;
-    device_scan_requested_sync_.signal();
-  } else {
-    ret = TransportAdapter::BAD_STATE;
-    LOG4CXX_INFO(logger_, "Device Scan is currently in progress");
+  {
+    sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
+    if (false == device_scan_requested_) {
+      LOG4CXX_INFO(logger_, "Requesting device Scan");
+      device_scan_requested_ = true;
+      device_scan_requested_cv_.NotifyOne();
+    } else {
+      ret = TransportAdapter::BAD_STATE;
+      LOG4CXX_INFO(logger_, "Device Scan is currently in progress");
+    }
   }
-  device_scan_requested_sync_.unlock();
 
   LOG4CXX_TRACE_EXIT(logger_);
   return ret;

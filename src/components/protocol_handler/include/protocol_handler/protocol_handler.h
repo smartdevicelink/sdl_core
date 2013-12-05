@@ -36,14 +36,13 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
 
 #include "protocol_handler/raw_message.h"
-#include "utils/shared_ptr.h"
 
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
+
 class ProtocolObserver;
 
 /**
@@ -72,13 +71,6 @@ class ProtocolHandler {
      * \param message RawMessage with params to be sent to Mobile App.
      */
     virtual void SendMessageToMobileApp(const RawMessagePtr& message) = 0;
-
-    /**
-     * \brief Returns size of frame to be formed from raw bytes.
-     * expects first bytes of message which will be treated as frame header.
-     */
-    virtual unsigned int GetPacketSize(
-      unsigned int size, unsigned char* data) = 0;
 
     /**
      * \brief Sends number of processed frames in case of binary nav streaming

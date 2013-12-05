@@ -42,20 +42,14 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
-// TODO(AK): add comment here.
 #define DCHECK(condition) \
-  if (!condition) { \
-    printf("Check failed: " #condition); \
+  if (!(condition)) { \
+    printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
+    printf("[Check failed: " #condition); \
+    printf("]\n\n"); \
     assert(false); \
   }
 
-#define CHECK(condition) \
-  if (!condition) { \
-    printf("Check failed: " #condition); \
-    assert(false); \
-  }
-
-// TODO(AK): add comment here.
 #define NOTREACHED() DCHECK(false)
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_

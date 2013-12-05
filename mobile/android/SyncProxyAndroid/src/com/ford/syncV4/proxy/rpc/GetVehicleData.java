@@ -316,7 +316,7 @@ public class GetVehicleData extends RPCRequest {
     public Boolean getAccPedalPosition() {
         return (Boolean) parameters.get(Names.accPedalPosition);
     }
-    public void setSteeringWheelAngle(Float steeringWheelAngle) {
+    public void setSteeringWheelAngle(Boolean steeringWheelAngle) {
         if (steeringWheelAngle != null) {
             parameters.put(Names.steeringWheelAngle, steeringWheelAngle);
         } else {

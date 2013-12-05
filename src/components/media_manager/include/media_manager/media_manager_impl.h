@@ -33,89 +33,50 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
-#include <net/if.h>
 #include <string>
-#include <map>
-#include "utils/logger.h"
-#include "utils/macro.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "media_manager/media_manager.h"
-#include "media_manager/socket_video_server.h"
-#include "media_manager/pipe_video_server.h"
-#include "media_manager/from_mic_to_file_recorder_thread.h"
-#include "media_manager/a2dp_source_player_thread.h"
-#include "media_manager/audio_stream_sender_thread.h"
-#include "media_manager/redecoder_client.h"
+#include "media_manager/media_adapter_impl.h"
+#include "media_manager/media_adapter_listener.h"
 
 namespace media_manager {
-
-// TODO(PK): Introduce base class for SourcePlayerThread with different
-// specific implementations if there are several different audio source
-// types present.
 
 class MediaManagerImpl : public MediaManager,
   public protocol_handler::ProtocolObserver {
   public:
-    static MediaManagerImpl* getMediaManager();
-
+    static MediaManagerImpl* instance();
+    virtual ~MediaManagerImpl();
     virtual void SetProtocolHandler(
-      protocol_handler::ProtocolHandler* protocol_hndlr);
-
-    virtual void addA2DPSource(const sockaddr& device);
-    virtual void removeA2DPSource(const sockaddr& device);
-    virtual void playA2DPSource(const sockaddr& device);
-    virtual void stopA2DPSource(const sockaddr& device);
-
-    virtual void addA2DPSource(const std::string& device);
-    virtual void removeA2DPSource(const std::string& device);
-    virtual void playA2DPSource(const std::string& device);
-    virtual void stopA2DPSource(const std::string& device);
-
-    virtual void startMicrophoneRecording(const std::string& outputFileName,
-                                          mobile_apis::SamplingRate::eType type,
-                                          int duration,
-                                          mobile_apis::BitsPerSample::eType,
-                                          unsigned int session_key, unsigned int correlation_id);
-    virtual void stopMicrophoneRecording();
-
-    virtual void startVideoStreaming();
-    virtual void stopVideoStreaming();
-
+      protocol_handler::ProtocolHandler* protocol_handler);
+    virtual void PlayA2DPSource(int application_key);
+    virtual void StopA2DPSource(int application_key);
+    virtual void StartMicrophoneRecording(int application_key,
+                                          const std::string& outputFileName,
+                                          int duration);
+    virtual void StopMicrophoneRecording(int application_key);
+    virtual void StartVideoStreaming(int application_key);
+    virtual void StopVideoStreaming(int application_key);
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
     virtual void OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr& message);
-
-    virtual void onRedecoded(const protocol_handler::RawMessagePtr& message);
-    virtual void setVideoRedecoder(redecoding::VideoRedecoder* redecoder);
-    virtual void setConsumer(video_stream_producer_consumer::VideoStreamConsumer* server);
-
-    void onTimer() const;
-
-    virtual ~MediaManagerImpl();
+      const protocol_handler::RawMessagePtr& message);
+    virtual void FramesProcessed(int application_key, int frame_number);
 
   protected:
     MediaManagerImpl();
+    virtual void Init();
+    protocol_handler::ProtocolHandler* protocol_handler_;
+    MediaAdapter* a2dp_player_;
+    MediaAdapterImpl* from_mic_recorder_;
+    MediaListenerPtr from_mic_listener_;
+    MediaAdapterImpl* video_streamer_;
+    MediaListenerPtr video_streamer_listener_;
 
   private:
-    std::map<std::string, threads::Thread*>              sources_;
-    threads::Thread*                                     recorderThread_;
-    video_stream_producer_consumer::VideoStreamConsumer* video_server_;
-    //redecoding::VideoRedecoder*                          redecoder_;
-
-    const int                                            MAC_ADDRESS_LENGTH_;
-    static MediaManagerImpl*                             sInstance_;
-    static log4cxx::LoggerPtr                            logger_;
-    static const std::string                             sA2DPSourcePrefix_;
-    threads::Thread*                                     senderThread_;
-    protocol_handler::ProtocolHandler*                   protocol_handler_;
-
-    std::string sockAddr2SourceAddr(const sockaddr& device);
-
+    static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };
 
 }  //  namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_

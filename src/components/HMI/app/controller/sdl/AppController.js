@@ -37,8 +37,8 @@ SDL.SDLAppController = Em.Object.create({
 
         this._super();
 
-        FFW.UI.set('isReady', true);
-        FFW.Navigation.set('isReady', true);
+        //FFW.UI.set('isReady', true);
+        //FFW.Navigation.set('isReady', true);
     },
 
     /**
@@ -68,6 +68,7 @@ SDL.SDLAppController = Em.Object.create({
         }
 
         FFW.UI.onCommand(element.commandID, this.model.appID);
+        SDL.OptionsView.deactivate();
     },
 
     /**
@@ -125,9 +126,7 @@ SDL.SDLAppController = Em.Object.create({
 
         SDL.SDLModel.uiShowKeyboard();
 
-        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
-            element.performInteractionRequestID,
-            element.choiceID);
+        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.choiceID);
 
         SDL.InteractionChoicesView.deactivate("SUCCESS");
     },

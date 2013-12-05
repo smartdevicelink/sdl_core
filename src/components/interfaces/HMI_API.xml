@@ -441,13 +441,6 @@
   <element name="turnText"/>
 </enum>
 
-<enum name="TouchEvent">
-  <element name="TOUCHSTART"/>
-  <element name="TOUCHMOVE"/>
-  <element name="TOUCHEND"/>
-  <element name="DOUBLETOUCH"/>
-</enum>
-
 <enum name="ImageFieldName">
   <element name="softButtonImage">
     <description>The image field for SoftButton</description>
@@ -740,6 +733,12 @@
   </element>
 </enum>
 
+<enum name="TouchType">
+  <element name="BEGIN"/>
+  <element name="MOVE"/>
+  <element name="END"/>
+</enum>
+
 <enum name="WarningLightStatus">
   <description>Reflects the status of a cluster instrument warning light.</description>
   <element name="OFF" internal_name="WLS_OFF">
@@ -1000,6 +999,35 @@
     </param>
 </struct>
 
+<struct name="TouchCoord">
+  <param name="x" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
+    <description>The x coordinate of the touch.</description>
+  </param>
+  <param name="y" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
+    <description>The y coordinate of the touch.</description>
+  </param>
+</struct>
+
+<struct name="TouchEvent">
+  <param name="id" type="Integer" mandatory="true" minvalue="0" maxvalue="9">
+    <description>
+      A touch's unique identifier.  The application can track the current touch events by id.
+      If a touch event has type begin, the id should be added to the set of touches.
+      If a touch event has type end, the id should be removed from the set of touches.
+    </description>
+  </param>
+  <param name="ts" type="Integer" mandatory="true" array="true" minvalue="0" maxvalue="2147483647" minsize="1" maxsize="1000">
+    <description>
+      The time that the touch was recorded.  This number can the time since the beginning of the session or something else as long as the units are in milliseconds.
+      The timestamp is used to determined the rate of change of position of a touch.
+      The application also uses the time to verify whether two touches, with different ids, are part of a single action by the user.
+      If there is only a single timestamp in this array, it is the same for every coordinate in the coordinates array.
+    </description>
+  </param>
+  <param name="c" type="Common.TouchCoord" mandatory="true" array="true" minsize="1" maxsize="1000">
+  </param>
+</struct>
+
 <struct name="PresetBankCapabilities">
     <description>Contains information about on-screen preset capabilities (whether the HW preset buttons could be duplicated with onscreen buttons).</description>
     <param name="onScreenPresetsAvailable" type="Boolean" mandatory="true">
@@ -1042,6 +1070,9 @@
     <description>A TTS chunk, that consists of the text/phonemes to be spoken</description>
     <param name="text" type="String" mandatory="true" maxlength="500">
         <description>The text or phonemes to be spoken.</description>
+    </param>
+    <param name="type" type="Common.SpeechCapabilities" mandatory="true">
+      <description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities.</description>
     </param>
 </struct>
 
@@ -1223,15 +1254,6 @@
   <param name="audioType" type="Common.AudioType" mandatory="true"/>
 </struct>
 
-<struct name="TouchLists">
-  <param name="touches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
-	<description>List of fingers currently on screen</description>
-  </param>
-  <param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
-	<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
-  </param>
-</struct>
-
 <struct name="Coordinate">
   <param name="xCoord" type="Integer" mandatory="true">
   </param>
@@ -1243,18 +1265,6 @@
   <param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
   </param>
   <param name="radiusCoord" type="Common.Coordinate" mandatory="true">
-  </param>
-</struct>
-
-<struct name="TouchEventInfo">
-  <param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
-	<description>Finger / stylus ID</description>
-  </param>
-  <param name="point" type="Common.Coordinate" mandatory="true">
-	<description>XY coordinate of where on screen the event happened</description>
-  </param>
-  <param name="area" type="Common.TouchArea" mandatory="false">
-	<description>Describe the ellipse approximating touch input shape</description>
   </param>
 </struct>
 
@@ -1280,6 +1290,12 @@
     <description>If disabled, entire string of text will be returned only once submitted by user.</description>
     <description>If omitted, this value will be set to FALSE.</description>
   </param>
+  <param name="keypressMode" type="Common.KeypressMode" mandatory="false" >
+    <description>
+    	Desired keypress mode.
+    	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+    </description>
+  </param> 
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -1412,7 +1428,7 @@
   <param name="highBeamsOn" type="Boolean" mandatory="true">
     <description>Status of the high beam lamps.</description>
   </param>
-  <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="true">
+  <param name="ambientLightSensorStatus" type="Common.AmbientLightStatus" mandatory="true">
     <description>Status of the ambient light sensor.</description>
   </param>
 </struct>
@@ -1878,6 +1894,12 @@
     <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
     </param>
   </function>
+  <function name="Started" messagetype="notification">
+    <description>Must be initiated  by TTS module to let SDL know that TTS session has started.</description>
+  </function>
+  <function name="Stopped" messagetype="notification">
+    <description>Must be initiated by TTS module to let SDL know that TTS session has stopped.</description>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
@@ -1885,6 +1907,20 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>Must be true if TTS is present and ready to communicate with SDL.</description>
     </param>
+  </function>
+  <function name="PerformInteraction" messagetype="request">
+    <description>Sets some properties for the application initiated request.</description>
+    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
+    </param>
+    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
+    </param>
+    <param name="timeout" type="Integer" mandatory="true">
+      <description>Timeout initiate timeoutPrompt</description>
+    </param>
+  </function>
+  <function name="PerformInteraction" messagetype="response">
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
@@ -2054,7 +2090,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2082,12 +2118,15 @@
     <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
-    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The list of choices to be used for the interaction with the user</description>
     </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
-      <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
-      <description>If omitted on supported displays, the default system-generated help items should be used.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
     </param>
     <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
       <description>Timeout in milliseconds.</description>
@@ -2156,21 +2195,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="ShowVrHelp" messagetype="request">
-    <description>Request from SDL to show help about available VR commands.</description>
-    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-      <description>VR Help Title text.</description>
-      <description>If omitted on supported displays, the default HU system help title should be used.</description>
-    </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that concerns this RPC.</description>
-    </param>
-  </function>
-  <function name="ShowVrHelp" messagetype="response">
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notification must be initiated by HMI on user choosing menu item.</description>
@@ -2323,14 +2347,11 @@
   </function>
   <function name="OnTouchEvent" messagetype="notification">
     <description>Notifies about touch events on the screen's prescribed area</description>
-    <param name="eventType" type="Common.TouchEvent" mandatory="true">
-      <description>Type of event - start, move, stop, etc.</description>
+    <param name="type" type="Common.TouchType" mandatory="true">
+      <description>The type of touch event.</description>
     </param>
-    <param name="touchLists" type="Common.TouchLists" mandatory="false">
-      <description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
-    </param>
-    <param name="info" type="Common.TouchEventInfo" mandatory="true">
-      <description>Coordinate of the touch, radius of touch input and input ID.</description>
+    <param name="event" type="Common.TouchEvent" mandatory="true" minsize="1" maxsize="10" array="true">
+      <description>List of all individual touches involved in this event.</description>
     </param>
   </function>
   <function name="Slider" messagetype="request">
@@ -2368,7 +2389,7 @@
     <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
       <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="true">
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
       <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">

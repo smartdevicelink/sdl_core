@@ -48,9 +48,25 @@ class RequestToHMI : public CommandImpl {
   virtual bool CleanUp();
   virtual void Run();
   void SendRequest();
+
+  /*
+   * @brief Retrieves correlation ID
+   */
+  inline int correlation_id() const;
+
+  /*
+   * @brief Retrieves application ID
+   */
+  inline unsigned int application_id() const;
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
 };
+int RequestToHMI::correlation_id() const {
+  return (*message_)[strings::params][strings::correlation_id].asInt();
+}
+unsigned int RequestToHMI::application_id() const {
+  return (*message_)[strings::msg_params][strings::app_id].asUInt();
+}
 
 }  // namespace commands
 

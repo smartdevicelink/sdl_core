@@ -81,13 +81,6 @@ SDL.SDLAppModel = Em.Object.extend({
         appInfo: null,
 
         /**
-         * Info navigation data for ShowConstantTBT request
-         *
-         * @type: {Object}
-         */
-        constantTBTParams: null,
-
-        /**
          * Current language of applications UI component
          *
          * @type {String}
@@ -205,6 +198,7 @@ SDL.SDLAppModel = Em.Object.extend({
 
             // Magic number is limit of 1000 commands added on one menu
             if (commands.length <= 999) {
+
                 commands[commands.length] = {
                     commandID: request.params.cmdID,
                     name     : request.params.menuParams.menuName,
@@ -218,6 +212,7 @@ SDL.SDLAppModel = Em.Object.extend({
                     SDL.OptionsView.commands.refreshItems();
                 }
 
+                console.log(commands.length);
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
                 FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
@@ -262,7 +257,6 @@ SDL.SDLAppModel = Em.Object.extend({
             if (commands.length <= 999) {
 
                 this.commandsList[request.params.menuID] = [];
-
                 commands[commands.length] = {
                     menuID  : request.params.menuID,
                     name    : request.params.menuParams.menuName ? request.params.menuParams.menuName : '',
@@ -302,22 +296,17 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @param {Object}
          *            message
-         * @param {Number}
-         *            performInteractionRequestId
          */
-        onPreformInteraction: function (message, performInteractionRequestId) {
+        onPreformInteraction: function (message) {
 
             SDL.InteractionChoicesView.clean();
 
             if (message) {
 
-                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
+                SDL.InteractionChoicesView.activate(message);
 
             } else {
-//                SDL.InteractionChoicesView.preformChoices([],
-//                    performInteractionRequestId,
-//                    30000);
-                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
+                SDL.InteractionChoicesView.activate("");
             }
 
             SDL.SDLController.VRMove();

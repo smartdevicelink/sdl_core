@@ -143,7 +143,11 @@ class ObjectSchemaItemTest : public ::testing::Test {
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] =  // NOLINT
       ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);  // NOLINT
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] =  // NOLINT
-      ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);  // NOLINT
+      ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(
+          TSchemaItemParameter<int>(1),
+          TSchemaItemParameter<int>(2)),
+        true);
+
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] =  // NOLINT
       ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);  // NOLINT
 

@@ -40,10 +40,60 @@
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
 
+namespace {
+
+log4cxx::LoggerPtr g_logger =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+
+hmi_apis::Common_Language::eType ToCommonLanguage(
+    mobile_apis::Language::eType mobile_language) {
+  // Update this check if mobile_api::Language
+  // or hmi_apis::Common_Language changes.
+  // Or, better, generate functions like this from XML
+  long lang_val =  long(mobile_language);
+  long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
+  long max_mobile_lang = long(mobile_apis::Language::NO_NO);
+  if (max_common_lang_val != max_mobile_lang) {
+    LOG4CXX_ERROR(g_logger, "Mapping between Common_Language and Language"
+                            " has changed! Please update converter function");
+  }
+  if (lang_val > max_common_lang_val) {
+    LOG4CXX_ERROR(g_logger, "Non-convertable language ID");
+  }
+  return hmi_apis::Common_Language::eType(lang_val);
+}
+
+}
+
 namespace application_manager {
+
+namespace {
+
+bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
+  using namespace smart_objects;
+  for (size_t i = 0; i < soft_buttons.length(); ++i) {
+    SmartObject& button = soft_buttons[i];
+
+    // Check if image parameter is valid
+    if (button.keyExists(strings::image)) {
+      SmartObject& buttonImage = button[strings::image];
+
+      // Image name must not be empty
+      std::string file_name = buttonImage[strings::value].asString();
+      file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end());
+      if (file_name.empty()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+}
 
 const VehicleData MessageHelper::vehicle_data_ =
 { {strings::gps, VehicleDataType::GPS},
@@ -463,75 +513,6 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
   return result;
 }
 
-void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
-  smart_objects::SmartObject* show_vr_help = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-
-  if (!show_vr_help) {
-    return;
-  }
-
-  smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
-  if (!app) {
-    ui_msg_params[strings::vr_help_title] = profile::Profile::instance()
-                                            ->vr_help_title();
-
-    smart_objects::SmartObject* vr_commands_array = CreateGeneralVrCommand();
-    if (!vr_commands_array) {
-      return;
-    }
-
-    ui_msg_params[strings::vr_help] = smart_objects::SmartObject(
-                                        smart_objects::SmartType_Array);
-
-    int help_size = vr_commands_array->length();
-    for (int i = 0; i < help_size; ++i) {
-      smart_objects::SmartObject item(smart_objects::SmartType_Map);
-      item[strings::text] = (*vr_commands_array).getElement(i);
-      item[strings::position] = i + 1;
-
-      ui_msg_params[strings::vr_help][i++] = item;
-    }
-
-    const std::set<Application*>& apps = ApplicationManagerImpl::instance()
-                                         ->applications();
-
-    int i = help_size;
-    std::set<Application*>::const_iterator it = apps.begin();
-    for (; apps.end() != it; ++it) {
-      if ((*it)->vr_synonyms()) {
-        smart_objects::SmartObject item(smart_objects::SmartType_Map);
-        item[strings::text] = (*((*it)->vr_synonyms())).getElement(0);
-        item[strings::position] = i + 1;
-        ui_msg_params[strings::vr_help][i++] = item;
-      }
-    }
-  } else {
-    smart_objects::SmartObject* vr_help = CreateAppVrHelp(app);
-    if (!vr_help) {
-      return;
-    }
-    ui_msg_params = *vr_help;
-    ui_msg_params[strings::app_id] = app->app_id();
-  }
-
-  (*show_vr_help)[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::UI_ShowVrHelp;
-  (*show_vr_help)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*show_vr_help)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*show_vr_help)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*show_vr_help)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*show_vr_help)[strings::msg_params] = ui_msg_params;
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(show_vr_help);
-}
-
 void MessageHelper::SendShowRequestToHMI(const Application* app) {
   if (!app) {
     return;
@@ -672,9 +653,11 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
 }
 
 void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
+  hmi_apis::Common_Language::eType app_common_language =
+      ToCommonLanguage(app->language());
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_vr_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
           app->app_id());
@@ -687,7 +670,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_tts_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
@@ -700,7 +683,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_ui_language()
-      != app->ui_language()) {
+      != app_common_language) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
@@ -901,7 +884,7 @@ void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   }
 }
 
-void MessageHelper::SendActivateAppToHMI(Application* const app) {
+void MessageHelper::SendActivateAppToHMI(unsigned int const app_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {
@@ -913,7 +896,7 @@ void MessageHelper::SendActivateAppToHMI(Application* const app) {
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
   (*message)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+  (*message)[strings::msg_params][strings::app_id] = app_id;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
@@ -1021,7 +1004,8 @@ void MessageHelper::SendNaviStartStream(
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1066,7 +1050,8 @@ void MessageHelper::SendNaviStopStream(int connection_key) {
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1175,6 +1160,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject& request_soft_buttons =
       message_params[strings::soft_buttons];
 
+  // Check whether soft buttons request is well-formed
+  if (!ValidateSoftButtons(request_soft_buttons))
+    return mobile_apis::Result::INVALID_DATA;
+
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
 
@@ -1268,32 +1257,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   }
 
   return mobile_apis::Result::SUCCESS;
-}
-
-// TODO(VS): change printf to logger
-bool MessageHelper::VerifyApplicationName(
-  smart_objects::SmartObject& msg_params) {
-
-  if (msg_params.keyExists(strings::tts_name)) {
-    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
-        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-          printf("Invalid characters in tts name.\n");
-          return false;
-        }
-      }
-  }
-
-  const std::string& name = msg_params[strings::app_name].asString();
-
-  if ((name[0] == '\n') || (name[0] == ' ') ||
-      ((name[0] == '\\') && (name[1] == 'n'))) {
-    printf("Invalid characters in application name.\n");
-    return false;
-  }
-
-  return true;
 }
 
 // TODO(AK): change printf to logger

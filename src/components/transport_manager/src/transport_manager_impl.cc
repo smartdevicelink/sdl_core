@@ -42,6 +42,7 @@
 
 #include "utils/macro.h"
 #include "protocol_handler/raw_message.h"
+#include "protocol_handler/protocol_packet.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_impl.h"
@@ -84,7 +85,7 @@ class TransportManagerImpl::IncomingDataHandler {
         logger_,
         "Total data size for connection " << connection_id << " is " << connection_data.size());
     while (connection_data.size() >= kBytesForSizeDetection) {
-      const uint32_t packet_size = tm_impl_->protocol_handler_->GetPacketSize(
+      const uint32_t packet_size = tm_impl_->GetPacketSize(
           kBytesForSizeDetection, &connection_data[0]);
       if (0 == packet_size) {
         LOG4CXX_ERROR(logger_, "Failed to get packet size");
@@ -133,8 +134,7 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
       is_initialized_(false),
       connection_id_counter_(0),
       config_(config),
-      incoming_data_handler_(new IncomingDataHandler(this)),
-      protocol_handler_(NULL) {
+      incoming_data_handler_(new IncomingDataHandler(this)) {
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, nullptr);
   pthread_cond_init(&message_queue_cond, nullptr);
@@ -482,12 +482,8 @@ int TransportManagerImpl::Init(void) {
   LOG4CXX_INFO(logger_, "Init is called");
   all_thread_active_ = true;
 
-  pthread_mutex_lock(&message_queue_mutex_);
   int error_code = pthread_create(&messsage_queue_thread_, 0,
                                   &MessageQueueStartThread, this);
-  // Wait while thread starts loop
-  pthread_mutex_lock(&message_queue_mutex_);
-  pthread_mutex_unlock(&message_queue_mutex_);
 
   if (0 != error_code) {
     LOG4CXX_ERROR(
@@ -496,12 +492,8 @@ int TransportManagerImpl::Init(void) {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  pthread_mutex_lock(&event_queue_mutex_);
   error_code = pthread_create(&event_queue_thread_, 0,
                               &EventListenerStartThread, this);
-  // Wait while thread starts loop
-  pthread_mutex_lock(&event_queue_mutex_);
-  pthread_mutex_unlock(&event_queue_mutex_);
 
   if (0 != error_code) {
     LOG4CXX_ERROR(
@@ -641,6 +633,42 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
   return NULL;
 }
 
+// TODO this function should be moved outside of TM to protocol handler or
+// somewhere else
+unsigned int TransportManagerImpl::GetPacketSize(
+  unsigned int data_size, unsigned char* first_bytes) {
+  DCHECK(first_bytes);
+  unsigned char offset = sizeof(uint32_t);
+  if (data_size < 2 * offset) {
+    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
+    return 0;
+  }
+
+  unsigned char* received_bytes = first_bytes;
+  DCHECK(received_bytes);
+
+  unsigned char version = received_bytes[0] >> 4u;
+  uint32_t frame_body_size = received_bytes[offset++] << 24u;
+  frame_body_size |= received_bytes[offset++] << 16u;
+  frame_body_size |= received_bytes[offset++] << 8u;
+  frame_body_size |= received_bytes[offset++];
+
+  unsigned int required_size = frame_body_size;
+  switch (version) {
+    case protocol_handler::PROTOCOL_VERSION_1:
+      required_size += protocol_handler::PROTOCOL_HEADER_V1_SIZE;
+      break;
+    case protocol_handler::PROTOCOL_VERSION_2:
+      required_size += protocol_handler::PROTOCOL_HEADER_V2_SIZE;
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
+      return 0;
+  }
+
+  return required_size;
+}
+
 void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
   const transport_adapter::DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_INFO(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
@@ -661,9 +689,10 @@ void TransportManagerImpl::OnDeviceListUpdated(const TransportAdapterSptr& ta) {
 }
 
 void TransportManagerImpl::EventListenerThread(void) {
+  pthread_mutex_lock(&event_queue_mutex_);
+
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (all_thread_active_) {
-    pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
     while (event_queue_.size() > 0) {
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
       EventQueue::iterator current = event_queue_.begin();
@@ -753,7 +782,7 @@ void TransportManagerImpl::EventListenerThread(void) {
                 "Connection ('" << device_id << ", " << app_handle << ") not found");
             break;
           }
-          RaiseEvent(&TransportManagerListener::OnTMMessageSend);
+          RaiseEvent(&TransportManagerListener::OnTMMessageSend, data);
           this->RemoveMessage(data);
           if (connection->shutDown && --connection->messages_count == 0) {
             connection->timer.Stop();
@@ -836,6 +865,7 @@ void TransportManagerImpl::EventListenerThread(void) {
       delete error;
       pthread_mutex_lock(&event_queue_mutex_);
     }  // while (event_queue_.size() > 0)
+    pthread_cond_wait(&device_listener_thread_wakeup_, &event_queue_mutex_);
   }  // while (all_thread_active_)
 
   LOG4CXX_INFO(logger_, "Event listener thread finished");
@@ -849,10 +879,12 @@ void* TransportManagerImpl::MessageQueueStartThread(void* data) {
 
 void TransportManagerImpl::MessageQueueThread(void) {
   LOG4CXX_INFO(logger_, "Message queue thread started");
+
+  pthread_mutex_lock(&message_queue_mutex_);
+
   while (all_thread_active_) {
     // TODO(YK): add priority processing
 
-    pthread_cond_wait(&message_queue_cond, &message_queue_mutex_);
     while (message_queue_.size() > 0) {
       MessageQueue::iterator it = message_queue_.begin();
       while (it != message_queue_.end() && it->valid() && (*it)->IsWaiting()) {
@@ -902,18 +934,11 @@ void TransportManagerImpl::MessageQueueThread(void) {
       }
       pthread_mutex_lock(&message_queue_mutex_);
     }
+    pthread_cond_wait(&message_queue_cond, &message_queue_mutex_);
   }  //  while(true)
 
   message_queue_.clear();
   LOG4CXX_INFO(logger_, "Message queue thread finished");
-}
-
-void TransportManagerImpl::SetProtocolHandler(
-    protocol_handler::ProtocolHandler* ph) {
-  //YK: temp solution until B1.0 release
-  if (ph) {
-    protocol_handler_ = ph;
-  }
 }
 
 }  // namespace transport_manager

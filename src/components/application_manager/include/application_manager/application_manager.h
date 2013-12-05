@@ -35,8 +35,8 @@
 
 #include <set>
 #include "hmi_message_handler/hmi_message_handler.h"
-#include "mobile_message_handler/mobile_message_handler.h"
 #include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace policies {
   class PolicyManager;
@@ -50,22 +50,22 @@ class HMIMatrix;
 class PoliciesManager;
 
 class ApplicationManager {
- public:
-  virtual ~ApplicationManager() {
-  }
+  public:
+    virtual ~ApplicationManager() {
+    }
 
-  virtual void set_hmi_message_handler(
+    virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
-  virtual void set_mobile_message_handler(
-      mobile_message_handler::MobileMessageHandler* handler) = 0;
-  virtual void set_connection_handler(
+    virtual void set_protocol_handler(
+      protocol_handler::ProtocolHandler* handler) = 0;
+    virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
   virtual void set_policy_manager(
       policies::PolicyManager* policy_manager) = 0;
 
- protected:
-  virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
-  virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
+  protected:
+    virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
+    virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
 };
 
 }  // namespace application_manager

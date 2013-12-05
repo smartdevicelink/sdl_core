@@ -120,16 +120,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
-    virtual void OnTMMessageReceived(
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageReceiveFailed(
-      transport_manager::ConnectionUID connection_id,
-      const transport_manager::DataReceiveError& error);
-    virtual void OnTMMessageSendFailed(
-      const transport_manager::DataSendError& error,
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageSend();
-
     /**
      * \brief Informs about failure during DisconnectDevice procedure of TM
      * \param device Information about disconnected device
@@ -194,7 +184,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id = 0,
-                                    std::list<int>* sessions_list = 0,
+                                    std::list<int>* sessions_list = NULL,
                                     unsigned int* device_id = 0);
 
     /**
@@ -206,8 +196,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int -1 in case of error or 0 in case of success
      */
     virtual int GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
-                                  std::string* device_name,
-                                  std::list<unsigned int>* applications_list);
+                                  std::string* device_name = NULL,
+                                  std::list<unsigned int>* applications_list = NULL,
+                                  std::string* mac_address = NULL);
 
     /**
      * \brief Sets pointer to TransportManager.

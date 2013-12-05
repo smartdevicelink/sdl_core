@@ -41,7 +41,18 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Array}
          */
         vehicleInfoPRNDL: [
-            "PARK", "REVERSE", "NEUTRAL", "FORWARD_DRIVE_2", "LOWGEAR"
+            "PARK",
+            "REVERSE",
+            "NEUTRAL",
+            "DRIVE",
+            "SPORT",
+            "LOWGEAR",
+            "FIRST",
+            "SECOND",
+            "THIRD",
+            "FOURTH",
+            "FIFTH",
+            "SIXTH"
         ],
 
         /**
@@ -83,11 +94,35 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Object}
          */
         vehicleData: {
+            'displayResolution':{
+                'width': 800,
+                'height': 480
+            },
             'speed': 80.0,
             'fuelLevel': 0.2,
             'fuelLevel_State': "UNKNOWN",
             'instantFuelConsumption': 2.2,
-            'tirePressure': "UNKNOWN",
+            'tirePressure': {
+                'pressureTelltale': 'OFF',
+                'leftFront': {
+                    'status': 'UNKNOWN'
+                },
+                'rightFront': {
+                    'status': 'UNKNOWN'
+                },
+                'leftRear': {
+                    'status': 'UNKNOWN'
+                },
+                'rightRear': {
+                    'status': 'UNKNOWN'
+                },
+                'innerLeftRear': {
+                    'status': 'UNKNOWN'
+                },
+                'innerRightRear': {
+                    'status': 'UNKNOWN'
+                }
+            },
             'beltStatus': {
                 'driverBeltDeployed': "NOT_SUPPORTED",
                 'passengerBeltDeployed': "NOT_SUPPORTED",
@@ -127,10 +162,11 @@ SDL.SDLVehicleInfoModel = Em.Object
             'wiperStatus': "NO_DATA_EXISTS",
             'headLampStatus': {
                 "lowBeamsOn": false,
-                "highBeamsOn": false
+                "highBeamsOn": false,
+                "ambientLightSensorStatus": "NIGHT"
             },
             'engineTorque': 2.5,
-            'accPedalPosition': 0.5,
+            'accPedalPosition': 10.5,
             'steeringWheelAngle': 1.2,
             'myKey': {
                 "e911Override": "NO_DATA_EXISTS"
@@ -148,8 +184,8 @@ SDL.SDLVehicleInfoModel = Em.Object
             'satRadioESN': "165165650",
             'rainSensor': 165165650,
             'gps': {
-                'longitudeDegrees': 423293,
-                'latitudeDegrees': -830464,
+                'longitudeDegrees': 42,
+                'latitudeDegrees': -83,
                 'utcYear': 2013,
                 'utcMonth': 2,
                 'utcDay': 14,
@@ -157,9 +193,9 @@ SDL.SDLVehicleInfoModel = Em.Object
                 'utcMinutes': 16,
                 'utcSeconds': 54,
                 'compassDirection': 'SOUTHWEST',
-                'pdop': 15,
+                'pdop': 8,
                 'hdop': 5,
-                'vdop': 30,
+                'vdop': 3,
                 'actual': false,
                 'satellites': 8,
                 'dimension': '2D',

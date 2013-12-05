@@ -108,12 +108,12 @@ class Profile {
     /**
      * @brief Maximum command id available for mobile app
      */
-    const unsigned int max_cmd_id() const;
+    const unsigned int& max_cmd_id() const;
 
     /**
      * @brief Default timeout for waiting for response to mobile app
      */
-    const unsigned int default_timeout() const;
+    const unsigned int& default_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -138,7 +138,7 @@ class Profile {
     /**
       * @brief Returns space for app
       */
-    const unsigned int space_available() const;
+    const unsigned int& space_available() const;
 
     /**
       * @brief Returns the video server type
@@ -149,6 +149,63 @@ class Profile {
       * @brief Returns the video server type
       */
     const std::string& named_pipe_path() const;
+
+    /**
+     * @brief Returns time scale for max amount of requests for application
+     * in hmi level none.
+     */
+    const unsigned int& app_hmi_level_none_time_scale() const;
+
+    /**
+      * @brief Returns path to testing file to which redirects video stream
+      */
+    const std::string& video_stream_file() const;
+
+    /**
+     * @brief Returns allowable max amount of requests per time scale for
+     * application in hmi level none
+     *
+     */
+    const unsigned int& app_hmi_level_none_time_scale_max_requests() const;
+
+    /**
+     * @brief Returns application time scale for max amount of requests per it.
+     */
+    const unsigned int& app_time_scale() const;
+
+    /**
+     * @brief Returns allowable max amount of requests per application
+     * time scale
+     */
+    const unsigned int& app_time_scale_max_requests() const;
+
+    /**
+     * @brief Returns allowable amount of the system pending requests
+     */
+    const unsigned int& pending_requests_amount() const;
+
+    /**
+     * @brief Returns Max allowed number of PutFile requests for one
+     * application in NONE
+     */
+    const unsigned int& put_file_in_none() const;
+
+    /**
+     * @brief Returns Max allowed number of DeleteFile requests for one
+     * application in NONE
+     */
+    const unsigned int& delete_file_in_none() const;
+
+    /**
+     * @brief Returns Max allowed number of ListFiles requests for one
+     * application in NONE
+     */
+    const unsigned int& list_files_in_none() const;
+
+    /*
+     * @brief Returns file name for storing applications data
+     */
+    const std::string& app_info_storage() const;
 
     // Members section
 
@@ -180,7 +237,8 @@ class Profile {
      * @param pSection   The section to read the value in
      * @param pKey       The key whose value needs to be read out
      *
-     * @return FALSE if could not read the value out of the profile (then the value is not changed)
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
      */
     bool ReadValue(bool* value,
                    const char* const pSection,
@@ -193,7 +251,8 @@ class Profile {
      * @param pSection   The section to read the value in
      * @param pKey       The key whose value needs to be read out
      *
-     * @return FALSE if could not read the value out of the profile (then the value is not changed)
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
      */
     bool ReadValue(std::string* value,
                    const char* const pSection,
@@ -217,6 +276,16 @@ class Profile {
     unsigned int                    space_available_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
+    unsigned int                    app_hmi_level_none_time_scale_max_requests_;
+    unsigned int                    app_hmi_level_none_requests_time_scale_;
+    std::string                     video_stream_file_;
+    unsigned int                    app_time_scale_max_requests_;
+    unsigned int                    app_requests_time_scale_;
+    unsigned int                    pending_requests_amount_;
+    unsigned int                    put_file_in_none_;
+    unsigned int                    delete_file_in_none_;
+    unsigned int                    list_files_in_none_;
+    std::string                     app_info_storage_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

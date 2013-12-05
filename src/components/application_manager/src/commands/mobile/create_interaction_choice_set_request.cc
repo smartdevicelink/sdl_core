@@ -106,66 +106,113 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     const Application* app) {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSet");
 
-  smart_objects::SmartObject& choice_set =
-      (*message_)[strings::msg_params][strings::choice_set];
-  size_t length = choice_set.length();
+  const smart_objects::SmartArray* new_choice_set_array =
+    (*message_)[strings::msg_params][strings::choice_set].asArray();
 
-  for (size_t i = 0; i < length; ++i) {
-    for (size_t j = i + 1; j < length; ++j) {
+  smart_objects::SmartArray::const_iterator it_array =
+      new_choice_set_array->begin();
 
-      /* Checks if incoming choice set doesn't has similar menu names. */
-      if (choice_set[i][strings::menu_name].asString()
-          == choice_set[j][strings::menu_name].asString()) {
-        LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated menu name "
-                      << choice_set[i][strings::menu_name].asString() << " "
-                      << choice_set[j][strings::menu_name].asString());
-        return mobile_apis::Result::DUPLICATE_NAME;
-      }
+  smart_objects::SmartArray::const_iterator it_array_end =
+      new_choice_set_array->end();
 
-      /* Checks if incoming choiceSet doesn't have duplicated choice ID's */
-      if (choice_set[i][strings::choice_id].asInt()
-          == choice_set[j][strings::choice_id].asInt()) {
-        LOG4CXX_ERROR(logger_, "Incoming choice set has duplicated choice ID");
-        return mobile_apis::Result::INVALID_ID;
-      }
+  // Self check of new choice set for params coincidence
+  for (; it_array != it_array_end; ++it_array) {
 
-      if (!compareSynonyms(choice_set[i], choice_set[j])) {
-        return mobile_apis::Result::DUPLICATE_NAME;
-      }
+    CoincidencePredicateChoiceID c((*it_array)[strings::choice_id].asInt());
+    if (1 != std::count_if(
+        new_choice_set_array->begin(),
+        new_choice_set_array->end(),
+        c)) {
+
+      LOG4CXX_ERROR(logger_, "Incoming choice set has duplicate IDs.");
+      return mobile_apis::Result::INVALID_ID;
     }
 
-    /* Choice ID doesn't exist in application choiceSet map */
-    const ChoiceSetMap& choice_set_map = app->choice_set_map();
-    ChoiceSetMap::const_iterator it = choice_set_map.begin();
-    for (; choice_set_map.end() != it; ++it) {
-      for (size_t i = 0; i < (*it->second)[strings::choice_set].length(); ++i) {
-        if ((*it->second)[strings::choice_set][i][strings::choice_id].asInt()
-            == choice_set[i][strings::choice_id].asInt()) {
-          LOG4CXX_ERROR(logger_, "Incoming choice ID already exist");
+    // Check new choice set params along with already registered choice sets
+    const ChoiceSetMap& app_choice_set_map = app->choice_set_map();
+    ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
+    ChoiceSetMap::const_iterator itEnd = app_choice_set_map.end();
+    for (; it != itEnd; ++it) {
+      const smart_objects::SmartObject* app_choice_set = it->second;
+      if (NULL != app_choice_set) {
+
+        const smart_objects::SmartArray* curr_choice_set =
+            (*app_choice_set)[strings::choice_set].asArray();
+
+        if ( std::any_of(curr_choice_set->begin(), curr_choice_set->end(), c)) {
+          LOG4CXX_ERROR(logger_, "Incoming choice ID already exists.");
           return mobile_apis::Result::INVALID_ID;
         }
       }
     }
+
+    CoincidencePredicateMenuName m((*it_array)[strings::menu_name].asString());
+    if (1 != std::count_if(
+        new_choice_set_array->begin(),
+        new_choice_set_array->end(),
+        m)) {
+
+      LOG4CXX_ERROR(logger_, "Incoming choice set has duplicate menu names.");
+      return mobile_apis::Result::DUPLICATE_NAME;
+    }
+
+    // Check coincidence inside the current choice
+    const smart_objects::SmartArray* vr_array =
+        (*it_array)[strings::vr_commands].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vr = vr_array->begin();
+    smart_objects::SmartArray::const_iterator it_vr_end = vr_array->end();
+
+    for (; it_vr != it_vr_end; ++it_vr) {
+      CoincidencePredicateVRCommands v((*it_vr));
+      if (1 != std::count_if(vr_array->begin(), vr_array->end(), v)) {
+
+        LOG4CXX_ERROR(logger_,
+                      "Incoming choice set has duplicate VR command(s)");
+
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }
+
+    // Check along with VR commands in other choices in the new set
+    smart_objects::SmartArray::const_iterator it_same_array =
+        new_choice_set_array->begin();
+
+    smart_objects::SmartArray::const_iterator it_same_array_end =
+        new_choice_set_array->end();
+
+    for (; it_same_array != it_same_array_end; ++it_same_array) {
+
+      // Skip check for itself
+      if ((*it_array)[strings::choice_id] ==
+          (*it_same_array)[strings::choice_id]) {
+
+        continue;
+      }
+
+      if (compareSynonyms((*it_array), (*it_same_array))) {
+
+        LOG4CXX_ERROR(logger_,
+                      "Incoming choice set has duplicate VR command(s).");
+
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }
   }
 
-  return  mobile_apis::Result::SUCCESS;
+ return  mobile_apis::Result::SUCCESS;
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
 
-  if (choice1[strings::choice_id].asInt() ==
-      choice2[strings::choice_id].asInt()) {
-    return false;
-  }
-
   smart_objects::SmartArray* vr_cmds_1 =
       choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1);
+  DCHECK(vr_cmds_1 != NULL);
   smart_objects::SmartArray* vr_cmds_2 =
       choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2);
+  DCHECK(vr_cmds_2 != NULL);
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(), vr_cmds_1->end(),
@@ -176,10 +223,10 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
   if (it != vr_cmds_1->end()) {
     LOG4CXX_INFO(logger_, "Incoming choice set has duplicated VR synonyms "
                  << it->asString());
-    return false;
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 bool CreateInteractionChoiceSetRequest::compareStr(

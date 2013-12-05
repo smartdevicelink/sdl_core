@@ -1,11 +1,12 @@
 include_directories (
   ./include
   ../utils/include/
-  ../../thirdPartyLibs/logger/include/
+  ../config_profile/include/
   ../../thirdPartyLibs/MessageBroker/include/
 )
 
 set (SOURCES
+    ./src/watchdog.cc
     ./src/request_watchdog.cc
     ./src/request_info.cc
 )

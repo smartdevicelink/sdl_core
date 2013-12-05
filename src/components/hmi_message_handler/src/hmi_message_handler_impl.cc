@@ -82,7 +82,6 @@ HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnMessageReceived()");
-  DCHECK(message);
   if (!observer_) {
     LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
@@ -117,7 +116,7 @@ void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::RemoveHMIMessageAdapter()");
-  DCHECK(adapter);
+  DCHECK(adapter != NULL);
   message_adapters_.erase(adapter);
 }
 

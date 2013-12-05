@@ -77,6 +77,57 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   mobile_apis::Result::eType CheckChoiceSet(const Application* app);
 
   /*
+  * @brief Predicate for using with CheckChoiceSet method to compare choice ID param
+  *
+  * return TRUE if there is coincidence of choice ID, otherwise FALSE
+  */
+  struct CoincidencePredicateChoiceID {
+    explicit CoincidencePredicateChoiceID(const unsigned int newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::choice_id].asInt() == newItem_;
+    };
+
+    const unsigned int newItem_;
+  };
+
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare menu name param
+  *
+  * return TRUE if there is coincidence of menu name, otherwise FALSE
+  */
+  struct CoincidencePredicateMenuName {
+    explicit CoincidencePredicateMenuName(const std::string& newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return obj[strings::menu_name].asString() == newItem_;
+    };
+
+    const std::string& newItem_;
+  };
+
+  /*
+  * @brief Predicate for using with CheckChoiceSet method to compare VR commands param
+  *
+  * return TRUE if there is coincidence of VR commands, otherwise FALSE
+  */
+  struct CoincidencePredicateVRCommands {
+    explicit CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
+    :newItem_(newItem)
+    {};
+
+    bool operator()(smart_objects::SmartObject obj) {
+      return compareStr(obj, newItem_);
+    };
+
+    const smart_objects::SmartObject& newItem_;
+  };
+
+  /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
    *
    * @param choice1  Choice to compare

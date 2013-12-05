@@ -30,16 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/mobile_message_handler.h"
 #include "./to_mobile_thread_impl.h"
 
 namespace application_manager {
 
 log4cxx::LoggerPtr ToMobileThreadImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
+      log4cxx::Logger::getLogger("ApplicationManager"));
 
 ToMobileThreadImpl::ToMobileThreadImpl(ApplicationManagerImpl* handler)
-    : handler_(handler) {
-  DCHECK(handler);
+  : handler_(handler) {
+  DCHECK(handler != NULL);
 }
 
 ToMobileThreadImpl::~ToMobileThreadImpl() {
@@ -52,13 +53,23 @@ void ToMobileThreadImpl::threadMain() {
       LOG4CXX_INFO(logger_, "Received message to mobile");
       utils::SharedPtr<Message> message = handler_->messages_to_mobile_.pop();
 
-      if (!handler_->mobile_handler_) {
-        LOG4CXX_ERROR(
-            logger_, "Mobile Message Handler is not set for HMIMessageHandler");
+      protocol_handler::RawMessage* rawMessage = 0;
+      if (message->protocol_version() == application_manager::kV1) {
+        rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV1(
+                       message);
+      } else if (message->protocol_version() == application_manager::kV2) {
+        rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV2(
+                       message);
+      } else {
         continue;
       }
 
-      handler_->mobile_handler_->SendMessageToMobileApp(message);
+      if (!handler_->protocol_handler_) {
+        return;
+      }
+
+      handler_->protocol_handler_->SendMessageToMobileApp(rawMessage);
+
       LOG4CXX_INFO(logger_, "Message for mobile given away.");
     }
     handler_->messages_to_mobile_.wait();

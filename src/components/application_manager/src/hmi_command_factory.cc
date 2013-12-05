@@ -95,8 +95,6 @@
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_request.h"
 #include "application_manager/commands/hmi/ui_perform_interaction_response.h"
-#include "application_manager/commands/hmi/ui_show_vr_help_request.h"
-#include "application_manager/commands/hmi/ui_show_vr_help_response.h"
 #include "application_manager/commands/hmi/vr_is_ready_request.h"
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 #include "application_manager/commands/hmi/vr_add_command_request.h"
@@ -127,6 +125,8 @@
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_request.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_response.h"
+#include "application_manager/commands/hmi/tts_perform_interaction_request.h"
+#include "application_manager/commands/hmi/tts_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vi_is_ready_request.h"
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
@@ -152,6 +152,8 @@
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
+#include "application_manager/commands/hmi/on_tts_started_notification.h"
+#include "application_manager/commands/hmi/on_tts_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
@@ -303,14 +305,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UISetGlobalPropertiesResponse(message));
       } else {
         command.reset(new commands::UISetGlobalPropertiesRequest(message));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::UI_ShowVrHelp: {
-      if (is_response) {
-        command.reset(new commands::UIShowVrHelpResponse(message));
-      } else {
-        command.reset(new commands::UIShowVrHelpRequest(message));
       }
       break;
     }
@@ -504,6 +498,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::TTSGetCapabilitiesRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Started: {
+      command.reset(new commands::OnTTSStartedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Stopped: {
+      command.reset(new commands::OnTTSStoppedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
@@ -748,6 +750,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviStopStreamResponse(message));
       } else {
         command.reset(new commands::NaviStopStreamRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+      if (is_response) {
+        command.reset(new commands::TTSPerformInteractionResponse(message));
+      } else {
+        command.reset(new commands::TTSPerformInteractionRequest(message));
       }
       break;
     }

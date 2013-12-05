@@ -5,10 +5,20 @@ cmake_policy(SET CMP0015 NEW)
 link_directories(../thirdPartyLibs/libusbx)
 cmake_policy(POP)
 
+if (DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+${GSTREAMER_gst_INCLUDE_DIR}
+)
+else(DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+)
+endif()
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
+  v4_protocol_v1_2_no_extra
   SmartObjects
   formatters
   ProtocolHandler
@@ -27,23 +37,16 @@ set(LIBRARIES
   avahi-client
   avahi-common
   ConfigProfile
-  MobileMessageHandler
   RequestWatchdog
   policies
   MediaManager
   Libusb-1.0.16
 )
 
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
-
 include_directories (
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
-  ../components/mobile_message_handler/include
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
@@ -55,14 +58,10 @@ include_directories (
   ../components/smart_objects/include/
   ../components/media_manager/include/
   ../components/policies/include/
-  ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/components/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
+  ${default_media_inc}
 )
 
 set (SOURCES

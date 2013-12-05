@@ -35,8 +35,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "utils/synchronisation_primitives.h"
-#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -82,17 +80,38 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
 
  private:
 
-  // members
-  sync_primitives::SynchronisationPrimitives synchronisation_;
-  sync_primitives::Timer* timer_;
+  /*
+   * @brief Check new ID along with known mobile application ID
+   *
+   * return TRUE if ID is known already, otherwise - FALSE
+   */
+  bool IsApplicationRegistered();
+
+  /*
+   * @brief Check for some request param. names restrictions, e.g. for
+   * newline characters
+   *
+   * return SUCCESS if param name pass the check, otherwise - error code
+   * will be returned
+   */
+  mobile_apis::Result::eType CheckRestrictions() const;
+
+  /*
+   * @brief Removes hidden symbols and spaces
+   *
+   * return cleared copy of param name
+   */
+  std::string ClearParamName(std::string param_name) const;
+
 
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
    *
-   * return TRUE if there is coincidence of app.name/TTS/VR synonyms, otherwise FALSE
+   * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
+   * otherwise appropriate error code returns
   */
-  bool CheckCoincidence();
+  mobile_apis::Result::eType CheckCoincidence();
 
   /*
    * @brief Predicate for using with CheckCoincidence method to compare with TTS SO

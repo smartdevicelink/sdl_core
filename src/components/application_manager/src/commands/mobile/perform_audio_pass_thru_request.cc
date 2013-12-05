@@ -51,6 +51,11 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 }
 
+bool PerformAudioPassThruRequest::Init() {
+  default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
+  return true;
+}
+
 void PerformAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::Run");
 

@@ -1,7 +1,3 @@
-/**
- * @file CSmartSchema.hpp
- * @brief CSmartSchema header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,92 +28,89 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CSMARTSCHEMA_HPP__
-#define __CSMARTSCHEMA_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
 
 #include "utils/shared_ptr.h"
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        class SmartObject;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
 
-        /**
-         * @brief Smart Schema.
-         */
-        class CSmartSchema
-        {
-        public:
+/**
+ * @brief Smart Schema.
+ */
+class CSmartSchema {
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * Default constructor. Creates empty schema.
+   */
+  CSmartSchema();
 
-            /**
-             * @brief Constructor.
-             *
-             * Default constructor. Creates empty schema.
-             */
-            CSmartSchema();
+  /**
+   * @brief Constructor.
+   *
+   * Creates schema with given root schema item.
+   *
+   * @param SchemaItem Root schema item.
+   */
+  explicit CSmartSchema(utils::SharedPtr<ISchemaItem> SchemaItem);
 
-            /**
-             * @brief Constructor.
-             *
-             * Creates schema with given root schema item.
-             *
-             * @param SchemaItem Root schema item.
-             */
-            CSmartSchema(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object SmartObject to validate.
+   *
+   * @return Result of validation.
+   */
+  Errors::eType validate(const SmartObject& Object);
 
-            /**
-             * @brief Validate smart object.
-             *
-             * @param Object SmartObject to validate.
-             *
-             * @return Result of validation.
-             */
-            Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
+  /**
+   * @brief Set new root schema item.
+   *
+   * @param SchemaItem Root schema item.
+   */
+  void setSchemaItem(utils::SharedPtr<ISchemaItem> SchemaItem);
 
-            /**
-             * @brief Set new root schema item.
-             *
-             * @param SchemaItem Root schema item.
-             */
-            void setSchemaItem(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem);
+  /**
+   * @brief Apply schema.
+   *
+   * @param Object Object to apply schema.
+   **/
+  virtual void applySchema(SmartObject& Object);
 
-            /**
-             * @brief Apply schema.
-             *
-             * @param Object Object to apply schema.
-             **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief The reverse SmartObject conversion using schema.
+   *
+   * @param object Object to convert.
+   */
+  // TODO(cpplint): Is this a non-const reference?
+  // If so, make const or use a pointer.
+  virtual void unapplySchema(SmartObject& object);
 
-            /**
-             * @brief The reverse SmartObject conversion using schema.
-             *
-             * @param object Object to convert.
-             */
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
+  /**
+   * @brief Build smart object by smart schema having copied matched
+   *        parameters from pattern smart object
+   *
+   * @param pattern_object pattern object
+   * @param result_object object to build
+   */
+  virtual void BuildObjectBySchema(const SmartObject& pattern_object,
+                                   SmartObject& result_object) const;
 
-            /**
-             * @brief Build smart object by smart schema having copied matched
-             *        parameters from pattern smart object
-             *
-             * @param pattern_object pattern object
-             * @param result_object object to build
-             */
-            virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) const;
+  virtual ~CSmartSchema() {
+  }
 
-            virtual ~CSmartSchema() {}
+ protected:
+  /**
+   * @brief Root schema item.
+   */
+  utils::SharedPtr<ISchemaItem> mSchemaItem;
+};
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
-        protected:
-
-            /**
-             * @brief Root schema item.
-             */
-            utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> mSchemaItem;
-        };
-    }
-}
-
-#endif //__CSMARTSCHEMA_HPP__
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_

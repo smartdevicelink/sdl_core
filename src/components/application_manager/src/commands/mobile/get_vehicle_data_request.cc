@@ -72,23 +72,21 @@ void GetVehicleDataRequest::Run() {
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
-
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  const int min_length_msg_params = 1;
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first)
         && true == (*message_)[str::msg_params][it->first].asBool()) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-
-      // copy entirely msg
-      msg_params = (*message_)[strings::msg_params];
-      msg_params[strings::app_id] = app->app_id();
-
-      CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                       msg_params, true, 1);
-      return;
+      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
     }
   }
-
+  if (msg_params.length() > min_length_msg_params) {
+  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                         msg_params, true, 1);
+  return;
+  }
   SendResponse(false, mobile_apis::Result::INVALID_DATA);
 }
 

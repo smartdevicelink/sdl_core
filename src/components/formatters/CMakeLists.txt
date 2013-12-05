@@ -1,11 +1,9 @@
 include_directories (
   ./include/
-  ../TransportManager/include/
   ../protocol_handler/include/
   ../utils/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
-  ../../thirdPartyLibs/logger/include
   ../../../src/components/smart_objects/include
 )
 

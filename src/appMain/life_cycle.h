@@ -35,7 +35,6 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "application_manager/application_manager_impl.h"
@@ -66,7 +65,6 @@ class LifeCycle {
     LifeCycle();
     transport_manager::TransportManager* transport_manager_;
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
-    mobile_message_handler::MobileMessageHandlerImpl* mmh_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;

@@ -153,7 +153,7 @@ class TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend() = 0;
+  virtual void OnTMMessageSend(const RawMessageSptr message) = 0;
 
   /**
    * @brief Reaction to the event, when sending of massage by transport manager is failed.

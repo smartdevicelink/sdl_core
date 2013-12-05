@@ -1,7 +1,3 @@
-/**
- * @file Errors.hpp
- * @brief Errors namespace header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,56 +28,53 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CSMARTOBJECT_VALIDATION_ERRORS_HPP__
-#define __CSMARTOBJECT_VALIDATION_ERRORS_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        namespace Errors
-        {
-            /**
-             * @brief Enumeration that provides information about SmartObject validation errors
-             **/
-            enum eType {
-                /**
-                 * @brief Success validation
-                 **/
-                OK = 0,
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+namespace Errors {
+/**
+ * @brief Enumeration that provides information about SmartObject validation errors
+ **/
+enum eType {
+  /**
+   * @brief Success validation
+   **/
+  OK = 0,
 
-                /**
-                 * @brief Invalid value.
-                 **/
-                INVALID_VALUE,
+  /**
+   * @brief Invalid value.
+   **/
+  INVALID_VALUE,
 
-                /**
-                 * @brief Value is out of allowed range.
-                 **/
-                OUT_OF_RANGE,
+  /**
+   * @brief Value is out of allowed range.
+   **/
+  OUT_OF_RANGE,
 
-                /**
-                 * @brief Mandatory parameter is missing.
-                 **/
-                MISSING_MANDATORY_PARAMETER,
+  /**
+   * @brief Mandatory parameter is missing.
+   **/
+  MISSING_MANDATORY_PARAMETER,
 
-                /**
-                 * @brief Mandatory untitled (with any name) parameter is missing.
-                 **/
-                MISSING_MANDATORY_UNTITLED_PARAMETER,
+  /**
+    * @brief Mandatory untitled (with any name) parameter is missing.
+    **/
+  MISSING_MANDATORY_UNTITLED_PARAMETER,
 
-                /**
-                 * @brief Unexpected parameter.
-                 **/
-                UNEXPECTED_PARAMETER,
+  /**
+    * @brief Unexpected parameter.
+    **/
+  UNEXPECTED_PARAMETER,
 
-                /**
-                 * @brief General validation error
-                 **/
-                ERROR
-            };
-        }
-    }
-}
+  /**
+   * @brief General validation error
+   **/
+  ERROR
+};
+}  // namespace Errors
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
-#endif //__CSMARTOBJECT_VALIDATION_ERRORS_HPP__
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_

@@ -147,11 +147,20 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void SendUIPerformInteractionRequest(Application* const app);
 
   /*
-   * @brief Sends TTS Speak request to HMI
+   * @brief Sends TTS PerformInteraction request to HMI
    *
    * @param app_id Application ID
+   *
    */
-  void SendTTSSpeakRequest(Application* const app);
+  void SendTTSPerformInteractionRequest(Application* const app);
+
+  /*
+   * @brief Prepare request for sending to HMI
+   *
+   * @param array of structure of TTS
+   *
+   */
+  void DeleteParameterFromTTSChunk(smart_objects::SmartObject& array_tts_chunk);
 
   /*
    * @brief Sends UI Show VR help request to HMI
@@ -203,7 +212,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   bool is_keyboard_trigger_source_;
   mobile_apis::TriggerSource::eType trigger_source_;
-  bool is_vr_help_item_;
 };
 
 }  // namespace commands

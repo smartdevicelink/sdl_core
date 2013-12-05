@@ -37,7 +37,21 @@
 
 namespace application_manager {
 
+namespace {
+using namespace mobile_api::AudioStreamingState;
+
+void UpdateVRState(ApplicationManagerImpl* app_mgr,
+                   bool vr_session_is_active_on_hmi) {
+  // If VR session state is now different (has changed) on HMI
+  if (app_mgr->vr_session_started() != vr_session_is_active_on_hmi) {
+    app_mgr->set_vr_session_started(vr_session_is_active_on_hmi);
+  }
+}
+
+}
+
 namespace commands {
+using namespace mobile_api::SystemContext;
 
 OnSystemContextNotification::OnSystemContextNotification(
     const MessageSharedPtr& message)
@@ -50,59 +64,29 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 void OnSystemContextNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->active_application();
-
-  if (NULL == app) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    return;
-  }
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  const std::set<Application*>& app_list = app_mgr->applications();
+  std::set<Application*>::const_iterator it = app_list.begin();
 
   mobile_api::SystemContext::eType system_context =
-      static_cast<mobile_api::SystemContext::eType>(
-          (*message_)[strings::msg_params][hmi_notification::system_context]
-          .asInt());
+    static_cast<mobile_api::SystemContext::eType>(
+    (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
 
-  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION != system_context)
-      && (true == ApplicationManagerImpl::instance()->vr_session_started())
-      && app->is_media_application()) {
-    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
-    ApplicationManagerImpl::instance()->set_vr_session_started(false);
-  } else if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context)
-      && (!ApplicationManagerImpl::instance()->vr_session_started())
-      && app->is_media_application()) {
-    if (true == ApplicationManagerImpl::instance()->attenuated_supported()) {
-      app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::ATTENUATED);
-    } else {
-      app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
-    }
-    ApplicationManagerImpl::instance()->set_vr_session_started(true);
-  } else if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context &&
-      app->is_media_application()) {
-    app->set_audio_streaming_state(mobile_api::AudioStreamingState::AUDIBLE);
-  } else if (!(app->is_media_application())) {
-    app->set_audio_streaming_state(
-        mobile_api::AudioStreamingState::NOT_AUDIBLE);
-  } else {
-    // TODO(DK): check system context MENU HMI_OBSCURED
-  }
+  UpdateVRState(app_mgr, SYSCTXT_VRSESSION == system_context);
 
-  if (system_context != app->system_context()) {
-    app->set_system_context(system_context);
+  // SDLAQ-CRS-833 implementation
+  for (; app_list.end() != it; ++it) {
+    if (mobile_api::HMILevel::HMI_FULL == (*it)->hmi_level() ||
+        mobile_api::HMILevel::HMI_LIMITED == (*it)->hmi_level()) {
 
-    // If main we need to activate application and send HMI level notification
-    if (mobile_api::SystemContext::SYSCTXT_MAIN == system_context
-        && mobile_api::HMILevel::HMI_FULL != app->hmi_level()) {
-      ApplicationManagerImpl::instance()->ActivateApplication(app);
-    } else {
-      NotifyMobileApp(app);
+      // If context actually changed
+      if (system_context != (*it)->system_context()) {
+        (*it)->set_system_context(system_context);
+      }
+
+      MessageHelper::SendHMIStatusNotification((*(*it)));
     }
   }
-}
-
-void OnSystemContextNotification::NotifyMobileApp(Application* const app) {
-  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 }  // namespace commands

@@ -45,12 +45,9 @@ VIIsReadyResponse::~VIIsReadyResponse() {
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_INFO(logger_, "VIIsReadyResponse::Run");
-
-  DCHECK(message_);
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;
-
   if (object[strings::msg_params].keyExists(strings::available)) {
     is_available = object[strings::msg_params][strings::available].asBool();
   }

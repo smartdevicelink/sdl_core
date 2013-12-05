@@ -1,11 +1,3 @@
-find_package(Gstreamer-1.0 REQUIRED)
-find_package(Glib-2.0 REQUIRED)
-
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
-
 include_directories (
   ./include/
   ../utils/include/
@@ -13,7 +5,6 @@ include_directories (
   ../protocol_handler/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
-  ../mobile_message_handler/include
   ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
@@ -22,10 +13,6 @@ include_directories (
   ../policies/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
@@ -44,6 +31,7 @@ set (SOURCES
 ./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/mobile_message_handler.cc
 )
 
 set (POLICIES_MANAGER
@@ -210,6 +198,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
+./src/commands/hmi/tts_perform_interaction_request.cc
+./src/commands/hmi/tts_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
@@ -250,8 +240,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
-./src/commands/hmi/ui_show_vr_help_request.cc
-./src/commands/hmi/ui_show_vr_help_response.cc
 ./src/commands/hmi/vi_is_ready_request.cc
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
@@ -278,6 +266,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_tts_started_notification.cc
+./src/commands/hmi/on_tts_stopped_notification.cc
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc

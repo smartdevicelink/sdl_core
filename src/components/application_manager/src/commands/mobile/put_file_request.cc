@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/put_file_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -57,6 +58,14 @@ void PutFileRequest::Run() {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
+  }
+
+  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
+      profile::Profile::instance()->put_file_in_none() <= application->put_file_in_none_count()) {
+      // If application is in the HMI_NONE level the quantity of allowed
+      // PutFile request is limited by the configuration profile
+      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
+      SendResponse(false, mobile_apis::Result::REJECTED);
   }
 
   unsigned int free_space = file_system::AvailableSpaceApp(application->name());
@@ -91,6 +100,7 @@ void PutFileRequest::Run() {
                            file_data)) {
       application->AddFile(sync_file_name, is_persistent_file);
 
+      application->increment_put_file_in_none_count();
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       LOG4CXX_ERROR(logger_, "Unable to save file");

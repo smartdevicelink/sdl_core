@@ -19,9 +19,6 @@ add_subdirectory(./utils)
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
-# --- Mobile message handler
-add_subdirectory(./mobile_message_handler)
-
 # --- Application manager
 add_subdirectory(./application_manager)
 

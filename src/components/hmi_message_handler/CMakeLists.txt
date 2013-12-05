@@ -7,7 +7,6 @@ include_directories (
   ../protocol_handler/include
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
-  ${CMAKE_BINARY_DIR}/src/components/Interfaces/
 )
 
 set (SOURCES

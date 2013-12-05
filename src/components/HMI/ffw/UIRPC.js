@@ -40,7 +40,7 @@ FFW.UI = FFW.RPCObserver.create({
      *
      * @type {Boolean}
      */
-    isReady: false,
+    isReady: true,
 
     /**
      * access to basic RPC functionality
@@ -55,6 +55,8 @@ FFW.UI = FFW.RPCObserver.create({
     onShowNotificationSubscribeRequestID: -1,
 
     onShowNotificationUnsubscribeRequestID: -1,
+
+    performInteractionRequestID: null,
 
     // const
     onShowNotificationNotification: "UI.ShowNotification",
@@ -220,8 +222,14 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.PerformInteraction":
                 {
+                    if (!this.performInteractionRequestID) {
+                        this.performInteractionRequestID = request.id;
+                    } else {
+                        this.interactionResponse(SDL.SDLModel.resultCode['REJECTED']);
+                        return;
+                    }
 
-                    SDL.SDLModel.uiPerformInteraction(request.params, request.id);
+                    SDL.SDLModel.uiPerformInteraction(request.params);
 
                     break;
                 }
@@ -430,7 +438,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ShowVrHelp":
                 {
 
-                    SDL.SDLModel.ShowVrHelp(request.params);
+                    //SDL.SDLModel.ShowVrHelp(request.params);
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -644,7 +652,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {Object} touchLists
      * @param {Object} info
      */
-    onTouchEvent: function (type, touchLists, info) {
+    onTouchEvent: function (type, event) {
 
         Em.Logger.log("FFW.UI.OnTouchEvent");
 
@@ -652,9 +660,8 @@ FFW.UI = FFW.RPCObserver.create({
             "jsonrpc": "2.0",
             "method": "UI.OnTouchEvent",
             "params": {
-                "eventType": type,
-                "touchLists": touchLists,
-                "info": info
+                "type": type,
+                "event": event
             }
         };
         this.client.send(JSONMessage);
@@ -693,7 +700,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {Number}
      *            commandID
      */
-    interactionResponse: function (resultCode, performInteractionRequestID, commandID, manualTextEntry) {
+    interactionResponse: function (resultCode, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
@@ -701,7 +708,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": performInteractionRequestID,
+                "id": this.performInteractionRequestID,
                 "result": {
                     "code": resultCode,
                     "method": "UI.PerformInteraction"
@@ -719,7 +726,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": performInteractionRequestID,
+                "id": this.performInteractionRequestID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "message": "Perform Interaction error response.",
@@ -730,10 +737,8 @@ FFW.UI = FFW.RPCObserver.create({
             };
         }
 
-
-
-
         this.client.send(JSONMessage);
+        this.performInteractionRequestID = null;
     },
 
     /**

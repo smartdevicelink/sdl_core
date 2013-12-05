@@ -69,11 +69,11 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         classNames: 'message'
     }),
 
-    ActivateTTS: function(msg, id) {
+    ActivateTTS: function(msg) {
 
         var self = this;
 
-        this.requestId = id;
+        //this.requestId = id;
 
         this.set('content', msg);
         this.set('active', true);
@@ -83,25 +83,14 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
             self.DeactivateTTS();
         }, 2000); // 2 second timeout for TTS popUp
+        FFW.TTS.Started();
     },
 
-    DeactivateTTS: function(aborted) {
-
-        if (aborted) {
-            FFW.TTS.sendError(SDL.SDLModel.resultCode["ABORTED"],
-                this.requestId,
-                "TTS.Speak",
-                "TTS Speak request aborted");
-        } else {
-            FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
-                this.requestId,
-                "TTS.Speak");
-        }
-
-        this.requestId = null;
-
+    DeactivateTTS: function() {
         clearTimeout(this.timer);
         this.set('active', false);
+        SDL.SDLController.TTSResponseHandler();
+        FFW.TTS.Stopped();
     },
 
     /**
@@ -111,6 +100,6 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
         this._super();
 
-        FFW.TTS.set('isReady', true);
+        //FFW.TTS.set('isReady', true);
     }
 });

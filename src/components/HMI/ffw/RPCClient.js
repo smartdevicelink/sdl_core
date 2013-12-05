@@ -256,6 +256,10 @@ FFW.RPCClient = Em.Object
             if (this.socket.readyState == this.socket.OPEN) {
                 var strJson = JSON.stringify(obj);
                 Em.Logger.log(strJson);
+
+                var logTime = new Date();
+                console.log(logTime.getHours() + ":" + logTime.getMinutes() + ":" + logTime.getSeconds() + ":" + logTime.getMilliseconds());
+
                 this.socket.send(strJson);
             } else {
                 Em.Logger
