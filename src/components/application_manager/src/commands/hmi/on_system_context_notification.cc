@@ -54,15 +54,9 @@ void UnmuteAudioStream(Application* app) {
 }
 
 void UpdateVRState(ApplicationManagerImpl* app_mgr,
-                   Application* app,
                    bool vr_session_is_active_on_hmi) {
   // If VR session state is now different (has changed) on HMI
   if (app_mgr->vr_session_started() != vr_session_is_active_on_hmi) {
-    if (vr_session_is_active_on_hmi)
-      MuteAudioStream(app_mgr, app);
-    else
-      UnmuteAudioStream(app);
-
     app_mgr->set_vr_session_started(vr_session_is_active_on_hmi);
   }
 }
@@ -83,22 +77,35 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 void OnSystemContextNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
 
-  // Only currently active app will receive HMI context update
-  Application* app = ApplicationManagerImpl::instance()->active_application();
-  // If there is active application
-  if (app) {
-    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  const std::set<Application*>& app_list = app_mgr->applications();
+  std::set<Application*>::const_iterator it = app_list.begin();
 
-    mobile_api::SystemContext::eType system_context =
-        static_cast<mobile_api::SystemContext::eType>((*message_)[strings::msg_params][hmi_notification::system_context]
-            .asInt());
+  mobile_api::SystemContext::eType system_context =
+    static_cast<mobile_api::SystemContext::eType>(
+    (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
 
-    // If context actually changed
-    if (system_context != app->system_context()) {
-      app->set_system_context(system_context);
-      if (app->is_media_application()) {
-        UpdateVRState(app_mgr, app, SYSCTXT_VRSESSION == system_context);
+  UpdateVRState(app_mgr, SYSCTXT_VRSESSION == system_context);
+
+  // SDLAQ-CRS-833 implementation
+  for (; app_list.end() != it; ++it) {
+    if (mobile_api::HMILevel::HMI_FULL == (*it)->hmi_level() ||
+        mobile_api::HMILevel::HMI_LIMITED == (*it)->hmi_level()) {
+
+      // If context actually changed
+      if (system_context != (*it)->system_context()) {
+        (*it)->set_system_context(system_context);
       }
+
+      // update audio stream state
+      if ((*it)->is_media_application()) {
+        if (SYSCTXT_VRSESSION == system_context) {
+          MuteAudioStream(app_mgr, app);
+        } else {
+          UnmuteAudioStream(app);
+        }
+      }
+
       NotifyMobileApp(app);
     }
   }
