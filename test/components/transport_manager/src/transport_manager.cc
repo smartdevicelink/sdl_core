@@ -94,7 +94,7 @@ class TransportManagerTest : public ::testing::Test {
     pthread_cond_init(&test_cond, NULL);
     mock_adapter = new MockTransportAdapter();
     mock_adapter->Init();
-    TransportManagerAttr cfg {0};
+    TransportManagerAttr cfg{0};
 
     tm = new TransportManagerImpl(cfg);
 
@@ -105,7 +105,7 @@ class TransportManagerTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-    tm->RemoveEventListener(tm_listener);
+    tm->Stop();
     delete tm_listener;
     pthread_cond_destroy(&test_cond);
     pthread_mutex_destroy(&test_mutex);
@@ -118,21 +118,19 @@ class TransportManagerTest : public ::testing::Test {
     pthread_mutex_lock(&test_mutex);
   }
 
-  virtual void TearDown() {
-    pthread_mutex_unlock(&test_mutex);
-  }
+  virtual void TearDown() { pthread_mutex_unlock(&test_mutex); }
 
   bool waitCond(int seconds) {
-    if (one_thread)
-      return true;
+    if (one_thread) return true;
     timespec elapsed;
     clock_gettime(CLOCK_REALTIME, &elapsed);
     elapsed.tv_sec += seconds;
-    return pthread_cond_timedwait(&test_cond, &test_mutex, &elapsed) != ETIMEDOUT;
+    return pthread_cond_timedwait(&test_cond, &test_mutex, &elapsed) !=
+           ETIMEDOUT;
   }
 };
 
-TransportManagerImpl * TransportManagerTest::tm;
+TransportManagerImpl *TransportManagerTest::tm;
 
 class MyTransportListener : public ::transport_manager::TransportManagerListenerEmpty {
  public:
@@ -140,12 +138,11 @@ class MyTransportListener : public ::transport_manager::TransportManagerListener
       : TransportManagerListenerEmpty(),
         test(test),
         connection(0),
-        device_handle(0) {
-  }
+        device_handle(0) {}
   ConnectionUID connection;
   DeviceHandle device_handle;
-  void OnConnectionEstablished(const DeviceInfo& device,
-                               const ConnectionUID& connection_id) {
+  void OnConnectionEstablished(const DeviceInfo &device,
+                               const ConnectionUID &connection_id) {
     connection = connection_id;
 
     pthread_mutex_lock(&test->test_mutex);
@@ -153,7 +150,7 @@ class MyTransportListener : public ::transport_manager::TransportManagerListener
     pthread_mutex_unlock(&test->test_mutex);
   }
 
-  void OnDeviceFound(const DeviceInfo& device_info) {
+  void OnDeviceFound(const DeviceInfo &device_info) {
     device_handle = device_info.device_handle();
   }
 
@@ -173,7 +170,7 @@ class MyTransportListener : public ::transport_manager::TransportManagerListener
   }
 
  private:
-  TransportManagerTest * test;
+  TransportManagerTest *test;
 };
 
 pthread_mutex_t TransportManagerTest::test_mutex;
@@ -184,7 +181,8 @@ MockTransportManagerListener *TransportManagerTest::tm_listener = NULL;
 
 TEST_F(TransportManagerTest, ScanDeviceFailed) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1).WillOnce(SignalTest(this));
+  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(1).WillOnce(
+      SignalTest(this));
 
   mock_adapter->get_device_scanner()->fail_further_search();
   tm->SearchDevices();
@@ -195,7 +193,8 @@ TEST_F(TransportManagerTest, ScanDeviceFailed) {
 TEST_F(TransportManagerTest, ScanDeviceNoFound) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(0);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
+  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(
+      SignalTest(this));
 
   tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
@@ -205,7 +204,8 @@ TEST_F(TransportManagerTest, ScanDeviceNoFound) {
 TEST_F(TransportManagerTest, ScanDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
+  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(
+      SignalTest(this));
 
   mock_adapter->get_device_scanner()->AddDevice("TestDevice", "MA:CA:DR:ES:S");
   tm->SearchDevices();
@@ -216,9 +216,12 @@ TEST_F(TransportManagerTest, ScanDeviceDone) {
 TEST_F(TransportManagerTest, ScanManyDeviceDone) {
   EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_)).Times(0);
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(2);
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(SignalTest(this));
-  mock_adapter->get_device_scanner()->AddDevice("TestDevice1", "MA:CA:DR:ES:S1");
-  mock_adapter->get_device_scanner()->AddDevice("TestDevice2", "MA:CA:DR:ES:S2");
+  EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1).WillOnce(
+      SignalTest(this));
+  mock_adapter->get_device_scanner()->AddDevice("TestDevice1",
+                                                "MA:CA:DR:ES:S1");
+  mock_adapter->get_device_scanner()->AddDevice("TestDevice2",
+                                                "MA:CA:DR:ES:S2");
   tm->SearchDevices();
   EXPECT_TRUE(waitCond(1));
   mock_adapter->get_device_scanner()->reset();
@@ -231,42 +234,46 @@ TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);
   EXPECT_CALL(*tm_listener, OnScanDevicesFinished()).Times(1);
   MyTransportListener *myListener = new MyTransportListener(this);
-  mock_adapter->get_device_scanner()->AddDevice(kInfo.name(), kInfo.mac_address());
+  mock_adapter->get_device_scanner()->AddDevice(kInfo.name(),
+                                                kInfo.mac_address());
   tm->AddEventListener(myListener);
   tm->SearchDevices();
   EXPECT_TRUE(waitCond(10));
 
   EXPECT_CALL(*tm_listener, OnConnectionFailed(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionEstablished(kInfo, kConnection)).Times(1);
+  EXPECT_CALL(*tm_listener, OnConnectionEstablished(kInfo, kConnection))
+      .Times(1);
   tm->ConnectDevice(kInfo.device_handle());
   EXPECT_TRUE(waitCond(10));
 
-  const int kTimes = 100; // Times of send message
+  const int kTimes = 100;  // Times of send message
   const unsigned int kVersionProtocol = 1;
   EXPECT_CALL(*tm_listener, OnTMMessageSendFailed(_, _)).Times(0);
   EXPECT_CALL(*tm_listener, OnTMMessageReceiveFailed(_, _)).Times(0);
   EXPECT_CALL(*tm_listener, OnConnectionClosed(kConnection)).Times(0);
-  //EXPECT_CALL(*tm_listener, OnTMMessageSend()).Times(kTimes); // FIXME (dchmerev@luxoft.com): make proper expect_call
+  // EXPECT_CALL(*tm_listener, OnTMMessageSend()).Times(kTimes); // FIXME
+  // (dchmerev@luxoft.com): make proper expect_call
   EXPECT_CALL(*tm_listener, OnTMMessageReceived(_)).Times(kTimes);
 
   const unsigned int kSize = 12;
-  unsigned char data[kSize] = { 0x20, 0x07, 0x01, 0x00,
-                                0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00, 0x00, 0x00 };
+  unsigned char data[kSize] = {0x20, 0x07, 0x01, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   for (int i = 0; i < kTimes; ++i) {
-    const RawMessageSptr kMessage = new RawMessage(kConnection, kVersionProtocol,
-                                                   data, kSize);
+    const RawMessageSptr kMessage =
+        new RawMessage(kConnection, kVersionProtocol, data, kSize);
     tm->SendMessageToDevice(kMessage);
   }
   EXPECT_TRUE(waitCond(10));
 
   EXPECT_CALL(*tm_listener, OnConnectionClosedFailure(_, _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnDisconnectFailed(kInfo.device_handle(), _)).Times(0);
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(kConnection)).Times(1).WillOnce(SignalTest(this));
+  EXPECT_CALL(*tm_listener, OnDisconnectFailed(kInfo.device_handle(), _))
+      .Times(0);
+  EXPECT_CALL(*tm_listener, OnConnectionClosed(kConnection)).Times(1).WillOnce(
+      SignalTest(this));
   tm->DisconnectDevice(kInfo.device_handle());
   EXPECT_TRUE(waitCond(10));
 
-  tm->RemoveEventListener(myListener);
+  tm->Stop();
   delete myListener;
   mock_adapter->get_device_scanner()->reset();
 }
@@ -275,7 +282,7 @@ TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
 }  // namespace components
 }  // namespace test
 
-int main(int argc, char** argv) {
-testing::InitGoogleTest(&argc, argv);
-return RUN_ALL_TESTS();
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

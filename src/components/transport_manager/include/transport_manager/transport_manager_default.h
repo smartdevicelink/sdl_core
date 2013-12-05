@@ -38,14 +38,6 @@
 
 #include "transport_manager/transport_manager_impl.h"
 
-#ifdef BLUETOOTH_SUPPORT
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-using transport_manager::transport_adapter::BluetoothTransportAdapter;
-#endif
-
-#include "transport_manager/tcp/tcp_transport_adapter.h"
-using transport_manager::transport_adapter::TcpTransportAdapter;
-
 namespace transport_manager {
 
 /**
@@ -65,17 +57,9 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
-#ifdef BLUETOOTH_SUPPORT
-  TransportAdapterSptr bluetooth_da_;
-#endif
-  TransportAdapterSptr tcp_da_;
-#ifdef USB_SUPPORT
-  TransportAdapterSptr usb_aoa_da_;
-#endif
-  explicit TransportManagerDefault(const TransportManagerAttr &config);
+  explicit TransportManagerDefault(const TransportManagerAttr& config);
 
-public:
-
+ public:
   /**
    * @brief Create instance of itself.
    *

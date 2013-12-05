@@ -49,8 +49,6 @@
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include <transport_manager/timer.h>
 
-using ::transport_manager::AdapterIterator;
-using ::transport_manager::transport_adapter::TransportAdapterSptr;
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
 namespace transport_manager {
@@ -76,7 +74,6 @@ struct TransportManagerAttr {
  */
 class TransportManagerImpl : public TransportManager {
  public:
-
   /**
    * @brief Hold connection parameters.
    */
@@ -91,12 +88,12 @@ class TransportManagerImpl : public TransportManager {
    * @brief Structure that contains internal connection parameters
    */
   struct ConnectionInternal: public Connection {
-    TransportAdapterSptr transport_adapter;
+    TransportAdapter* transport_adapter;
     Timer timer;
     bool shutDown;
     int messages_count;
 
-    ConnectionInternal(TransportAdapterSptr transport_adapter,
+    ConnectionInternal(TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
                        const ApplicationHandle& app_id)
         : transport_adapter(transport_adapter),
@@ -154,7 +151,8 @@ class TransportManagerImpl : public TransportManager {
   static void DisconnectFailedRoutine(void* p);
 
   /**
-   * @brief Disconnect from applications connected on device by connection unique identifier.
+   * @brief Disconnect from applications connected on device by connection
+   *unique identifier.
    *
    * @param connection Connection unique identifier.
    *
@@ -195,14 +193,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   virtual int AddEventListener(TransportManagerListener* listener);
 
-  /**
-   * @brief Delete listener from the container of transport manager listeners.
-   *
-   * @param listener Pointer to the transport manager listener.
-   *
-   * @return Code error.
-   **/
-  virtual int RemoveEventListener(TransportManagerListener* listener);
+  virtual int Stop();
 
   /**
    * @brief Add device adapter to the container of device adapters.
@@ -212,17 +203,7 @@ class TransportManagerImpl : public TransportManager {
    * @return Code error.
    **/
   virtual int AddTransportAdapter(
-      transport_adapter::TransportAdapterSptr transport_adapter);
-
-  /**
-   * @brief Remove device adapter from the container of device adapters.
-   *
-   * @param transport_adapter Smart pointer to the device adapter.
-   *
-   * @return Code error.
-   */
-  int RemoveTransportAdapter(
-      transport_adapter::TransportAdapterSptr transport_adapter);
+      transport_adapter::TransportAdapter* transport_adapter);
 
   /**
    * @brief Remove device from the container that hold devices.
@@ -246,14 +227,7 @@ class TransportManagerImpl : public TransportManager {
    * @brief Updates total device list with info from specific transport adapter.
    * @param ta Transport adapter
    */
-  void UpdateDeviceList(TransportAdapterSptr ta);
-
-  /**
-   * @brief Return container that hold connections.
-   *
-   * @return Container that hold connections.
-   */
-  std::vector<Connection> GetConnectionList();
+  void UpdateDeviceList(TransportAdapter* ta);
 
   /**
    * @brief Constructor.
@@ -268,10 +242,11 @@ class TransportManagerImpl : public TransportManager {
    */
   TransportManagerAttr config_;
 
-  template<class Proc, class ... Args>
-  void RaiseEvent(Proc proc, Args ... args) {
-    for (TransportManagerListenerList::iterator it = transport_manager_listener_
-        .begin(); it != transport_manager_listener_.end(); ++it) {
+  template <class Proc, class... Args>
+  void RaiseEvent(Proc proc, Args... args) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end(); ++it) {
       ((*it)->*proc)(args...);
     }
   }
@@ -291,7 +266,8 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   /*not clear when this function shall be used
-   * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr new_message);*/
+   * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr
+   * new_message);*/
 
   /**
    * @brief Remove message from the container of massages.
@@ -315,7 +291,8 @@ class TransportManagerImpl : public TransportManager {
   void PostEvent(const TransportAdapterEvent& event);
 
   /**
-   * @brief Type definition of container that holds smart pointer to the raw massages.
+   * @brief Type definition of container that holds smart pointer to the raw
+   *massages.
    **/
   typedef std::list<RawMessageSptr> MessageQueue;
 
@@ -324,17 +301,11 @@ class TransportManagerImpl : public TransportManager {
    **/
   typedef std::vector<TransportAdapterEvent> EventQueue;
 
-  /**
-   * @brief Constructor.
-   *
-   * @param transport_adapter_list container that holds smart pointer to the device adapters.
-   **/
-  explicit TransportManagerImpl(
-      std::vector<transport_adapter::TransportAdapterSptr> transport_adapter_list);
-
   static void* MessageQueueStartThread(void* data);
+
   /**
-   * @brief Scan message's queue and pull messages according to priority and serial number
+   * @brief Scan message's queue and pull messages according to priority and
+   *serial number
    *
    * @param
    *
@@ -374,7 +345,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   mutable pthread_mutex_t message_queue_mutex_;
 
-  pthread_cond_t message_queue_cond;
+  pthread_cond_t message_queue_cond_;
 
   /**
    * @brief store events from comming device
@@ -400,7 +371,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief ID of message queue processing thread
    **/
-  pthread_t messsage_queue_thread_;
+  pthread_t message_queue_thread_;
 
   /**
    * @brief Conditional event thread
@@ -421,8 +392,8 @@ class TransportManagerImpl : public TransportManager {
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
- private:
 
+ private:
   /**
    * @brief Returns size of frame to be formed from raw bytes.
    * expects first bytes of message which will be treated as frame header.
@@ -432,7 +403,8 @@ class TransportManagerImpl : public TransportManager {
   unsigned int GetPacketSize(unsigned int size, unsigned char* data);
 
   /**
-   * @brief Structure that contains conversion functions (Device ID -> Device Handle; Device Handle -> Device ID)
+   * @brief Structure that contains conversion functions (Device ID -> Device
+   * Handle; Device Handle -> Device ID)
    */
   struct Handle2GUIDConverter {
     typedef std::vector<DeviceUID> ConversionTable;
@@ -443,12 +415,12 @@ class TransportManagerImpl : public TransportManager {
     }
 
     DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
-      ConversionTable::iterator it = std::find(conversion_table_.begin(),
-                                               conversion_table_.end(),
-                                               dev_uid);
+      ConversionTable::iterator it = std::find(
+          conversion_table_.begin(), conversion_table_.end(), dev_uid);
       if (it != conversion_table_.end()) {
         is_new = false;
-        return std::distance(conversion_table_.begin(), it) + 1;  // handle begin since 1 (one)
+        return std::distance(conversion_table_.begin(), it) +
+               1;  // handle begin since 1 (one)
       }
       is_new = true;
       conversion_table_.push_back(dev_uid);
@@ -466,7 +438,8 @@ class TransportManagerImpl : public TransportManager {
   };
 
   /**
-   * @brief Converter variable (Device ID -> Device Handle; Device Handle -> Device ID)
+   * @brief Converter variable (Device ID -> Device Handle; Device Handle ->
+   * Device ID)
    */
   Handle2GUIDConverter converter_;
 
@@ -474,12 +447,14 @@ class TransportManagerImpl : public TransportManager {
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;
   std::vector<ConnectionInternal> connections_;
-  std::map<DeviceUID, TransportAdapterSptr> device_to_adapter_map_;
-  std::vector<TransportAdapterSptr> transport_adapters_;
+  std::map<DeviceUID, TransportAdapter*> device_to_adapter_map_;
+  std::vector<TransportAdapter*> transport_adapters_;
   /** For keep listeners which were add TMImpl */
-  std::map<TransportAdapterSptr, TransportAdapterListenerImpl*> transport_adapter_listeners_;
+  std::map<TransportAdapter*, TransportAdapterListenerImpl*>
+      transport_adapter_listeners_;
 
-  typedef std::vector<std::pair<TransportAdapterSptr, DeviceInfo> > DeviceList;
+  typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
+      DeviceList;
   DeviceList device_list_;
 
   class IncomingDataHandler;
@@ -493,19 +468,21 @@ class TransportManagerImpl : public TransportManager {
 
   void AddDataToContainer(
       ConnectionUID id,
-      std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >& container,
+      std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >&
+          container,
       unsigned char* data, unsigned int data_size);
   bool GetFrameSize(unsigned char* data, unsigned int data_size,
                     unsigned int& frame_size);
-  bool GetFrame(
-      std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >& container,
-      ConnectionUID id, unsigned int frame_size, unsigned char** frame);
+  bool GetFrame(std::map<ConnectionUID,
+                         std::pair<unsigned int, unsigned char*> >& container,
+                ConnectionUID id, unsigned int frame_size,
+                unsigned char** frame);
 
-  void OnDeviceListUpdated(const TransportAdapterSptr& ta);
+  void OnDeviceListUpdated(TransportAdapter* ta);
   static Connection convert(ConnectionInternal& p);
 };
-//class ;
+// class ;
 
-}// namespace transport_manager
+}  // namespace transport_manager
 
 #endif
