@@ -44,6 +44,8 @@ total_warning_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]
 total_info_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
 total_note_quantity=$(awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Note" -v counter=0 '$5==val {counter++} END {print counter}')
 
+awk '{print $0}' ./err_warn_inf_names.tmp | awk '!x[$0]++' >> list_of_err_warn_inf_note.txt
+
 echo 	Summary >> ./developers/total.txt
 echo >> ./developers/total.txt
 echo -e ' \t 'Errors:   $total_error_quantity >> ./developers/total.txt
