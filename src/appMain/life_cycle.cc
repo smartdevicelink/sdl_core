@@ -262,9 +262,9 @@ void LifeCycle::StopComponents(int params) {
   instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
   instance()->app_manager_->~ApplicationManagerImpl();
 
+  instance()->transport_manager_->Stop();
+
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->connection_handler_);
   instance()->protocol_handler_->set_session_observer(NULL);
   instance()->connection_handler_->~ConnectionHandlerImpl();
 
@@ -273,8 +273,6 @@ void LifeCycle::StopComponents(int params) {
   delete instance()->mmh_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->protocol_handler_);
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
 #ifdef MEDIA_MANAGER
