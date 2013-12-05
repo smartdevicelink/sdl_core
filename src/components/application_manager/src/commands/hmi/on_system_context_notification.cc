@@ -40,19 +40,6 @@ namespace application_manager {
 namespace {
 using namespace mobile_api::AudioStreamingState;
 
-void MuteAudioStream(const ApplicationManagerImpl* app_mgr,
-                          Application* app) {
-  if (app_mgr->attenuated_supported()) {
-    app->set_audio_streaming_state(ATTENUATED);
-  } else {
-    app->set_audio_streaming_state(NOT_AUDIBLE);
-  }
-}
-
-void UnmuteAudioStream(Application* app) {
-  app->set_audio_streaming_state(AUDIBLE);
-}
-
 void UpdateVRState(ApplicationManagerImpl* app_mgr,
                    bool vr_session_is_active_on_hmi) {
   // If VR session state is now different (has changed) on HMI
@@ -97,22 +84,9 @@ void OnSystemContextNotification::Run() {
         (*it)->set_system_context(system_context);
       }
 
-      // update audio stream state
-      if ((*it)->is_media_application()) {
-        if (SYSCTXT_VRSESSION == system_context) {
-          MuteAudioStream(app_mgr, *it);
-        } else {
-          UnmuteAudioStream(*it);
-        }
-      }
-
-      NotifyMobileApp(*it);
+      MessageHelper::SendHMIStatusNotification((*(*it)));
     }
   }
-}
-
-void OnSystemContextNotification::NotifyMobileApp(Application* const app) {
-  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 }  // namespace commands

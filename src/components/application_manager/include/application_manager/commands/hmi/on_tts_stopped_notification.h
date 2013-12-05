@@ -30,32 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_SPEAK_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_SPEAK_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_STOPPED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_STOPPED_NOTIFICATION_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief TTSSpeakRequest command class
+ * @brief OnTTSStoppedNotification command class
  **/
-class TTSSpeakRequest
-    : public RequestToHMI {
+class OnTTSStoppedNotification : public NotificationFromHMI {
  public:
   /**
-   * @brief TTSSpeakRequest class constructor
+   * @brief OnTTSStoppedNotification class constructor
    *
-   * @param message Incoming SmartObject message
+   * @param message Incoming SmartObject OnTTSStartedNotificationmessage
    **/
-  explicit TTSSpeakRequest(const MessageSharedPtr& message);
+  explicit OnTTSStoppedNotification(const MessageSharedPtr& message);
 
   /**
-   * @brief TTSSpeakRequest class destructor
+   * @brief OnTTSStoppedNotification class destructor
    **/
-  virtual ~TTSSpeakRequest();
+  virtual ~OnTTSStoppedNotification();
 
   /**
    * @brief Execute command
@@ -63,11 +62,11 @@ class TTSSpeakRequest
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TTSSpeakRequest);
+  DISALLOW_COPY_AND_ASSIGN(OnTTSStoppedNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_SPEAK_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_TTS_STOPPED_NOTIFICATION_H_

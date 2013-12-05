@@ -48,7 +48,6 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
-./src/commands/tts_interface.cc
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -266,6 +265,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_tts_started_notification.cc
+./src/commands/hmi/on_tts_stopped_notification.cc
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc

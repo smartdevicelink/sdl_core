@@ -1656,7 +1656,6 @@ void ApplicationManagerImpl::UnregisterAppInterface(
 }
 
 void ApplicationManagerImpl::Mute() {
-
   mobile_apis::AudioStreamingState::eType state = attenuated_supported()
       ? mobile_apis::AudioStreamingState::ATTENUATED
       : mobile_apis::AudioStreamingState::NOT_AUDIBLE
@@ -1665,8 +1664,10 @@ void ApplicationManagerImpl::Mute() {
   std::set<Application*>::const_iterator it = application_list_.begin();
   std::set<Application*>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
-    (*it)->set_audio_streaming_state(state);
-    MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it)->is_media_application()) {
+      (*it)->set_audio_streaming_state(state);
+      MessageHelper::SendHMIStatusNotification(*(*it));
+    }
   }
 }
 
@@ -1674,8 +1675,12 @@ void ApplicationManagerImpl::Unmute() {
   std::set<Application*>::const_iterator it = application_list_.begin();
   std::set<Application*>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
-    (*it)->set_audio_streaming_state(mobile_apis::AudioStreamingState::AUDIBLE);
-    MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it)->is_media_application()) {
+      (*it)->set_audio_streaming_state(
+          mobile_apis::AudioStreamingState::AUDIBLE
+          );
+      MessageHelper::SendHMIStatusNotification(*(*it));
+    }
   }
 }
 

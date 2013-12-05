@@ -152,6 +152,8 @@
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
+#include "application_manager/commands/hmi/on_tts_started_notification.h"
+#include "application_manager/commands/hmi/on_tts_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
@@ -496,6 +498,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::TTSGetCapabilitiesRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Started: {
+      command.reset(new commands::OnTTSStartedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Stopped: {
+      command.reset(new commands::OnTTSStoppedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
