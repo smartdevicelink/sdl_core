@@ -555,7 +555,7 @@ void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
 #else
   pthread_mutex_unlock(&message_queue_mutex_);
 #endif
-  pthread_cond_signal(&message_queue_cond);
+  pthread_cond_signal(&message_queue_cond_);
   LOG4CXX_INFO(logger_, "Post message complete");
 }
 
@@ -578,14 +578,6 @@ void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Remove message from queue complete");
 }
 
-#ifdef USE_RWLOCK
-  pthread_rwlock_wrlock(&event_queue_rwlock_);
-#else
-#endif
-#ifdef USE_RWLOCK
-  pthread_rwlock_unlock(&event_queue_rwlock_);
-#else
-#endif
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
 #ifdef USE_RWLOCK
   pthread_rwlock_wrlock(&event_queue_rwlock_);

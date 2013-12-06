@@ -95,6 +95,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-D__USE_UNIX98)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   add_definitions(-DOS_QNX)
+  add_definitions(-D__EXT_POSIX1_200112)
 endif()
 
 IF(CMAKE_C_FLAGS_DEBUG)
