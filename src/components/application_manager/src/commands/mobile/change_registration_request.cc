@@ -73,121 +73,83 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
+  if (!instance->is_ui_cooperating()) {
+    ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  }
+
+  if (!instance->is_vr_cooperating()) {
+    vr_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  }
+
+  if (!instance->is_tts_cooperating()) {
+    tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  }
+
   const int hmi_language =
       (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
   const int language =
       (*message_)[strings::msg_params][strings::language].asInt();
 
-  hmi_apis::Common_Result::eType result = hmi_apis::Common_Result::INVALID_ENUM;
-
-  bool ui_flag = false;
-  bool vr_flag = false;
-  bool tts_flag = false;
-
-  if (instance->is_ui_cooperating()) {
-    if (false == IsLanguageSupportedByUI(hmi_language)) {
-      LOG4CXX_ERROR(logger_, "Language is not supported");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
-    }
-
-    if (app->ui_language() != hmi_language) {
-      ui_flag = true;
-    }
-  } else {
-   ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
-
-  if (instance->is_vr_cooperating()) {
-    if (false == IsLanguageSupportedByVR(language)) {
-      LOG4CXX_ERROR(logger_, "Language is not supported");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
-    }
-    if (app->language() != language) {
-      vr_flag = true;
-    }
-  } else {
-    vr_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
-
-  if (instance->is_tts_cooperating()) {
-    if (false == IsLanguageSupportedByTTS(language)) {
-      LOG4CXX_ERROR(logger_, "Language is not supported");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
-    }
-    if (app->language() != language) {
-      tts_flag = true;
-    }
-  } else {
-    tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  }
-
-  if (vr_flag) {
-    is_vr_send_ = true;
-  }
-
-  if (tts_flag) {
-    is_tts_send_ = true;
-  }
-
-  if (ui_flag) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
-    msg_params[strings::language] = hmi_language;
-    msg_params[strings::app_id] = app->app_id();
-
-    is_ui_send_ = true;
-    SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
-                   &msg_params, true);
-  }
-
-  if (vr_flag) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::language] =
-        (*message_)[strings::msg_params][strings::language];
-    msg_params[strings::app_id] = app->app_id();
-
-    SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
-                   &msg_params, true);
-  }
-
-  if (tts_flag) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::language] =
-        (*message_)[strings::msg_params][strings::language];
-    msg_params[strings::app_id] = app->app_id();
-
-    SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
-                   &msg_params, true);
-  }
-
-  if (!ui_flag && !vr_flag && !tts_flag) {
-    LOG4CXX_ERROR(logger_, "Current language is the same");
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "Current language is the same");
+  if (false ==
+      (IsLanguageSupportedByUI(hmi_language) &&
+       IsLanguageSupportedByVR(language) &&
+       IsLanguageSupportedByTTS(language))) {
+    LOG4CXX_ERROR(logger_, "Language is not supported");
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
+
+  // UI processing
+  smart_objects::SmartObject ui_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
+  ui_params[strings::language] = hmi_language;
+  ui_params[strings::app_id] = app->app_id();
+
+  SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
+                 &ui_params, true);
+
+  is_ui_send_ = true;
+
+  // VR processing
+  smart_objects::SmartObject vr_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  vr_params[strings::language] =
+      (*message_)[strings::msg_params][strings::language];
+
+  vr_params[strings::app_id] = app->app_id();
+
+  SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
+                 &vr_params, true);
+
+  is_vr_send_ = true;
+
+  // TTS processing
+  smart_objects::SmartObject tts_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  tts_params[strings::language] =
+      (*message_)[strings::msg_params][strings::language];
+
+  tts_params[strings::app_id] = app->app_id();
+
+  SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
+                 &tts_params, true);
+
+  is_tts_send_ = true;
 }
 
-bool ChangeRegistrationRequest::WasAnySuccess(const hmi_apis::Common_Result::eType ui,
-                   const hmi_apis::Common_Result::eType vr,
-                   const hmi_apis::Common_Result::eType tts) {
-  if (hmi_apis::Common_Result::SUCCESS == ui) {
-    return true;
-  }
-  if (hmi_apis::Common_Result::SUCCESS == vr) {
-    return true;
-  }
-  if (hmi_apis::Common_Result::SUCCESS == tts) {
-    return true;
-  }
-  return false;
+bool ChangeRegistrationRequest::WasAnySuccess(
+      const hmi_apis::Common_Result::eType ui,
+      const hmi_apis::Common_Result::eType vr,
+      const hmi_apis::Common_Result::eType tts) {
+
+  return
+      hmi_apis::Common_Result::SUCCESS == ui ||
+      hmi_apis::Common_Result::SUCCESS == vr ||
+      hmi_apis::Common_Result::SUCCESS == tts;
 }
 
 void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
@@ -233,7 +195,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
     if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
       application->set_ui_language(static_cast<mobile_api::Language::eType>(
-          (*message_)[strings::msg_params][strings::hmi_display_language].asInt()));
+         (*message_)[strings::msg_params][strings::hmi_display_language].asInt()
+          ));
     }
 
     if (hmi_apis::Common_Result::SUCCESS == vr_result_
@@ -266,18 +229,15 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     return false;
   }
 
-  bool is_language_supported = false;
   for (size_t i = 0; i < ui_languages->length(); ++i) {
     if (hmi_display_lang == ui_languages->getElement(i).asInt()) {
-      is_language_supported = true;
-      break;
+      return true;
     }
   }
 
-  if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
-  }
-  return is_language_supported;
+  LOG4CXX_ERROR(logger_, "Language isn't supported by UI");
+
+  return false;
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
@@ -290,18 +250,15 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     return false;
   }
 
-  bool is_language_supported = false;
   for (size_t i = 0; i < vr_languages->length(); ++i) {
     if (hmi_display_lang == vr_languages->getElement(i).asInt()) {
-      is_language_supported = true;
-      break;
+      return true;
     }
   }
 
-  if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
-  }
-  return is_language_supported;
+  LOG4CXX_ERROR(logger_, "Language isn't supported by VR");
+
+  return false;
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
@@ -314,34 +271,24 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     return false;
   }
 
-  bool is_language_supported = false;
   for (size_t i = 0; i < tts_languages->length(); ++i) {
     if (hmi_display_lang == tts_languages->getElement(i).asInt()) {
-      is_language_supported = true;
+      return true;
       break;
     }
   }
 
-  if (false == is_language_supported) {
-    LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
-  }
-  return is_language_supported;
+  LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
+  return false;
 }
 
 bool ChangeRegistrationRequest::IsPendingResponseExist() {
-  if (is_ui_send_ != is_ui_received_) {
-    return true;
-  }
 
-  if (is_vr_send_ != is_vr_received_) {
-    return true;
-  }
-
-  if (is_tts_send_ != is_tts_received_) {
-    return true;
-  }
-
-  return false;
+  return
+      is_ui_send_ != is_ui_received_ ||
+      is_vr_send_ != is_vr_received_ ||
+      is_tts_send_ != is_tts_received_
+      ;
 }
 
 }  // namespace commands
