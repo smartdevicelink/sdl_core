@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sched.h>
 #include <cstring>
 
 #include "transport_manager/usb/qnx/usb_connection.h"
@@ -67,6 +68,7 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
 }
 
 UsbConnection::~UsbConnection() {
+  Finalise();
   if (in_urb_) usbd_free_urb(in_urb_);
   if (out_urb_) usbd_free_urb(out_urb_);
 
@@ -143,9 +145,7 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
   }
 
   pending_in_transfer_ = false;
-  if (disconnecting_) {
-    CheckAllTransfersComplete();
-  } else {
+  if (!disconnecting_) {
     if (!PostInTransfer()) {
       controller_->ConnectionAborted(device_uid_, app_handle_,
                                      CommunicationError());
@@ -232,8 +232,6 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
     pending_out_transfer_ = false;
   }
   pthread_mutex_unlock(&out_messages_mutex_);
-
-  if (disconnecting_) CheckAllTransfersComplete();
 }
 
 TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
@@ -254,8 +252,8 @@ TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
   return TransportAdapter::OK;
 }
 
-TransportAdapter::Error UsbConnection::Disconnect() {
-  LOG4CXX_INFO(logger_, "Disconnecting");
+void UsbConnection::Finalise() {
+  LOG4CXX_INFO(logger_, "Finalising");
   pthread_mutex_lock(&out_messages_mutex_);
   disconnecting_ = true;
   usbd_abort_pipe(in_pipe_);
@@ -265,7 +263,13 @@ TransportAdapter::Error UsbConnection::Disconnect() {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }
   pthread_mutex_unlock(&out_messages_mutex_);
-  CheckAllTransfersComplete();
+  while (pending_in_transfer_ || pending_out_transfer_) sched_yield();
+}
+
+TransportAdapter::Error UsbConnection::Disconnect() {
+  LOG4CXX_INFO(logger_, "Disconnecting");
+  Finalise();
+  controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
 }
 
@@ -389,15 +393,6 @@ bool UsbConnection::OpenEndpoints() {
   }
 
   return true;
-}
-
-void UsbConnection::CheckAllTransfersComplete() {
-  LOG4CXX_INFO(logger_, "Pending transfers: " << pending_in_transfer_
-                                              << pending_out_transfer_);
-  if (!(pending_in_transfer_ || pending_out_transfer_)) {
-    LOG4CXX_INFO(logger_, "USB disconnect done " << device_uid_);
-    controller_->DisconnectDone(device_uid_, app_handle_);
-  }
 }
 
 }  // namespace transport_adapter
