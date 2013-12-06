@@ -64,7 +64,9 @@ if (BUILD_AVAHI_SUPPORT)
 	list(APPEND LIBRARIES avahi-client avahi-common)
 endif()
 if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 endif()
 
 include_directories (
