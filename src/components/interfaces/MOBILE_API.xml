@@ -3886,7 +3886,7 @@
     	Binary data is in binary part of hybrid msg.
     </description>
 
-    <param name="syncFileName" type="String" maxlength="500" mandatory="true">
+    <param name="syncFileName" type="String" maxlength="255" mandatory="true">
       <description>File reference name.</description>
     </param>
 
@@ -3940,7 +3940,7 @@
     	Not supported on first generation SYNC vehicles.
     </description>
 
-    <param name="syncFileName" type="String" maxlength="500" mandatory="true">
+    <param name="syncFileName" type="String" maxlength="255" mandatory="true">
       <description>File reference name.</description>
     </param>
 
@@ -4026,7 +4026,7 @@
     	Not supported on first generation SYNC vehicles.
     </description>
 
-    <param name="syncFileName" type="String" maxlength="500" mandatory="true">
+    <param name="syncFileName" type="String" maxlength="255" mandatory="true">
       <description>File reference name.</description>
     </param>
 
