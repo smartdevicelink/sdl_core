@@ -35,7 +35,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
-#include "protocol_handler/protocol_handler.h"//YK: temp solution until B1.0 release
+#include "protocol_handler/protocol_handler.h"  //YK: temp solution until B1.0 release
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -60,11 +60,11 @@ class TransportManager {
    */
   virtual int Init() = 0;
 
- /**
-   * @brief Start scanning for new devices.
-   *
-   * @return Code error.
-   **/
+  /**
+    * @brief Start scanning for new devices.
+    *
+    * @return Code error.
+    **/
   virtual int SearchDevices(void) = 0;
 
   /**
@@ -86,7 +86,8 @@ class TransportManager {
   virtual int DisconnectDevice(const DeviceHandle &device_id) = 0;
 
   /**
-   * @brief Disconnect from applications connected on device by connection unique identifier.
+   * @brief Disconnect from applications connected on device by connection
+   *unique identifier.
    *
    * @param connection Connection unique identifier.
    *
@@ -113,13 +114,14 @@ class TransportManager {
   virtual int ReceiveEventFromDevice(const TransportAdapterEvent &event) = 0;
 
   /**
-   * @brief Add device adapter to the container of device adapters.
+   * @brief Add transport adapter.
    *
-   * @param transport_adapter Smart pointer to the device adapter.
+   * @param transport_adapter Transport adapter
    *
-   * @return Code error.
+   * @return Error code.
    **/
-  virtual int AddTransportAdapter(transport_adapter::TransportAdapterSptr transport_adapter) = 0;
+  virtual int AddTransportAdapter(
+      transport_adapter::TransportAdapter *transport_adapter) = 0;
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -131,13 +133,11 @@ class TransportManager {
   virtual int AddEventListener(TransportManagerListener *listener) = 0;
 
   /**
-   * @brief Delete listener from the container of transport manager listeners.
+   * @brief Stop work finally. No new events guaranteed after method finish.
    *
-   * @param listener Pointer to the transport manager listener.
-   *
-   * @return Code error.
+   * @return Error code.
    **/
-  virtual int RemoveEventListener(TransportManagerListener *listener) = 0;
+  virtual int Stop() = 0;
 
   /**
    * @brief Remove device from the container that hold devices.

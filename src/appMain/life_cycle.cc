@@ -219,15 +219,13 @@ void LifeCycle::StopComponents(int params) {
   LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
   instance()->policy_manager_->~PolicyManager();
 
+  instance()->transport_manager_->Stop();
+
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->connection_handler_);
   instance()->protocol_handler_->set_session_observer(NULL);
   instance()->connection_handler_->~ConnectionHandlerImpl();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->protocol_handler_);
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   instance()->media_manager_->SetProtocolHandler(NULL);
