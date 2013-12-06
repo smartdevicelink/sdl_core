@@ -90,6 +90,12 @@ endif()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_definitions(-DOS_LINUX)
+  add_definitions(-D__USE_UNIX98)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  add_definitions(-DOS_QNX)
+endif()
 
 IF(CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
@@ -233,4 +239,4 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
 
-# vim: set sw=2 ts=2 et :
+# vim: set ts=2 sw=2 et:
