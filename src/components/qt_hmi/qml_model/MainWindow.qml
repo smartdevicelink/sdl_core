@@ -339,8 +339,15 @@ Rectangle {
     function getMainScreen(){
         return mainScreen
     }
+
+    function getContentLoader(){
+        return contentLoader
+    }
+
+    function getWarningInfo(){
+        return warningInfo
+    }
     /*
       * Test Support Section End
       */
-
 }
