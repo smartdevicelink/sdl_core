@@ -41,7 +41,7 @@
 using transport_manager::transport_adapter::BluetoothTransportAdapter;
 #endif
 
-#ifdef USB_SUPORT
+#ifdef USB_SUPPORT
 #include "transport_manager/usb/usb_aoa_adapter.h"
 using transport_manager::transport_adapter::UsbAoaAdapter;
 #endif
@@ -59,7 +59,7 @@ int TransportManagerDefault::Init() {
   AddTransportAdapter(bluetooth_da_);
 #endif
   AddTransportAdapter(tcp_da_);
-#ifdef USB_SUPORT
+#ifdef USB_SUPPORT
   AddTransportAdapter(usb_aoa_da_);
 #endif
 
@@ -72,7 +72,7 @@ TransportManagerDefault::~TransportManagerDefault() {
     RemoveTransportAdapter(bluetooth_da_);
 #endif
     RemoveTransportAdapter(tcp_da_);
-#ifdef USB_SUPORT
+#ifdef USB_SUPPORT
     RemoveTransportAdapter(usb_aoa_da_);
 #endif
   }
@@ -87,7 +87,7 @@ TransportManagerDefault::TransportManagerDefault(
       , bluetooth_da_(new BluetoothTransportAdapter())
 #endif
       , tcp_da_(new TcpTransportAdapter())
-#ifdef USB_SUPORT
+#ifdef USB_SUPPORT
       , usb_aoa_da_(new UsbAoaAdapter())
 #endif
       {}
