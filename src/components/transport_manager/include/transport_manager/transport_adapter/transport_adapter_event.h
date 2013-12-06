@@ -43,13 +43,6 @@ namespace transport_manager {
 class TransportAdapterEvent {
  public:
   /**
-   * @brief Overloaded operator "==".
-   *
-   * @param Other reference to the event of device adapter.
-   */
-  bool operator==(const TransportAdapterEvent &other);
-
-  /**
    * @brief Constructor.
    *
    * @param type Event type.

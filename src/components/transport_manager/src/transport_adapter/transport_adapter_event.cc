@@ -86,21 +86,4 @@ BaseError *TransportAdapterEvent::event_error(void) const {
   return event_error_;
 }
 
-bool TransportAdapterEvent::operator==(const TransportAdapterEvent &other) {
-  if (this->event_type_ == other.event_type_ &&
-      this->application_id_ == other.application_id_ &&
-      this->transport_adapter_ == other.transport_adapter_) {
-
-    if (!this->event_data_.valid() && !other.event_data_.valid()) return true;
-
-    if (this->event_data_.valid() && other.event_data_.valid() &&
-        this->event_data_.get() == other.event_data_.get()) {
-      return true;
-    }
-    return false;
-  } else {
-    return false;
-  }
-}
-
 }  // namespace transport_manager
