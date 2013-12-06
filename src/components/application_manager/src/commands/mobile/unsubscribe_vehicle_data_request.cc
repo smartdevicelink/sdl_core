@@ -94,7 +94,7 @@ void UnsubscribeVehicleDataRequest::Run() {
 
   if (0 == items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "Provided VehicleData is empty", &response_params);
+                 "No data in the request", &response_params);
   } else if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Unsubscribed on provided VehicleData", &response_params);

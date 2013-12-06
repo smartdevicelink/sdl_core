@@ -34,11 +34,14 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_THREAD
 
 #include <time.h>
+
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/timer_thread.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/synchronisation_primitives.h"
 
 namespace timer {
 
@@ -82,9 +85,9 @@ class TimerThread {
      * Previously started timeout will be set to new value.
      * On timeout TimerThread::onTimeOut interface will be called.
      *
-     * @param timeout Timeout in seconds to be set
+     * @param timeout_seconds Timeout in seconds to be set
      */
-    virtual void start(unsigned int timeout);
+    virtual void start(unsigned int timeout_seconds);
 
     /*
      * @brief Stops timer execution
@@ -129,16 +132,17 @@ class TimerThread {
         /*
          * @brief Restart timer
          *
-         * @param timeout New timeout to be set
+         * @param timeout_seconds New timeout to be set
          */
-        virtual void setTimeOut(unsigned int timeout);
+        virtual void setTimeOut(unsigned int timeout_seconds);
 
       protected:
 
       private:
         const TimerThread*                               timer_thread_;
-        unsigned int                                     timeout_;
-        sync_primitives::SynchronisationPrimitives       sync_primitive_;
+        unsigned int                                     timeout_seconds_;
+        sync_primitives::Lock                            state_lock_;
+        sync_primitives::ConditionalVariable             termination_condition_;
         volatile bool                                    stop_flag_;
 
         DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
@@ -181,12 +185,12 @@ TimerThread<T>::~TimerThread() {
 }
 
 template <class T>
-void TimerThread<T>::start(unsigned int timeout) {
+void TimerThread<T>::start(unsigned int timeout_seconds) {
   if (is_running_) {
     stop();
   }
 
-  delegate_->setTimeOut(timeout);
+  delegate_->setTimeOut(timeout_seconds);
   if (delegate_ && thread_) {
     is_running_ = true;
     thread_->startWithOptions(
@@ -213,10 +217,8 @@ void TimerThread<T>::onTimeOut() const {
 template <class T>
 TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread)
   : timer_thread_(timer_thread),
-    timeout_(0),
+    timeout_seconds_(0),
     stop_flag_(false) {
-
-  sync_primitive_.init();
 }
 
 template <class T>
@@ -226,33 +228,33 @@ TimerThread<T>::TimerDelegate::~TimerDelegate() {
 
 template <class T>
 void TimerThread<T>::TimerDelegate::threadMain() {
-  sync_primitive_.lock();
+  using sync_primitives::ConditionalVariable;
+  sync_primitives::AutoLock auto_lock(state_lock_);
   if (!stop_flag_) {
-    timespec time_spec;
-    clock_gettime(CLOCK_REALTIME, &time_spec);
-    time_spec.tv_sec += timeout_;
-    pthread_cond_timedwait(&sync_primitive_.conditional_var(),
-                           &sync_primitive_.mutex(),
-                           &time_spec);
+    ConditionalVariable::WaitStatus wait_status =
+        termination_condition_.WaitFor(auto_lock, timeout_seconds_ * 1000);
 
-    if (false == stop_flag_ && timer_thread_) {
+    if (ConditionalVariable::kTimeout == wait_status &&
+        false == stop_flag_ && timer_thread_) {
       timer_thread_->onTimeOut();
     }
   }
   stop_flag_ = false;
-  sync_primitive_.unlock();
 }
 
 template <class T>
 bool TimerThread<T>::TimerDelegate::exitThreadMain() {
-  stop_flag_ = true;
-  sync_primitive_.signal();
+  {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    stop_flag_ = true;
+  }
+  termination_condition_.NotifyOne();
   return true;
 }
 
 template <class T>
-void TimerThread<T>::TimerDelegate::setTimeOut(unsigned int timeout) {
-  timeout_ = timeout;
+void TimerThread<T>::TimerDelegate::setTimeOut(unsigned int timeout_seconds) {
+  timeout_seconds_ = timeout_seconds;
 }
 
 }  // namespace timer

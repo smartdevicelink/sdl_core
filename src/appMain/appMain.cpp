@@ -57,6 +57,9 @@
 //#include <gst/gst.h>
 #endif
 
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
 // ----------------------------------------------------------------------------
 // Third-Party includes
 #include "networking.h"  // cpplint: Include the directory when naming .h files
@@ -203,10 +206,13 @@ int main(int argc, char** argv) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   LOG4CXX_INFO(logger, " Application started!");
+  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   // Initialize gstreamer. Needed to activate debug from the command line.
+#ifdef MEDIA_MANAGER
 #if defined(DEFAULT_MEDIA)
 //  gst_init(&argc, &argv);
+#endif
 #endif
 
   // --------------------------------------------------------------------------

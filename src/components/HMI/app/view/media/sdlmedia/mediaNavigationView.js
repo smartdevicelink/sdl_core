@@ -35,8 +35,18 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     elementId: 'MediaNavigationView',
 
     classNameBindings: [
-        'SDL.States.media.sdlmedia.mediaNavigation.active:active_state:inactive_state'
+        'this.activeState:active_state:inactive_state'
     ],
+
+    activeState: function(){
+        if (SDL.TurnByTurnView.activeTBT) {
+            return false;
+        } else if (SDL.States.media.sdlmedia.mediaNavigation.active) {
+            return true;
+        } else {
+            return false;
+        }
+    }.property('SDL.States.media.sdlmedia.mediaNavigation.active', 'SDL.TurnByTurnView.activeTBT'),
 
     childViews: [
         'videoView',

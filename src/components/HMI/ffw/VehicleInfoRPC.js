@@ -40,7 +40,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
      * 
      * @type {Boolean}
      */
-    isReady: false,
+    isReady: true,
 
     /**
      * access to basic RPC functionality

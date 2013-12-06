@@ -1,7 +1,3 @@
-/**
- * @file TNumberSchemaItem.cpp
- * @brief TNumberSchemaItem source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -34,25 +30,20 @@
 
 #include "smart_objects/number_schema_item.h"
 
-namespace smartobejct_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
 
-template <>
-smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<int>
-    ::getSmartType(void) {
-
-  return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+template<> SmartType TNumberSchemaItem<int>::getSmartType() {
+  return SmartType_Integer;
 }
 
-template <>
-smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<long>
-    ::getSmartType(void) {
-
-  return NsSmartDeviceLink::NsSmartObjects::SmartType_Integer;
+template<> SmartType TNumberSchemaItem<unsigned int>::getSmartType() {
+  return SmartType_Integer;
 }
 
-template <>
-smartobejct_ns::SmartType smartobejct_ns::TNumberSchemaItem<double>
-    ::getSmartType(void) {
-
-  return NsSmartDeviceLink::NsSmartObjects::SmartType_Double;
+template<> SmartType TNumberSchemaItem<double>::getSmartType() {
+  return SmartType_Double;
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

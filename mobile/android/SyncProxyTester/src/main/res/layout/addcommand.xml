@@ -29,21 +29,6 @@
                 android:text="@string/addcommand_commandIDDefault"
                 android:visibility="visible"/>
 
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:text="@string/addcommand_commandName"/>
-
-        <EditText
-                android:id="@+id/addcommand_commandName"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:freezesText="true"
-                android:inputType="textCapWords"
-                android:text="@string/addcommand_commandNameDefault"
-                android:visibility="visible"/>
-
         <CheckBox
                 android:id="@+id/addcommand_useVRSynonyms"
                 android:layout_width="wrap_content"
@@ -61,33 +46,64 @@
                 android:visibility="visible"/>
 
         <CheckBox
-                android:id="@+id/addcommand_useParentID"
+                android:id="@+id/addcommand_useMenuParams"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="@string/addcommand_useParentID"/>
+                android:text="@string/addcommand_useMenuParams"/>
 
-        <Spinner
-                android:id="@+id/addcommand_availableSubmenus"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
-
-        <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/addcommand_menuPos"
-                android:id="@+id/addcommand_useMenuPos"
-                android:layout_gravity="left|center_vertical"/>
-
-        <EditText
-                android:text="@string/addcommand_menuPosDefault"
-                android:id="@+id/addcommand_menuPos"
+        <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="4"
-                android:freezesText="true"
-                android:inputType="number"/>
+                android:paddingLeft="10dip"
+                android:orientation="vertical">
+
+            <CheckBox
+                    android:id="@+id/addcommand_useCommandName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/addcommand_useCommandName"/>
+
+            <EditText
+                    android:id="@+id/addcommand_commandName"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:freezesText="true"
+                    android:inputType="textCapWords"
+                    android:text="@string/addcommand_commandNameDefault"
+                    android:visibility="visible"/>
+
+            <CheckBox
+                    android:id="@+id/addcommand_useParentID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/addcommand_useParentID"/>
+
+            <Spinner
+                    android:id="@+id/addcommand_availableSubmenus"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/addcommand_menuPos"
+                    android:id="@+id/addcommand_useMenuPos"
+                    android:layout_gravity="left|center_vertical"/>
+
+            <EditText
+                    android:text="@string/addcommand_menuPosDefault"
+                    android:id="@+id/addcommand_menuPos"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="4"
+                    android:freezesText="true"
+                    android:inputType="number"/>
+
+        </LinearLayout>
 
         <CheckBox
                 android:id="@+id/addcommand_useIcon"

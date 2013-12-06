@@ -88,7 +88,7 @@ class MockTransportManagerListener :
   MOCK_METHOD1(OnTMMessageReceived, void(const RawMessageSptr data_container));
   MOCK_METHOD2(OnTMMessageReceiveFailed, void(ConnectionUID connection_id,
           const DataReceiveError& error));
-  MOCK_METHOD0(OnTMMessageSend, void());
+  MOCK_METHOD1(OnTMMessageSend, void(const RawMessageSptr message));
   MOCK_METHOD2(OnTMMessageSendFailed, void(const DataSendError& error,
           const RawMessageSptr message));
 };

@@ -191,6 +191,15 @@ namespace System
        */
       bool Join(void** ret = NULL);
 
+#ifdef _WIN32
+      HANDLE
+#else
+      pthread_t
+#endif
+      GetId() const {
+        return m_id;
+      }
+
     private:
       /**
        * \brief Entry point of thread before calling specific 

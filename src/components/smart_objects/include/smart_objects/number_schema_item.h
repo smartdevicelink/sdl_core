@@ -1,7 +1,3 @@
-/**
- * @file TNumberSchemaItem.hpp
- * @brief TNumberSchemaItem header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,10 +28,11 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
-#define __SMARTOBJECT_TNUMBERSCHEMAITEM_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
 #include <typeinfo>
+#include <string>
 
 #include "utils/shared_ptr.h"
 
@@ -43,157 +40,159 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        /**
-         * @brief Number schema item.
-         *
-         * @tparam NumberType Number type.
-         **/
-        template <typename NumberType>
-        class TNumberSchemaItem: public ISchemaItem
-        {
-        public:
-            /**
-             * @brief Create a new schema item.
-             *
-             * @param MinValue Minimum allowed value.
-             * @param MaxValue Maximum allowed value.
-             * @param DefaultValue Default value.
-             *
-             * @return Shared pointer to a new schema item.
-             **/
-            static utils::SharedPtr<TNumberSchemaItem> create(const TSchemaItemParameter<NumberType> & MinValue = TSchemaItemParameter<NumberType>(),
-                                                        const TSchemaItemParameter<NumberType> & MaxValue = TSchemaItemParameter<NumberType>(),
-                                                        const TSchemaItemParameter<NumberType> & DefaultValue = TSchemaItemParameter<NumberType>());
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
 
-            /**
-             * @brief Validate smart object.
-             *
-             * @param Object Object to validate.
-             *
-             * @return NsSmartObjects::Errors::eType
-             **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+/**
+ * @brief Number schema item.
+ *
+ * @tparam NumberType Number type.
+ **/
+template<typename NumberType>
+class TNumberSchemaItem : public ISchemaItem {
+ public:
+  /**
+   * @brief Create a new schema item.
+   *
+   * @param MinValue Minimum allowed value.
+   * @param MaxValue Maximum allowed value.
+   * @param DefaultValue Default value.
+   *
+   * @return Shared pointer to a new schema item.
+   **/
+  static utils::SharedPtr<TNumberSchemaItem> create(
+      const TSchemaItemParameter<NumberType>& MinValue = TSchemaItemParameter<
+          NumberType>(),
+      const TSchemaItemParameter<NumberType>& MaxValue = TSchemaItemParameter<
+          NumberType>(),
+      const TSchemaItemParameter<NumberType>& DefaultValue =
+          TSchemaItemParameter<NumberType>());
 
-            /**
-             * @brief Set default value to an object.
-             *
-             * @param Object Object to set default value.
-             *
-             * @return true if default value was successfully set, false otherwise.
-             **/
-            virtual bool setDefaultValue(SmartObject & Object);
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  virtual Errors::eType validate(const SmartObject& Object);
 
-            /**
-             * @brief Build smart object by smart schema having copied matched
-             *        parameters from pattern smart object
-             *
-             * @param pattern_object pattern object
-             * @param result_object object to build
-             */
-            virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+  /**
+   * @brief Set default value to an object.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  // TODO(cpplint): Is this a non-const reference?
+  // If so, make const or use a pointer.
+  virtual bool setDefaultValue(SmartObject& Object);
 
-            virtual ~TNumberSchemaItem() {}
+  /**
+   * @brief Build smart object by smart schema having copied matched
+   *        parameters from pattern smart object
+   *
+   * @param pattern_object pattern object
+   * @param result_object object to build
+   */
+  virtual void BuildObjectBySchema(const SmartObject& pattern_object,
+                                   SmartObject& result_object);
 
-        private:
+  virtual ~TNumberSchemaItem() {
+  }
 
-            /**
-             * @brief Constructor.
-             *
-             * @param MinValue Minimum allowed value.
-             * @param MaxValue Maximum allowed value.
-             * @param DefaultValue Default value.
-             **/
-            TNumberSchemaItem(const TSchemaItemParameter<NumberType> & MinValue,
-                              const TSchemaItemParameter<NumberType> & MaxValue,
-                              const TSchemaItemParameter<NumberType> & DefaultValue);
+ private:
+  /**
+   * @brief Constructor.
+   *
+   * @param MinValue Minimum allowed value.
+   * @param MaxValue Maximum allowed value.
+   * @param DefaultValue Default value.
+   **/
+  TNumberSchemaItem(const TSchemaItemParameter<NumberType>& MinValue,
+                    const TSchemaItemParameter<NumberType>& MaxValue,
+                    const TSchemaItemParameter<NumberType>& DefaultValue);
 
-            /**
-             * @brief Get smart type for this NumberType.
-             *
-             * @return Smart type for this NumberType.
-             **/
-            static SmartType getSmartType(void);
+  /**
+   * @brief Get smart type for this NumberType.
+   *
+   * @return Smart type for this NumberType.
+   **/
+  static SmartType getSmartType();
 
-            bool isNumberType(SmartType type);
+  bool isNumberType(SmartType type);
 
-            /**
-             * @brief Copy constructor.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             **/
-            TNumberSchemaItem(const TNumberSchemaItem<NumberType> & Other);
+  /**
+   * @brief Copy constructor.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   **/
+  TNumberSchemaItem(const TNumberSchemaItem<NumberType>& Other);
 
-            /**
-             * @brief Assignment operator.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             *
-             * @return Not implemented.
-             **/
-            TNumberSchemaItem & operator =(const TNumberSchemaItem<NumberType> & Other);
+  /**
+   * @brief Assignment operator.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   *
+   * @return Not implemented.
+   **/
+  TNumberSchemaItem & operator =(const TNumberSchemaItem<NumberType>& Other);
 
-            /**
-             * @brief Minimum allowed value.
-             **/
-            const TSchemaItemParameter<NumberType> mMinValue;
+  /**
+   * @brief Minimum allowed value.
+   **/
+  const TSchemaItemParameter<NumberType> mMinValue;
 
-            /**
-             * @brief Maximum allowed value.
-             **/
-            const TSchemaItemParameter<NumberType> mMaxValue;
+  /**
+   * @brief Maximum allowed value.
+   **/
+  const TSchemaItemParameter<NumberType> mMaxValue;
 
-            /**
-             * @brief Default value.
-             **/
-            const TSchemaItemParameter<NumberType> mDefaultValue;
-        };
+  /**
+   * @brief Default value.
+   **/
+  const TSchemaItemParameter<NumberType> mDefaultValue;
+};
 
-        /**
-         * @brief Specialization of getSmartType for int.
-         *
-         * @return SmartType_Integer.
-         **/
-        template <>
-        SmartType TNumberSchemaItem<int>::getSmartType(void);
+/**
+ * @brief Specialization of getSmartType for int.
+ *
+ * @return SmartType_Integer.
+ **/
+template<>
+SmartType TNumberSchemaItem<int>::getSmartType();
 
-        /**
-         * @brief Specialization of getSmartType for long.
-         *
-         * @return SmartType_Integer.
-         **/
-        template <>
-        SmartType TNumberSchemaItem<long>::getSmartType(void);
+/**
+ * @brief Specialization of getSmartType for long.
+ *
+ * @return SmartType_Integer.
+ **/
+template<>
+SmartType TNumberSchemaItem<unsigned int>::getSmartType();
 
-        /**
-         * @brief Specialization of getSmartType for double.
-         *
-         * @return SmartType_Double.
-         **/
-        template <>
-        SmartType TNumberSchemaItem<double>::getSmartType(void);
-    }
+/**
+ * @brief Specialization of getSmartType for double.
+ *
+ * @return SmartType_Double.
+ **/
+template<>
+SmartType TNumberSchemaItem<double>::getSmartType(void);
+
+template<typename NumberType>
+utils::SharedPtr<TNumberSchemaItem<NumberType> >
+TNumberSchemaItem<NumberType>::create(
+    const TSchemaItemParameter<NumberType>& MinValue,
+    const TSchemaItemParameter<NumberType>& MaxValue,
+    const TSchemaItemParameter<NumberType>& DefaultValue) {
+  return new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
 }
 
-template <typename NumberType>
-utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType> > NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MinValue,
-                                                                                                                                                                  const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & MaxValue,
-                                                                                                                                                                  const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<NumberType> & DefaultValue)
-{
-    return new NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
-}
-
-template <typename NumberType>
-bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
+template<typename NumberType>
+bool TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
   if (SmartType_Integer == type || SmartType_Double == type) {
     return true;
   }
@@ -201,93 +200,83 @@ bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::isNumberT
   return false;
 }
 
-template <typename NumberType>
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
+template<typename NumberType>
+Errors::eType TNumberSchemaItem<NumberType>::validate(
+    const SmartObject& Object) {
+  Errors::eType result = Errors::ERROR;
 
-    if (isNumberType(Object.getType()))
-    {
-        result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
-        NumberType value; // = Object;
-
-        if (std::string("i") == typeid(value).name()) {
-          value = Object.asInt();
-        } else if (std::string("j") == typeid(value).name()) {
-          value = Object.asUInt();
-        } else if (std::string("d") == typeid(value).name()) {
-          value = Object.asDouble();
-        } else {
-          NOTREACHED();
-        }
-
-        NumberType rangeLimit;
-
-        if (true == mMinValue.getValue(rangeLimit))
-        {
-            if (value < rangeLimit)
-            {
-                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
-            }
-        }
-
-        if ((NsSmartDeviceLink::NsSmartObjects::Errors::OK == result) &&
-            (true == mMaxValue.getValue(rangeLimit)))
-        {
-            if (value > rangeLimit)
-            {
-                result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
-            }
-        }
-    }
-    else
-    {
-        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
-    }
-
-    return result;
-}
-
-template <typename NumberType>
-bool NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(SmartObject & Object)
-{
-    bool result = false;
+  if (isNumberType(Object.getType())) {
+    result = Errors::OK;
     NumberType value;
 
-    if (true == mDefaultValue.getValue(value))
-    {
-        Object = value;
-        result = true;
+    if (std::string("i") == typeid(value).name()) {
+      value = Object.asInt();
+    } else if (std::string("j") == typeid(value).name()) {
+      value = Object.asUInt();
+    } else if (std::string("d") == typeid(value).name()) {
+      value = Object.asDouble();
+    } else {
+      NOTREACHED();
     }
 
-    return result;
+    NumberType rangeLimit;
+
+    if (true == mMinValue.getValue(rangeLimit)) {
+      if (value < rangeLimit) {
+        result = Errors::OUT_OF_RANGE;
+      }
+    }
+
+    if ((Errors::OK == result) && (true == mMaxValue.getValue(rangeLimit))) {
+      if (value > rangeLimit) {
+        result = Errors::OUT_OF_RANGE;
+      }
+    }
+  } else {
+    result = Errors::INVALID_VALUE;
+  }
+
+  return result;
 }
 
+template<typename NumberType>
+bool TNumberSchemaItem<NumberType>::setDefaultValue(SmartObject& Object) {
+  bool result = false;
+  NumberType value;
 
-template <typename NumberType>
-void NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::BuildObjectBySchema(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
+  if (true == mDefaultValue.getValue(value)) {
+    Object = value;
+    result = true;
+  }
+
+  return result;
+}
+
+template<typename NumberType>
+void TNumberSchemaItem<NumberType>::BuildObjectBySchema(
+    const SmartObject& pattern_object, SmartObject& result_object) {
 
   if (getSmartType() == pattern_object.getType()) {
-    result_object = pattern_object; // TODO(AK): check this..
-  }else {
+    result_object = pattern_object;  // TODO(AK): check this..
+  } else {
     bool result = setDefaultValue(result_object);
-    if (false == result)  {
+    if (false == result) {
       result_object = static_cast<NumberType>(0);
     }
   }
 }
 
-template <typename NumberType>
-NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<NumberType>::TNumberSchemaItem(const TSchemaItemParameter<NumberType> & MinValue,
-                                                                            const TSchemaItemParameter<NumberType> & MaxValue,
-                                                                            const TSchemaItemParameter<NumberType> & DefaultValue):
-mMinValue(MinValue),
-mMaxValue(MaxValue),
-mDefaultValue(DefaultValue)
-{
+template<typename NumberType>
+TNumberSchemaItem<NumberType>::TNumberSchemaItem(
+    const TSchemaItemParameter<NumberType>& MinValue,
+    const TSchemaItemParameter<NumberType>& MaxValue,
+    const TSchemaItemParameter<NumberType>& DefaultValue)
+    : mMinValue(MinValue),
+      mMaxValue(MaxValue),
+      mDefaultValue(DefaultValue) {
 }
 
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
-#endif
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_

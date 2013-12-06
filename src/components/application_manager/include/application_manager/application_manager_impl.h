@@ -45,14 +45,16 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-//#include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "mobile_message_handler/mobile_message_observer.h"
 
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
+
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-
 
 #include "formatters/CSmartFactory.hpp"
 
@@ -126,8 +128,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::vector<Application*> applications_by_button(unsigned int button);
     std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
     std::vector<Application*> applications_with_navi();
-
-    const std::set<connection_handler::Device>& device_list();
 
     /////////////////////////////////////////////////////
 
@@ -440,6 +440,38 @@ class ApplicationManagerImpl : public ApplicationManager,
                               unsigned int mobile_correlation_id,
                               unsigned int new_timeout_value);
 
+    /*
+     * @brief Retrieves application id associated whith correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     *
+     * @return application id associated whith correlation id
+     */
+    const unsigned int application_id(const int correlation_id);
+
+    /*
+     * @brief Sets application id correlation id
+     *
+     * @param correlation_id Correlation ID of the HMI request
+     * @param app_id Application ID
+     */
+    void set_application_id(const int correlation_id,
+                            const unsigned int app_id);
+
+    /*
+     * @brief Change AudioStreamingState for all application according to
+     * system audio-mixing capabilities (NOT_AUDIBLE/ATTENUATED) and
+     * send notification for this changes
+     */
+    void Mute();
+
+    /*
+     * @brief Change AudioStreamingState for all application to AUDIBLE and
+     * send notification for this changes
+     */
+    void Unmute();
+
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -482,6 +514,12 @@ class ApplicationManagerImpl : public ApplicationManager,
         unsigned int connection_key);
 
     /**
+     * @brief Unregister application in SDL
+     */
+    void UnregisterAppInterface(const unsigned int& app_id);
+
+    // members
+    /**
      * @brief Map of connection keys and associated applications
      */
     std::map<int, Application*> applications_;
@@ -496,6 +534,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     std::list<CommandSharedPtr> notification_list_;
 
+    /**
+     * @brief Map of correlation id  and associated application id.
+     */
+    std::map<const int, const unsigned int> appID_list_;
+
     MessageChain message_chaining_;
     bool audio_pass_thru_active_;
     sync_primitives::Lock audio_pass_thru_lock_;
@@ -507,7 +550,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::Common_Language::eType vr_language_;
     hmi_apis::Common_Language::eType tts_language_;
     smart_objects::SmartObject* vehicle_type_;
-//  media_manager::MediaManager* media_manager_;
+#ifdef MEDIA_MANAGER
+  media_manager::MediaManager* media_manager_;
+#endif
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     mobile_message_handler::MobileMessageHandler* mobile_handler_;

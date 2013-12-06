@@ -128,7 +128,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
       const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageSend();
+    virtual void OnTMMessageSend(const transport_manager::RawMessageSptr message);
 
     /**
      * \brief Informs about failure during DisconnectDevice procedure of TM

@@ -28,27 +28,45 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
 
-#include "utils/macro.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
-namespace sync_primitives {
-class SynchronisationPrimitives;
+namespace application_manager {
 
-class Timer {
+namespace commands {
+
+/**
+ * @brief TTSPerformInteractionRequest command class
+ **/
+class TTSPerformInteractionRequest : public RequestToHMI {
   public:
-    explicit Timer(SynchronisationPrimitives* sync_primitive);
-    virtual ~Timer();
-    virtual void StartWait(unsigned int seconds);
+    /**
+     * @brief TTSPerformInteractionRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit TTSPerformInteractionRequest(const MessageSharedPtr& message);
+
+    /**
+     * @brief TTSPerformInteractionRequest class destructor
+     **/
+    virtual ~TTSPerformInteractionRequest();
+
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
   private:
-    SynchronisationPrimitives* sync_primitive_;
-    DISALLOW_COPY_AND_ASSIGN(Timer);
+    DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionRequest);
 };
 
-}  // namespace sync_primitives
+}  // namespace commands
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER
+}  // namespace application_manager
+
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_

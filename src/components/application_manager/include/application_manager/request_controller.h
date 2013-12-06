@@ -34,20 +34,15 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 
 #include <list>
-#include "utils/synchronisation_primitives.h"
+#include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "request_watchdog/request_watchdog.h"
-#include "application_manager/commands/command.h"
 #include "request_watchdog/watchdog_subscriber.h"
+#include "application_manager/commands/command.h"
 
 namespace application_manager {
 
 namespace request_controller {
-
-/*
- * @brief Typedef for active mobile request
- *
- */
-typedef utils::SharedPtr<commands::Command> Request;
 
 /*
  * @brief RequestController class is used to control currently active mobile
@@ -56,6 +51,25 @@ typedef utils::SharedPtr<commands::Command> Request;
 class RequestController: public request_watchdog::WatchdogSubscriber  {
  public:
 
+  // Data types
+
+  /*
+   * @brief Typedef for active mobile request
+   *
+   */
+  typedef utils::SharedPtr<commands::Command> Request;
+
+  /**
+   * @brief Synchronizing state identifiers
+   */
+  enum TResult
+  {
+    SUCCESS = 0,
+    TOO_MANY_REQUESTS,
+    TOO_MANY_PENDING_REQUESTS,
+  };
+
+  // Methods
   /*
    * @brief Class constructor
    *
@@ -69,12 +83,14 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
   virtual ~RequestController();
 
   /*
-   * @brief Adds request to queue
+   * @brief Check if max request amount wasn't exceed and adds request to queue.
    *
    * @param request Active mobile request
    *
+   * @return Result code
+   *
    */
-  void addRequest(const Request& request);
+  TResult addRequest(const Request& request);
 
   /*
    * @brief Removes request from queue
@@ -83,6 +99,14 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    *
    */
   void terminateRequest(unsigned int mobile_correlation_id);
+
+  /*
+   * @brief Removes all requests from queue for specified application
+   *
+   * @param app_id Mobile application ID
+   *
+   */
+  void terminateAppRequests(unsigned int app_id);
 
   /**
    * @ Updates request timeout
@@ -108,7 +132,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
  private:
 
   std::list<Request>                          request_list_;
-  sync_primitives::SynchronisationPrimitives  list_mutex_;
+  sync_primitives::Lock                       request_list_lock_;
   request_watchdog::Watchdog*                 watchdog_;
 
   DISALLOW_COPY_AND_ASSIGN(RequestController);

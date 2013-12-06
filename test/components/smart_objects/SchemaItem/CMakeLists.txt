@@ -17,6 +17,8 @@ set (LIBRARIES
     jsoncpp
     SmartObjects
     formatters
+    apr-1
+    aprutil-1
 )
 
 create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")
@@ -27,3 +29,5 @@ create_test("test_SmartObject_EnumSchemaItemTest"           "./EnumSchemaItemTes
 create_test("test_SmartObject_ObjectSchemaItemTest"         "./ObjectSchemaItemTest.cpp"  "${LIBRARIES}")
 create_test("test_SmartObject_AlwaysTrueSchemaItemTest"     "./AlwaysTrueSchemaItemTest.cpp"  "${LIBRARIES}")
 create_test("test_SmartObject_AlwaysFalseSchemaItemTest"    "./AlwaysFalseSchemaItemTest.cpp"  "${LIBRARIES}")
+
+# vim: set ts=2 sw=2 et:

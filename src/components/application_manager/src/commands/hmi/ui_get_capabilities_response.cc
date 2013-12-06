@@ -57,6 +57,13 @@ void UIGetCapabilitiesResponse::Run() {
     ApplicationManagerImpl::instance()->set_soft_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
   }
+
+  if ((*message_)[strings::msg_params].keyExists(
+                                      strings::audio_pass_thru_capabilities)) {
+
+    ApplicationManagerImpl::instance()->set_audio_pass_thru_capabilities(
+      (*message_)[strings::msg_params][strings::audio_pass_thru_capabilities]);
+  }
 }
 
 }  // namespace commands

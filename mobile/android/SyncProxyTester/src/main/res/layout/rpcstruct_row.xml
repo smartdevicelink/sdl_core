@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/softbuttonrow_deleteButton"
+        android:layout_toLeftOf="@+id/rpcstructrow_deleteButton"
         android:text="" />
 
     <TextView
@@ -25,7 +25,7 @@
         android:text="" />
 
     <ImageButton
-        android:id="@+id/softbuttonrow_deleteButton"
+        android:id="@+id/rpcstructrow_deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

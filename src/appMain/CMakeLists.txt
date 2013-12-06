@@ -34,11 +34,8 @@ set(LIBRARIES
   Utils
   encryption
   jsoncpp
-  #bluetooth
-  #pthread
   #rt
-  socket
-  #avahi-client
+  #avahi-common
   #avahi-common
   ConfigProfile
   MobileMessageHandler
@@ -51,10 +48,24 @@ set(LIBRARIES
   aprutil-1
 )
 
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
+endif()
+
+
+if (BUILD_MEDIA_MANAGER)
+	LIST(APPEND LIBRARIES MediaManager)
+endif()
+
+if (BUILD_BT_SUPPORT)
+	list(APPEND LIBRARIES bluetooth)
+endif()
+if (BUILD_AVAHI_SUPPORT)
+	list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+if (BUILD_USB_SUPPORT)
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 
 include_directories (
   ./
@@ -71,7 +82,6 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
-  ../utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/
@@ -128,3 +138,4 @@ ENDIF (${WEB_HMI})
 install (TARGETS ${PROJECT} DESTINATION bin)
 #target_link_libraries ("ApplicationManager" log4cxx)
 
+# vim: set ts=2 sw=2 et:

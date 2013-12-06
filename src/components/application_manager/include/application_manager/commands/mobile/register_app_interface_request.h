@@ -34,9 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
+#include <string.h>
 #include "application_manager/commands/command_request_impl.h"
-#include "utils/synchronisation_primitives.h"
-#include "utils/timer.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -81,11 +80,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
-
-  // members
-  sync_primitives::SynchronisationPrimitives synchronisation_;
-  sync_primitives::Timer* timer_;
-
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
@@ -105,7 +99,8 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
     {};
 
     bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::text] == newItem_;
+      const std::string text = obj[strings::text].asString();
+      return !(strcasecmp(text.c_str(), newItem_.c_str()));
     };
 
     const std::string &newItem_;
@@ -122,7 +117,8 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       {};
 
       bool operator()(smart_objects::SmartObject obj) {
-        return obj == newItem_;
+        const std::string vr_synonym = obj.asString();
+        return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
       };
 
       const std::string &newItem_;

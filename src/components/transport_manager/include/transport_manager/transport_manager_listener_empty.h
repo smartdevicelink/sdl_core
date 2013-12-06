@@ -168,7 +168,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend() {
+  virtual void OnTMMessageSend(RawMessageSptr message) {
   }
 
   /**

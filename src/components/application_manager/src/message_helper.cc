@@ -40,8 +40,34 @@
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
+
+namespace {
+
+log4cxx::LoggerPtr g_logger =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ApplicationManager"));
+
+hmi_apis::Common_Language::eType ToCommonLanguage(
+    mobile_apis::Language::eType mobile_language) {
+  // Update this check if mobile_api::Language
+  // or hmi_apis::Common_Language changes.
+  // Or, better, generate functions like this from XML
+  long lang_val =  long(mobile_language);
+  long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
+  long max_mobile_lang = long(mobile_apis::Language::NO_NO);
+  if (max_common_lang_val != max_mobile_lang) {
+    LOG4CXX_ERROR(g_logger, "Mapping between Common_Language and Language"
+                            " has changed! Please update converter function");
+  }
+  if (lang_val > max_common_lang_val) {
+    LOG4CXX_ERROR(g_logger, "Non-convertable language ID");
+  }
+  return hmi_apis::Common_Language::eType(lang_val);
+}
+
+}
 
 namespace application_manager {
 
@@ -673,9 +699,11 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
 }
 
 void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
+  hmi_apis::Common_Language::eType app_common_language =
+      ToCommonLanguage(app->language());
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_vr_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
           app->app_id());
@@ -688,7 +716,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_tts_language()
-      != app->language()) {
+      != app_common_language) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
@@ -701,7 +729,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
 
   if (mobile_apis::Language::INVALID_ENUM != app->language()
       && ApplicationManagerImpl::instance()->active_ui_language()
-      != app->ui_language()) {
+      != app_common_language) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
@@ -902,7 +930,7 @@ void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
   }
 }
 
-void MessageHelper::SendActivateAppToHMI(Application* const app) {
+void MessageHelper::SendActivateAppToHMI(unsigned int const app_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {
@@ -914,7 +942,7 @@ void MessageHelper::SendActivateAppToHMI(Application* const app) {
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
   (*message)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*message)[strings::msg_params][strings::app_id] = app->app_id();
+  (*message)[strings::msg_params][strings::app_id] = app_id;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
@@ -1022,7 +1050,8 @@ void MessageHelper::SendNaviStartStream(
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1067,7 +1096,8 @@ void MessageHelper::SendNaviStopStream(int connection_key) {
 
   // TODO(PV) : remove connectionhandler
   unsigned int app_id = 0;
-  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(connection_key,
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
       &app_id);
 
   printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
@@ -1277,7 +1307,10 @@ bool MessageHelper::VerifyApplicationName(
 
   if (msg_params.keyExists(strings::tts_name)) {
     for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-        const std::string& tts_name = msg_params[strings::tts_name][i][strings::text].asString();
+
+      const std::string& tts_name =
+            msg_params[strings::tts_name][i][strings::text].asString();
+
         if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
             ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
           printf("Invalid characters in tts name.\n");
@@ -1288,7 +1321,20 @@ bool MessageHelper::VerifyApplicationName(
 
   const std::string& name = msg_params[strings::app_name].asString();
 
-  if ((name[0] == '\n') || (name[0] == ' ') ||
+  // Expecting for some chars different from newlines and spaces in the appName
+  std::string name_copy = name;
+  std::string::iterator name_copy_new_end =
+      std::remove(
+          name_copy.begin(),
+          std::remove(name_copy.begin(), name_copy.end(), ' '),
+	  '\n');
+
+  if (std::string(name_copy.begin(), name_copy_new_end).empty()) {
+    printf("Application name is empty.\n");
+    return false;
+  }
+
+  if ((name[0] == '\n') ||
       ((name[0] == '\\') && (name[1] == 'n'))) {
     printf("Invalid characters in application name.\n");
     return false;

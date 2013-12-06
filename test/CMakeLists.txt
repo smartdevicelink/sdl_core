@@ -15,18 +15,18 @@ include_directories (
   ../src/components/application_manager/include
   ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
-  ../src/components/audio_manager/include
+  ../src/components/media_manager/include
+  ../src/components/config_profile/include
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/thirdPartyLibs/jsoncpp/include/
-  ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
-  #../test/components/audio_manager/include
+  ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
@@ -71,9 +71,14 @@ set(LIBRARIES
     jsoncpp
 #   rt
    # ${GSTREAMER_gstreamer_LIBRARY}
-    Libusb-1.0.16
 )
+
+if (BUILD_USB_SUPPORT)
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 
 add_executable("test_suit" "./test_suit.cc")
 target_link_libraries("test_suit" ${LIBRARIES})
 
+
+# vim: set ts=2 sw=2 et:

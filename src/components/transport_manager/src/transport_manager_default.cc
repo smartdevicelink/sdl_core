@@ -34,15 +34,19 @@
  */
 
 #include "transport_manager/transport_manager_default.h"
-
-//#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+
+#ifdef BLUETOOTH_SUPPORT
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+using transport_manager::transport_adapter::BluetoothTransportAdapter;
+#endif
+
+#ifdef USB_SUPPORT
 #include "transport_manager/usb/usb_aoa_adapter.h"
-
-
-//using transport_manager::transport_adapter::BluetoothTransportAdapter;
-using transport_manager::transport_adapter::TcpTransportAdapter;
 using transport_manager::transport_adapter::UsbAoaAdapter;
+#endif
+
+using transport_manager::transport_adapter::TcpTransportAdapter;
 
 namespace transport_manager {
 
@@ -51,18 +55,26 @@ int TransportManagerDefault::Init() {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  //AddTransportAdapter(bluetooth_da_);
+#ifdef BLUETOOTH_SUPPORT
+  AddTransportAdapter(bluetooth_da_);
+#endif
   AddTransportAdapter(tcp_da_);
+#ifdef USB_SUPPORT
   AddTransportAdapter(usb_aoa_da_);
+#endif
 
   return E_SUCCESS;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {
   if (is_initialized_) {
-    //RemoveTransportAdapter(bluetooth_da_);
+#ifdef BLUETOOTH_SUPPORT
+    RemoveTransportAdapter(bluetooth_da_);
+#endif
     RemoveTransportAdapter(tcp_da_);
+#ifdef USB_SUPPORT
     RemoveTransportAdapter(usb_aoa_da_);
+#endif
   }
 }
 
@@ -70,10 +82,15 @@ TransportManagerAttr default_config_ = { 0 };
 
 TransportManagerDefault::TransportManagerDefault(
     const TransportManagerAttr& config)
-    : TransportManagerImpl(config),
-      //bluetooth_da_(new BluetoothTransportAdapter()),
-      tcp_da_(new TcpTransportAdapter()),
-      usb_aoa_da_(new UsbAoaAdapter()) {}
+    : TransportManagerImpl(config)
+#ifdef BLUETOOTH_SUPPORT
+      , bluetooth_da_(new BluetoothTransportAdapter())
+#endif
+      , tcp_da_(new TcpTransportAdapter())
+#ifdef USB_SUPPORT
+      , usb_aoa_da_(new UsbAoaAdapter())
+#endif
+      {}
 
 TransportManagerDefault* TransportManagerDefault::Instance() {
   static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -90,3 +107,5 @@ TransportManagerDefault* TransportManagerDefault::Instance() {
 }
 
 }  //  namespace transport_manager
+
+// vim: set ts=2 sw=2 et:

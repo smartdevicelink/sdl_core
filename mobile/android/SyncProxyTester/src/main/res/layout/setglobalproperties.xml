@@ -87,14 +87,26 @@
                 android:text="@string/setglobalproperties_vrHelpItemDefault"
                 android:visibility="visible"/>
 
-        <EditText
-                android:id="@+id/setglobalproperties_vrHelpItemImage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:freezesText="true"
-                android:inputType="textCapSentences"
-                android:text="@string/setglobalproperties_vrHelpItemImageDefault"
-                android:visibility="visible"/>
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <CheckBox
+                    android:id="@+id/setglobalproperties_useVRHelpItemImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"/>
+
+            <EditText
+                    android:id="@+id/setglobalproperties_vrHelpItemImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:freezesText="true"
+                    android:inputType="textCapSentences"
+                    android:text="@string/setglobalproperties_vrHelpItemImageDefault"
+                    android:visibility="visible"/>
+
+        </LinearLayout>
 
         <CheckBox
                 android:id="@+id/setglobalproperties_choiceMenuTitle"

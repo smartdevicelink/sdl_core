@@ -1486,20 +1486,39 @@
     </param>
   </struct>
 
-  <enum name="TouchEvent">
-    <element name="TOUCHSTART"/>
-		<element name="TOUCHMOVE"/>
-		<element name="TOUCHEND"/>
-		<element name="DOUBLETOUCH"/>
+  <struct name="TouchCoord">
+    <param name="x" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
+      <description>The x coordinate of the touch.</description>
+    </param>
+    <param name="y" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
+      <description>The y coordinate of the touch.</description>
+    </param>
+  </struct>
+
+  <enum name="TouchType">
+    <element name="BEGIN"/>
+    <element name="MOVE"/>
+    <element name="END"/>
   </enum>
 
-  <struct name="TouchLists">
-		<param name="touches" type="Integer" array="true" mandatory="true" minvalue="0" maxvalue="9" minsize="1" maxsize="10">
-			<description>List of fingers currently on screen</description>
-		</param>
-		<param name="changedTouches" type="Integer" mandatory="true" minvalue="0" maxvalue="9" array="true" minsize="1" maxsize="10">
-			<description>List of fingers involved in the current event. For example, in a touchend event, this will be the finger that was removed</description>
-		</param>
+  <struct name="TouchEvent">
+    <param name="id" type="Integer" mandatory="true" minvalue="0" maxvalue="9">
+       <description>
+         A touch's unique identifier.  The application can track the current touch events by id.
+         If a touch event has type begin, the id should be added to the set of touches.
+         If a touch event has type end, the id should be removed from the set of touches.
+       </description>
+    </param>
+    <param name="ts" type="Integer" mandatory="true" array="true" minvalue="0" maxvalue="2147483647" minsize="1" maxsize="1000">
+       <description>
+         The time that the touch was recorded.  This number can the time since the beginning of the session or something else as long as the units are in milliseconds.
+         The timestamp is used to determined the rate of change of position of a touch.
+         The application also uses the time to verify whether two touches, with different ids, are part of a single action by the user.
+         If there is only a single timestamp in this array, it is the same for every coordinate in the coordinates array.
+       </description>
+    </param>
+    <param name="c" type="TouchCoord" mandatory="true" array="true" minsize="1" maxsize="1000">
+    </param>
   </struct>
 
   <struct name="Coordinate">
@@ -1513,18 +1532,6 @@
 		<param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
 		</param>
 		<param name="radiusCoord" type="Coordinate" mandatory="true">
-		</param>
-  </struct>
-
-  <struct name="TouchEventInfo">
-		<param name="id" type="Integer" mandatory="false" minvalue="0" maxvalue="9">
-			<description>Finger / stylus ID</description>
-		</param>
-		<param name="point" type="Coordinate" mandatory="true">
-			<description>XY coordinate of where on screen the event happened</description>
-		</param>
-		<param name="area" type="TouchArea" mandatory="false">
-			<description>Describe the ellipse approximating touch input shape</description>
 		</param>
   </struct>
 
@@ -2640,11 +2647,11 @@
       </description>
     </param>
 
-    <param name="statusBar" type="String" maxlength="500" mandatory="false">
+    <param name="statusBar" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Requires investigation regarding the nav display capabilities. Potentially lower lowerStatusBar, upperStatusBar, titleBar, etc.</description>
     </param>
 
-    <param name="mediaClock" type="String" minlength="0" maxlength="500" mandatory="false">
+    <param name="mediaClock" type="String" minlength="1" maxlength="500" mandatory="false">
       <description>
       	Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
       	If this text is set, any automatic media clock updates previously set with SetMediaClockTimer will be stopped.
@@ -4282,23 +4289,17 @@
     </param>
 
   </function>
-  
+
+
   <function name="OnTouchEvent" functionID="OnTouchEventID" messagetype="notification" platform="MobileNav">
-  
-		<description>Notifies about touch events on the screen's prescribed area</description>
-		
-		<param name="eventType" type="TouchEvent" mandatory="true">
-			<description>Type of event - start, move, stop, etc.</description>
-		</param>
-		
-		<param name="touchLists" type="TouchLists" mandatory="false">
-			<description>Lists of touch inputs involved in cooperation with screen. Can be ommited for single single input touch.</description>
-		</param>
-		
-		<param name="info" type="TouchEventInfo" mandatory="true">
-			<description>Coordinate of the touch, radius of touch input and input ID.</description>
-		</param>ZZ
-	</function>	
+      <description>Notifies about touch events on the screen's prescribed area</description>
+	<param name="type" type="TouchType" mandatory="true">
+	   <description>The type of touch event.</description>
+	</param>
+	<param name="event" type="TouchEvent" mandatory="true" minsize="1" maxsize="10" array="true">
+	   <description>List of all individual touches involved in this event.</description>
+	</param>
+   </function>	
   
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
