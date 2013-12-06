@@ -71,7 +71,7 @@ Item {
             {softButtonID:0, isHighlighted:true, systemAction:Common.SystemAction.DEFAULT_ACTION,
                 type:Common.SoftButtonType.SBT_TEXT, text:"Default Action"},
             {softButtonID:1, isHighlighted:false, systemAction:Common.SystemAction.STEAL_FOCUS,
-                type:Common.SoftButtonType.SBT_IMAGE,text:"Steal Focus"},
+                type:Common.SoftButtonType.SBT_IMAGE, text:"Steal Focus"},
             {softButtonID:2, isHighlighted:false, systemAction:Common.SystemAction.KEEP_CONTEXT,
                 type:Common.SoftButtonType.SBT_BOTH, text:"Keep context"}]
 
@@ -146,16 +146,16 @@ Item {
             for (var i = 0, len = messageModel.softButtons.count; i < len; i++) {
                 var act = messageModel.softButtons.get(i)
                 var exp = initData.softButtons[i]
-                compare(act.softButtonID, exp.softButtonID,"wrong softButtonID in button")
-                compare(act.isHighlighted, exp.isHighlighted,"wrong isHighlighted in button")
-                compare(act.systemAction, exp.systemAction,"wrong systemAction in button")
-                compare(act.text, exp.text,"wrong text in button")
+                compare(act.softButtonID, exp.softButtonID, "wrong softButtonID in button")
+                compare(act.isHighlighted, exp.isHighlighted, "wrong isHighlighted in button")
+                compare(act.systemAction, exp.systemAction, "wrong systemAction in button")
+                compare(act.text, exp.text, "wrong text in button")
             }
             //check model data equals to init data
             compare(messageModel.running, true, "ScrollableMessage didn't start")
             compare(messageModel.longMessageText, initData.messageText.fieldText, "wrong messageText")
             compare(messageModel.appId, initData.appID, "wrong application ID")
-            compare(messageModel.timeout,initData.timeout, "wrong timeout")
+            compare(messageModel.timeout, initData.timeout, "wrong timeout")
             verify(messageModel.async !== undefined, "async in undefined")
             destroyView()
             console.debug("exit")
@@ -186,7 +186,7 @@ Item {
             console.debug("enter")
             var initData  = {appID:1, timeout:0,    messageText:{fieldText:"Simple text"},
                 softButtons:softButtonsListExample}
-            var initData2 = {appID:1, timeout:10000,messageText:{fieldText:"Simple text 2"},
+            var initData2 = {appID:1, timeout:10000, messageText:{fieldText:"Simple text 2"},
                 softButtons:[]}
             createMessageView(initData.appID)
 
@@ -202,7 +202,7 @@ Item {
             verify(actualResult2.__errno === undefined, "ScrollableMessage return error state")
             compare(messageModel.running, true, "ScrollableMessage didn't start")
             compare(messageModel.longMessageText, initData2.messageText.fieldText, "wrong messageText")
-            compare(messageModel.timeout,initData2.timeout, "wrong timeout")
+            compare(messageModel.timeout, initData2.timeout, "wrong timeout")
             compare(messageModel.appId, initData2.appID, "wrong application ID")
             verify(messageModel.async !== undefined, "async in undefined")
             destroyView()
@@ -411,7 +411,7 @@ Item {
             //wait rendering
             waitForRendering(mainWindowLoader)
             var textAreaHeight2 = messageView.getTextArea().height
-            console.debug("messageTextH",textAreaHeight,textAreaHeight2)
+            console.debug("messageTextH", textAreaHeight, textAreaHeight2)
             verify(textAreaHeight2  <= textAreaHeight, "Height of text area shoud be less with buttons")
 
             destroyView()
