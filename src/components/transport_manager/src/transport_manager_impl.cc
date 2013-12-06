@@ -911,6 +911,8 @@ void TransportManagerImpl::MessageQueueThread(void) {
   }  //  while(true)
 
   message_queue_.clear();
+
+  pthread_mutex_unlock(&message_queue_mutex_);
   LOG4CXX_INFO(logger_, "Message queue thread finished");
 }
 
