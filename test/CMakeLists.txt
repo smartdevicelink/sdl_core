@@ -74,7 +74,9 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 endif()
 
 add_executable("test_suit" "./test_suit.cc")

@@ -59,11 +59,17 @@ if (BUILD_USB_SUPPORT)
     ./src/usb/qnx/usb_connection.cc
     ./src/usb/qnx/platform_usb_device.cc
     )
-    target_link_libraries ("TransportManager" usbdi )
   endif()
 endif(BUILD_USB_SUPPORT)
 
 add_library("TransportManager" ${SOURCES})
+
+if (BUILD_USB_SUPPORT)
+  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    target_link_libraries ("TransportManager" usbdi )
+  endif()
+endif(BUILD_USB_SUPPORT)
+
 if (BUILD_AVAHI_SUPPORT)
   target_link_libraries ("TransportManager" avahi-common)
 endif()
