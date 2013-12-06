@@ -43,6 +43,7 @@ Rectangle {
     property date lastAlertTime
     property var softButtons
     property int appId
+    property string popUpName // TODO{ALESHIN}: No requerments for closePopUp, if alert couldn't be closed by closePopUp request - delete everywhere
 
     color: "transparent"
 
@@ -112,7 +113,10 @@ Rectangle {
                         width: Constants.alertWidth / 2
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
-                        onKeepContext: { alertWindow.restart(); }
+                        onKeepContext: {
+                            alertWindow.restart();
+                            sdlUI.onResetTimeout(appId, "UI.Alert")
+                        }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
@@ -127,7 +131,10 @@ Rectangle {
                         width: Constants.alertWidth / 2
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
-                        onKeepContext: { alertWindow.restart(); }
+                        onKeepContext: {
+                            alertWindow.restart();
+                            sdlUI.onResetTimeout(appId, "UI.Alert")
+                        }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
@@ -147,7 +154,10 @@ Rectangle {
                         width: Constants.alertWidth / 2
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
-                        onKeepContext: { alertWindow.restart(); }
+                        onKeepContext: {
+                            alertWindow.restart();
+                            sdlUI.onResetTimeout(appId, "UI.Alert")
+                        }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
@@ -162,7 +172,10 @@ Rectangle {
                         width: Constants.alertWidth / 2
                         onPressed: { alertWindow.keep = true; }
                         onReleased: { alertWindow.keep = false; }
-                        onKeepContext: { alertWindow.restart(); }
+                        onKeepContext: {
+                            alertWindow.restart();
+                            sdlUI.onResetTimeout(appId, "UI.Alert")
+                        }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             contentLoader.go("views/SDLPlayerView.qml", appId);
@@ -226,16 +239,21 @@ Rectangle {
         visible = true
     }
 
-    function complete (reason) {
-        timer.stop()
-        DBus.sendReply(async, {"__retCode": reason})
-
+    function complete (reason, data) {
         if (!keep) {
             hide()
+            switch (reason) {
+            case Common.Result.SUCCESS:
+                DBus.sendReply(async, { __retCode: Common.Result.SUCCESS, __message: "UI.Alert" })
+                break
+            // For other cases
+            }
         }
+        timer.stop()
     }
 
     function hide() {
+        console.debug(popUpName, "HIDE")
         dataContainer.activeAlert = false
         dataContainer.applicationContext = dataContainer.applicationSavedContext
         visible = false
@@ -251,6 +269,18 @@ Rectangle {
     onKeepChanged: {
         if (visible && !keep && !timer.running) {
             hide()
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            dataContainer.activePopup.push(popUpName)
+        } else {
+            for (var i in dataContainer.activePopup) {
+                if (dataContainer.activePopup[i] === popUpName) {
+                    dataContainer.activePopup.splice(i, 1)
+                }
+            }
         }
     }
 }

@@ -98,11 +98,14 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("Buttons", "OnButtonEvent");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonPress");
   DBusMessageController::SubscribeTo("UI", "OnCommand");
-  DBusMessageController::SubscribeTo("VR", "OnCommand");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnReady");
   DBusMessageController::SubscribeTo("UI", "OnDriverDistraction");
   DBusMessageController::SubscribeTo("UI", "OnSystemContext");
   DBusMessageController::SubscribeTo("UI", "OnAppActivated");
+  DBusMessageController::SubscribeTo("UI", "OnLanguageChange");
+  DBusMessageController::SubscribeTo("UI", "OnResetTimeout");
+  DBusMessageController::SubscribeTo("VR", "OnCommand");
+  DBusMessageController::SubscribeTo("VR", "OnLanguageChange");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnReady");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnAppDeactivated");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnStartDeviceDiscovery");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnUpdateDeviceList");
@@ -110,9 +113,7 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnAppActivated");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitApplication");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitAllApplications");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnDeviceChosen");
-  DBusMessageController::SubscribeTo("UI", "OnLanguageChange");
-  DBusMessageController::SubscribeTo("VR", "OnLanguageChange");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnDeviceChosen");  
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnGpsData");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnSpeed");

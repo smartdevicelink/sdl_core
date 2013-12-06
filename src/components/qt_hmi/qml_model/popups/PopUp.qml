@@ -38,6 +38,7 @@ import "../models/Constants.js" as Constants
 Item {
     default property alias content: content.children
     property int padding: Constants.popUpPadding
+    property string popUpName
 
     visible: false
 
@@ -66,11 +67,20 @@ Item {
     }
 
     onVisibleChanged: {
-        dataContainer.activePopup = visible ? this : null
+        if (popUpName) {
+            if (visible) {
+                dataContainer.activePopup.push(popUpName)
+            } else {
+                for (var i in dataContainer.activePopup) {
+                    if (dataContainer.activePopup[i] === popUpName) {
+                        dataContainer.activePopup.splice(i, 1)
+                    }
+                }
+            }
+        }
     }
 
     function show() {
-
         console.debug("enter");
         visible = true;
         console.debug("exit");
@@ -81,5 +91,4 @@ Item {
         visible = false;
         console.debug("exit");
     }
-
 }

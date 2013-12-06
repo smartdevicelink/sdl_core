@@ -61,9 +61,7 @@ ContextPopup {
             text: name
             icon: image
             onClicked: {
-                timer.stop()
-                DBus.sendReply(dataContainer.interactionModel.async, {"choiceID": id})
-                hide()
+                complete(Common.Result.SUCCESS, {"choiceID": id})
             }
         }
     }
@@ -72,8 +70,7 @@ ContextPopup {
         Timer {
             id: timer
             onTriggered: {
-                DBus.sendError(dataContainer.interactionModel.async, Common.Result.TIMED_OUT)
-                hide()
+                complete(Common.Result.TIMED_OUT)
             }
         }
     }
@@ -83,6 +80,24 @@ ContextPopup {
         timer.interval = dataContainer.interactionModel.timeout
         timer.start()
         show()
+        console.debug("exit")
+    }
+
+    function complete (reason, data) {
+        console.debug("enter")
+        switch (reason) {
+            case Common.Result.SUCCESS:
+                DBus.sendReply(dataContainer.interactionModel.async, data)
+                break
+            case Common.Result.ABORTED:
+                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.ABORTED })
+                break
+            case Common.Result.TIMED_OUT:
+                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.TIMED_OUT })
+                break
+        }
+        timer.stop()
+        hide()
         console.debug("exit")
     }
 }

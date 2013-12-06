@@ -181,7 +181,8 @@ ContextPopup {
             font.pixelSize: Constants.fontSize * 2
         }
 
-        BackButton {
+        OvalButton {
+            text: "Close"
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 console.debug("enter")

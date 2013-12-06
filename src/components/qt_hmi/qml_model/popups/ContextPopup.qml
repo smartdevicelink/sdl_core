@@ -46,6 +46,7 @@ PopUp {
 
     function hide() {
         console.debug("enter")
+        console.debug(popUpName, "HIDE")
         if (visible) { // must not decrement counter if hide() called for invisible popup
             visible = false;
             dataContainer.popups--

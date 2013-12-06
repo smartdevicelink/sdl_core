@@ -401,13 +401,37 @@ Item {
         console.debug("exit")
     }
 
-    function closePopUp () {
+    function closePopUp (methodName) {
         console.debug("enter")
-        if (dataContainer.activePopup) {
-            //close pop-up that is currently active with ABORT code
-            dataContainer.activePopup.complete(Common.Result.ABORT)
+        var popUpToClose
+
+        if (dataContainer.activePopup.length === 0) {
+            return { __retCode: Common.Result.ABORT, __message: "No active PopUps"}
         }
-        //response to this callwith SUCCESS code
+
+        if (methodName !== undefined) {
+            popUpToClose = methodName
+        } else {
+            popUpToClose = dataContainer.activePopup[dataContain.activePopUp.length - 1]
+        }
+
+        switch (popUpToClose) {
+            case "UI.PerformInteraction":
+                interactionPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.Slider":
+                sliderPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.PerformAudioPassThru":
+                performAudioPassThruPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.Alert":
+                alertWindow.complete(Common.Result.SUCCESS)
+                break
+            case "UI.VrHelp":
+                vrHelpPopup.complete(Common.Result.SUCCESS)
+                break
+        }
         console.debug("exit")
     }
 

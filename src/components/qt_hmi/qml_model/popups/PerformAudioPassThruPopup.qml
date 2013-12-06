@@ -137,7 +137,8 @@ ContextPopup {
             }
         }
 
-        BackButton {
+        OvalButton {
+            text: "Close"
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 console.debug("enter")
