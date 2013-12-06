@@ -25,7 +25,9 @@ if (BUILD_AVAHI_SUPPORT)
 endif()
 
 if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
 endif()
 
 set (SOURCES
@@ -54,6 +56,8 @@ create_test("test_TcpTransportAdapter" "src/test_tcp_transport_adapter.cc" "${LI
 target_link_libraries("test_TransportManagerTest" TransportManager)
 
 if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries("test_TransportManagerTest" Libusb-1.0.16)
+endif()
 endif()
 # vim: set ts=2 sw=2 et:

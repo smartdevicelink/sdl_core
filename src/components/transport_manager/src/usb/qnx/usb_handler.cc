@@ -74,10 +74,6 @@ UsbHandler::~UsbHandler() {
 
 bool operator==(const usbd_device_instance_t& a,
                 const usbd_device_instance_t& b) {
-  LOG4CXX_INFO(logger_,
-               "compare (" << (int)a.path << "," << (int)a.devno << ") and ("
-                           << (int)b.path << "," << (int)b.devno << ") -> "
-                           << (a.path == b.path && a.devno == b.devno));
   return a.path == b.path && a.devno == b.devno;
 }
 
