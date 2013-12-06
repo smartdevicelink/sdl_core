@@ -68,8 +68,8 @@ Item {
         property var timer
 
         property var softButtonsListExample : [
-            {softButtonID:0, isHighlighted:true,  systemAction:Common.SystemAction.DEFAULT_ACTION,
-                type:Common.SoftButtonType.SBT_TEXT ,text:"Default Action"},
+            {softButtonID:0, isHighlighted:true, systemAction:Common.SystemAction.DEFAULT_ACTION,
+                type:Common.SoftButtonType.SBT_TEXT, text:"Default Action"},
             {softButtonID:1, isHighlighted:false, systemAction:Common.SystemAction.STEAL_FOCUS,
                 type:Common.SoftButtonType.SBT_IMAGE,text:"Steal Focus"},
             {softButtonID:2, isHighlighted:false, systemAction:Common.SystemAction.KEEP_CONTEXT,
@@ -137,27 +137,19 @@ Item {
             var result = sdlUIProxy.scrollableMessage(initData)
             getMessageViewModel()
 
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             timer = messageView.getTimer()
             if(!timer)
                 qtest_fail("timer is undefined");
             //check button equals to init data
-            if (messageModel.softButtons.count === initData.softButtons.length) {
-                for (var i = 0, len = messageModel.softButtons.count; i < len; i++) {
-                    var act = messageModel.softButtons.get(i)
-                    var exp = initData.softButtons[i]
-                    if (!act.softButtonID === exp.softButtonID)
-                        fail("wrong softButtonID in button")
-                    if (!act.isHighlighted === exp.isHighlighted)
-                        fail("wrong isHighlighted in button")
-                    if (!act.systemAction ===  exp.systemAction)
-                        fail("wrong systemAction in button")
-                    if (!act.text === exp.text)
-                        fail("wrong text in button")
-                }
-            } else {
-                fail("wrong buttons count created")
+            compare(messageModel.softButtons.count, initData.softButtons.length, "wrong buttons count created")
+            for (var i = 0, len = messageModel.softButtons.count; i < len; i++) {
+                var act = messageModel.softButtons.get(i)
+                var exp = initData.softButtons[i]
+                compare(act.softButtonID, exp.softButtonID,"wrong softButtonID in button")
+                compare(act.isHighlighted, exp.isHighlighted,"wrong isHighlighted in button")
+                compare(act.systemAction, exp.systemAction,"wrong systemAction in button")
+                compare(act.text, exp.text,"wrong text in button")
             }
             //check model data equals to init data
             compare(messageModel.running, true, "ScrollableMessage didn't start")
@@ -178,8 +170,7 @@ Item {
             var result = sdlUIProxy.scrollableMessage(initData)
             getMessageViewModel()
 
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             //NOTE: don't check timer - it has been triggered immediately (timeout is 0)
             //MessageView call @complete immediately
             compare(messageModel.running, false, "ScrollableMessage didn't stop")
@@ -207,10 +198,8 @@ Item {
             var actualResult2 = sdlUIProxy.scrollableMessage(initData2)
             getMessageViewModel()
 
-            if(actualResult.__errno !== undefined)
-                fail("ScrollableMessage return error state")
-            if(actualResult2.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(actualResult.__errno === undefined, "ScrollableMessage return error state")
+            verify(actualResult2.__errno === undefined, "ScrollableMessage return error state")
             compare(messageModel.running, true, "ScrollableMessage didn't start")
             compare(messageModel.longMessageText, initData2.messageText.fieldText, "wrong messageText")
             compare(messageModel.timeout,initData2.timeout, "wrong timeout")
@@ -237,10 +226,8 @@ Item {
             //create new view
             var actualResult2 = sdlUIProxy.scrollableMessage(initData2)
             getMessageViewModel()
-            if(actualResult.__errno !== undefined)
-                fail("ScrollableMessage return error state")
-            if(actualResult2.__errno === undefined)
-                fail("ScrollableMessage don't return error state")
+            verify(actualResult.__errno === undefined, "ScrollableMessage return error state")
+            verify(actualResult2.__errno !== undefined, "ScrollableMessage don't return error state")
             compare(messageModel.running, true, "ScrollableMessage didn't start")
             compare(messageView, firstView, "creating new view insteed stay first")
             compare(messageModel.longMessageText, initData.messageText.fieldText, "wrong messageText")
@@ -263,8 +250,7 @@ Item {
             getMessageViewModel()
 
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             //look for back button
             var backButton  = messageView.getBackButton()
             verify(backButton !== undefined, "Not created back button")
@@ -294,8 +280,7 @@ Item {
             getMessageViewModel()
 
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             //look for DEFAULT_ACTION button
             var defaultActionButton  = findButtonByAction(Common.SystemAction.DEFAULT_ACTION)
             verify(defaultActionButton !== undefined, "Not created button with DEFAULT_ACTION")
@@ -326,8 +311,7 @@ Item {
 
             //check
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             //look for STEAL_FOCUS button
             var stealFocusButton  = findButtonByAction(Common.SystemAction.STEAL_FOCUS)
             verify(stealFocusButton !== undefined, "Not created button with STEAL_FOCUS")
@@ -356,8 +340,7 @@ Item {
 
             //check
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
             //look for KEEP_CONTEXT button
             var keepContexButton  = findButtonByAction(Common.SystemAction.KEEP_CONTEXT)
             verify(keepContexButton !== undefined, "Not created button with KEEP_CONTEXT")
@@ -376,7 +359,6 @@ Item {
             console.debug("exit")
         }
 
-
         //add long text to model and check scrollBar visibility
         function test_09_ScrollBarShown() {
             console.debug("enter")
@@ -392,8 +374,7 @@ Item {
 
             //check
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
 
             //wait rendering
             waitForRendering(mainWindowLoader)
@@ -415,9 +396,7 @@ Item {
 
             //check
             compare(messageModel.running, true, "ScrollableMessage didn't start")
-            if(result.__errno !== undefined)
-                fail("ScrollableMessage return error state")
-
+            verify(result.__errno === undefined, "ScrollableMessage return error state")
 
             var textAreaHeight = messageView.getTextArea().height
             wait(initData.timeout)
@@ -426,7 +405,7 @@ Item {
                 softButtons:softButtonsListExample}
             createMessageView(initData.appID)
 
-            var result2= sdlUIProxy.scrollableMessage(initData2)
+            var result2 = sdlUIProxy.scrollableMessage(initData2)
             getMessageViewModel()
 
             //wait rendering
