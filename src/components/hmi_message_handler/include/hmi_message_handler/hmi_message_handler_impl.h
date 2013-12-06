@@ -38,16 +38,39 @@
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
 
 namespace hmi_message_handler {
-
 typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+
+namespace impl {
+/*
+* These dummy classes are here to locally impose strong typing on different
+* kinds of messages
+* Currently there is no type difference between incoming and outgoing messages
+* TODO(ikozyrenko): replace these with globally defined message types
+* when we have them.
+*/
+struct MessageFromHmi: public MessageSharedPointer {
+  MessageFromHmi(const MessageSharedPointer& message)
+      : MessageSharedPointer(message) {}
+};
+
+struct MessageToHmi: public MessageSharedPointer {
+  MessageToHmi(const MessageSharedPointer& message)
+      : MessageSharedPointer(message) {}
+
+};
+}
 
 class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
-class HMIMessageHandlerImpl : public HMIMessageHandler {
+class HMIMessageHandlerImpl
+    : public HMIMessageHandler,
+      public threads::MessageLoopThread<impl::MessageFromHmi>::Handler,
+      public threads::MessageLoopThread<impl::MessageToHmi>::Handler {
  public:
   static HMIMessageHandlerImpl* instance();
   ~HMIMessageHandlerImpl();
@@ -61,17 +84,24 @@ class HMIMessageHandlerImpl : public HMIMessageHandler {
  private:
   HMIMessageHandlerImpl();
 
+
+  // threads::MessageLoopThread<*>::Handler implementations
+
+  // CALLED ON messages_from_hmi_ THREAD!
+  virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+  // CALLED ON messages_to_hmi_ THREAD!
+  virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+ private:
+
   HMIMessageObserver* observer_;
   std::set<HMIMessageAdapter*> message_adapters_;
 
-  threads::Thread* to_hmi_thread_;
-  friend class ToHMIThreadImpl;
+  // Construct message threads when everything is already created
 
-  threads::Thread* from_hmi_thread_;
-  friend class FromHMIThreadImpl;
-
-  MessageQueue<MessageSharedPointer> messages_to_hmi_;
-  MessageQueue<MessageSharedPointer> messages_from_hmi_;
+  // Thread that pumps messages coming from hmi.
+  threads::MessageLoopThread<impl::MessageFromHmi> messages_from_hmi_;
+  // Thread that pumps messages being passed to hmi.
+  threads::MessageLoopThread<impl::MessageToHmi> messages_to_hmi_;
 
   static log4cxx::LoggerPtr logger_;
 

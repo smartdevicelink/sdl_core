@@ -41,6 +41,7 @@
 #include "utils/logger.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/threads/message_loop_thread.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -67,6 +68,26 @@ typedef transport_manager::ConnectionUID ConnectionID;
 
 using transport_manager::TransportManagerListenerImpl;
 
+namespace impl {
+/*
+ * These dummy classes are here to locally impose strong typing on different
+ * kinds of messages
+ * Currently there is no type difference between incoming and outgoing messages
+ * TODO(ikozyrenko): replace these with globally defined message types
+ * when we have them.
+ */
+struct RawFordMessageFromMobile: public RawMessagePtr {
+  explicit RawFordMessageFromMobile(const RawMessagePtr& message)
+      : RawMessagePtr(message) {}
+};
+
+struct RawFordMessageToMobile: public RawMessagePtr {
+  explicit RawFordMessageToMobile(const RawMessagePtr& message)
+      : RawMessagePtr(message) {}
+};
+
+}
+
 /**
  * \class ProtocolHandlerImpl
  * \brief Class for handling message exchange between Transport and higher
@@ -75,8 +96,11 @@ using transport_manager::TransportManagerListenerImpl;
  * and if needed passes message to JSON Handler or notifies Connection Handler
  * about activities around sessions.
  */
-class ProtocolHandlerImpl : public TransportManagerListenerImpl,
-  public ProtocolHandler {
+class ProtocolHandlerImpl
+    : public ProtocolHandler,
+      public TransportManagerListenerImpl,
+      public threads::MessageLoopThread<impl::RawFordMessageFromMobile>::Handler,
+      public threads::MessageLoopThread<impl::RawFordMessageToMobile>::Handler {
   public:
     /**
      * \brief Constructor
@@ -305,6 +329,12 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
       ConnectionID connection_id ,
       int connection_key);
 
+    // threads::MessageLoopThread<*>::Handler implementations
+    // CALLED ON raw_ford_messages_from_mobile_ thread!
+    void Handle(const impl::RawFordMessageFromMobile& message);
+    // CALLED ON raw_ford_messages_to_mobile_ thread!
+    void Handle(const impl::RawFordMessageToMobile& message);
+  private:
     /**
      * \brief For logging.
      */
@@ -328,16 +358,6 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
     transport_manager::TransportManager* transport_manager_;
 
     /**
-     *\brief Queue for message from Mobile side.
-     */
-    MessageQueue<RawMessagePtr> messages_from_mobile_app_;
-
-    /**
-     *\brief Queue for message to Mobile side.
-     */
-    MessageQueue<RawMessagePtr> messages_to_mobile_app_;
-
-    /**
      *\brief Map of frames for messages received in multiple frames.
      */
     std::map<int, ProtocolPacket*> incomplete_multi_frame_messages_;
@@ -359,13 +379,10 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
      */
     std::map<unsigned char, unsigned int> message_counters_;
 
-    // Thread for handling messages from Mobile side.
-    threads::Thread* handle_messages_from_mobile_app_;
-    friend class MessagesFromMobileAppHandler;
-
-    // Thread for handling message to Mobile side.
-    threads::Thread* handle_messages_to_mobile_app_;
-    friend class MessagesToMobileAppHandler;
+    // Thread that pumps non-parsed messages coming from mobile side.
+    threads::MessageLoopThread<impl::RawFordMessageFromMobile> raw_ford_messages_from_mobile_;
+    // Thread that pumps messages prepared to being sent to mobile side.
+    threads::MessageLoopThread<impl::RawFordMessageToMobile> raw_ford_messages_to_mobile_;
 };
 }  // namespace protocol_handler
 

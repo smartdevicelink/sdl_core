@@ -66,6 +66,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
@@ -109,10 +110,47 @@ typedef std::map<unsigned int, HMIRequest> MobileRequest;
  */
 typedef std::map<unsigned int, MobileRequest> MessageChain;
 
+class ApplicationManagerImpl;
+
+namespace impl {
+using namespace threads;
+
+/*
+ * These dummy classes are here to locally impose strong typing on different
+ * kinds of messages
+ * Currently there is no type difference between incoming and outgoing messages
+ * And due to ApplicationManagerImpl works as message router it has to distinguish
+ * messages passed from it's different connection points
+ * TODO(ikozyrenko): replace these with globally defined message types
+ * when we have them.
+ */
+struct MessageFromMobile: public utils::SharedPtr<Message> {
+  explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+};
+struct MessageToMobile: public utils::SharedPtr<Message> {
+  explicit MessageToMobile(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+};
+struct MessageFromHmi: public utils::SharedPtr<Message> {
+  explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+};
+struct MessageToHmi: public utils::SharedPtr<Message> {
+  explicit MessageToHmi(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+};
+
+}
+
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
+  public threads::MessageLoopThread< impl::MessageFromMobile >::Handler,
+  public threads::MessageLoopThread< impl::MessageToMobile >::Handler,
+  public threads::MessageLoopThread< impl::MessageFromHmi >::Handler,
+  public threads::MessageLoopThread< impl::MessageToHmi >::Handler,
   public HMICapabilities {
   public:
     ~ApplicationManagerImpl();
@@ -513,6 +551,25 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void SaveApplications() const;
 
+    // threads::MessageLoopThread<*>::Handler implementations
+    /*
+     * @brief Handles for threads pumping different types
+     * of messages. Beware, each is called on different thread!
+     */
+    // CALLED ON messages_from_mobile_ thread!
+    virtual void Handle(const impl::MessageFromMobile& message) OVERRIDE;
+
+    // CALLED ON messages_to_mobile_ thread!
+    virtual void Handle(const impl::MessageToMobile& message) OVERRIDE;
+
+    // CALLED ON messages_from_hmi_ thread!
+    virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+
+    // CALLED ON messages_to_hmi_ thread!
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+
+  private:
+
     // members
     /**
      * @brief Map of connection keys and associated applications
@@ -555,20 +612,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     // TODO(YS): Remove old implementation
     policies_manager::PoliciesManager policies_manager_;
 
-    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
-
-    threads::Thread* from_mobile_thread_;
-    friend class FromMobileThreadImpl;
-    threads::Thread* to_mobile_thread_;
-    friend class ToMobileThreadImpl;
-    threads::Thread* from_hmh_thread_;
-    friend class FromHMHThreadImpl;
-    threads::Thread* to_hmh_thread_;
-    friend class ToHMHThreadImpl;
-
     hmi_apis::HMI_API* hmi_so_factory_;
     mobile_apis::MOBILE_API* mobile_so_factory_;
 
@@ -576,6 +619,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     static unsigned int message_chain_current_id_;
     static const unsigned int message_chain_max_id_;
     request_controller::RequestController         request_ctrl;
+
+    // Construct message threads when everything is already created
+
+    // Thread that pumps messages coming from mobile side.
+    threads::MessageLoopThread< impl::MessageFromMobile > messages_from_mobile_;
+    // Thread that pumps messages being passed to mobile side.
+    threads::MessageLoopThread< impl::MessageToMobile > messages_to_mobile_;
+    // Thread that pumps messages coming from HMI.
+    threads::MessageLoopThread< impl::MessageFromHmi > messages_from_hmi_;
+    // Thread that pumps messages being passed to HMI.
+    threads::MessageLoopThread< impl::MessageToHmi > messages_to_hmi_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

@@ -52,4 +52,12 @@
 
 #define NOTREACHED() DCHECK(false)
 
+// Allows to perform static check that virtual function from base class is
+// actually being overriden if compiler support is available
+#if __cplusplus >= 201103L
+#define OVERRIDE override
+#else
+#define OVERRIDE
+#endif
+
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_

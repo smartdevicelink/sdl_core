@@ -50,10 +50,6 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-#include "./from_hmh_thread_impl.h"
-#include "./to_hmh_thread_impl.h"
-#include "./from_mobile_thread_impl.h"
-#include "./to_mobile_thread_impl.h"
 #include "policies/policy_manager.h"
 
 namespace application_manager {
@@ -80,37 +76,14 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     connection_handler_(NULL),
     policy_manager_(NULL),
     protocol_handler_(NULL),
-    from_mobile_thread_(NULL),
-    to_mobile_thread_(NULL),
-    from_hmh_thread_(NULL),
-    to_hmh_thread_(NULL),
+    messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
+    messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
+    messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
+    messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
     hmi_so_factory_(NULL),
     request_ctrl(),
     media_manager_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  from_mobile_thread_ = new threads::Thread(
-    "application_manager::FromMobileThreadImpl",
-    new FromMobileThreadImpl(this));
-  if (!InitThread(from_mobile_thread_)) {
-    return;
-  }
-  to_mobile_thread_ = new threads::Thread(
-    "application_manager::ToMobileThreadImpl", new ToMobileThreadImpl(this));
-  if (!InitThread(to_mobile_thread_)) {
-    return;
-  }
-
-  to_hmh_thread_ = new threads::Thread("application_manager::ToHMHThreadImpl",
-                                       new ToHMHThreadImpl(this));
-  if (!InitThread(to_hmh_thread_)) {
-    return;
-  }
-
-  from_hmh_thread_ = new threads::Thread(
-    "application_manager::FromHMHThreadImpl", new FromHMHThreadImpl(this));
-  if (!InitThread(from_hmh_thread_)) {
-    return;
-  }
 
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
@@ -146,30 +119,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   if (vehicle_type_) {
     delete vehicle_type_;
-  }
-
-  if (from_mobile_thread_) {
-    from_mobile_thread_->stop();
-    delete from_mobile_thread_;
-    from_mobile_thread_ = NULL;
-  }
-
-  if (to_hmh_thread_) {
-    to_hmh_thread_->stop();
-    delete to_hmh_thread_;
-    to_hmh_thread_ = NULL;
-  }
-
-  if (from_hmh_thread_) {
-    from_hmh_thread_->stop();
-    delete from_hmh_thread_;
-    from_hmh_thread_ = NULL;
-  }
-
-  if (to_mobile_thread_) {
-    to_mobile_thread_->stop();
-    delete to_mobile_thread_;
-    to_mobile_thread_ = NULL;
   }
 
   message_chaining_.clear();
@@ -901,7 +850,7 @@ void ApplicationManagerImpl::OnMessageReceived(
 
   utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
   if (outgoing_message) {
-    messages_from_mobile_.push(outgoing_message);
+    messages_from_mobile_.PostMessage(impl::MessageFromMobile(outgoing_message));
   } else {
     LOG4CXX_WARN(logger_, "Incorrect message received");
   }
@@ -940,7 +889,7 @@ void ApplicationManagerImpl::OnMessageReceived(
     return;
   }
 
-  messages_from_hmh_.push(message);
+  messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
 void ApplicationManagerImpl::OnErrorSending(
@@ -1085,7 +1034,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
-  messages_to_mobile_.push(message_to_send);
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send));
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1255,7 +1204,7 @@ void ApplicationManagerImpl::SendMessageToHMI(
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-  messages_to_hmh_.push(message_to_send);
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 
 bool ApplicationManagerImpl::ManageHMICommand(
@@ -1670,6 +1619,60 @@ void ApplicationManagerImpl::UnregisterAppInterface(
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   UnregisterApplication(app_id);
+}
+
+void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
+  LOG4CXX_INFO(logger_, "Received message from Mobile side");
+
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+  ProcessMessageFromMobile(message);
+}
+
+void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
+  protocol_handler::RawMessage* rawMessage = 0;
+  if (message->protocol_version() == application_manager::kV1) {
+    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV1(
+                   message);
+  } else if (message->protocol_version() == application_manager::kV2) {
+    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV2(
+                   message);
+  } else {
+    return;
+  }
+
+  if (!protocol_handler_) {
+    return;
+  }
+
+  protocol_handler_->SendMessageToMobileApp(rawMessage);
+
+  LOG4CXX_INFO(logger_, "Message for mobile given away.");
+
+}
+
+void ApplicationManagerImpl::Handle(const impl::MessageFromHmi& message) {
+  LOG4CXX_INFO(logger_, "Received message from hmi");
+
+  if (!message) {
+    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+  ProcessMessageFromHMI(message);
+}
+
+void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
+  LOG4CXX_INFO(logger_, "Received message to hmi");
+  if (!hmi_handler_) {
+    LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
+    return;
+  }
+
+  hmi_handler_->SendMessageToHMI(message);
+  LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 
 void ApplicationManagerImpl::Mute() {
