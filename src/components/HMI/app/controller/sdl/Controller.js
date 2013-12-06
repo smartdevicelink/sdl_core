@@ -134,9 +134,11 @@ SDL.SDLController = Em.Object
                 SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
             } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp) {
 
-                SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                if (SDL.SDLAppController.model) {
+                    SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                }
             }
-        }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData'),
+        }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
          * Notify SDLCore that TTS haas finished processing
@@ -222,12 +224,12 @@ SDL.SDLController = Em.Object
             switch (element.groupName) {
                 case "AlertPopUp": {
                     SDL.AlertPopUp.deactivate();
-                    this.getApplicationModel(element.appID).turnOnSDL();
+                    this.onActivateSDLApp(element);
                     break;
                 }
                 case "ScrollableMessage": {
                     SDL.ScrollableMessage.deactivate();
-                    this.getApplicationModel(element.appID).turnOnSDL();
+                    this.onActivateSDLApp(element);
                     break;
                 }
             }
@@ -333,9 +335,10 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result) {
+        interactionChoiseCloseResponse: function(result, choiceID, manualTextEntry) {
 
-            FFW.UI.interactionResponse(result);
+            FFW.UI.interactionResponse(result, choiceID, manualTextEntry);
+            SDL.SDLModel.set('interactionData', {'vrHelpTitle': null, 'vrHelp': null});
         },
         /**
          * Method to sent notification for Alert

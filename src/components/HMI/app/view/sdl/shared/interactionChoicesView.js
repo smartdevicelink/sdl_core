@@ -145,7 +145,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         activate: function (message) {
 
-            if (message) {
+            if (message && message.initialText) {
                 this.set('caption', message.initialText.fieldText);
             }
 
@@ -212,12 +212,19 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 }
             } else {
 
-                this.preformChoices(message.choiceSet, message.timeout);
+                if (message.choiceSet) {
+                    this.preformChoices(message.choiceSet, message.timeout);
 
-                this.set('list', true);
-                this.set('icon', false);
-                this.set('search', false);
-                this.set('active', true);
+                    this.set('list', true);
+                    this.set('icon', false);
+                    this.set('search', false);
+                    this.set('active', true);
+                } else {
+
+                    this.timer = setTimeout(function () {
+                        SDL.InteractionChoicesView.deactivate("TIMED_OUT");
+                    }, message.timeout);
+                }
             }
 
         },
@@ -247,7 +254,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 }
                 case "SUCCESS":
                 {
-                    FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
+                    SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
                     break;
                 }
                 default:

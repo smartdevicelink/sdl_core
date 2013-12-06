@@ -301,13 +301,7 @@ SDL.SDLAppModel = Em.Object.extend({
 
             SDL.InteractionChoicesView.clean();
 
-            if (message) {
-
-                SDL.InteractionChoicesView.activate(message);
-
-            } else {
-                SDL.InteractionChoicesView.activate("");
-            }
+            SDL.InteractionChoicesView.activate(message);
 
             SDL.SDLController.VRMove();
         },
