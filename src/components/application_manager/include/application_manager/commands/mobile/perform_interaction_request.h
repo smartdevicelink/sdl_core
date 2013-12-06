@@ -114,6 +114,15 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void ProcessVRNotification(const smart_objects::SmartObject& message);
 
   /*
+   * @brief Function will be called when event AppUnregistered comes
+   *
+   * @param message which will be sent to mobile side
+   *
+   */
+  void ProcessAppUnregisteredNotification
+  (const smart_objects::SmartObject& message);
+
+  /*
    * @brief Sends VRDeleteCommand request to HMI
    *
    * @param app_id Application ID

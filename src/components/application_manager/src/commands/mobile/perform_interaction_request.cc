@@ -55,6 +55,7 @@ PerformInteractionRequest::PerformInteractionRequest(
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -212,6 +213,11 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ProcessPerformInteractionResponse(event.smart_object());
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
+      LOG4CXX_INFO(logger_,"Received OnAppUnregistered event");
+      ProcessAppUnregisteredNotification(event.smart_object());
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
       break;
@@ -304,6 +310,32 @@ void PerformInteractionRequest::ProcessVRNotification(
     }
 }
 
+void PerformInteractionRequest::ProcessAppUnregisteredNotification
+  (const smart_objects::SmartObject& message) {
+ LOG4CXX_INFO
+  (logger_,"PerformInteractionRequest::ProcessAppUnregisteredNotification");
+ const unsigned int app_id = (*message_)[strings::params]
+                                         [strings::connection_key].asUInt();
+ if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
+   Application* app = ApplicationManagerImpl::instance()->application(app_id);
+   if (NULL == app) {
+     LOG4CXX_ERROR(logger_, "NULL pointer");
+     return;
+   }
+   if (app->is_perform_interaction_active()) {
+     if (mobile_apis::InteractionMode::MANUAL_ONLY
+         != app->perform_interaction_mode()) {
+       SendVrDeleteCommand (app);
+     }
+     app->set_perform_interaction_mode(-1);
+     app->DeletePerformInteractionChoiceSetMap();
+     app->set_perform_interaction_active(0);
+   }
+ } else {
+   LOG4CXX_INFO(logger_,"Notification was sent from another application");
+ }
+}
+
 void PerformInteractionRequest::SendVrDeleteCommand (Application* const app) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
   const PerformChoiceSetMap& choice_set_map = app
@@ -386,7 +418,6 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
             smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
             (*choice_set)[strings::choice_set][j][strings::vr_commands];
-
         CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params,
                          false);
       }
