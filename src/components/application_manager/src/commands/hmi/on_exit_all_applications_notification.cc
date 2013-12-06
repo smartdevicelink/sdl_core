@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
+#include "life_cycle.h"
 
 namespace application_manager {
 
@@ -53,6 +54,8 @@ void OnExitAllApplicationsNotification::Run() {
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
 
   ApplicationManagerImpl::instance()->UnregisterAllApplications(reason);
+
+  main_namespace::LifeCycle::instance()->StopComponents(reason);
 }
 
 }  // namespace commands
