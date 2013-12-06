@@ -41,6 +41,7 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 /**
@@ -125,6 +126,14 @@ class TEnumSchemaItem : public ISchemaItem {
    */
   static bool stringToEnum(const std::string& str, EnumType &value);
 
+  /**
+   * @brief Get string representation of enumeration elements.
+   *
+   * @return Map of enum element to its string representation.
+   **/
+  static const std::map<EnumType, std::string>&
+    getEnumElementsStringRepresentation();
+
   virtual ~TEnumSchemaItem() {
   }
 
@@ -157,14 +166,6 @@ class TEnumSchemaItem : public ISchemaItem {
    * @return Not implemented.
    **/
   TEnumSchemaItem & operator =(const TEnumSchemaItem<EnumType>& Other);
-
-  /**
-   * @brief Get string representation of enumeration elements.
-   *
-   * @return Map of enum element to its string representation.
-   **/
-  static const std::map<EnumType, std::string>&
-    getEnumElementsStringRepresentation();
 
   /**
    * @brief Set of allowed enumeration elements.

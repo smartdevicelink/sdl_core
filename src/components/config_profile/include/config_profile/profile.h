@@ -202,6 +202,11 @@ class Profile {
      */
     const unsigned int& list_files_in_none() const;
 
+    /*
+     * @brief Returns file name for storing applications data
+     */
+    const std::string& app_info_storage() const;
+
     // Members section
 
   protected:
@@ -280,6 +285,7 @@ class Profile {
     unsigned int                    put_file_in_none_;
     unsigned int                    delete_file_in_none_;
     unsigned int                    list_files_in_none_;
+    std::string                     app_info_storage_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

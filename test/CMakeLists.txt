@@ -13,7 +13,6 @@ include_directories (
   ../src/components/formatters/include
   ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../src/components/application_manager/include
-  ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
@@ -54,7 +53,6 @@ set(LIBRARIES
     HMI_API
     SmartObjects
     ApplicationManager
-    MobileMessageHandler
     ProtocolHandler
     Utils
     ConfigProfile

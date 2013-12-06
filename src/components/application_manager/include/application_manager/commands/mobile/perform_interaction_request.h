@@ -212,7 +212,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   bool is_keyboard_trigger_source_;
   mobile_apis::TriggerSource::eType trigger_source_;
-  bool is_vr_help_item_;
 };
 
 }  // namespace commands

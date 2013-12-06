@@ -38,9 +38,11 @@
 namespace protocol_handler {
 
 RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data, unsigned int data_size)
+                       unsigned char* data, unsigned int data_size,
+                       unsigned char type)
   : connection_key_(connectionKey),
     protocol_version_(protocolVersion),
+    service_type_(NONE),
     waiting_(false),
     fully_binary_(false),
     data_size_(data_size) {
@@ -51,6 +53,18 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
     }
   } else {
     data_ = 0;
+  }
+
+  switch (type) {
+    case 0x07:
+      service_type_ = RPC;
+      break;
+    case 0x0B:
+      service_type_ = MOBILE_NAV;
+      break;
+    case 0x0F:
+      service_type_ = BULK;
+      break;
   }
 }
 
@@ -79,6 +93,10 @@ unsigned int RawMessage::data_size() const {
 
 unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
+}
+
+ServiceTypes RawMessage::service_type() const {
+  return service_type_;
 }
 
 bool RawMessage::IsWaiting() const {

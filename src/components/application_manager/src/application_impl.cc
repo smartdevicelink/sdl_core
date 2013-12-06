@@ -165,7 +165,7 @@ void ApplicationImpl::set_name(const std::string& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
-  // Audio streaming state for non-media application can not be defferent
+  // Audio streaming state for non-media application can not be different
   // from NOT_AUDIBLE
   if (!is_media)
     set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
@@ -204,8 +204,9 @@ void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
   if (!is_media_application()
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_ERROR(g_logger, "Trying to set audio streaming state"
+    LOG4CXX_WARN(g_logger, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
+    return;
   }
   audio_streaming_state_ = state;
 }

@@ -14,9 +14,9 @@ set (LIBRARIES
     gtest_main
     gmock
     gmock_main
-    jsoncpp
     SmartObjects
     formatters
+    jsoncpp
 )
 
 create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")
@@ -27,3 +27,4 @@ create_test("test_SmartObject_EnumSchemaItemTest"           "./EnumSchemaItemTes
 create_test("test_SmartObject_ObjectSchemaItemTest"         "./ObjectSchemaItemTest.cpp"  "${LIBRARIES}")
 create_test("test_SmartObject_AlwaysTrueSchemaItemTest"     "./AlwaysTrueSchemaItemTest.cpp"  "${LIBRARIES}")
 create_test("test_SmartObject_AlwaysFalseSchemaItemTest"    "./AlwaysFalseSchemaItemTest.cpp"  "${LIBRARIES}")
+create_test("test_SmartObject_ObjectOptionalSchemaItemTest" "./object_optional_schema_test.cc"  "${LIBRARIES}")

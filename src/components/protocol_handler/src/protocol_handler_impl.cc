@@ -220,17 +220,12 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 }
 
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
-  // TODO(PV): implement if needed.
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
-  // TODO(PK): Check if it RegisterAppInterfaceResponse with error was sent
-  if(false) {
-    for (ProtocolObservers::iterator it = protocol_observers_.begin();
-        protocol_observers_.end() != it;
-        ++it) {
-      // TODO(PK): Paste valid app_id taken from message
-      (*it)->OnMobileMessageSent(NULL /*Valid message*/);
-    }
+  for (ProtocolObservers::iterator it = protocol_observers_.begin();
+       protocol_observers_.end() != it;
+       ++it) {
+    (*it)->OnMobileMessageSent(message);
   }
 }
 
@@ -434,13 +429,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
                                   connection_key,
                                   packet->version(),
                                   packet->data(),
-                                  packet->data_size()));
-
-      if (SERVICE_TYPE_NAVI == packet->service_type()) {
-        LOG4CXX_INFO(logger_, "Streaming message received of size " <<
-                     packet->data_size() << " body: " << packet->data());
-        HandleStreamingMessage(connection_id, connection_key, raw_message);
-      }
+                                  packet->data_size(),
+                                  packet->service_type()));
 
       NotifySubscribers(raw_message);
       break;
@@ -618,15 +608,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
-  return RESULT_OK;
-}
-
-RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
-  ConnectionID connection_id ,
-  int connection_key,
-  RawMessagePtr recieved_msg) {
-  recieved_msg->set_fully_binary(true);
-
   return RESULT_OK;
 }
 

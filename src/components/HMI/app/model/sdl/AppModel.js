@@ -296,22 +296,17 @@ SDL.SDLAppModel = Em.Object.extend({
          *
          * @param {Object}
          *            message
-         * @param {Number}
-         *            performInteractionRequestId
          */
-        onPreformInteraction: function (message, performInteractionRequestId) {
+        onPreformInteraction: function (message) {
 
             SDL.InteractionChoicesView.clean();
 
             if (message) {
 
-                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
+                SDL.InteractionChoicesView.activate(message);
 
             } else {
-//                SDL.InteractionChoicesView.preformChoices([],
-//                    performInteractionRequestId,
-//                    30000);
-                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
+                SDL.InteractionChoicesView.activate("");
             }
 
             SDL.SDLController.VRMove();

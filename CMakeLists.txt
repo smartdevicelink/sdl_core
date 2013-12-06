@@ -29,7 +29,7 @@ ELSE (CMAKE_C_FLAGS_DEBUG)
     add_definitions(-DRELEASE)
 ENDIF(CMAKE_C_FLAGS_DEBUG)
 
-option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" ON)
+option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" OFF)
 if (DEFAULT_MEDIA_FLAG)
 add_definitions(-DDEFAULT_MEDIA)
 # required to find 'glibconfig.h'

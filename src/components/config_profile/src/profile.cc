@@ -62,7 +62,8 @@ Profile::Profile()
   , pending_requests_amount_(1000)
   , put_file_in_none_(5)
   , delete_file_in_none_(5)
-  , list_files_in_none_(5) {
+  , list_files_in_none_(5)
+  , app_info_storage_("app_info.dat") {
   UpdateValues();
 }
 
@@ -185,6 +186,10 @@ const unsigned int& Profile::delete_file_in_none() const {
 
 const unsigned int& Profile::list_files_in_none() const {
   return list_files_in_none_;
+}
+
+const std::string& Profile::app_info_storage() const {
+  return app_info_storage_;
 }
 
 void Profile::UpdateValues() {
@@ -446,6 +451,15 @@ void Profile::UpdateValues() {
                  pending_requests_amount_);
   }
 
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "AppInfo", "AppInfoStorage", value))
+      && ('\0' != *value)) {
+    app_info_storage_ = value;
+    LOG4CXX_INFO(logger_,
+                 "Set Application information storage to "
+                 << app_info_storage_);
+  }
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

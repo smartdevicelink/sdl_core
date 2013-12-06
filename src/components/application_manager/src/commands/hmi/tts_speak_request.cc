@@ -38,8 +38,6 @@ namespace commands {
 
 TTSSpeakRequest::TTSSpeakRequest(const MessageSharedPtr& message)
     : RequestToHMI(message) {
-
-  TTSInterface::Mute();
 }
 
 TTSSpeakRequest::~TTSSpeakRequest() {

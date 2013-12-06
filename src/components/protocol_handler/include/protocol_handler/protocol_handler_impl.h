@@ -306,16 +306,6 @@ class ProtocolHandlerImpl : public TransportManagerListenerImpl,
       int connection_key);
 
     /**
-     * \brief Handles Map Streaming message
-     * \param original_message Message, recieved from TM as is
-     * \param connection_key Id of session over which message was received
-     * \param recieved_msg Parsed message
-     */
-    RESULT_CODE HandleStreamingMessage(ConnectionID connection_id ,
-                                       int connection_key,
-                                       RawMessagePtr recieved_msg);
-
-    /**
      * \brief For logging.
      */
     static log4cxx::LoggerPtr logger_;

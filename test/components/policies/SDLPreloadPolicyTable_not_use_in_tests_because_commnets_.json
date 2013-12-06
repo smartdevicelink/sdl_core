@@ -1,0 +1,358 @@
+{
+    "policy_table":{
+        "module_config":{
+            "endpoints":{
+                "0x07":{
+                   "default":[
+                        "http://applinkqa.trafficmanager.net/api/policies"
+                   ]
+                }
+            },
+            "preloaded_pt":"true",
+        },        
+        "functional_groupings":{
+            "Base-4":{ //FIELD IS OPTIONAL
+                "rpcs":{
+                    "GenericResponse":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "DeleteCommand":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "PerformInteraction":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL"
+                        ]
+                    },
+                    "Speak":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnAppInterfaceUnregistered":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "OnButtonPress":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "SetMediaClockTimer":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "AddSubMenu":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "RegisterAppInterface":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "UnregisterAppInterface":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "DeleteSubMenu":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "Alert":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnButtonEvent":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "DeleteInteractionChoiceSet":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnPermissionsChange":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "SetGlobalProperties":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnCommand":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "Show":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "AddCommand":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "ChangeRegistration":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "CreateInteractionChoiceSet":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "Slider":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL"
+                        ]
+                    },
+                    "ResetGlobalProperties":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnDriverDistraction":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnHMIStatus":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
+                    "SubscribeButton":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "UnsubscribeButton":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnTBTClientState":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "OnAudioPassThru":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "PerformAudioPassThru":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "EndAudioPassThru":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "ScrollableMessage":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "FULL"
+                        ]
+                    },
+                    "OnLanguageChange":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    }
+                }
+            },
+            "Location-1":{ //FIELD IS OPTIONAL
+                "user_consent_prompt":"Location", //FIELD IS OPTIONAL
+                "rpcs":{
+                    "GetVehicleData":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ],
+                        "parameters":[ //FIELD IS OPTIONAL
+                            "gps",
+                            "speed"
+                        ]
+                    },
+                    "SubscribeVehicleData":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ],
+                        "parameters":[ //FIELD IS OPTIONAL
+                            "gps",
+                            "speed"
+                        ]
+                    },
+                    "UnsubscribeVehicleData":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ],
+                        "parameters":[ //FIELD IS OPTIONAL
+                            "gps",
+                            "speed"
+                        ]
+                   },
+                    "OnVehicleData":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ],
+                        "parameters":[ //FIELD IS OPTIONAL
+                            "gps",
+                            "speed"
+                        ]
+                    }
+                }
+            },         
+            "Navigation-1":{ //FIELD IS OPTIONAL
+                "rpcs":{
+                    "AlertManeuver":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "ShowConstantTBT":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "UpdateTurnList":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    }
+                }
+            },
+            "Notifications":{ //FIELD IS OPTIONAL
+                "user_consent_prompt":"Notifications",
+                "rpcs":{
+                    "Alert":{ //FIELD IS OPTIONAL
+                        "hmi_levels":[
+                            "BACKGROUND"
+                        ]
+                    }
+                }
+            }           
+        },
+        "app_policies":{
+            "default":{
+                "priority":"EMERGENCY",
+                "groups":[
+                    "Base-4"
+                ]
+            },
+            "123456":{ //FIELD IS OPTIONAL
+                "groups":[
+                    "Location-1",
+                    "Navigation-1",
+                    "Base-4"
+                ],
+                "nicknames":[ //FIELD IS OPTIONAL
+                    "SDLTester",
+                    "SyncProxytester"
+                ]
+            },
+            "789":{ //FIELD IS OPTIONAL
+                "priority":"NORMAL",
+                "groups":[
+                    "Notifications",
+                    "Base-4"
+                ],
+                "nicknames":[ //FIELD IS OPTIONAL
+                    "Music App"
+                ]
+            }
+        }
+    }
+}

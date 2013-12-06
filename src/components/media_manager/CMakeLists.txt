@@ -41,7 +41,6 @@ include_directories (
   ../application_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include/
-  ../mobile_message_handler/include/
   ../request_watchdog/include/
   ../formatters/include
   ../config_profile/include/

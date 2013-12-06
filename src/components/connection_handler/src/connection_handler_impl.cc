@@ -73,21 +73,6 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
   connection_handler_observer_ = observer;
 }
 
-void ConnectionHandlerImpl::OnTMMessageReceived(
-  const transport_manager::RawMessageSptr message) {
-}
-
-void ConnectionHandlerImpl::OnTMMessageReceiveFailed(
-  transport_manager::ConnectionUID connection_id,
-  const transport_manager::DataReceiveError& error) {
-}
-void ConnectionHandlerImpl::OnTMMessageSendFailed(
-  const transport_manager::DataSendError& error,
-  const transport_manager::RawMessageSptr message) {
-}
-void ConnectionHandlerImpl::OnTMMessageSend(const transport_manager::RawMessageSptr message) {
-}
-
 void ConnectionHandlerImpl::OnDeviceListUpdated(
   const std::vector<transport_manager::DeviceInfo>& device_info_list) {
   bool list_actually_changed = false;

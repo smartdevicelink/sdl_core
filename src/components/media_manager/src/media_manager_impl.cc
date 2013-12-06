@@ -171,7 +171,8 @@ void MediaManagerImpl::StopVideoStreaming(int application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
-  if (message->is_fully_binary()) {
+  if (message->service_type()
+      == protocol_handler::ServiceTypes::MOBILE_NAV) {
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
     }

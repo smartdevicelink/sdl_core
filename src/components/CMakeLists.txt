@@ -19,9 +19,6 @@ add_subdirectory(./utils)
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
-# --- Mobile message handler
-add_subdirectory(./mobile_message_handler)
-
 # --- Application manager
 add_subdirectory(./application_manager)
 
@@ -36,3 +33,6 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./media_manager)
+
+# --- Policies
+add_subdirectory(./policies)
