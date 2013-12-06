@@ -14,7 +14,6 @@ include_directories (
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
   ../../thirdPartyLibs/MessageBroker/include
-  ../../appMain/
   ${CMAKE_BINARY_DIR}/src/components/
 )
 

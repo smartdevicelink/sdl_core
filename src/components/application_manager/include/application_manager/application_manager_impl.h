@@ -186,12 +186,19 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool UnregisterApplication(int app_id);
 
     /*
-     * @brief Closes all registered applications
+     * @brief Sets unregister reason for closing all registered applications
+     * duringHU switching off
      *
-     * @param hmi_off Describes if the reason for exiting
-     *  applications was HU switching off
+     * @param reason Describes the reason for HU switching off
      */
-    void UnregisterAllApplications(bool hmi_off = false);
+    void SetUnregisterAllApplicationsReason(
+        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Closes all registered applications
+     */
+    void UnregisterAllApplications();
+
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
@@ -619,6 +626,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     static unsigned int message_chain_current_id_;
     static const unsigned int message_chain_max_id_;
     request_controller::RequestController         request_ctrl;
+    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     // Construct message threads when everything is already created
 

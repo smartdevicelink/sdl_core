@@ -82,6 +82,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
     hmi_so_factory_(NULL),
     request_ctrl(),
+    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
     media_manager_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
 
@@ -305,43 +306,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // application->set_app_allowed(result);
 
   return application;
-}
-
-bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
-  LOG4CXX_INFO(logger_, "UnregisterApplication " << app_id);
-
-  std::map<int, Application*>::iterator it = applications_.find(app_id);
-  if (applications_.end() == it) {
-    return false;
-  }
-  Application* app_to_remove = it->second;
-  applications_.erase(it);
-  application_list_.erase(app_to_remove);
-  request_ctrl.terminateAppRequests(app_id);
-  delete app_to_remove;
-  return true;
-}
-
-void ApplicationManagerImpl::UnregisterAllApplications(bool hmi_off) {
-
-  // Saving unregistered app.info to the file system before
-  SaveApplications();
-
-  applications_.clear();
-  for (std::set<Application*>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
-
-    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      (*it)->app_id(), mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET);
-
-    delete(*it);
-  }
-  application_list_.clear();
-
-  if (hmi_off) {
-    hmi_cooperating_ = false;
-  }
 }
 
 bool ApplicationManagerImpl::RemoveAppDataFromHMI(Application* application) {
@@ -1609,16 +1573,65 @@ void ApplicationManagerImpl::set_application_id(const int correlation_id,
                      (correlation_id, app_id));
 }
 
+void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
+    mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  unregister_reason_ = reason;
+}
+
+void ApplicationManagerImpl::UnregisterAllApplications() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications "  <<
+               unregister_reason_);
+
+  hmi_cooperating_ = false;
+
+  // Saving unregistered app.info to the file system before
+  SaveApplications();
+
+  for (std::set<Application*>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+
+    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+     (*it)->app_id(), unregister_reason_);
+
+    UnregisterAppInterface((*it)->app_id());
+  }
+  application_list_.clear();
+  applications_.clear();
+}
+
 void ApplicationManagerImpl::UnregisterAppInterface(
   const unsigned int& app_id) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAppInterface "
+               << app_id);
+
   std::map<int, Application*>::const_iterator it = applications_.find(app_id);
   if (it == applications_.end()) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
   }
+
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   UnregisterApplication(app_id);
+}
+
+bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterApplication "
+               << app_id);
+
+  std::map<int, Application*>::iterator it = applications_.find(app_id);
+  if (applications_.end() == it) {
+    return false;
+  }
+
+  Application* app_to_remove = it->second;
+  applications_.erase(it);
+  application_list_.erase(app_to_remove);
+  request_ctrl.terminateAppRequests(app_id);
+  delete app_to_remove;
+
+  return true;
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
