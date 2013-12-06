@@ -57,89 +57,93 @@ const char *FormatterJsonRpc::kMessage = "message";
 
 bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
                                 std::string &out_str) {
-  Json::Value root(Json::objectValue);
-
-  root[kJsonRpc] = kJsonRpcExpectedValue;
-
-  NsSmartObjects::SmartObject formatted_object(obj);
-  Json::Value msg_params_json(Json::objectValue);
-  formatted_object.getSchema().unapplySchema(formatted_object);
-
   bool result = true;
-  bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
-  bool empty_message_params = true;
-  if (true == is_message_params) {
-    const NsSmartObjects::SmartObject &msg_params =
-        formatted_object.getElement(strings::S_MSG_PARAMS);
+  try {
+    Json::Value root(Json::objectValue);
 
-    result = (NsSmartObjects::SmartType_Map == msg_params.getType());
-    if (true == result) {
-      objToJsonValue(msg_params, msg_params_json);
-    }
-    if (0 < msg_params.length()) {
-      empty_message_params = false;
-    }
-  }
+    root[kJsonRpc] = kJsonRpcExpectedValue;
 
-  if (false == formatted_object.keyExists(strings::S_PARAMS)) {
-    result = false;
-  } else {
-    const NsSmartObjects::SmartObject &params = formatted_object.getElement(
-        strings::S_PARAMS);
-    if (NsSmartObjects::SmartType_Map != params.getType()) {
+    NsSmartObjects::SmartObject formatted_object(obj);
+    Json::Value msg_params_json(Json::objectValue);
+    formatted_object.getSchema().unapplySchema(formatted_object);
+
+    bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
+    bool empty_message_params = true;
+    if (true == is_message_params) {
+      const NsSmartObjects::SmartObject &msg_params = formatted_object
+          .getElement(strings::S_MSG_PARAMS);
+
+      result = (NsSmartObjects::SmartType_Map == msg_params.getType());
+      if (true == result) {
+        objToJsonValue(msg_params, msg_params_json);
+      }
+      if (0 < msg_params.length()) {
+        empty_message_params = false;
+      }
+    }
+
+    if (false == formatted_object.keyExists(strings::S_PARAMS)) {
       result = false;
     } else {
-      const NsSmartObjects::SmartObject &message_type_object =
-          params.getElement(strings::S_MESSAGE_TYPE);
-
-      if (NsSmartObjects::SmartType_String != message_type_object.getType()) {
+      const NsSmartObjects::SmartObject &params = formatted_object.getElement(
+          strings::S_PARAMS);
+      if (NsSmartObjects::SmartType_Map != params.getType()) {
         result = false;
       } else {
-        const std::string message_type = message_type_object;
+        const NsSmartObjects::SmartObject &message_type_object = params
+            .getElement(strings::S_MESSAGE_TYPE);
 
-        if (kRequest == message_type) {
-          if (false == empty_message_params) {
+        if (NsSmartObjects::SmartType_String != message_type_object.getType()) {
+          result = false;
+        } else {
+          const std::string message_type = message_type_object.asString();
+
+          if (kRequest == message_type) {
+            if (false == empty_message_params) {
+              root[kParams] = msg_params_json;
+            }
+            result = result && SetMethod(params, root);
+            result = result && SetId(params, root);
+          } else if (kResponse == message_type) {
+            root[kResult] = msg_params_json;
+            result = result && SetMethod(params, root[kResult]);
+            result = result && SetId(params, root);
+
+            if (false == params.keyExists(strings::kCode)) {
+              result = false;
+            } else {
+              const NsSmartObjects::SmartObject &code = params.getElement(
+                  strings::kCode);
+
+              if (NsSmartObjects::SmartType_Integer != code.getType()) {
+                result = false;
+              } else {
+                root[kResult][kCode] = code.asInt();
+              }
+            }
+          } else if (kNotification == message_type) {
             root[kParams] = msg_params_json;
-          }
-          result = result && SetMethod(params, root);
-          result = result && SetId(params, root);
-        } else if (kResponse == message_type) {
-          root[kResult] = msg_params_json;
-          result = result && SetMethod(params, root[kResult]);
-          result = result && SetId(params, root);
+            result = result && SetMethod(params, root);
+          } else if (kErrorResponse == message_type) {
+            result = result && SetId(params, root);
+            result = result && SetMethod(params, root[kError][kData]);
+            result = result && SetMessage(params, root[kError]);
 
-          if (false == params.keyExists(strings::kCode)) {
-            result = false;
-          } else {
             const NsSmartObjects::SmartObject &code = params.getElement(
                 strings::kCode);
-
             if (NsSmartObjects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kResult][kCode] = code.asInt();
+              root[kError][kCode] = code.asInt();
             }
-          }
-        } else if (kNotification == message_type) {
-          root[kParams] = msg_params_json;
-          result = result && SetMethod(params, root);
-        } else if (kErrorResponse == message_type) {
-          result = result && SetId(params, root);
-          result = result && SetMethod(params, root[kError][kData]);
-          result = result && SetMessage(params, root[kError]);
-
-          const NsSmartObjects::SmartObject &code = params.getElement(
-                strings::kCode);
-          if (NsSmartObjects::SmartType_Integer != code.getType()) {
-            result = false;
-          } else {
-            root[kError][kCode] = code.asInt();
           }
         }
       }
     }
+    out_str = root.toStyledString();
+  } catch (...) {
+    result = false;
   }
-  out_str = root.toStyledString();
 
   return result;
 }

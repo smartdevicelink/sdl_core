@@ -62,12 +62,11 @@ class LifeCycle {
   public:
     static LifeCycle* instance();
     bool StartComponents();
-
     /**
     * Initialize MessageBroker component
     * @return true if success otherwise false.
     */
-    bool InitMessageSystem();
+    bool InitMessageBroker();
     static void StopComponents(int params);
 
   private:

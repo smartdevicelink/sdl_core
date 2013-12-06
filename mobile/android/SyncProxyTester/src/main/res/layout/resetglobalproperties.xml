@@ -39,6 +39,20 @@
         android:text="@string/vr_help_items" />
 
     <CheckBox
+        android:id="@+id/resetglobalproperties_choiceMenuName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/menuName" />
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceMenuIcon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/menuIcon" />
+
+    <CheckBox
         android:id="@+id/resetglobalproperties_choiceKeyboardProperties"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

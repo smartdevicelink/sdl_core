@@ -1,7 +1,3 @@
-/**
- * @file CSmartSchema.cpp
- * @brief CSmartSchema source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -31,44 +27,44 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 
-NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema()
-: mSchemaItem(NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create())
-{
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+
+CSmartSchema::CSmartSchema()
+    : mSchemaItem(CAlwaysTrueSchemaItem::create()) {
 }
 
-NsSmartDeviceLink::NsSmartObjects::CSmartSchema::CSmartSchema(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
-: mSchemaItem(SchemaItem)
-{
-
+CSmartSchema::CSmartSchema(utils::SharedPtr<ISchemaItem> SchemaItem)
+    : mSchemaItem(SchemaItem) {
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object) const
-{
-    return mSchemaItem->validate(object);
+Errors::eType CSmartSchema::validate(const SmartObject& object) {
+  return mSchemaItem->validate(object);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::setSchemaItem(utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> SchemaItem)
-{
-    mSchemaItem = SchemaItem;
+Errors::eType CSmartSchema::validate(const SmartObject& object) const {
+  return mSchemaItem->validate(object);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    mSchemaItem->applySchema(Object);
+void CSmartSchema::setSchemaItem(utils::SharedPtr<ISchemaItem> SchemaItem) {
+  mSchemaItem = SchemaItem;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    mSchemaItem->unapplySchema(Object);
+void CSmartSchema::applySchema(SmartObject& Object) {
+  mSchemaItem->applySchema(Object);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::CSmartSchema::BuildObjectBySchema(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) const  {
+void CSmartSchema::unapplySchema(SmartObject& Object) {
+  mSchemaItem->unapplySchema(Object);
+}
 
+void CSmartSchema::BuildObjectBySchema(const SmartObject& pattern_object,
+                                       SmartObject& result_object) const {
   mSchemaItem->BuildObjectBySchema(pattern_object, result_object);
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

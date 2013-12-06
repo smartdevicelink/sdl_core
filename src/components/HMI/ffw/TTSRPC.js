@@ -34,10 +34,24 @@ FFW.TTS = FFW.RPCObserver.create( {
 
     /**
      * If true then TTS is present and ready to communicate with SDL.
-     * 
+     *
      * @type {Boolean}
      */
-    isReady: false,
+    isReady: true,
+
+    /**
+     * Request id of current running Speak request
+     *
+     * @type {Boolean}
+     */
+    requestId: null,
+
+    /**
+     * Flag to determine if Speak request was aborted
+     *
+     * @type {Boolean}
+     */
+    aborted: false,
 
     /*
      * access to basic RPC functionality
@@ -130,7 +144,12 @@ FFW.TTS = FFW.RPCObserver.create( {
         switch (request.method) {
         case "TTS.Speak": {
 
-            SDL.SDLModel.onPrompt(request.params.ttsChunks, request.id);
+            if (SDL.TTSPopUp.active) {
+                FFW.TTS.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, "TTS.Speak", "TTS in progress. Rejected.");
+            } else {
+                this.requestId = request.id;
+                SDL.SDLModel.onPrompt(request.params.ttsChunks);
+            }
 
             break;
         }
@@ -171,6 +190,24 @@ FFW.TTS = FFW.RPCObserver.create( {
                 }
             };
             this.client.send(JSONMessage);
+
+            break;
+        }
+        case "TTS.PerformInteraction":
+        {
+
+            SDL.SDLModel.onPrompt(request.params.helpPrompt);
+
+            var request = request;
+
+            setTimeout(function(){
+                if (SDL.InteractionChoicesView.active) {
+                    //FFW.TTS.requestId = request.id;
+                    SDL.SDLModel.onPrompt(request.params.timeoutPrompt);
+                }
+            }, request.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
+
+            this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "TTS.PerformInteraction");
 
             break;
         }

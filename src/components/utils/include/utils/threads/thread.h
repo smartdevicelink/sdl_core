@@ -36,25 +36,11 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_
 
-#if defined(OS_WIN)
-#include <windows.h>
-typedef DWORD PlatformThreadId;
-typedef void* PlatformThreadHandle;  // HANDLE
-#elif defined(OS_POSIX)
+#if defined(OS_POSIX)
 #include <pthread.h>
-typedef pthread_t PlatformThreadHandle;
-#if defined(OS_LINUX) || defined(OS_OPENBSD)
-#include <unistd.h>
-typedef pid_t PlatformThreadId;
-#elif defined(OS_BSD)
-#include <sys/types.h>
-typedef lwpid_t PlatformThreadId;
-#elif defined(OS_MACOSX)
-#include <mach/mach.h>
-typedef mach_port_t PlatformThreadId;
-#endif
 #endif
 
+#include <ostream>
 #include <string>
 
 #include "utils/macro.h"
@@ -63,6 +49,14 @@ typedef mach_port_t PlatformThreadId;
 #include "utils/threads/thread_options.h"
 
 namespace threads {
+
+namespace impl {
+#if defined(OS_POSIX)
+typedef pthread_t PlatformThreadHandle;
+#else
+#error Please implement thread for your OS
+#endif
+}
 
 /**
  * Non platform specific thread abstraction that establishes a
@@ -87,6 +81,33 @@ namespace threads {
  */
 class Thread {
  public:
+
+  /*
+   * Class that represents unique in-process thread identifier
+   * due to restriction of pthread API it only allows checks
+   * for equality to different thread id and no ordering.
+   *
+   * ostream<< operator is provided for this class which
+   * outputs thread name associated to an identifier.
+   */
+  class Id {
+   public:
+    explicit Id(const impl::PlatformThreadHandle& id): id_(id) {}
+    bool operator==(const Id that) const;
+   private:
+    impl::PlatformThreadHandle id_;
+    friend class Thread;
+  };
+
+  // Get unique ID of currently executing thread
+  static Id CurrentId();
+
+  // Get name associated with thread identified by thread_id
+  static std::string NameFromId(Id thread_id);
+
+  // Give thread thread_id a name, helpful for debugging
+  static void SetNameForId(Id thread_id, const std::string& name);
+
   /**
    * Ctor.
    * @param name - display string to identify the thread.
@@ -170,7 +191,7 @@ class Thread {
    * The native thread handle.
    * @return thread handle.
    */
-  PlatformThreadHandle thread_handle() const {
+  impl::PlatformThreadHandle thread_handle() const {
     return thread_handle_;
   }
 
@@ -178,8 +199,8 @@ class Thread {
    * Thread id.
    * @return return thread id.
    */
-  PlatformThreadId thread_id() const {
-    return thread_id_;
+  Id thread_id() const {
+    return Id(thread_handle());
   }
 
   /**
@@ -198,8 +219,7 @@ class Thread {
  protected:
   std::string name_;
   ThreadDelegate* delegate_;
-  PlatformThreadHandle thread_handle_;
-  PlatformThreadId thread_id_;
+  impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;
   bool isThreadRunning_;
 
@@ -208,6 +228,10 @@ class Thread {
  private:
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
+
+inline bool operator!= (Thread::Id left, Thread::Id right) {return !(left == right); }
+std::ostream& operator<<(std::ostream& os, Thread::Id thread_id);
+
 }  // namespace threads
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_

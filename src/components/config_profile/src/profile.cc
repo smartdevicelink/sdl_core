@@ -54,7 +54,13 @@ Profile::Profile()
   , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
-  , space_available_(104857600) {
+  , space_available_(104857600)
+  , app_time_scale_max_requests_(100)
+  , app_requests_time_scale_(10)
+  , pending_requests_amount_(1000)
+  , put_file_in_none_(5)
+  , delete_file_in_none_(5)
+  , list_files_in_none_(5) {
   UpdateValues();
 }
 
@@ -98,11 +104,11 @@ const std::vector<std::string>& Profile::vr_commands() const {
   return vr_commands_;
 }
 
-const unsigned int Profile::max_cmd_id() const {
+const unsigned int& Profile::max_cmd_id() const {
   return max_cmd_id_;
 }
 
-const unsigned int Profile::default_timeout() const {
+const unsigned int& Profile::default_timeout() const {
   return default_timeout_;
 }
 
@@ -126,7 +132,7 @@ bool Profile::is_mixing_audio_supported() const {
   return is_mixing_audio_supported_;
 }
 
-const unsigned int Profile::space_available() const {
+const unsigned int& Profile::space_available() const {
   return space_available_;
 }
 
@@ -140,6 +146,30 @@ const std::string&  Profile::video_server_type() const {
 
 const std::string& Profile::named_pipe_path() const {
   return named_pipe_path_;
+}
+
+const unsigned int& Profile::app_time_scale() const {
+  return app_requests_time_scale_;
+}
+
+const unsigned int& Profile::app_time_scale_max_requests() const {
+  return app_time_scale_max_requests_;
+}
+
+const unsigned int& Profile::pending_requests_amount() const {
+  return pending_requests_amount_;
+}
+
+const unsigned int& Profile::put_file_in_none() const {
+  return put_file_in_none_;
+}
+
+const unsigned int& Profile::delete_file_in_none() const {
+  return delete_file_in_none_;
+}
+
+const unsigned int& Profile::list_files_in_none() const {
+  return list_files_in_none_;
 }
 
 void Profile::UpdateValues() {
@@ -231,9 +261,45 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     max_cmd_id_ = atoi(value);
     if (max_cmd_id_ < 0) {
-      max_cmd_id_ = 20000000000;
+      max_cmd_id_ = 2000000000;
     }
     LOG4CXX_INFO(logger_, "Set Maximum Command ID to " << max_cmd_id_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "FILESYSTEM RESTRICTIONS", "PutFileRequest", value))
+      && ('\0' != *value)) {
+    put_file_in_none_ = atoi(value);
+    if (put_file_in_none_ < 0) {
+      put_file_in_none_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Max allowed number of PutFile requests for one "
+        "application in NONE to " << put_file_in_none_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "FILESYSTEM RESTRICTIONS", "DeleteFileRequest", value))
+      && ('\0' != *value)) {
+    delete_file_in_none_ = atoi(value);
+    if (delete_file_in_none_ < 0) {
+      delete_file_in_none_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Max allowed number of DeleteFile requests for one "
+        "application in NONE to " << delete_file_in_none_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "FILESYSTEM RESTRICTIONS", "ListFilesRequest", value))
+      && ('\0' != *value)) {
+    list_files_in_none_ = atoi(value);
+    if (list_files_in_none_ < 0) {
+      list_files_in_none_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Max allowed number of ListFiles requests for one "
+        "application in NONE to " << list_files_in_none_);
   }
 
   *value = '\0';
@@ -308,6 +374,37 @@ void Profile::UpdateValues() {
       str = strtok(NULL, ",");
     }
   }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppTimeScaleMaxRequests", value))
+      && ('\0' != *value)) {
+    app_time_scale_max_requests_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set max amount of requests per application"
+                 " time scale " <<  app_time_scale_max_requests_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppRequestsTimeScale", value))
+      && ('\0' != *value)) {
+    app_requests_time_scale_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
+                 " of requests " << app_requests_time_scale_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "PendingRequestsAmount", value))
+      && ('\0' != *value)) {
+    pending_requests_amount_ = atoi(value);
+    if (space_available_ <= 0) {
+      pending_requests_amount_ = 1000;
+    }
+    LOG4CXX_INFO(logger_, "Set system pending requests amount " <<
+                 pending_requests_amount_);
+  }
+
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

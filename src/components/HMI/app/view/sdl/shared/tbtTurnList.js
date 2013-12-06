@@ -36,7 +36,9 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
         elementId: 'tbtTurnListView',
 
         childViews: [
-            'backButton', 'captionText', 'tbtTurnListList'
+            'backButton',
+            'captionText',
+            'tbtTurnListList'
         ],
 
         /**
@@ -46,6 +48,16 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
 
             this.set('active', true);
         },
+
+        /**
+         * Deactivate window if TurnByTurnView window was closed
+         */
+        closeTurnList: function () {
+
+            if (!SDL.TurnByTurnView.get('activeState')) {
+                this.set('active', false);
+            }
+        }.observes('SDL.TurnByTurnView.activeState'),
 
         /**
          * Title Labes of window

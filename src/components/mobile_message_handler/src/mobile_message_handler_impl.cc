@@ -113,6 +113,10 @@ void MobileMessageHandlerImpl::OnMessageReceived(
   messages_from_mobile_app_.push(message);
 }
 
+void MobileMessageHandlerImpl::OnMobileMessageSent(
+    const protocol_handler::RawMessagePtr& message) {
+}
+
 void MobileMessageHandlerImpl::SendMessageToMobileApp(
   const MobileMessage& message) {
   LOG4CXX_INFO(logger_, "MobileMessageHandlerImpl SendMessageToMobileApp()");

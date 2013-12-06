@@ -56,7 +56,7 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[str::params][str::connection_key]);
+      (*message_)[str::params][str::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -95,7 +95,7 @@ void SubscribeVehicleDataRequest::Run() {
 
   if (0 == items_to_subscribe) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "Provided VehicleData is empty", &response_params);
+                 "No data in the request", &response_params);
   } else if (subscribed_items == items_to_subscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Subscribed on provided VehicleData", &response_params);

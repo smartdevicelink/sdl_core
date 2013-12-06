@@ -1,7 +1,3 @@
-/**
- * @file SmartObject.cpp
- * @brief SmartObject source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -36,26 +32,27 @@
 
 #include <errno.h>
 
-#include <limits>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(void)
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+
+SmartObject::SmartObject()
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& Other)
+SmartObject::SmartObject(const SmartObject& Other)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   duplicate(Other);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(SmartType Type)
+SmartObject::SmartObject(SmartType Type)
     : m_type(SmartType_Null),
       m_schema() {
   switch (Type) {
@@ -88,29 +85,34 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(SmartType Type)
     case SmartType_Invalid:
       m_type = SmartType_Invalid;
       break;
+    default: {
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      break;
+    }
   }
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::~SmartObject() {
+SmartObject::~SmartObject() {
   cleanup_data();
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& Other) {
+SmartObject& SmartObject::operator=(const SmartObject& Other) {
   if (this != &Other)
     duplicate(Other);
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& Other) const {
+bool SmartObject::operator==(const SmartObject& Other) const {
   if (m_type != Other.m_type)
     return false;
 
   switch (m_type) {
     case SmartType_Integer:
-      return m_data.unsigned_int_value == Other.m_data.unsigned_int_value;
+      return m_data.int_value == Other.m_data.int_value;
     case SmartType_Double:
       return m_data.double_value == Other.m_data.double_value;
     case SmartType_Boolean:
@@ -139,6 +141,14 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
       return true;
     case SmartType_Invalid:
       return true;
+    default: {
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      break;
+    }
   }
   return false;
 }
@@ -146,47 +156,104 @@ bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
 // =============================================================
 // INTEGER TYPE SUPPORT
 // =============================================================
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(int InitialValue)
+SmartObject::SmartObject(int InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator int() const {
+int SmartObject::asInt() const {
   return convert_int();
 }
 
-int NsSmartDeviceLink::NsSmartObjects::SmartObject::asInt() const {
-  return static_cast<int>(*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    int NewValue) {
+SmartObject& SmartObject::operator=(int NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    int Value) const {
+bool SmartObject::operator==(int Value) const {
   int comp = convert_int();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_int_value) {
+  if (comp == invalid_int_value) {
     return false;
   } else {
     return comp == Value;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_integer(
-    int NewValue) {
+void SmartObject::set_value_integer(int NewValue) {
   set_new_type(SmartType_Integer);
-  m_data.unsigned_int_value = NewValue;
+  m_data.int_value = NewValue;
 }
 
-int NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_int(void) const {
+int SmartObject::convert_int() const {
+  int retval;
+
+  switch (m_type) {
+    case SmartType_String:
+      retval = convert_string_to_unsigned_int(m_data.str_value);
+      break;
+    case SmartType_Boolean:
+      retval = (m_data.bool_value == true) ? 1 : 0;
+      break;
+    case SmartType_Integer:
+      retval = m_data.int_value;
+      break;
+    case SmartType_Double:
+      retval = static_cast<unsigned int>(m_data.double_value);
+      break;
+    default: {
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      retval = invalid_int_value;
+      break;
+    }
+  }
+
+  return static_cast<int>(retval);
+}
+
+// =============================================================
+// unsigned int TYPE SUPPORT
+// =============================================================
+SmartObject::SmartObject(unsigned int InitialValue)
+    : m_type(SmartType_Null),
+      m_schema() {
+  m_data.str_value = NULL;
+  set_value_unsigned_int(InitialValue);
+}
+
+unsigned int SmartObject::asUInt() const {
+  return convert_unsigned_int();
+}
+
+SmartObject& SmartObject::operator=(unsigned int NewValue) {
+  if (m_type != SmartType_Invalid) {
+    set_value_unsigned_int(NewValue);
+  }
+  return *this;
+}
+
+bool SmartObject::operator==(unsigned int Value) const {
+  int comp = convert_unsigned_int();
+  if (comp == invalid_int_value) {
+    return false;
+  } else {
+    return comp == Value;
+  }
+}
+
+void SmartObject::set_value_unsigned_int(unsigned int NewValue) {
+  set_new_type(SmartType_Integer);
+  m_data.int_value = NewValue;
+}
+
+unsigned int SmartObject::convert_unsigned_int() const {
   unsigned int retval;
 
   switch (m_type) {
@@ -196,378 +263,305 @@ int NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_int(void) const {
     case SmartType_Boolean:
       return (m_data.bool_value == true) ? 1 : 0;
     case SmartType_Integer:
-      retval = m_data.unsigned_int_value;
+      retval = m_data.int_value;
       break;
     case SmartType_Double:
       retval = static_cast<unsigned int>(m_data.double_value);
       break;
-    default:
+    default: {
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
       return invalid_int_value;
+    }
   }
 
-/*  if (retval > std::numeric_limits<int>::max()
-      || retval < std::numeric_limits<int>::min()) {
-    return invalid_int_value;
-  } else {*/
-    return static_cast<int>(retval);
-  // }
-}
-
-// =============================================================
-// unsigned int TYPE SUPPORT
-// =============================================================
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    unsigned int InitialValue)
-    : m_type(SmartType_Null),
-      m_schema() {
-  m_data.str_value = NULL;
-  set_value_unsigned_int(InitialValue);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator unsigned int(void) const {
-  return convert_unsigned_int();
-}
-
-unsigned int NsSmartDeviceLink::NsSmartObjects::SmartObject::asUInt() const {
-  return static_cast<unsigned int>(*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    unsigned int NewValue) {
-  if (m_type != SmartType_Invalid) {
-    set_value_unsigned_int(NewValue);
-  }
-  return *this;
-}
-
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    unsigned int Value) const {
-  int comp = convert_unsigned_int();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_int_value) {
-    return false;
-  } else {
-    return comp == Value;
-  }
-}
-
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_unsigned_int(
-    unsigned int NewValue) {
-  set_new_type(SmartType_Integer);
-  m_data.unsigned_int_value = NewValue;
-}
-
-unsigned int
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_unsigned_int() const {
-  switch (m_type) {
-    case SmartType_String:
-      return convert_string_to_unsigned_int(m_data.str_value);
-      break;
-    case SmartType_Boolean:
-      return (m_data.bool_value == true) ? 1 : 0;
-    case SmartType_Integer:
-      return m_data.unsigned_int_value;
-      break;
-    case SmartType_Double:
-      return static_cast<unsigned int>(m_data.double_value);
-      break;
-    default:
-      break;
-  }
-
-  return invalid_int_value;
+  return retval;
 }
 
 // =============================================================
 // DOUBLE TYPE SUPPORT
 // =============================================================
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    double InitialValue)
+SmartObject::SmartObject(double InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_double(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator double() const {
+double SmartObject::asDouble() const {
   return convert_double();
 }
 
-double NsSmartDeviceLink::NsSmartObjects::SmartObject::asDouble() const {
-  return static_cast<double>(*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    double NewValue) {
+SmartObject& SmartObject::operator=(double NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_double(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    double Value) const {
+bool SmartObject::operator==(double Value) const {
   double comp = convert_double();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_double_value) {
+  if (comp == invalid_double_value) {
     return false;
   } else {
     return comp == Value;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_double(
-    double NewValue) {
+void SmartObject::set_value_double(double NewValue) {
   set_new_type(SmartType_Double);
   m_data.double_value = NewValue;
 }
 
-double NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_double(
-    void) const {
+double SmartObject::convert_double(void) const {
+  double retval;
+
   switch (m_type) {
     case SmartType_String:
-      return convert_string_to_double(m_data.str_value);
+      retval = convert_string_to_double(m_data.str_value);
+      break;
     case SmartType_Boolean:
-      return (m_data.bool_value) ? 1.0 : 0.0;
-    case SmartType_Integer: {
-      return static_cast<double>(convert_int());
-    }
+      retval = (m_data.bool_value) ? 1.0 : 0.0;
+      break;
+    case SmartType_Integer:
+      retval = static_cast<double>(convert_int());
+      break;
     case SmartType_Double:
-      return m_data.double_value;
+      retval = m_data.double_value;
+      break;
     default:
-      return invalid_double_value;
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      retval = invalid_double_value;
+      break;
   }
 
-  return invalid_double_value;
+  return retval;
 }
 
 // =============================================================
 // BOOL TYPE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(bool InitialValue)
+SmartObject::SmartObject(bool InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_bool(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator bool() const {
+bool SmartObject::asBool() const {
   return convert_bool();
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::asBool() const {
-  return static_cast<bool>(*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    bool NewValue) {
+SmartObject& SmartObject::operator=(bool NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_bool(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    bool Value) const {
+bool SmartObject::operator==(bool Value) const {
   bool comp = convert_bool();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_bool_value) {
+  if (comp == invalid_bool_value) {
     return false;
   } else {
     return comp == Value;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_bool(
-    bool NewValue) {
+void SmartObject::set_value_bool(bool NewValue) {
   set_new_type(SmartType_Boolean);
   m_data.bool_value = NewValue;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_bool(void) const {
+bool SmartObject::convert_bool() const {
+  bool retval;
+
   switch (m_type) {
     case SmartType_Boolean:
-      return m_data.bool_value;
+      retval = m_data.bool_value;
+      break;
     case SmartType_Integer:
-      return (m_data.unsigned_int_value != 0);
+      retval = (m_data.int_value != 0);
       break;
     case SmartType_Double:
-      return (m_data.double_value != 0.0);
+      retval = (m_data.double_value != 0.0);
       break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      retval = invalid_bool_value;
       break;
   }
 
-  return invalid_bool_value;
+  return retval;
 }
 
 // =============================================================
 // CHAR TYPE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(char InitialValue)
+SmartObject::SmartObject(char InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_char(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator char() const {
+char SmartObject::asChar() const {
   return convert_char();
 }
 
-char NsSmartDeviceLink::NsSmartObjects::SmartObject::asChar() const {
-  return static_cast<char>(*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    char NewValue) {
+SmartObject& SmartObject::operator=(char NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_char(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    char Value) const {
+bool SmartObject::operator==(char Value) const {
   char comp = convert_char();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_char_value) {
+  if (comp == invalid_char_value) {
     return false;
   } else {
     return comp == Value;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_char(
-    char NewValue) {
+void SmartObject::set_value_char(char NewValue) {
   set_new_type(SmartType_Character);
   m_data.char_value = NewValue;
 }
 
-char NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_char(void) const {
+char SmartObject::convert_char() const {
+  char retval;
+
   switch (m_type) {
     case SmartType_String:
-      return
+      retval =
           (m_data.str_value->length() == 1) ?
               m_data.str_value->at(0) : invalid_char_value;
+      break;
     case SmartType_Character:
-      return m_data.char_value;
+      retval = m_data.char_value;
+      break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      retval = invalid_char_value;
       break;
   }
 
-  return invalid_char_value;
+  return retval;
 }
 
 // =============================================================
 // STD::STRING TYPE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    const std::string& InitialValue)
+SmartObject::SmartObject(const std::string& InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_string(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator std::string(
-    void) const {
+std::string SmartObject::asString() const {
   return convert_string();
 }
 
-std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::asString() const {
-  return (std::string) (*this);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    const std::string& NewValue) {
+SmartObject& SmartObject::operator=(const std::string& NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_string(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    std::string Value) const {
+bool SmartObject::operator==(std::string Value) const {
   std::string comp = convert_string();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_string_value) {
+  if (comp == invalid_string_value) {
     return false;
   } else {
     return comp == Value;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_string(
-    const std::string& NewValue) {
+void SmartObject::set_value_string(const std::string& NewValue) {
   set_new_type(SmartType_String);
   m_data.str_value = new std::string(NewValue);
 }
 
-std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string(
-    void) const {
+std::string SmartObject::convert_string(void) const {
+  std::string retval;
+
   switch (m_type) {
     case SmartType_String:
-      return *(m_data.str_value);
+      retval = *(m_data.str_value);
+      break;
     case SmartType_Integer:
-      // TODO(AK): fix this hack
-      return std::to_string(m_data.unsigned_int_value);
+      retval = std::to_string(static_cast<int>(m_data.int_value));
       break;
     case SmartType_Character:
-      return std::string(1, m_data.char_value);
+      retval = std::string(1, m_data.char_value);
       break;
     case SmartType_Double:
-      return convert_double_to_string(m_data.double_value);
+      retval = convert_double_to_string(m_data.double_value);
       break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
+      retval = invalid_cstr_value;
       break;
   }
-  return invalid_string_value;
+  return retval;
 }
 
 // =============================================================
 // CHAR* TYPE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    char* InitialValue)
+SmartObject::SmartObject(char* InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_cstr(InitialValue);
   return;
 }
-/*
- NsSmartDeviceLink::NsSmartObjects::SmartObject::operator char*(void) const
- {
- return convert_string().c_str();
- }
- */
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    const char* NewValue) {
+
+SmartObject& SmartObject::operator=(const char* NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_cstr(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    const char* Value) const {
+bool SmartObject::operator==(const char* Value) const {
   std::string comp = convert_string();
   std::string val(Value);
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_string_value) {
+  if (comp == invalid_string_value) {
     return false;
   } else {
     return comp == val;
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_cstr(
-    const char* NewValue) {
+void SmartObject::set_value_cstr(const char* NewValue) {
   if (NewValue) {
     set_value_string(std::string(NewValue));
   } else {
@@ -579,67 +573,63 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_cstr(
 // =============================================================
 // BINARY TYPE SUPPORT
 // =============================================================
-NsSmartDeviceLink::NsSmartObjects::SmartObject::SmartObject(
-    const SmartBinary& InitialValue)
+SmartObject::SmartObject(const SmartBinary& InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_binary(InitialValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator
-NsSmartDeviceLink::NsSmartObjects::SmartBinary(void) const {
+SmartBinary SmartObject::asBinary() const {
   return convert_binary();
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartBinary
-NsSmartDeviceLink::NsSmartObjects::SmartObject::asBinary() const {
-  // return static_cast<NsSmartDeviceLink::NsSmartObjects::SmartBinary>(*this);
-  return convert_binary();
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartArray*
-NsSmartDeviceLink::NsSmartObjects::SmartObject::asArray() const {
+SmartArray* SmartObject::asArray() const {
   if (m_type != SmartType_Array) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return NULL;
   }
 
   return m_data.array_value;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator=(
-    SmartBinary NewValue) {
+SmartObject& SmartObject::operator=(SmartBinary NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_binary(NewValue);
   }
   return *this;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::operator==(
-    SmartBinary Value) const {
+bool SmartObject::operator==(SmartBinary Value) const {
   SmartBinary comp = convert_binary();
-  if (comp == NsSmartDeviceLink::NsSmartObjects::invalid_binary_value) {
+  if (comp == invalid_binary_value) {
     return false;
   } else {
     return std::equal(comp.begin(), comp.end(), Value.begin());
   }
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_value_binary(
-    SmartBinary NewValue) {
+void SmartObject::set_value_binary(SmartBinary NewValue) {
   set_new_type(SmartType_Binary);
   m_data.binary_value = new SmartBinary(NewValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartBinary
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_binary(
-    void) const {
+SmartBinary SmartObject::convert_binary(void) const {
   switch (m_type) {
     case SmartType_Binary:
       return *(m_data.binary_value);
-    default:
+    default: {
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
       return invalid_binary_value;
+    }
   }
 
   return invalid_binary_value;
@@ -649,18 +639,15 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_binary(
 // ARRAY INTERFACE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](int Index) {
+SmartObject& SmartObject::operator[](int Index) {
   return handle_array_access(Index);
 }
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](int Index) const{
+
+const SmartObject& SmartObject::operator[](int Index) const{
   return getElement(Index);
 }
 
-inline NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_array_access(
-    int Index) {
+inline SmartObject& SmartObject::handle_array_access(int Index) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }
@@ -676,10 +663,15 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_array_access(
     Index = sz;
   }
   if (Index == sz) {
-    NsSmartDeviceLink::NsSmartObjects::SmartObject uc;
+    SmartObject uc;
     m_data.array_value->push_back(uc);
   }
   if (Index > sz || Index < 0) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return invalid_object_value;
   }
   return m_data.array_value->at(Index);
@@ -689,63 +681,41 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_array_access(
 // MAP INTERFACE SUPPORT
 // =============================================================
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    const std::string Key) {
+SmartObject& SmartObject::operator[](const std::string Key) {
   return handle_map_access(Key);
 }
 
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    const std::string Key) const {
-  return getElement(Key);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    char* Key) {
+SmartObject& SmartObject::operator[](char* Key) {
   std::string str(Key);
   return handle_map_access(str);
 }
 
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    char* Key) const {
-  std::string str(Key);
-  return getElement(str);
-}
-
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    const char* Key) {
+SmartObject& SmartObject::operator[](const char* Key) {
   std::string str(Key);
   return handle_map_access(str);
 }
 
-
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::operator[](
-    const char* Key) const {
+const SmartObject& SmartObject::operator[](const char* Key) const {
   return getElement(Key);
 }
 
-
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::getElement(
-    size_t Index) const {
-  if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == m_type) {
+const SmartObject& SmartObject::getElement(size_t Index) const {
+  if (SmartType_Array == m_type) {
     if (Index < m_data.array_value->size()) {
       return m_data.array_value->at(Index);
     }
   }
 
+/*
+#if !defined UNIT_TESTS
+  NOTREACHED();
+#endif
+*/
   return invalid_object_value;
 }
 
-const NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::getElement(
-    const std::string & Key) const {
-  if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map == m_type) {
+const SmartObject& SmartObject::getElement(const std::string & Key) const {
+  if (SmartType_Map == m_type) {
     SmartMap::const_iterator i = m_data.map_value->find(Key);
 
     if (i != m_data.map_value->end()) {
@@ -753,12 +723,15 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::getElement(
     }
   }
 
+/*
+#if !defined UNIT_TESTS
+  NOTREACHED();
+#endif
+*/
   return invalid_object_value;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject&
-NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_map_access(
-    const std::string Key) {
+SmartObject& SmartObject::handle_map_access(const std::string Key) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }
@@ -767,7 +740,7 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_map_access(
   if (m_type != SmartType_Map) {
     cleanup_data();
     m_type = SmartType_Map;
-    m_data.map_value = new NsSmartDeviceLink::NsSmartObjects::SmartMap();
+    m_data.map_value = new SmartMap();
   }
 
   // TODO(404): Add check for key presense
@@ -777,8 +750,7 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::handle_map_access(
 // =============================================================
 // OTHER METHODS
 // =============================================================
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::duplicate(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& OtherObject) {
+void SmartObject::duplicate(const SmartObject& OtherObject) {
   SmartData newData;
   SmartType newType = OtherObject.m_type;
   CSmartSchema newSchema = OtherObject.m_schema;
@@ -791,7 +763,7 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::duplicate(
       newData.array_value = new SmartArray(*OtherObject.m_data.array_value);
       break;
     case SmartType_Integer:
-      newData.unsigned_int_value = OtherObject.m_data.unsigned_int_value;
+      newData.int_value = OtherObject.m_data.int_value;
       break;
     case SmartType_Double:
       newData.double_value = OtherObject.m_data.double_value;
@@ -809,6 +781,11 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::duplicate(
       newData.binary_value = new SmartBinary(*OtherObject.m_data.binary_value);
       break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
       break;
   }
 
@@ -819,7 +796,7 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::duplicate(
   m_schema = newSchema;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::cleanup_data() {
+void SmartObject::cleanup_data() {
   switch (m_type) {
     case SmartType_String:
       delete m_data.str_value;
@@ -834,11 +811,16 @@ void NsSmartDeviceLink::NsSmartObjects::SmartObject::cleanup_data() {
       delete m_data.binary_value;
       break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
       break;
   }
 }
 
-size_t NsSmartDeviceLink::NsSmartObjects::SmartObject::length() const {
+size_t SmartObject::length() const {
   size_t size = 0;
 
   switch (m_type) {
@@ -852,6 +834,11 @@ size_t NsSmartDeviceLink::NsSmartObjects::SmartObject::length() const {
       size = m_data.map_value->size();
       break;
     default:
+/*
+#if !defined UNIT_TESTS
+      NOTREACHED();
+#endif
+*/
       size = 0;
       break;
   }
@@ -859,23 +846,18 @@ size_t NsSmartDeviceLink::NsSmartObjects::SmartObject::length() const {
   return size;
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::set_new_type(
-    SmartType NewType) {
+void SmartObject::set_new_type(SmartType NewType) {
   cleanup_data();
   m_type = NewType;
 }
 
-double
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_double(
-    const std::string* Value) {
+double SmartObject::convert_string_to_double(const std::string* Value) {
   if (0 == Value->size()) {
-    return invalid_double_value;
-  }
-
-  char firstSymbol = Value->at(0);
-
-  if ((firstSymbol != '.') && (firstSymbol != '+') && (firstSymbol != '-')
-      && ((firstSymbol < '0') || (firstSymbol > '9'))) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return invalid_double_value;
   }
 
@@ -884,15 +866,18 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_double(
 
   double result = strtod(Value->c_str(), &ptr);
   if (errno || (ptr != (Value->c_str() + Value->length()))) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return invalid_double_value;
   }
 
   return result;
 }
 
-std::string
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_double_to_string(
-    const double& Value) {
+std::string SmartObject::convert_double_to_string(const double& Value) {
   std::stringstream ss;
 
   // convert double to string w fixed notation, hi precision
@@ -910,17 +895,14 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_double_to_string(
   return s;
 }
 
-unsigned int
-NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_unsigned_int(
+unsigned int SmartObject::convert_string_to_unsigned_int(
     const std::string* Value) {
   if (0 == Value->size()) {
-    return invalid_int_value;
-  }
-
-  char firstSymbol = Value->at(0);
-
-  if ((firstSymbol != '+') && (firstSymbol != '-')
-      && ((firstSymbol < '0') || (firstSymbol > '9'))) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return invalid_int_value;
   }
 
@@ -928,19 +910,22 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::convert_string_to_unsigned_int(
   errno = 0;
   unsigned int result = strtol(Value->c_str(), &ptr, 10);
   if (errno || (ptr != (Value->c_str() + Value->length()))) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return invalid_int_value;
   }
 
   return result;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartType
-NsSmartDeviceLink::NsSmartObjects::SmartObject::getType() const {
+SmartType SmartObject::getType() const {
   return m_type;
 }
 
-std::set<std::string>
-NsSmartDeviceLink::NsSmartObjects::SmartObject::enumerate() const {
+std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
   if (m_type == SmartType_Map) {
@@ -952,39 +937,51 @@ NsSmartDeviceLink::NsSmartObjects::SmartObject::enumerate() const {
   return keys;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::keyExists(
-    const std::string & Key) const {
+bool SmartObject::keyExists(const std::string & Key) const {
   if (m_type != SmartType_Map) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return false;
   }
 
   return m_data.map_value->count(Key);
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::erase(
-    const std::string & Key) {
+bool SmartObject::erase(const std::string & Key) {
   if (m_type != SmartType_Map) {
+/*
+#if !defined UNIT_TESTS
+    NOTREACHED();
+#endif
+*/
     return false;
   }
 
   return (1 == m_data.map_value->erase(Key));
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::SmartObject::isValid() const {
+bool SmartObject::isValid() {
   return (Errors::OK == m_schema.validate(*this));
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType
-NsSmartDeviceLink::NsSmartObjects::SmartObject::validate() {
+bool SmartObject::isValid() const {
+  return (Errors::OK == m_schema.validate(*this));
+}
+
+Errors::eType SmartObject::validate() {
   return m_schema.validate(*this);
 }
 
-void NsSmartDeviceLink::NsSmartObjects::SmartObject::setSchema(
-    NsSmartDeviceLink::NsSmartObjects::CSmartSchema schema) {
+void SmartObject::setSchema(CSmartSchema schema) {
   m_schema = schema;
 }
 
-NsSmartDeviceLink::NsSmartObjects::CSmartSchema
-NsSmartDeviceLink::NsSmartObjects::SmartObject::getSchema() {
+CSmartSchema SmartObject::getSchema() {
   return m_schema;
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

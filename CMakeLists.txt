@@ -47,7 +47,6 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
-set(BUILD_TESTS ON)
 option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 
 # TODO(AK): check current OS here
@@ -61,6 +60,15 @@ ELSE (CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRELEASE" )
     add_definitions(-DRELEASE)
 ENDIF(CMAKE_C_FLAGS_DEBUG)
+
+option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" ON)
+if (DEFAULT_MEDIA_FLAG)
+add_definitions(-DDEFAULT_MEDIA)
+# required to find 'glibconfig.h'
+find_package(PkgConfig)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+add_definitions(${GLIB2_CFLAGS})
+endif()
 
 # --- Interface generator
 

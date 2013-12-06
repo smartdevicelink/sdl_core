@@ -80,8 +80,8 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
         }.property( 'SDL.SDLMediaController.currentAppId' ),
         textBinding: 'SDL.SDLMediaController.currentAppName',
         iconBinding: 'SDL.SDLMediaController.currentAppIcon',
-        action: 'turnOnSDL',
-        target: 'SDL.MediaController'
+        action: 'activateCurrentApp',
+        target: 'SDL.SDLMediaController'
     } )
 
 } );

@@ -65,9 +65,18 @@ class ResponseFromHMI : public CommandImpl {
    */
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                           const NsSmart::SmartObject& msg_params) const;
+
+  /*
+   * @brief Retrieves correlation ID
+   */
+  inline int correlation_id() const;
  private:
   DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);
 };
+
+int ResponseFromHMI::correlation_id() const {
+  return (*message_)[strings::params][strings::correlation_id].asInt();
+}
 
 }  // namespace commands
 

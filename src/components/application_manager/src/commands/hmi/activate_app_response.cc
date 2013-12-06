@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/activate_app_response.h"
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -44,6 +46,26 @@ ActivateAppResponse::~ActivateAppResponse() {
 
 void ActivateAppResponse::Run() {
   LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS == code) {
+    int correlation_id = ResponseFromHMI::correlation_id();
+    const unsigned int app_id = ApplicationManagerImpl::instance()->
+        application_id(correlation_id);
+    if (!app_id) {
+      LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
+      return;
+    }
+    Application* application = ApplicationManagerImpl::instance()->application(app_id);
+    if (application) {
+      ApplicationManagerImpl::instance()->ActivateApplication(application);
+    } else {
+      LOG4CXX_ERROR(logger_, "Application cannot activate");
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Error result code"<<code);
+  }
 }
 
 }  // namespace commands

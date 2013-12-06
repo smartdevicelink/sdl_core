@@ -1,55 +1,60 @@
+if (DEFAULT_MEDIA_FLAG)
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
-
-# required to find 'glibconfig.h'
 find_package(PkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
+set(default_includes
+  ${GSTREAMER_gst_INCLUDE_DIR}
+  ${GLIB_glib_2_INCLUDE_DIR}
+)
+set(default_sources
+    ./src/a2dp_source_player_adapter.cc
+    ./src/from_mic_recorder_adapter.cc
+    ./src/from_mic_to_file_recorder_thread.cc
+    ./src/socket_video_streamer_adapter.cc
+    ./src/pipe_video_streamer_adapter.cc
+)
+set(LIBRARIES
+  ${GSTREAMER_gstreamer_LIBRARY}
+  pulse-simple
+  pulse
+  gobject-2.0
+  glib-2.0
+)
+else(DEFAULT_MEDIA_FLAG)
+set(default_includes
+)
+set(default_sources
+)
+set(LIBRARIES
+)
+endif()
 
 include_directories (
   ./include
   ../utils/include/
   ../protocol_handler/include/
-  ../interfaces
-  ../application_manager/include/
-  
-  ../hmi_message_handler/include
-  ../mobile_message_handler/include
   ../connection_handler/include/
   ../transport_manager/include/
-  ../protocol_handler/include/
-  ../config_profile/include/
-  ../request_watchdog/include/
-  ../smart_objects/include/
-  ../formatters/include/
-  
-    ../../thirdPartyLibs/logger/include/
-  ../../thirdPartyLibs/MessageBroker/include/
   ../application_manager/include/
-  ../connection_handler/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
+  ../smart_objects/include/
+  ../hmi_message_handler/include/
+  ../mobile_message_handler/include/
+  ../request_watchdog/include/
+  ../formatters/include
+  ../config_profile/include/
   ${CMAKE_BINARY_DIR}/src/components/
-)
-
-set(LIBRARIES
-  ${GSTREAMER_gstreamer_LIBRARY}
+  ${default_includes}
 )
 
 set (SOURCES
-    ./src/media_manager_impl.cc
-    ./src/from_mic_to_file_recorder_thread.cc
-    ./src/a2dp_source_player_thread.cc
-    ./src/socket_video_server.cc
-    ./src/pipe_video_server.cc
+    ./src/media_adapter_impl.cc
+    ./src/from_mic_recorder_listener.cc
     ./src/audio_stream_sender_thread.cc
+    ./src/video_streamer_listener.cc
+    ./src/media_manager_impl.cc
 )
 
-add_library("MediaManager" ${SOURCES} )
-target_link_libraries ("MediaManager" Utils)
-target_link_libraries ("MediaManager" log4cxx)
-target_link_libraries ("MediaManager" pulse-simple)
-target_link_libraries ("MediaManager" pulse)
-target_link_libraries ("MediaManager" gobject-2.0)
-target_link_libraries ("MediaManager" glib-2.0)
-target_link_libraries ("MediaManager" ${LIBRARIES})
+add_library("MediaManager" ${SOURCES} ${default_sources})
+target_link_libraries("MediaManager" ${LIBRARIES})

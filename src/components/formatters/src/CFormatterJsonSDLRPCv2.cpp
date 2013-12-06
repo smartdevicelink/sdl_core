@@ -1,7 +1,3 @@
-/**
- * @file CFormatterJsonSDLRPCv2.cpp
- * @brief CFormatterJsonSDLRPCv2 source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -35,57 +31,63 @@
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "formatters/meta_formatter.h"
 
-namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
-namespace jsonhandler_ns = NsSmartDeviceLink::NsJSONHandler;
+namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+
+namespace NsSmartDeviceLink {
+namespace NsJSONHandler {
+namespace Formatters {
 
 // ----------------------------------------------------------------------------
 
-bool NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::toString(
-        const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-        std::string& outStr)
-{
+bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
+                                      std::string& outStr) {
+  bool result = true;
+  try {
     Json::Value root(Json::objectValue);
 
-    NsSmartDeviceLink::NsSmartObjects::SmartObject formattedObj(obj);
-    formattedObj.getSchema().unapplySchema(formattedObj);       // converts enums(as int) to strings
+    smart_objects_ns::SmartObject formattedObj(obj);
+    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int) to strings
 
-    objToJsonValue(formattedObj.getElement(NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS), root);
+    objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), root);
 
     outStr = root.toStyledString();
 
-    return true;
+    result = true;
+  } catch (...) {
+    result = false;
+  }
+
+  return result;
 }
 
 // ----------------------------------------------------------------------------
 
-Formatters::CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
-  Formatters::CFormatterJsonSDLRPCv2::MetaFormatToString(
-            const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-            const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-            std::string& outStr) {
+CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode CFormatterJsonSDLRPCv2::MetaFormatToString(
+    const smart_objects_ns::SmartObject& object,
+    const smart_objects_ns::CSmartSchema& schema, std::string& outStr) {
 
-  meta_formatter_error_code::tMetaFormatterErrorCode result_code
-                                    = meta_formatter_error_code::kErrorOk;
+  meta_formatter_error_code::tMetaFormatterErrorCode result_code =
+      meta_formatter_error_code::kErrorOk;
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObject tmp_object;
+  smart_objects_ns::SmartObject tmp_object;
 
-  if (false == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
-      result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
-      return result_code;
+  if (false
+      == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
+    result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
+    return result_code;
   }
 
   // determine whether smart objects are functions
   // (in terms of SDLRPC communication)
-  bool is_root_object_created_by_schema = (
-    (tmp_object.getType() == smart_objects_ns::SmartType_Map)
-      && tmp_object.keyExists(jsonhandler_ns::strings::S_PARAMS)
-      && tmp_object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+  bool is_root_object_created_by_schema = ((tmp_object.getType()
+      == smart_objects_ns::SmartType_Map)
+      && tmp_object.keyExists(strings::S_PARAMS)
+      && tmp_object.keyExists(strings::S_MSG_PARAMS));
 
-  bool is_root_object = (
-    (object.getType() == smart_objects_ns::SmartType_Map)
-      && object.keyExists(jsonhandler_ns::strings::S_PARAMS)
-      && object.keyExists(jsonhandler_ns::strings::S_MSG_PARAMS));
+  bool is_root_object = ((object.getType() == smart_objects_ns::SmartType_Map)
+      && object.keyExists(strings::S_PARAMS)
+      && object.keyExists(strings::S_MSG_PARAMS));
 
   if (false == is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
@@ -97,4 +99,8 @@ Formatters::CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
   CFormatterJsonSDLRPCv2::toString(tmp_object, outStr);
 
   return result_code;
+}
+
+}
+}
 }

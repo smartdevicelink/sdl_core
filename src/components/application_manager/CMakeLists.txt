@@ -1,15 +1,4 @@
-find_package(Gstreamer-1.0 REQUIRED)
-find_package(Glib-2.0 REQUIRED)
-
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
-
 include_directories (
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
-  ${CMAKE_BINARY_DIR}/src/components/
   ./include/
   ../utils/include/
   ../formatters/include/
@@ -24,6 +13,7 @@ include_directories (
   ../transport_manager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES
@@ -58,6 +48,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
+./src/commands/tts_interface.cc
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -207,6 +198,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
+./src/commands/hmi/tts_perform_interaction_request.cc
+./src/commands/hmi/tts_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
@@ -253,6 +246,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
 ./src/commands/hmi/vi_read_did_response.cc
+./src/commands/hmi/vi_get_vehicle_data_request.cc
+./src/commands/hmi/vi_get_vehicle_data_response.cc
 ./src/commands/hmi/vi_get_dtcs_request.cc
 ./src/commands/hmi/vi_get_dtcs_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
@@ -285,6 +280,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
 ./src/commands/hmi/on_show_notification.cc
+./src/commands/hmi/on_vi_vehicle_data_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc

@@ -55,7 +55,7 @@ UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -94,7 +94,7 @@ void UnsubscribeVehicleDataRequest::Run() {
 
   if (0 == items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "Provided VehicleData is empty", &response_params);
+                 "No data in the request", &response_params);
   } else if (unsubscribed_items == items_to_unsubscribe) {
     SendResponse(true, mobile_apis::Result::SUCCESS,
                  "Unsubscribed on provided VehicleData", &response_params);

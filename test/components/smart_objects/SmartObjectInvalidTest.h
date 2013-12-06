@@ -85,37 +85,37 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj = 1;
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, (int)obj);
+        ASSERT_EQ(invalid_int_value, obj.asInt());
 
         // ---- unsigned int ---- //
         obj = static_cast<unsigned int>(100);
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, (unsigned int)obj);
+        ASSERT_EQ(invalid_int_value, obj.asUInt());
 
         // ---- DOUBLE ---- //
         obj = 3.14;
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_double_value, (double)obj);
+        ASSERT_EQ(invalid_double_value, obj.asDouble());
 
         // ---- CHAR ---- //
         obj = 'a';
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_char_value, (char)obj);
+        ASSERT_EQ(invalid_char_value, obj.asChar());
 
         // ---- BOOL ---- //
         obj = true;
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_bool_value, (bool)obj);
+        ASSERT_EQ(invalid_bool_value, obj.asBool());
 
         // ---- CHAR* ---- //
         obj = "Hello, world";
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, (std::string)obj);
+        ASSERT_EQ(invalid_string_value, obj.asString());
 
         // ---- STD::STRING ---- //
         obj = std::string("Hello, world");
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, (std::string)obj);
+        ASSERT_EQ(invalid_string_value, obj.asString());
 
         // ---- BINARY ---- //
         NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
@@ -132,10 +132,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj[3] = 3.14;
 
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, (int)obj[0]);
-        ASSERT_EQ(invalid_bool_value, (bool)obj[1]);
-        ASSERT_EQ(invalid_char_value, (char)obj[2]);
-        ASSERT_EQ(invalid_double_value, (double)obj[3]);
+        ASSERT_EQ(invalid_int_value, obj[0].asInt());
+        ASSERT_EQ(invalid_bool_value, obj[1].asBool());
+        ASSERT_EQ(invalid_char_value, obj[2].asChar());
+        ASSERT_EQ(invalid_double_value, obj[3].asDouble());
 
         // ---- DEEP ARRAY ---- //
         obj[0] = 1;
@@ -143,9 +143,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj[1][1][0] = true;
 
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, (int)obj[0]);
-        ASSERT_EQ(invalid_double_value, (double)obj[1][0]);
-        ASSERT_EQ(invalid_bool_value, (bool)obj[1][1][0]);
+        ASSERT_EQ(invalid_int_value, obj[0].asInt());
+        ASSERT_EQ(invalid_double_value, obj[1][0].asDouble());
+        ASSERT_EQ(invalid_bool_value, obj[1][1][0].asBool());
 
         // ---- MAP ---- //
         obj["name"] = "My name";
@@ -153,9 +153,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj["isValid"] = true;
 
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, (std::string)obj["name"]);
-        ASSERT_EQ(invalid_int_value, (int)obj["count"]);
-        ASSERT_EQ(invalid_bool_value, (bool)obj["isValid"]);
+        ASSERT_EQ(invalid_string_value, obj["name"].asString());
+        ASSERT_EQ(invalid_int_value, obj["count"].asInt());
+        ASSERT_EQ(invalid_bool_value, obj["isValid"].asBool());
 
         // ---- DEEP MAP ---- //
         obj["request"]["name"] = "My Request";
@@ -166,11 +166,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         ASSERT_EQ(SmartType_Invalid, obj.getType());
 
-        ASSERT_EQ(invalid_string_value, (std::string)obj["request"]["name"]);
-        ASSERT_EQ(invalid_int_value, (int)obj["request"]["id"]);
-        ASSERT_EQ(invalid_string_value, (std::string)obj["response"]["name"]);
-        ASSERT_EQ(invalid_int_value, (int)obj["response"]["id"]);
-        ASSERT_EQ(invalid_bool_value, (bool)obj["we"]["need"]["to"]["go"]["deeper"]);
+        ASSERT_EQ(invalid_string_value, obj["request"]["name"].asString());
+        ASSERT_EQ(invalid_int_value, obj["request"]["id"].asInt());
+        ASSERT_EQ(invalid_string_value, obj["response"]["name"].asString());
+        ASSERT_EQ(invalid_int_value, obj["response"]["id"].asInt());
+        ASSERT_EQ(invalid_bool_value, obj["we"]["need"]["to"]["go"]["deeper"].asBool());
     }
 }}}}
 

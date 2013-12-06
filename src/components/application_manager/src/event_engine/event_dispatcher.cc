@@ -36,10 +36,10 @@
 
 namespace application_manager {
 namespace event_engine {
+using namespace sync_primitives;
 
 EventDispatcher::EventDispatcher()
-: observers_() {
-  mutex_.init();
+    : observers_() {
 }
 
 EventDispatcher::~EventDispatcher() {
@@ -52,27 +52,25 @@ EventDispatcher* EventDispatcher::instance()
 }
 
 void EventDispatcher::raise_event(const Event& event) {
-  mutex_.lock();
-
   // create local list
   ObserverList list;
+  {
+    AutoLock auto_lock(state_lock_);
+    // check if event is notification
+    if (hmi_apis::messageType::notification == event.smart_object_type()) {
 
-  // check if event is notification
-  if (hmi_apis::messageType::notification == event.smart_object_type()) {
+      //ObserversMap iterator
+      ObserversMap::iterator it = observers_[event.id()].begin();
+      for (; observers_[event.id()].end() != it; ++it) {
+        list = it->second;
+      }
+    }
 
-    //ObserversMap iterator
-    ObserversMap::iterator it =  observers_[event.id()].begin();
-    for (; observers_[event.id()].end() != it; ++it) {
-      list = it->second;
+    if (hmi_apis::messageType::response == event.smart_object_type()
+        || hmi_apis::messageType::error_response == event.smart_object_type()) {
+      list = observers_[event.id()][event.smart_object_correlation_id()];
     }
   }
-
-  if (hmi_apis::messageType::response == event.smart_object_type() ||
-      hmi_apis::messageType::error_response == event.smart_object_type()) {
-    list = observers_[event.id()][event.smart_object_correlation_id()];
-  }
-
-  mutex_.unlock();
 
   // Call observers
   ObserverList::iterator observers =  list.begin();
@@ -84,14 +82,13 @@ void EventDispatcher::raise_event(const Event& event) {
 void EventDispatcher::add_observer(const Event::EventID& event_id,
                                    int hmi_correlation_id,
                                    EventObserver* const observer) {
-  mutex_.lock();
+  AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);
-  mutex_.unlock();
 }
 
 void EventDispatcher::remove_observer(const Event::EventID& event_id,
                                       EventObserver* const observer) {
-  mutex_.lock();
+  AutoLock auto_lock(state_lock_);
   ObserversMap::iterator it =  observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
 
@@ -103,12 +100,10 @@ void EventDispatcher::remove_observer(const Event::EventID& event_id,
       }
     }
   }
-  mutex_.unlock();
 }
 
 void EventDispatcher::remove_observer(EventObserver* const observer) {
-  mutex_.lock();
-
+  AutoLock auto_lock(state_lock_);
   EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {
 
@@ -124,8 +119,6 @@ void EventDispatcher::remove_observer(EventObserver* const observer) {
       }
     }
   }
-
-  mutex_.unlock();
 }
 
 }

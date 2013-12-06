@@ -167,4 +167,3 @@ void Message::set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& o
   object_ = object;
 }
 }  // namespace application_manager
-

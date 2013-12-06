@@ -1,7 +1,3 @@
-/**
- * @file CAlwaysTrueSchemaItem.cpp
- * @brief CAlwaysTrueSchemaItem source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -34,16 +30,19 @@
 
 #include "smart_objects/always_true_schema_item.h"
 
-NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem(void)
-{
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+
+CAlwaysTrueSchemaItem::CAlwaysTrueSchemaItem(void) {
 }
 
-utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem> NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::create(void)
-{
-    return new CAlwaysTrueSchemaItem();
+utils::SharedPtr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create(void) {
+  return new CAlwaysTrueSchemaItem();
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CAlwaysTrueSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject& object)
-{
-    return NsSmartDeviceLink::NsSmartObjects::Errors::OK;
+Errors::eType CAlwaysTrueSchemaItem::validate(const SmartObject& object) {
+  return Errors::OK;
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink

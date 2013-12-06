@@ -1,3 +1,19 @@
+[CW48]
+* SyncProxyAndroid SDK: Update touch-related messages and structures to protocol version 3.0.K.
+* Make some parameters optional in AddCommand, Alert, AlertManeuver, SetGlobalProperties, ShowConstantTBT, Slider, and UpdateTurnList dialogs.
+* Fix: SPT didn't send all the activation requests when it had been closed with Back button.
+* SyncProxyAndroid SDK: Fix sending GetVehicleData with steeringWheelAngle parameter.
+* Fix: don't add/remove command until a successful response comes.
+* AddCommand dialog: allow to uncheck commandName parameter.
+* Brand new CreateInteractionChoiceSet dialog. The user can now set an arbitrary number of Choice objects.
+
+[CW47]
+* SyncProxyTester uploads and sets the icon after it's received a first OnHMIStatus.
+* SyncProxyAndroid SDK: Bluetooth transport: Attempt to fix a bug when sending a lot of data for a while on Android prior to 4.2. The transport artificially drops the speed after sent packet.
++ Use "Close Session" menu item to unregister app w/o disconnecting. When the app is started again, it reregisters itself automagically.
++ SyncProxyAndroid SDK: Add SyncProxyBase.closeSession() method that allows to close session w/o disconnecting.
++ SyncProxyAndroid SDK: a few changes to simplify testing.
+
 [CW46]
 + Reregister app when it has been disconnected due to language change.
 + SyncProxyAndroid SDK: add onAppUnregisteredAfterLanguageChange() callback to IProxyListenerBase to notify an app when it has been disconnected due to language change.

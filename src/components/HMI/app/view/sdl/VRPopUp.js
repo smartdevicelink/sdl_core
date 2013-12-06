@@ -139,6 +139,6 @@ SDL.VRPopUp = Em.ContainerView.create( {
     didInsertElement: function() {
         this._super();
         
-        FFW.VR.set( 'isReady', true );
+        //FFW.VR.set( 'isReady', true );
     }
 } );
