@@ -69,7 +69,7 @@ class UsbConnection : public Connection {
   bool PostOutTransfer();
   void OnInTransfer(usbd_urb* urb);
   void OnOutTransfer(usbd_urb* urb);
-  void CheckAllTransfersComplete();
+  void Finalise();
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
