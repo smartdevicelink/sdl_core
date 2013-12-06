@@ -559,15 +559,6 @@ void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Remove message from queue complete");
 }
 
-void TransportManagerImpl::RemoveEvent(const TransportAdapterEvent& event) {
-  LOG4CXX_INFO(logger_, "Remove event from queue called");
-  pthread_mutex_lock(&event_queue_mutex_);
-  std::remove(event_queue_.begin(), event_queue_.end(), event);
-  pthread_cond_signal(&device_listener_thread_wakeup_);
-  pthread_mutex_unlock(&event_queue_mutex_);
-  LOG4CXX_INFO(logger_, "Remove event from queue complete");
-}
-
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
   pthread_mutex_lock(&event_queue_mutex_);
   event_queue_.push_back(event);

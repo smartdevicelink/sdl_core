@@ -277,13 +277,6 @@ class TransportManagerImpl : public TransportManager {
   void RemoveMessage(const RawMessageSptr message);
 
   /**
-   * @brief Remove event from the container of events.
-   *
-   * @param event Event of device adapter.
-   */
-  void RemoveEvent(const TransportAdapterEvent& event);
-
-  /**
    * @brief Post event to the container of events.
    *
    * @param event Event of device adapter.
