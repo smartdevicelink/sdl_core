@@ -397,6 +397,7 @@ Item {
             console.debug("rejected")
             throw Common.Result.REJECTED
         }
+        DBus.sendReply({__retCode: Common.Result.SUCCESS})
         performAudioPassThruPopup.complete(Common.Result.SUCCESS)
         console.debug("exit")
     }

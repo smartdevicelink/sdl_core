@@ -3,7 +3,8 @@
 #include "interfaces/QT_HMI_API.h"
 
 DBusController::DBusController(QObject *parent)
-    : QObject(parent) {
+    : QObject(parent),
+      message(NULL) {
 }
 
 void DBusController::addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid) {
@@ -24,6 +25,17 @@ void DBusController::sendReply(QVariant asyncObject, QVariant data) {
             QDBusConnection::sessionBus().send(msg);
         }
         replies.erase(it);
+    }
+}
+
+void DBusController::sendReply(QVariant data) {
+    if (!message)
+        return;
+    QDBusMessage msg = message->createReply();
+    if(!fill(msg, data.toMap())) {
+        QDBusConnection::sessionBus().send(message->createErrorReply(QDBusError::InternalError, QString::number(hmi_apis::Common_Result::INVALID_DATA)));
+    } else {
+        QDBusConnection::sessionBus().send(msg);
     }
 }
 
