@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "utils/shared_ptr.h"
+#include "protocol_handler/message_priority.h"
 
 namespace application_manager {
 
@@ -59,7 +60,7 @@ enum ProtocolVersion {
 
 class Message {
  public:
-  Message();
+  Message(protocol_handler::MessagePriority priority);
   Message(const Message& message);
   Message& operator=(const Message& message);
   bool operator==(const Message& message);
@@ -86,10 +87,18 @@ class Message {
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
 
+  // Tells whether |this| message has higher priority
+  // (and must be processed earlier) than |that|
+  bool HasHigherPriorityThan(const Message& that) const;
+
  private:
   int function_id_;  // @remark protocol V2.
   int correlation_id_;  // @remark protocol V2.
   MessageType type_;  // @remark protocol V2.
+
+  // Pre-calculated message priority, higher priority messages are
+  // Processed first
+  protocol_handler::MessagePriority priority_;
 
   int connection_key_;
   ProtocolVersion version_;

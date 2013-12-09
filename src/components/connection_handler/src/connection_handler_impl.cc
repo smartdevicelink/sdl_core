@@ -272,7 +272,8 @@ unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
       int first_session_key = KeyFromPair(connection_handle,
                                           (it->second).GetFirstSessionID());
       int session_key = KeyFromPair(connection_handle, new_session_id);
-      ServiceType type = static_cast<ServiceType>(service_type);
+      protocol_handler::ServiceType type =
+          protocol_handler::ServiceTypeFromByte(service_type);
 
       bool success = connection_handler_observer_->OnSessionStartedCallback(
                        (it->second).connection_device_handle(),
@@ -301,8 +302,9 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
     int firstSessionID = (it->second).GetFirstSessionID();
-    ServiceType type = static_cast<ServiceType>(service_type);
-    if (ServiceType::kRPCSession == type) {
+    protocol_handler::ServiceType type =
+        protocol_handler::ServiceTypeFromByte(service_type);
+    if (protocol_handler::kRpc == type) {
       result = (it->second).RemoveSession(sessionId);
       if (0 > result) {
         LOG4CXX_ERROR(logger_, "Not possible to remove session!");

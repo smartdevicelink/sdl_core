@@ -75,12 +75,13 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_handler_(NULL),
     connection_handler_(NULL),
     policy_manager_(NULL),
+    hmi_so_factory_(NULL),
+    mobile_so_factory_(NULL),
     protocol_handler_(NULL),
     messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
     messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
     messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
-    hmi_so_factory_(NULL),
     request_ctrl(),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
     media_manager_(NULL) {
@@ -893,10 +894,10 @@ void ApplicationManagerImpl::RemoveDevice(
 
 bool ApplicationManagerImpl::OnSessionStartedCallback(
   connection_handler::DeviceHandle device_handle, int session_key,
-  int first_session_key, connection_handler::ServiceType type) {
+  int first_session_key, protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
 
-  if (connection_handler::ServiceType::kNaviSession == type) {
+  if (protocol_handler::kMovileNav == type) {
     LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
 
     // send to HMI startStream request
@@ -920,18 +921,18 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
 
 void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     int first_session_key,
-    connection_handler::ServiceType type) {
+    protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
     "\n\t\t\t\tRemoving session " << session_key << " with first session "
     << first_session_key << " type " << type);
   switch (type) {
-    case connection_handler::ServiceType::kRPCSession: {
+    case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
       UnregisterApplication(first_session_key);
       break;
     }
-    case connection_handler::ServiceType::kNaviSession: {
+    case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       application_manager::MessageHelper::SendNaviStopStream(session_key);
       media_manager_->StopVideoStreaming(session_key);
@@ -988,7 +989,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
-  utils::SharedPtr<Message> message_to_send(new Message);
+  // Messages to mobile are not yet prioritized so use default priority value
+  utils::SharedPtr<Message> message_to_send(new Message(
+      protocol_handler::MessagePriority::kDefault));
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
@@ -1154,7 +1157,9 @@ void ApplicationManagerImpl::SendMessageToHMI(
     return;
   }
 
-  utils::SharedPtr<Message> message_to_send(new Message);
+  // SmartObject |message| has no way to declare priority for now
+  utils::SharedPtr<Message> message_to_send(
+      new Message(protocol_handler::MessagePriority::kDefault));
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
@@ -1400,9 +1405,9 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
   DCHECK(message);
   utils::SharedPtr<Message> outgoing_message;
 
-  if (message->service_type() != protocol_handler::ServiceTypes::RPC
+  if (message->service_type() != protocol_handler::kRpc
       &&
-      message->service_type() != protocol_handler::ServiceTypes::BULK) {
+      message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
     LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
     return outgoing_message;

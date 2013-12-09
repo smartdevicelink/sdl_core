@@ -34,6 +34,7 @@
 
 #include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
+#include "protocol_handler/service_type.h"
 
 namespace {
 const unsigned char kRequest = 0x0;
@@ -53,7 +54,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
-    new application_manager::Message;
+      new application_manager::Message(
+          protocol_handler::MessagePriority::FromServiceType(
+              message->service_type())
+      );
   if (!message) {
     NOTREACHED();
     return NULL;
@@ -76,7 +80,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
   application_manager::Message* outgoing_message =
-    new application_manager::Message;
+      new application_manager::Message(
+          protocol_handler::MessagePriority::FromServiceType(
+              message->service_type())
+      );
   if (!message) {
     NOTREACHED();
     LOG4CXX_ERROR(logger_, "Allocation failed: outgoing message");

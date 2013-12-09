@@ -61,6 +61,8 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
+#include "protocol_handler/service_type.h"
+
 #include "utils/macro.h"
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
@@ -121,36 +123,72 @@ using namespace threads;
  * Currently there is no type difference between incoming and outgoing messages
  * And due to ApplicationManagerImpl works as message router it has to distinguish
  * messages passed from it's different connection points
- * TODO(ikozyrenko): replace these with globally defined message types
+ * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
 struct MessageFromMobile: public utils::SharedPtr<Message> {
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
+
 struct MessageToMobile: public utils::SharedPtr<Message> {
   explicit MessageToMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageToMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
+
 struct MessageFromHmi: public utils::SharedPtr<Message> {
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
+
 struct MessageToHmi: public utils::SharedPtr<Message> {
   explicit MessageToHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageToHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
 
+// Short type names for proiritized message queues
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageFromMobile> > FromMobileQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageToMobile> > ToMobileQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
-  public threads::MessageLoopThread< impl::MessageFromMobile >::Handler,
-  public threads::MessageLoopThread< impl::MessageToMobile >::Handler,
-  public threads::MessageLoopThread< impl::MessageFromHmi >::Handler,
-  public threads::MessageLoopThread< impl::MessageToHmi >::Handler,
+  public impl::FromMobileQueue::Handler,
+  public impl::ToMobileQueue::Handler,
+  public impl::FromHmiQueue::Handler,
+  public impl::ToHmiQueue::Handler,
   public HMICapabilities {
   public:
     ~ApplicationManagerImpl();
@@ -440,11 +478,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int session_key,
                                   int first_session_key,
-                                  connection_handler::ServiceType type);
+                                  protocol_handler::ServiceType type);
 
     void OnSessionEndedCallback(int session_key,
                                 int first_session_key,
-                                connection_handler::ServiceType type);
+                                protocol_handler::ServiceType type);
 
     /**
      * @ Add notification to collection
@@ -624,13 +662,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     // Construct message threads when everything is already created
 
     // Thread that pumps messages coming from mobile side.
-    threads::MessageLoopThread< impl::MessageFromMobile > messages_from_mobile_;
+    impl::FromMobileQueue messages_from_mobile_;
     // Thread that pumps messages being passed to mobile side.
-    threads::MessageLoopThread< impl::MessageToMobile > messages_to_mobile_;
+    impl::ToMobileQueue messages_to_mobile_;
     // Thread that pumps messages coming from HMI.
-    threads::MessageLoopThread< impl::MessageFromHmi > messages_from_hmi_;
+    impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
-    threads::MessageLoopThread< impl::MessageToHmi > messages_to_hmi_;
+    impl::ToHmiQueue messages_to_hmi_;
 
     // Lock for applications list
     sync_primitives::Lock applications_list_lock_;

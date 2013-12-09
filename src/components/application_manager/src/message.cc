@@ -41,16 +41,18 @@ bool BinaryDataPredicate(unsigned char i, unsigned char j) {
 
 namespace application_manager {
 
-Message::Message()
+Message::Message(protocol_handler::MessagePriority priority)
     : function_id_(0),
       type_(kUnknownType),
+      priority_(priority),
       correlation_id_(0),
       connection_key_(0),
       binary_data_(NULL),
       version_(kUnknownProtocol) {
 }
 
-Message::Message(const Message& message) {
+Message::Message(const Message& message)
+    : priority_(message.priority_) {
   *this = message;
 }
 
@@ -64,6 +66,7 @@ Message& Message::operator=(const Message& message) {
   }
   set_json_message(message.json_message_);
   set_protocol_version(message.protocol_version());
+  priority_ = message.priority_;
 
   return *this;
 }
@@ -157,6 +160,10 @@ void Message::set_json_message(const std::string& json_message) {
 
 void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
+}
+
+bool Message::HasHigherPriorityThan(const Message& that) const {
+  return this->priority_ > that.priority_;
 }
 
 }  // namespace application_manager
