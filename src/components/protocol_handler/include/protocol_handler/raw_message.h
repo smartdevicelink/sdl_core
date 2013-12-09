@@ -38,6 +38,7 @@
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "protocol_handler/service_type.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -62,7 +63,7 @@ class RawMessage {
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
                unsigned char* data, unsigned int dataSize,
-               unsigned char type = ServiceTypes::RPC);
+               unsigned char type = ServiceType::kRpc);
 
     /**
      * \brief Destructor
