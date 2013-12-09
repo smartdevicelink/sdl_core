@@ -964,7 +964,7 @@ void ApplicationManagerImpl::set_connection_handler(
 }
 
 void ApplicationManagerImpl::set_policy_manager(
-    policies::PolicyManager* policy_manager) {
+  policies::PolicyManager* policy_manager) {
   policy_manager_ = policy_manager;
 }
 
@@ -1000,7 +1000,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
   // Messages to mobile are not yet prioritized so use default priority value
   utils::SharedPtr<Message> message_to_send(new Message(
-      protocol_handler::MessagePriority::kDefault));
+        protocol_handler::MessagePriority::kDefault));
   if (!ConvertSOtoMessage((*message), (*message_to_send))) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
@@ -1168,7 +1168,7 @@ void ApplicationManagerImpl::SendMessageToHMI(
 
   // SmartObject |message| has no way to declare priority for now
   utils::SharedPtr<Message> message_to_send(
-      new Message(protocol_handler::MessagePriority::kDefault));
+    new Message(protocol_handler::MessagePriority::kDefault));
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return;
@@ -1596,7 +1596,7 @@ void ApplicationManagerImpl::set_application_id(const int correlation_id,
 }
 
 void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
-    mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   unregister_reason_ = reason;
 }
 
@@ -1614,7 +1614,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
        ++it) {
 
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-     (*it)->app_id(), unregister_reason_);
+      (*it)->app_id(), unregister_reason_);
 
     UnregisterApplication((*it)->app_id());
   }
@@ -1647,7 +1647,7 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
 bool ApplicationManagerImpl::IsApplicationRegistered(int connection_key) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::IsApplicationRegistered");
 
-  if ( applications_.find(connection_key) == applications_.end() ) {
+  if (applications_.find(connection_key) == applications_.end()) {
     return false;
   }
 
@@ -1675,8 +1675,13 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   } else {
     return;
   }
+  if (!rawMessage) {
+    LOG4CXX_ERROR(logger_, "Failed to create raw message.");
+    return;
+  }
 
   if (!protocol_handler_) {
+    LOG4CXX_WARN(logger_, "Protocol Handler is not set; cannot send message to mobile.");
     return;
   }
 
@@ -1730,8 +1735,8 @@ void ApplicationManagerImpl::Unmute() {
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(
-          mobile_apis::AudioStreamingState::AUDIBLE
-          );
+        mobile_apis::AudioStreamingState::AUDIBLE
+      );
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }
@@ -1757,16 +1762,16 @@ void ApplicationManagerImpl::SaveApplications() const {
     unsigned int device_id = 0;
     std::string mac_adddress;
     if (-1 != conn_handler->GetDataOnSessionKey(
-        it->first,
-        NULL,
-        NULL,
-        &device_id) ) {
+          it->first,
+          NULL,
+          NULL,
+          &device_id)) {
 
-      if ( -1 != conn_handler->GetDataOnDeviceID(
-          device_id,
-          NULL,
-          NULL,
-          &mac_adddress) ) {
+      if (-1 != conn_handler->GetDataOnDeviceID(
+            device_id,
+            NULL,
+            NULL,
+            &mac_adddress)) {
 
         LOG4CXX_ERROR(logger_,
                       "There is an error occurs during getting of device MAC.");
@@ -1776,17 +1781,17 @@ void ApplicationManagerImpl::SaveApplications() const {
     const Application* app = it->second;
 
     snprintf(
-        message,
-        msg_size,
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%s;",
-        strings::app_id, app->mobile_app_id()->asInt(),
-        strings::connection_key, it->first,
-        strings::hmi_level, static_cast<int>(app->hmi_level()),
-        "mac_address", mac_adddress.c_str()
-        );
+      message,
+      msg_size,
+      "%s:%d;"
+      "%s:%d;"
+      "%s:%d;"
+      "%s:%s;",
+      strings::app_id, app->mobile_app_id()->asInt(),
+      strings::connection_key, it->first,
+      strings::hmi_level, static_cast<int>(app->hmi_level()),
+      "mac_address", mac_adddress.c_str()
+    );
 
     app_data = message;
   } // end of app.list
@@ -1799,10 +1804,10 @@ void ApplicationManagerImpl::SaveApplications() const {
 
   if (file.is_open()) {
     file_system::Write(
-          &file,
-          reinterpret_cast<const unsigned char*>(app_data.c_str()),
-          app_data.size()
-          );
+      &file,
+      reinterpret_cast<const unsigned char*>(app_data.c_str()),
+      app_data.size()
+    );
   } else {
     LOG4CXX_ERROR(logger_,
                   "There is an error occurs during saving application info.");
