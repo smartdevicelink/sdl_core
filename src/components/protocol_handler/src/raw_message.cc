@@ -85,10 +85,6 @@ unsigned int RawMessage::protocol_version() const {
   return protocol_version_;
 }
 
-ServiceType RawMessage::service_type() const {
-  return service_type_;
-}
-
 bool RawMessage::IsWaiting() const {
   return waiting_;
 }

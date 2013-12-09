@@ -38,7 +38,6 @@
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "protocol_handler/service_type.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -63,7 +62,7 @@ class RawMessage {
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
                unsigned char* data, unsigned int dataSize,
-               unsigned char type = 0x07);
+               unsigned char type = ServiceTypes::RPC);
 
     /**
      * \brief Destructor
@@ -95,7 +94,9 @@ class RawMessage {
     /**
      * \brief Getter for service type
      */
-    ServiceType service_type() const;
+    ServiceType service_type() const {
+      return service_type_;
+    }
 
     bool IsWaiting() const;
 
