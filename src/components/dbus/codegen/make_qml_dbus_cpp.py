@@ -454,10 +454,6 @@ class Impl(FordXmlParser):
                     out.write("return ret;\n")
                 out.write("}\n")
 
-                # FIXME (dchmerev@luxoft.com)
-                if method_name == 'endAudioPassThru':
-                    out.write("return ret;");
-
                 out.write("QVariantMap out_arg;\n")
                 out.write("if (out_arg_v.type() == QVariant::Map) {\n")
                 with CodeBlock(out) as out:
