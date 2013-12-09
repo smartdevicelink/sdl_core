@@ -47,6 +47,8 @@ namespace transport_adapter {
 
 class LibusbListener;
 
+const int kUsbConfiguration = 1;
+
 class UsbControlTransferSequence {
  public:
   void Start();
