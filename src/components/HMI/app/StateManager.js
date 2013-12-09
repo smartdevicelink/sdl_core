@@ -143,6 +143,12 @@ var StateManager = Em.StateManager.extend({
 
         nonMedia: Em.State.create({
 
+            enter: function () {
+
+                this._super();
+                SDL.SDLController.activateTBT();
+            },
+
             exit: function () {
 
                 this._super();
@@ -169,6 +175,12 @@ var StateManager = Em.StateManager.extend({
         player: Em.State.create({}),
 
         sdlmedia: Em.State.create({
+
+            enter: function () {
+
+                this._super();
+                SDL.SDLController.activateTBT();
+            },
 
             mediaNavigation: Em.State.create({
 

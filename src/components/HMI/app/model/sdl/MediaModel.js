@@ -59,6 +59,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 uiPerformInteraction: null
             }));
 
+            this.set('tbtActivate', false);
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);

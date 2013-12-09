@@ -210,7 +210,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                         this.set('list', false);
                         this.set('search', false);
                         this.set('icon', false);
-                        this.set('active', true);
+                       // this.set('active', true);
 
                         break;
                     }

@@ -191,7 +191,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
     disableButtons: function(){
 
-        if (!SDL.SDLAppController.model.globalProperties.keyboardProperties) {
+        if (SDL.SDLAppController.model && !SDL.SDLAppController.model.globalProperties.keyboardProperties) {
             return false;
         }
         var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;

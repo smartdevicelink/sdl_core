@@ -521,7 +521,11 @@ SDL.SDLModel = Em.Object.create({
     tbtActivate: function(params) {
 
         SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
-        SDL.TurnByTurnView.activate(params.appID);
+        SDL.SDLController.getApplicationModel(params.appID).set('tbtActivate', true);
+
+        if (SDL.SDLAppController.model) {
+            SDL.SDLController.activateTBT();
+        }
     },
 
     /**
@@ -695,21 +699,26 @@ SDL.SDLModel = Em.Object.create({
      */
     onSDLSetAppIcon: function (message, id, method) {
 
-        var img = new Image();
-        img.onload = function () {
+        if (SDL.SDLController.getApplicationModel(message.appID)){
+            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["APPLICATION_NOT_REGISTERED"], id, method);
+        } else {
 
-            // code to set the src on success
-            SDL.SDLController.getApplicationModel(message.appID).set('appIcon', message.syncFileName.value);
-            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], id, method);
-        };
-        img.onerror = function (event) {
+            var img = new Image();
+            img.onload = function () {
 
-            // doesn't exist or error loading
-            FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
-            return false;
-        };
+                // code to set the src on success
+                SDL.SDLController.getApplicationModel(message.appID).set('appIcon', message.syncFileName.value);
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], id, method);
+            };
+            img.onerror = function (event) {
 
-        img.src = message.syncFileName.value;
+                // doesn't exist or error loading
+                FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
+                return false;
+            };
+
+            img.src = message.syncFileName.value;
+        }
     },
 
     /**
