@@ -180,10 +180,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
-     *
-     * @return operation result
      */
-    bool UnregisterApplication(int app_id);
+    bool UnregisterApplication(const unsigned int& app_id);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -548,11 +546,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveMobileRequestFromMessageChain(unsigned int mobile_correlation_id,
         unsigned int connection_key);
 
-    /**
-     * @brief Unregister application in SDL
-     */
-    void UnregisterAppInterface(const unsigned int& app_id);
-
     /*
      * @brief Save unregistered applications info to the file system
      */
@@ -638,6 +631,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     threads::MessageLoopThread< impl::MessageFromHmi > messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     threads::MessageLoopThread< impl::MessageToHmi > messages_to_hmi_;
+
+    // Lock for applications list
+    sync_primitives::Lock applications_list_lock_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };

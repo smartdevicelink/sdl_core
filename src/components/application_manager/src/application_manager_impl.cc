@@ -298,6 +298,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
   applications_.insert(std::pair<int, Application*>(app_id, application));
   application_list_.insert(application);
 
@@ -926,7 +928,7 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
   switch (type) {
     case connection_handler::ServiceType::kRPCSession: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterAppInterface(first_session_key);
+      UnregisterApplication(first_session_key);
       break;
     }
     case connection_handler::ServiceType::kNaviSession: {
@@ -1112,7 +1114,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key,
           mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
 
-        UnregisterAppInterface(connection_key);
+        UnregisterApplication(connection_key);
         return false;
       } else if (result ==
                  request_controller::RequestController::NONE_HMI_LEVEL_MANY_REQUESTS) {
@@ -1123,7 +1125,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key, mobile_api::AppInterfaceUnregisteredReason::
           REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
-        UnregisterAppInterface(connection_key);
+        UnregisterApplication(connection_key);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1594,36 +1596,24 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
      (*it)->app_id(), unregister_reason_);
 
-    UnregisterAppInterface((*it)->app_id());
+    UnregisterApplication((*it)->app_id());
   }
-  application_list_.clear();
-  applications_.clear();
 }
 
-void ApplicationManagerImpl::UnregisterAppInterface(
-  const unsigned int& app_id) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAppInterface "
-               << app_id);
+bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
+  LOG4CXX_INFO(logger_,
+               "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
-  std::map<int, Application*>::const_iterator it = applications_.find(app_id);
-  if (it == applications_.end()) {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::map<int, Application*>::iterator it = applications_.find(app_id);
+  if (applications_.end() == it) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
-    return;
+    return false;
   }
 
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-  UnregisterApplication(app_id);
-}
-
-bool ApplicationManagerImpl::UnregisterApplication(int app_id) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterApplication "
-               << app_id);
-
-  std::map<int, Application*>::iterator it = applications_.find(app_id);
-  if (applications_.end() == it) {
-    return false;
-  }
 
   Application* app_to_remove = it->second;
   applications_.erase(it);
