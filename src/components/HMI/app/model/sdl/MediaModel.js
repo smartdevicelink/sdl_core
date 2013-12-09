@@ -55,6 +55,10 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 alignment    : "text-align:center"
             }));
 
+            this.set('activeRequests', Em.Object.create({
+                uiPerformInteraction: null
+            }));
+
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);

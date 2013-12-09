@@ -125,6 +125,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
         icon: false,
 
         /**
+         * Id of app initiated performInteraction request
+         */
+        appID: null,
+
+        /**
          * Method updates popup timer when data changes through keyboard
          */
         timerUpdate: function (){
@@ -145,16 +150,20 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
          */
         activate: function (message) {
 
-            if (message && message.initialText) {
-                this.set('caption', message.initialText.fieldText);
+            this.clean();
+
+            if (message.params && message.params.initialText) {
+                this.set('caption', message.params.initialText.fieldText);
             }
 
-            if (message.interactionLayout) {
+            this.appID = message.params.appID;
 
-                switch (message.interactionLayout) {
+            if (message.params.interactionLayout) {
+
+                switch (message.params.interactionLayout) {
                     case "ICON_ONLY" : {
 
-                        this.preformChoicesNavigation(message.choiceSet, message.timeout);
+                        this.preformChoicesNavigation(message.params.choiceSet, message.params.timeout);
 
 
                         this.set('search', false);
@@ -165,7 +174,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                     }
                     case "ICON_WITH_SEARCH" : {
 
-                        this.preformChoicesNavigation(message.choiceSet, message.timeout);
+                        this.preformChoicesNavigation(message.params.choiceSet, message.params.timeout);
 
                         this.set('icon', true);
                         this.set('search', true);
@@ -175,7 +184,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                     }
                     case "LIST_ONLY" : {
 
-                        this.preformChoices(message.choiceSet, message.timeout);
+                        this.preformChoices(message.params.choiceSet, message.params.timeout);
 
                         this.set('list', true);
                         this.set('icon', false);
@@ -185,7 +194,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                     }
                     case "LIST_WITH_SEARCH" : {
 
-                        this.preformChoices(message.choiceSet, message.timeout);
+                        this.preformChoices(message.params.choiceSet, message.params.timeout);
 
                         this.set('list', true);
                         this.set('search', true);
@@ -194,7 +203,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                         break;
                     }
                     case "KEYBOARD" : {
-                        this.preformChoices(null, message.timeout);
+                        this.preformChoices(null, message.params.timeout);
                         SDL.SDLModel.uiShowKeyboard(this.input);
 
 
@@ -212,8 +221,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                 }
             } else {
 
-                if (message.choiceSet) {
-                    this.preformChoices(message.choiceSet, message.timeout);
+                if (message.params.choiceSet) {
+                    this.preformChoices(message.params.choiceSet, message.params.timeout);
 
                     this.set('list', true);
                     this.set('icon', false);
@@ -223,7 +232,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
                     this.timer = setTimeout(function () {
                         SDL.InteractionChoicesView.deactivate("TIMED_OUT");
-                    }, message.timeout);
+                    }, message.params.timeout);
                 }
             }
 
@@ -244,17 +253,17 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             switch (result) {
                 case "ABORTED":
                 {
-                    SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["ABORTED"]);
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["ABORTED"]);
                     break;
                 }
                 case "TIMED_OUT":
                 {
-                    SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["TIMED_OUT"]);
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["TIMED_OUT"]);
                     break;
                 }
                 case "SUCCESS":
                 {
-                    SDL.SDLController.interactionChoiseCloseResponse(SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
                     break;
                 }
                 default:
@@ -262,6 +271,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
                     // default action
                 }
             }
+
+            this.appID = null;
         },
 
         /**

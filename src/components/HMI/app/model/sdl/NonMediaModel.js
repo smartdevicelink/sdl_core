@@ -49,6 +49,10 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 alignment    : "text-align:center"
             }));
 
+            this.set('activeRequests', Em.Object.create({
+                uiPerformInteraction: null
+            }));
+
             this.set('constantTBTParams', null);
 
             this.set('globalProperties.helpPrompt', []);

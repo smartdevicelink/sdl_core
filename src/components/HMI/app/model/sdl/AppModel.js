@@ -34,6 +34,13 @@
 SDL.SDLAppModel = Em.Object.extend({
 
         /**
+         * Application's container for current processed requests on HMI
+         *
+         * @type {Object}
+         */
+        activeRequests: {},
+
+        /**
          * Application Id
          *
          * @type {Number}
@@ -288,22 +295,6 @@ SDL.SDLAppModel = Em.Object.extend({
             }
 
             return SDL.SDLModel.resultCode['SUCCESS'];
-        },
-
-        /**
-         * SDL UI PreformInteraction response handeler open Perform Interaction
-         * screen and show choices
-         *
-         * @param {Object}
-         *            message
-         */
-        onPreformInteraction: function (message) {
-
-            SDL.InteractionChoicesView.clean();
-
-            SDL.InteractionChoicesView.activate(message);
-
-            SDL.SDLController.VRMove();
         },
 
         /**
