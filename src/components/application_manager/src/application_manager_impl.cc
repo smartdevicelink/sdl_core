@@ -1502,7 +1502,7 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
   bool result = true;
 
-  if (true == profile::Profile::instance()->launch_hmi()) {
+  if (false == profile::Profile::instance()->launch_hmi()) {
     // TODO(DK) : load HMI capabilities from file
     return true;
   }
