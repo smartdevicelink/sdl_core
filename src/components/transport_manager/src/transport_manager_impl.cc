@@ -698,6 +698,8 @@ void TransportManagerImpl::EventListenerThread(void) {
 
   pthread_mutex_lock(&event_queue_mutex_);
 
+  pthread_mutex_lock(&event_queue_mutex_);
+
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (true) {
     while (event_queue_.size() > 0) {
