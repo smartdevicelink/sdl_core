@@ -68,25 +68,12 @@ GeneralView {
                         anchors.fill: parent
                         enabled: model.icon.value !== undefined
 
-                        onClicked: {
-                            console.debug("enter")
-                            switch (type) {
-                                case Internal.MenuItemType.MI_NODE:
-                                    sdlUIProxy.onCommand(model.id, dataContainer.currentApplication.appId)
-                                    break;
-                                case Internal.MenuItemType.MI_SUBMENU:
-                                case Internal.MenuItemType.MI_PARENT:
-                                    dataContainer.currentApplication.currentSubMenu = subMenu
-                                    break;
-                            }
-                            console.debug("exit")
-                        }
-
                         Component.onCompleted: {
                             console.debug("enter")
                             onPressed.connect(text.press)
                             onReleased.connect(text.release)
                             onCanceled.connect(text.release)
+                            onClicked.connect(text.click)
                             console.debug("exit")
                         }
                     }
@@ -95,6 +82,8 @@ GeneralView {
                 ClickableText {
                     id: text
                     text: name + (type === Internal.MenuItemType.MI_SUBMENU ? " >" : "")
+                    width: sdlPlayerOptionsListView.width - x
+                    elide: Text.ElideRight
                     defaultColor: type === Internal.MenuItemType.MI_PARENT ?
                                       Constants.inactiveButtonTextColor :
                                       Constants.primaryColor
@@ -103,11 +92,12 @@ GeneralView {
                                       Constants.primaryColorPressed
                     font.pixelSize: Constants.titleFontSize
 
-                    onClicked: {
+                    function click() {
                         console.debug("enter")
                         switch (type) {
                             case Internal.MenuItemType.MI_NODE:
-                                sdlUIProxy.onCommand(model.id, dataContainer.currentApplication.appId)
+                                sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
+                                contentLoader.back()
                                 break;
                             case Internal.MenuItemType.MI_SUBMENU:
                             case Internal.MenuItemType.MI_PARENT:
@@ -116,6 +106,7 @@ GeneralView {
                         }
                         console.debug("exit")
                     }
+                    onClicked: click()
                 }
             }
         }

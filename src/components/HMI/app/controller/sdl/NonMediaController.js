@@ -81,14 +81,9 @@ SDL.NonMediaController = Em.Object.create( {
     /**
      * Restore current application to active state
      */
-    restoreCurrentApp: function() {
+    activateCurrentApp: function() {
 
-        if (SDL.SDLAppController.model.appID === this.currentAppId) {
-            FFW.BasicCommunication.OnAppActivated(this.currentAppId);
-            return;
-        }
-        this.activateApp(SDL.SDLController
-            .getApplicationModel(this.currentAppId));
+        FFW.BasicCommunication.OnAppActivated(this.currentAppId);
     },
 
     /**

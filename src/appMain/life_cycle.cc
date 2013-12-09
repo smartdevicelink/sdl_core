@@ -36,9 +36,20 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
+using threads::Thread;
+
 namespace main_namespace {
 log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("appMain"));
+
+namespace {
+
+void NameMessageBrokerThread(const System::Thread& thread,
+                             const std::string& name) {
+  Thread::SetNameForId(Thread::Id(thread.GetId()), name);
+}
+
+} // namespace
 
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
@@ -100,25 +111,13 @@ bool LifeCycle::StartComponents() {
   mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
-  media_manager_ = media_manager::MediaManagerImpl::getMediaManager();
+  media_manager_ = media_manager::MediaManagerImpl::instance();
 
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(mmh_);
   protocol_handler_->AddProtocolObserver(media_manager_);
+  protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
-
-  media_manager::MediaManagerImpl::getMediaManager()->setVideoRedecoder(NULL);
-
-  if ("socket" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
-       new media_manager::video_stream_producer_consumer::SocketVideoServer());
-  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    media_manager::MediaManagerImpl::getMediaManager()->setConsumer(
-       new media_manager::video_stream_producer_consumer::PipeVideoServer());
-  }
-
-  // TODO(PV): add media manager
-
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
@@ -135,7 +134,7 @@ bool LifeCycle::StartComponents() {
 }
 
 #ifdef WEB_HMI
-bool LifeCycle::InitMessageSystem() {
+bool LifeCycle::InitMessageBroker() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
@@ -191,6 +190,9 @@ bool LifeCycle::InitMessageSystem() {
       *message_broker_, &NsMessageBroker::CMessageBroker::MethodForThread,
       NULL));
   mb_thread_->Start(false);
+  // Thread can be named only when started because before that point
+  // thread doesn't have valid Id to associate name with
+  NameMessageBrokerThread(*mb_thread_, "MessageBrokerThread");
 
   LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
   mb_server_thread_  = new System::Thread(
@@ -198,17 +200,16 @@ bool LifeCycle::InitMessageSystem() {
       *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
       NULL));
   mb_server_thread_->Start(false);
+  NameMessageBrokerThread(*mb_server_thread_, "MessageBrokerTCPServerThread");
 
   LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
   mb_adapter_thread_  = new System::Thread(
     new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
       *mb_adapter_,
-      &hmi_message_handler::MessageBrokerAdapter::MethodForReceiverThread,
+      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
       NULL));
   mb_adapter_thread_->Start(false);
-
-  mb_adapter_->registerController();
-  mb_adapter_->SubscribeTo();
+  NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
 
   return true;
 }
@@ -219,7 +220,7 @@ bool LifeCycle::InitMessageSystem() {
  * Initialize DBus component
  * @return true if success otherwise false.
  */
-bool LifeCycle::InitMessageSystem() {
+bool LifeCycle::InitMessageBroker() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
 
@@ -269,11 +270,13 @@ void LifeCycle::StopComponents(int params) {
   instance()->transport_manager_->SetProtocolHandler(NULL);
   instance()->transport_manager_->RemoveEventListener(
     instance()->protocol_handler_);
+
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
   instance()->media_manager_->SetProtocolHandler(NULL);
   delete instance()->protocol_handler_;
-  delete instance()->media_manager_;
+  instance()->media_manager_->~MediaManagerImpl();
 
-  LOG4CXX_INFO(logger_, "Fasten your seatbelts, we're going to remove TM");
+  LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and adapter.");

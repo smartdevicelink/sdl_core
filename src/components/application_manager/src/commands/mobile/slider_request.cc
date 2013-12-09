@@ -66,7 +66,7 @@ void SliderRequest::Run() {
 
   Application* application_impl =
       application_manager::ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::params][strings::connection_key]);
+          (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == application_impl) {
     LOG4CXX_ERROR(logger_, "Application is not registered");

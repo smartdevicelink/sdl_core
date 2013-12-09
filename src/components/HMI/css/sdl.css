@@ -52,6 +52,12 @@
 	color: gold;
 }
 
+.isHighlighted .ico{
+    border-style: solid;
+    border-color: #FFA300 #F7DA9C;
+    border-width: 1px;
+}
+
 .softButton .ico{
     width: 50px;
     height: 49px;
@@ -100,7 +106,6 @@
 
 #info_nonMedia {
 	z-index: 1001;
-    overflow: hidden;
 }
 
 #info_nonMedia .backButton {
@@ -113,6 +118,7 @@
 	top: 90px;
 	width: 600px;
 	height: 300px;
+    overflow: hidden;
 }
 
 #info_nonMedia .app_title {

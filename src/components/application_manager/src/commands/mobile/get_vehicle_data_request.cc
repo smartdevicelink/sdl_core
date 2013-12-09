@@ -47,7 +47,7 @@ namespace str = strings;
 
 #ifdef WEB_HMI
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-: CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {
@@ -56,7 +56,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
@@ -85,7 +85,7 @@ void GetVehicleDataRequest::Run() {
       msg_params[strings::app_id] = app->app_id();
 
       CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-          msg_params, true, 1);
+                       msg_params, true, 1);
       return;
     }
   }
@@ -104,7 +104,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key];
+  int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
@@ -244,6 +244,6 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 }
 #endif // #ifdef QT_HMI
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager

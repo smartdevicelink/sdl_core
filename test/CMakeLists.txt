@@ -15,18 +15,18 @@ include_directories (
   ../src/components/application_manager/include
   ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
-  ../src/components/audio_manager/include
+  ../src/components/media_manager/include
+  ../src/components/config_profile/include
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/thirdPartyLibs/jsoncpp/include/
-  ../src/thirdPartyLibs/logger/include/
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
-  ../test/components/audio_manager/include
+  ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
@@ -59,7 +59,7 @@ set(LIBRARIES
     Utils
     ConfigProfile
     #test_JSONHandler_v4_protocol_v2_0_revP
-    #test_JSONHandlerTest
+    # test_json_handler
     test_SmartObjectTest
     test_FormattersCommandsTest
     test_UtilsTest

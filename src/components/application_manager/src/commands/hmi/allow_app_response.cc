@@ -56,7 +56,7 @@ void AllowAppResponse::Run() {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
-  app->set_app_allowed((*message_)[strings::msg_params][hmi_response::allowed]);
+  app->set_app_allowed((*message_)[strings::msg_params][hmi_response::allowed].asBool());
 }
 
 }  // namespace commands

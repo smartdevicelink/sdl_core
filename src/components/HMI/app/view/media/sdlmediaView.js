@@ -44,14 +44,14 @@ SDL.sdlView = Em.ContainerView
         ],
 
         activeState: function(){
-            if (SDL.TurnByTurnView.active) {
+            if (SDL.TurnByTurnView.activeTBT) {
                 return false;
             } else if (SDL.States.media.sdlmedia.active) {
                 return true;
             } else {
                 return false;
             }
-        }.property('SDL.States.media.sdlmedia.active', 'SDL.TurnByTurnView.active'),
+        }.property('SDL.States.media.sdlmedia.active', 'SDL.TurnByTurnView.activeTBT'),
 
         /**
          * View Components

@@ -29,20 +29,7 @@ import static org.mockito.Mockito.verify;
  * Created by enikolsky on 2013-11-14.
  */
 public class LanguageChangeTest extends InstrumentationTestCase {
-
     private static final int CALLBACK_WAIT_TIMEOUT = 500;
-
-    private static SyncProxyALM getSyncProxyALMNoTransport(
-            IProxyListenerALM proxyListener) throws SyncException {
-        // we use custom subclass here to override the initializeProxy() method
-        // to avoid using a transport
-        return new SyncProxyALM(proxyListener, "!", null, null, true, null,
-                null, null, null, null, false, null) {
-            @Override
-            protected void initializeProxy() throws SyncException {
-            }
-        };
-    }
 
     private static ProtocolMessage createProtocolMessage(
             final String functionName, final Hashtable<String, Object> params,
@@ -73,7 +60,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testCorrectLanguageChange()
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
         proxy._wiproVersion = 2;
 
@@ -107,7 +95,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testLanguageChangeDifferentReason()
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
         proxy._wiproVersion = 2;
 
@@ -137,7 +126,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testAppUnregisteredWithoutLanguageChange()
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
         proxy._wiproVersion = 2;
 
@@ -157,7 +147,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testMessagesBetweenLanguageChangeAndAppUnregistered()
             throws JSONException, SyncException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
         proxy._wiproVersion = 2;
 

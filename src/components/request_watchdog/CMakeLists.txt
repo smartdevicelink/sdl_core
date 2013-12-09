@@ -1,7 +1,7 @@
 include_directories (
   ./include
   ../utils/include/
-  ../../thirdPartyLibs/logger/include/
+  ../config_profile/include/
   ../../thirdPartyLibs/MessageBroker/include/
 )
 

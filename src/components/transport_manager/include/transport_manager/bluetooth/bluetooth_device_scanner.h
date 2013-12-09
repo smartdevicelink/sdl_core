@@ -43,8 +43,9 @@
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
-#include "utils/synchronisation_primitives.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -154,7 +155,8 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool shutdown_requested_;
   bool device_scan_requested_;
   bool ready_;
-  sync_primitives::SynchronisationPrimitives device_scan_requested_sync_;
+  sync_primitives::Lock device_scan_requested_lock_;
+  sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
   std::vector<bdaddr_t> paired_devices_;
 

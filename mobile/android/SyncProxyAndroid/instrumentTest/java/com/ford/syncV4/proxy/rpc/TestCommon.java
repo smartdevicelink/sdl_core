@@ -2,6 +2,10 @@ package com.ford.syncV4.proxy.rpc;
 
 import android.test.InstrumentationTestCase;
 
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,5 +29,17 @@ public class TestCommon {
                                                         .getTargetContext()
                                                         .getCacheDir()
                                                         .getPath());
+    }
+
+    public static SyncProxyALM getSyncProxyALMNoTransport(
+            IProxyListenerALM proxyListener) throws SyncException {
+        // we use custom subclass here to override the initializeProxy() method
+        // to avoid using a transport
+        return new SyncProxyALM(proxyListener, "!", null, null, true, null,
+                null, null, null, null, false, null) {
+            @Override
+            protected void initializeProxy() throws SyncException {
+            }
+        };
     }
 }

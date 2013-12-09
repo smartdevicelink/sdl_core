@@ -56,14 +56,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int
         obj = 5;
-        ASSERT_EQ(5, (int)obj);
+        ASSERT_EQ(5, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Obj bool
         obj = true;
-        ASSERT_TRUE((bool)obj);
+        ASSERT_TRUE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
@@ -73,11 +73,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_FALSE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         //Obj string
         obj = "Test";
-        ASSERT_EQ(std::string("Test"), (std::string)obj);
+        ASSERT_EQ(std::string("Test"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
@@ -101,21 +101,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int correct
         obj = 15;
-        ASSERT_EQ(15, (int)obj);
+        ASSERT_EQ(15, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 9;
-        ASSERT_EQ(9, (int)obj);
+        ASSERT_EQ(9, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object int correct
         obj = 10;
-        ASSERT_EQ(10, (int)obj);
+        ASSERT_EQ(10, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -137,21 +137,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int correct
         obj = 749;
-        ASSERT_EQ(749, (int)obj);
+        ASSERT_EQ(749, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 750;
-        ASSERT_EQ(750, (int)obj);
+        ASSERT_EQ(750, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object int correct
         obj = -750;
-        ASSERT_EQ(-750, (int)obj);
+        ASSERT_EQ(-750, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -173,28 +173,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int correct
         obj = 749;
-        ASSERT_EQ(749, (int)obj);
+        ASSERT_EQ(749, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 750;
-        ASSERT_EQ(750, (int)obj);
+        ASSERT_EQ(750, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object int correct
         obj = -949;
-        ASSERT_EQ(-949, (int)obj);
+        ASSERT_EQ(-949, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = -950;
-        ASSERT_EQ(-950, (int)obj);
+        ASSERT_EQ(-950, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -218,28 +218,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int correct
         obj = -12000;
-        ASSERT_EQ(-12000, (int)obj);
+        ASSERT_EQ(-12000, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = -12001;
-        ASSERT_EQ(-12001, (int)obj);
+        ASSERT_EQ(-12001, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object int correct
         obj = 100;
-        ASSERT_EQ(100, (int)obj);
+        ASSERT_EQ(100, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 101;
-        ASSERT_EQ(101, (int)obj);
+        ASSERT_EQ(101, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -249,7 +249,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(-38, (int)obj);
+        EXPECT_EQ(-38, obj.asInt());
 
         //Object string
         obj = "string";
@@ -259,7 +259,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(-38, (int)obj);
+        EXPECT_EQ(-38, obj.asInt());
     }
 
     /**
@@ -279,28 +279,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int correct
         obj = 90;
-        ASSERT_EQ(90, (int)obj);
+        ASSERT_EQ(90, obj.asInt());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 89;
-        ASSERT_EQ(89, (int)obj);
+        ASSERT_EQ(89, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object int correct
         obj = 100;
-        ASSERT_EQ(100, (int)obj);
+        ASSERT_EQ(100, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object int incorrect
         obj = 101;
-        ASSERT_EQ(101, (int)obj);
+        ASSERT_EQ(101, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -310,7 +310,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-        EXPECT_EQ(50, (int)obj);
+        EXPECT_EQ(50, obj.asInt());
 
         //Object string
         obj = "string";
@@ -320,7 +320,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-        EXPECT_EQ(50, (int)obj);
+        EXPECT_EQ(50, obj.asInt());
     }
 
     TEST(test_int_map_validate, test_NumberSchemaItemTest)
@@ -354,11 +354,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         //Set default value
         bool resDefault = item->setDefaultValue(obj["aa"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38, (int)obj["aa"]);
+        EXPECT_EQ(-38, obj["aa"].asInt());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38, (int)obj);
+        EXPECT_EQ(-38, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -404,11 +404,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj[0]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38, (int)obj[0]);
+        EXPECT_EQ(-38, obj[0].asInt());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38, (int)obj);
+        EXPECT_EQ(-38, obj.asInt());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
@@ -437,14 +437,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object int
         obj = 5.79;
-        ASSERT_EQ(5.79, (double)obj);
+        ASSERT_EQ(5.79, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Obj bool
         obj = true;
-        ASSERT_TRUE((bool)obj);
+        ASSERT_TRUE(obj.asBool());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
@@ -454,11 +454,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_FALSE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-        EXPECT_TRUE((bool)obj);
+        EXPECT_TRUE(obj.asBool());
 
         //Obj string
         obj = "Test";
-        ASSERT_EQ(std::string("Test"), (std::string)obj);
+        ASSERT_EQ(std::string("Test"), obj.asString());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::INVALID_VALUE, resultType);
@@ -484,24 +484,24 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object double correct
         obj = 10.000001;
-        ASSERT_EQ(10.000001, (double)obj);
+        ASSERT_EQ(10.000001, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 9.999999;
-        ASSERT_EQ(9.999999, (double)obj);
+        ASSERT_EQ(9.999999, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-
+/*
         //Object int
         obj = 10;
-        ASSERT_EQ(10, (int)obj);
+        ASSERT_EQ(10, obj.asInt());
 
         resultType = item->validate(obj);
-        EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(Errors::INVALID_VALUE, resultType);*/
     }
 
     /**
@@ -520,21 +520,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object double correct
         obj = 749.0;
-        ASSERT_EQ(749.0, (double)obj);
+        ASSERT_EQ(749.0, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 749.0001;
-        ASSERT_EQ(749.0001, (double)obj);
+        ASSERT_EQ(749.0001, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object double correct
         obj = -750.0;
-        ASSERT_EQ(-750.0, (double)obj);
+        ASSERT_EQ(-750.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -556,28 +556,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object double correct
         obj = 749.0;
-        ASSERT_EQ(749.0, (double)obj);
+        ASSERT_EQ(749.0, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 749.001;
-        ASSERT_EQ(749.001, (double)obj);
+        ASSERT_EQ(749.001, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object double correct
         obj = -949.0;
-        ASSERT_EQ(-949.0, (double)obj);
+        ASSERT_EQ(-949.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = -949.00001;
-        ASSERT_EQ(-949.00001, (double)obj);
+        ASSERT_EQ(-949.00001, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -601,28 +601,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object double correct
         obj = -12000.0;
-        ASSERT_EQ(-12000.0, (double)obj);
+        ASSERT_EQ(-12000.0, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = -12000.01;
-        ASSERT_EQ(-12000.01, (double)obj);
+        ASSERT_EQ(-12000.01, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object double correct
         obj = 100.0;
-        ASSERT_EQ(100.0, (double)obj);
+        ASSERT_EQ(100.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 100.001;
-        ASSERT_EQ(100.001, (double)obj);
+        ASSERT_EQ(100.001, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -632,7 +632,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(-38.0, (double)obj);
+        EXPECT_EQ(-38.0, obj.asDouble());
 
         //Object string
         obj = "string";
@@ -642,7 +642,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
-        EXPECT_EQ(-38.0, (double)obj);
+        EXPECT_EQ(-38.0, obj.asDouble());
     }
 
     /**
@@ -662,28 +662,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         //Object double correct
         obj = 90.0;
-        ASSERT_EQ(90.0, (double)obj);
+        ASSERT_EQ(90.0, obj.asDouble());
 
         int resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 89.999;
-        ASSERT_EQ(89.999, (double)obj);
+        ASSERT_EQ(89.999, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         //Object double correct
         obj = 100.0;
-        ASSERT_EQ(100.0, (double)obj);
+        ASSERT_EQ(100.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
 
         //Object double incorrect
         obj = 100.001;
-        ASSERT_EQ(100.001, (double)obj);
+        ASSERT_EQ(100.001, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
@@ -693,7 +693,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-        EXPECT_EQ(50.0, (double)obj);
+        EXPECT_EQ(50.0, obj.asDouble());
 
         //Object string
         obj = "string";
@@ -703,7 +703,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_TRUE(resDefault);
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-        EXPECT_EQ(50.0, (double)obj);
+        EXPECT_EQ(50.0, obj.asDouble());
     }
 
     TEST(test_double_map_validate, test_NumberSchemaItemTest)
@@ -736,11 +736,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj["aa"]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38.0, (double)obj["aa"]);
+        EXPECT_EQ(-38.0, obj["aa"].asDouble());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38.0, (double)obj);
+        EXPECT_EQ(-38.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(Errors::OK, resultType);
@@ -786,11 +786,11 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         bool resDefault = item->setDefaultValue(obj[0]);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38.0, (double)obj[0]);
+        EXPECT_EQ(-38.0, obj[0].asDouble());
 
         resDefault = item->setDefaultValue(obj);
         EXPECT_TRUE(resDefault);
-        EXPECT_EQ(-38.0, (double)obj);
+        EXPECT_EQ(-38.0, obj.asDouble());
 
         resultType = item->validate(obj);
         EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);

@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -174,6 +175,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+    private static final int CREATECHOICESET_MAXCHOICES = 100;
     private static final int REQUEST_FILE_OPEN = 50;
     private final static int REQUEST_CHOOSE_XML_TEST = 51;
     private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
@@ -188,6 +190,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private static int autoIncSoftButtonId = 5500;
     /**
+     * Autoincrementing id for new choices.
+     */
+    private static int autoIncChoiceId = 9000;
+    /**
      * In onCreate() specifies if it is the first time the activity is created
      * during this app launch.
      */
@@ -199,7 +205,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_CLEAR = 10;
     private final int MNU_EXIT = 11;
     private final int MNU_TOGGLE_MEDIA = 12;
-    private final int MNU_UNREGISTER = 14;
+    private final int MNU_CLOSESESSION = 14;
     private final int MNU_APP_VERSION = 15;
     private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
     private final int MNU_WAKELOCK = 17;
@@ -231,6 +237,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * successful AddSubMenuResponse comes.
      */
     private SyncSubMenu _latestAddSubmenu = null;
+    private Pair<Integer, Integer> _latestAddCommand = null;
+    private Integer _latestDeleteCommandCmdID = null;
     private int autoIncCorrId = 101;
     private int autoIncChoiceSetId = 1;
     private int autoIncChoiceSetIdCmdId = 1;
@@ -282,6 +290,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Shared ArrayAdapter containing ImageType values.
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
+    // Request id for SoftButtonsListActivity
+    static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    // Request id for ChoiceListActivity
+    static final int REQUEST_LIST_CHOICES = 45;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -297,6 +309,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public static int getNewSoftButtonId() {
         return autoIncSoftButtonId++;
+    }
+
+    public static int getNewChoiceId() {
+        return autoIncChoiceId++;
     }
 
     /**
@@ -336,6 +352,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(logTag, "onCreate");
 
         _activity = this;
 
@@ -582,8 +599,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         boolean isMedia = mediaCheckBox.isChecked();
                         boolean isNavi = naviCheckBox.isChecked();
                         int videoSource = (videoSourceGroup.getCheckedRadioButtonId() == R.id.selectprotocol_radioSourceMP4 ?
-                            Const.KEY_VIDEOSOURCE_MP4 :
-                            Const.KEY_VIDEOSOURCE_H264);
+                                Const.KEY_VIDEOSOURCE_MP4 :
+                                Const.KEY_VIDEOSOURCE_H264);
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem())
                                 .name();
@@ -644,13 +661,27 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void startSyncProxy() {
         // Publish an SDP record and create a SYNC proxy.
         // startSyncProxyService();
-        if (ProxyService.getInstance() == null) {
+        final ProxyService instance = ProxyService.getInstance();
+        if (instance == null) {
             Intent startIntent = new Intent(SyncProxyTester._activity, ProxyService.class);
             startService(startIntent);
             // bindService(startIntent, this, Context.BIND_AUTO_CREATE);
         } else {
             // need to get the instance and add myself as a listener
-            ProxyService.getInstance().setCurrentActivity(SyncProxyTester._activity);
+            instance.setCurrentActivity(SyncProxyTester._activity);
+
+            final SyncProxyALM proxyInstance = ProxyService.getProxyInstance();
+            if (proxyInstance.getIsConnected()) {
+                if (!proxyInstance.getAppInterfaceRegistered()) {
+                    try {
+                        proxyInstance.openSession();
+                    } catch (SyncException e) {
+                        Log.e(logTag, "Can't open session", e);
+                    }
+                }
+            } else {
+                instance.startProxy();
+            }
         }
     }
 
@@ -728,6 +759,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(logTag, "onDestroy");
         //endSyncProxyInstance();
         saveMessageSelectCount();
         _activity = null;
@@ -772,7 +804,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             menu.add(0, MNU_EXIT, 0, "Exit");
 /*			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");*/
             menu.add(0, MNU_APP_VERSION, 0, "App version");
-            menu.add(0, MNU_UNREGISTER, 0, "Unregister");
+            menu.add(0, MNU_CLOSESESSION, 0, "Close Session");
             menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
             menu.add(0, XML_TEST, 0, "XML Test");
             menu.add(0, POLICIES_TEST, 0, "Policies Test");
@@ -870,25 +902,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 editor.commit();
                 //super.finish();
                 return true;
-            case MNU_UNREGISTER:
-            /*
-            endSyncProxyInstance();
-        	startSyncProxyService();
-        	*/
-                if (ProxyService.getInstance() == null) {
-                    Intent startIntent = new Intent(this, ProxyService.class);
-                    startService(startIntent);
-                    //bindService(startIntent, this, Context.BIND_AUTO_CREATE);
-                } else {
-                    // need to get the instance and add myself as a listener
-                    ProxyService.getInstance().setCurrentActivity(this);
-                }
-                if (ProxyService.getInstance().getProxyInstance() != null) {
-                    try {
-                        ProxyService.getInstance().getProxyInstance().resetProxy();
-                    } catch (SyncException e) {
-                    }
-                }
+            case MNU_CLOSESESSION:
+                closeSession();
                 return true;
             case MNU_APP_VERSION: {
                 showAppVersion();
@@ -903,6 +918,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
 
         return false;
+    }
+
+    private void closeSession() {
+        ProxyService.getProxyInstance().closeSession(true);
+        finish();
+        saveMessageSelectCount();
     }
 
     private void xmlTest() {
@@ -1232,26 +1253,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which) == Names.AddCommand) {
                                 sendAddCommand();
                             } else if (adapter.getItem(which) == Names.DeleteCommand) {
-                                //something
-                                AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                                builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
-
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        DeleteCommand msg = new DeleteCommand();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        int cmdID = _commandAdapter.getItem(which);
-                                        msg.setCmdID(cmdID);
-                                        try {
-                                            _msgAdapter.logMessage(msg, true);
-                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                        } catch (SyncException e) {
-                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                        removeCommandFromList(cmdID);
-                                    }
-                                });
-                                AlertDialog dlg = builder.create();
-                                dlg.show();
+                                sendDeleteCommand();
                             } else if (adapter.getItem(which) == Names.AddSubMenu) {
                                 sendAddSubmenu();
                             } else if (adapter.getItem(which) == Names.DeleteSubMenu) {
@@ -1383,11 +1385,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     @Override
                                     public void onClick(View v) {
                                         IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
                                         Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                        intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                                 SCROLLABLEMESSAGE_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                        startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                     }
                                 });
 
@@ -1680,86 +1682,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which) == Names.ShowConstantTBT) {
                                 sendShowConstantTBT();
                             } else if (adapter.getItem(which) == Names.AlertManeuver) {
-                                //AlertManeuver
-                                AlertDialog.Builder builder;
-                                AlertDialog dlg;
-
-                                final Context mContext = adapter.getContext();
-                                LayoutInflater inflater = (LayoutInflater) mContext
-                                        .getSystemService(LAYOUT_INFLATER_SERVICE);
-                                View layout = inflater.inflate(R.layout.alertmaneuver, null);
-
-                                final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
-
-                                SoftButton sb1 = new SoftButton();
-                                sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                                sb1.setText("Reply");
-                                sb1.setType(SoftButtonType.SBT_TEXT);
-                                sb1.setIsHighlighted(false);
-                                sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-                                SoftButton sb2 = new SoftButton();
-                                sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                                sb2.setText("Close");
-                                sb2.setType(SoftButtonType.SBT_TEXT);
-                                sb2.setIsHighlighted(false);
-                                sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-                                currentSoftButtons = new Vector<SoftButton>();
-                                currentSoftButtons.add(sb1);
-                                currentSoftButtons.add(sb2);
-
-                                Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
-                                btnSoftButtons.setOnClickListener(new OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        IntentHelper.addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-                                        Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                        intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
-                                                ALERTMANEUVER_MAXSOFTBUTTONS);
-                                        startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
-                                    }
-                                });
-
-                                builder = new AlertDialog.Builder(mContext);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
-                                        String ttsChunksString = txtTtsChunks.getText().toString();
-                                        for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            ttsChunks.add(chunk);
-                                        }
-
-                                        if (!ttsChunks.isEmpty()) {
-                                            try {
-                                                AlertManeuver msg = new AlertManeuver();
-                                                msg.setTtsChunks(ttsChunks);
-                                                msg.setCorrelationID(autoIncCorrId++);
-                                                if (currentSoftButtons != null) {
-                                                    msg.setSoftButtons(currentSoftButtons);
-                                                } else {
-                                                    msg.setSoftButtons(new Vector<SoftButton>());
-                                                }
-                                                currentSoftButtons = null;
-                                                _msgAdapter.logMessage(msg, true);
-                                                ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                            } catch (SyncException e) {
-                                                _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "No TTS Chunks entered", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        currentSoftButtons = null;
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.setView(layout);
-                                dlg = builder.create();
-                                dlg.show();
+                                sendAlertManeuver();
                             } else if (adapter.getItem(which) == Names.UpdateTurnList) {
                                 sendUpdateTurnList();
                             } else if (adapter.getItem(which) == Names.SetDisplayLayout) {
@@ -1782,6 +1705,123 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             messageSelectCount.put(function, curCount + 1);
                         }
 
+                        private void sendAlertManeuver() {
+                            final Context mContext = adapter.getContext();
+                            LayoutInflater inflater = (LayoutInflater) mContext
+                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
+                            View layout = inflater.inflate(R.layout.alertmaneuver, null);
+
+                            final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.alertManeuver_chkIncludeSBs);
+
+                            SoftButton sb1 = new SoftButton();
+                            sb1.setSoftButtonID(
+                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setText("Reply");
+                            sb1.setType(SoftButtonType.SBT_TEXT);
+                            sb1.setIsHighlighted(false);
+                            sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+                            SoftButton sb2 = new SoftButton();
+                            sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+                            sb2.setText("Close");
+                            sb2.setType(SoftButtonType.SBT_TEXT);
+                            sb2.setIsHighlighted(false);
+                            sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+                            currentSoftButtons = new Vector<SoftButton>();
+                            currentSoftButtons.add(sb1);
+                            currentSoftButtons.add(sb2);
+
+                            Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
+                            btnSoftButtons.setOnClickListener(new OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    IntentHelper.addObjectForKey(
+                                            currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                            ALERTMANEUVER_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
+                                }
+                            });
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
+                                    String ttsChunksString = txtTtsChunks.getText().toString();
+                                    for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
+                                        TTSChunk chunk = TTSChunkFactory.createChunk(
+                                                SpeechCapabilities.TEXT,
+                                                ttsChunk);
+                                        ttsChunks.add(chunk);
+                                    }
+
+                                    if (!ttsChunks.isEmpty()) {
+                                        try {
+                                            AlertManeuver msg = new AlertManeuver();
+                                            msg.setTtsChunks(ttsChunks);
+                                            msg.setCorrelationID(autoIncCorrId++);
+                                            if (useSoftButtons.isChecked()) {
+                                                if (currentSoftButtons != null) {
+                                                    msg.setSoftButtons(currentSoftButtons);
+                                                } else {
+                                                    msg.setSoftButtons(new Vector<SoftButton>());
+                                                }
+                                            }
+                                            currentSoftButtons = null;
+                                            _msgAdapter.logMessage(msg, true);
+                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                        } catch (SyncException e) {
+                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                        }
+                                    } else {
+                                        Toast.makeText(mContext,
+                                                "No TTS Chunks entered",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    currentSoftButtons = null;
+                                    dialog.cancel();
+                                }
+                            });
+                            builder.setView(layout);
+                            builder.show();
+                        }
+
+                        /**
+                         * Opens the UI for DeleteCommand and sends it.
+                         */
+                        private void sendDeleteCommand() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
+                            builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    DeleteCommand msg = new DeleteCommand();
+                                    msg.setCorrelationID(autoIncCorrId++);
+                                    int cmdID = _commandAdapter.getItem(which);
+                                    msg.setCmdID(cmdID);
+                                    try {
+                                        _msgAdapter.logMessage(msg, true);
+                                        ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+                                    } catch (SyncException e) {
+                                        _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                    }
+
+                                    if (_latestDeleteCommandCmdID != null) {
+                                        Log.w(logTag,
+                                                "Latest deleteCommand should be null, but it is " +
+                                                        _latestDeleteCommandCmdID);
+                                    }
+                                    _latestDeleteCommandCmdID = cmdID;
+                                }
+                            });
+                            builder.show();
+                        }
+
                         /**
                          * Sends Alert message.
                          */
@@ -1797,6 +1837,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
+                            final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
@@ -1823,10 +1864,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(View v) {
                                     IntentHelper
                                             .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -1839,7 +1880,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setAlertText1(txtAlertField1.getText().toString());
                                         msg.setAlertText2(txtAlertField2.getText().toString());
                                         msg.setAlertText3(txtAlertField3.getText().toString());
-                                        msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        if (useDuration.isChecked()) {
+                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                        }
                                         msg.setPlayTone(chkPlayTone.isChecked());
                                         msg.setProgressIndicator(useProgressIndicator.isChecked());
 
@@ -2189,9 +2232,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     (ViewGroup) findViewById(R.id.itemRoot));
 
                             final EditText editCmdID = (EditText) layout.findViewById(R.id.addcommand_commandID);
+                            final CheckBox chkUseCommandName = (CheckBox) layout.findViewById(R.id.addcommand_useCommandName);
                             final EditText er = (EditText) layout.findViewById(R.id.addcommand_commandName);
                             final CheckBox chkUseVrSynonyms = (CheckBox) layout.findViewById(R.id.addcommand_useVRSynonyms);
                             final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
+                            final CheckBox chkUseMenuParams = (CheckBox) layout.findViewById(R.id.addcommand_useMenuParams);
                             final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                             final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
                             s.setAdapter(_submenuAdapter);
@@ -2236,19 +2281,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCorrelationID(autoIncCorrId++);
                                     msg.setCmdID(cmdID);
 
-                                    String itemText = er.getText().toString();
-                                    MenuParams menuParams = new MenuParams();
-                                    menuParams.setMenuName(itemText);
-                                    if (chkUseMenuPos.isChecked()) {
-                                        menuParams.setPosition(pos);
-                                    }
-                                    if (chkUseParentID.isChecked()) {
-                                        SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
-                                        if (sm != null) {
-                                            menuParams.setParentID(sm.getSubMenuId());
+                                    if (chkUseMenuParams.isChecked()) {
+                                        MenuParams menuParams = new MenuParams();
+                                        if (chkUseCommandName.isChecked()) {
+                                            String itemText = er.getText().toString();
+                                            menuParams.setMenuName(itemText);
                                         }
+                                        if (chkUseMenuPos.isChecked()) {
+                                            menuParams.setPosition(pos);
+                                        }
+                                        if (chkUseParentID.isChecked()) {
+                                            SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
+                                            if (sm != null) {
+                                                menuParams.setParentID(sm.getSubMenuId());
+                                            }
+                                        }
+                                        msg.setMenuParams(menuParams);
                                     }
-                                    msg.setMenuParams(menuParams);
 
                                     if (chkUseVrSynonyms.isChecked()) {
                                         msg.setVrCommands(new Vector<String>(Arrays.asList(
@@ -2269,7 +2318,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
 
-                                    addCommandToList(cmdID, menuParams.getParentID());
+                                    if (_latestAddCommand != null) {
+                                        Log.w(logTag,
+                                                "Latest addCommand should be null, but it is " +
+                                                        _latestAddCommand.first +
+                                                        " / " +
+                                                        _latestAddCommand.second);
+                                    }
+                                    Integer parentID = null;
+                                    if (msg.getMenuParams() != null) {
+                                        parentID = msg.getMenuParams().getParentID();
+                                    }
+                                    _latestAddCommand = new Pair<Integer, Integer>(cmdID, parentID);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2361,10 +2421,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.showconstanttbt,
                                     (ViewGroup) findViewById(R.id.showconstanttbt_Root));
 
+                            final CheckBox useNavigationText1 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText1);
                             final EditText txtNavigationText1 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText1);
+                            final CheckBox useNavigationText2 = (CheckBox) layout.findViewById(R.id.showconstanttbt_useNavigationText2);
                             final EditText txtNavigationText2 = (EditText) layout.findViewById(R.id.showconstanttbt_txtNavigationText2);
+                            final CheckBox useETA = (CheckBox) layout.findViewById(R.id.showconstanttbt_useETA);
                             final EditText txtEta = (EditText) layout.findViewById(R.id.showconstanttbt_txtEta);
+                            final CheckBox useTimeToDestination = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTimeToDestination);
                             final EditText txtTimeToDestination = (EditText) layout.findViewById(R.id.showconstanttbt_txtTimeToDestination);
+                            final CheckBox useTotalDistance = (CheckBox) layout.findViewById(R.id.showconstanttbt_useTotalDistance);
                             final EditText txtTotalDistance = (EditText) layout.findViewById(R.id.showconstanttbt_txtTotalDistance);
                             final CheckBox chkUseTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_turnIconCheck);
                             final Spinner spnTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_turnIconType);
@@ -2372,9 +2437,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkUseNextTurnIcon = (CheckBox) layout.findViewById(R.id.showconstanttbt_nextTurnIconCheck);
                             final Spinner spnNextTurnIconType = (Spinner) layout.findViewById(R.id.showconstanttbt_nextTurnIconType);
                             final EditText txtNextTurnIconValue = (EditText) layout.findViewById(R.id.showconstanttbt_nextTurnIconValue);
+                            final CheckBox useDistanceToManeuver = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuver);
                             final EditText txtDistanceToManeuver = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuver);
+                            final CheckBox useDistanceToManeuverScale = (CheckBox) layout.findViewById(R.id.showconstanttbt_useDistanceToManeuverScale);
                             final EditText txtDistanceToManeuverScale = (EditText) layout.findViewById(R.id.showconstanttbt_txtDistanceToManeuverScale);
+                            final CheckBox useManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_useManeuverComplete);
                             final CheckBox chkManeuverComplete = (CheckBox) layout.findViewById(R.id.showconstanttbt_chkManeuverComplete);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.showconstanttbt_useSoftButtons);
 
                             spnTurnIconType.setAdapter(imageTypeAdapter);
                             spnTurnIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
@@ -2403,11 +2472,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2416,11 +2485,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         ShowConstantTBT msg = new ShowConstantTBT();
-                                        msg.setNavigationText1(txtNavigationText1.getText().toString());
-                                        msg.setNavigationText2(txtNavigationText2.getText().toString());
-                                        msg.setEta(txtEta.getText().toString());
-                                        msg.setTimeToDestination(txtTimeToDestination.getText().toString());
-                                        msg.setTotalDistance(txtTotalDistance.getText().toString());
+
+                                        if (useNavigationText1.isChecked()) {
+                                            msg.setNavigationText1(txtNavigationText1.getText().toString());
+                                        }
+                                        if (useNavigationText2.isChecked()) {
+                                            msg.setNavigationText2(txtNavigationText2.getText().toString());
+                                        }
+                                        if (useETA.isChecked()) {
+                                            msg.setEta(txtEta.getText().toString());
+                                        }
+                                        if (useTimeToDestination.isChecked()) {
+                                            msg.setTimeToDestination(txtTimeToDestination.getText().toString());
+                                        }
+                                        if (useTotalDistance.isChecked()) {
+                                            msg.setTotalDistance(txtTotalDistance.getText().toString());
+                                        }
 
                                         if (chkUseTurnIcon.isChecked()) {
                                             Image image = new Image();
@@ -2438,14 +2518,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setNextTurnIcon(image);
                                         }
 
-                                        msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
-                                        msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
-                                        msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        if (useDistanceToManeuver.isChecked()) {
+                                            msg.setDistanceToManeuver((float) Integer.parseInt(txtDistanceToManeuver.getText().toString()));
+                                        }
+                                        if (useDistanceToManeuverScale.isChecked()) {
+                                            msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
+                                        }
+                                        if (useManeuverComplete.isChecked()) {
+                                            msg.setManeuverComplete(chkManeuverComplete.isChecked());
+                                        }
                                         msg.setCorrelationID(autoIncCorrId++);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(new Vector<SoftButton>());
+                                            }
                                         }
                                         _msgAdapter.logMessage(msg, true);
                                         ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
@@ -2471,169 +2559,44 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Opens the dialog for CreateInteractionChoiceSet message and sends it.
                          */
                         private void sendCreateInteractionChoiceSet() {
-                            Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.createinteractionchoices,
-                                    (ViewGroup) findViewById(R.id.createcommands_Root));
+                            Choice choice1 = new Choice();
+                            choice1.setChoiceID(getNewChoiceId());
+                            choice1.setMenuName("super");
+                            Vector<String> vrCommands = new Vector<String>();
+                            vrCommands.add("super");
+                            vrCommands.add("best");
+                            choice1.setVrCommands(vrCommands);
+                            Image image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("turn_left.png");
+                            choice1.setImage(image);
+                            choice1.setSecondaryText("42");
+                            choice1.setTertiaryText("The Cat");
 
-                            final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
-                            final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
-                            final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
-                            final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
-                            final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
-                            final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
+                            Choice choice2 = new Choice();
+                            choice2.setChoiceID(getNewChoiceId());
+                            choice2.setMenuName("awesome");
+                            vrCommands = new Vector<String>();
+                            vrCommands.add("magnificent");
+                            vrCommands.add("incredible");
+                            choice2.setVrCommands(vrCommands);
+                            image = new Image();
+                            image.setImageType(ImageType.DYNAMIC);
+                            image.setValue("action.png");
+                            choice2.setImage(image);
+                            choice2.setTertiaryText("Schrödinger's cat");
 
-                            final EditText secondary_text1 = (EditText) layout.findViewById(R.id.createcommands_secondary_text1);
-                            final EditText secondary_text2 = (EditText) layout.findViewById(R.id.createcommands_secondary_text2);
-                            final EditText secondary_text3 = (EditText) layout.findViewById(R.id.createcommands_secondary_text3);
+                            Vector<Choice> choices = new Vector<Choice>();
+                            choices.add(choice1);
+                            choices.add(choice2);
 
-                            final EditText tertiary_text1 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text1);
-                            final EditText tertiary_text2 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text2);
-                            final EditText tertiary_text3 = (EditText) layout.findViewById(R.id.createcommands_tertiary_text3);
-
-                            final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
-                            final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
-                            final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
-                            final CheckBox image1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image1Check);
-                            final CheckBox image2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image2Check);
-                            final CheckBox image3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_image3Check);
-
-                            final CheckBox secondaryImage1Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Check);
-                            final CheckBox secondaryImage2Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Check);
-                            final CheckBox secondaryImage3Check = (CheckBox) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Check);
-
-                            final Spinner image1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image1Type);
-                            final Spinner image2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image2Type);
-                            final Spinner image3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_image3Type);
-
-                            final Spinner secondaryImage1Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Type);
-                            final Spinner secondaryImage2Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Type);
-                            final Spinner secondaryImage3Type = (Spinner) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Type);
-
-                            final EditText image1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image1Value);
-                            final EditText image2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image2Value);
-                            final EditText image3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_image3Value);
-
-                            final EditText secondaryImage1Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image1Value);
-                            final EditText secondaryImage2Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image2Value);
-                            final EditText secondaryImage3Value = (EditText) layout.findViewById(R.id.createinteractionchoiceset_secondary_image3Value);
-
-                            Spinner[] spinners = {image1Type, image2Type, image3Type, secondaryImage1Type, secondaryImage2Type, secondaryImage3Type};
-                            for (Spinner spinner : spinners) {
-                                spinner.setAdapter(imageTypeAdapter);
-                                spinner.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
-                            }
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<Choice> commands = new Vector<Choice>();
-
-                                    if (choice1.isChecked()) {
-                                        Choice one = new Choice();
-                                        one.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        one.setMenuName(command1.getText().toString());
-                                        one.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr1.getText().toString().split(JOIN_STRING))));
-                                        one.setSecondaryText(secondary_text1.getText().toString());
-                                        one.setTertiaryText(tertiary_text1.getText().toString());
-                                        if (image1Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image1Type.getSelectedItemPosition()));
-                                            image.setValue(image1Value.getText().toString());
-                                            one.setImage(image);
-                                        }
-
-                                        if (secondaryImage1Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage1Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage1Value.getText().toString());
-                                            one.setSecondaryImage(image);
-                                        }
-
-                                        commands.add(one);
-                                    }
-
-                                    if (choice2.isChecked()) {
-                                        Choice two = new Choice();
-                                        two.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        two.setMenuName(command2.getText().toString());
-                                        two.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr2.getText().toString().split(JOIN_STRING))));
-                                        two.setSecondaryText(secondary_text2.getText().toString());
-                                        two.setTertiaryText(tertiary_text2.getText().toString());
-                                        if (image2Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image2Type.getSelectedItemPosition()));
-                                            image.setValue(image2Value.getText().toString());
-                                            two.setImage(image);
-                                        }
-
-                                        if (secondaryImage2Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage2Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage2Value.getText().toString());
-                                            two.setSecondaryImage(image);
-                                        }
-
-
-                                        commands.add(two);
-                                    }
-
-                                    if (choice3.isChecked()) {
-                                        Choice three = new Choice();
-                                        three.setChoiceID(autoIncChoiceSetIdCmdId++);
-                                        three.setMenuName(command3.getText().toString());
-                                        three.setVrCommands(new Vector<String>(Arrays.asList(
-                                                vr3.getText().toString().split(JOIN_STRING))));
-                                        three.setSecondaryText(secondary_text3.getText().toString());
-                                        three.setTertiaryText(tertiary_text3.getText().toString());
-                                        if (image3Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(image3Type.getSelectedItemPosition()));
-                                            image.setValue(image3Value.getText().toString());
-                                            three.setImage(image);
-                                        }
-
-                                        if (secondaryImage3Check.isChecked()) {
-                                            Image image = new Image();
-                                            image.setImageType(imageTypeAdapter.getItem(secondaryImage3Type.getSelectedItemPosition()));
-                                            image.setValue(secondaryImage3Value.getText().toString());
-                                            three.setSecondaryImage(image);
-                                        }
-
-                                        commands.add(three);
-                                    }
-
-                                    if (!commands.isEmpty()) {
-                                        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        int choiceSetID = autoIncChoiceSetId++;
-                                        msg.setInteractionChoiceSetID(choiceSetID);
-                                        msg.setChoiceSet(commands);
-                                        try {
-                                            _msgAdapter.logMessage(msg, true);
-                                            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-                                            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
-                                                Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
-                                            }
-                                            _latestCreateChoiceSetId = choiceSetID;
-                                        } catch (SyncException e) {
-                                            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "No commands to set", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
+                            IntentHelper.addObjectForKey(choices,
+                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                            Intent intent = new Intent(adapter.getContext(),
+                                    ChoiceListActivity.class);
+                            intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                    CREATECHOICESET_MAXCHOICES);
+                            startActivityForResult(intent, REQUEST_LIST_CHOICES);
                         }
 
                         /**
@@ -2716,10 +2679,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper
-                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -2978,6 +2941,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             View layout = inflater.inflate(R.layout.updateturnlist, null);
                             final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
                             final EditText txtIconList = (EditText) layout.findViewById(R.id.updateturnlist_txtIconList);
+                            final CheckBox useTurnList = (CheckBox) layout.findViewById(R.id.updateturnlist_useTurnList);
+                            final CheckBox useIconList = (CheckBox) layout.findViewById(R.id.updateturnlist_useIconList);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.updateturnlist_chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2993,11 +2959,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 @Override
                                 public void onClick(View v) {
                                     IntentHelper.addObjectForKey(currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             UPDATETURNLIST_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -3009,6 +2975,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 								 * and icon items. only when the both fields are empty, we
 								 * don't send anything.
 								 */
+                                    boolean turnListEnabled = useTurnList.isChecked();
+                                    boolean iconListEnabled = useIconList.isChecked();
                                     String turnListString = txtTurnList.getText().toString();
                                     String iconListString = txtIconList.getText().toString();
                                     if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
@@ -3020,20 +2988,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         for (int i = 0; i < turnCount; ++i) {
                                             Turn t = new Turn();
-                                            t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
-                                            Image ti = new Image();
-                                            ti.setValue((i < iconNames.length) ? iconNames[i] : "");
-                                            ti.setImageType(ImageType.DYNAMIC);
-                                            t.setTurnIcon(ti);
+                                            if (turnListEnabled) {
+                                                t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
+                                            }
+
+                                            if (iconListEnabled) {
+                                                Image ti = new Image();
+                                                ti.setValue((i < iconNames.length) ? iconNames[i] : "");
+                                                ti.setImageType(ImageType.DYNAMIC);
+                                                t.setTurnIcon(ti);
+                                            }
                                             tarray.add(t);
                                         }
                                         UpdateTurnList msg = new UpdateTurnList();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setTurnList(tarray);
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(new Vector<SoftButton>());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(
+                                                        currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(
+                                                        new Vector<SoftButton>());
+                                            }
                                         }
                                         currentSoftButtons = null;
 
@@ -3091,6 +3068,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
                             final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
                             final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
+                            final CheckBox useTimeout = (CheckBox) layout.findViewById(R.id.slider_useTimeout);
                             final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
 
                             final CheckBox chkDynamicFooter = (CheckBox) layout.findViewById(R.id.slider_chkDynamicFooter);
@@ -3111,7 +3089,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
                                         Slider msg = new Slider();
-                                        msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        if (useTimeout.isChecked()) {
+                                            msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+                                        }
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
                                         msg.setSliderHeader(txtSliderHeader.getText().toString());
 
@@ -3278,6 +3258,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
                             final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
                             final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+                            final CheckBox useVRHelpItemImage = (CheckBox) layout.findViewById(R.id.setglobalproperties_useVRHelpItemImage);
                             final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
                             final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
                             final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
@@ -3378,10 +3359,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 item.setPosition(1);
                                             }
 
-                                            Image image = new Image();
-                                            image.setValue(itemImageArray[i]);
-                                            image.setImageType(ImageType.DYNAMIC);
-                                            item.setImage(image);
+                                            if (useVRHelpItemImage.isChecked()) {
+                                                Image image = new Image();
+                                                image.setValue(
+                                                        itemImageArray[i]);
+                                                image.setImageType(
+                                                        ImageType.DYNAMIC);
+                                                item.setImage(image);
+                                            }
 
                                             vrHelpItems.add(item);
                                         }
@@ -3448,6 +3433,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpTitle);
                             final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpItems);
                             final CheckBox choiceKeyboardProperties = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceKeyboardProperties);
+                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceMenuIcon);
+                            final CheckBox choiceMenuName = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceMenuName);
 
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -3469,6 +3456,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                     if (choiceVRHelpItem.isChecked()) {
                                         properties.add(GlobalProperty.VRHELPITEMS);
+                                    }
+
+                                    if (choiceMenuIcon.isChecked()) {
+                                        properties.add(GlobalProperty.MENUICON);
+                                    }
+
+                                    if (choiceMenuName.isChecked()) {
+                                        properties.add(GlobalProperty.MENUNAME);
                                     }
 
                                     if (choiceKeyboardProperties.isChecked()) {
@@ -3862,6 +3857,37 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
+     * Called when a AddCommandResponse comes. If successful, add it to the
+     * adapter.
+     */
+    public void onAddCommandResponse(boolean success) {
+        if (_latestAddCommand != null) {
+            if (success) {
+                addCommandToList(_latestAddCommand.first,
+                        _latestAddCommand.second);
+            }
+            _latestAddCommand = null;
+        } else {
+            Log.w(logTag, "Latest addCommand is unset");
+        }
+    }
+
+    /**
+     * Called when a DeleteCommandResponse comes. If successful, remove it from
+     * the adapter.
+     */
+    public void onDeleteCommandResponse(boolean success) {
+        if (_latestDeleteCommandCmdID != null) {
+            if (success) {
+                removeCommandFromList(_latestDeleteCommandCmdID);
+            }
+            _latestDeleteCommandCmdID = null;
+        } else {
+            Log.w(logTag, "Latest deleteCommand is unset");
+        }
+    }
+
+    /**
      * Called whenever an OnAudioPassThru notification comes. The aptData is the
      * audio data sent in it.
      */
@@ -3909,7 +3935,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             if (isExtStorageWritable()) {
                 audioPassThruMediaPlayer.setDataSource(outFile.toString());
             } else {
-				/*
+                /*
 				 * setDataSource with a filename on the internal storage throws
 				 * "java.io.IOException: Prepare failed.: status=0x1", so we
 				 * open the file with a special method
@@ -4030,18 +4056,45 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         _msgAdapter.logMessage("Disconnected", true);
     }
 
+    void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
+        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
+        msg.setCorrelationID(autoIncCorrId++);
+        int choiceSetID = autoIncChoiceSetId++;
+        msg.setInteractionChoiceSetID(choiceSetID);
+        msg.setChoiceSet(choices);
+        try {
+            _msgAdapter.logMessage(msg, true);
+            ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+                Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
+            }
+            _latestCreateChoiceSetId = choiceSetID;
+        } catch (SyncException e) {
+            _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case Const.REQUEST_LIST_SOFTBUTTONS:
+            case REQUEST_LIST_SOFTBUTTONS:
                 if (resultCode == RESULT_OK) {
                     currentSoftButtons = (Vector<SoftButton>) IntentHelper.
-                            getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                     if (chkIncludeSoftButtons != null) {
                         chkIncludeSoftButtons.setChecked(true);
                     }
                 }
-                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                break;
+
+            case REQUEST_LIST_CHOICES:
+                if (resultCode == RESULT_OK) {
+                    Vector<Choice> choices = (Vector<Choice>) IntentHelper.
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                    sendCreateInteractionChoiceSet(choices);
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                 break;
 
             case REQUEST_FILE_OPEN:

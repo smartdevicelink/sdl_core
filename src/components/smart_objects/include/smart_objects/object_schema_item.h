@@ -1,7 +1,3 @@
-/**
- * @file CObjectSchemaItem.hpp
- * @brief CObjectSchemaItem header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,8 +28,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_COBJECTSCHEMAITEM_HPP__
-#define __SMARTOBJECT_COBJECTSCHEMAITEM_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
 
 #include <map>
 #include <string>
@@ -43,126 +39,125 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        /**
-         * @brief Object schema item.
-         **/
-        class CObjectSchemaItem: public ISchemaItem
-        {
-        public:
-            /**
-             * @brief Object member.
-             **/
-            struct SMember
-            {
-                /**
-                 * @brief Default constructor.
-                 **/
-                SMember(void);
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+/**
+ * @brief Object schema item.
+ **/
+class CObjectSchemaItem : public ISchemaItem {
+ public:
+  /**
+   * @brief Object member.
+   **/
+  struct SMember {
+    /**
+     * @brief Default constructor.
+     **/
+    SMember(void);
 
-                /**
-                 * @brief Constructor.
-                 *
-                 * @param SchemaItem Member schema item.
-                 * @param IsMandatory true if member is mandatory, false
-                 *                    otherwise. Defaults to true.
-                 **/
-                SMember(const utils::SharedPtr<ISchemaItem> & SchemaItem,
-                        const bool IsMandatory = true);
+    /**
+     * @brief Constructor.
+     *
+     * @param SchemaItem Member schema item.
+     * @param IsMandatory true if member is mandatory, false
+     *                    otherwise. Defaults to true.
+     **/
+    SMember(const utils::SharedPtr<ISchemaItem>& SchemaItem,
+            const bool IsMandatory = true);
 
-                /**
-                 * @brief Member schema item.
-                 **/
-                utils::SharedPtr<ISchemaItem> mSchemaItem;
+    /**
+     * @brief Member schema item.
+     **/
+    utils::SharedPtr<ISchemaItem> mSchemaItem;
 
-                /**
-                 * @brief true if member is mandatory, false otherwise.
-                 **/
-                bool mIsMandatory;
-            };
+    /**
+     * @brief true if member is mandatory, false otherwise.
+     **/
+    bool mIsMandatory;
+  };
 
-            /**
-             * @brief Create a new schema item.
-             *
-             * @param Members Map of member name to SMember structure
-             *                describing the object member.
-             *
-             * @return Shared pointer to a new schema item.
-             **/
-            static utils::SharedPtr<CObjectSchemaItem> create(const std::map<std::string, SMember> & Members);
+  /**
+   * @brief Create a new schema item.
+   *
+   * @param Members Map of member name to SMember structure
+   *                describing the object member.
+   *
+   * @return Shared pointer to a new schema item.
+   **/
+  static utils::SharedPtr<CObjectSchemaItem> create(
+      const std::map<std::string, SMember>& Members);
 
-            /**
-             * @brief Validate smart object.
-             *
-             * @param Object Object to validate.
-             *
-             * @return NsSmartObjects::Errors::eType
-             **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  virtual Errors::eType validate(const SmartObject& Object);
 
-            /**
-             * @brief Apply schema.
-             *
-             * @param Object Object to apply schema.
-             **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Apply schema.
+   *
+   * @param Object Object to apply schema.
+   **/
+  virtual void applySchema(SmartObject& Object);
 
-            /**
-             * @brief Unapply schema.
-             *
-             * @param Object Object to unapply schema.
-             **/
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Unapply schema.
+   *
+   * @param Object Object to unapply schema.
+   **/
+  virtual void unapplySchema(SmartObject& Object);
 
-            /**
-             * @brief Build smart object by smart schema having copied matched
-             *        parameters from pattern smart object
-             *
-             * @param pattern_object pattern object
-             * @param result_object object to build
-             */
-            virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+  /**
+   * @brief Build smart object by smart schema having copied matched
+   *        parameters from pattern smart object
+   *
+   * @param pattern_object pattern object
+   * @param result_object object to build
+   */
+  virtual void BuildObjectBySchema(const SmartObject& pattern_object,
+                                   SmartObject& result_object);
 
-        private:
-            /**
-             * @brief Constructor.
-             *
-             * @param Members Map of member name to SMember structure
-             *                describing the object member.
-             **/
-            CObjectSchemaItem(const std::map<std::string, SMember> & Members);
+  virtual ~CObjectSchemaItem() {
+  }
 
-            /**
-             * @brief Copy constructor.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             **/
-            CObjectSchemaItem(const CObjectSchemaItem & Other);
+ private:
+  /**
+   * @brief Constructor.
+   *
+   * @param Members Map of member name to SMember structure
+   *                describing the object member.
+   **/
+  CObjectSchemaItem(const std::map<std::string, SMember>& Members);
 
-            /**
-             * @brief Assignment operator.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             *
-             * @return Not implemented.
-             **/
-            CObjectSchemaItem & operator =(const CObjectSchemaItem & Other);
+  /**
+   * @brief Copy constructor.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   **/
+  CObjectSchemaItem(const CObjectSchemaItem& Other);
 
-            /**
-             * @brief Map of member name to SMember structure describing the object member.
-             **/
-            const std::map<std::string, SMember> mMembers;
-        };
-    }
-}
+  /**
+   * @brief Assignment operator.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   *
+   * @return Not implemented.
+   **/
+  CObjectSchemaItem & operator =(const CObjectSchemaItem& Other);
 
-#endif
+  /**
+   * @brief Map of member name to SMember structure describing the object member.
+   **/
+  const std::map<std::string, SMember> mMembers;
+};
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_

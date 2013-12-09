@@ -65,7 +65,7 @@ void ChangeRegistrationRequest::Run() {
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
 
   Application* app = instance->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -224,7 +224,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
   if (!IsPendingResponseExist()) {
     Application* application = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key]);
+        (*message_)[strings::params][strings::connection_key].asUInt());
 
     if (NULL == application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");

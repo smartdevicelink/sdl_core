@@ -53,7 +53,7 @@ void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -62,7 +62,7 @@ void SetIconRequest::Run() {
   }
 
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string relative_file_path = app->name();
   relative_file_path += "/";

@@ -181,6 +181,7 @@ GeneralView {
             height: 1/4 * parent.height
 
             BackButton {
+                id:backButton
                 anchors.centerIn: parent
                 onClicked: {
                     console.debug("enter")
@@ -190,4 +191,26 @@ GeneralView {
             }
         }
     }
+    /**
+      * Test Support Section
+      *
+      */
+    function getTimer(){
+        return timer
+    }
+    function getSoftButtonsListView(){
+        return softButtons
+    }
+    function getScrollbar(){
+        return scrollbar
+    }
+    function getTextArea(){
+        return middle
+    }
+    function getBackButton(){
+        return backButton
+    }
+    /**
+      * Test Support Section End
+      */
 }

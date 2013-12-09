@@ -12,6 +12,15 @@ cmake_policy(SET CMP0015 NEW)
 link_directories(../thirdPartyLibs/libusbx)
 cmake_policy(POP)
 
+if (DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+${GSTREAMER_gst_INCLUDE_DIR}
+)
+else(DEFAULT_MEDIA_FLAG)
+set(default_media_inc
+)
+endif()
+
 set(LIBRARIES
   ApplicationManager
   HMI_API
@@ -22,6 +31,8 @@ set(LIBRARIES
   connectionHandler
   TransportManager
   HMIMessageHandler
+  MessageBroker
+  ${BROKER_LIBRARIES}  
   Utils
   encryption
   jsoncpp
@@ -33,20 +44,11 @@ set(LIBRARIES
   ConfigProfile
   MobileMessageHandler
   RequestWatchdog
-  MessageBroker
-  ${BROKER_LIBRARIES}
   MediaManager
   Libusb-1.0.16
 )
 
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
-
 include_directories (
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
@@ -68,6 +70,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}
+  ${default_media_inc}
 )
 
 set (SOURCES

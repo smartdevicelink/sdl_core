@@ -45,8 +45,6 @@ OnUpdateDeviceList::~OnUpdateDeviceList() {
 
 void OnUpdateDeviceList::Run() {
   LOG4CXX_INFO(logger_, "OnUpdateDeviceList::Run");
-
-  ApplicationManagerImpl::instance()->device_list();
 }
 
 }  // namespace commands

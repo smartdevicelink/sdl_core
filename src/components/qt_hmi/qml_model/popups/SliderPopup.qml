@@ -41,8 +41,14 @@ import "../controls"
 ContextPopup {
     property var async
     property int position: 1
+    /**
+      * Test Support Section
+      */
     property int resultCode: -1
     signal onReady
+    /**
+      * Test Support Section End
+      */
 
     function showSlider(){
         console.debug("enter")
@@ -68,10 +74,9 @@ ContextPopup {
         dataContainer.uiSlider.running = false
         switch(reason) {
         case Common.Result.ABORTED:
-            console.debug("aborted position is", dataContainer.uiSlider.position)
+            console.debug("aborted position is", position)
             resultCode = Common.Result.ABORTED
-            DBus.sendReply(async, {__retCode: resultCode,
-                               sliderPosition: dataContainer.uiSlider.position})
+            DBus.sendReply(async, {__retCode: resultCode, sliderPosition: position})
             break
         case Common.Result.SUCCESS:
             console.debug("send position", position)
@@ -95,7 +100,6 @@ ContextPopup {
         Timer {
             id: timer
             interval: dataContainer.uiSlider.timeout
-            triggeredOnStart:false
             onTriggered: {
                 console.debug("triggered")
                 complete(Common.Result.SUCCESS)
@@ -112,6 +116,8 @@ ContextPopup {
 
         Text {
             id: headerText
+            width: borderRectangle.width
+            elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: dataContainer.uiSlider.header
             color: Constants.sliderTextColor
@@ -175,6 +181,8 @@ ContextPopup {
 
         Text {
             id:footerText
+            width: borderRectangle.width
+            elide: Text.ElideRight
             anchors.horizontalCenter: parent.horizontalCenter
             text: ""
             color: Constants.sliderTextColor

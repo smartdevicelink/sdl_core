@@ -43,7 +43,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/date_time.h"
-#include "utils/synchronisation_primitives.h"
+#include "utils/lock.h"
 
 namespace request_watchdog {
 
@@ -61,6 +61,23 @@ class RequestWatchdog : public Watchdog {
     virtual void updateRequestTimeout(int connection_key,
                                       int correlation_id,
                                       int new_timeout_value);
+
+    /*
+     * @brief Check if amount of requests during time scale for application
+     * doesn't exceed limit.
+     *
+     * @brief connection_key Application ID
+     * @brief app_time_scale Configured time scale for application
+     * @brief max_request_per_time_scale Configured max request amount for
+     * application time scale
+     *
+     * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
+     */
+    virtual bool checkTimeScaleMaxRequest(
+                                const int& connection_key,
+                                const unsigned int& app_time_scale,
+                                const unsigned int& max_request_per_time_scale);
+
     virtual void removeAllRequests();
 
     virtual int getRegesteredRequestsNumber();
@@ -68,13 +85,38 @@ class RequestWatchdog : public Watchdog {
     ~RequestWatchdog();
 
   private:
+
+    /*
+    * @brief
+    *
+    * return TRUE
+    */
+    struct TimeScale {
+      explicit TimeScale(const TimevalStruct& start, const TimevalStruct& end, int connection_key)
+      :start_(start),
+       end_(end),
+       connection_key_(connection_key) {};
+
+      bool operator()(std::pair<RequestInfo*, TimevalStruct> mapEntry) {
+        bool result = false;
+        if (mapEntry.first->connectionID_ == connection_key_) {
+          if (mapEntry.second.tv_sec >= start_.tv_sec &&
+              mapEntry.second.tv_sec <= end_.tv_sec) {
+            result = true;
+          }
+        }
+        return result;
+      };
+
+      TimevalStruct start_;
+      TimevalStruct end_;
+      int connection_key_;
+    };
+
     RequestWatchdog();
 
     static const int DEFAULT_CYCLE_TIMEOUT = 250000;
     static log4cxx::LoggerPtr logger_;
-
-
-    sync_primitives::SynchronisationPrimitives instanceMutex_;
 
     void notifySubscribers(const RequestInfo& requestInfo);
 
@@ -82,11 +124,11 @@ class RequestWatchdog : public Watchdog {
     void stopDispatcherThreadIfNeeded();
 
     std::list<WatchdogSubscriber*> subscribers_;
-    sync_primitives::SynchronisationPrimitives subscribersListMutex_;
+    sync_primitives::Lock subscribersLock_;
 
     std::map<RequestInfo*, TimevalStruct> requests_;
+    sync_primitives::Lock requestsLock_;
 
-    sync_primitives::SynchronisationPrimitives requestsMapMutex_;
     friend class QueueDispatcherThreadDelegate;
 
     class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {

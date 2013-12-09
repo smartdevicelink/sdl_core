@@ -1,7 +1,3 @@
-/**
- * @file TEnumSchemaItem.hpp
- * @brief TEnumSchemaItem header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,8 +28,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
-#define __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
 
 #include <map>
 #include <set>
@@ -45,261 +41,261 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+/**
+ * @brief Enumeration schema item.
+ *
+ * @tparam EnumType Enumeration type.
+ **/
+template<typename EnumType>
+class TEnumSchemaItem : public ISchemaItem {
+ public:
+  /**
+   * @brief Create a new schema item.
+   *
+   * @param AllowedElements Set of allowed enumeration elements.
+   * @param DefaultValue Default value.
+   *
+   * @return Shared pointer to a new schema item.
+   **/
+  static utils::SharedPtr<TEnumSchemaItem> create(
+      const std::set<EnumType>& AllowedElements,
+      const TSchemaItemParameter<EnumType> & DefaultValue =
+          TSchemaItemParameter<EnumType>());
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        /**
-         * @brief Enumeration schema item.
-         *
-         * @tparam EnumType Enumeration type.
-         **/
-        template <typename EnumType>
-        class TEnumSchemaItem: public ISchemaItem
-        {
-        public:
-            /**
-             * @brief Create a new schema item.
-             *
-             * @param AllowedElements Set of allowed enumeration elements.
-             * @param DefaultValue Default value.
-             *
-             * @return Shared pointer to a new schema item.
-             **/
-            static utils::SharedPtr<TEnumSchemaItem> create(const std::set<EnumType> & AllowedElements,
-                                                      const TSchemaItemParameter<EnumType> & DefaultValue = TSchemaItemParameter<EnumType>());
+  /**
+   * @brief Validate smart object.
+   *
+   * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  virtual Errors::eType validate(const SmartObject& Object);
 
-            /**
-             * @brief Validate smart object.
-             *
-             * @param Object Object to validate.
-             *
-             * @return NsSmartObjects::Errors::eType
-             **/
-            virtual Errors::eType validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Set default value to an object.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  // TODO(cpplint): Is this a non-const reference?
+  // If so, make const or use a pointer.
+  virtual bool setDefaultValue(SmartObject& Object);
 
-            /**
-             * @brief Set default value to an object.
-             *
-             * @param Object Object to set default value.
-             *
-             * @return true if default value was successfully set, false otherwise.
-             **/
-            virtual bool setDefaultValue(SmartObject & Object);
+  /**
+   * @brief Apply schema.
+   *
+   * This implementation checks if enumeration is represented as string
+   * and tries to convert it to integer according to element-to-string
+   * map provided by getEnumElementsStringRepresentation().
+   *
+   * @param Object Object to apply schema.
+   **/
+  // TODO(cpplint): Is this a non-const reference?
+    // If so, make const or use a pointer.
+  virtual void applySchema(SmartObject& Object);
 
-            /**
-             * @brief Apply schema.
-             *
-             * This implementation checks if enumeration is represented as string
-             * and tries to convert it to integer according to element-to-string
-             * map provided by getEnumElementsStringRepresentation().
-             *
-             * @param Object Object to apply schema.
-             **/
-            virtual void applySchema(SmartObject & Object);
+  /**
+   * @brief Unapply schema.
+   *
+   * @param Object Object to unapply schema.
+   **/
+  // TODO(cpplint): Is this a non-const reference?
+    // If so, make const or use a pointer.
+  virtual void unapplySchema(SmartObject& Object);
 
-            /**
-             * @brief Unapply schema.
-             *
-             * @param Object Object to unapply schema.
-             **/
-            virtual void unapplySchema(SmartObject & Object);
+  /**
+   * @brief Build smart object by smart schema having copied matched
+   *        parameters from pattern smart object
+   *
+   * @param pattern_object pattern object
+   * @param result_object object to build
+   */
+  virtual void BuildObjectBySchema(const SmartObject& pattern_object,
+                                   SmartObject& result_object);
 
-            /**
-             * @brief Build smart object by smart schema having copied matched
-             *        parameters from pattern smart object
-             *
-             * @param pattern_object pattern object
-             * @param result_object object to build
-             */
-            virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+  /**
+   * @brief The method converts a string into the value of enum EnumType
+   *
+   * @param str String to convert
+   * @param value the resulting enum value
+   * @return true if the string is converted successfully
+   */
+  static bool stringToEnum(const std::string& str, EnumType &value);
 
-            /**
-             * @brief The method converts a string into the value of enum EnumType
-             *
-             * @param str String to convert
-             * @param value the resulting enum value
-             * @return true if the string is converted successfully
-             */
-            static bool stringToEnum(const std::string& str, EnumType &value);
+  virtual ~TEnumSchemaItem() {
+  }
 
-        private:
+ private:
+  /**
+   * @brief Constructor.
+   *
+   * @param AllowedElements Set of allowed enumeration elements.
+   * @param DefaultValue Default value.
+   **/
+  TEnumSchemaItem(const std::set<EnumType>& AllowedElements,
+                  const TSchemaItemParameter<EnumType>& DefaultValue);
 
-            /**
-             * @brief Constructor.
-             *
-             * @param AllowedElements Set of allowed enumeration elements.
-             * @param DefaultValue Default value.
-             **/
-            TEnumSchemaItem(const std::set<EnumType> & AllowedElements,
-                            const TSchemaItemParameter<EnumType> & DefaultValue);
+  /**
+   * @brief Copy constructor.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   **/
+  TEnumSchemaItem(const TEnumSchemaItem<EnumType>& Other);
 
-            /**
-             * @brief Copy constructor.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             **/
-            TEnumSchemaItem(const TEnumSchemaItem<EnumType> & Other);
+  /**
+   * @brief Assignment operator.
+   *
+   * Not implemented to prevent misuse.
+   *
+   * @param Other Other schema item.
+   *
+   * @return Not implemented.
+   **/
+  TEnumSchemaItem & operator =(const TEnumSchemaItem<EnumType>& Other);
 
-            /**
-             * @brief Assignment operator.
-             *
-             * Not implemented to prevent misuse.
-             *
-             * @param Other Other schema item.
-             *
-             * @return Not implemented.
-             **/
-            TEnumSchemaItem & operator =(const TEnumSchemaItem<EnumType> & Other);
+  /**
+   * @brief Get string representation of enumeration elements.
+   *
+   * @return Map of enum element to its string representation.
+   **/
+  static const std::map<EnumType, std::string>&
+    getEnumElementsStringRepresentation();
 
-            /**
-             * @brief Get string representation of enumeration elements.
-             *
-             * @return Map of enum element to its string representation.
-             **/
-            static const std::map<EnumType, std::string> & getEnumElementsStringRepresentation(void);
+  /**
+   * @brief Set of allowed enumeration elements.
+   **/
+  const std::set<EnumType> mAllowedElements;
 
-            /**
-             * @brief Set of allowed enumeration elements.
-             **/
-            const std::set<EnumType> mAllowedElements;
+  /**
+   * @brief Default value.
+   **/
+  const TSchemaItemParameter<EnumType> mDefaultValue;
+};
 
-            /**
-             * @brief Default value.
-             **/
-            const TSchemaItemParameter<EnumType> mDefaultValue;
-        };
-    }
+template<typename EnumType>
+utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
+    const std::set<EnumType>& AllowedElements,
+    const TSchemaItemParameter<EnumType>& DefaultValue) {
+  return new TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
 }
 
-template <typename EnumType>
-utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType> > NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::create(const std::set<EnumType> & AllowedElements,
-                                                                                                                                                          const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue)
-{
-    return new NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>(AllowedElements, DefaultValue);
+template<typename EnumType>
+Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
+  Errors::eType result = Errors::ERROR;
+
+  if (SmartType_Integer == Object.getType()) {
+    if (mAllowedElements.end()
+        != mAllowedElements.find(static_cast<EnumType>(Object.asInt()))) {
+      result = Errors::OK;
+    } else {
+      result = Errors::OUT_OF_RANGE;
+    }
+  } else {
+    result = Errors::INVALID_VALUE;
+  }
+
+  return result;
 }
 
-template <typename EnumType>
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    NsSmartDeviceLink::NsSmartObjects::Errors::eType result = NsSmartDeviceLink::NsSmartObjects::Errors::ERROR;
+// TODO(cpplint): Is this a non-const reference?
+// If so, make const or use a pointer.
+template<typename EnumType>
+bool TEnumSchemaItem<EnumType>::setDefaultValue(SmartObject& Object) {
+  bool result = false;
+  EnumType value;
 
-    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
-    {
-        if (mAllowedElements.end() != mAllowedElements.find(static_cast<EnumType>((int)Object)))
-        {
-            result = NsSmartDeviceLink::NsSmartObjects::Errors::OK;
-        }
-        else
-        {
-            result = NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE;
-        }
-    }
-    else
-    {
-        result = NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
-    }
+  if (true == mDefaultValue.getValue(value)) {
+    Object = static_cast<int>(value);
+    result = true;
+  }
 
-    return result;
+  return result;
 }
 
-template <typename EnumType>
-bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    bool result = false;
-    EnumType value;
+// TODO(cpplint): Is this a non-const reference?
+// If so, make const or use a pointer.
+template<typename EnumType>
+void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
+  if (SmartType_String == Object.getType()) {
+    std::string stringValue = Object.asString();
+    const std::map<EnumType, std::string> elementsStringRepresentation =
+        getEnumElementsStringRepresentation();
 
-    if (true == mDefaultValue.getValue(value))
-    {
-        Object = static_cast<int>(value);
-        result = true;
+    for (typename std::map<EnumType, std::string>::const_iterator i =
+        elementsStringRepresentation.begin();
+        i != elementsStringRepresentation.end(); ++i) {
+      if (i->second == stringValue) {
+        Object = static_cast<int>(i->first);
+        break;
+      }
     }
-
-    return result;
+  }
 }
 
-template <typename EnumType>
-void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    if (NsSmartDeviceLink::NsSmartObjects::SmartType_String == Object.getType())
-    {
-        std::string stringValue = Object;
-        const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
+// TODO(cpplint): Is this a non-const reference?
+// If so, make const or use a pointer.
+template<typename EnumType>
+void TEnumSchemaItem<EnumType>::unapplySchema(SmartObject& Object) {
+  if (SmartType_Integer == Object.getType()) {
+    int integerValue = Object.asInt();
+    const std::map<EnumType, std::string> elementsStringRepresentation =
+        getEnumElementsStringRepresentation();
+    typename std::map<EnumType, std::string>::const_iterator i =
+        elementsStringRepresentation.find(static_cast<EnumType>(integerValue));
 
-        for (typename std::map<EnumType, std::string>::const_iterator i = elementsStringRepresentation.begin(); i != elementsStringRepresentation.end(); ++i)
-        {
-            if (i->second == stringValue)
-            {
-                Object = static_cast<int>(i->first);
-                break;
-            }
-        }
+    if (i != elementsStringRepresentation.end()) {
+      Object = i->second;
     }
+  }
 }
 
-template <typename EnumType>
-void NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer == Object.getType())
-    {
-        int integerValue = Object;
-        const std::map<EnumType, std::string> elementsStringRepresentation = getEnumElementsStringRepresentation();
-        typename std::map<EnumType, std::string>::const_iterator i = elementsStringRepresentation.find(static_cast<EnumType>(integerValue));
+template<typename EnumType>
+void TEnumSchemaItem<EnumType>::BuildObjectBySchema(
+    const SmartObject& pattern_object, SmartObject& result_object) {
 
-        if (i != elementsStringRepresentation.end())
-        {
-            Object = i->second;
-        }
-    }
-}
-
-template <typename EnumType>
-void smart_objects_ns::TEnumSchemaItem<EnumType>::BuildObjectBySchema(
-    const smart_objects_ns::SmartObject& pattern_object,
-    smart_objects_ns::SmartObject& result_object) {
-
-  if (smart_objects_ns::SmartType_Integer == pattern_object.getType()) {
-    result_object = static_cast<int>(pattern_object);
+  if (SmartType_Integer == pattern_object.getType()) {
+    result_object = pattern_object;  // TODO(AK): Check this...
   } else {
     bool result = setDefaultValue(result_object);
-    if (false ==result) {
+    if (false == result) {
       result_object = static_cast<EnumType>(EnumType::INVALID_ENUM);
     }
   }
 }
 
-template <typename EnumType>
-NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::TEnumSchemaItem(const std::set<EnumType> & AllowedElements,
-                                                                      const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<EnumType> & DefaultValue):
-mAllowedElements(AllowedElements),
-mDefaultValue(DefaultValue)
-{
+template<typename EnumType>
+TEnumSchemaItem<EnumType>::TEnumSchemaItem(
+    const std::set<EnumType> & AllowedElements,
+    const TSchemaItemParameter<EnumType> & DefaultValue)
+    : mAllowedElements(AllowedElements),
+      mDefaultValue(DefaultValue) {
 }
 
 template<typename EnumType>
-bool NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::stringToEnum(const std::string& str, EnumType &value)
-{
-    bool result = false;
-    std::map<EnumType, std::string> enumMap =
-            NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<EnumType>::getEnumElementsStringRepresentation();
+bool TEnumSchemaItem<EnumType>::stringToEnum(const std::string& str,
+                                             EnumType& value) {
+  bool result = false;
+  std::map<EnumType, std::string> enumMap =
+      TEnumSchemaItem<EnumType>::getEnumElementsStringRepresentation();
 
-    for (typename std::map<EnumType, std::string>::const_iterator it = enumMap.begin(); it != enumMap.end(); ++it)
-    {
-        if (str == it->second)
-        {
-            value = it->first;
-            result = true;
-            break;
-        }
+  for (typename std::map<EnumType, std::string>::const_iterator it = enumMap
+      .begin(); it != enumMap.end(); ++it) {
+    if (str == it->second) {
+      value = it->first;
+      result = true;
+      break;
     }
+  }
 
-    return result;
+  return result;
 }
 
-#endif
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_

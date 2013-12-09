@@ -1,7 +1,3 @@
-/**
- * @file TSchemaItemParameter.hpp
- * @brief TSchemaItemParameter header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,92 +28,88 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_VALIDATION_TVALIDATORPARAMETER_HPP__
-#define __SMARTOBJECT_VALIDATION_TVALIDATORPARAMETER_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_PARAMETER_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_PARAMETER_H_
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        /**
-         * @brief SchemaItem parameter.
-         *
-         * Container for schema item parameter such as min/max value, size,
-         * etc. which may be unspecified.
-         *
-         * @tparam ParameterType Type of a parameter.
-         */
-        template <typename ParameterType>
-        class TSchemaItemParameter
-        {
-        public:
-            /**
-             * @brief Constructor.
-             *
-             * Initialize unspecified parameter.
-             **/
-            TSchemaItemParameter(void);
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+/**
+ * @brief SchemaItem parameter.
+ *
+ * Container for schema item parameter such as min/max value, size,
+ * etc. which may be unspecified.
+ *
+ * @tparam ParameterType Type of a parameter.
+ */
+template<typename ParameterType>
+class TSchemaItemParameter {
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * Initialize unspecified parameter.
+   **/
+  TSchemaItemParameter();
 
-            /**
-             * @brief Constructor.
-             *
-             * Initialize parameter with specified value.
-             *
-             * @param ParameterValue Value of a parameter.
-             **/
-            TSchemaItemParameter(const ParameterType & ParameterValue);
+  /**
+   * @brief Constructor.
+   *
+   * Initialize parameter with specified value.
+   *
+   * @param ParameterValue Value of a parameter.
+   **/
+  explicit TSchemaItemParameter(const ParameterType& ParameterValue);
 
-            /**
-             * @brief Get parameter value.
-             *
-             * Get the value of the parameter if it is specified.
-             *
-             * @param Value Reference to variable that must receive the
-             *              value of the parameter. If parameter is not
-             *              specified this variable is not modified.
-             *
-             * @return true if the parameter is specified and its value
-             *         has been stored in Value variable, false otherwise.
-             **/
-            bool getValue(ParameterType & Value) const;
+  /**
+   * @brief Get parameter value.
+   *
+   * Get the value of the parameter if it is specified.
+   *
+   * @param Value Reference to variable that must receive the
+   *              value of the parameter. If parameter is not
+   *              specified this variable is not modified.
+   *
+   * @return true if the parameter is specified and its value
+   *         has been stored in Value variable, false otherwise.
+   **/
+  bool getValue(ParameterType& Value) const;
 
-        private:
-            /**
-             * @brief true if parameter is specified, false otherwise.
-             **/
-            const bool mIsSpecified;
+ private:
+  /**
+   * @brief true if parameter is specified, false otherwise.
+   **/
+  const bool mIsSpecified;
 
-            /**
-             * @brief Parameter value.
-             **/
-            const ParameterType mValue;
-        };
-    }
+  /**
+   * @brief Parameter value.
+   **/
+  const ParameterType mValue;
+};
+
+template<typename ParameterType>
+TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void)
+    : mIsSpecified(false),
+      mValue() {
 }
 
-template <typename ParameterType>
-NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void):
-mIsSpecified(false),
-mValue()
-{
+template<typename ParameterType>
+TSchemaItemParameter<ParameterType>::TSchemaItemParameter(
+    const ParameterType& ParameterValue)
+    : mIsSpecified(true),
+      mValue(ParameterValue) {
 }
 
-template <typename ParameterType>
-NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(const ParameterType & ParameterValue):
-mIsSpecified(true),
-mValue(ParameterValue)
-{
+template<typename ParameterType>
+bool TSchemaItemParameter<ParameterType>::getValue(
+    ParameterType& Value) const {
+  if (true == mIsSpecified) {
+    Value = mValue;
+  }
+
+  return mIsSpecified;
 }
 
-template <typename ParameterType>
-bool NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::getValue(ParameterType & Value) const
-{
-    if (true == mIsSpecified)
-    {
-        Value = mValue;
-    }
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 
-    return mIsSpecified;
-}
-
-#endif
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_PARAMETER_H_

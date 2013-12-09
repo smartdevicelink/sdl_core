@@ -74,7 +74,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                         sprintf(k_key, "k_%d", k);
                         sprintf(value, "%d", i + j + k);
 
-                        ASSERT_EQ(std::string(value), static_cast<std::string>(obj[i_key][j_key][k_key])) <<
+                        ASSERT_EQ(std::string(value), obj[i_key][j_key][k_key].asString()) <<
                                 "Wrong value in the map at [" << i_key << "][" << j_key << "][" << k_key << "]";
                     }
         }
@@ -95,7 +95,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                for (int j = 0; j < size; j++)
                    for (int k = 0; k < size; k++)
                    {
-                       ASSERT_EQ(base + i + j + k, static_cast<int>(obj[i][j][k])) <<
+                       ASSERT_EQ(base + i + j + k, obj[i][j][k].asInt()) <<
                                "Wrong value in the array at index: " << i << ", " << j << ", " << k;
                    }
        }
@@ -108,28 +108,28 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         SmartObject obj;
 
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj)) << "Wrong cast to int just after construction";
+        ASSERT_EQ(invalid_int_value, obj.asInt()) << "Wrong cast to int just after construction";
 
         obj = 10;
-        ASSERT_EQ(10, static_cast<int>(obj)) << "Wrong cast to int";
+        ASSERT_EQ(10, obj.asInt()) << "Wrong cast to int";
 
         obj = "some string";
-        ASSERT_EQ("some string", static_cast<std::string>(obj)) << "Wrong cast to std::string";
+        ASSERT_EQ("some string", obj.asString()) << "Wrong cast to std::string";
 
         obj = false;
-        ASSERT_FALSE(static_cast<bool>(obj)) << "Wrong cast to bool";
+        ASSERT_FALSE(obj.asBool()) << "Wrong cast to bool";
 
         obj = 'A';
-        ASSERT_EQ('A', static_cast<char>(obj)) << "Wrong cast to char";
+        ASSERT_EQ('A', obj.asChar()) << "Wrong cast to char";
 
         obj = 3.14;
-        ASSERT_EQ(3.14, static_cast<double>(obj)) << "Wrong cast to double";
+        ASSERT_EQ(3.14, obj.asDouble()) << "Wrong cast to double";
 
         // array test
         for (int i = 0; i < 100; i++)
         {
             obj[i] = i;
-            ASSERT_EQ(i, static_cast<int>(obj[i]));
+            ASSERT_EQ(i, obj[i].asInt());
         }
 
         // map test
@@ -138,7 +138,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             char key[8];
             sprintf(key, "%d", i);
             obj[key] = i;
-            ASSERT_EQ(i, static_cast<int>(obj[key]));
+            ASSERT_EQ(i, obj[key].asInt());
         }
     }
 
@@ -146,21 +146,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         SmartObject obj;
 
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj[0])) << "Wrong value at accessing non existent index";
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value at accessing non existent key";
+        ASSERT_EQ(invalid_int_value, obj[0].asInt()) << "Wrong value at accessing non existent index";
+        ASSERT_EQ(invalid_int_value, obj["non_existent_key"].asInt()) << "Wrong value at accessing non existent key";
 
         obj[0] = 1;
-        ASSERT_EQ(1, static_cast<int>(obj[0])) << "Wrong value at 0 index";
+        ASSERT_EQ(1, obj[0].asInt()) << "Wrong value at 0 index";
         obj[1] = 2;
-        ASSERT_EQ(2, static_cast<int>(obj[1])) << "Wrong value at 1 index";
+        ASSERT_EQ(2, obj[1].asInt()) << "Wrong value at 1 index";
 
         obj[0][0] = 3;
         obj[1][0] = 1;
-        ASSERT_EQ(3, static_cast<int>(obj[0][0])) << "Wrong value at index 0, 0";
+        ASSERT_EQ(3, obj[0][0].asInt()) << "Wrong value at index 0, 0";
 
         obj[0][0][0] = 4;
         obj[0][1][0] = 5;
-        ASSERT_EQ(4, static_cast<int>(obj[0][0][0])) << "Wrong value at index 0, 0, 0";
+        ASSERT_EQ(4, obj[0][0][0].asInt()) << "Wrong value at index 0, 0, 0";
 
         const int size = 32;
         makeArrayObject(obj, size);
@@ -173,14 +173,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         SmartObject obj;
 
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value for non existent key";
+        ASSERT_EQ(invalid_int_value, obj["non_existent_key"].asInt()) << "Wrong value for non existent key";
 
         obj["abc"]["def"]["ghi"] = 5;
-        ASSERT_EQ(5, static_cast<int>(obj["abc"]["def"]["ghi"])) << "Wrong value for triple map";
+        ASSERT_EQ(5, obj["abc"]["def"]["ghi"].asInt()) << "Wrong value for triple map";
 
         obj["123"]["456"]["789"] = "string test";
 
-        ASSERT_EQ("string test", static_cast<std::string>(obj["123"]["456"]["789"])) << "Wrong value for triple map";
+        ASSERT_EQ("string test", obj["123"]["456"]["789"].asString()) << "Wrong value for triple map";
 
         const int size = 32;
 
@@ -192,23 +192,23 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     TEST(ConstructorsTest, test_SmartObjectUnitTest)
     {
         SmartObject objInt(5678);
-        ASSERT_EQ(5678, static_cast<int>(objInt)) << "Wrong constructor with int param";
+        ASSERT_EQ(5678, objInt.asInt()) << "Wrong constructor with int param";
 
         char c_str[] = "test c_string";
         SmartObject obj_c_str(c_str);
-        ASSERT_EQ("test c_string", static_cast<std::string>(obj_c_str)) << "Wrong constructor with c_str param";
+        ASSERT_EQ("test c_string", obj_c_str.asString()) << "Wrong constructor with c_str param";
 
         SmartObject obj_std_str(std::string("test std_string"));
-        ASSERT_EQ(std::string("test std_string"), static_cast<std::string>(obj_std_str));
+        ASSERT_EQ(std::string("test std_string"), obj_std_str.asString());
 
         SmartObject obj_char('R');
-        ASSERT_EQ('R', static_cast<char>(obj_char)) << "Wrong constructor with char param";
+        ASSERT_EQ('R', obj_char.asChar()) << "Wrong constructor with char param";
 
         SmartObject obj_double(-0.4321);
-        ASSERT_EQ(-0.4321, static_cast<double>(obj_double)) << "Wrong constructor with double param";
+        ASSERT_EQ(-0.4321, obj_double.asDouble()) << "Wrong constructor with double param";
 
         SmartObject obj_bool(true);
-        ASSERT_TRUE(static_cast<bool>(obj_bool)) << "Wrong constructor with bool param";
+        ASSERT_TRUE(obj_bool.asBool()) << "Wrong constructor with bool param";
 
         SmartObject src_obj;
 
@@ -216,81 +216,81 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         src_obj["key_2"]["sub_key_1"] = "value_2";
 
         SmartObject dst_obj(src_obj);
-        ASSERT_EQ("value_1", static_cast<std::string>(dst_obj["key_1"])) << "Copy constructor is not correct";
-        ASSERT_EQ("value_2", static_cast<std::string>(dst_obj["key_2"]["sub_key_1"])) << "Copy constructor is not correct";
+        ASSERT_EQ("value_1", dst_obj["key_1"].asString()) << "Copy constructor is not correct";
+        ASSERT_EQ("value_2", dst_obj["key_2"]["sub_key_1"].asString()) << "Copy constructor is not correct";
     }
 
     TEST(FromString, TypeConversion)
     {
         {   // String to bool
             SmartObject obj;
-            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            ASSERT_EQ(invalid_bool_value, obj.asBool());
             obj = "true";
-            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            ASSERT_EQ(invalid_bool_value, obj.asBool());
             obj = "false";
-            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            ASSERT_EQ(invalid_bool_value, obj.asBool());
             obj = true;
-            ASSERT_TRUE(static_cast<bool>(obj));
+            ASSERT_TRUE(obj.asBool());
         }
         {   // String to int
             SmartObject obj;
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+            ASSERT_EQ(invalid_int_value, obj.asInt());
             obj = "0";
-            ASSERT_EQ(0, static_cast<int>(obj));
+            ASSERT_EQ(0, obj.asInt());
             obj = "-34323";
-            ASSERT_EQ(-34323, static_cast<int>(obj));
+            ASSERT_EQ(-34323, obj.asInt());
             obj = "+1234";
-            ASSERT_EQ(1234, static_cast<int>(obj));
+            ASSERT_EQ(1234, obj.asInt());
             obj = "3232.0";
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            ASSERT_EQ(invalid_int_value, obj.asInt());        // FIXME:
             obj = "123wtf";
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            ASSERT_EQ(invalid_int_value, obj.asInt());        // FIXME:
             obj = "";
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            ASSERT_EQ(invalid_int_value, obj.asInt());        // FIXME:
             obj = " 123 ";
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            ASSERT_EQ(invalid_int_value, obj.asInt());        // FIXME:
             obj = " 123";
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            ASSERT_EQ(123, obj.asInt());        // FIXME:
         }
         {   // String to char
             SmartObject obj;
-            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+            ASSERT_EQ(invalid_char_value, obj.asChar());
             obj = "C";
-            ASSERT_EQ('C', static_cast<char>(obj));
+            ASSERT_EQ('C', obj.asChar());
             obj = "\n";
-            ASSERT_EQ('\n', static_cast<char>(obj));
+            ASSERT_EQ('\n', obj.asChar());
             obj = " A";
-            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+            ASSERT_EQ(invalid_char_value, obj.asChar());
             obj = "";
-            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+            ASSERT_EQ(invalid_char_value, obj.asChar());
         }
         {   // String to double
             SmartObject obj;
-            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+            ASSERT_EQ(invalid_double_value, obj.asDouble());
             obj = "1234";
-            ASSERT_EQ(1234, static_cast<double>(obj));
+            ASSERT_EQ(1234, obj.asDouble());
             obj = "-0.1234";
-            ASSERT_EQ(-0.1234, static_cast<double>(obj));
+            ASSERT_EQ(-0.1234, obj.asDouble());
             obj = ".54321";
-            ASSERT_EQ(.54321, static_cast<double>(obj));
+            ASSERT_EQ(.54321, obj.asDouble());
             obj = "123.45.6";
-            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+            ASSERT_EQ(invalid_double_value, obj.asDouble());        // FIXME:
             obj = "123 wtf";
-            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+            ASSERT_EQ(invalid_double_value, obj.asDouble());        // FIXME:
             obj = " 0.5";
-            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+            ASSERT_EQ(0.5, obj.asDouble());        // FIXME:
         }
         {   // String to Map
             SmartObject obj;
-            ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+            ASSERT_EQ(invalid_int_value, obj["key"].asInt());
             obj = "this is not a map";
-            ASSERT_EQ(invalid_char_value, static_cast<char>(obj["some_key"]));
+            ASSERT_EQ(invalid_char_value, obj["some_key"].asChar());
         }
         {   // String to Array
             SmartObject obj;
-            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj[0]));
+            ASSERT_EQ(invalid_bool_value, obj[0].asBool());
             obj = "this is not an array";
-            ASSERT_EQ(invalid_double_value, static_cast<double>(obj[0]));
+            ASSERT_EQ(invalid_double_value, obj[0].asDouble());
         }
         {   // String to Binary
             SmartObject obj;
@@ -306,24 +306,24 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj = true;
 
-        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
-        ASSERT_EQ(1, static_cast<int>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(1.0, static_cast<double>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_string_value, obj.asString());
+        ASSERT_TRUE(obj.asBool());
+        ASSERT_EQ(1, obj.asInt());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(1.0, obj.asDouble());
+        ASSERT_EQ(invalid_int_value, obj["key"].asInt());
+        ASSERT_EQ(invalid_char_value, obj[0].asChar());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = false;
 
-        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
-        ASSERT_FALSE(static_cast<bool>(obj));
-        ASSERT_EQ(0, static_cast<int>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(0, static_cast<double>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_string_value, obj.asString());
+        ASSERT_FALSE(obj.asBool());
+        ASSERT_EQ(0, obj.asBool());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(0, obj.asDouble());
+        ASSERT_EQ(invalid_int_value, obj["key"].asInt());
+        ASSERT_EQ(invalid_char_value, obj[0].asChar());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -333,29 +333,29 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj = 123;
 
-        ASSERT_EQ("123", static_cast<std::string>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(123.0, static_cast<double>(obj));
+        ASSERT_EQ("123", obj.asString());
+        ASSERT_TRUE(obj.asBool());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(123.0, obj.asDouble());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = 5;
-        ASSERT_EQ("5", static_cast<std::string>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ("5", obj.asString());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
 
         obj = 0;
-        ASSERT_EQ("0", static_cast<std::string>(obj));
-        ASSERT_FALSE(static_cast<bool>(obj));
+        ASSERT_EQ("0", obj.asString());
+        ASSERT_FALSE(obj.asBool());
 
         obj = 1;
-        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_TRUE(obj.asBool());
 
         obj = -1234;
-        ASSERT_EQ(-1234, static_cast<int>(obj));
-        ASSERT_EQ("-1234", static_cast<std::string>(obj));
-        ASSERT_EQ(-1234.0, static_cast<double>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ(-1234, obj.asInt());
+        ASSERT_EQ("-1234", obj.asString());
+        ASSERT_EQ(-1234.0, obj.asDouble());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_TRUE(obj.asBool());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -365,22 +365,22 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj = '1';
 
-        ASSERT_EQ("1", static_cast<std::string>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
-        ASSERT_EQ('1', static_cast<char>(obj));
-        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ("1", obj.asString());
+        ASSERT_EQ(invalid_int_value, obj.asInt());
+        ASSERT_EQ('1', obj.asChar());
+        ASSERT_EQ(invalid_double_value, obj.asDouble());
+        ASSERT_EQ(invalid_int_value, obj["key"].asInt());
+        ASSERT_EQ(invalid_char_value, obj[0].asChar());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = '0';
 
-        ASSERT_EQ("0", static_cast<std::string>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
-        ASSERT_EQ('0', static_cast<char>(obj));
-        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ("0", obj.asString());
+        ASSERT_EQ(invalid_int_value, obj.asInt());
+        ASSERT_EQ('0', obj.asChar());
+        ASSERT_EQ(invalid_double_value, obj.asDouble());
+        ASSERT_EQ(invalid_int_value, obj["key"].asInt());
+        ASSERT_EQ(invalid_char_value, obj[0].asChar());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -389,27 +389,27 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         SmartObject obj;
 
         obj = 0.1;
-        ASSERT_EQ("0.1", static_cast<std::string>(obj));        // FIXME: result 0.100000
-        ASSERT_EQ(0, static_cast<int>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(0.1, static_cast<double>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ("0.1", obj.asString());        // FIXME: result 0.100000
+        ASSERT_EQ(0, obj.asInt());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(0.1, obj.asDouble());
+        ASSERT_TRUE(obj.asBool());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
         obj = 0.9;
-        ASSERT_EQ("0.9", static_cast<std::string>(obj));
-        ASSERT_EQ(0, static_cast<int>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ("0.9", obj.asString());
+        ASSERT_EQ(0, obj.asInt());
+        ASSERT_TRUE(obj.asBool());
 
         obj = -12323.999;
-        ASSERT_EQ("-12323.999", static_cast<std::string>(obj));
-        ASSERT_EQ(-12323, static_cast<int>(obj));
-        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ("-12323.999", obj.asString());
+        ASSERT_EQ(-12323, obj.asInt());
+        ASSERT_TRUE(obj.asBool());
 
         obj = 0.0;
-        ASSERT_EQ("0", static_cast<std::string>(obj));
-        ASSERT_EQ(0, static_cast<int>(obj));
-        ASSERT_FALSE(static_cast<bool>(obj));
+        ASSERT_EQ("0", obj.asString());
+        ASSERT_EQ(0, obj.asInt());
+        ASSERT_FALSE(obj.asBool());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -419,12 +419,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj["key1"] = 123;
 
-        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
-        ASSERT_EQ(123, static_cast<int>(obj["key1"]));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_string_value, obj.asString());
+        ASSERT_EQ(invalid_int_value, obj.asInt());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(invalid_double_value, obj.asDouble());
+        ASSERT_EQ(123, obj["key1"].asInt());
+        ASSERT_EQ(invalid_char_value, obj[0].asChar());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -435,12 +435,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj[0] = 'A';
         obj[1] = -123;
 
-        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
-        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
-        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
-        ASSERT_EQ('A', static_cast<char>(obj[0]));
-        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key1"]));
+        ASSERT_EQ(invalid_string_value, obj.asString());
+        ASSERT_EQ(invalid_int_value, obj.asInt());
+        ASSERT_EQ(invalid_char_value, obj.asChar());
+        ASSERT_EQ(invalid_double_value, obj.asDouble());
+        ASSERT_EQ('A', obj[0].asChar());
+        ASSERT_EQ(invalid_int_value, obj["key1"].asInt());
         ASSERT_EQ(invalid_binary_value, obj.asBinary());
     }
 
@@ -451,22 +451,22 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         objSrc = -6;
         objDst = 7;
         objDst = objSrc;
-        ASSERT_EQ(-6, static_cast<int>(objDst)) << "Wrong assignment for int object";
+        ASSERT_EQ(-6, objDst.asInt()) << "Wrong assignment for int object";
 
         objSrc = "Some test string";
         objDst = "Other string";
         objDst = objSrc;
-        ASSERT_EQ("Some test string", static_cast<std::string>(objDst)) << "Wrong assignment for std::string object";
+        ASSERT_EQ("Some test string", objDst.asString()) << "Wrong assignment for std::string object";
 
         objSrc = 0.5;
         objDst = 4;
         objDst = objSrc;
-        ASSERT_EQ(0.5, static_cast<double>(objDst)) << "Wrong assignment for double object";
+        ASSERT_EQ(0.5, objDst.asDouble()) << "Wrong assignment for double object";
 
         objSrc = true;
         objDst = false;
         objDst = objSrc;
-        ASSERT_TRUE(static_cast<bool>(objDst)) << "Wrong assignment for bool object";
+        ASSERT_TRUE(objDst.asBool()) << "Wrong assignment for bool object";
 
         const int size = 32;
         makeMapObject(objSrc, size);
@@ -517,12 +517,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
        obj = obj[0];
 
-       ASSERT_EQ("test string", static_cast<std::string>(obj));
+       ASSERT_EQ("test string", obj.asString());
 
        obj["abc"] = "new test string";
        obj = obj["abc"];
 
-       ASSERT_EQ("new test string", static_cast<std::string>(obj));
+       ASSERT_EQ("new test string", obj.asString());
    }
 
     TEST(CopyConstructorTest, SmartObjectTest)
@@ -533,7 +533,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         SmartObject dstObj = srcObj[0];
 
-        ASSERT_EQ("test string", static_cast<std::string>(dstObj));
+        ASSERT_EQ("test string", dstObj.asString());
     }
 
     TEST(MapEraseTest, SmartObjectTest)

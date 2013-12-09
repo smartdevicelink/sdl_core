@@ -84,8 +84,7 @@ SDL.SDLController = Em.Object
 
             for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
                 if (SDL.SDLModel.registeredComponents[i].type == component) {
-                    SDL.SDLModel.set('registeredComponents.' + i + '.state',
-                        true);
+                    SDL.SDLModel.set('registeredComponents.' + i + '.state',  true);
                     return;
                 }
             }
@@ -114,7 +113,26 @@ SDL.SDLController = Em.Object
                 if (!SDL.SDLModel.registeredComponents[i].state) { return; }
             }
             FFW.BasicCommunication.onReady();
+            SDL.SDLModel.timeStamp = new Date().getTime();
         }.observes('SDL.SDLModel.registeredComponents.@each.state'),
+
+        /**
+         * Notify SDLCore that TTS haas finished processing
+         *
+         * @type {String}
+         */
+        TTSResponseHandler: function() {
+
+            if (FFW.TTS.requestId) {
+                if (FFW.TTS.aborted) {
+                    FFW.TTS.sendError(SDL.SDLModel.resultCode["ABORTED"], FFW.TTS.requestId, "TTS.Speak", "TTS Speak request aborted");
+                } else {
+                    FFW.TTS.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], FFW.TTS.requestId, "TTS.Speak");
+                }
+                FFW.TTS.requestId = null;
+                FFW.TTS.aborted = false;
+            }
+        },
 
         /**
          * Move VR list to right side when VRHelpList was activated
@@ -180,16 +198,16 @@ SDL.SDLController = Em.Object
         stealFocusSoftButton: function(element) {
 
             switch (element.groupName) {
-            case "AlertPopUp": {
-                SDL.AlertPopUp.deactivate();
-                this.getApplicationModel(element.appID).turnOnSDL();
-                break;
-            }
-            case "ScrollableMessage": {
-                SDL.ScrollableMessage.deactivate();
-                this.getApplicationModel(element.appID).turnOnSDL();
-                break;
-            }
+                case "AlertPopUp": {
+                    SDL.AlertPopUp.deactivate();
+                    this.getApplicationModel(element.appID).turnOnSDL();
+                    break;
+                }
+                case "ScrollableMessage": {
+                    SDL.ScrollableMessage.deactivate();
+                    this.getApplicationModel(element.appID).turnOnSDL();
+                    break;
+                }
             }
         },
         /**
@@ -538,8 +556,7 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            // FFW.BasicCommunication.ActivateApp(element.appID);
-            this.getApplicationModel(element.activeAppId).turnOnSDL();
+            FFW.BasicCommunication.OnAppActivated(element.appID);
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC

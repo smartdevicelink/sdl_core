@@ -52,7 +52,15 @@
 #include "utils/logger.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
+
+#if defined(DEFAULT_MEDIA)
+#include <gst/gst.h>
+#endif
+
 #include "media_manager/media_manager_impl.h"
+// ----------------------------------------------------------------------------
+// Third-Party includes
+#include "networking.h"  // cpplint: Include the directory when naming .h files
 
 // ----------------------------------------------------------------------------
 
@@ -196,9 +204,20 @@ int main(int argc, char** argv) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   LOG4CXX_INFO(logger, " Application started!");
+  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   // Initialize gstreamer. Needed to activate debug from the command line.
+#if defined(DEFAULT_MEDIA)
   gst_init(&argc, &argv);
+#endif
+  // --------------------------------------------------------------------------
+  // Third-Party components initialization.
+
+  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
+    LOG4CXX_INFO(logger, "InitMessageBroker failed");
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -207,13 +226,6 @@ int main(int argc, char** argv) {
 
   main_namespace::LifeCycle::instance()->StartComponents();
 
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->server_address() ==
       std::string(kLocalHostAddress)) {
@@ -224,7 +236,6 @@ int main(int argc, char** argv) {
     }
     LOG4CXX_INFO(logger, "InitHmi successful");
   }
-
   // --------------------------------------------------------------------------
 
   utils::SubscribeToTerminateSignal(

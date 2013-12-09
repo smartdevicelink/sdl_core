@@ -32,35 +32,34 @@
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
+#include <unistd.h>
 #endif
 
 #include <string>
-#include "media_manager/audio_stream_sender_thread.h"
+#include "./audio_stream_sender_thread.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
-#include "utils/timer.h"
 
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
 
 namespace media_manager {
+using namespace sync_primitives;
 
 const int AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("AudioPassThruThread"));
 
 AudioStreamSenderThread::AudioStreamSenderThread(
-  const std::string fileName, unsigned int session_key,
-  unsigned int correlation_id)
+  const std::string fileName, unsigned int session_key)
   : session_key_(session_key),
-    correlation_id_(correlation_id),
+    shouldBeStoped_(false),
     fileName_(fileName) {
   LOG4CXX_TRACE_ENTER(logger_);
-  stopFlagMutex_.init();
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
@@ -71,27 +70,16 @@ void AudioStreamSenderThread::threadMain() {
 
   offset_ = 0;
 
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = false;
-  stopFlagMutex_.unlock();
+  setShouldBeStopped(false);
 
   while (true) {
-
-    stopFlagMutex_.lock();
-    bool shouldBeStoped = shouldBeStoped_;
-    stopFlagMutex_.unlock();
-
-    if (shouldBeStoped) {
+    if (getShouldBeStopped()) {
       break;
     }
 
     sendAudioChunkToMobile();
 
-    stopFlagMutex_.lock();
-    shouldBeStoped = shouldBeStoped_;
-    stopFlagMutex_.unlock();
-
-    if (shouldBeStoped) {
+    if (getShouldBeStopped()) {
       break;
     }
 
@@ -129,27 +117,30 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     offset_ = offset_ + to - from;
 
     application_manager::ApplicationManagerImpl::instance()->
-    SendAudioPassThroughNotification(session_key_, correlation_id_,
+    SendAudioPassThroughNotification(session_key_,
                                      std::vector<unsigned char>(from, to));
     binaryData.clear();
   }
 }
 
+bool AudioStreamSenderThread::getShouldBeStopped() {
+  AutoLock auto_lock(shouldBeStoped_lock_);
+  return shouldBeStoped_;
+}
+
+void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
+  AutoLock auto_lock(shouldBeStoped_lock_);
+  shouldBeStoped_ = should_stop;
+}
+
 bool AudioStreamSenderThread::exitThreadMain() {
   LOG4CXX_INFO(logger_, "AudioStreamSenderThread::exitThreadMain");
-
-  stopFlagMutex_.lock();
-  shouldBeStoped_ = true;
-  stopFlagMutex_.unlock();
+  setShouldBeStopped(true);
   return true;
 }
 
 unsigned int AudioStreamSenderThread::session_key() const {
   return session_key_;
-}
-
-unsigned int AudioStreamSenderThread::correlation_id() const {
-  return correlation_id_;
 }
 
 }  // namespace media_manager

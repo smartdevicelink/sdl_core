@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/delete_file_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -51,7 +52,7 @@ void DeleteFileRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
 
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -59,8 +60,16 @@ void DeleteFileRequest::Run() {
     return;
   }
 
+  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
+      profile::Profile::instance()->delete_file_in_none() <= application->delete_file_in_none_count()) {
+      // If application is in the HMI_NONE level the quantity of allowed
+      // DeleteFile request is limited by the configuration profile
+      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+  }
+
   const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name];
+      (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string relative_file_path = application->name();
   relative_file_path += "/";
@@ -71,6 +80,7 @@ void DeleteFileRequest::Run() {
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
       application->DeleteFile(sync_file_name);
+      application->increment_delete_file_in_none_count();
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);

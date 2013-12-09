@@ -1,36 +1,38 @@
 # Generating interface
+GenerateInterface("test_json_rpc.xml" "gen::test::components::json_rpc" "jsonrpc")
 GenerateInterface("test_JSONHandler_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "sdlrpcv2")
 GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "sdlrpcv1")
 
-# --- Formatters
-add_subdirectory(./formatters)
 
 include_directories (
-  ../../../src/components/utils/include
-  ../../../src/thirdPartyLibs/gmock-1.6.0/include
-  ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
-  ../../../src/components/smart_objects/include
-  ../../../src/thirdPartyLibs/logger/include/
-  ../../../src//thirdPartyLibs/jsoncpp/include/
-  ../../../src/components/JSONHandler/include/
-  ../../../test/components/json_handler/include/
-  ../../../test/components/
+  ${CMAKE_SOURCE_DIR}/src//thirdPartyLibs/jsoncpp/include/
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/gtest/include
+
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
+
+  ${CMAKE_SOURCE_DIR}/test/components/json_handler/include/
   ${CMAKE_BINARY_DIR}
 )
 
-# Generating interface
-GenerateInterface("test_JSONHandler_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler2" "alrpcv2")
-GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::components::JSONHandler1" "alrpcv1")
+set(LIBRARIES
+    gtest
+    gtest_main
+    gmock
+    gmock_main
 
-set (SOURCES
-  ./src/smart_schema_draft_test.cc
-  ./src/formatters/formatter_test_helper.cc
-  ./src/formatters/formatter_json_alrpcv1_test.cc
-  ./src/formatters/formatter_json_alrpcv2_test.cc
-  ./src/formatters/formatter_json_rpc2_test.cc
+    test_json_rpc
+    test_JSONHandler_v4_protocol_v2_0_revP
+    test_JSONHandler_v4_protocol_v1_2_no_extra
+
+    jsoncpp
+    formatters
+    SmartObjects
 )
 
-create_test("test_JSONHandler" "${SOURCES}" "${LIBRARIES}")
-
-add_library("test_JSONHandlerTest" ${SOURCES})
-
+create_test("test_JSONHandler_JSONRPCFullScenario" "./src/test_json_rpc_full_scenario.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonSDLRPCv2Test" "./src/formatter_test_helper.cc;./src/meta_formatter_test_helper.cc;./src/FormatterJsonSDLRPCv2Test.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonSDLRPCv1Test" "./src/formatter_test_helper.cc;./src/FormatterJsonSDLRPCv1Test.cpp" "${LIBRARIES}")
+create_test("test_JSONHandler_FormatterJsonRPC2Test" "./src/formatter_json_rpc_test.cc;./src/formatter_test_helper.cc" "${LIBRARIES}")
+create_test("test_JSONHandler_MetaFormatter" "./src/meta_formatter_test.cc;./src/meta_formatter_test_helper.cc" "${LIBRARIES}")

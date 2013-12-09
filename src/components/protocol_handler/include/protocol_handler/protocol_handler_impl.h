@@ -195,7 +195,7 @@ class ProtocolHandlerImpl : public TransportManagerListenerEmpty,
      * @brief Notifies about successfully sending message.
      *
      **/
-    virtual void OnTMMessageSend();
+    virtual void OnTMMessageSend(const RawMessagePtr message);
 
     /**
      * @brief Notifies about error occured during

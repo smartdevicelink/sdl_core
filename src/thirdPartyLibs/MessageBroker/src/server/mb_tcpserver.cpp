@@ -67,6 +67,7 @@ namespace NsMessageBroker
 
       nb = recv(fd, buf, MAX_RECV_DATA, 0);
       DBG_MSG(("Recieved %d from %d\n", nb, fd));
+
       if (nb > 0)
       {
          unsigned int recieved_data = nb;
@@ -82,13 +83,16 @@ namespace NsMessageBroker
              char buf_tmp[MAX_RECV_BUFFER_LENGTH];
              memset(buf_tmp, 0 , MAX_RECV_BUFFER_LENGTH);
              memcpy(buf_tmp, buf, MAX_RECV_DATA);
+             ssize_t recv_data = 0;
              while ((data_length > recieved_data) &&
-                 (0 < (recv(fd, buf_tmp + recieved_data, MAX_RECV_DATA, 0)))) {
-               recieved_data += MAX_RECV_DATA;
+                 (0 < (recv_data =
+                     recv(fd, buf_tmp + recieved_data, MAX_RECV_DATA, 0)))) {
+               recieved_data += recv_data;
              }
              nb = recieved_data;
              data = buf_tmp;
            }
+
            mWebSocketHandler.parseWebSocketData(data, (unsigned int&)nb);
          }
          std::string msg = std::string(data, nb);
@@ -305,6 +309,7 @@ namespace NsMessageBroker
          }
       }
       m_receivingBuffers.clear();
+      Server::Close();
       /* listen socket should be closed in Server destructor */
    }
 

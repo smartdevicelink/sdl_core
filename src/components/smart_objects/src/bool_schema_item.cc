@@ -1,7 +1,3 @@
-/**
- * @file CBoolSchemaItem.cpp
- * @brief CBoolSchemaItem source file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -35,38 +31,35 @@
 #include "smart_objects/bool_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
 
-utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue)
-{
-    return new CBoolSchemaItem(DefaultValue);
+utils::SharedPtr<CBoolSchemaItem> CBoolSchemaItem::create(
+    const TSchemaItemParameter<bool> & DefaultValue) {
+  return new CBoolSchemaItem(DefaultValue);
 }
 
-NsSmartDeviceLink::NsSmartObjects::Errors::eType NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::validate(const NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    return (true == NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean == Object.getType()) ? NsSmartDeviceLink::NsSmartObjects::Errors::OK : NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE;
+Errors::eType CBoolSchemaItem::validate(const SmartObject& Object) {
+  return
+      (true == SmartType_Boolean == Object.getType()) ?
+          Errors::OK : Errors::INVALID_VALUE;
 }
 
-bool NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::setDefaultValue(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object)
-{
-    bool result = false;
-    bool value = false;
+bool CBoolSchemaItem::setDefaultValue(SmartObject& Object) {
+  bool result = false;
+  bool value = false;
 
-    if (true == mDefaultValue.getValue(value))
-    {
-        Object = value;
-        result = true;
-    }
+  if (true == mDefaultValue.getValue(value)) {
+    Object = value;
+    result = true;
+  }
 
-    return result;
+  return result;
 }
 
-
-void smart_objects_ns::CBoolSchemaItem::BuildObjectBySchema(
-    const smart_objects_ns::SmartObject& pattern_object,
-    smart_objects_ns::SmartObject& result_object) {
-
-  if (smart_objects_ns::SmartType_Boolean == pattern_object.getType()) {
+void CBoolSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
+                                          SmartObject& result_object) {
+  if (SmartType_Boolean == pattern_object.getType()) {
     result_object = pattern_object;
   } else {
     bool result = setDefaultValue(result_object);
@@ -74,12 +67,13 @@ void smart_objects_ns::CBoolSchemaItem::BuildObjectBySchema(
       result_object = false;
     }
   }
-
-
 }
 
-NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::CBoolSchemaItem(const NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool> & DefaultValue):
-mDefaultValue(DefaultValue)
-{
+CBoolSchemaItem::CBoolSchemaItem(
+    const TSchemaItemParameter<bool>& DefaultValue)
+    : mDefaultValue(DefaultValue) {
 }
+
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
 

@@ -38,6 +38,10 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         'SDL.States.media.sdlmedia.mediaNavigation.baseNavigation.active:active_state:inactive_state'
     ],
 
+    afterRender: function() {
+        this.update();
+    },
+
     childViews: [
         'mainField1',
         'mainField2',
@@ -55,9 +59,9 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     mainField5: null,
     mainField6: null,
 
-    update: function(appID){
+    update: function(){
 
-        var naviParams = SDL.SDLController.getApplicationModel(appID).constantTBTParams;
+        var naviParams = SDL.SDLModel.constantTBTParams;
 
         if (naviParams) {
 
@@ -109,8 +113,8 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                             isHighlighted: naviParams.softButtons[i].isHighlighted ? true : false,
                             softButtonID: naviParams.softButtons[i].softButtonID,
                             systemAction: naviParams.softButtons[i].systemAction,
-                            classNames: 'softButton softButton'  + (i + 1),
-                            appID: appID
+                            classNames: 'navButton softButton softButton'  + (i + 1),
+                            appID: null
                         }));
                 }
             }
@@ -160,7 +164,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     }),
 
     optionsBtn: SDL.Button.extend({
-        classNames: 'naviOptionsBtn',
+        classNames: 'naviOptionsBtn navButton',
         text : "Options",
         action: 'openCommandsList',
         target: 'SDL.SDLAppController'

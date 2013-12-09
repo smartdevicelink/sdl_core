@@ -1,7 +1,3 @@
-/**
- * @file SmartObject.hpp
- * @brief SmartObject header file.
- */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -32,67 +28,69 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTOBJECT_ISCHEMA_ITEM_HPP__
-#define __SMARTOBJECT_ISCHEMA_ITEM_HPP__
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
 
-#include "errors.h"
+#include "smart_objects/errors.h"
 
-namespace NsSmartDeviceLink
-{
-    namespace NsSmartObjects
-    {
-        class SmartObject;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
 
-        /**
-         * @brief Base schema item.
-         **/
-        class ISchemaItem
-        {
-        public:
-            /**
-             * @brief Validate object.
-             *
-             * @param Object Object to validate.
-             *
-             * @return NsSmartObjects::Errors::eType
-             **/
-            virtual Errors::eType validate(const SmartObject & Object);
+/**
+ * @brief Base schema item.
+ **/
+class ISchemaItem {
+ public:
+  /**
+   * @brief Validate object.
+   *
+   * @param Object Object to validate.
+   *
+   * @return NsSmartObjects::Errors::eType
+   **/
+  virtual Errors::eType validate(const SmartObject& Object);
 
-            /**
-             * @brief Set default value to an object.
-             *
-             * @param Object Object to set default value.
-             *
-             * @return true if default value was successfully set, false otherwise.
-             **/
-            virtual bool setDefaultValue(SmartObject & Object);
+  /**
+   * @brief Set default value to an object.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  virtual bool setDefaultValue(SmartObject& Object);
 
-            /**
-             * @brief Apply schema.
-             *
-             * @param Object Object to apply schema.
-             **/
-            virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Apply schema.
+   *
+   * @param Object Object to apply schema.
+   **/
+  virtual void applySchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
 
-            /**
-             * @brief Unapply schema.
-             *
-             * @param Object Object to unapply schema.
-             **/
-            virtual void unapplySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject & Object);
+  /**
+   * @brief Unapply schema.
+   *
+   * @param Object Object to unapply schema.
+   **/
+  virtual void unapplySchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
 
-            /**
-             * @brief Build smart object by smart schema having copied matched
-             *        parameters from pattern smart object
-             *
-             * @param pattern_object pattern object
-             * @param result_object object to build
-             */
-            virtual void BuildObjectBySchema(
-              const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
-              NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
-        };
-    }
-}
+  /**
+   * @brief Build smart object by smart schema having copied matched
+   *        parameters from pattern smart object
+   *
+   * @param pattern_object pattern object
+   * @param result_object object to build
+   */
+  virtual void BuildObjectBySchema(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 
-#endif
+  virtual ~ISchemaItem() {
+  }
+};
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_

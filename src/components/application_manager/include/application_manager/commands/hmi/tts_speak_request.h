@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_SPEAK_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/tts_interface.h"
 
 namespace application_manager {
 
@@ -42,7 +43,9 @@ namespace commands {
 /**
  * @brief TTSSpeakRequest command class
  **/
-class TTSSpeakRequest : public RequestToHMI {
+class TTSSpeakRequest
+    : public RequestToHMI,
+      public TTSInterface {
  public:
   /**
    * @brief TTSSpeakRequest class constructor

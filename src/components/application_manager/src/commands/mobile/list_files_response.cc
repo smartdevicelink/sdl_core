@@ -59,7 +59,7 @@ void ListFilesResponse::Run() {
     }
   }
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key]);
+      (*message_)[strings::params][strings::connection_key].asUInt());
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
