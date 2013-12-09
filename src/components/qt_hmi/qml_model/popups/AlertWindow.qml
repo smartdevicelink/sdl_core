@@ -115,7 +115,6 @@ Rectangle {
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
-                            contentLoader.go("views/SDLPlayerView.qml", appId);
                             alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
@@ -130,7 +129,6 @@ Rectangle {
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
-                            contentLoader.go("views/SDLPlayerView.qml", appId);
                             alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
@@ -150,7 +148,6 @@ Rectangle {
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
-                            contentLoader.go("views/SDLPlayerView.qml", appId);
                             alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
@@ -165,7 +162,6 @@ Rectangle {
                         onKeepContext: { alertWindow.restart(); }
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
-                            contentLoader.go("views/SDLPlayerView.qml", appId);
                             alertWindow.complete(Common.Result.SUCCESS);
                         }
                     }
