@@ -12,9 +12,10 @@ else
 	WORDSIZE=-d__WORDSIZE=32
 fi
 
+(cd tools/FlexeLint && make -f co-gcc.mak > /dev/null)
+
 find ./src/ -type d -name "*include*" | awk '{print "--i../." $0}'  > ./tools/FlexeLint/sdl-include-path.lnt
 
-cpp -xc++ -v < /dev/null 2>&1 |sed -n '\#<...> search starts here:#,\#End of search list.#p'|sed '1d;$d'|sed 's/^ \(.*\)/--i"\1"/' > ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/include/gstreamer-1.0\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/include/glib-2.0\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/lib/i386-linux-gnu/glib-2.0/include\"" >> ./tools/FlexeLint/gcc-include-path.lnt
@@ -30,3 +31,4 @@ cd ./tools/FlexeLint/
 rm ./sdl-include-path.lnt
 rm ./sdl-modules.lnt
 
+make -f co-gcc.mak clean > /dev/null
