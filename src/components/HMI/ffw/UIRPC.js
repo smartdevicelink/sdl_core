@@ -56,8 +56,6 @@ FFW.UI = FFW.RPCObserver.create({
 
     onShowNotificationUnsubscribeRequestID: -1,
 
-    performInteractionRequestID: null,
-
     // const
     onShowNotificationNotification: "UI.ShowNotification",
 
@@ -222,14 +220,8 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.PerformInteraction":
                 {
-                    if (!this.performInteractionRequestID) {
-                        this.performInteractionRequestID = request.id;
-                    } else {
-                        this.interactionResponse(SDL.SDLModel.resultCode['REJECTED']);
-                        return;
-                    }
 
-                    SDL.SDLModel.uiPerformInteraction(request.params);
+                    SDL.SDLModel.uiPerformInteraction(request);
 
                     break;
                 }
@@ -693,14 +685,12 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      *
-     * @param {Number}
-     *            resultCode
-     * @param {Number}
-     *            performInteractionRequestID
-     * @param {Number}
-     *            commandID
+     * @param {Number} appID
+     * @param {Number} resultCode
+     * @param {Number} commandID
+     * @param {String} manualTextEntry
      */
-    interactionResponse: function (resultCode, commandID, manualTextEntry) {
+    interactionResponse: function (appID, resultCode, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
@@ -708,7 +698,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": this.performInteractionRequestID,
+                "id": appID,
                 "result": {
                     "code": resultCode,
                     "method": "UI.PerformInteraction"
@@ -726,7 +716,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": this.performInteractionRequestID,
+                "id": appID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "message": "Perform Interaction error response.",
@@ -738,7 +728,6 @@ FFW.UI = FFW.RPCObserver.create({
         }
 
         this.client.send(JSONMessage);
-        this.performInteractionRequestID = null;
     },
 
     /**

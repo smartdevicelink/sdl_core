@@ -132,11 +132,13 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
 
                 SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-            } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp) {
+            } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
 
                 if (SDL.SDLAppController.model) {
                     SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
                 }
+            } else {
+                SDL.VRHelpListView.deactivate();
             }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
@@ -335,10 +337,12 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
-        interactionChoiseCloseResponse: function(result, choiceID, manualTextEntry) {
+        interactionChoiseCloseResponse: function(appID, result, choiceID, manualTextEntry) {
 
-            FFW.UI.interactionResponse(result, choiceID, manualTextEntry);
+            FFW.UI.interactionResponse(SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction, result, choiceID, manualTextEntry);
             SDL.SDLModel.set('interactionData', {'vrHelpTitle': null, 'vrHelp': null});
+
+            SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
         },
         /**
          * Method to sent notification for Alert

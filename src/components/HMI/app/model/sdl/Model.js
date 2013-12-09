@@ -604,6 +604,9 @@ SDL.SDLModel = Em.Object.create({
 
         if (SDL.SDLController.getApplicationModel(params.appID)) {
 
+            if (SDL.SDLController.getApplicationModel(params.appID).activeRequests.uiPerformInteraction) {
+                SDL.InteractionChoicesView.deactivate("ABORTED");
+            }
             SDL.SDLController.unregisterApplication(params.appID);
         }
     },
@@ -747,20 +750,21 @@ SDL.SDLModel = Em.Object.create({
      */
     uiPerformInteraction: function (message) {
 
-        if (!message) {
-            SDL.SDLAppController.model.onPreformInteraction(message);
+        if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
+            SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
-
-            if (message.vrHelpTitle && message.vrHelp) {
-                this.set('interactionData', {'vrHelpTitle': message.vrHelpTitle, 'vrHelp': message.vrHelp});
-            }
-
-            if (!SDL.InteractionChoicesView.active) {
-                SDL.SDLController.getApplicationModel(message.appID).onPreformInteraction(message);
-            } else {
-                SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"]);
-            }
+            SDL.SDLController.interactionChoiseCloseResponse(message.appID, SDL.SDLModel.resultCode['REJECTED']);
+            return;
         }
+
+        if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
+
+            this.set('interactionData', {'vrHelpTitle': message.params.vrHelpTitle, 'vrHelp': message.params.vrHelp});
+        }
+
+        SDL.InteractionChoicesView.activate(message);
+
+        SDL.SDLController.VRMove();
     },
 
     /**
