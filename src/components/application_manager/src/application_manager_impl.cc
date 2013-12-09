@@ -1501,6 +1501,12 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 
 bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
   bool result = true;
+
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    // TODO(DK) : load HMI capabilities from file
+    return true;
+  }
+
   if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_
       && is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_
       && is_ivi_ready_response_recieved_) {

@@ -43,6 +43,7 @@ log4cxx::LoggerPtr logger_ =
 namespace profile {
 Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
+  , launch_hmi_(true)
   , policies_file_name_("policy_table.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
@@ -85,6 +86,10 @@ void Profile::config_file_name(const std::string& fileName) {
 
 const std::string& Profile::config_file_name() const {
   return config_file_name_;
+}
+
+bool Profile::launch_hmi() const {
+  return launch_hmi_;
 }
 
 const std::string& Profile::policies_file_name() const {
@@ -197,6 +202,18 @@ void Profile::UpdateValues() {
 
   char value[INI_LINE_LEN + 1];
   *value = '\0';
+
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "LaunchHMI", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      launch_hmi_ = true;
+    } else {
+      launch_hmi_ = false;
+    }
+    LOG4CXX_INFO(logger_, "Set launch HMI to " << launch_hmi_);
+  }
+
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerAddress", value))
       && ('\0' != *value)) {

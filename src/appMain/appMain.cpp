@@ -187,14 +187,16 @@ int main(int argc, char** argv) {
   main_namespace::LifeCycle::instance()->StartComponents();
 
 
-  if (profile::Profile::instance()->server_address() ==
-      std::string(kLocalHostAddress)) {
-    LOG4CXX_INFO(logger, "Start HMI on localhost");
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    if (profile::Profile::instance()->server_address() ==
+        std::string(kLocalHostAddress)) {
+      LOG4CXX_INFO(logger, "Start HMI on localhost");
 
-    if (!InitHmi()) {
-      exit(EXIT_FAILURE);
+      if (!InitHmi()) {
+        exit(EXIT_FAILURE);
+      }
+      LOG4CXX_INFO(logger, "InitHmi successful");
     }
-    LOG4CXX_INFO(logger, "InitHmi successful");
   }
   // --------------------------------------------------------------------------
 
