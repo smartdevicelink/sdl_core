@@ -73,7 +73,7 @@ namespace impl {
  * These dummy classes are here to locally impose strong typing on different
  * kinds of messages
  * Currently there is no type difference between incoming and outgoing messages
- * TODO(ikozyrenko): replace these with globally defined message types
+ * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
 struct RawFordMessageFromMobile: public RawMessagePtr {
