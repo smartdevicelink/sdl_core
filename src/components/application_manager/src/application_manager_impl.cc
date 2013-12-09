@@ -833,15 +833,24 @@ void ApplicationManagerImpl::OnMobileMessageSent(
     return;
   }
 
+  unsigned int key = app_msg->connection_key();
+
   // Application connection should be closed if RegisterAppInterface failed and
   // RegisterAppInterfaceResponse with success == false was sent to the mobile
-  if (app_msg->function_id() == mobile_apis::FunctionID::RegisterAppInterfaceID
-      && app_msg->type() == MessageType::kResponse) {
-    unsigned int key = app_msg->connection_key();
+  if (false == IsApplicationRegistered(key)) {
+    LOG4CXX_INFO(logger_, "Application isn't registered");
 
-    if (NULL != connection_handler_) {
-      static_cast<connection_handler::ConnectionHandlerImpl*>
-      (connection_handler_)->CloseConnection(key);
+    if (static_cast<mobile_apis::FunctionID::eType>(app_msg->function_id()) == mobile_apis::FunctionID::RegisterAppInterfaceID) {
+      LOG4CXX_INFO(logger_, "Function id is RegisterAppInterfaceID");
+
+      if (app_msg->type() == MessageType::kResponse) {
+        LOG4CXX_INFO(logger_, "Message type is kResponse");
+
+        if (NULL != connection_handler_) {
+          static_cast<connection_handler::ConnectionHandlerImpl*>
+          (connection_handler_)->CloseConnection(key);
+        }
+      }
     }
   }
 }
@@ -1633,6 +1642,16 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   delete app_to_remove;
 
   return true;
+}
+
+bool ApplicationManagerImpl::IsApplicationRegistered(int connection_key) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::IsApplicationRegistered");
+
+  if ( applications_.find(connection_key) == applications_.end() ) {
+    return false;
+  }
+
+  return false;
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
