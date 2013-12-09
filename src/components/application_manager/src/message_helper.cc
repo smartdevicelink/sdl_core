@@ -1166,6 +1166,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
+  bool flag_unsuported_resource = false;
 
   int j = 0;
   for (int i = 0; i < request_soft_buttons.length(); ++i) {
@@ -1183,11 +1184,11 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
             if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
                 verification_result) {
               request_soft_buttons[i].erase(strings::image);
+              flag_unsuported_resource = true;
+            } else {
+              return mobile_apis::Result::INVALID_DATA;
             }
-            return verification_result;
           }
-        } else {
-          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
@@ -1207,28 +1208,25 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (request_soft_buttons[i].keyExists(strings::text)) {
           text_exist = VerifySoftButtonText(request_soft_buttons[i]);
         }
+        if (!text_exist) {
+          return  mobile_apis::Result::INVALID_DATA;
+        }
 
         bool image_exist = false;
         if (image_supported) {
           image_exist = request_soft_buttons[i].keyExists(strings::image);
         }
-
-        if ((!image_exist) && (!text_exist)) {
-          return mobile_apis::Result::INVALID_DATA;
-        }
-
         if (image_exist) {
           mobile_apis::Result::eType verification_result = VerifyImage(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
-            request_soft_buttons[i].erase(strings::image);
-            if (!text_exist) {
-              return mobile_apis::Result::INVALID_DATA;
-            }
             if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
                 verification_result) {
-              return verification_result;
+              request_soft_buttons[i].erase(strings::image);
+              flag_unsuported_resource = true;
+            } else  {
+              return mobile_apis::Result::INVALID_DATA;
             }
           }
         }
@@ -1255,8 +1253,11 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   if (0 == request_soft_buttons.length()) {
     message_params.erase(strings::soft_buttons);
   }
-
-  return mobile_apis::Result::SUCCESS;
+  if (flag_unsuported_resource) {
+    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  } else {
+    return mobile_apis::Result::SUCCESS;
+  }
 }
 
 // TODO(AK): change printf to logger
