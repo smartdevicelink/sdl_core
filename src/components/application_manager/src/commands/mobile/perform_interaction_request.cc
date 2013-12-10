@@ -504,21 +504,28 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
 
 void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     Application* const app) {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   if ((*message_)[strings::msg_params].keyExists(strings::help_promt)) {
+
     msg_params[strings::help_promt] =
         (*message_)[strings::msg_params][strings::help_promt];
+
     DeleteParameterFromTTSChunk(msg_params[strings::help_promt]);
   } else {
+
     smart_objects::SmartObject& choice_list =
-          (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-    msg_params[strings::help_promt] = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+    msg_params[strings::help_promt] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
     int index = 0;
     for (int i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject* choice_set = app->FindChoiceSet(
-          choice_list[i].asInt());
+      smart_objects::SmartObject* choice_set =
+          app->FindChoiceSet(choice_list[i].asInt());
+
       if (choice_set) {
         for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
           smart_objects::SmartObject& vr_commands =
@@ -533,20 +540,33 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
       }
     }
   }
+
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_promt)) {
     msg_params[strings::timeout_promt] =
             (*message_)[strings::msg_params][strings::timeout_promt];
+
     DeleteParameterFromTTSChunk(msg_params[strings::timeout_promt]);
   } else {
     msg_params[strings::timeout_promt] = msg_params[strings::help_promt];
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
+      msg_params[strings::initial_prompt] =
+          (*message_)[strings::msg_params][strings::initial_prompt];
+
+      DeleteParameterFromTTSChunk(msg_params[strings::initial_prompt]);
+  }
+
   int mode =
         (*message_)[strings::msg_params][strings::interaction_mode].asInt();
-  if (InteractionMode::BOTH == mode || InteractionMode::MANUAL_ONLY == mode) {
+
+  if (InteractionMode::BOTH == mode ||
+      InteractionMode::MANUAL_ONLY == mode) {
     msg_params[strings::timeout] = default_timeout_/2;
   } else {
     msg_params[strings::timeout] = default_timeout_;
   }
+
   SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params);
 }
 
