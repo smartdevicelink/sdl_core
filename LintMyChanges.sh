@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+
 if [ "$1" == "all" ]; then
 	CHECKSCOPE=ALL
+	shift
 else
 	CHECKSCOPE=MY
 fi
-
-set -e
 
 MACHINE_TYPE=`uname -m`
 
@@ -27,7 +28,7 @@ echo "--i\"/usr/include/glib-2.0\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/lib/i386-linux-gnu/glib-2.0/include\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/lib/x86_64-linux-gnu/glib-2.0/include\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 
-if [ $CHECKSCOPE == "ALL" ]; then
+if [ "$CHECKSCOPE" == "ALL" ]; then
   find ./src/components/ ./src/appMain/  \( -name "*.cc" -o -name "*.cpp" \) | awk '{print "../../" $0}' > ./tools/FlexeLint/sdl-modules.lnt
   cd ./tools/FlexeLint/
   #./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ -dOS_POSIX ${WORDSIZE} smartdevicelink.lnt

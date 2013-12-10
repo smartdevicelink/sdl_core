@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-source LintMyChanges.sh all
+source LintMyChanges.sh all "$@"
