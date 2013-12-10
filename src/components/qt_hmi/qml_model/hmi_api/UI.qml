@@ -166,8 +166,7 @@ Item {
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: { {", startTime.hours, ", ", startTime.minutes, ", ", startTime.seconds, "}, ",
-                      endTime,", ", updateMode, ", ", appID, "}")
+        console.debug("enter: {", startTime, ", ", endTime, ", ", updateMode, ", ", appID, "}")
 
         var app = dataContainer.getApplication(appID)
         var newStartTime
