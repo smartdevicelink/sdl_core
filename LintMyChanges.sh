@@ -33,13 +33,14 @@ if [ "$CHECKSCOPE" == "ALL" ]; then
   cd ./tools/FlexeLint/
   #./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ -dOS_POSIX ${WORDSIZE} smartdevicelink.lnt
   ./${FLINT_BINARY}  $3 -e830 -e831 -zero -u --i../../$1/src/components/ -os flexelint_result.txt -dOS_POSIX ${WORDSIZE} $2 smartdevicelink.lnt
+  rm ./sdl-modules.lnt
 else
   (git diff --name-only HEAD ; git ls-files --other --exclude-standard) | grep '.cc\|.cpp' | grep 'src/components\|src/appMain' | awk '{print "../../" $0}' > ./tools/FlexeLint/sdl-changed-modules.lnt
   cd ./tools/FlexeLint/
   ./${FLINT_BINARY} -w1 -zero -u --i../../$1/src/components/ -dOS_POSIX ${WORDSIZE} smartdevicelink-changes.lnt
+  rm ./sdl-changed-modules.lnt
 fi # if [ $CHECKSCOPE == "ALL" ]
 
 rm ./sdl-include-path.lnt
-rm ./sdl-changed-modules.lnt
 
 make -f co-gcc.mak clean > /dev/null
