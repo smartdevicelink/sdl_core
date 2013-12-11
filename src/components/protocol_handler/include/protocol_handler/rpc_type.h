@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
 
 #include <stdint.h>
+#include <ostream>
 
 namespace protocol_handler {
 
@@ -48,6 +49,10 @@ enum RpcType {
 RpcType RpcTypeFromByte(uint8_t byte);
 // Check and convert RpcType to byte value ready to be transmitted
 uint8_t RpcTypeToByte(RpcType type);
+
+const char* RpcTypeToString(RpcType type);
+
+std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
 
 } // namespace protocol_handler
 

@@ -91,8 +91,12 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
                             message->data_size());
 
   // Silently drop message if it wasn't parsed correctly
-  if (message_bytestream.IsBad())
+  if (message_bytestream.IsBad()) {
+    LOG4CXX_INFO(logger_,
+                 "Drop ill-formed message from mobile, partially parsed: "
+                 <<payload);
     return NULL;
+  }
 
   std::auto_ptr<application_manager::Message> outgoing_message(
       new application_manager::Message(

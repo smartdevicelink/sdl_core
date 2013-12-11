@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PAYLOAD_H_
 
 #include <stdint.h>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,9 @@ namespace protocol_handler {
 
 // Applink Protocolv5 4.1.2 Protocol Payload Binary header
 struct ProtocolPayloadHeaderV2 {
+  ProtocolPayloadHeaderV2()
+      : rpc_type(kRpcTypeReserved),
+        rpc_function_id(0), corellation_id(0), json_size(0) {}
   RpcType  rpc_type;
   uint32_t rpc_function_id;
   uint32_t corellation_id;
@@ -64,6 +68,9 @@ struct ProtocolPayloadV2 {
 // If error during parsing is detected, bit stream is marked as invalid
 void Extract(utils::BitStream* bs, ProtocolPayloadHeaderV2* headerv2);
 void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload, size_t payload_size);
+
+std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header);
+std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload);
 
 } // namespace protocol_handler
 

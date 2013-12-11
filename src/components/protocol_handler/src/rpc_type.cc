@@ -66,4 +66,21 @@ uint8_t RpcTypeToByte(RpcType type) {
   return uint8_t(type);
 }
 
+const char* RpcTypeToString(RpcType type) {
+  switch (type) {
+    case kRpcTypeRequest:
+      return "kRpcTypeRequest";
+    case kRpcTypeResponse:
+      return "kRpcTypeResponse";
+    case kRpcTypeNotification:
+      return "kRpcTypeNotification";
+    default:
+      return "kRpcTypeReserved";
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, RpcType rpc_type) {
+  return os<<RpcTypeToString(rpc_type);
+}
+
 } // namespace protocol_handler

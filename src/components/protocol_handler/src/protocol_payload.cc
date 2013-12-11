@@ -76,4 +76,21 @@ void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload,
   }
 }
 
+std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header) {
+  return os<<"(ProtocolPayloadHeaderV2"
+           <<"  rpc_type: "<<payload_header.rpc_type
+           <<", rpc_function_id: "<<payload_header.rpc_function_id
+           <<", corellation_id: "<<payload_header.corellation_id
+           <<", json_size: "<<payload_header.json_size
+           <<")";
+}
+
+std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload) {
+  return os<<"(ProtocolPayloadV2"
+           <<"  header: "<<payload.header
+           <<", json (bytes): "<<payload.json.size()
+           <<", data (bytes): "<<payload.data.size()
+           <<")";
+}
+
 } // namespace protocol_handler
