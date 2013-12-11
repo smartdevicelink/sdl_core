@@ -90,10 +90,10 @@ endif()
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  add_definitions(-DOS_LINUX)
+#  add_definitions(-DOS_LINUX)
 #  add_definitions(-D__USE_UNIX98)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  add_definitions(-DOS_QNX)
+#  add_definitions(-DOS_QNX)
 #  add_definitions(-D__EXT_POSIX1_200112)
 endif()
 

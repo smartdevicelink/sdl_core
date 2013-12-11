@@ -550,12 +550,12 @@ void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
   pthread_mutex_lock(&message_queue_mutex_);
 #endif
   message_queue_.push_back(message);
+  pthread_cond_signal(&message_queue_cond_);
 #ifdef USE_RWLOCK
   pthread_rwlock_unlock(&message_queue_rwlock_);
 #else
   pthread_mutex_unlock(&message_queue_mutex_);
 #endif
-  pthread_cond_signal(&message_queue_cond_);
   LOG4CXX_INFO(logger_, "Post message complete");
 }
 
@@ -699,6 +699,7 @@ void TransportManagerImpl::EventListenerThread(void) {
   pthread_mutex_lock(&event_queue_mutex_);
 
   pthread_mutex_lock(&event_queue_mutex_);
+#endif
 
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (true) {
@@ -920,23 +921,20 @@ void TransportManagerImpl::MessageQueueThread(void) {
       while (it != message_queue_.end() && it->valid() && (*it)->IsWaiting()) {
         ++it;
       }
-      RawMessageSptr active_msg;
       if (it == message_queue_.end()) {
 #ifdef USE_RWLOCK
         pthread_rwlock_unlock(&message_queue_rwlock_);
-#else
+#endif
         pthread_mutex_unlock(&message_queue_mutex_);
 #endif
         break;
-      } else {
-        active_msg = *it;
-#ifdef USE_RWLOCK
-        pthread_rwlock_unlock(&message_queue_rwlock_);
-#else
-        pthread_mutex_unlock(&message_queue_mutex_);
-#endif
       }
-
+      RawMessageSptr active_msg = *it;
+#ifdef USE_RWLOCK
+      pthread_rwlock_unlock(&message_queue_rwlock_);
+#else
+      pthread_mutex_unlock(&message_queue_mutex_);
+#endif
       if (active_msg.valid() && !active_msg->IsWaiting()) {
         ConnectionInternal* connection =
             GetConnection(active_msg->connection_key());
