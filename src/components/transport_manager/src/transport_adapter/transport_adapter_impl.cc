@@ -270,6 +270,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
          ++it) {
       DeviceSptr existing_device = it->second;
       if (device->IsSameAs(existing_device.get())) {
+        existing_device->set_keep_on_disconnect(true);
         device_found = true;
         break;
       }
@@ -282,6 +283,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
                                                  << "\")");
     }
 
+    device->set_keep_on_disconnect(true);
     new_devices[device->unique_device_id()] = device;
   }
 
@@ -301,6 +303,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
 
     if (new_devices.end() == new_devices.find(it->first)) {
       if (connected_devices.end() != connected_devices.find(it->first)) {
+        existing_device->set_keep_on_disconnect(false);
         new_devices[it->first] = existing_device;
       }
     }
@@ -368,6 +371,22 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
   pthread_mutex_lock(&connections_mutex_);
   connections_.erase(std::make_pair(device_id, app_handle));
   pthread_mutex_unlock(&connections_mutex_);
+
+  if (device_disconnected) {
+    pthread_mutex_lock(&devices_mutex_);
+    DeviceMap::const_iterator it = devices_.find(device_id);
+    if (it != devices_.end()) {
+      DeviceSptr device = it->second;
+      if (!device->keep_on_disconnect()) {
+        devices_.erase(it);
+        for (TransportAdapterListenerList::iterator it = listeners_.begin();
+             it != listeners_.end(); ++it) {
+          (*it)->OnDeviceListUpdated(this);
+        }
+      }
+    }
+    pthread_mutex_unlock(&devices_mutex_);
+  }
 }
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,

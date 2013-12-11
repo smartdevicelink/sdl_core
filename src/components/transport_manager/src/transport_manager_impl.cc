@@ -723,12 +723,6 @@ void TransportManagerImpl::EventListenerThread(void) {
           RaiseEvent(&TransportManagerListener::OnConnectionClosed,
                      connection->id);
           RemoveConnection(connection->id);
-          if (connections_.empty()) {
-            std::vector<DeviceInfo> device_infos;
-            device_infos.clear();
-            RaiseEvent(&TransportManagerListener::OnDeviceListUpdated,
-                       device_infos);
-          }
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
