@@ -290,7 +290,27 @@ Rectangle {
                     "startTime": -1,
                     "endTime": -1,
                     "startTimeForProgress": -1
-                }
+                },
+                vrHelpItems: [
+                    {
+                        text: "ATATA",
+                        image: "",
+                        position: 1
+                    },
+
+                    {
+                        text: "ASDF",
+                        image: "",
+                        position: 2
+                    },
+
+                    {
+                        text: "q1w2e3",
+                        image: "",
+                        position: 3
+                    }
+
+                ]
              });
         }
 

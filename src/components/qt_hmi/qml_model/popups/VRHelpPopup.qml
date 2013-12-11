@@ -56,12 +56,14 @@ ContextPopup {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
 
-        model: dataContainer.vrHelp
+        model: {
+            dataContainer.currentApplication.vrHelpItems
+        }
 
         delegate: Row {
             spacing: Constants.iconItemListSpacing
             Icon {
-                source: model.icon
+                source: model.image
                 width: Constants.iconItemListSize
                 height: Constants.iconItemListSize
             }

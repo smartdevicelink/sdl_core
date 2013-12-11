@@ -109,7 +109,23 @@ QtObject {
                 if (application.timeoutPrompt !== undefined) {
                     currentApplication.timeoutPrompt = application.timeoutPrompt
                 }
+                if (application.mediaClock.startTime !== undefined) {
+                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
+                }
+                if (application.mediaClock.endTime !== undefined) {
+                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
+                }
                 // Check fields with mandatory = false
+
+                console.debug("11`")
+                currentApplication.menuIcon.source = application.menuIcon
+                console.debug("12`")
+                currentApplication.vrHelpTitle = application.vrHelpTitle
+                console.debug("13`")
+                currentApplication.menuTitle = application.menuTitle
+                console.debug("14`")
+                currentApplication.vrHelpItems = application.vrHelpItems
+                console.debug("15`")
 
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
@@ -118,12 +134,6 @@ QtObject {
                 currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
                 currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
                 currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
-                if (application.mediaClock.startTime !== undefined) {
-                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
-                }
-                if (application.mediaClock.endTime !== undefined) {
-                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
-                }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -140,6 +150,7 @@ QtObject {
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
             icon: app.icon,
+            menuIcon: "",
             deviceName: app.deviceName,
             appId: app.appId,
             hmiDisplayLanguageDesired: app.hmiDisplayLanguageDesired,
@@ -156,7 +167,11 @@ QtObject {
             turnListSoftButtons: [],
             mediaClock: app.mediaClock,
             languageTTSVR: Common.Language.EN_US,
-            softButtons: []
+            softButtons: [],
+            vrHelpTitle: "",
+            menuTitle: "",
+            keyboardProperties: [],
+            vrHelpItems: app.vrHelpItems
             // This place is for adding new properties
         })
 
@@ -173,8 +188,10 @@ QtObject {
 
     function setApplicationProperties(appId, props) {
         console.log("Enter setApplicationProperties function");
+
         var app = getApplication(appId)
         for (var p in props) {
+            console.debug(p)
             if (props[p] !== undefined) {
                 app[p] = props[p]
             }
@@ -272,7 +289,7 @@ QtObject {
 
     property ListModel vrCommands: ListModel {}
 
-    property ListModel vrHelp: ListModel {}
+//    property ListModel vrHelp: ListModel {}
 
     function reset () {
         console.log("dataContainer reset enter");
@@ -450,22 +467,22 @@ QtObject {
         console.debug("exit")
     }
 
-    function setVrHelp (vrHelp) {
-        this.vrHelp.clear()
-        var index
-        for (var i = 0; i < vrHelp.length; ++i) {
-            index = 0
-// sort by simple inserts
-            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
-                ++index
-            }
-            this.vrHelp.insert(index, {
-                                            "text": vrHelp[i].text,
-                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
-                                            "position": vrHelp[i].position
-                                        })
-        }
-    }
+    //    function setVrHelp (vrHelp) {
+    //        this.vrHelp.clear()
+    //        var index
+    //        for (var i = 0; i < vrHelp.length; ++i) {
+    //            index = 0
+    //// sort by simple inserts
+    //            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
+    //                ++index
+    //            }
+    //            this.vrHelp.insert(index, {
+    //                                            "text": vrHelp[i].text,
+    //                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
+    //                                            "position": vrHelp[i].position
+    //                                        })
+    //        }
+    //    }
 
     property NavigationModel navigationModel: NavigationModel { }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
