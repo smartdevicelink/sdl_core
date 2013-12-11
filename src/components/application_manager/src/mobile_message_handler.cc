@@ -123,6 +123,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
                "MobileMessageHandler HandleOutgoingMessageProtocolV1()");
   std::string messageString = message->json_message();
   if (messageString.length() == 0) {
+    LOG4CXX_INFO(logger_,
+                 "Drop ill-formed message from mobile");
     return NULL;
   }
 

@@ -99,6 +99,11 @@ void Extract(BitStream* bs, uint32_t* val, size_t bits) {
 void Extract(BitStream* bs, std::string* str, size_t length) {
   DCHECK(bs && str);
   if (*bs) {
+    // Prevent memory over-allocation
+    if (bs->FullBytesLeft() < length) {
+      bs->MarkBad();
+      return;
+    }
     str->resize(length+1);
     void* stringdata = &(*str)[0];
     bs->ExtractBytes(stringdata, length);
@@ -109,6 +114,11 @@ void Extract(BitStream* bs, std::string* str, size_t length) {
 void Extract(BitStream* bs, std::vector<uint8_t>* data, size_t length) {
   DCHECK(bs && data);
   if (*bs) {
+    // Prevent memory over-allocation
+    if (bs->FullBytesLeft() < length) {
+      bs->MarkBad();
+      return;
+    }
     data->resize(length);
     void* dataptr = &data->front();
     bs->ExtractBytes(dataptr, length);
