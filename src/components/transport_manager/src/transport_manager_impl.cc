@@ -695,12 +695,6 @@ void TransportManagerImpl::EventListenerThread(void) {
 #ifndef USE_RWLOCK
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
-
-  pthread_mutex_lock(&event_queue_mutex_);
-
-  pthread_mutex_lock(&event_queue_mutex_);
-#endif
-
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (true) {
     while (event_queue_.size() > 0) {
@@ -924,8 +918,6 @@ void TransportManagerImpl::MessageQueueThread(void) {
       if (it == message_queue_.end()) {
 #ifdef USE_RWLOCK
         pthread_rwlock_unlock(&message_queue_rwlock_);
-#endif
-        pthread_mutex_unlock(&message_queue_mutex_);
 #endif
         break;
       }
