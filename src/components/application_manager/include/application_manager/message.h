@@ -38,11 +38,13 @@
 
 #include "utils/shared_ptr.h"
 #include "protocol_handler/message_priority.h"
+#include "protocol_handler/rpc_type.h"
 
 namespace application_manager {
 
 typedef std::vector<unsigned char> BinaryData;
 
+// Message type is a general type used by both mobile and HMI messages
 enum MessageType {
   kUnknownType = -1,
   kRequest = 0,
@@ -50,6 +52,9 @@ enum MessageType {
   kNotification = 2,
   kErrorResponse = 3
 };
+
+// Map PrcType to corresponding MessageType
+MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type);
 
 enum ProtocolVersion {
   kUnknownProtocol = -1,

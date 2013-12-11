@@ -41,6 +41,21 @@ bool BinaryDataPredicate(unsigned char i, unsigned char j) {
 
 namespace application_manager {
 
+MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
+  switch (rpc_type) {
+    case protocol_handler::kRpcTypeRequest:
+      return kRequest;
+    case protocol_handler::kRpcTypeResponse:
+      return kResponse;
+    case protocol_handler::kRpcTypeNotification:
+      return kNotification;
+    case protocol_handler::kRpcTypeReserved:
+    default:
+      DCHECK(false);
+      return kUnknownType;
+  }
+}
+
 Message::Message(protocol_handler::MessagePriority priority)
     : function_id_(0),
       type_(kUnknownType),

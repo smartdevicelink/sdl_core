@@ -35,6 +35,11 @@
 #include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
 #include "protocol_handler/service_type.h"
+#include "protocol_handler/protocol_payload.h"
+#include "utils/bitstream.h"
+
+#include <stdint.h>
+#include <memory>
 
 namespace {
 const unsigned char kRequest = 0x0;
@@ -79,97 +84,36 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
-  application_manager::Message* outgoing_message =
-    new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      message->service_type())
-  );
-  if (!message) {
-    NOTREACHED();
-    LOG4CXX_ERROR(logger_, "Allocation failed: outgoing message");
+
+  utils::BitStream message_bytestream(message->data(), message->data_size());
+  protocol_handler::ProtocolPayloadV2 payload;
+  protocol_handler::Extract(&message_bytestream, &payload,
+                            message->data_size());
+
+  // Silently drop message if it wasn't parsed correctly
+  if (message_bytestream.IsBad())
     return NULL;
-  }
 
-  unsigned char* receivedData = message->data();
-  unsigned char offset = 0;
-  unsigned char firstByte = receivedData[offset++];
+  std::auto_ptr<application_manager::Message> outgoing_message(
+      new application_manager::Message(
+          protocol_handler::MessagePriority::FromServiceType(
+              message->service_type())));
 
-  int rpcType = -1;
-  unsigned char rpcTypeFlag = firstByte >> 4u;
-  switch (rpcTypeFlag) {
-    case kRequest:
-      rpcType = 0;
-      break;
-    case kResponse:
-      rpcType = 1;
-      break;
-    case kNotification:
-      rpcType = 2;
-      break;
-    default:
-      NOTREACHED();
-      break;
-  }
-
-  unsigned int functionId = firstByte >> 8u;
-
-  functionId <<= 24u;
-  functionId |= receivedData[offset++] << 16u;
-  functionId |= receivedData[offset++] << 8u;
-  functionId |= receivedData[offset++];
-
-  unsigned int correlationId = receivedData[offset++] << 24u;
-  correlationId |= receivedData[offset++] << 16u;
-  correlationId |= receivedData[offset++] << 8u;
-  correlationId |= receivedData[offset++];
-
-  unsigned int jsonSize = receivedData[offset++] << 24u;
-  jsonSize |= receivedData[offset++] << 16u;
-  jsonSize |= receivedData[offset++] << 8u;
-  jsonSize |= receivedData[offset++];
-
-  if (jsonSize > message->data_size()) {
-    delete outgoing_message;
-    LOG4CXX_ERROR(logger_, "Received invalid json packet header.");
-    return NULL;
-  }
-
-  std::string json_string = std::string(
-                              reinterpret_cast<const char*>(receivedData) + offset, jsonSize);
-
-  if (functionId == 0 || correlationId == 0 || message->connection_key() == 0) {
-    delete outgoing_message;
-    LOG4CXX_ERROR(logger_, "Invalid message constructed.");
-    return NULL;
-  }
-
-  outgoing_message->set_json_message(json_string);
-  outgoing_message->set_function_id(functionId);
+  outgoing_message->set_json_message(payload.json);
+  outgoing_message->set_function_id(payload.header.rpc_function_id);
   outgoing_message->set_message_type(
-    static_cast<application_manager::MessageType>(rpcType));
-  outgoing_message->set_correlation_id(correlationId);
+      MessageTypeFromRpcType(payload.header.rpc_type));
+  outgoing_message->set_correlation_id(int(payload.header.corellation_id));
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
     static_cast<application_manager::ProtocolVersion>(message
         ->protocol_version()));
 
-  if (message->data_size() > (offset + jsonSize)) {
-    application_manager::BinaryData* binaryData =
-      new application_manager::BinaryData(
-      receivedData + offset + jsonSize,
-      receivedData + message->data_size());
-
-    if (!binaryData) {
-      delete outgoing_message;
-      LOG4CXX_ERROR(logger_, "Allocation failed: binary data");
-      NOTREACHED();
-      return NULL;
-    }
-
-    outgoing_message->set_binary_data(binaryData);
+  if (!payload.data.empty()) {
+    outgoing_message->set_binary_data(
+        new application_manager::BinaryData(payload.data));
   }
-
-  return outgoing_message;
+  return outgoing_message.release();
 }
 
 protocol_handler::RawMessage*
