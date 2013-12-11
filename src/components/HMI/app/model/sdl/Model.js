@@ -768,7 +768,8 @@ SDL.SDLModel = Em.Object.create({
 
         if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
 
-            this.set('interactionData', {'vrHelpTitle': message.params.vrHelpTitle, 'vrHelp': message.params.vrHelp});
+            SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
+            SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
         }
 
         SDL.InteractionChoicesView.activate(message);

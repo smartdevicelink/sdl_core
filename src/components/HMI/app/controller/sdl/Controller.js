@@ -140,18 +140,33 @@ SDL.SDLController = Em.Object
          */
         showVRHelpItems: function() {
 
-            if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+            if (SDL.SDLAppController.model) {
+                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
 
-                SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-            } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
+                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
 
-                if (SDL.SDLAppController.model) {
-                    SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                    if (SDL.SDLAppController.model) {
+                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                    }
+                } else {
+                    SDL.VRHelpListView.deactivate();
                 }
-            } else {
-                SDL.VRHelpListView.deactivate();
             }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
+
+        /**
+         * Handler for Help button in VR menu
+         * triggers helpPrompt on HMI
+         *
+         */
+        vrHelpAction: function() {
+            if (SDL.SDLModel.interactionData.helpPrompt) {
+                SDL.SDLModel.onPrompt(SDL.SDLModel.interactionData.helpPrompt);
+            } else if (SDL.SDLAppController.model && SDL.SDLAppController.model.globalProperties.helpPrompt.length) {
+                SDL.SDLModel.onPrompt(SDL.SDLAppController.model.globalProperties.helpPrompt);
+            }
+        },
 
         /**
          * Notify SDLCore that TTS haas finished processing
@@ -351,7 +366,8 @@ SDL.SDLController = Em.Object
         interactionChoiseCloseResponse: function(appID, result, choiceID, manualTextEntry) {
 
             FFW.UI.interactionResponse(SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction, result, choiceID, manualTextEntry);
-            SDL.SDLModel.set('interactionData', {'vrHelpTitle': null, 'vrHelp': null});
+            SDL.SDLModel.set('interactionData.vrHelpTitle', null);
+            SDL.SDLModel.set('interactionData.vrHelp', null);
 
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
         },
