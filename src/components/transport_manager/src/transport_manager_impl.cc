@@ -945,4 +945,3 @@ void TransportManagerImpl::MessageQueueThread(void) {
 }  // namespace transport_manager
 
 // vim: set ts=2 sw=2 et:
-// ☭
