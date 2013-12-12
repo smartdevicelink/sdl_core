@@ -71,6 +71,10 @@ class TransportManagerListenerImpl : public TransportManagerListener {
    */
   virtual void OnDeviceFound(const DeviceInfo& device_info) {
   }
+  virtual void OnDeviceAdded(const DeviceInfo& device_info) {
+  }
+  virtual void OnDeviceRemoved(const DeviceInfo& device_info) {
+  }
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.

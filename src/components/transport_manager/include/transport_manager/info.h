@@ -134,6 +134,11 @@ class DeviceInfo : public Info {
    * @brief Overloaded operator "==".
    */
   friend bool operator ==(const DeviceInfo &first, const DeviceInfo &second);
+
+  // Needed for std::set container
+  bool operator <(const DeviceInfo& than) const {
+    return device_handle_ < than.device_handle_;
+  }
 };
 
 /**

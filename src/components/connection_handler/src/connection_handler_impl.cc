@@ -112,6 +112,16 @@ void ConnectionHandlerImpl::OnDeviceFound(
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceFound()");
 }
 
+void ConnectionHandlerImpl::OnDeviceAdded(
+  const transport_manager::DeviceInfo& device_info) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceAdded()");
+}
+
+void ConnectionHandlerImpl::OnDeviceRemoved(
+  const transport_manager::DeviceInfo& device_info) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceRemoved()");
+}
+
 bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
   const std::vector<transport_manager::DeviceInfo>& device_list,
   const connection_handler::DeviceHandle device_handle) {

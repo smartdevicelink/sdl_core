@@ -37,6 +37,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <queue>
+#include <set>
 #include <algorithm>
 #include <limits>
 #include <functional>
@@ -508,21 +509,46 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
 }
 
 void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
+  std::set<DeviceInfo> old_devices;
   for (DeviceList::iterator it = device_list_.begin();
        it != device_list_.end();) {
     if (it->first == ta) {
+      old_devices.insert(it->second);
       it = device_list_.erase(it);
     } else {
       ++it;
     }
   }
 
+  std::set<DeviceInfo> new_devices;
   const transport_adapter::DeviceList dev_list = ta->GetDeviceList();
   for (transport_adapter::DeviceList::const_iterator it = dev_list.begin();
        it != dev_list.end(); ++it) {
     DeviceHandle device_handle = converter_.UidToHandle(*it);
     DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
     device_list_.push_back(std::make_pair(ta, info));
+    new_devices.insert(info);
+  }
+
+  std::set<DeviceInfo> added_devices;
+  std::set_difference(new_devices.begin(), new_devices.end(),
+    old_devices.begin(), old_devices.end(),
+    std::inserter(added_devices, added_devices.begin()));
+  for(std::set<DeviceInfo>::const_iterator it = added_devices.begin();
+    it != added_devices.end();
+    ++it) {
+    RaiseEvent(&TransportManagerListener::OnDeviceAdded, *it);
+  }
+
+  std::set<DeviceInfo> removed_devices;
+  std::set_difference(old_devices.begin(), old_devices.end(),
+    new_devices.begin(), new_devices.end(),
+    std::inserter(removed_devices, removed_devices.begin()));
+
+  for(std::set<DeviceInfo>::const_iterator it = removed_devices.begin();
+    it != removed_devices.end();
+    ++it) {
+    RaiseEvent(&TransportManagerListener::OnDeviceRemoved, *it);
   }
 }
 
@@ -917,3 +943,6 @@ void TransportManagerImpl::MessageQueueThread(void) {
 }
 
 }  // namespace transport_manager
+
+// vim: set ts=2 sw=2 et:
+// ☭
