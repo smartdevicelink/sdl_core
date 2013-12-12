@@ -655,8 +655,10 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
 void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
   hmi_apis::Common_Language::eType app_common_language =
       ToCommonLanguage(app->language());
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_vr_language()
+  const HMICapabilities& hmi_capabilities =
+  ApplicationManagerImpl::instance()->hmi_capabilities();
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_vr_language()
       != app_common_language) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
@@ -668,9 +670,8 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
     ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_tts_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_tts_language() != app_common_language) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
@@ -681,9 +682,8 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
     ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_ui_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_ui_language()!= app_common_language) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
@@ -1118,7 +1118,9 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  if (!ApplicationManagerImpl::instance()->VerifyImageType(
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+  if (!hmi_capabilities.VerifyImageType(
       static_cast<mobile_apis::ImageType::eType>(image[strings::image_type]
           .asInt()))) {
     return mobile_apis::Result::UNSUPPORTED_RESOURCE;
@@ -1149,8 +1151,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     return mobile_apis::Result::SUCCESS;
   }
 
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* soft_button_capabilities =
-     ApplicationManagerImpl::instance()->soft_button_capabilities();
+      hmi_capabilities.soft_button_capabilities();
   bool image_supported = false;
   if (soft_button_capabilities) {
     image_supported =

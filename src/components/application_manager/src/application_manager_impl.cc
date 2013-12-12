@@ -68,10 +68,6 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
-    ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    vehicle_type_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
     policy_manager_(NULL),
@@ -82,7 +78,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
     messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
-    request_ctrl(),
+    request_ctrl_(),
+    hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
     media_manager_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
@@ -119,9 +116,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   UnregisterAllApplications();
 
-  if (vehicle_type_) {
-    delete vehicle_type_;
-  }
+
 
   message_chaining_.clear();
 
@@ -612,33 +607,6 @@ void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
   is_vr_session_strated_ = state;
 }
 
-void ApplicationManagerImpl::set_active_ui_language(
-  const hmi_apis::Common_Language::eType& language) {
-  ui_language_ = language;
-}
-
-void ApplicationManagerImpl::set_active_vr_language(
-  const hmi_apis::Common_Language::eType& language) {
-  vr_language_ = language;
-}
-
-void ApplicationManagerImpl::set_active_tts_language(
-  const hmi_apis::Common_Language::eType& language) {
-  tts_language_ = language;
-}
-
-void ApplicationManagerImpl::set_vehicle_type(
-  const smart_objects::SmartObject& vehicle_type) {
-  if (vehicle_type_) {
-    delete vehicle_type_;
-  }
-  vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
-}
-
-const smart_objects::SmartObject* ApplicationManagerImpl::vehicle_type() const {
-  return vehicle_type_;
-}
-
 void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
   is_all_apps_allowed_ = allowed;
 }
@@ -728,81 +696,6 @@ std::string ApplicationManagerImpl::GetDeviceName(
   }
 
   return device_name;
-}
-
-void ApplicationManagerImpl::set_is_vr_cooperating(bool value) {
-  is_vr_ready_response_recieved_ = true;
-  is_vr_cooperating_ = value;
-  if (is_vr_cooperating_) {
-    utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::VR_GetLanguage));
-    ManageHMICommand(get_language);
-    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::VR_GetSupportedLanguages));
-    ManageHMICommand(get_all_languages);
-    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::VR_GetCapabilities));
-    ManageHMICommand(get_capabilities);
-
-    MessageHelper::SendHelpVrCommand();
-  }
-}
-
-void ApplicationManagerImpl::set_is_tts_cooperating(bool value) {
-  is_tts_ready_response_recieved_ = true;
-  is_tts_cooperating_ = value;
-  if (is_tts_cooperating_) {
-    utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::TTS_GetLanguage));
-    ManageHMICommand(get_language);
-    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::TTS_GetSupportedLanguages));
-    ManageHMICommand(get_all_languages);
-    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::TTS_GetCapabilities));
-    ManageHMICommand(get_capabilities);
-  }
-}
-
-void ApplicationManagerImpl::set_is_ui_cooperating(bool value) {
-  is_ui_ready_response_recieved_ = true;
-  is_ui_cooperating_ = value;
-  if (is_ui_cooperating_) {
-    utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::UI_GetLanguage));
-    ManageHMICommand(get_language);
-    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::UI_GetSupportedLanguages));
-    ManageHMICommand(get_all_languages);
-    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::UI_GetCapabilities));
-    ManageHMICommand(get_capabilities);
-  }
-}
-
-void ApplicationManagerImpl::set_is_navi_cooperating(bool value) {
-  is_navi_ready_response_recieved_ = true;
-  is_navi_cooperating_ = value;
-}
-
-void ApplicationManagerImpl::set_is_ivi_cooperating(bool value) {
-  is_ivi_ready_response_recieved_ = true;
-  is_ivi_cooperating_ = value;
-  if (is_ivi_cooperating_) {
-    utils::SharedPtr<smart_objects::SmartObject> get_type(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
-    ManageHMICommand(get_type);
-  }
 }
 
 void ApplicationManagerImpl::OnMessageReceived(
@@ -1008,7 +901,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
-    request_ctrl.terminateRequest(
+    request_ctrl_.terminateRequest(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
@@ -1102,7 +995,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       }
 
       request_controller::RequestController::TResult result =
-        request_ctrl.addRequest(command, app_hmi_level);
+        request_ctrl_.addRequest(command, app_hmi_level);
 
       if (result == request_controller::RequestController::SUCCESS) {
         LOG4CXX_INFO(logger_, "Perform request");
@@ -1408,7 +1301,6 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   return true;
 }
 
-
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
   const protocol_handler::RawMessagePtr& message) {
   DCHECK(message);
@@ -1508,51 +1400,8 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
   return *mobile_so_factory_;
 }
 
-bool ApplicationManagerImpl::IsHMICapabilitiesInitialized() {
-  bool result = true;
-
-  if (false == profile::Profile::instance()->launch_hmi()) {
-    // TODO(DK) : load HMI capabilities from file
-    return true;
-  }
-
-  if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_
-      && is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_
-      && is_ivi_ready_response_recieved_) {
-    if (is_vr_cooperating_) {
-      if ((!vr_supported_languages_)
-          || (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
-        result = false;
-      }
-    }
-
-    if (is_tts_cooperating_) {
-      if ((!tts_supported_languages_)
-          || (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
-        result = false;
-      }
-    }
-
-    if (is_ui_cooperating_) {
-      if ((!ui_supported_languages_)
-          || (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
-        result = false;
-      }
-    }
-
-    if (is_ivi_cooperating_) {
-      if (!vehicle_type_) {
-        result = false;
-      }
-    }
-  } else {
-    result = false;
-  }
-
-  LOG4CXX_INFO(logger_,
-               "HMICapabilities::IsHMICapabilitiesInitialized() " << result);
-
-  return result;
+HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
+  return hmi_capabilities_;
 }
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {
@@ -1572,8 +1421,8 @@ void ApplicationManagerImpl::removeNotification(const CommandSharedPtr& ptr) {
 void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
     unsigned int mobile_correlation_id,
     unsigned int new_timeout_value) {
-  request_ctrl.updateRequestTimeout(connection_key, mobile_correlation_id,
-                                    new_timeout_value);
+  request_ctrl_.updateRequestTimeout(connection_key, mobile_correlation_id,
+                                     new_timeout_value);
 }
 
 const unsigned int ApplicationManagerImpl::application_id
@@ -1638,7 +1487,7 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   Application* app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
-  request_ctrl.terminateAppRequests(app_id);
+  request_ctrl_.terminateAppRequests(app_id);
   delete app_to_remove;
 
   return true;
@@ -1714,7 +1563,8 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 }
 
 void ApplicationManagerImpl::Mute() {
-  mobile_apis::AudioStreamingState::eType state = attenuated_supported()
+  mobile_apis::AudioStreamingState::eType state =
+      hmi_capabilities_.attenuated_supported()
       ? mobile_apis::AudioStreamingState::ATTENUATED
       : mobile_apis::AudioStreamingState::NOT_AUDIBLE
       ;

@@ -30,33 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/hmi_capabilities.h"
+#include "config_profile/profile.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
-HMICapabilities::HMICapabilities()
-    : is_vr_ready_response_recieved_(false),
-      is_tts_ready_response_recieved_(false),
-      is_ui_ready_response_recieved_(false),
-      is_navi_ready_response_recieved_(false),
-      is_ivi_ready_response_recieved_(false),
-      attenuated_supported_(false),
-      ui_supported_languages_(NULL),
-      tts_supported_languages_(NULL),
-      vr_supported_languages_(NULL),
-      display_capabilities_(NULL),
-      hmi_zone_capabilities_(NULL),
-      soft_buttons_capabilities_(NULL),
-      button_capabilities_(NULL),
-      preset_bank_capabilities_(NULL),
-      vr_capabilities_(NULL),
-      speech_capabilities_(NULL),
-      audio_pass_thru_capabilities_(NULL) {
+HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
+  : is_vr_cooperating_(false),
+    is_tts_cooperating_(false),
+    is_ui_cooperating_(false),
+    is_navi_cooperating_(false),
+    is_ivi_cooperating_(false),
+    is_vr_ready_response_recieved_(false),
+    is_tts_ready_response_recieved_(false),
+    is_ui_ready_response_recieved_(false),
+    is_navi_ready_response_recieved_(false),
+    is_ivi_ready_response_recieved_(false),
+    ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
+    vehicle_type_(NULL),
+    attenuated_supported_(false),
+    ui_supported_languages_(NULL),
+    tts_supported_languages_(NULL),
+    vr_supported_languages_(NULL),
+    display_capabilities_(NULL),
+    hmi_zone_capabilities_(NULL),
+    soft_buttons_capabilities_(NULL),
+    button_capabilities_(NULL),
+    preset_bank_capabilities_(NULL),
+    vr_capabilities_(NULL),
+    speech_capabilities_(NULL),
+    audio_pass_thru_capabilities_(NULL),
+    app_mngr_(app_mngr){
 }
 
 HMICapabilities::~HMICapabilities() {
+  delete vehicle_type_;
   delete ui_supported_languages_;
   delete tts_supported_languages_;
   delete vr_supported_languages_;
@@ -70,12 +84,78 @@ HMICapabilities::~HMICapabilities() {
   delete audio_pass_thru_capabilities_;
 }
 
+bool HMICapabilities::is_hmi_capabilities_initialized() const {
+  bool result = true;
+
+  printf("\n##############1\n");
+    if (false == profile::Profile::instance()->launch_hmi()) {
+      // TODO(DK) : load HMI capabilities from file
+      printf("\n##############2\n");
+      return true;
+    }
+
+    if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_
+        && is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_
+        && is_ivi_ready_response_recieved_) {
+      if (is_vr_cooperating_) {
+        if ((!vr_supported_languages_)
+            || (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
+          printf("\n##############3\n");
+          result = false;
+        }
+      }
+
+      if (is_tts_cooperating_) {
+        if ((!tts_supported_languages_)
+            || (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
+          printf("\n##############4\n");
+          result = false;
+        }
+      }
+
+      if (is_ui_cooperating_) {
+        if ((!ui_supported_languages_)
+            || (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
+          printf("\n##############5\n");
+          result = false;
+        }
+      }
+
+      if (is_ivi_cooperating_) {
+        if (!vehicle_type_) {
+          printf("\n##############6\n");
+          result = false;
+        }
+      }
+    } else {
+      printf("\n##############7\n");
+      result = false;
+    }
+
+    printf("\n############## %d \n", result);
+    return result;
+}
+
 bool HMICapabilities::is_vr_cooperating() const {
   return is_vr_cooperating_;
 }
 
 void HMICapabilities::set_is_vr_cooperating(bool value) {
+  is_vr_ready_response_recieved_ = true;
   is_vr_cooperating_ = value;
+  if (is_vr_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage));
+    app_mngr_->ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages));
+    app_mngr_->ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities));
+    app_mngr_->ManageHMICommand(get_capabilities);
+
+    MessageHelper::SendHelpVrCommand();
+  }
 }
 
 bool HMICapabilities::is_tts_cooperating() const {
@@ -83,7 +163,22 @@ bool HMICapabilities::is_tts_cooperating() const {
 }
 
 void HMICapabilities::set_is_tts_cooperating(bool value) {
+  is_tts_ready_response_recieved_ = true;
   is_tts_cooperating_ = value;
+  if (is_tts_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetLanguage));
+    app_mngr_->ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetSupportedLanguages));
+    app_mngr_->ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetCapabilities));
+    app_mngr_->ManageHMICommand(get_capabilities);
+  }
 }
 
 bool HMICapabilities::is_ui_cooperating() const {
@@ -91,7 +186,22 @@ bool HMICapabilities::is_ui_cooperating() const {
 }
 
 void HMICapabilities::set_is_ui_cooperating(bool value) {
+  is_ui_ready_response_recieved_ = true;
   is_ui_cooperating_ = value;
+  if (is_ui_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_language(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::UI_GetLanguage));
+    app_mngr_->ManageHMICommand(get_language);
+    utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::UI_GetSupportedLanguages));
+    app_mngr_->ManageHMICommand(get_all_languages);
+    utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::UI_GetCapabilities));
+    app_mngr_->ManageHMICommand(get_capabilities);
+  }
 }
 
 bool HMICapabilities::is_navi_cooperating() const {
@@ -99,6 +209,7 @@ bool HMICapabilities::is_navi_cooperating() const {
 }
 
 void HMICapabilities::set_is_navi_cooperating(bool value) {
+  is_navi_ready_response_recieved_ = true;
   is_navi_cooperating_ = value;
 }
 
@@ -107,7 +218,14 @@ bool HMICapabilities::is_ivi_cooperating() const {
 }
 
 void HMICapabilities::set_is_ivi_cooperating(bool value) {
+  is_ivi_ready_response_recieved_ = true;
   is_ivi_cooperating_ = value;
+  if (is_ivi_cooperating_) {
+    utils::SharedPtr<smart_objects::SmartObject> get_type(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
+    app_mngr_->ManageHMICommand(get_type);
+  }
 }
 
 bool HMICapabilities::attenuated_supported() const {
@@ -116,6 +234,33 @@ bool HMICapabilities::attenuated_supported() const {
 
 void HMICapabilities::set_attenuated_supported(bool state) {
   attenuated_supported_ = state;
+}
+
+void HMICapabilities::set_active_ui_language(
+  const hmi_apis::Common_Language::eType& language) {
+  ui_language_ = language;
+}
+
+void HMICapabilities::set_active_vr_language(
+  const hmi_apis::Common_Language::eType& language) {
+  vr_language_ = language;
+}
+
+void HMICapabilities::set_active_tts_language(
+  const hmi_apis::Common_Language::eType& language) {
+  tts_language_ = language;
+}
+
+void HMICapabilities::set_vehicle_type(
+  const smart_objects::SmartObject& vehicle_type) {
+  if (vehicle_type_) {
+    delete vehicle_type_;
+  }
+  vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
+}
+
+const smart_objects::SmartObject* HMICapabilities::vehicle_type() const {
+  return vehicle_type_;
 }
 
 void HMICapabilities::set_ui_supported_languages(
@@ -143,7 +288,7 @@ void HMICapabilities::set_vr_supported_languages(
   vr_supported_languages_ = new smart_objects::SmartObject(supported_languages);
 }
 
-bool HMICapabilities::VerifyImageType(int image_type) {
+bool HMICapabilities::VerifyImageType(int image_type) const {
   if (!display_capabilities_) {
     return false;
   }

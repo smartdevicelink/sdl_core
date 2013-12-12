@@ -147,8 +147,8 @@
 	},
 	"AudioPassThruCapabilities":
 	{
-		"samplingRate"	:"44KHZ",
-		"bitsPerSample" :"8_BIT",
+		"samplingRate"	: ["8kHZ", "16kHZ", "44KHZ"],
+		"bitsPerSample" : ["8_BIT", "16_BIT"],
 		"audioType"		:"PCM"
 	},
 	"HMIZoneCapabilities":"FRONT",
@@ -165,5 +165,10 @@
 		"model" 	:"Fiesta",
 		"modelYear" :"2013",
 		"trim"		:"SE"
+	},
+	"SyncMessageVersion":
+	{
+		"majorVersion": 3,
+		"minorVersion": 0
 	}
 }

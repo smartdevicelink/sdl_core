@@ -188,8 +188,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::FromMobileQueue::Handler,
   public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler,
-  public impl::ToHmiQueue::Handler,
-  public HMICapabilities {
+  public impl::ToHmiQueue::Handler {
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -205,12 +204,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    /**
-     * @brief Checks if all HMI capabilities received
-     *
-     * @return TRUE if all information received, otherwise FALSE
-     */
-    bool IsHMICapabilitiesInitialized();
+    HMICapabilities& hmi_capabilities();
 
     Application* RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -352,56 +346,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     void set_vr_session_started(const bool& state);
 
     /*
-     * @brief Retrieves currently active UI language
-     *
-     * @return Currently active UI language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_ui_language() const;
-
-    /*
-     * @brief Sets currently active UI language
-     *
-     * @param language Currently active UI language
-     */
-    void set_active_ui_language(const hmi_apis::Common_Language::eType& language);
-
-    /*
-     * @brief Retrieves currently active VR language
-     *
-     * @return Currently active VR language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_vr_language() const;
-
-    /*
-     * @brief Sets currently active VR language
-     *
-     * @param language Currently active VR language
-     */
-    void set_active_vr_language(const hmi_apis::Common_Language::eType& language);
-
-    /*
-     * @brief Retrieves currently active TTS language
-     *
-     * @return Currently active TTS language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_tts_language() const;
-
-    /*
-     * @brief Sets currently active TTS language
-     *
-     * @param language Currently active TTS language
-     */
-    void set_active_tts_language(
-      const hmi_apis::Common_Language::eType& language);
-
-    void set_vehicle_type(const smart_objects::SmartObject& vehicle_type);
-
-    const smart_objects::SmartObject* vehicle_type() const;
-
-    /*
      * @brief Retrieves SDL access to all mobile apps
      *
      * @return Currently active state of the access
@@ -441,11 +385,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
-    virtual void set_is_vr_cooperating(bool value);
-    virtual void set_is_tts_cooperating(bool value);
-    virtual void set_is_ui_cooperating(bool value);
-    virtual void set_is_navi_cooperating(bool value);
-    virtual void set_is_ivi_cooperating(bool value);
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
@@ -645,27 +584,26 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
-    hmi_apis::Common_Language::eType ui_language_;
-    hmi_apis::Common_Language::eType vr_language_;
-    hmi_apis::Common_Language::eType tts_language_;
-    smart_objects::SmartObject* vehicle_type_;
-    media_manager::MediaManager* media_manager_;
 
+    media_manager::MediaManager*            media_manager_;
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
-    connection_handler::ConnectionHandler* connection_handler_;
-    policies::PolicyManager* policy_manager_;
-    protocol_handler::ProtocolHandler* protocol_handler_;
+    connection_handler::ConnectionHandler*  connection_handler_;
+    protocol_handler::ProtocolHandler*      protocol_handler_;
+    policies::PolicyManager*                policy_manager_;
+    request_controller::RequestController   request_ctrl_;
+    HMICapabilities                         hmi_capabilities_;
 
     // TODO(YS): Remove old implementation
     policies_manager::PoliciesManager policies_manager_;
 
-    hmi_apis::HMI_API* hmi_so_factory_;
-    mobile_apis::MOBILE_API* mobile_so_factory_;
+    hmi_apis::HMI_API*                      hmi_so_factory_;
+    mobile_apis::MOBILE_API*                mobile_so_factory_;
 
     static log4cxx::LoggerPtr logger_;
     static unsigned int message_chain_current_id_;
     static const unsigned int message_chain_max_id_;
-    request_controller::RequestController         request_ctrl;
+
+    // The reason of HU shutdown
     mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     // Construct message threads when everything is already created
@@ -695,21 +633,6 @@ bool ApplicationManagerImpl::vr_session_started() const {
 
 bool ApplicationManagerImpl::driver_distraction() const {
   return is_distracting_driver_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_ui_language() const {
-  return ui_language_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_vr_language() const {
-  return vr_language_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_tts_language() const {
-  return tts_language_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {

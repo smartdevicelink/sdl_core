@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace NsSmartDeviceLink {
@@ -45,24 +46,36 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 
-struct HMICapabilities {
-  HMICapabilities();
+class ApplicationManagerImpl;
+
+class HMICapabilities {
+
+ public:
+
+  explicit HMICapabilities(ApplicationManagerImpl* const app_mngr);
   virtual ~HMICapabilities();
 
-  virtual bool is_vr_cooperating() const;
-  virtual void set_is_vr_cooperating(bool value);
+  /**
+   * @brief Checks if all HMI capabilities received
+   *
+   * @return TRUE if all information received, otherwise FALSE
+   */
+  bool is_hmi_capabilities_initialized() const;
 
-  virtual bool is_tts_cooperating() const;
-  virtual void set_is_tts_cooperating(bool value);
+  bool is_vr_cooperating() const;
+  void set_is_vr_cooperating(bool value);
 
-  virtual bool is_ui_cooperating() const;
-  virtual void set_is_ui_cooperating(bool value);
+  bool is_tts_cooperating() const;
+  void set_is_tts_cooperating(bool value);
 
-  virtual bool is_navi_cooperating() const;
-  virtual void set_is_navi_cooperating(bool value);
+  bool is_ui_cooperating() const;
+  void set_is_ui_cooperating(bool value);
 
-  virtual bool is_ivi_cooperating() const;
-  virtual void set_is_ivi_cooperating(bool value);
+  bool is_navi_cooperating() const;
+  void set_is_navi_cooperating(bool value);
+
+  bool is_ivi_cooperating() const;
+  void set_is_ivi_cooperating(bool value);
 
   /*
    * @brief Retrieves if mixing audio is supported by HMI
@@ -78,6 +91,56 @@ struct HMICapabilities {
    * @param state New state to be set
    */
   void set_attenuated_supported(bool state);
+
+  /*
+   * @brief Retrieves currently active UI language
+   *
+   * @return Currently active UI language
+   */
+  inline const hmi_apis::Common_Language::eType&
+  active_ui_language() const;
+
+  /*
+   * @brief Sets currently active UI language
+   *
+   * @param language Currently active UI language
+   */
+  void set_active_ui_language(const hmi_apis::Common_Language::eType& language);
+
+  /*
+   * @brief Retrieves currently active VR language
+   *
+   * @return Currently active VR language
+   */
+  inline const hmi_apis::Common_Language::eType&
+  active_vr_language() const;
+
+  /*
+   * @brief Sets currently active VR language
+   *
+   * @param language Currently active VR language
+   */
+  void set_active_vr_language(const hmi_apis::Common_Language::eType& language);
+
+  /*
+   * @brief Retrieves currently active TTS language
+   *
+   * @return Currently active TTS language
+   */
+  inline const hmi_apis::Common_Language::eType&
+  active_tts_language() const;
+
+  /*
+   * @brief Sets currently active TTS language
+   *
+   * @param language Currently active TTS language
+   */
+  void set_active_tts_language(
+    const hmi_apis::Common_Language::eType& language);
+
+  void set_vehicle_type(const smart_objects::SmartObject& vehicle_type);
+
+  const smart_objects::SmartObject* vehicle_type() const;
 
   /*
    * @brief Retrieves UI supported languages
@@ -149,7 +212,7 @@ struct HMICapabilities {
    * @param image_type recieved type of image from Enum.
    * @return Bool true if supported
    */
-  bool VerifyImageType(int image_type);
+  bool VerifyImageType(int image_type) const;
 
   /*
    * @brief Sets supported display capabilities
@@ -295,6 +358,10 @@ struct HMICapabilities {
   bool is_ivi_ready_response_recieved_;
 
   bool attenuated_supported_;
+  hmi_apis::Common_Language::eType ui_language_;
+  hmi_apis::Common_Language::eType vr_language_;
+  hmi_apis::Common_Language::eType tts_language_;
+  smart_objects::SmartObject* vehicle_type_;
   smart_objects::SmartObject* ui_supported_languages_;
   smart_objects::SmartObject* tts_supported_languages_;
   smart_objects::SmartObject* vr_supported_languages_;
@@ -306,7 +373,24 @@ struct HMICapabilities {
   smart_objects::SmartObject* vr_capabilities_;
   smart_objects::SmartObject* speech_capabilities_;
   smart_objects::SmartObject* audio_pass_thru_capabilities_;
+
+  ApplicationManagerImpl*     app_mngr_;
 };
+
+inline const hmi_apis::Common_Language::eType&
+HMICapabilities::active_ui_language() const {
+  return ui_language_;
+}
+
+inline const hmi_apis::Common_Language::eType&
+HMICapabilities::active_vr_language() const {
+  return vr_language_;
+}
+
+inline const hmi_apis::Common_Language::eType&
+HMICapabilities::active_tts_language() const {
+  return tts_language_;
+}
 }  //  namespace application_manager
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
