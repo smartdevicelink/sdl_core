@@ -52,7 +52,17 @@ class HMICapabilities {
 
  public:
 
+  /*
+   * @ Class constructor
+   *
+   * @param app_mngr Application manager pointer
+   */
   explicit HMICapabilities(ApplicationManagerImpl* const app_mngr);
+
+  /*
+   * @brief Class destructor
+   *
+   */
   virtual ~HMICapabilities();
 
   /**
@@ -62,6 +72,11 @@ class HMICapabilities {
    */
   bool is_hmi_capabilities_initialized() const;
 
+  /**
+   * @brief Checks if all HMI capabilities received
+   *
+   * @return TRUE if all information received, otherwise FALSE
+   */
   bool is_vr_cooperating() const;
   void set_is_vr_cooperating(bool value);
 
@@ -344,6 +359,8 @@ class HMICapabilities {
       const smart_objects::SmartObject& preset_bank_capabilities);
 
  protected:
+
+ private:
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;
   bool is_ui_cooperating_;
@@ -361,20 +378,24 @@ class HMICapabilities {
   hmi_apis::Common_Language::eType ui_language_;
   hmi_apis::Common_Language::eType vr_language_;
   hmi_apis::Common_Language::eType tts_language_;
-  smart_objects::SmartObject* vehicle_type_;
-  smart_objects::SmartObject* ui_supported_languages_;
-  smart_objects::SmartObject* tts_supported_languages_;
-  smart_objects::SmartObject* vr_supported_languages_;
-  smart_objects::SmartObject* display_capabilities_;
-  smart_objects::SmartObject* hmi_zone_capabilities_;
-  smart_objects::SmartObject* soft_buttons_capabilities_;
-  smart_objects::SmartObject* button_capabilities_;
-  smart_objects::SmartObject* preset_bank_capabilities_;
-  smart_objects::SmartObject* vr_capabilities_;
-  smart_objects::SmartObject* speech_capabilities_;
-  smart_objects::SmartObject* audio_pass_thru_capabilities_;
+  smart_objects::SmartObject*      vehicle_type_;
+  smart_objects::SmartObject*      ui_supported_languages_;
+  smart_objects::SmartObject*      tts_supported_languages_;
+  smart_objects::SmartObject*      vr_supported_languages_;
+  smart_objects::SmartObject*      display_capabilities_;
+  smart_objects::SmartObject*      hmi_zone_capabilities_;
+  smart_objects::SmartObject*      soft_buttons_capabilities_;
+  smart_objects::SmartObject*      button_capabilities_;
+  smart_objects::SmartObject*      preset_bank_capabilities_;
+  smart_objects::SmartObject*      vr_capabilities_;
+  smart_objects::SmartObject*      speech_capabilities_;
+  smart_objects::SmartObject*      audio_pass_thru_capabilities_;
 
-  ApplicationManagerImpl*     app_mngr_;
+  ApplicationManagerImpl*          app_mngr_;
+
+  DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
+
+  bool load_capabilities_from_file();
 };
 
 inline const hmi_apis::Common_Language::eType&

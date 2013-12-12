@@ -95,6 +95,11 @@ class Profile {
     const std::string& policies_file_name() const;
 
     /**
+     * @brief Returns hmi capabilities file name
+     */
+    const std::string& hmi_capabilities_file_name() const;
+
+    /**
      * @brief Returns help promt vector
      */
     const std::vector<std::string>& help_promt() const;
@@ -270,6 +275,7 @@ class Profile {
     uint16_t                        server_port_;
     uint16_t                        navi_server_port_;
     std::string                     policies_file_name_;
+    std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_promt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;

@@ -45,6 +45,7 @@ Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
   , launch_hmi_(true)
   , policies_file_name_("policy_table.json")
+  , hmi_capabilities_file_name_("hmi_capabilities.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
   , navi_server_port_(5050)
@@ -94,6 +95,10 @@ bool Profile::launch_hmi() const {
 
 const std::string& Profile::policies_file_name() const {
   return policies_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_file_name() const {
+  return hmi_capabilities_file_name_;
 }
 
 const std::string& Profile::server_address() const {

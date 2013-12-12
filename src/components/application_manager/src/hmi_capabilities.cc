@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "json/json.h"
+#include "utils/file_system.h"
 #include "config_profile/profile.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
@@ -82,15 +84,15 @@ HMICapabilities::~HMICapabilities() {
   delete vr_capabilities_;
   delete speech_capabilities_;
   delete audio_pass_thru_capabilities_;
+  app_mngr_ = NULL;
 }
 
 bool HMICapabilities::is_hmi_capabilities_initialized() const {
   bool result = true;
 
-  printf("\n##############1\n");
+
     if (false == profile::Profile::instance()->launch_hmi()) {
       // TODO(DK) : load HMI capabilities from file
-      printf("\n##############2\n");
       return true;
     }
 
@@ -98,41 +100,35 @@ bool HMICapabilities::is_hmi_capabilities_initialized() const {
         && is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_
         && is_ivi_ready_response_recieved_) {
       if (is_vr_cooperating_) {
-        if ((!vr_supported_languages_)
-            || (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
-          printf("\n##############3\n");
+        if ((!vr_supported_languages_) ||
+            (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
           result = false;
         }
       }
 
       if (is_tts_cooperating_) {
-        if ((!tts_supported_languages_)
-            || (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
-          printf("\n##############4\n");
+        if ((!tts_supported_languages_) ||
+            (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
           result = false;
         }
       }
 
       if (is_ui_cooperating_) {
-        if ((!ui_supported_languages_)
-            || (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
-          printf("\n##############5\n");
-          result = false;
+        if ((!ui_supported_languages_)  ||
+            (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
+           result = false;
         }
       }
 
       if (is_ivi_cooperating_) {
         if (!vehicle_type_) {
-          printf("\n##############6\n");
           result = false;
         }
       }
     } else {
-      printf("\n##############7\n");
       result = false;
     }
 
-    printf("\n############## %d \n", result);
     return result;
 }
 
@@ -372,6 +368,22 @@ void HMICapabilities::set_preset_bank_capabilities(
   }
   preset_bank_capabilities_ = new smart_objects::SmartObject(
       preset_bank_capabilities);
+}
+
+bool HMICapabilities::load_capabilities_from_file() {
+  std::string json_string;
+  std::string file_name =
+      profile::Profile::instance()->hmi_capabilities_file_name();
+
+  if (!file_system::FileExists(file_name)) {
+    return false;
+  }
+
+  if (!file_system::ReadFile(file_name, json_string)) {
+    return false;
+  }
+
+  return true;
 }
 
 }  //  namespace application_manager
