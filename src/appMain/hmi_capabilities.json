@@ -1,8 +1,8 @@
 {
 	"UI":
 	{
-		"activeLanguage":"EN-US",
-	    "supportedLanguages":
+		"language":"EN-US",
+	    "languages":
 	    [
 	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
 	    ]
@@ -10,8 +10,8 @@
     "VR":
 	{
 		"capabilities":["TEXT"],
-		"activeLanguage":"EN-US",
-	    "supportedLanguages":
+		"language":"EN-US",
+	    "languages":
 	    [
 	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
 	    ]
@@ -19,8 +19,8 @@
     "TTS":
 	{
 		"capabilities":"TEXT",
-		"activeLanguage":"EN-US",
-	    "supportedLanguages":
+		"language":"EN-US",
+	    "languages":
 	    [
 	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
 	    ]

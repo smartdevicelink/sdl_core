@@ -774,6 +774,7 @@ void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
 void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   SendDeleteCommandRequestToHMI(app);
   SendDeleteSubMenuRequestToHMI(app);
+  SendRemoveVrCommandsOnUnregisterApp(app);
   ResetGlobalproperties(app);
 }
 

@@ -231,7 +231,16 @@ void Profile::UpdateValues() {
                            "MAIN", "PoliciesTable", value))
       && ('\0' != *value)) {
     policies_file_name_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << policies_file_name_);
+    LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "HMICapabilities", value))
+      && ('\0' != *value)) {
+    hmi_capabilities_file_name_ = value;
+    LOG4CXX_INFO(logger_, "Set hmi capabilities file to " <<
+                 hmi_capabilities_file_name_);
   }
 
   *value = '\0';

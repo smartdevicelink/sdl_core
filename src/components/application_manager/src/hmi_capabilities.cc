@@ -38,6 +38,8 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager_impl.h"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -69,6 +71,7 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     speech_capabilities_(NULL),
     audio_pass_thru_capabilities_(NULL),
     app_mngr_(app_mngr){
+
 }
 
 HMICapabilities::~HMICapabilities() {
@@ -92,7 +95,7 @@ bool HMICapabilities::is_hmi_capabilities_initialized() const {
 
 
     if (false == profile::Profile::instance()->launch_hmi()) {
-      // TODO(DK) : load HMI capabilities from file
+      //  load_capabilities_from_file();
       return true;
     }
 
@@ -383,6 +386,19 @@ bool HMICapabilities::load_capabilities_from_file() {
     return false;
   }
 
+  try {
+    Json::Reader reader_;
+    Json::Value  root_json;
+
+    bool result = reader_.parse(json_string, root_json, false);
+    if (!result) {
+      return false;
+    }
+
+
+  } catch (...) {
+    return false;
+  }
   return true;
 }
 
