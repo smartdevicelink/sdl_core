@@ -52,6 +52,34 @@ QtObject {
         this.timeout = timeout
         interactionPopup.activate()
         async = new Async.AsyncCall()
+
+        if (vrHelp !== undefined) {
+            var checkSequentialPosition = vrHelp[0].position
+            for (var index = 0; index < vrHelp.length; index++) {
+                if (vrHelp[index].position !== checkSequentialPosition) {
+                    return { __retCode: Common.Result.REJECTED, __message: "Nonsequential positions of VrHelpItems" }
+                }
+                checkSequentialPosition++
+            }
+
+            if (app.vrHelpItemsPerformInteraction.count === 0) {
+                app.vrHelpItemsPerformInteraction.clear()
+            }
+            for (var j = 0; j < vrHelp.length; ++j) {
+                app.vrHelpItemsPerformInteraction.append({
+                    text: vrHelp[j].text,
+                    image: vrHelp[j].image ? vrHelp[j].image : "",
+                    position: vrHelp[j].position
+                    })
+            }
+        } /*else {
+            if (vrHelpTitle !== undefined) {
+                return { __retCode: Common.Result.REJECTED, __message: "vrHelpItems - undefined, vrHelpTitle - provided" }
+            } else {
+                // Use default VR Help Items instead of provided
+            }
+        }*/
+
         console.debug("exit")
         return async
     }

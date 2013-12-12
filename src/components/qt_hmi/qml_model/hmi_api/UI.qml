@@ -290,26 +290,40 @@ Item {
 
         console.debug("2")
         if (vrHelp !== undefined) {
+            console.debug("21")
             var checkSequentialPosition = vrHelp[0].position
-            for (var index = 0; index < vrHelp.lenght; index++) {
+            for (var index = 0; index < vrHelp.length; index++) {
+                console.debug("22")
                 if (vrHelp[index].position !== checkSequentialPosition) {
                     return { __retCode: Common.Result.REJECTED, __message: "Nonsequential positions of VrHelpItems" }
                 }
                 checkSequentialPosition++
             }
 
-            app.vrHelpItems.clear()
+            console.debug("23")
+            if (app.vrHelpItems.count === 0) {
+                app.vrHelpItems.clear()
+            }
             for (var i = 0; i < vrHelp.length; ++i) {
+                console.debug("233", vrHelp[i].image.imageType, vrHelp[i].image.value)
                 app.vrHelpItems.append({
-                                   "text": vrHelp[i].text,
-                                   "image": vrHelp[i].image ? vrHelp[i].image.value : "",
-                                   "position": vrHelp[i].position
+                                   text: vrHelp[i].text,
+                                   image: vrHelp[i].image ? vrHelp[i].image : "",
+                                   position: vrHelp[i].position
                                     })
+                ///!!!
+                console.debug("44", app.vrHelpItems.count)
+                for(var j = 0; j < app.vrHelpItems.count; ++j) {
+                    console.debug(app.vrHelpItems.get(j).text, app.vrHelpItems.get(j).image, app.vrHelpItems.get(j).position)
+                }
+                console.debug("45")
             }
         } else {
+            console.debug("24")
             if (vrHelpTitle !== undefined) {
                 return { __retCode: Common.Result.REJECTED, __message: "vrHelpItems - undefined, vrHelpTitle - provided" }
             } else {
+                console.debug("25")
                 // Use default VR Help Items instead of provided
             }
         }
@@ -336,16 +350,6 @@ Item {
             menuIcon: newMenuIcon
         })
         console.debug("exit")
-    }
-
-    function showVrHelp (vrHelpTitle, vrHelp, appID) {
-//        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + appID)
-//        if (vrHelpTitle) {
-//            vrHelpPopup.title = vrHelpTitle
-//        }
-//        dataContainer.setVrHelp(vrHelp)
-//        vrHelpPopup.show()
-//        console.debug("exit")
     }
 
     function isReady () {

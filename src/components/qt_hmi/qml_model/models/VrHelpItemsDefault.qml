@@ -3,18 +3,28 @@ import QtQuick 2.0
 
 ListModel {
     ListElement {
-        text: "ATATA"
-        image: ""
+        text: "SyncProxyTester"
+        moreParameters:[ ListElement {
+                value: "/home/aleshin/work/applink/src/appMain/SyncProxyTester/action.png"
+                imageType: 1
+            } ]
         position: 1
     }
     ListElement {
-        text: "ASDF"
-        image: ""
+        text: "XML Test "
+        image: ListElement {
+            value: "/home/aleshin/work/applink/src/appMain/SyncProxyTester/action.png"
+            imageType: 1
+        }
         position: 2
     }
     ListElement {
-        text: "q1w2e3"
-        image: ""
+        text: "Policies Test"
+        image: ListElement{
+            value: "/home/aleshin/work/applink/src/appMain/SyncProxyTester/action.png"
+            imageType: 1
+        }
         position: 3
     }
 }
+

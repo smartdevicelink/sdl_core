@@ -47,6 +47,8 @@ QtObject {
     property var appType
     property int hmiUITextAlignment
     property string vrHelpTitle //!
+    property string vrHelpTitleDefault: "VR HELP" //!
+    property string vrHelpTitlePerformInteraction //!
     property string menuTitle //!
 
     // media player
@@ -59,6 +61,7 @@ QtObject {
     property KeyboardProperties keyboardProperties: KeyboardProperties { } //!
     property ListModel vrHelpItemsDefault: VrHelpItemsDefault { } //!
     property ListModel vrHelpItems: ListModel { }
+    property ListModel vrHelpItemsPerformInteraction: ListModel {  } // !
     property ListModel options: ListModel { }
     property ListModel currentSubMenu: options
     property ListModel turnList

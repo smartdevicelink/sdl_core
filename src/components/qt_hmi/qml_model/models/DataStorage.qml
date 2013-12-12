@@ -38,7 +38,6 @@ import "Internal.js" as Internal
 import "Constants.js" as Constants
 
 QtObject {
-
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
     property SliderModel uiSlider: SliderModel { }
@@ -118,13 +117,17 @@ QtObject {
                 // Check fields with mandatory = false
 
                 console.debug("11`")
-                currentApplication.menuIcon.source = application.menuIcon
-                console.debug("12`")
+                if (application.menuIcon !== undefined) {
+                    currentApplication.menuIcon.source = application.menuIcon
+                }
+                console.debug("12`", currentApplication.menuIcon.source)
                 currentApplication.vrHelpTitle = application.vrHelpTitle
+                currentApplication.vrHelpTitleDefault = application.vrHelpTitleDefault
                 console.debug("13`")
                 currentApplication.menuTitle = application.menuTitle
                 console.debug("14`")
                 currentApplication.vrHelpItems = application.vrHelpItems
+                currentApplication.vrHelpItemsPerformInteraction = application.vrHelpItemsPerformInteraction
                 console.debug("15`")
 
                 currentApplication.deviceName = application.deviceName
@@ -169,6 +172,8 @@ QtObject {
             languageTTSVR: Common.Language.EN_US,
             softButtons: [],
             vrHelpTitle: "",
+            vrHelpTitlePerformInteraction: "",
+            vrHelpTitleDefault: app.vrHelpTitleDefault,
             menuTitle: "",
             keyboardProperties: [],
             vrHelpItems: app.vrHelpItems
