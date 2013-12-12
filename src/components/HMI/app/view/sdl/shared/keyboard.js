@@ -59,6 +59,22 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         }
     },
 
+    backButton: SDL.Button.extend( {
+        classNames:
+            [
+                'back-button'
+            ],
+        action: function() {
+
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.uiPerformInteraction && !SDL.InteractionChoicesView.active) {
+                SDL.InteractionChoicesView.deactivate("ABORTED");
+            }
+            SDL.Keyboard.deactivate();
+        },
+        icon: 'images/media/ico_back.png',
+        onDown: false
+    } ),
+
     /**
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
@@ -71,6 +87,10 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     },
 
     inputChanges: function (element) {
+
+        if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.uiPerformInteraction) {
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
+        }
 
         if (this.searchBar.input.value == null) {
             this.searchBar.input.set('value', "");
@@ -191,31 +211,32 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
 
     disableButtons: function(){
 
-        if (SDL.SDLAppController.model && !SDL.SDLAppController.model.globalProperties.keyboardProperties) {
-            return false;
-        }
-        var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;
+        if (SDL.SDLAppController.model) {
+            if (!SDL.SDLAppController.model.globalProperties.keyboardProperties) {
+                return;
+            }
+            var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;
 
-        if (SDL.SDLAppController.model && list){
+            if (SDL.SDLAppController.model && list){
 
-            for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
-                if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) < 0) {
-                    this.buttonsAreaQWERTY._childViews[i].set('disabled', true);
-                    this.buttonsAreaQWERTZ._childViews[i].set('disabled', true);
-                    this.buttonsAreaAZERTY._childViews[i].set('disabled', true);
-                } else {
+                for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
+                    if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) < 0) {
+                        this.buttonsAreaQWERTY._childViews[i].set('disabled', true);
+                        this.buttonsAreaQWERTZ._childViews[i].set('disabled', true);
+                        this.buttonsAreaAZERTY._childViews[i].set('disabled', true);
+                    } else {
+                        this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
+                        this.buttonsAreaQWERTZ._childViews[i].set('disabled', false);
+                        this.buttonsAreaAZERTY._childViews[i].set('disabled', false);
+                    }
+                }
+            } else if (SDL.SDLAppController.model && !list) {
+                for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
                     this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
-                    this.buttonsAreaQWERTZ._childViews[i].set('disabled', false);
-                    this.buttonsAreaAZERTY._childViews[i].set('disabled', false);
                 }
             }
-        } else if (SDL.SDLAppController.model && !list) {
-            for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
-                this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
-            }
         }
 
-        return true;
     }.observes('SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList.@each'),
 
     buttonsAreaQWERTY: SDL.QWERTYLayout.create({

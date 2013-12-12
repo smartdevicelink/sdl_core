@@ -49,7 +49,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     }.property('SDL.States.media.sdlmedia.mediaNavigation.active', 'SDL.TurnByTurnView.activeTBT'),
 
     childViews: [
-        'videoView',
+       // 'videoView',
         SDL.BaseNavigationView
     ],
 

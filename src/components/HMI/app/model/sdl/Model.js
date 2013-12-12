@@ -476,8 +476,16 @@ SDL.SDLModel = Em.Object.create({
      */
     startStream: function(params) {
 
+        var videoView =  Ember.View.create({
+            templateName: "video",
+            template: Ember.Handlebars.compile('<video id="html5Player" src=' + params.url + '></video>')
+        }),
+        videoChild = SDL.MediaNavigationView.createChildView(videoView);
+
+        SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
+
         SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-        this.playVideo();
+       // this.playVideo();
     },
 
     /**
@@ -487,8 +495,11 @@ SDL.SDLModel = Em.Object.create({
      */
     stopStream: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
-        this.pauseVideo();
+//        var videoView = SDL.MediaNavigationView._childViews.filterProperty('templateName', "video");
+//        SDL.MediaNavigationView.get('childViews').popObject(videoView);
+//
+//        //SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
+//        this.pauseVideo();
     },
 
     /**
@@ -699,7 +710,7 @@ SDL.SDLModel = Em.Object.create({
      */
     onSDLSetAppIcon: function (message, id, method) {
 
-        if (SDL.SDLController.getApplicationModel(message.appID)){
+        if (!SDL.SDLController.getApplicationModel(message.appID)){
             FFW.UI.sendUIResult(SDL.SDLModel.resultCode["APPLICATION_NOT_REGISTERED"], id, method);
         } else {
 
