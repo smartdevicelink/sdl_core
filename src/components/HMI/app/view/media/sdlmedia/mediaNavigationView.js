@@ -49,7 +49,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     }.property('SDL.States.media.sdlmedia.mediaNavigation.active', 'SDL.TurnByTurnView.activeTBT'),
 
     childViews: [
-       // 'videoView',
+        'videoView',
         SDL.BaseNavigationView
     ],
 
@@ -68,7 +68,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
         SDL.SDLModel.onTouchEvent(event);
     },
 
-    videoView: Ember.View.extend({
+    videoView: Ember.View.create({
         templateName: "video",
         template: Ember.Handlebars.compile('<video id="html5Player"></video>')
     })

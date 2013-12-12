@@ -55,6 +55,8 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this.set('constantTBTParams', null);
 
+            //TO DO need to be removed in future
+            //this.set('unregistered', false);
 
             this.set('tbtActivate', false);
             this.set('globalProperties.helpPrompt', []);

@@ -129,7 +129,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
         this._super();
 
         if (notification.method == this.onStopStreamNotification) {
-            SDL.SDLModel.onStopStream(notification.params);
+            SDL.SDLModel.onStopStream(notification.params.appID);
         }
     },
 
@@ -203,7 +203,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 }
                 case "Navigation.StopStream": {
 
-                    SDL.SDLModel.stopStream(request.params);
+                    SDL.SDLModel.stopStream(request.params.appID);
 
                     this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,

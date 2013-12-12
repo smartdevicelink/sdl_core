@@ -476,16 +476,8 @@ SDL.SDLModel = Em.Object.create({
      */
     startStream: function(params) {
 
-        var videoView =  Ember.View.create({
-            templateName: "video",
-            template: Ember.Handlebars.compile('<video id="html5Player" src=' + params.url + '></video>')
-        }),
-        videoChild = SDL.MediaNavigationView.createChildView(videoView);
-
-        SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
-
         SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-       // this.playVideo();
+        SDL.SDLModel.playVideo();
     },
 
     /**
@@ -493,13 +485,25 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      */
-    stopStream: function(params) {
+    stopStream: function(appID) {
 
-//        var videoView = SDL.MediaNavigationView._childViews.filterProperty('templateName', "video");
-//        SDL.MediaNavigationView.get('childViews').popObject(videoView);
-//
-//        //SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
-//        this.pauseVideo();
+        var createVideoView =  Ember.View.create({
+                templateName: "video",
+                template: Ember.Handlebars.compile('<video id="html5Player"></video>')
+            }),
+            videoChild = null;
+
+        SDL.MediaNavigationView.removeChild(SDL.MediaNavigationView.get('videoView'));
+        SDL.MediaNavigationView.rerender();
+
+        SDL.SDLController.getApplicationModel(appID).set('navigationStream', null);
+
+        //this.pauseVideo();
+
+        videoChild = SDL.MediaNavigationView.createChildView(createVideoView);
+
+        SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
+        SDL.MediaNavigationView.set('videoView', videoChild);
     },
 
     /**
@@ -968,7 +972,9 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.TurnByTurnView.deactivate();
 
-            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            //if (!SDL.SDLController.getApplicationModel(appID).unregistered) {
+                FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            //}
         }
     }
 });

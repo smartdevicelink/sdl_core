@@ -507,8 +507,9 @@ SDL.SDLController = Em.Object
          */
         unregisterApplication: function(appID) {
 
+            //this.getApplicationModel(appID).set('unregistered', true);
             this.getApplicationModel(appID).onDeleteApplication(appID);
-            this.set('model', null);
+            SDL.SDLAppController.set('model', null);
         },
         /**
          * SDL Driver Distraction ON/OFF switcher

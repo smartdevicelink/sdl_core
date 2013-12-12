@@ -213,12 +213,14 @@ void SocketVideoStreamerAdapter::VideoStreamer::threadMain() {
     while (is_client_connected_) {
       server_->messages_.wait();
       protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      printf("recieved message for socket server");
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;
       }
 
       is_client_connected_ = send(msg);
+      printf("is_client_connected %d", is_client_connected_);
     }
 
     stop();
