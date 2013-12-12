@@ -246,18 +246,17 @@ void ThreadedSocketConnection::Transmit() {
   do {
     bytes_read = read(read_fd_, buffer, sizeof(buffer));
   } while (bytes_read > 0);
+  if ((bytes_read < 0) && (EAGAIN != errno)) {
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
+    Abort();
+    LOG4CXX_INFO(logger_, "exit");
+    return;
+  }
 
   // send data if possible
   if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
     LOG4CXX_INFO(logger_, "frames_to_send_ not empty()  (#" << pthread_self() << ")");
-
-    if ((bytes_read < 0) && (EAGAIN != errno)) {
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-      Abort();
-      LOG4CXX_INFO(logger_, "exit");
-      return;
-    }
 
     // send data
     const bool send_ok = Send();
