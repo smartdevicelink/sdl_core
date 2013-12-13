@@ -138,6 +138,7 @@ var StateManager = Em.StateManager.extend({
 
                 this._super();
                 SDL.DeviceListView.clearDeviceList();
+                FFW.BasicCommunication.OnStartDeviceDiscovery();
             }
         }),
 
