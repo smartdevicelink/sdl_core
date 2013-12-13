@@ -158,14 +158,14 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
             case "VehicleInfo.SubscribeVehicleData": {
 
-                SDL.SDLVehicleInfoModel.SubscribeVehicleData(request.params);
+                SDL.SDLVehicleInfoModel.SubscribeVehicleData(request);
 
                 break;
             }
 
             case "VehicleInfo.UnsubscribeVehicleData": {
 
-                SDL.SDLVehicleInfoModel.UnsubscribeVehicleData(request.params);
+                SDL.SDLVehicleInfoModel.UnsubscribeVehicleData(request);
 
                 break;
             }
@@ -207,7 +207,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
     /**
      * Send error response from onRPCRequest
-     * 
+     *
      * @param {Number}
      *            resultCode
      * @param {Number}
@@ -231,6 +231,35 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "data": {
                         "method": method
                     }
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * Send response from onRPCRequest
+     *
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
+     */
+    sendVIResult: function(resultCode, id, method) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode,
+                    "method": method
                 }
             };
             this.client.send(JSONMessage);

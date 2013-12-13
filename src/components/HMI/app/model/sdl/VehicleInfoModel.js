@@ -322,13 +322,14 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Object} message
          */
         SubscribeVehicleData: function(message) {
-            if (SDL.SDLController.getApplicationModel(message.params.appID)) {
-
-                for (var i = 0; i < message.params.length; i++) {
-                   // SDL.SDLController.getApplicationModel(message.params.appID).subscribedData.push(message.params.[i])
-                }
-                //SDL.SDLController.getApplicationModel(message.params.appID).
-            }
+//            if (SDL.SDLController.getApplicationModel(message.params.appID)) {
+//
+//                for (var i = 0; i < message.params.length; i++) {
+//                   // SDL.SDLController.getApplicationModel(message.params.appID).subscribedData.push(message.params.[i])
+//                }
+//                //SDL.SDLController.getApplicationModel(message.params.appID).
+//            }
+            FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method);
         },
 
         /**
@@ -337,7 +338,7 @@ SDL.SDLVehicleInfoModel = Em.Object
          * @type {Object} message
          */
         UnsubscribeVehicleData: function(message) {
-
+            FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method);
         },
 
         /**
