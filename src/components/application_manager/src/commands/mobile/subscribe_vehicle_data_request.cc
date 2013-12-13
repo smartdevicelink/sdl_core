@@ -76,11 +76,17 @@ void SubscribeVehicleDataRequest::Run() {
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+
+  msg_params[strings::app_id] = app->app_id();
+
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first)
         && true == (*message_)[str::msg_params][it->first].asBool()) {
       ++items_to_subscribe;
       response_params[it->first][strings::data_type] = it->second;
+      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
 
       if (app->SubscribeToIVI(static_cast<unsigned int>(it->second))) {
         ++subscribed_items;
@@ -111,11 +117,8 @@ void SubscribeVehicleDataRequest::Run() {
 //    return;
 //  }
 
-  (*message_)[strings::msg_params][strings::app_id] =
-      (*message_)[str::params][str::connection_key].asUInt();
-
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
-                 &(*message_),
+                 &msg_params,
                  true);
 }
 
