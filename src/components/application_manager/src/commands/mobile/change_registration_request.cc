@@ -63,25 +63,24 @@ void ChangeRegistrationRequest::Run() {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
 
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
+  const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
 
-  Application* app = instance->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
-
+  Application* app = instance->application(connection_key());
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (!instance->is_ui_cooperating()) {
+  if (!hmi_capabilities.is_ui_cooperating()) {
     ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
-  if (!instance->is_vr_cooperating()) {
+  if (!hmi_capabilities.is_vr_cooperating()) {
     vr_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
-  if (!instance->is_tts_cooperating()) {
+  if (!hmi_capabilities.is_tts_cooperating()) {
     tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
@@ -185,8 +184,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   }
 
   if (!IsPendingResponseExist()) {
-    Application* application = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key].asUInt());
+    Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
 
     if (NULL == application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -195,16 +194,13 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
     if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
       application->set_ui_language(static_cast<mobile_api::Language::eType>(
-         (*message_)[strings::msg_params][strings::hmi_display_language].asInt()
-          ));
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt()));
     }
 
     if (hmi_apis::Common_Result::SUCCESS == vr_result_
         || hmi_apis::Common_Result::SUCCESS == tts_result_) {
-      application->set_language(
-          static_cast<mobile_api::Language::eType>(
-              (*message_)[strings::msg_params]
-                          [strings::language].asInt()));
+      application->set_language(static_cast<mobile_api::Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
     }
 
     int greates_result_code = std::max(std::max(ui_result_, vr_result_),
@@ -221,8 +217,11 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int& hmi_display_lang) {
+
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* ui_languages =
-      ApplicationManagerImpl::instance()->ui_supported_languages();
+      hmi_capabilities.ui_supported_languages();
 
   if (!ui_languages) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -242,8 +241,10 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int& hmi_display_lang) {
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* vr_languages =
-      ApplicationManagerImpl::instance()->vr_supported_languages();
+      hmi_capabilities.vr_supported_languages();
 
   if (!vr_languages) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -263,8 +264,10 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int& hmi_display_lang) {
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* tts_languages =
-      ApplicationManagerImpl::instance()->tts_supported_languages();
+      hmi_capabilities.tts_supported_languages();
 
   if (!tts_languages) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

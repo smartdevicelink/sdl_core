@@ -63,6 +63,8 @@ class TransportManagerListener {
    * @param device_info Variable that hold information about device.
    */
   virtual void OnDeviceFound(const DeviceInfo &device_info) = 0;
+  virtual void OnDeviceAdded(const DeviceInfo &device_info) = 0;
+  virtual void OnDeviceRemoved(const DeviceInfo &device_info) = 0;
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.

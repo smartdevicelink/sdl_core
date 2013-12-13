@@ -70,6 +70,11 @@ class Profile {
     void config_file_name(const std::string& fileName);
 
     /**
+      * @brief Returns true if HMI should be started, otherwise false
+      */
+    bool launch_hmi() const;
+
+    /**
      * @brief Returns server address
      */
     const std::string& server_address() const;
@@ -88,6 +93,11 @@ class Profile {
      * @brief Returns policies file name
      */
     const std::string& policies_file_name() const;
+
+    /**
+     * @brief Returns hmi capabilities file name
+     */
+    const std::string& hmi_capabilities_file_name() const;
 
     /**
      * @brief Returns help promt vector
@@ -259,11 +269,13 @@ class Profile {
                    const char* const pKey) const;
 
     // Members section
+    bool                            launch_hmi_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        navi_server_port_;
     std::string                     policies_file_name_;
+    std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_promt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;

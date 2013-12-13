@@ -38,6 +38,7 @@
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "protocol_handler/service_type.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -45,20 +46,6 @@
  */
 
 namespace protocol_handler {
-
-// TODO(PV): maybe move this to some 'common' header file?
-// this is the same as in ConnectionHandler.
-/**
-  * \brief Enum describing possible types of sessions: RPC for API messages,
-  Navi for video streaming.
-  */
-enum ServiceTypes {
-  NONE = -1,
-  RPC = 0x07,
-  MOBILE_NAV = 0x0B,
-  BULK = 0x0F
-};
-
 /**
  * \class SmartDeviceLinkRawMessage
  * \brief Class-wraper for information about message for interchanging
@@ -76,7 +63,7 @@ class RawMessage {
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
                unsigned char* data, unsigned int dataSize,
-               unsigned char type = 0x07);
+               unsigned char type = ServiceType::kRpc);
 
     /**
      * \brief Destructor
@@ -108,11 +95,18 @@ class RawMessage {
     /**
      * \brief Getter for service type
      */
-    ServiceTypes service_type() const;
+    ServiceType service_type() const {
+      return service_type_;
+    }
 
     bool IsWaiting() const;
 
     void set_waiting(bool v);
+
+    /*
+     * \brief Compares priorities of two messages based on their service type
+     */
+    bool HasHigherPriorityThan(const RawMessage& that) const;
 
   private:
     /**
@@ -140,7 +134,7 @@ class RawMessage {
     /**
      * \brief Type of service message belongs to
      */
-    ServiceTypes service_type_;
+    ServiceType service_type_;
 
     /**
      * specifies current state of message in queue. if false message is "ready to be processed"

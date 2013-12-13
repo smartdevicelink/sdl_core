@@ -37,6 +37,14 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this._super();
 
+            var subscribeVIData = {};
+
+            for (var key in SDL.SDLVehicleInfoModel.vehicleData) {
+                subscribeVIData[key] = false;
+            }
+
+            this.set('subscribedData', subscribeVIData);
+
             // init properties here
             this.set('appInfo', Em.Object.create({
                 field1       : '<field1>',
@@ -55,6 +63,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this.set('constantTBTParams', null);
 
+            this.set('tbtActivate', false);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
             this.set('globalProperties.keyboardProperties', Em.Object.create());

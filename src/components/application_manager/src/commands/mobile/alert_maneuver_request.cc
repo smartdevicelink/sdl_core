@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -83,17 +84,6 @@ void AlertManeuverRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    msg_params[hmi_request::soft_buttons] =
-        (*message_)[strings::msg_params][strings::soft_buttons];
-  }
-
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params,
-                 true);
-
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
@@ -107,35 +97,83 @@ void AlertManeuverRequest::Run() {
           (*message_)[strings::msg_params][strings::tts_chunks];
 
       msg_params[strings::app_id] = app->app_id();
-      CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
+      SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+      pending_requests_.push_back(hmi_apis::FunctionID::TTS_Speak);
     }
   }
+
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    msg_params[hmi_request::soft_buttons] =
+        (*message_)[strings::msg_params][strings::soft_buttons];
+  }
+
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params,
+                 true);
+  pending_requests_.push_back(hmi_apis::FunctionID::Navigation_AlertManeuver);
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ShowRequest::on_event");
+  LOG4CXX_INFO(logger_, "AlertManeuverRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
+  mobile_apis::Result::eType result_code;
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
 
-      mobile_apis::Result::eType result_code =
+      pending_requests_.erase(
+          std::find(pending_requests_.begin(),
+                    pending_requests_.end(),
+                    hmi_apis::FunctionID::Navigation_AlertManeuver));
+
+      result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != result_) {
-        result_code = result_;
-      }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      pending_requests_.erase(
+          std::find(pending_requests_.begin(),
+                    pending_requests_.end(),
+                    hmi_apis::FunctionID::TTS_Speak));
+
+      result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
       break;
     }
     default: {
       LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
-      break;
+      SendResponse(false, result_code, "Received unknown event");
+      return;
     }
+  }
+
+  if (mobile_apis::Result::INVALID_ENUM == result_) {
+    result_= result_code;
+  } else if (mobile_apis::Result::SUCCESS == result_) {
+    result_ =
+        result_ == result_code
+        ? mobile_apis::Result::SUCCESS
+        : result_code
+        ;
+  }
+
+  if (pending_requests_.empty()) {
+    bool success = mobile_apis::Result::SUCCESS == result_code;
+
+    if (mobile_apis::Result::INVALID_ENUM != result_) {
+      result_code = result_;
+    }
+
+    SendResponse(success, result_code, NULL, &(message[strings::msg_params]));
   }
 }
 

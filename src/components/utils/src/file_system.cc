@@ -338,11 +338,9 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
     for (; it_sym != it_sym_end; ++it_sym) {
 
       if (*it_path == *it_sym) {
-        char c = *it_path;
-        int value = static_cast<int>(c);
-        std::stringstream ss;
-        ss << std::hex << value;
-        std::string percent_value = "%" + ss.str();
+        size_t size = 100;
+        char percent_value[size];
+        snprintf(percent_value, size, "%%%x", *it_path);
         converted_path += percent_value;
         ++it_path;
         continue;

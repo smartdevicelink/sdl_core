@@ -73,18 +73,34 @@ namespace impl {
  * These dummy classes are here to locally impose strong typing on different
  * kinds of messages
  * Currently there is no type difference between incoming and outgoing messages
- * TODO(ikozyrenko): replace these with globally defined message types
+ * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
 struct RawFordMessageFromMobile: public RawMessagePtr {
   explicit RawFordMessageFromMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
+  // This operator is used by priority queue to sort messages based
+  // on their priority, "smaller" messages come out from priority queue first
+  bool operator < (const RawFordMessageFromMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
 
 struct RawFordMessageToMobile: public RawMessagePtr {
   explicit RawFordMessageToMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
+  // This operator is used by priority queue to sort messages based
+  // on their priority, "smaller" messages come out from priority queue first
+  bool operator < (const RawFordMessageToMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
 };
+
+// Short type names for proiritized message queues
+typedef threads::MessageLoopThread<
+               std::priority_queue<RawFordMessageFromMobile> > FromMobileQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<RawFordMessageToMobile> > ToMobileQueue;
 
 }
 
@@ -99,8 +115,8 @@ struct RawFordMessageToMobile: public RawMessagePtr {
 class ProtocolHandlerImpl
     : public ProtocolHandler,
       public TransportManagerListenerImpl,
-      public threads::MessageLoopThread<impl::RawFordMessageFromMobile>::Handler,
-      public threads::MessageLoopThread<impl::RawFordMessageToMobile>::Handler {
+      public impl::FromMobileQueue::Handler,
+      public impl::ToMobileQueue::Handler {
   public:
     /**
      * \brief Constructor
@@ -380,9 +396,9 @@ class ProtocolHandlerImpl
     std::map<unsigned char, unsigned int> message_counters_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
-    threads::MessageLoopThread<impl::RawFordMessageFromMobile> raw_ford_messages_from_mobile_;
+    impl::FromMobileQueue raw_ford_messages_from_mobile_;
     // Thread that pumps messages prepared to being sent to mobile side.
-    threads::MessageLoopThread<impl::RawFordMessageToMobile> raw_ford_messages_to_mobile_;
+    impl::ToMobileQueue raw_ford_messages_to_mobile_;
 };
 }  // namespace protocol_handler
 

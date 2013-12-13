@@ -43,7 +43,9 @@ log4cxx::LoggerPtr logger_ =
 namespace profile {
 Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
+  , launch_hmi_(true)
   , policies_file_name_("policy_table.json")
+  , hmi_capabilities_file_name_("hmi_capabilities.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
   , navi_server_port_(5050)
@@ -87,8 +89,16 @@ const std::string& Profile::config_file_name() const {
   return config_file_name_;
 }
 
+bool Profile::launch_hmi() const {
+  return launch_hmi_;
+}
+
 const std::string& Profile::policies_file_name() const {
   return policies_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_file_name() const {
+  return hmi_capabilities_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -197,6 +207,18 @@ void Profile::UpdateValues() {
 
   char value[INI_LINE_LEN + 1];
   *value = '\0';
+
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "LaunchHMI", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      launch_hmi_ = true;
+    } else {
+      launch_hmi_ = false;
+    }
+    LOG4CXX_INFO(logger_, "Set launch HMI to " << launch_hmi_);
+  }
+
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerAddress", value))
       && ('\0' != *value)) {
@@ -209,7 +231,16 @@ void Profile::UpdateValues() {
                            "MAIN", "PoliciesTable", value))
       && ('\0' != *value)) {
     policies_file_name_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << policies_file_name_);
+    LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "HMICapabilities", value))
+      && ('\0' != *value)) {
+    hmi_capabilities_file_name_ = value;
+    LOG4CXX_INFO(logger_, "Set hmi capabilities file to " <<
+                 hmi_capabilities_file_name_);
   }
 
   *value = '\0';

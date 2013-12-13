@@ -46,7 +46,9 @@ MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {
 void MixingAudioSupportedResponse::Run() {
   LOG4CXX_INFO(logger_, "MixingAudioSupportedResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_attenuated_supported((*message_)
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+  hmi_capabilities.set_attenuated_supported((*message_)
       [strings::msg_params][hmi_response::attenuated_supported].asBool());
 }
 

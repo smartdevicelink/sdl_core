@@ -231,6 +231,23 @@ void UsbDeviceScanner::TurnIntoAccessoryMode(
 
   int libusb_ret = 0;
 
+  int configuration;
+  libusb_ret = libusb_get_configuration(device_handle, &configuration);
+  if (LIBUSB_SUCCESS != libusb_ret) {
+     LOG4CXX_INFO(
+       logger_,
+       "libusb_get_configuration failed: " << libusb_error_name(libusb_ret));
+     return;
+  }
+  if (configuration != kUsbConfiguration) {
+    libusb_ret = libusb_set_configuration(device_handle, kUsbConfiguration);
+    if (LIBUSB_SUCCESS != libusb_ret) {
+       LOG4CXX_INFO(
+         logger_,
+         "libusb_set_configuration failed: " << libusb_error_name(libusb_ret));
+       return;
+    }
+  }
   libusb_ret = libusb_claim_interface(device_handle, 0);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_INFO(

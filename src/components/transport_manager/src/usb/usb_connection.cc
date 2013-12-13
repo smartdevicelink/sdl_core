@@ -253,15 +253,34 @@ TransportAdapter::Error UsbConnection::Disconnect() {
 }
 
 bool UsbConnection::Init() {
-  if (!FindEndpoints()) {
-    return false;
-  }
-
   int libusb_ret;
   libusb_ret = libusb_open(libusb_device_, &device_handle_);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_,
                   "libusb_open failed: " << libusb_error_name(libusb_ret));
+    return false;
+  }
+
+  int configuration;
+  libusb_ret = libusb_get_configuration(device_handle_, &configuration);
+  if (LIBUSB_SUCCESS != libusb_ret) {
+     LOG4CXX_INFO(
+       logger_,
+       "libusb_get_configuration failed: " << libusb_error_name(libusb_ret));
+     return false;
+  }
+
+  if (configuration != kUsbConfiguration) {
+    libusb_ret = libusb_set_configuration(device_handle_, kUsbConfiguration);
+    if (LIBUSB_SUCCESS != libusb_ret) {
+       LOG4CXX_INFO(
+         logger_,
+         "libusb_set_configuration failed: " << libusb_error_name(libusb_ret));
+       return false;
+    }
+  }
+
+  if (!FindEndpoints()) {
     return false;
   }
 

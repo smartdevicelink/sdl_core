@@ -34,6 +34,13 @@
 SDL.SDLAppModel = Em.Object.extend({
 
         /**
+         * List of subscribed data on VehicleInfo model
+         *
+         * @type {Object}
+         */
+        subscribedData: {},
+
+        /**
          * Application's container for current processed requests on HMI
          *
          * @type {Object}
@@ -130,6 +137,13 @@ SDL.SDLAppModel = Em.Object.extend({
         commandsList: {
             0: []
         },
+
+        /**
+         * Flag to open ShowConstantTBTview when entering to current screen
+         *
+         * @type {Boolean}
+         */
+        tbtActivate: false,
 
         /**
          * Return current menu commands

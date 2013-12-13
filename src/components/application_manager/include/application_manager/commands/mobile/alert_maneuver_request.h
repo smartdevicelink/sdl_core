@@ -73,6 +73,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
 
  private:
   mobile_apis::Result::eType  result_;
+  std::vector<hmi_apis::FunctionID::eType> pending_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };

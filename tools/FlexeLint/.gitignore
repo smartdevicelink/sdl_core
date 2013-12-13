@@ -1,1 +1,4 @@
 gcc-include-path.lnt
+lint_cmac.h
+lint_cppmac.h
+size-options.lnt

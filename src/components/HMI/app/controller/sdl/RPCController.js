@@ -2381,11 +2381,97 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request GetVehicleData
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
                 GetVehicleData: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request SubscribeVehicleData
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                SubscribeVehicleData: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request UnsubscribeVehicleData
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                UnsubscribeVehicleData: function(params) {
 
                     if (params == null) {
 

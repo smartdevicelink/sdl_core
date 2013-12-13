@@ -48,10 +48,12 @@ OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {
 
 void OnAppUnregisteredNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppUnregisteredNotification::Run");
+
   //sending event for delete VRCommand on PerformInteraction
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
   event.set_smart_object(*message_);
   event.raise();
+
   SendNotification();
 }
 

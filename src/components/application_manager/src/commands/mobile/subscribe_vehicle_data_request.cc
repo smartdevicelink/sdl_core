@@ -76,11 +76,17 @@ void SubscribeVehicleDataRequest::Run() {
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+
+  msg_params[strings::app_id] = app->app_id();
+
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first)
         && true == (*message_)[str::msg_params][it->first].asBool()) {
       ++items_to_subscribe;
       response_params[it->first][strings::data_type] = it->second;
+      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
 
       if (app->SubscribeToIVI(static_cast<unsigned int>(it->second))) {
         ++subscribed_items;
@@ -93,23 +99,39 @@ void SubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (0 == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "No data in the request", &response_params);
-  } else if (subscribed_items == items_to_subscribe) {
-    SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Subscribed on provided VehicleData", &response_params);
-  } else if (0 == subscribed_items) {
-    SendResponse(false, mobile_apis::Result::IGNORED,
-                 "Already subscribed on provided VehicleData",
-                 &response_params);
-  } else if (subscribed_items < items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::WARNINGS,
-                 "Already subscribed on some VehicleData", &response_params);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
-    return;
-  }
+//  if (0 == items_to_subscribe) {
+//    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+//                 "No data in the request", &response_params);
+//  } else if (subscribed_items == items_to_subscribe) {
+//    SendResponse(true, mobile_apis::Result::SUCCESS,
+//                 "Subscribed on provided VehicleData", &response_params);
+//  } else if (0 == subscribed_items) {
+//    SendResponse(false, mobile_apis::Result::IGNORED,
+//                 "Already subscribed on provided VehicleData",
+//                 &response_params);
+//  } else if (subscribed_items < items_to_subscribe) {
+//    SendResponse(false, mobile_apis::Result::WARNINGS,
+//                 "Already subscribed on some VehicleData", &response_params);
+//  } else {
+//    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
+//    return;
+//  }
+
+  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+                 &msg_params,
+                 true);
+}
+
+void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::on_event");
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  SendResponse(true,
+               mobile_apis::Result::SUCCESS,
+               0,
+               &(message[strings::msg_params])
+               );
 }
 
 }  // namespace commands

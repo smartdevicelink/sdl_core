@@ -37,11 +37,14 @@
 #include <vector>
 
 #include "utils/shared_ptr.h"
+#include "protocol_handler/message_priority.h"
+#include "protocol_handler/rpc_type.h"
 
 namespace application_manager {
 
 typedef std::vector<unsigned char> BinaryData;
 
+// Message type is a general type used by both mobile and HMI messages
 enum MessageType {
   kUnknownType = -1,
   kRequest = 0,
@@ -49,6 +52,9 @@ enum MessageType {
   kNotification = 2,
   kErrorResponse = 3
 };
+
+// Map PrcType to corresponding MessageType
+MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type);
 
 enum ProtocolVersion {
   kUnknownProtocol = -1,
@@ -59,7 +65,7 @@ enum ProtocolVersion {
 
 class Message {
  public:
-  Message();
+  Message(protocol_handler::MessagePriority priority);
   Message(const Message& message);
   Message& operator=(const Message& message);
   bool operator==(const Message& message);
@@ -86,10 +92,18 @@ class Message {
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
 
+  // Tells whether |this| message has higher priority
+  // (and must be processed earlier) than |that|
+  bool HasHigherPriorityThan(const Message& that) const;
+
  private:
   int function_id_;  // @remark protocol V2.
   int correlation_id_;  // @remark protocol V2.
   MessageType type_;  // @remark protocol V2.
+
+  // Pre-calculated message priority, higher priority messages are
+  // Processed first
+  protocol_handler::MessagePriority priority_;
 
   int connection_key_;
   ProtocolVersion version_;

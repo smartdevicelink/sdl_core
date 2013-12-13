@@ -45,7 +45,7 @@ NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
 }
 
 void NaviAlertManeuverResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIAddCommandRequest::Run");
+  LOG4CXX_INFO(logger_, "NaviAlertManeuverResponse::Run");
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
   event.set_smart_object(*message_);
