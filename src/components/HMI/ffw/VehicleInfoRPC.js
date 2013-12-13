@@ -267,6 +267,34 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
     },
 
     /**
+     * Send response from onRPCRequest
+     *
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     * @param {Object} data
+     */
+    sendVISubscribeVehicleDataResult: function(resultCode, id, method, data) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": data
+            };
+
+            JSONMessage.result.code = resultCode;
+            JSONMessage.result.method = method;
+
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
      * Send error response from onRPCRequest
      * 
      * @param {Number}

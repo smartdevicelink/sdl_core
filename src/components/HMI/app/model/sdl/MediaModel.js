@@ -37,6 +37,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
             this._super();
 
+            var subscribeVIData = {};
+
+            for (var key in SDL.SDLVehicleInfoModel.vehicleData) {
+                subscribeVIData[key] = false;
+            }
+
+            this.set('subscribedData', subscribeVIData);
+
             // init properties here
             this.set('appInfo', Em.Object.create({
                 field1       : '<field1>',
@@ -58,9 +66,6 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('activeRequests', Em.Object.create({
                 uiPerformInteraction: null
             }));
-
-            //TO DO need to be removed in future
-            //this.set('unregistered', false);
 
             this.set('tbtActivate', false);
             this.set('isPlaying', true);
