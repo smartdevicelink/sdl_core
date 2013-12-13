@@ -70,7 +70,7 @@ void OnUILanguageChangeNotification::Run() {
       ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
+  while (applications.end() != it) {
     Application* app = *it;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
@@ -83,6 +83,8 @@ void OnUILanguageChangeNotification::Run() {
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
       ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
     }
+
+    it = applications.begin();
   }
 }
 

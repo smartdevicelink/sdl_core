@@ -67,7 +67,7 @@ void OnTTSLanguageChangeNotification::Run() {
       ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
+  while (applications.end() != it) {
     Application* app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
@@ -76,15 +76,13 @@ void OnTTSLanguageChangeNotification::Run() {
         != (*message_)[strings::msg_params][strings::language].asInt()) {
       app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
 
-      MessageHelper::SendDeleteCommandRequestToHMI(app);
-      MessageHelper::SendRemoveVrCommandsOnUnregisterApp(app);
-
-      MessageHelper::SendOnAppUnregNotificationToHMI(app);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
       ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
     }
+
+    it = applications.begin();
   }
 }
 
