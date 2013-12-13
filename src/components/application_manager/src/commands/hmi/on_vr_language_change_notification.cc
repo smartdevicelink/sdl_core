@@ -68,6 +68,7 @@ void OnVRLanguageChangeNotification::Run() {
 
   std::set<Application*>::iterator it = applications.begin();
   while (applications.end() != it) {
+    Application* app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
