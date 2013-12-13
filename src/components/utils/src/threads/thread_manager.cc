@@ -85,12 +85,6 @@ ThreadManager& ThreadManager::instance() {
   return *instance_;
 }
 
-// static
-void ThreadManager::Shutdown() {
-  delete instance_;
-  instance_ = NULL;
-}
-
 ThreadManager::ThreadManager() {
   names_.insert(kUnknownName);
 }

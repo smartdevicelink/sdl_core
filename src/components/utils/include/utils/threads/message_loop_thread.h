@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_MESSAGE_LOOP_THREAD_H_
 
 #include <string>
+#include <queue>
 
 #include "utils/logger.h"
 #include "utils/macro.h"
@@ -15,9 +16,11 @@ namespace threads {
  * to it's queue. To handle messages someone, Handler must be implemented and
  * passed to MessageLoopThread constructor.
  */
-template <class Message>
+template < class Q >
 class MessageLoopThread {
  public:
+  typedef Q Queue;
+  typedef typename Queue::value_type Message;
   /*
    * Handler interface. It is called from a thread that is
    * owned by MessageLoopThread so make sure is only accesses
@@ -48,7 +51,7 @@ class MessageLoopThread {
    * able to correctly shut it down
    */
   struct LoopThreadDelegate : public threads::ThreadDelegate {
-    LoopThreadDelegate(MessageQueue<Message>* message_queue,
+    LoopThreadDelegate(MessageQueue<Message, Queue>* message_queue,
                        Handler* handler);
 
     // threads::ThreadDelegate overrides
@@ -61,17 +64,17 @@ class MessageLoopThread {
     // Handler that processes messages
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
-    MessageQueue<Message>& message_queue_;
+    MessageQueue<Message, Queue>& message_queue_;
   };
  private:
-  MessageQueue<Message> message_queue_;
+  MessageQueue<Message, Queue> message_queue_;
   threads::Thread thread_;
 };
 
 ///////// Implementation
 
-template<class Message>
-MessageLoopThread<Message>::MessageLoopThread(const std::string& name,
+template<class Q>
+MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
                                               Handler* handler,
                                               const ThreadOptions& thread_opts)
     : thread_(name.c_str(), new LoopThreadDelegate(&message_queue_, handler)) {
@@ -83,29 +86,29 @@ MessageLoopThread<Message>::MessageLoopThread(const std::string& name,
   }
 }
 
-template<class Message>
-MessageLoopThread<Message>::~MessageLoopThread() {
+template<class Q>
+MessageLoopThread<Q>::~MessageLoopThread() {
   // this will join us with the thread while it drains message queue
   thread_.stop();
 }
 
-template <class Message>
-void MessageLoopThread<Message>::PostMessage(const Message& message) {
+template <class Q>
+void MessageLoopThread<Q>::PostMessage(const Message& message) {
   message_queue_.push(message);
 }
 
 //////////
-template<class Message>
-MessageLoopThread<Message>::LoopThreadDelegate::LoopThreadDelegate(
-    MessageQueue<Message>* message_queue, Handler* handler)
+template<class Q>
+MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
+    MessageQueue<Message, Queue>* message_queue, Handler* handler)
     : handler_(*handler),
       message_queue_(*message_queue) {
   DCHECK(handler != NULL);
   DCHECK(message_queue != NULL);
 }
 
-template<class Message>
-void MessageLoopThread<Message>::LoopThreadDelegate::threadMain() {
+template<class Q>
+void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   while(!message_queue_.IsShuttingDown()){
     DrainQue();
     message_queue_.wait();
@@ -114,15 +117,15 @@ void MessageLoopThread<Message>::LoopThreadDelegate::threadMain() {
   DrainQue();
 }
 
-template<class Message>
-bool MessageLoopThread<Message>::LoopThreadDelegate::exitThreadMain() {
+template<class Q>
+bool MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
   message_queue_.Shutdown();
   // Prevent canceling thread until queue is drained
   return true;
 }
 
-template<class Message>
-void MessageLoopThread<Message>::LoopThreadDelegate::DrainQue() {
+template<class Q>
+void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
   while(!message_queue_.empty()) {
     handler_.Handle(message_queue_.pop());
   }

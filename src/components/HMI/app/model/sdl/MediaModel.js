@@ -59,6 +59,10 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 uiPerformInteraction: null
             }));
 
+            //TO DO need to be removed in future
+            //this.set('unregistered', false);
+
+            this.set('tbtActivate', false);
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);

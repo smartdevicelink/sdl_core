@@ -50,12 +50,15 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 void OnTTSLanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run");
 
-  ApplicationManagerImpl::instance()->set_active_tts_language(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-      ApplicationManagerImpl::instance()->active_ui_language();
+      hmi_capabilities.active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnLanguageChangeID;

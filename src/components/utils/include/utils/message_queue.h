@@ -43,8 +43,10 @@
  * \class MessageQueue
  * \brief Wrapper for multithreading queue.
  */
-template<typename T> class MessageQueue {
+
+template<typename T, class Q = std::queue<T> > class MessageQueue {
   public:
+    typedef Q Queue;
     /**
      * \brief Default constructor
      */
@@ -98,10 +100,18 @@ template<typename T> class MessageQueue {
      */
     void Shutdown();
   private:
+
+    /*
+     * Different ways of taking next element from queue for
+     * two supported queue types
+     */
+    static T TakeFromQueue(std::queue<T>& queue);
+    static T TakeFromQueue(std::priority_queue<T>& queue);
+
     /**
      *\brief Queue
      */
-    std::queue<T> queue_;
+    Queue queue_;
     volatile bool shutting_down_;
     /**
      *\brief Platform specific syncronisation variable
@@ -110,11 +120,11 @@ template<typename T> class MessageQueue {
     mutable sync_primitives::ConditionalVariable queue_new_items_;
 };
 
-template<typename T> MessageQueue<T>::MessageQueue()
+template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
     : shutting_down_(false) {
 }
 
-template<typename T> MessageQueue<T>::~MessageQueue() {
+template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
   if (!queue_.empty()) {
     log4cxx::LoggerPtr logger =
         log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
@@ -122,29 +132,29 @@ template<typename T> MessageQueue<T>::~MessageQueue() {
   }
 }
 
-template<typename T> void MessageQueue<T>::wait() {
+template<typename T, class Q> void MessageQueue<T, Q>::wait() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   while (!shutting_down_ && queue_.empty()) {
     queue_new_items_.Wait(auto_lock);
   }
 }
 
-template<typename T> int MessageQueue<T>::size() const {
+template<typename T, class Q> int MessageQueue<T, Q>::size() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.size();
 }
 
-template<typename T> bool MessageQueue<T>::empty() const {
+template<typename T, class Q> bool MessageQueue<T, Q>::empty() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.empty();
 }
 
-template<typename T> bool MessageQueue<T>::IsShuttingDown() const {
+template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return shutting_down_;
 }
 
-template<typename T> void MessageQueue<T>::push(const T& element) {
+template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (shutting_down_) {
     log4cxx::LoggerPtr logger =
@@ -156,24 +166,35 @@ template<typename T> void MessageQueue<T>::push(const T& element) {
   queue_new_items_.Broadcast();
 }
 
-template<typename T> T MessageQueue<T>::pop() {
+template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
     log4cxx::LoggerPtr logger =
         log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
     LOG4CXX_ERROR(logger, "Runtime error, popping out of empty que");
   }
-
-  T result = queue_.front();
-  queue_.pop();
-
-  return result;
+  return TakeFromQueue(queue_);
 }
 
-template<typename T> void MessageQueue<T>::Shutdown() {
+template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = true;
   queue_new_items_.Broadcast();
+}
+
+
+template<typename T, class Q>
+T MessageQueue<T, Q>::TakeFromQueue(std::queue<T>& queue) {
+  T result = queue.front();
+  queue.pop();
+  return result;
+}
+
+template<typename T, class Q>
+T MessageQueue<T, Q>::TakeFromQueue(std::priority_queue<T>& queue) {
+  T result = queue.top();
+  queue.pop();
+  return result;
 }
 
 #endif  //  MESSAGE_QUEUE_CLASS

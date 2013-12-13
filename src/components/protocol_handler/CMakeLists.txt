@@ -6,9 +6,13 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/rpc_type.cc
     ./src/raw_message.cc
     ./src/protocol_handler_impl.cc
     ./src/protocol_packet.cc
+    ./src/protocol_payload.cc
+    ./src/message_priority.cc
+    ./src/service_type.cc
 )
 
 add_library("ProtocolHandler" ${SOURCES})

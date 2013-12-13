@@ -78,7 +78,6 @@ class ThreadManager {
  public:
   // Singleton access method
   static ThreadManager& instance();
-  static void Shutdown();
 
   // Name a thread. Should be called only once for every thread.
   // Threads can't be renamed
@@ -109,6 +108,11 @@ class ThreadManager {
   mutable UnnamedThreadRegistry unnamed_thread_namer_;
 
   // Singleton instance
+  // We need ThreadManager to be singleton because it provides (debugging)
+  // functionality that is to be used by every module in the system.
+  // And it must outlive all other singletones (so all other singletones
+  // are able to use it for debugging while being destroyed)
+  // This it is leaked (intentionally!).
   static ThreadManager* instance_;
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);

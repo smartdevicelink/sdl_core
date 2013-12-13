@@ -47,7 +47,9 @@ VRGetLanguageResponse::~VRGetLanguageResponse() {
 void VRGetLanguageResponse::Run() {
   LOG4CXX_INFO(logger_, "VRGetLanguageResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_active_vr_language(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+  hmi_capabilities.set_active_vr_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));
 }

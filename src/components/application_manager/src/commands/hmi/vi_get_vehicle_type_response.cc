@@ -47,7 +47,10 @@ VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {
 void VIGetVehicleTypeResponse::Run() {
   LOG4CXX_INFO(logger_, "VIGetVehicleTypeResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_vehicle_type(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
 }
 

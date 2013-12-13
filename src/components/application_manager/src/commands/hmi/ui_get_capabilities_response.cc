@@ -47,21 +47,24 @@ UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
 void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_display_capabilities(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_display_capabilities(
       (*message_)[strings::msg_params][hmi_response::display_capabilities]);
-  ApplicationManagerImpl::instance()->set_hmi_zone_capabilities(
+  hmi_capabilities.set_hmi_zone_capabilities(
       (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
 
   if ((*message_)[strings::msg_params].keyExists(
                                       hmi_response::soft_button_capabilities)) {
-    ApplicationManagerImpl::instance()->set_soft_button_capabilities(
+    hmi_capabilities.set_soft_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
   }
 
   if ((*message_)[strings::msg_params].keyExists(
                                       strings::audio_pass_thru_capabilities)) {
 
-    ApplicationManagerImpl::instance()->set_audio_pass_thru_capabilities(
+    hmi_capabilities.set_audio_pass_thru_capabilities(
       (*message_)[strings::msg_params][strings::audio_pass_thru_capabilities]);
   }
 }

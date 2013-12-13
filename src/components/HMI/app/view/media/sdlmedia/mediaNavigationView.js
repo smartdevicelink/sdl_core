@@ -68,7 +68,7 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
         SDL.SDLModel.onTouchEvent(event);
     },
 
-    videoView: Ember.View.extend({
+    videoView: Ember.View.create({
         templateName: "video",
         template: Ember.Handlebars.compile('<video id="html5Player"></video>')
     })

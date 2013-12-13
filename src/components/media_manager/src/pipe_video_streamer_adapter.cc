@@ -114,7 +114,8 @@ void PipeVideoStreamerAdapter::StartActivity(int application_key) {
 
   LOG4CXX_TRACE(logger, "Pipe was successfully created");
 
-  if (pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0)) {
+  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
+  if (-1 == pipe_fd_) {
     LOG4CXX_ERROR(logger, "Cannot open pipe for writing " << named_pipe_path_);
     return;
   }

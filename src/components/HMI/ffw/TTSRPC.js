@@ -196,7 +196,9 @@ FFW.TTS = FFW.RPCObserver.create( {
         case "TTS.PerformInteraction":
         {
 
-            SDL.SDLModel.onPrompt(request.params.helpPrompt);
+            SDL.SDLModel.onPrompt(request.params.initialPrompt);
+
+            SDL.SDLModel.interactionData.helpPrompt = request.params.helpPrompt;
 
             var request = request;
 
@@ -204,6 +206,7 @@ FFW.TTS = FFW.RPCObserver.create( {
                 if (SDL.InteractionChoicesView.active) {
                     //FFW.TTS.requestId = request.id;
                     SDL.SDLModel.onPrompt(request.params.timeoutPrompt);
+                    SDL.SDLModel.interactionData.helpPrompt = null;
                 }
             }, request.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
 

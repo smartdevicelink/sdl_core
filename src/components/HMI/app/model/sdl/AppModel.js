@@ -132,6 +132,13 @@ SDL.SDLAppModel = Em.Object.extend({
         },
 
         /**
+         * Flag to open ShowConstantTBTview when entering to current screen
+         *
+         * @type {Boolean}
+         */
+        tbtActivate: false,
+
+        /**
          * Return current menu commands
          *
          * @return {Array}

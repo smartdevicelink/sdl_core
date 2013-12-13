@@ -60,13 +60,7 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  MessageHelper::SendDeleteCommandRequestToHMI(application);
-  MessageHelper::SendRemoveVrCommandsOnUnregisterApp(application);
-
-  MessageHelper::SendOnAppUnregNotificationToHMI(application);
-
-  if (!app_manager->UnregisterApplication(
-      (*message_)[strings::params][strings::connection_key].asUInt())) {
+  if (!app_manager->UnregisterApplication(connection_key())) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     LOG4CXX_ERROR(logger_, "Generic error");
     return;

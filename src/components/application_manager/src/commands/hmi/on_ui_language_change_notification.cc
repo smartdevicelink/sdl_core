@@ -50,7 +50,10 @@ OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUILanguageChangeNotification::Run");
 
-  ApplicationManagerImpl::instance()->set_active_ui_language(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
@@ -58,7 +61,7 @@ void OnUILanguageChangeNotification::Run() {
       (*message_)[strings::msg_params][strings::language];
 
   (*message_)[strings::msg_params][strings::language] =
-      ApplicationManagerImpl::instance()->active_vr_language();
+      hmi_capabilities.active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnLanguageChangeID;
