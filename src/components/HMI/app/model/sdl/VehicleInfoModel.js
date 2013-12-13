@@ -318,6 +318,30 @@ SDL.SDLVehicleInfoModel = Em.Object
 
         /**
          * Function returns response message to VehicleInfoRPC
+         *
+         * @type {Object} message
+         */
+        SubscribeVehicleData: function(message) {
+            if (SDL.SDLController.getApplicationModel(message.params.appID)) {
+
+                for (var i = 0; i < message.params.length; i++) {
+                   // SDL.SDLController.getApplicationModel(message.params.appID).subscribedData.push(message.params.[i])
+                }
+                //SDL.SDLController.getApplicationModel(message.params.appID).
+            }
+        },
+
+        /**
+         * Function returns response message to VehicleInfoRPC
+         *
+         * @type {Object} message
+         */
+        UnsubscribeVehicleData: function(message) {
+
+        },
+
+        /**
+         * Function returns response message to VehicleInfoRPC
          * 
          * @type {Object} message
          */
@@ -340,18 +364,9 @@ SDL.SDLVehicleInfoModel = Em.Object
             text += "are not avaliable";
 
             if (result) {
-                FFW.VehicleInfo
-                    .sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"],
-                        message.id,
-                        message.method,
-                        data);
+                FFW.VehicleInfo.sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, data);
             } else {
-                FFW.VehicleInfo
-                    .sendGetVehicleDataError(SDL.SDLModel.resultCode["DATA_NOT_AVAILABLE"],
-                        message.id,
-                        message.method,
-                        text,
-                        data);
+                FFW.VehicleInfo.sendGetVehicleDataError(SDL.SDLModel.resultCode["DATA_NOT_AVAILABLE"], message.id, message.method, text, data);
             }
         },
 

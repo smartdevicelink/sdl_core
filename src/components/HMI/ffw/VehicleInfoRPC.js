@@ -156,6 +156,20 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                 break;
             }
 
+            case "VehicleInfo.SubscribeVehicleData": {
+
+                SDL.SDLVehicleInfoModel.SubscribeVehicleData(request.params);
+
+                break;
+            }
+
+            case "VehicleInfo.UnsubscribeVehicleData": {
+
+                SDL.SDLVehicleInfoModel.UnsubscribeVehicleData(request.params);
+
+                break;
+            }
+
             case "VehicleInfo.GetVehicleType": {
 
                 SDL.SDLVehicleInfoModel.getVehicleType(request.id);
