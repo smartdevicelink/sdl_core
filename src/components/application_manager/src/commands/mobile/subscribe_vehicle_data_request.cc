@@ -93,23 +93,42 @@ void SubscribeVehicleDataRequest::Run() {
     }
   }
 
-  if (0 == items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "No data in the request", &response_params);
-  } else if (subscribed_items == items_to_subscribe) {
-    SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Subscribed on provided VehicleData", &response_params);
-  } else if (0 == subscribed_items) {
-    SendResponse(false, mobile_apis::Result::IGNORED,
-                 "Already subscribed on provided VehicleData",
-                 &response_params);
-  } else if (subscribed_items < items_to_subscribe) {
-    SendResponse(false, mobile_apis::Result::WARNINGS,
-                 "Already subscribed on some VehicleData", &response_params);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
-    return;
-  }
+//  if (0 == items_to_subscribe) {
+//    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+//                 "No data in the request", &response_params);
+//  } else if (subscribed_items == items_to_subscribe) {
+//    SendResponse(true, mobile_apis::Result::SUCCESS,
+//                 "Subscribed on provided VehicleData", &response_params);
+//  } else if (0 == subscribed_items) {
+//    SendResponse(false, mobile_apis::Result::IGNORED,
+//                 "Already subscribed on provided VehicleData",
+//                 &response_params);
+//  } else if (subscribed_items < items_to_subscribe) {
+//    SendResponse(false, mobile_apis::Result::WARNINGS,
+//                 "Already subscribed on some VehicleData", &response_params);
+//  } else {
+//    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
+//    return;
+//  }
+
+  (*message_)[strings::msg_params][strings::app_id] =
+      (*message_)[str::params][str::connection_key].asUInt();
+
+  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+                 &(*message_),
+                 true);
+}
+
+void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::on_event");
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  SendResponse(true,
+               mobile_apis::Result::SUCCESS,
+               0,
+               &(message[strings::msg_params])
+               );
 }
 
 }  // namespace commands
