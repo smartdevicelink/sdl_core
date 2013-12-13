@@ -54,6 +54,7 @@ static const uint16_t kAoaVid = 0x18d1;
 static const uint16_t kAoaPid1 = 0x2d00;
 static const uint16_t kAoaPid2 = 0x2d01;
 static const uint8_t kAoaInterfaceSubclass = 0xff;
+static const int kUsbConfiguration = 1;
 
 typedef utils::SharedPtr<UsbHandler> UsbHandlerSptr;
 
