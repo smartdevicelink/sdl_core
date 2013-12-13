@@ -52,6 +52,7 @@ void UIGetCapabilitiesResponse::Run() {
 
   hmi_capabilities.set_display_capabilities(
       (*message_)[strings::msg_params][hmi_response::display_capabilities]);
+
   hmi_capabilities.set_hmi_zone_capabilities(
       (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
 

@@ -5,7 +5,41 @@
 	    "languages":
 	    [
 	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
-	    ]
+	    ],
+	    "displayCapabilities":
+		{
+			"displayType":"GEN2_8_DMA",
+			"textFields":
+			[
+			  	"mainField1","mainField2","mainField3","mainField4","statusBar","mediaClock","mediaTrack","alertText1","alertText2","alertText3",
+			  	"scrollableMessageBody","initialInteractionText","navigationText1","navigationText2","ETA","totalDistance","navigationText",
+			  	"audioPassThruDisplayText1","audioPassThruDisplayText2","sliderHeader","sliderFooter","notificationText","menuName",
+			  	"secondaryText","tertiaryText","timeToDestination","turnText"
+			],
+			"mediaClockFormats":
+			[
+				"CLOCK1","CLOCK2","CLOCK3","CLOCKTEXT1","CLOCKTEXT2","CLOCKTEXT3","CLOCKTEXT4"
+			],
+			"graphicSupported":true,
+			"imageCapabilities":
+			[
+				"DYNAMIC"
+			]
+		},
+		"audioPassThruCapabilities":
+		{
+			"samplingRate"	: "44KHZ",
+			"bitsPerSample" : "8_BIT",
+			"audioType"		: "PCM"
+		},
+		"hmiZoneCapabilities":"FRONT",
+		"softButtonCapabilities":
+		{
+			"shortPressAvailable":true,
+			"longPressAvailable" :true,
+			"upDownAvailable"	 :true,
+			"imageSupported"	 :true
+		}
     },
     "VR":
 	{
@@ -125,41 +159,7 @@
     		"onScreenPresetsAvailable":true
     	}
     },
-	"DisplayCapabilities":
-	{
-		"displayType":"GEN2_8_DMA",
-		"textFields":
-		[
-		  	"mainField1","mainField2","mainField3","mainField4","statusBar","mediaClock","mediaTrack","alertText1","alertText2","alertText3",
-		  	"scrollableMessageBody","initialInteractionText","navigationText1","navigationText2","ETA","totalDistance","navigationText",
-		  	"audioPassThruDisplayText1","audioPassThruDisplayText2","sliderHeader","sliderFooter","notificationText","menuName",
-		  	"secondaryText","tertiaryText","timeToDestination","turnText"
-		],
-		"mediaClockFormats":
-		[
-			"CLOCK1","CLOCK2","CLOCK3","CLOCKTEXT1","CLOCKTEXT2","CLOCKTEXT3","CLOCKTEXT4"
-		],
-		"graphicSupported":true,
-		"imageCapabilities":
-		[
-			"DYNAMIC"
-		]
-	},
-	"AudioPassThruCapabilities":
-	{
-		"samplingRate"	: ["8kHZ", "16kHZ", "44KHZ"],
-		"bitsPerSample" : ["8_BIT", "16_BIT"],
-		"audioType"		:"PCM"
-	},
-	"HMIZoneCapabilities":"FRONT",
-	"SoftButtonCapabilities":
-	{
-		"shortPressAvailable":true,
-		"longPressAvailable" :true,
-		"upDownAvailable"	 :true,
-		"imageSupported"	 :true
-	},
-	"VehicleType":
+	"VehicleInfo":
 	{
 		"make"		:"Ford",
 		"model" 	:"Fiesta",

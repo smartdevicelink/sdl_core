@@ -378,32 +378,35 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
 
-  utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
-  ManageHMICommand(is_vr_ready);
 
-  utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
-    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
-  ManageHMICommand(is_tts_ready);
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
+    ManageHMICommand(is_vr_ready);
 
-  utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
-    MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
-  ManageHMICommand(is_ui_ready);
+    utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
+    ManageHMICommand(is_tts_ready);
 
-  utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
-    MessageHelper::CreateModuleInfoSO(
-      hmi_apis::FunctionID::Navigation_IsReady));
-  ManageHMICommand(is_navi_ready);
+    utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
+    ManageHMICommand(is_ui_ready);
 
-  utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
-    MessageHelper::CreateModuleInfoSO(
-      hmi_apis::FunctionID::VehicleInfo_IsReady));
-  ManageHMICommand(is_ivi_ready);
+    utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::Navigation_IsReady));
+    ManageHMICommand(is_navi_ready);
 
-  utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
-    MessageHelper::CreateModuleInfoSO(
-      hmi_apis::FunctionID::Buttons_GetCapabilities));
-  ManageHMICommand(button_capabilities);
+    utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::VehicleInfo_IsReady));
+    ManageHMICommand(is_ivi_ready);
+
+    utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::Buttons_GetCapabilities));
+    ManageHMICommand(button_capabilities);
+  }
 
   if (!connection_handler_) {
     LOG4CXX_WARN(logger_, "Connection handler is not set.");
