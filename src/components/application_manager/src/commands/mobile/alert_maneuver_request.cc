@@ -31,7 +31,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -84,35 +83,50 @@ void AlertManeuverRequest::Run() {
     }
   }
 
+  // Checking parameters and how many HMI requests should be sent
+  bool tts_is_ok = false;
+
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
-      // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-
-      msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
-          smart_objects::SmartType_Array);
-      msg_params[hmi_request::tts_chunks] =
-          (*message_)[strings::msg_params][strings::tts_chunks];
-
-      msg_params[strings::app_id] = app->app_id();
-      SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
-      pending_requests_.push_back(hmi_apis::FunctionID::TTS_Speak);
+      pending_requests_.Add(hmi_apis::FunctionID::TTS_Speak);
+      tts_is_ok = true;
     }
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  bool soft_buttons_is_ok = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    msg_params[hmi_request::soft_buttons] =
-        (*message_)[strings::msg_params][strings::soft_buttons];
+    pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
+    soft_buttons_is_ok = true;
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params,
-                 true);
-  pending_requests_.push_back(hmi_apis::FunctionID::Navigation_AlertManeuver);
+  // Sending requests to HMI
+  if (soft_buttons_is_ok) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+
+    msg_params[hmi_request::soft_buttons] =
+            (*message_)[strings::msg_params][strings::soft_buttons];
+
+    SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
+                   &msg_params,
+                   true);
+  }
+
+  if (tts_is_ok) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+
+    msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+
+    msg_params[hmi_request::tts_chunks] =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+
+    msg_params[strings::app_id] = app->app_id();
+    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+  }
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
@@ -120,14 +134,12 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   mobile_apis::Result::eType result_code;
-  switch (event.id()) {
+  hmi_apis::FunctionID::eType id = event.id();
+  switch (id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
 
-      pending_requests_.erase(
-          std::find(pending_requests_.begin(),
-                    pending_requests_.end(),
-                    hmi_apis::FunctionID::Navigation_AlertManeuver));
+      pending_requests_.Remove(id);
 
       result_code =
           static_cast<mobile_apis::Result::eType>(
@@ -138,10 +150,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
 
-      pending_requests_.erase(
-          std::find(pending_requests_.begin(),
-                    pending_requests_.end(),
-                    hmi_apis::FunctionID::TTS_Speak));
+      pending_requests_.Remove(id);
 
       result_code =
           static_cast<mobile_apis::Result::eType>(
@@ -166,7 +175,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
         ;
   }
 
-  if (pending_requests_.empty()) {
+  if (pending_requests_.IsFinal(id)) {
     bool success = mobile_apis::Result::SUCCESS == result_code;
 
     if (mobile_apis::Result::INVALID_ENUM != result_) {
@@ -174,6 +183,10 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
 
     SendResponse(success, result_code, NULL, &(message[strings::msg_params]));
+  } else {
+    LOG4CXX_INFO(logger_,
+                "There are some pending responses from HMI."
+                "AlertManeuverRequest still waiting.");
   }
 }
 
