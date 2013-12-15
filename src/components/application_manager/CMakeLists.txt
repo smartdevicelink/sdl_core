@@ -249,6 +249,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
 ./src/commands/hmi/vi_subscribe_vehicle_data_response.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
 ./src/commands/hmi/navi_alert_maneuver_request.cc
