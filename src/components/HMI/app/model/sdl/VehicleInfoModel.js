@@ -377,6 +377,7 @@ SDL.SDLVehicleInfoModel = Em.Object
         UnsubscribeVehicleData: function(message) {
             if (SDL.SDLController.getApplicationModel(message.params.appID)) {
 
+                var subscribeVIData = {};
                 for (var key in message.params) {
                     if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
@@ -392,7 +393,7 @@ SDL.SDLVehicleInfoModel = Em.Object
                     }
                 }
             }
-            FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method);
+            FFW.VehicleInfo.sendVISubscribeVehicleDataResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, subscribeVIData);
         },
 
         /**
