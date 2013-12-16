@@ -352,15 +352,20 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
+                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = message.params[key];
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "SUCCESS"
                         };
-                    } else if (key != 'appID' && message.params[key]) {
+                    } else if (key != 'appID' && message.params[key] && key !== "clusterModeStatus") {
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
+                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                        }
+                    } else if (key === "clusterModeStatus") {
+                        subscribeVIData["clusterModes"] = {
+                            dataType: this.eVehicleDataType["clusterModes"],
                             resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
                         }
                     }
@@ -379,15 +384,20 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
+                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "SUCCESS"
                         };
-                    } else if (key != 'appID' && message.params[key]) {
+                    } else if (key != 'appID' && message.params[key] && key !== "clusterModeStatus") {
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
+                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                        }
+                    } else if (key === "clusterModeStatus") {
+                        subscribeVIData["clusterModes"] = {
+                            dataType: this.eVehicleDataType["clusterModes"],
                             resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
                         }
                     }
