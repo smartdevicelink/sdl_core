@@ -50,6 +50,7 @@ QtObject {
     property string playPauseState
     property ApplicationData hmiUIText: ApplicationData { }
     property MediaClockModel mediaClock: MediaClockModel { }
+    property NavigationModel navigationModel: NavigationModel { }
 
     property string helpPrompt
     property string timeoutPrompt
@@ -59,6 +60,8 @@ QtObject {
     property ListModel turnList
     property ListModel softButtons
     property ListModel turnListSoftButtons
+    property ListModel navigationSoftButtons
+    property ListModel alertManeuverSoftButtons
     property ListModel customPresets
     property int languageTTSVR
     // This place is for adding new properties
@@ -68,7 +71,7 @@ QtObject {
         appId = -1
         appName = ""
         ngnMediaScreenAppName = ""
-        appIcon.reset()
+  //      appIcon.reset()
         deviceName = ""
         hmiDisplayLanguageDesired = -1
         isMediaApplication = false
@@ -82,6 +85,8 @@ QtObject {
         currentSubMenu = options
         turnList = null
         softButtons = null
+        navigationSoftButtons = null
+        alertManeuverSoftButtons = null
         turnListSoftButtons = null
         customPresets = null
         languageTTSVR = -1

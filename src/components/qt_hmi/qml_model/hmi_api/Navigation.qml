@@ -46,21 +46,37 @@ Item {
                              distanceToManeuverScale, maneuverComplete,
                              softButtons, appID) {
         console.debug("enter")
-        navigationTexts.forEach(fillTexts);
-        dataContainer.navigationModel.turnIcon = turnIcon ? turnIcon.value : ""
-        dataContainer.navigationModel.nextTurnIcon = nextTurnIcon ? nextTurnIcon.value : ""
-        dataContainer.navigationModel.distanceToManeuver = distanceToManeuver;
-        dataContainer.navigationModel.distanceToManeuverScale = distanceToManeuverScale;
+        var app = dataContainer.getApplication(appID)
+        var dataToUpdate = {}
+
+        navigationTexts.forEach(fillTexts, dataToUpdate) // Check
+        if (turnIcon !== undefined) { dataToUpdate.turnIcon = turnIcon }
+        if (nextTurnIcon !== undefined) { dataToUpdate.nextTurnIcon = nextTurnIcon }
+        if (distanceToManeuver !== undefined) {
+            dataToUpdate.distanceToManeuver = distanceToManeuver
+        } else {
+            DBus.sendReply( {__retCode: Common.Result.INVALID_DATA, __message: "distanceToManeuver absence"} )
+        }
+        if (distanceToManeuverScale !== undefined) {
+            dataToUpdate.distanceToManeuverScale = distanceToManeuverScale
+        } else {
+            DBus.sendReply( {__retCode: Common.Result.INVALID_DATA, __message: "distanceToManeuverScale absence"} )
+        }
         if (maneuverComplete !== undefined) {
-            dataContainer.navigationModel.maneuverComplete = maneuverComplete;
+            dataToUpdate.maneuverComplete = maneuverComplete
         }
         if (softButtons !== undefined) {
-            dataContainer.navigationModel.softButtons.clear();
-            softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.softButtons);
+            app.navigationSoftButtons.clear()
+            softButtons.forEach(function(x) { app.navigationSoftButtons.append(x); });
         }
-        dataContainer.navigationModel.appId = appID;
-        contentLoader.go("./views/TurnByTurnView.qml");        
-        console.debug("exit")
+        if (appID !== undefined) {
+            dataToUpdate.appID = appID
+        } else {
+            dBus.sendReply( {__retCode: Common.Result.INVALID_DATA, __message: "appID absence"} )
+        }
+
+        dataContainer.setApplicationProperties(appID, { navigationModel : dataToUpdate } )
+        contentLoader.go("./views/TurnByTurnView.qml", appID)
     }
 
     function alertManeuver(softButtons) {
@@ -89,19 +105,19 @@ Item {
     function fillTexts(element, index, array) {
         switch (element.fieldName) {
         case Common.TextFieldName.navigationText1:
-            dataContainer.navigationModel.text1 = element.fieldText;
+            this.text1 = element.fieldText;
             break;
         case Common.TextFieldName.navigationText2:
-            dataContainer.navigationModel.text2 = element.fieldText;
+            this.text2 = element.fieldText;
             break;
         case Common.TextFieldName.ETA:
-            dataContainer.navigationModel.eta = element.fieldText;
+            this.eta = element.fieldText;
             break;
         case Common.TextFieldName.totalDistance:
-            dataContainer.navigationModel.totalDistance = element.fieldText;
+            this.totalDistance = element.fieldText;
             break;
         case Common.TextFieldName.timeToDestination:
-            dataContainer.navigationModel.timeToDestination = element.fieldText;
+            this.timeToDestination = element.fieldText;
             break;
         }
     }

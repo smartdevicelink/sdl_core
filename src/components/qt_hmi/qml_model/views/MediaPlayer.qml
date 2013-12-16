@@ -154,10 +154,10 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     color: Constants.primaryColor
-                    text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                    text: "Time to destination: " + dataContainer.currentApplication.navigationModel.timeToDestination
                     font.pixelSize: Constants.fontSize
                     horizontalAlignment: dataContainer.hmiUITextAlignment
-                    visible: mediaPlayerView.playerType === "SDL" && dataContainer.navigationModel.timeToDestination
+                    visible: mediaPlayerView.playerType === "SDL" && dataContainer.currentApplication.navigationModel.timeToDestination
                 }
             }
         }

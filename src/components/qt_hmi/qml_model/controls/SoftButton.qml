@@ -59,11 +59,6 @@ OvalButton {
                 defaultAction();
                 break;
             case Common.SystemAction.STEAL_FOCUS:
-                if (dataContainer.currentApplication.isMediaApplication) {
-                    contentLoader.go("views/SDLPlayerView.qml", appId);
-                } else {
-                    contentLoader.go("views/SDLNonMediaView.qml", appId);
-                }
                 stealFocus();
                 break;
             case Common.SystemAction.KEEP_CONTEXT:
@@ -82,8 +77,6 @@ OvalButton {
             defaultAction();
             break;
         case Common.SystemAction.STEAL_FOCUS:
-            if (dataContainer.currentApplication.isMediaApplication) { contentLoader.go("views/SDLPlayerView.qml", appId); }
-                else { contentLoader.go("views/SDLNonMediaView.qml", appId); }
             stealFocus();
             break;
         case Common.SystemAction.KEEP_CONTEXT:

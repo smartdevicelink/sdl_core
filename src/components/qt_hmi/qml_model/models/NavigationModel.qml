@@ -46,7 +46,7 @@ QtObject {
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
     property bool maneuverComplete: null
-    property ListModel softButtons: ListModel {}
-    property int appId: -1
-    property ListModel alertManeuverSoftButtons: ListModel {}
+   // property ListModel softButtons: ListModel { }
+    property int appID: -1
+ //   property ListModel alertManeuverSoftButtons: ListModel { }
 }

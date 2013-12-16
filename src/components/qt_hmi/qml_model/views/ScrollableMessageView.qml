@@ -127,8 +127,8 @@ GeneralView {
                     delegate: SoftButton {
                         appId: dataContainer.currentApplication.appId
                         button: model
-                        onKeepContext: timer.restart()
-                        onDefaultAction: scrollableMessageView.complete(true)
+                        onKeepContext: { timer.restart() }
+                        onDefaultAction: { scrollableMessageView.complete(true) }
                     }
                 }
             }

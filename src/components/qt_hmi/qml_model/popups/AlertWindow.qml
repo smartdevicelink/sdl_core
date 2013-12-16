@@ -116,6 +116,11 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
+                            if (dataContainer.currentApplication.isMediaApplication) {
+                                contentLoader.go("views/SDLPlayerView.qml", appId);
+                            } else {
+                                contentLoader.go("views/SDLNonMediaView.qml", appId);
+                            }
                         }
                     }
                     SoftButton {
@@ -130,6 +135,11 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
+                            if (dataContainer.currentApplication.isMediaApplication) {
+                                contentLoader.go("views/SDLPlayerView.qml", appId);
+                            } else {
+                                contentLoader.go("views/SDLNonMediaView.qml", appId);
+                            }
                         }
                     }
                 }
@@ -149,6 +159,11 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
+                            if (dataContainer.currentApplication.isMediaApplication) {
+                                contentLoader.go("views/SDLPlayerView.qml", appId);
+                            } else {
+                                contentLoader.go("views/SDLNonMediaView.qml", appId);
+                            }
                         }
                     }
                     SoftButton {
@@ -163,6 +178,11 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
+                            if (dataContainer.currentApplication.isMediaApplication) {
+                                contentLoader.go("views/SDLPlayerView.qml", appId);
+                            } else {
+                                contentLoader.go("views/SDLNonMediaView.qml", appId);
+                            }
                         }
                     }
                 }
