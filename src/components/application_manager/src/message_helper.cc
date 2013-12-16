@@ -1194,6 +1194,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
               return mobile_apis::Result::INVALID_DATA;
             }
           }
+        } else {
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
@@ -1208,18 +1210,19 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = false;
 
         if (request_soft_buttons[i].keyExists(strings::text)) {
-          text_exist = VerifySoftButtonText(request_soft_buttons[i]);
-        }
-        if (!text_exist) {
+          VerifySoftButtonText(request_soft_buttons[i]);
+        } else {
           return  mobile_apis::Result::INVALID_DATA;
         }
 
         bool image_exist = false;
         if (image_supported) {
           image_exist = request_soft_buttons[i].keyExists(strings::image);
+          if (!image_exist) {
+            return mobile_apis::Result::INVALID_DATA;
+          }
         }
         if (image_exist) {
           mobile_apis::Result::eType verification_result = VerifyImage(
