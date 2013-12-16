@@ -81,11 +81,8 @@ Item {
 
     function alertManeuver(softButtons) {
         console.debug("enter")
-        if (softButtons !== undefined) {
-            dataContainer.navigationModel.alertManeuverSoftButtons.clear();
-            softButtons.forEach(fillSoftButtons, dataContainer.navigationModel.alertManeuverSoftButtons);
-        }
         console.debug("exit")
+        return { __retCode: Common.Result.SUCCESS }
     }
 
     function updateTurnList(turnList, softButtons, appID) {
