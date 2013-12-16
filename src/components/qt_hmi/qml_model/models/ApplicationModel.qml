@@ -71,7 +71,7 @@ QtObject {
         appId = -1
         appName = ""
         ngnMediaScreenAppName = ""
-  //      appIcon.reset()
+        appIcon.reset()
         deviceName = ""
         hmiDisplayLanguageDesired = -1
         isMediaApplication = false

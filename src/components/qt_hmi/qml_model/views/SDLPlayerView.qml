@@ -72,9 +72,6 @@ GeneralView {
                 delegate: SoftButton {
                     appId: dataContainer.currentApplication.appId
                     button: dataContainer.currentApplication.softButtons.get(index)
-                    onKeepContext: { }
-                    onDefaultAction: { }
-                    onStealFocus: { }
                 }
             }
         ]

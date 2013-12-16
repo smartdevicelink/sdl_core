@@ -66,9 +66,6 @@ GeneralView {
                         SoftButton {
                             appId: dataContainer.currentApplication.appId
                             button: dataContainer.currentApplication.turnListSoftButtons.get(index)
-                            onKeepContext: { }
-                            onDefaultAction: { } // TODO{ALeshin}: Add behavior on different system actions at this screen
-                            onStealFocus: { }
                         }
                 }
             }
