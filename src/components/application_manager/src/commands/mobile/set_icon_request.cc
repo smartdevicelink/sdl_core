@@ -44,6 +44,7 @@ namespace commands {
 
 SetIconRequest::SetIconRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_SetAppIcon);
 }
 
 SetIconRequest::~SetIconRequest() {
@@ -83,13 +84,50 @@ void SetIconRequest::Run() {
   msg_params[strings::sync_file_name] = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  const std::string full_file_path_for_hmi = file_system::ConvertPathForURL(full_file_path);
+  const std::string full_file_path_for_hmi = file_system::ConvertPathForURL(
+      full_file_path);
 
   msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi;
 
+  //TODO (VS): research why is image_type hardcoded
   msg_params[strings::sync_file_name][strings::image_type] = ImageType::DYNAMIC;
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, msg_params, true, 1);
+  //for further use in on_event function
+  (*message_)[strings::msg_params][strings::sync_file_name] =
+      msg_params[strings::sync_file_name];
+
+  SendHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, &msg_params, true);
+}
+
+void SetIconRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SetIconRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_SetAppIcon: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      if (result) {
+        Application* app = ApplicationManagerImpl::instance()->application(
+            connection_key());
+
+        app->set_app_icon_path(
+            (*message_)[strings::msg_params]
+                       [strings::sync_file_name].asString());
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands

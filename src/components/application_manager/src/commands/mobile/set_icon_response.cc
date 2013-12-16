@@ -33,8 +33,6 @@
 
 #include "application_manager/commands/mobile/set_icon_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -50,45 +48,7 @@ SetIconResponse::~SetIconResponse() {
 void SetIconResponse::Run() {
   LOG4CXX_INFO(logger_, "SetIconResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  const MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-      ->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  smart_objects::SmartObject data = msg_chain->data();
-  const int connection_key = msg_chain->connection_key();
-
-  if (!IsPendingResponseExist()) {
-    const int code = (*message_)[strings::params][hmi_response::code].asInt();
-
-    if (hmi_apis::Common_Result::SUCCESS == code) {
-      Application* app = ApplicationManagerImpl::instance()->application(
-          connection_key);
-
-      app->set_app_icon_path(
-          data[strings::msg_params][strings::sync_file_name].asString());
-
-      SendResponse(true);
-    } else {
-      // TODO(VS): Some logic
-      SendResponse(false);
-    }
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands
