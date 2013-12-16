@@ -570,9 +570,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         final Boolean appInterfaceRegistered =
                 _syncProxy.getAppInterfaceRegistered();
 
-        if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered &&
-                firstHMIStatusChange) {
-            setAppIcon();
+        if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
+            if (!isModuleTesting()) {
+                setAppIcon();
+            }
         }
 
 		if (prevHMILevel != curHMILevel) {
