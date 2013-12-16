@@ -42,8 +42,6 @@ namespace application_manager {
 
 namespace commands {
 
-namespace str = strings;
-
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -55,7 +53,8 @@ UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  unsigned int app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -68,46 +67,73 @@ void UnsubscribeVehicleDataRequest::Run() {
   int items_to_unsubscribe = 0;
   // counter for subscribed items by application
   int unsubscribed_items = 0;
-  // response params
-  namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
-  NsSmart::SmartObject response_params;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)
-        && true == (*message_)[str::msg_params][it->first].asBool()) {
-      ++items_to_unsubscribe;
-      response_params[it->first][strings::data_type] = it->second;
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
-      if (app->UnsubscribeFromIVI(static_cast<unsigned int>(it->second))) {
+  msg_params[strings::app_id] = app->app_id();
+
+  for (; vehicle_data.end() != it; ++it) {
+    std::string key_name = it->first;
+    if ((*message_)[strings::msg_params].keyExists(key_name)) {
+      bool is_key_enabled = (*message_)[strings::msg_params][key_name].asBool();
+      if (is_key_enabled) {
+        ++items_to_unsubscribe;
+        msg_params[key_name] = is_key_enabled;
+      }
+
+      VehicleDataType key_type = it->second;
+      if (app->UnsubscribeFromIVI(static_cast<unsigned int>(key_type))) {
         ++unsubscribed_items;
-        response_params[it->first][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
-      } else {
-        response_params[it->first][strings::result_code] =
-            mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
       }
     }
   }
 
   if (0 == items_to_unsubscribe) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "No data in the request", &response_params);
-  } else if (unsubscribed_items == items_to_unsubscribe) {
-    SendResponse(true, mobile_apis::Result::SUCCESS,
-                 "Unsubscribed on provided VehicleData", &response_params);
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "No data in the request", &msg_params);
+    return;
   } else if (0 == unsubscribed_items) {
-    SendResponse(false, mobile_apis::Result::IGNORED,
-                 "Was not subscribed on any VehicleData", &response_params);
-  } else if (unsubscribed_items < items_to_unsubscribe) {
-    SendResponse(false, mobile_apis::Result::WARNINGS,
-                 "Was subscribed not to all VehicleData", &response_params);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unknown command sequence!");
+    SendResponse(false,
+                 mobile_apis::Result::IGNORED,
+                 "Was not subscribed on any VehicleData", &msg_params);
     return;
   }
+
+  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
+                 &msg_params,
+                 true);
+}
+
+void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event){
+  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::on_event");
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt()
+          );
+
+  bool success =
+      hmi_result == hmi_apis::Common_Result::SUCCESS;
+
+  mobile_apis::Result::eType result =
+      hmi_result == hmi_apis::Common_Result::SUCCESS
+      ? mobile_apis::Result::SUCCESS
+      : static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt()
+          );
+
+  const char* info = 0;
+  SendResponse(success,
+               result,
+               info,
+               &(message[strings::msg_params]));
 }
 
 }  // namespace commands

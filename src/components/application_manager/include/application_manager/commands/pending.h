@@ -31,55 +31,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PENDING_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PENDING_H_
 
-#include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/pending.h"
-#include "interfaces/MOBILE_API.h"
+#include <set>
 #include "utils/macro.h"
+#include "utils/lock.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief AlertManeuverRequest command class
- **/
-class AlertManeuverRequest : public CommandRequestImpl {
+/*
+ * @brief Class for monitoring of pending requests/responses to HMI
+ */
+class Pending {
  public:
-  /**
-   * @brief AlertManeuverRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit AlertManeuverRequest(const MessageSharedPtr& message);
-
-  /**
-   * @brief AlertManeuverRequest class destructor
-   **/
-  virtual ~AlertManeuverRequest();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
+  /*
+   * Constructor
    */
-  virtual void on_event(const event_engine::Event& event);
+  Pending();
+
+  /*
+   * Destructor
+   */
+  ~Pending();
+
+  void Add(hmi_apis::FunctionID::eType id);
+  void Remove(hmi_apis::FunctionID::eType id);
+  bool IsFinal(hmi_apis::FunctionID::eType id);
 
  private:
-  mobile_apis::Result::eType  result_;
-  Pending pending_requests_;
-
-  DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
+  std::set<hmi_apis::FunctionID::eType> pending_;
+  sync_primitives::Lock lock_;
+  hmi_apis::FunctionID::eType last_;
+  DISALLOW_COPY_AND_ASSIGN(Pending);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PENDING_H_

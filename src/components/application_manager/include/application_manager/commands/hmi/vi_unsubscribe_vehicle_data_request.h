@@ -29,47 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_get_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
+
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+/**
+ * @brief VIUnsubscribeVehicleDataRequest command class
+ **/
+class VIUnsubscribeVehicleDataRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief VIUnsubscribeVehicleDataRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VIUnsubscribeVehicleDataRequest(const MessageSharedPtr& message);
 
-UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
-}
+  /**
+   * @brief VIUnsubscribeVehicleDataRequest class destructor
+   **/
+  virtual ~VIUnsubscribeVehicleDataRequest();
 
-void UIGetCapabilitiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-
-  hmi_capabilities.set_display_capabilities(
-      (*message_)[strings::msg_params][hmi_response::display_capabilities]);
-
-  hmi_capabilities.set_hmi_zone_capabilities(
-      (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
-
-  if ((*message_)[strings::msg_params].keyExists(
-                                      hmi_response::soft_button_capabilities)) {
-    hmi_capabilities.set_soft_button_capabilities(
-      (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(
-                                      strings::audio_pass_thru_capabilities)) {
-
-    hmi_capabilities.set_audio_pass_thru_capabilities(
-      (*message_)[strings::msg_params][strings::audio_pass_thru_capabilities]);
-  }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_

@@ -29,45 +29,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/ui_get_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
+VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
     const MessageSharedPtr& message)
     : ResponseFromHMI(message) {
 }
 
-UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
+VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {
 }
 
-void UIGetCapabilitiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
+void VIUnsubscribeVehicleDataResponse::Run() {
+  LOG4CXX_INFO(logger_, "VIUnsubscribeVehicleDataResponse::Run");
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-
-  hmi_capabilities.set_display_capabilities(
-      (*message_)[strings::msg_params][hmi_response::display_capabilities]);
-
-  hmi_capabilities.set_hmi_zone_capabilities(
-      (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
-
-  if ((*message_)[strings::msg_params].keyExists(
-                                      hmi_response::soft_button_capabilities)) {
-    hmi_capabilities.set_soft_button_capabilities(
-      (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(
-                                      strings::audio_pass_thru_capabilities)) {
-
-    hmi_capabilities.set_audio_pass_thru_capabilities(
-      (*message_)[strings::msg_params][strings::audio_pass_thru_capabilities]);
-  }
+  event_engine::Event event(
+      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData
+      );
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

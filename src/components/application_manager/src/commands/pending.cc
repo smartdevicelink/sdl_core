@@ -31,55 +31,37 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
-
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief AlertManeuverRequest command class
- **/
-class AlertManeuverRequest : public CommandRequestImpl {
- public:
-  /**
-   * @brief AlertManeuverRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit AlertManeuverRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief AlertManeuverRequest class destructor
-   **/
-  virtual ~AlertManeuverRequest();
+Pending::Pending()
+: last_(hmi_apis::FunctionID::INVALID_ENUM) {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+Pending::~Pending() {
+}
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  virtual void on_event(const event_engine::Event& event);
+void Pending::Add(hmi_apis::FunctionID::eType id) {
+  sync_primitives::AutoLock L(lock_);
+  pending_.insert(id);
+}
 
- private:
-  mobile_apis::Result::eType  result_;
-  Pending pending_requests_;
+void Pending::Remove(hmi_apis::FunctionID::eType id) {
+  sync_primitives::AutoLock L(lock_);
+  pending_.erase(id);
 
-  DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
-};
+  if (pending_.empty()) {
+    last_ = id;
+  }
+}
+
+bool Pending::IsFinal(hmi_apis::FunctionID::eType id) {
+  return id == last_;
+}
 
 }  // namespace commands
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_

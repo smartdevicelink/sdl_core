@@ -139,6 +139,8 @@
 #include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_response.h"
+#include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
+#include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_request.h"
 #include "application_manager/commands/hmi/navi_show_constant_tbt_request.h"
 #include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
@@ -595,6 +597,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VISubscribeVehicleDataResponse(message));
       } else {
         command.reset(new commands::VISubscribeVehicleDataRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData: {
+      if (is_response) {
+        command.reset(new commands::VIUnsubscribeVehicleDataResponse(message));
+      } else {
+        command.reset(new commands::VIUnsubscribeVehicleDataRequest(message));
       }
       break;
     }

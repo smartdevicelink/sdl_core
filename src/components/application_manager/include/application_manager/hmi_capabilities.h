@@ -72,24 +72,32 @@ class HMICapabilities {
    */
   bool is_hmi_capabilities_initialized() const;
 
+  /*
+   * @brief Checks is image type(Static/Dynamic) requested by
+   * Mobile Device is supported on current HMI.
+   * @param image_type recieved type of image from Enum.
+   * @return Bool true if supported
+   */
+  bool VerifyImageType(int image_type) const;
+
   /**
    * @brief Checks if all HMI capabilities received
    *
    * @return TRUE if all information received, otherwise FALSE
    */
-  bool is_vr_cooperating() const;
+  inline bool is_vr_cooperating() const;
   void set_is_vr_cooperating(bool value);
 
-  bool is_tts_cooperating() const;
+  inline bool is_tts_cooperating() const;
   void set_is_tts_cooperating(bool value);
 
-  bool is_ui_cooperating() const;
+  inline bool is_ui_cooperating() const;
   void set_is_ui_cooperating(bool value);
 
-  bool is_navi_cooperating() const;
+  inline bool is_navi_cooperating() const;
   void set_is_navi_cooperating(bool value);
 
-  bool is_ivi_cooperating() const;
+  inline bool is_ivi_cooperating() const;
   void set_is_ivi_cooperating(bool value);
 
   /*
@@ -98,7 +106,7 @@ class HMICapabilities {
    *
    * @return Current state of the mixing audio flag
    */
-  bool attenuated_supported() const;
+  inline bool attenuated_supported() const;
 
   /*
    * @brief Sets state for mixing audio
@@ -123,6 +131,22 @@ class HMICapabilities {
   void set_active_ui_language(const hmi_apis::Common_Language::eType& language);
 
   /*
+   * @brief Retrieves UI supported languages
+   *
+   * @return Currently supported UI languages
+   */
+  inline const smart_objects::SmartObject*
+  ui_supported_languages() const;
+
+  /*
+   * @brief Sets supported UI languages
+   *
+   * @param supported_languages Supported UI languages
+   */
+  void set_ui_supported_languages(
+      const smart_objects::SmartObject& supported_languages);
+
+  /*
    * @brief Retrieves currently active VR language
    *
    * @return Currently active VR language
@@ -136,6 +160,22 @@ class HMICapabilities {
    * @param language Currently active VR language
    */
   void set_active_vr_language(const hmi_apis::Common_Language::eType& language);
+
+  /*
+   * @brief Retrieves VR supported languages
+   *
+   * @return Currently supported VR languages
+   */
+  inline const smart_objects::SmartObject*
+  vr_supported_languages() const;
+
+  /*
+   * @brief Sets supported VR languages
+   *
+   * @param supported_languages Supported VR languages
+   */
+  void set_vr_supported_languages(
+      const smart_objects::SmartObject& supported_languages);
 
   /*
    * @brief Retrieves currently active TTS language
@@ -153,37 +193,13 @@ class HMICapabilities {
   void set_active_tts_language(
     const hmi_apis::Common_Language::eType& language);
 
-  void set_vehicle_type(const smart_objects::SmartObject& vehicle_type);
-
-  const smart_objects::SmartObject* vehicle_type() const;
-
-  /*
-   * @brief Retrieves UI supported languages
-   *
-   * @return Currently supported UI languages
-   */
-  inline const smart_objects::SmartObject*
-  ui_supported_languages() const {
-    return ui_supported_languages_;
-  }
-
-  /*
-   * @brief Sets supported UI languages
-   *
-   * @param supported_languages Supported UI languages
-   */
-  void set_ui_supported_languages(
-      const smart_objects::SmartObject& supported_languages);
-
   /*
    * @brief Retrieves TTS  supported languages
    *
    * @return Currently supported TTS languages
    */
   inline const smart_objects::SmartObject*
-  tts_supported_languages() const {
-    return tts_supported_languages_;
-  }
+  tts_supported_languages() const;
 
   /*
    * @brief Sets supported TTS languages
@@ -194,40 +210,12 @@ class HMICapabilities {
       const smart_objects::SmartObject& supported_languages);
 
   /*
-   * @brief Retrieves VR supported languages
-   *
-   * @return Currently supported VR languages
-   */
-  inline const smart_objects::SmartObject*
-  vr_supported_languages() const {
-    return vr_supported_languages_;
-  }
-
-  /*
-   * @brief Sets supported VR languages
-   *
-   * @param supported_languages Supported VR languages
-   */
-  void set_vr_supported_languages(
-      const smart_objects::SmartObject& supported_languages);
-
-  /*
    * @brief Retrieves information about the display capabilities
    *
    * @return Currently supported display capabilities
    */
   inline const smart_objects::SmartObject*
-  display_capabilities() const {
-    return display_capabilities_;
-  }
-
-  /*
-   * @brief Checks is image type(Static/Dynamic) requested by
-   * Mobile Device is supported on current HMI.
-   * @param image_type recieved type of image from Enum.
-   * @return Bool true if supported
-   */
-  bool VerifyImageType(int image_type) const;
+  display_capabilities() const;
 
   /*
    * @brief Sets supported display capabilities
@@ -243,9 +231,7 @@ class HMICapabilities {
    * @return Currently supported HMI zone capabilities
    */
   inline const smart_objects::SmartObject*
-  hmi_zone_capabilities() const {
-    return hmi_zone_capabilities_;
-  }
+  hmi_zone_capabilities() const;
 
   /*
    * @brief Sets supported HMI zone capabilities
@@ -261,9 +247,7 @@ class HMICapabilities {
    * @return Currently supported SoftButton's capabilities
    */
   inline const smart_objects::SmartObject*
-  soft_button_capabilities() const {
-    return soft_buttons_capabilities_;
-  }
+  soft_button_capabilities() const;
 
   /*
    * @brief Sets supported SoftButton's capabilities
@@ -278,9 +262,7 @@ class HMICapabilities {
    *
    * @return Currently supported Button's capabilities
    */
-  inline const smart_objects::SmartObject* button_capabilities() const {
-    return button_capabilities_;
-  }
+  inline const smart_objects::SmartObject* button_capabilities() const;
 
   /*
    * @brief Sets supported Button's capabilities
@@ -303,9 +285,7 @@ class HMICapabilities {
    *
    * @return Currently supported speech capabilities
    */
-  inline const smart_objects::SmartObject* speech_capabilities() const {
-    return speech_capabilities_;
-  }
+  inline const smart_objects::SmartObject* speech_capabilities() const;
 
   /*
    * @brief Sets supported VR capabilities
@@ -319,9 +299,7 @@ class HMICapabilities {
    *
    * @return Currently supported VR capabilities
    */
-  inline const smart_objects::SmartObject* vr_capabilities() const {
-    return vr_capabilities_;
-  }
+  inline const smart_objects::SmartObject* vr_capabilities() const;
 
   /*
    * @brief Sets supported audio_pass_thru capabilities
@@ -337,18 +315,14 @@ class HMICapabilities {
    * @return Currently supported audio_pass_thru capabilities
    */
   inline const smart_objects::SmartObject*
-  audio_pass_thru_capabilities() const {
-    return audio_pass_thru_capabilities_;
-  }
+  audio_pass_thru_capabilities() const;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
    *
    * @return Currently supported preset bank capabilities
    */
-  inline const smart_objects::SmartObject* preset_bank_capabilities() const {
-    return preset_bank_capabilities_;
-  }
+  inline const smart_objects::SmartObject* preset_bank_capabilities() const;
 
   /*
    * @brief Sets supported preset bank capabilities
@@ -358,23 +332,45 @@ class HMICapabilities {
   void set_preset_bank_capabilities(
       const smart_objects::SmartObject& preset_bank_capabilities);
 
+  /*
+   * @brief Sets vehicle information(make, model, modelYear)
+   *
+   * @param vehicle_type Cuurent vehicle information
+   */
+  void set_vehicle_type(const smart_objects::SmartObject& vehicle_type);
+
+  /*
+   * @brief Retrieves vehicle information(make, model, modelYear)
+   *
+   * @param vehicle_type Cuurent vehicle information
+   */
+  inline const smart_objects::SmartObject* vehicle_type() const;
+
  protected:
 
+  /*
+   * @brief Loads capabilities from local file in case SDL was launched
+   * without HMI
+   *
+   * @return TRUE if capabilities loaded successfully, otherwise FALSE.
+   */
+  bool load_capabilities_from_file();
+
  private:
-  bool is_vr_cooperating_;
-  bool is_tts_cooperating_;
-  bool is_ui_cooperating_;
-  bool is_navi_cooperating_;
-  bool is_ivi_cooperating_;
+  bool                             is_vr_cooperating_;
+  bool                             is_tts_cooperating_;
+  bool                             is_ui_cooperating_;
+  bool                             is_navi_cooperating_;
+  bool                             is_ivi_cooperating_;
 
   // to check if IsReady response for corresponding interface received
-  bool is_vr_ready_response_recieved_;
-  bool is_tts_ready_response_recieved_;
-  bool is_ui_ready_response_recieved_;
-  bool is_navi_ready_response_recieved_;
-  bool is_ivi_ready_response_recieved_;
+  bool                             is_vr_ready_response_recieved_;
+  bool                             is_tts_ready_response_recieved_;
+  bool                             is_ui_ready_response_recieved_;
+  bool                             is_navi_ready_response_recieved_;
+  bool                             is_ivi_ready_response_recieved_;
 
-  bool attenuated_supported_;
+  bool                             attenuated_supported_;
   hmi_apis::Common_Language::eType ui_language_;
   hmi_apis::Common_Language::eType vr_language_;
   hmi_apis::Common_Language::eType tts_language_;
@@ -394,24 +390,104 @@ class HMICapabilities {
   ApplicationManagerImpl*          app_mngr_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
-
-  bool load_capabilities_from_file();
 };
 
-inline const hmi_apis::Common_Language::eType&
+bool HMICapabilities::is_ui_cooperating() const {
+  return is_ui_cooperating_;
+}
+
+bool HMICapabilities::is_vr_cooperating() const {
+  return is_vr_cooperating_;
+}
+
+bool HMICapabilities::is_tts_cooperating() const {
+  return is_tts_cooperating_;
+}
+
+bool HMICapabilities::is_navi_cooperating() const {
+  return is_navi_cooperating_;
+}
+
+bool HMICapabilities::is_ivi_cooperating() const {
+  return is_ivi_cooperating_;
+}
+
+const hmi_apis::Common_Language::eType&
 HMICapabilities::active_ui_language() const {
   return ui_language_;
 }
 
-inline const hmi_apis::Common_Language::eType&
+const smart_objects::SmartObject*
+HMICapabilities::ui_supported_languages() const {
+  return ui_supported_languages_;
+}
+
+const hmi_apis::Common_Language::eType&
 HMICapabilities::active_vr_language() const {
   return vr_language_;
 }
 
-inline const hmi_apis::Common_Language::eType&
+const smart_objects::SmartObject*
+HMICapabilities::vr_supported_languages() const {
+  return vr_supported_languages_;
+}
+
+const hmi_apis::Common_Language::eType&
 HMICapabilities::active_tts_language() const {
   return tts_language_;
 }
+
+const smart_objects::SmartObject*
+HMICapabilities::tts_supported_languages() const {
+  return tts_supported_languages_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::display_capabilities() const {
+  return display_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::hmi_zone_capabilities() const {
+  return hmi_zone_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::soft_button_capabilities() const {
+  return soft_buttons_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilities::button_capabilities() const {
+  return button_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::speech_capabilities() const {
+  return speech_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilities::vr_capabilities() const {
+  return vr_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::audio_pass_thru_capabilities() const {
+  return audio_pass_thru_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::preset_bank_capabilities() const {
+  return preset_bank_capabilities_;
+}
+
+bool HMICapabilities::attenuated_supported() const {
+  return attenuated_supported_;
+}
+
+const smart_objects::SmartObject* HMICapabilities::vehicle_type() const {
+  return vehicle_type_;
+}
+
 }  //  namespace application_manager
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_

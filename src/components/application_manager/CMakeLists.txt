@@ -46,6 +46,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
+./src/commands/pending.cc
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -249,6 +250,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
 ./src/commands/hmi/vi_subscribe_vehicle_data_response.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
 ./src/commands/hmi/navi_alert_maneuver_request.cc
