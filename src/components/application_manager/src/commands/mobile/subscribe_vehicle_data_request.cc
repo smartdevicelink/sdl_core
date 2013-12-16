@@ -54,7 +54,8 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+      CommandRequestImpl::connection_key()
+  );
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -128,10 +129,9 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt()
           );
 
-  const char* info = 0;
   SendResponse(success,
                result,
-               info,
+               0,
                &(message[strings::msg_params]));
 }
 

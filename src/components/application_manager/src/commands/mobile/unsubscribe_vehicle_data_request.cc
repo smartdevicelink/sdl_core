@@ -53,9 +53,9 @@ UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
-  unsigned int app_id =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  Application* app = ApplicationManagerImpl::instance()->application(
+      CommandRequestImpl::connection_key()
+      );
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -129,10 +129,9 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event){
           message[strings::params][hmi_response::code].asInt()
           );
 
-  const char* info = 0;
   SendResponse(success,
                result,
-               info,
+               0,
                &(message[strings::msg_params]));
 }
 
