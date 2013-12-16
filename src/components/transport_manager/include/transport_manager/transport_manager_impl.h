@@ -35,9 +35,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
-#if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
-    (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
-#define USE_RWLOCK
+#include <features.h>
+
+#ifdef RWLOCK_SUPPORT
+#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
+      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
+#  define USE_RWLOCK
+#  endif
 #endif
 
 #include <queue>

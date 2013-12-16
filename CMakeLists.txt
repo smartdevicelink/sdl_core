@@ -54,6 +54,7 @@ option(BUILD_MEDIA_MANAGER "Build media_manager component" ON)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
+option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -83,19 +84,16 @@ if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
 endif()
 
+if (BUILD_RWLOCK_SUPPORT)
+  add_definitions(-DRWLOCK_SUPPORT)
+endif()
+
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-#  add_definitions(-DOS_LINUX)
-#  add_definitions(-D__USE_UNIX98)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-#  add_definitions(-DOS_QNX)
-#  add_definitions(-D__EXT_POSIX1_200112)
-endif()
 
 IF(CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
