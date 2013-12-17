@@ -106,6 +106,7 @@ class AlertRequest : public CommandRequestImpl {
   mobile_apis::Result::eType  ui_alert_result_;
   bool                        is_tts_speak_send_;
   bool                        is_tts_speak_received_;
+  mobile_apis::Result::eType  tts_speak_result_code_;
 };
 
 }  // namespace commands

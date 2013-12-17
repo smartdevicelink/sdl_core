@@ -141,7 +141,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
       pending_requests_.Remove(id);
 
-      result_code =
+      navi_alert_maneuver_result_code_ =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
@@ -152,7 +152,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
       pending_requests_.Remove(id);
 
-      result_code =
+      tts_speak_result_code_ =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
@@ -165,24 +165,26 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (mobile_apis::Result::INVALID_ENUM == result_) {
-    result_= result_code;
-  } else if (mobile_apis::Result::SUCCESS == result_) {
-    result_ =
-        result_ == result_code
-        ? mobile_apis::Result::SUCCESS
-        : result_code
-        ;
-  }
+  result_code = (mobile_apis::Result::SUCCESS != tts_speak_result_code_)
+      ? tts_speak_result_code_
+      : navi_alert_maneuver_result_code_;
 
   if (pending_requests_.IsFinal(id)) {
     bool success = mobile_apis::Result::SUCCESS == result_code;
 
-    if (mobile_apis::Result::INVALID_ENUM != result_) {
-      result_code = result_;
-    }
+    if (mobile_apis::Result::INVALID_ENUM != result_code) {
+      mobile_apis::Result::eType return_code =
+      static_cast<mobile_apis::Result::eType>(result_code);
+      const char* return_info = NULL;
 
-    SendResponse(success, result_code, NULL, &(message[strings::msg_params]));
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == return_code) {
+        return_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      }
+
+      SendResponse(success, static_cast<mobile_apis::Result::eType>(return_code),
+                   return_info, &(message[strings::msg_params]));
+    }
   } else {
     LOG4CXX_INFO(logger_,
                 "There are some pending responses from HMI."

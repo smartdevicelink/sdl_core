@@ -102,13 +102,17 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::SpeakID;
 
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == code) {
-    const mobile_apis::Result::eType return_code =
-        mobile_apis::Result::WARNINGS;
+  mobile_apis::Result::eType return_code =
+      static_cast<mobile_apis::Result::eType>(code);
+  const char* return_info = NULL;
+
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == return_code) {
+    return_code = mobile_apis::Result::WARNINGS;
+    return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
   }
 
-  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-               "UNSUPPORTED_RESOURCE", &(message[strings::msg_params]));
+  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(return_code),
+               return_info, &(message[strings::msg_params]));
 }
 
 }  // namespace commands
