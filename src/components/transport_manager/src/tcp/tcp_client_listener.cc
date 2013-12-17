@@ -203,7 +203,15 @@ TransportAdapter::Error TcpClientListener::StopListening() {
     return TransportAdapter::BAD_STATE;
 
   thread_stop_requested_ = true;
-  shutdown(socket_, SHUT_RDWR);
+  int byebyesocket = socket(AF_INET, SOCK_STREAM, 0);
+  sockaddr_in server_address;
+  memset(&server_address, 0, sizeof(server_address));
+  server_address.sin_family = AF_INET;
+  server_address.sin_port = htons(port_);
+  server_address.sin_addr.s_addr = INADDR_ANY;
+  connect(byebyesocket, (sockaddr*)&server_address, sizeof(server_address));
+  shutdown(byebyesocket, SHUT_RDWR);
+  close(byebyesocket);
   pthread_join(thread_, 0);
   LOG4CXX_INFO(logger_, "Tcp client listener thread terminated");
   close(socket_);
