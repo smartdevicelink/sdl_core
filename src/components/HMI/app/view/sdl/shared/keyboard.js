@@ -215,7 +215,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             if (!SDL.SDLAppController.model.globalProperties.keyboardProperties) {
                 return;
             }
-            var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;
+            var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList ? SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList : [];
 
             for (var i = 0; i < list.length; i++) {
                 list[i] = list[i].toLowerCase();
