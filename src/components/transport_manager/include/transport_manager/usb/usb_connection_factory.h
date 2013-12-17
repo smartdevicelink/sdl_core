@@ -38,7 +38,7 @@
 
 #include "transport_manager/transport_adapter/server_connection_factory.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/usb/libusb_handler.h"
+#include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -46,20 +46,22 @@ namespace transport_adapter {
 class UsbConnectionFactory : public ServerConnectionFactory {
  public:
   UsbConnectionFactory(TransportAdapterController* controller);
-  void SetLibusbHandler(const LibusbHandlerSptr& libusb_handler);
+  void SetUsbHandler(const UsbHandlerSptr& usb_handler);
+
  protected:
   virtual TransportAdapter::Error Init();
-  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
-                                                const ApplicationHandle& app_handle);
+  virtual TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_uid, const ApplicationHandle& app_handle);
   virtual void Terminate();
   virtual bool IsInitialised() const;
   virtual ~UsbConnectionFactory();
+
  private:
   TransportAdapterController* controller_;
-  LibusbHandlerSptr libusb_handler_;
+  UsbHandlerSptr usb_handler_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONNECTION_FACTORY_H_

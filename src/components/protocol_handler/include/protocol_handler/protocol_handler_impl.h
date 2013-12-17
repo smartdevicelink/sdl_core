@@ -49,7 +49,7 @@
 #include "protocol_handler/protocol_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_listener_impl.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -62,11 +62,11 @@ class SessionObserver;
 class MessagesFromMobileAppHandler;
 class MessagesToMobileAppHandler;
 
+using transport_manager::TransportManagerListenerEmpty;
+
 typedef std::multimap<int, RawMessagePtr> MessagesOverNaviMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
 typedef transport_manager::ConnectionUID ConnectionID;
-
-using transport_manager::TransportManagerListenerImpl;
 
 namespace impl {
 /*
@@ -114,7 +114,7 @@ typedef threads::MessageLoopThread<
  */
 class ProtocolHandlerImpl
     : public ProtocolHandler,
-      public TransportManagerListenerImpl,
+      public TransportManagerListenerEmpty,
       public impl::FromMobileQueue::Handler,
       public impl::ToMobileQueue::Handler {
   public:

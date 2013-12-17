@@ -181,4 +181,12 @@ bool Message::HasHigherPriorityThan(const Message& that) const {
   return this->priority_ > that.priority_;
 }
 
+NsSmartDeviceLink::NsSmartObjects::SmartObject& Message::smart_object() {
+  return object_;
+}
+
+void Message::set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object) {
+  object_ = object;
+}
 }  // namespace application_manager
+

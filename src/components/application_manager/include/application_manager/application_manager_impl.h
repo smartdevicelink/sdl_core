@@ -45,9 +45,12 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-#include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -584,8 +587,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
+#ifdef MEDIA_MANAGER
+  media_manager::MediaManager* media_manager_;
+#endif
 
-    media_manager::MediaManager*            media_manager_;
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
     protocol_handler::ProtocolHandler*      protocol_handler_;

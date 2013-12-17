@@ -156,7 +156,7 @@ namespace policies_draft_test {
         so_ns::SmartObject(),
         mobile_apis::HMILevel::HMI_BACKGROUND);
     ASSERT_EQ(::policies::PERMISSION_INIT_FAILED, perm_result.result);
-    ASSERT_DEATH({delete policy_manager;}, "");
+    //ASSERT_DEATH({delete policy_manager;}, "");//ykazakov: not supported under QNX
   }
 
   TEST_F(Policies_test, test_policies_PT_bad_json_file_test) {

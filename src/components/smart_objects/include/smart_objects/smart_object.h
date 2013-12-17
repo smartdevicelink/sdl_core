@@ -468,6 +468,7 @@ class SmartObject {
    * @return SmartObject&
    **/
   SmartObject& operator[](int Index);
+  const SmartObject& operator[](int Index) const;
 
   /**
    * @brief Get array element.
@@ -495,6 +496,7 @@ class SmartObject {
    * @return SmartObject&
    **/
   SmartObject& operator[](const std::string Key);
+  const SmartObject& operator[](const std::string Key) const;
 
   /**
    * @brief Support of map-like access
@@ -503,6 +505,7 @@ class SmartObject {
    * @return SmartObject&
    **/
   SmartObject& operator[](char* Key);
+  const SmartObject& operator[](char* Key) const;
 
   /**
    * @brief Support of map-like access
@@ -567,7 +570,7 @@ class SmartObject {
    *
    * @return bolean validation result
    **/
-  bool isValid();
+  bool isValid() const;
 
   /**
    * @brief Validates object according to attached schema.
@@ -612,6 +615,7 @@ class SmartObject {
   size_t length() const;
 
  protected:
+  static std::string OperatorToTransform(const SmartMap::value_type &pair) ;
   /**
    * @name Support of type: int (internal)
    * @{

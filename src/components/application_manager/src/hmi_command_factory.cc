@@ -131,8 +131,79 @@
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
+
+#ifdef WEB_HMI
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
+#include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
+#endif // #ifdef WEB_HMI
+
+#ifdef QT_HMI
+#include "application_manager/commands/hmi/vi_get_gps_data_request.h"
+#include "application_manager/commands/hmi/vi_get_gps_data_response.h"
+#include "application_manager/commands/hmi/vi_get_speed_request.h"
+#include "application_manager/commands/hmi/vi_get_speed_response.h"
+#include "application_manager/commands/hmi/vi_get_rpm_request.h"
+#include "application_manager/commands/hmi/vi_get_rpm_response.h"
+#include "application_manager/commands/hmi/vi_get_fuel_level_request.h"
+#include "application_manager/commands/hmi/vi_get_fuel_level_response.h"
+#include "application_manager/commands/hmi/vi_get_fuel_level_state_request.h"
+#include "application_manager/commands/hmi/vi_get_fuel_level_state_response.h"
+#include "application_manager/commands/hmi/vi_get_instant_fuel_consumption_request.h"
+#include "application_manager/commands/hmi/vi_get_instant_fuel_consumption_response.h"
+#include "application_manager/commands/hmi/vi_get_external_temperature_request.h"
+#include "application_manager/commands/hmi/vi_get_external_temperature_response.h"
+#include "application_manager/commands/hmi/vi_get_vin_request.h"
+#include "application_manager/commands/hmi/vi_get_vin_response.h"
+#include "application_manager/commands/hmi/vi_get_prndl_request.h"
+#include "application_manager/commands/hmi/vi_get_prndl_response.h"
+#include "application_manager/commands/hmi/vi_get_tire_pressure_request.h"
+#include "application_manager/commands/hmi/vi_get_tire_pressure_response.h"
+#include "application_manager/commands/hmi/vi_get_odometer_request.h"
+#include "application_manager/commands/hmi/vi_get_odometer_response.h"
+#include "application_manager/commands/hmi/vi_get_belt_status_request.h"
+#include "application_manager/commands/hmi/vi_get_belt_status_response.h"
+#include "application_manager/commands/hmi/vi_get_body_information_request.h"
+#include "application_manager/commands/hmi/vi_get_body_information_response.h"
+#include "application_manager/commands/hmi/vi_get_device_status_request.h"
+#include "application_manager/commands/hmi/vi_get_device_status_response.h"
+#include "application_manager/commands/hmi/vi_get_driver_braking_request.h"
+#include "application_manager/commands/hmi/vi_get_driver_braking_response.h"
+#include "application_manager/commands/hmi/vi_get_wiper_status_request.h"
+#include "application_manager/commands/hmi/vi_get_wiper_status_response.h"
+#include "application_manager/commands/hmi/vi_get_head_lamp_status_request.h"
+#include "application_manager/commands/hmi/vi_get_head_lamp_status_response.h"
+#include "application_manager/commands/hmi/vi_get_engine_torque_request.h"
+#include "application_manager/commands/hmi/vi_get_engine_torque_response.h"
+#include "application_manager/commands/hmi/vi_get_acc_pedal_position_request.h"
+#include "application_manager/commands/hmi/vi_get_acc_pedal_position_response.h"
+#include "application_manager/commands/hmi/vi_get_steering_wheel_angle_request.h"
+#include "application_manager/commands/hmi/vi_get_steering_wheel_angle_response.h"
+#include "application_manager/commands/hmi/vi_get_my_key_request.h"
+#include "application_manager/commands/hmi/vi_get_my_key_response.h"
+#include "application_manager/commands/hmi/on_vi_gps_data_notification.h"
+#include "application_manager/commands/hmi/on_vi_speed_notification.h"
+#include "application_manager/commands/hmi/on_vi_rpm_notification.h"
+#include "application_manager/commands/hmi/on_vi_fuel_level_notification.h"
+#include "application_manager/commands/hmi/on_vi_fuel_level_state_notification.h"
+#include "application_manager/commands/hmi/on_vi_instant_fuel_consumption_notification.h"
+#include "application_manager/commands/hmi/on_vi_external_temperature_notification.h"
+#include "application_manager/commands/hmi/on_vi_vin_notification.h"
+#include "application_manager/commands/hmi/on_vi_prndl_notification.h"
+#include "application_manager/commands/hmi/on_vi_tire_pressure_notification.h"
+#include "application_manager/commands/hmi/on_vi_odometer_notification.h"
+#include "application_manager/commands/hmi/on_vi_belt_status_notification.h"
+#include "application_manager/commands/hmi/on_vi_body_information_notification.h"
+#include "application_manager/commands/hmi/on_vi_device_status_notification.h"
+#include "application_manager/commands/hmi/on_vi_driver_braking_notification.h"
+#include "application_manager/commands/hmi/on_vi_wiper_status_notification.h"
+#include "application_manager/commands/hmi/on_vi_head_lamp_status_notification.h"
+#include "application_manager/commands/hmi/on_vi_engine_torque_notification.h"
+#include "application_manager/commands/hmi/on_vi_acc_pedal_position_notification.h"
+#include "application_manager/commands/hmi/on_vi_steering_wheel_angle_notification.h"
+#include "application_manager/commands/hmi/on_vi_my_key_notification.h"
+#endif // #ifdef QT_HMI
+
 #include "application_manager/commands/hmi/vi_get_dtcs_request.h"
 #include "application_manager/commands/hmi/vi_get_dtcs_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
@@ -170,7 +241,6 @@
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/commands/hmi/on_show_notification.h"
-#include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
@@ -568,6 +638,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#ifdef WEB_HMI
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       if (is_response) {
         command.reset(new commands::VIGetVehicleDataResponse(message));
@@ -576,6 +647,177 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#endif // #ifdef WEB_HMI
+#ifdef QT_HMI
+    case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
+      if (is_response) {
+        command.reset(new commands::VIGetGpsDataResponse(message));
+      } else {
+        command.reset(new commands::VIGetGpsDataRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetSpeed: {
+      if (is_response) {
+        command.reset(new commands::VIGetSpeedResponse(message));
+      } else {
+        command.reset(new commands::VIGetSpeedRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetRpm: {
+      if (is_response) {
+        command.reset(new commands::VIGetRpmResponse(message));
+      } else {
+        command.reset(new commands::VIGetRpmRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetFuelLevel: {
+      if (is_response) {
+        command.reset(new commands::VIGetFuelLevelResponse(message));
+      } else {
+        command.reset(new commands::VIGetFuelLevelRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState: {
+      if (is_response) {
+        command.reset(new commands::VIGetFuelLevelStateResponse(message));
+      } else {
+        command.reset(new commands::VIGetFuelLevelStateRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption: {
+      if (is_response) {
+        command.reset(new commands::VIGetInstantFuelConsumptionResponse(message));
+      } else {
+        command.reset(new commands::VIGetInstantFuelConsumptionRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature: {
+      if (is_response) {
+        command.reset(new commands::VIGetExternalTemperatureResponse(message));
+      } else {
+        command.reset(new commands::VIGetExternalTemperatureRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetVin: {
+      if (is_response) {
+        command.reset(new commands::VIGetVinResponse(message));
+      } else {
+        command.reset(new commands::VIGetVinRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetPrndl: {
+      if (is_response) {
+        command.reset(new commands::VIGetPrndlResponse(message));
+      } else {
+        command.reset(new commands::VIGetPrndlRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetTirePressure: {
+      if (is_response) {
+        command.reset(new commands::VIGetTirePressureResponse(message));
+      } else {
+        command.reset(new commands::VIGetTirePressureRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
+      if (is_response) {
+        command.reset(new commands::VIGetOdometerResponse(message));
+      } else {
+        command.reset(new commands::VIGetOdometerRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetBeltStatus: {
+      if (is_response) {
+        command.reset(new commands::VIGetBeltStatusResponse(message));
+      } else {
+        command.reset(new commands::VIGetBeltStatusRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetBodyInformation: {
+      if (is_response) {
+        command.reset(new commands::VIGetBodyInformationResponse(message));
+      } else {
+        command.reset(new commands::VIGetBodyInformationRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus: {
+      if (is_response) {
+        command.reset(new commands::VIGetDeviceStatusResponse(message));
+      } else {
+        command.reset(new commands::VIGetDeviceStatusRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetDriverBraking: {
+      if (is_response) {
+        command.reset(new commands::VIGetDriverBrakingResponse(message));
+      } else {
+        command.reset(new commands::VIGetDriverBrakingRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetWiperStatus: {
+      if (is_response) {
+        command.reset(new commands::VIGetWiperStatusResponse(message));
+      } else {
+        command.reset(new commands::VIGetWiperStatusRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus: {
+      if (is_response) {
+        command.reset(new commands::VIGetHeadLampStatusResponse(message));
+      } else {
+        command.reset(new commands::VIGetHeadLampStatusRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetEngineTorque: {
+      if (is_response) {
+        command.reset(new commands::VIGetEngineTorqueResponse(message));
+      } else {
+        command.reset(new commands::VIGetEngineTorqueRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition: {
+      if (is_response) {
+        command.reset(new commands::VIGetAccPedalPositionResponse(message));
+      } else {
+        command.reset(new commands::VIGetAccPedalPositionRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle: {
+      if (is_response) {
+        command.reset(new commands::VIGetSteeringWheelAngleResponse(message));
+      } else {
+        command.reset(new commands::VIGetSteeringWheelAngleRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetMyKey: {
+      if (is_response) {
+        command.reset(new commands::VIGetMyKeyResponse(message));
+      } else {
+        command.reset(new commands::VIGetMyKeyRequest(message));
+      }
+      break;
+    }
+#endif // #ifdef QT_HMI
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
       if (is_response) {
         command.reset(new commands::VIGetDTCsResponse(message));
@@ -733,10 +975,98 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnButtonPressNotification(message));
       break;
     }
+#ifdef WEB_HMI
     case hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
       command.reset(new commands::OnVIVehicleDataNotification(message));
       break;
     }
+#endif // #ifdef WEB_HMI
+#ifdef QT_HMI
+    case hmi_apis::FunctionID::VehicleInfo_OnGpsData: {
+      command.reset(new commands::OnVIGpsDataNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnSpeed: {
+      command.reset(new commands::OnVISpeedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnRpm: {
+      command.reset(new commands::OnVIRpmNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnFuelLevel: {
+      command.reset(new commands::OnVIFuelLevelNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnFuelLevelState: {
+      command.reset(new commands::OnVIFuelLevelStateNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnInstantFuelConsumption: {
+      command.reset(new commands::OnVIInstantFuelConsumptionNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnExternalTemperature: {
+      command.reset(new commands::OnVIExternalTemperatureNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnVin: {
+      command.reset(new commands::OnVIVinNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnPrndl: {
+      command.reset(new commands::OnVIPrndlNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnTirePressure: {
+      command.reset(new commands::OnVITirePressureNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnOdometer: {
+      command.reset(new commands::OnVIOdometerNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnBeltStatus: {
+      command.reset(new commands::OnVIBeltStatusNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnBodyInformation: {
+      command.reset(new commands::OnVIBodyInformationNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnDeviceStatus: {
+      command.reset(new commands::OnVIDeviceStatusNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnDriverBraking: {
+      command.reset(new commands::OnVIDriverBrakingNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnWiperStatus: {
+      command.reset(new commands::OnVIWiperStatusNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnHeadLampStatus: {
+      command.reset(new commands::OnVIHeadLampStatusNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnEngineTorque: {
+      command.reset(new commands::OnVIEngineTorqueNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnAccPedalPosition: {
+      command.reset(new commands::OnVIAccPedalPositionNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnSteeringWheelAngle: {
+      command.reset(new commands::OnVISteeringWheelAngleNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnMyKey: {
+      command.reset(new commands::OnVIMyKeyNotification(message));
+      break;
+    }
+#endif // #ifdef QT_HMI
     case hmi_apis::FunctionID::UI_ShowNotification: {
       command.reset(new commands::OnShowNotification(message));
       break;

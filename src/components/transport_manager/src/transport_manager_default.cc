@@ -34,10 +34,17 @@
  */
 
 #include "transport_manager/transport_manager_default.h"
-
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+
+#ifdef BLUETOOTH_SUPPORT
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#endif
+#include "transport_manager/tcp/tcp_transport_adapter.h"
+
+#ifdef USB_SUPPORT
 #include "transport_manager/usb/usb_aoa_adapter.h"
+#endif
+
 
 namespace transport_manager {
 
@@ -46,9 +53,13 @@ int TransportManagerDefault::Init() {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
+#ifdef BLUETOOTH_SUPPORT
   AddTransportAdapter(new transport_adapter::BluetoothTransportAdapter);
+#endif
   AddTransportAdapter(new transport_adapter::TcpTransportAdapter);
+#ifdef USB_SUPPORT
   AddTransportAdapter(new transport_adapter::UsbAoaAdapter);
+#endif
 
   return E_SUCCESS;
 }

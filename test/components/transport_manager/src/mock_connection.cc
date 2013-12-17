@@ -35,7 +35,7 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
-
+#include <sstream>
 #include "transport_manager/common.h"
 #include "transport_manager/mock_connection.h"
 

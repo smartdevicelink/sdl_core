@@ -35,6 +35,15 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
+#include <pthread.h>
+
+#ifdef RWLOCK_SUPPORT
+#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
+      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
+#  define USE_RWLOCK
+#  endif
+#endif
+
 #include <queue>
 #include <map>
 #include <list>
@@ -82,6 +91,29 @@ class TransportManagerImpl : public TransportManager {
     DeviceUID device;
     ApplicationHandle application;
   };
+
+ private:
+  /**
+   * @brief Structure that contains internal connection parameters
+   */
+  struct ConnectionInternal: public Connection {
+    TransportAdapter* transport_adapter;
+    Timer timer;
+    bool shutDown;
+    int messages_count;
+
+    ConnectionInternal(TransportAdapter* transport_adapter,
+                       const ConnectionUID& id, const DeviceUID& dev_id,
+                       const ApplicationHandle& app_id)
+        : transport_adapter(transport_adapter),
+          shutDown(false),
+          messages_count(0) {
+            Connection::id = id;
+            Connection::device = dev_id;
+            Connection::application = app_id;
+    }
+  };
+ public:
 
   /**
    * @brief Destructor.
@@ -313,6 +345,9 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to messages.
    **/
+#ifdef USE_RWLOCK
+  mutable pthread_rwlock_t message_queue_rwlock_;
+#endif
   mutable pthread_mutex_t message_queue_mutex_;
 
   pthread_cond_t message_queue_cond_;
@@ -356,6 +391,9 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to events.
    **/
+#ifdef USE_RWLOCK
+  mutable pthread_rwlock_t event_queue_rwlock_;
+#endif
   mutable pthread_mutex_t event_queue_mutex_;
 
   /**
@@ -413,29 +451,6 @@ class TransportManagerImpl : public TransportManager {
    */
   Handle2GUIDConverter converter_;
 
-  /**
-   * @brief Structure that contains internal connection parameters
-   */
-  struct ConnectionInternal {
-    TransportAdapter* transport_adapter;
-    ConnectionUID id;
-    DeviceUID device;
-    ApplicationHandle application;
-    Timer timer;
-    bool shutDown;
-    int messages_count;
-
-    ConnectionInternal(TransportAdapter* transport_adapter,
-                       const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id)
-        : transport_adapter(transport_adapter),
-          id(id),
-          device(dev_id),
-          application(app_id),
-          shutDown(false),
-          messages_count(0) {}
-  };
-
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;
   std::vector<ConnectionInternal> connections_;
@@ -471,6 +486,7 @@ class TransportManagerImpl : public TransportManager {
                 unsigned char** frame);
 
   void OnDeviceListUpdated(TransportAdapter* ta);
+  static Connection convert(ConnectionInternal& p);
 };
 // class ;
 

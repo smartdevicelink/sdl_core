@@ -17,6 +17,10 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
+set(RTLIB rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+set(RTLIB )
+endif()
 set (LIBRARIES
     gtest
     gtest_main
@@ -29,6 +33,7 @@ set (LIBRARIES
     ConfigProfile
     MessageBroker
     MOBILE_API
+    ${RTLIB}
 )
 
 create_test("test_policies_draft_test" "./policies_draft_test.cc" "${LIBRARIES}")
