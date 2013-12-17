@@ -395,9 +395,8 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
     Application* const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  if (InteractionMode::VR_ONLY
-      == (*message_)[strings::msg_params][strings::interaction_mode].asInt()) {
+  int mode = (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+  if (InteractionMode::VR_ONLY == mode) {
     // TODO(DK): We need subscribe perform interaction with on command notification
     /*CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
      smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);*/

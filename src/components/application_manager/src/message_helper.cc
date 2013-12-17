@@ -95,8 +95,8 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
 }
 
-const VehicleData MessageHelper::vehicle_data_ =
-{ {strings::gps, VehicleDataType::GPS},
+const VehicleData MessageHelper::vehicle_data_ = {
+  {strings::gps, VehicleDataType::GPS},
   {strings::speed, VehicleDataType::SPEED },
   {strings::rpm, VehicleDataType::RPM},
   {strings::fuel_level, VehicleDataType::FUELLEVEL},
