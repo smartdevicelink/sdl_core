@@ -88,10 +88,10 @@ void SetIconRequest::Run() {
 
   msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi;
 
-  //TODO (VS): research why is image_type hardcoded
+  // TODO(VS): research why is image_type hardcoded
   msg_params[strings::sync_file_name][strings::image_type] = ImageType::DYNAMIC;
 
-  //for further use in on_event function
+  // for further use in on_event function
   (*message_)[strings::msg_params][strings::sync_file_name] =
       msg_params[strings::sync_file_name];
 
@@ -114,9 +114,13 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
         Application* app = ApplicationManagerImpl::instance()->application(
             connection_key());
 
-        app->set_app_icon_path(
-            (*message_)[strings::msg_params]
-                       [strings::sync_file_name].asString());
+        const std::string path = (*message_)[strings::msg_params]
+                                            [strings::sync_file_name]
+                                            [strings::value].asString();
+        app->set_app_icon_path(path);
+
+        LOG4CXX_INFO(logger_,
+                     "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
