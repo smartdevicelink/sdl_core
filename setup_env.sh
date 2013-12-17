@@ -143,7 +143,7 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
-if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ] then
+if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ]; then
 echo "Installing CMake build system"
 apt-install ${CMAKE_BUILD_SYSTEM}
 echo $OK
