@@ -187,18 +187,18 @@ Rectangle {
             visible: false
         }
 
+        VRHelpPopup {
+            id: vrHelpPopup
+            popUpName: "UI.VrHelp"
+            anchors.centerIn: parent
+            visible: false
+        }
+
         AlertWindow {
             id: alertWindow
             popUpName: "UI.Alert"
             objectName: "AlertWindow"
             anchors.fill: parent
-            visible: false
-        }
-
-        VRHelpPopup {
-            id: vrHelpPopup
-            popUpName: "UI.VrHelp"
-            anchors.centerIn: parent
             visible: false
         }
     }
