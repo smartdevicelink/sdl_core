@@ -75,6 +75,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
 
         listWrapper: Em.ContainerView.extend({
 
+            classNameBindings: ['this.parentView.icon::hide'],
+
             elementId: 'listWrapper',
 
             classNames: 'listWrapper',
@@ -84,7 +86,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView
             ],
 
             naviChoises: Em.ContainerView.extend({
-                classNameBindings: ['this.parentView.icon::hide'],
                 classNames: 'naviChoises',
                 childViews: [
                     'captionText'

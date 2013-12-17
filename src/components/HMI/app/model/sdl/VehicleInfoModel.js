@@ -366,7 +366,7 @@ SDL.SDLVehicleInfoModel = Em.Object
                     } else if (key === "clusterModeStatus") {
                         subscribeVIData["clusterModes"] = {
                             dataType: this.eVehicleDataType["clusterModes"],
-                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                            resultCode: "SUCCESS"
                         }
                     }
                 }
@@ -398,7 +398,7 @@ SDL.SDLVehicleInfoModel = Em.Object
                     } else if (key === "clusterModeStatus") {
                         subscribeVIData["clusterModes"] = {
                             dataType: this.eVehicleDataType["clusterModes"],
-                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                            resultCode: "SUCCESS"
                         }
                     }
                 }
