@@ -620,6 +620,30 @@
     <element name="sliderFooter">
       <description> Footer text for slider</description>
     </element>
+    
+    <element name="notificationText">
+      <description> Footer text for slider</description>
+    </element>
+    
+    <element name="menuName">
+      <description> Primary text for Choice</description>
+    </element>
+
+    <element name="secondaryText">
+      <description> Secondary text for Choice</description>
+    </element>
+
+    <element name="tertiaryText">
+      <description> Tertiary text for Choice</description>
+    </element>
+    
+    <element name="timeToDestination">
+    	<description> Time to destination</description>
+    </element>
+    
+  	<element name="turnText">
+  		<description> Turn text</description>
+  	</element>
 
   </enum>
 
