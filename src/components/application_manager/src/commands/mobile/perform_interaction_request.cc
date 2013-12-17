@@ -218,6 +218,12 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
+    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+      LOG4CXX_INFO(logger_, "Received TTS_PerformInteraction");
+      tts_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
+          event.smart_object()[strings::params][hmi_response::code].asInt());
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
       break;
@@ -380,15 +386,24 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
         smart_objects::SmartType_Map);
     msg_params = message[strings::msg_params];
     bool result_code = false;
-    const hmi_apis::Common_Result::eType code =
-        static_cast<hmi_apis::Common_Result::eType>(
+    mobile_apis::Result::eType code =
+        static_cast<mobile_apis::Result::eType>(
             message[strings::params][hmi_response::code].asInt());
     if (hmi_apis::Common_Result::SUCCESS == code) {
       msg_params[strings::trigger_source] = trigger_source_;
       result_code = true;
     }
+
+    const char* return_info = NULL;
+
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+        tts_perform_interaction_code_) {
+      code = mobile_apis::Result::WARNINGS;
+      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    }
+
     SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-                   NULL, &(msg_params));
+                 return_info, &(msg_params));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(

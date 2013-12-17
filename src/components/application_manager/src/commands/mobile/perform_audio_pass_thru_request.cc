@@ -147,7 +147,14 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const char* return_info = NULL;
+
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      }
+
+      SendResponse(result, result_code, return_info, &(message[strings::msg_params]));
       break;
     }
     default: {
