@@ -46,7 +46,6 @@ namespace str = strings;
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {

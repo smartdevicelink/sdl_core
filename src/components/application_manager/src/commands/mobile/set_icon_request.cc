@@ -44,7 +44,6 @@ namespace commands {
 
 SetIconRequest::SetIconRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_SetAppIcon);
 }
 
 SetIconRequest::~SetIconRequest() {

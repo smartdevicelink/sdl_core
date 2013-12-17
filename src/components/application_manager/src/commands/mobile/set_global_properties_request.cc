@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include <algorithm>
 
 namespace application_manager {
 
@@ -44,7 +45,13 @@ namespace commands {
 
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
     const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    : CommandRequestImpl(message),
+      is_ui_send_(false),
+      is_tts_send_(false),
+      is_ui_received_(false),
+      is_tts_received_(false),
+      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {
 }
 
 SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
@@ -110,13 +117,6 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  // by default counter is 1 for TTS request. If only one param specified
-  // for TTS REJECT response will be sent
-  unsigned int chaining_counter = 1;
-  if (is_help_prompt_present || is_timeout_prompt_present) {
-    ++chaining_counter;
-  }
-
   if (is_vr_help_title_present && is_vr_help_present) {
     // check vrhelpitem position index
     if (!CheckVrHelpItemsOrder()) {
@@ -152,8 +152,8 @@ void SetGlobalPropertiesRequest::Run() {
           msg_params[hmi_request::keyboard_properties];
     }
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, params,
-                     true, chaining_counter);
+    SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                       &params, true);
   } else if (!is_vr_help_title_present && !is_vr_help_present) {
     const CommandsMap& cmdMap = app->commands_map();
     CommandsMap::const_iterator command_it = cmdMap.begin();
@@ -195,8 +195,8 @@ void SetGlobalPropertiesRequest::Run() {
           msg_params[hmi_request::keyboard_properties];
     }
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, params,
-                     true, chaining_counter);
+    SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                       &params, true);
   } else {
     LOG4CXX_ERROR(logger_, "Request rejected");
     SendResponse(false, mobile_apis::Result::REJECTED);
@@ -222,8 +222,8 @@ void SetGlobalPropertiesRequest::Run() {
 
     params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties, params,
-                     true);
+    SendHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                   &params, true);
   }
 }
 
@@ -251,6 +251,49 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
   }
 
   return true;
+}
+
+void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_SetGlobalProperties: {
+      LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+      is_ui_received_ = true;
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+      LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      is_tts_received_ = true;
+      tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
+
+  bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+        && (hmi_apis::Common_Result::SUCCESS == tts_result_))
+        || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+            && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+        || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+            && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+
+  SendResponse(result,
+               static_cast<mobile_apis::Result::eType>(
+                   std::max(ui_result_, tts_result_)),
+               NULL, &(message[strings::msg_params]));
+}
+
+bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
+
+  return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
 }
 
 }  // namespace commands

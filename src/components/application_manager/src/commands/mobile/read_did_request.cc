@@ -43,7 +43,6 @@ namespace commands {
 
 ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_SetAppIcon);
 }
 
 ReadDIDRequest::~ReadDIDRequest() {
