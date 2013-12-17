@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -47,11 +48,9 @@ UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
 void UIPerformAudioPassThruResponse::Run() {
   LOG4CXX_INFO(logger_, "UIPerformAudioPassThruResponse::Run");
 
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::PerformAudioPassThruID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

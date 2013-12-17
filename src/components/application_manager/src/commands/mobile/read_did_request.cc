@@ -43,6 +43,7 @@ namespace commands {
 
 ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_SetAppIcon);
 }
 
 ReadDIDRequest::~ReadDIDRequest() {
@@ -75,8 +76,29 @@ void ReadDIDRequest::Run() {
   msg_params[strings::did_location] =
       (*message_)[strings::msg_params][strings::did_location];
 
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID, msg_params, true,
-                   1);
+  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID, &msg_params, true);
+}
+
+void ReadDIDRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ReadDIDRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands

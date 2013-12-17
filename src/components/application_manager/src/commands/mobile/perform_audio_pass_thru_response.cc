@@ -33,8 +33,7 @@
 
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
+
 
 namespace application_manager {
 
@@ -51,25 +50,7 @@ PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {
 void PerformAudioPassThruResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruResponse::Run");
 
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  if (!IsPendingResponseExist()) {
-    if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
-      int session_key =
-        (*message_)[strings::params][strings::connection_key].asUInt();
-      ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
-    }
-    SendResponse(true);
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

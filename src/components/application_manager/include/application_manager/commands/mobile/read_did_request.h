@@ -59,6 +59,13 @@ class ReadDIDRequest : public CommandRequestImpl {
   virtual ~ReadDIDRequest();
 
   /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();
