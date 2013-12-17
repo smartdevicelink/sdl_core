@@ -113,7 +113,6 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"alertText3", hmi_apis::Common_TextFieldName::alertText3},
     {"scrollableMessageBody" , hmi_apis::Common_TextFieldName::scrollableMessageBody},
     {"initialInteractionText", hmi_apis::Common_TextFieldName::initialInteractionText},
-    {"navigationText"        , hmi_apis::Common_TextFieldName::navigationText},
     {"navigationText1"       , hmi_apis::Common_TextFieldName::navigationText1},
     {"navigationText2"       , hmi_apis::Common_TextFieldName::navigationText2},
     {"ETA"                   , hmi_apis::Common_TextFieldName::ETA},
@@ -532,8 +531,10 @@ bool HMICapabilities::load_capabilities_from_file() {
 
      Json::Value text_fields = display_capabilities.get("textFields", "");
      for (int i = 0; i < text_fields.size(); i++) {
-       display_capabilities_so["textFields"][i] =
-           button_enum_name.find(text_fields[i].asString())->second;
+
+       // there is an issue with enum to string, therefore used string
+       display_capabilities_so["textFields"][i]["name"] =
+           text_fields_enum_name.find(text_fields[i].asString())->first;
      }
 
      display_capabilities_so["mediaClockFormats"] =
@@ -559,22 +560,25 @@ bool HMICapabilities::load_capabilities_from_file() {
 
      Json::Value audio_capabilities = ui.get("audioPassThruCapabilities", "");
      smart_objects::SmartObject audio_capabilities_so =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
-     audio_capabilities_so["samplingRate"] =
+              smart_objects::SmartObject(smart_objects::SmartType_Array);
+     int i = 0;
+     audio_capabilities_so[i] =
+                   smart_objects::SmartObject(smart_objects::SmartType_Map);
+     audio_capabilities_so[i]["samplingRate"] =
          sampling_rate_enum.find(
              audio_capabilities.get("samplingRate", "").asString())->second;
-     audio_capabilities_so["bitsPerSample"] =
+     audio_capabilities_so[i]["bitsPerSample"] =
          bit_per_sample_enum.find(
              audio_capabilities.get("bitsPerSample", "").asString())->second;
-     audio_capabilities_so["audioType"] =
+     audio_capabilities_so[i]["audioType"] =
          audio_type_enum.find(
              audio_capabilities.get("audioType", "").asString())->second;
      set_audio_pass_thru_capabilities(audio_capabilities_so);
 
      smart_objects::SmartObject hmi_zone_capabilities_so =
-         smart_objects::SmartObject(smart_objects::SmartType_Integer);
-
-     hmi_zone_capabilities_so =
+         smart_objects::SmartObject(smart_objects::SmartType_Array);
+     int index = 0;
+     hmi_zone_capabilities_so[index] =
          hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())->second;
      set_hmi_zone_capabilities(hmi_zone_capabilities_so);
 
