@@ -35,7 +35,6 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef QT_HMI
 #  include "hmi_message_handler/dbus_message_adapter.h"
@@ -48,7 +47,10 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
+#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
+#include "policies/policy_manager_impl.h"
+#endif
 
 #ifdef WEB_HMI
 #  include "CMessageBroker.hpp"
@@ -62,18 +64,18 @@ class LifeCycle {
   public:
     static LifeCycle* instance();
     bool StartComponents();
+
     /**
     * Initialize MessageBroker component
     * @return true if success otherwise false.
     */
-    bool InitMessageBroker();
+    bool InitMessageSystem();
     static void StopComponents(int params);
 
   private:
     LifeCycle();
     transport_manager::TransportManager* transport_manager_;
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
-    mobile_message_handler::MobileMessageHandlerImpl* mmh_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
@@ -83,7 +85,10 @@ class LifeCycle {
 #ifdef WEB_HMI
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
 #endif  // WEB_HMI
+#ifdef MEDIA_MANAGER
     media_manager::MediaManagerImpl* media_manager_;
+    policies::PolicyManagerImpl* policy_manager_;
+#endif
 
 #ifdef WEB_HMI
     NsMessageBroker::CMessageBroker* message_broker_;

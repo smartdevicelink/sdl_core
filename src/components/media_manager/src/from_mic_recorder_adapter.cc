@@ -42,7 +42,6 @@ log4cxx::LoggerPtr FromMicRecorderAdapter::logger_ = log4cxx::LoggerPtr(
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
   : recorder_thread_(NULL)
-  , current_application_(0)
   , output_file_("default_recorded_audio.wav")
   , kDefaultDuration(1000)
   , duration_(0) {
@@ -50,15 +49,21 @@ FromMicRecorderAdapter::FromMicRecorderAdapter()
 }
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
+  LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::~FromMicRecorderAdapter()");
   StopActivity(current_application_);
 }
 
 void FromMicRecorderAdapter::StartActivity(int application_key) {
+  LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::StartActivity "
+               << application_key);
   if (application_key == current_application_) {
+    LOG4CXX_WARN(logger_, "Running recording from mic for "
+                 << current_application_);
     return;
   }
   if (!recorder_thread_) {
-    FromMicToFileRecorderThread* thread_delegate = new FromMicToFileRecorderThread(
+    FromMicToFileRecorderThread* thread_delegate =
+      new FromMicToFileRecorderThread(
       output_file_, duration_);
     recorder_thread_ = new threads::Thread("MicrophoneRecorder",
                                            thread_delegate);
@@ -70,6 +75,14 @@ void FromMicRecorderAdapter::StartActivity(int application_key) {
 }
 
 void FromMicRecorderAdapter::StopActivity(int application_key) {
+  LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::StopActivity "
+               << application_key);
+  if (application_key != current_application_) {
+    LOG4CXX_WARN(logger_, "Running activity on other app key "
+                 << current_application_);
+    return;
+  }
+
   if (NULL != recorder_thread_) {
     recorder_thread_->stop();
     delete recorder_thread_;

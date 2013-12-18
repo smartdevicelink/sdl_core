@@ -67,19 +67,13 @@ void OnVRCommandNotification::Run() {
   }
 
   // Check if this is one of standart VR commands (i.e. "Help")
-  if (cmd_id > max_cmd_id) {
-    if (max_cmd_id + 1 == cmd_id
-        && 0 == active_app->is_perform_interaction_active()) {
-      MessageHelper::SendShowVrHelpToHMI(active_app);
-    } else if (max_cmd_id + 1 == cmd_id
-        && 0 != active_app->is_perform_interaction_active()) {
-      event_engine::Event event(hmi_apis::FunctionID::UI_ShowVrHelp);
-      event.set_smart_object(*message_);
-      event.raise();
-    } else {
-      LOG4CXX_INFO(logger_, "Switched App");
-      MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
-    }
+  if (cmd_id > max_cmd_id + 1) {
+    LOG4CXX_INFO(logger_, "Switched App");
+    MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
+    return;
+  }
+  // Check if this is "Help"
+  if (cmd_id == max_cmd_id + 1) {
     return;
   }
   const unsigned int app_id = (*message_)[strings::msg_params][strings::app_id]

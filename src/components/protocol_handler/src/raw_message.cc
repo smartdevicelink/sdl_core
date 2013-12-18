@@ -35,12 +35,16 @@
 
 #include "protocol_handler/raw_message.h"
 
+#include "protocol_handler/message_priority.h"
+
 namespace protocol_handler {
 
 RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data, unsigned int data_size)
+                       unsigned char* data, unsigned int data_size,
+                       unsigned char type)
   : connection_key_(connectionKey),
     protocol_version_(protocolVersion),
+    service_type_(ServiceTypeFromByte(type)),
     waiting_(false),
     fully_binary_(false),
     data_size_(data_size) {
@@ -87,6 +91,11 @@ bool RawMessage::IsWaiting() const {
 
 void RawMessage::set_waiting(bool v) {
   waiting_ = v;
+}
+
+bool RawMessage::HasHigherPriorityThan(const RawMessage& that) const {
+  return MessagePriority::FromServiceType(this->service_type()) >
+      MessagePriority::FromServiceType(that.service_type());
 }
 
 }  // namespace protocol_handler

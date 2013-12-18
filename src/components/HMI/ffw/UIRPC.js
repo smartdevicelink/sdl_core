@@ -221,7 +221,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.PerformInteraction":
                 {
 
-                    SDL.SDLModel.uiPerformInteraction(request.params, request.id);
+                    SDL.SDLModel.uiPerformInteraction(request);
 
                     break;
                 }
@@ -430,7 +430,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ShowVrHelp":
                 {
 
-                    SDL.SDLModel.ShowVrHelp(request.params);
+                    //SDL.SDLModel.ShowVrHelp(request.params);
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -685,14 +685,12 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      *
-     * @param {Number}
-     *            resultCode
-     * @param {Number}
-     *            performInteractionRequestID
-     * @param {Number}
-     *            commandID
+     * @param {Number} appID
+     * @param {Number} resultCode
+     * @param {Number} commandID
+     * @param {String} manualTextEntry
      */
-    interactionResponse: function (resultCode, performInteractionRequestID, commandID, manualTextEntry) {
+    interactionResponse: function (appID, resultCode, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
@@ -700,7 +698,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": performInteractionRequestID,
+                "id": appID,
                 "result": {
                     "code": resultCode,
                     "method": "UI.PerformInteraction"
@@ -718,7 +716,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": performInteractionRequestID,
+                "id": appID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "message": "Perform Interaction error response.",
@@ -728,9 +726,6 @@ FFW.UI = FFW.RPCObserver.create({
                 }
             };
         }
-
-
-
 
         this.client.send(JSONMessage);
     },

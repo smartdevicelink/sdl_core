@@ -34,7 +34,6 @@
 */
 
 #include <unistd.h>
-
 #include <iterator>
 #include <vector>
 #include <algorithm>
@@ -211,6 +210,37 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     if (count == max_request_per_time_scale ) {
       LOG4CXX_ERROR(logger_, "Requests count " << count <<
                     " exceed application limit" << max_request_per_time_scale);
+      result = false;
+    }
+
+  }
+
+  return result;
+}
+
+bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
+                              const int& hmi_level,
+                              const int& connection_key,
+                              const unsigned int& app_time_scale,
+                              const unsigned int& max_request_per_time_scale) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  bool result = true;
+  {
+    AutoLock auto_lock(requestsLock_);
+    TimevalStruct end = date_time::DateTime::getCurrentTime();
+    TimevalStruct start;
+    start.tv_sec = end.tv_sec - app_time_scale;
+
+    HMILevelTimeScale scale(start, end, connection_key, hmi_level);
+    int count = 0;
+
+    count = count_if (requests_.begin(), requests_.end(), scale);
+
+    if (count == max_request_per_time_scale ) {
+      LOG4CXX_ERROR(logger_, "Requests count " << count <<
+                    " exceed application limit" << max_request_per_time_scale
+                    << " in hmi level " << hmi_level);
       result = false;
     }
 

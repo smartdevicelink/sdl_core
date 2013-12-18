@@ -59,8 +59,13 @@ enum eType {
   MISSING_MANDATORY_PARAMETER,
 
   /**
-   * @brief Unexpected parameter.
-   **/
+    * @brief Mandatory untitled (with any name) parameter is missing.
+    **/
+  MISSING_MANDATORY_UNTITLED_PARAMETER,
+
+  /**
+    * @brief Unexpected parameter.
+    **/
   UNEXPECTED_PARAMETER,
 
   /**

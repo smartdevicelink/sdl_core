@@ -61,7 +61,7 @@ RequestController::~RequestController() {
 }
 
 RequestController::TResult RequestController::addRequest(
-    const Request& request) {
+    const Request& request, const mobile_apis::HMILevel::eType& hmi_level) {
   LOG4CXX_INFO(logger_, "RequestController::addRequest()");
 
   RequestController::TResult result = RequestController::SUCCESS;
@@ -69,20 +69,34 @@ RequestController::TResult RequestController::addRequest(
     AutoLock auto_lock(request_list_lock_);
 
     const commands::CommandRequestImpl* request_impl =
-      (static_cast<commands::CommandRequestImpl*>(&(*request)));
+      static_cast<commands::CommandRequestImpl*>(request.get());
 
-    const unsigned int app_time_scale =
+    const unsigned int& app_hmi_level_none_time_scale =
+        profile::Profile::instance()->app_hmi_level_none_time_scale();
+
+    const unsigned int& app_hmi_level_none_max_request_per_time_scale =
+     profile::Profile::instance()->app_hmi_level_none_time_scale_max_requests();
+
+    const unsigned int& app_time_scale =
         profile::Profile::instance()->app_time_scale();
 
-    const unsigned int max_request_per_time_scale =
+    const unsigned int& max_request_per_time_scale =
         profile::Profile::instance()->app_time_scale_max_requests();
 
-    const unsigned int pending_requests_amount =
+    const unsigned int& pending_requests_amount =
         profile::Profile::instance()->pending_requests_amount();
 
-    if (false ==
-        watchdog_->checkTimeScaleMaxRequest(request_impl->connection_key(),
-            app_time_scale, max_request_per_time_scale)) {
+    const mobile_apis::HMILevel::eType hmi_level =
+        mobile_apis::HMILevel::HMI_NONE;
+
+    if (false == watchdog_->checkHMILevelTimeScaleMaxRequest(hmi_level,
+                  request_impl->connection_key(), app_hmi_level_none_time_scale,
+                  app_hmi_level_none_max_request_per_time_scale)) {
+      LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
+      result = RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
+    } else if (false == watchdog_->checkTimeScaleMaxRequest(
+                                  request_impl->connection_key(),
+                                  app_time_scale, max_request_per_time_scale)) {
       LOG4CXX_ERROR(logger_, "Too many application requests");
       result = RequestController::TOO_MANY_REQUESTS;
     } else if (pending_requests_amount == request_list_.size()) {
@@ -99,7 +113,8 @@ RequestController::TResult RequestController::addRequest(
                               request_impl->function_id(),
                               request_impl->connection_key(),
                               request_impl->correlation_id(),
-                              request_impl->default_timeout()));
+                              request_impl->default_timeout(),
+                              hmi_level));
 
       LOG4CXX_INFO(logger_, "Added request to watchdog.");
       LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
@@ -109,7 +124,8 @@ RequestController::TResult RequestController::addRequest(
   return result;
 }
 
-void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
+void RequestController::terminateRequest(
+    const unsigned int& mobile_correlation_id) {
   LOG4CXX_INFO(logger_, "RequestController::terminateRequest()");
 
   {
@@ -128,7 +144,8 @@ void RequestController::terminateRequest(unsigned int mobile_correlation_id) {
   }
 }
 
-void RequestController::terminateAppRequests(unsigned int app_id) {
+void RequestController::terminateAppRequests(
+    const unsigned int& app_id) {
   LOG4CXX_INFO(logger_, "RequestController::terminateAppRequests()");
 
   {
@@ -146,9 +163,10 @@ void RequestController::terminateAppRequests(unsigned int app_id) {
   }
 }
 
-void RequestController::updateRequestTimeout(unsigned int connection_key,
-                                             unsigned int mobile_correlation_id,
-                                             unsigned int new_timeout) {
+void RequestController::updateRequestTimeout(
+    const unsigned int& connection_key,
+    const unsigned int& mobile_correlation_id,
+    const unsigned int& new_timeout) {
   LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
 
   watchdog_->updateRequestTimeout(connection_key,
@@ -156,7 +174,8 @@ void RequestController::updateRequestTimeout(unsigned int connection_key,
                                   new_timeout);
 }
 
-void RequestController::onTimeoutExpired(request_watchdog::RequestInfo info) {
+void RequestController::onTimeoutExpired(
+    const request_watchdog::RequestInfo& info) {
   LOG4CXX_INFO(logger_, "RequestController::onTimeoutExpired()");
 
   commands::CommandRequestImpl* request_impl = NULL;

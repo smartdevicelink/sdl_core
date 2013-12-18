@@ -45,7 +45,8 @@ namespace media_manager {
 log4cxx::LoggerPtr A2DPSourcePlayerAdapter::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("A2DPSourcePlayerAdapter"));
 
-class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDelegate {
+class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
+    : public threads::ThreadDelegate {
   public:
     explicit A2DPSourcePlayerThread(const std::string& device);
 
@@ -62,16 +63,15 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread: public threads::ThreadDel
     const int BUFSIZE_;
     pa_simple* s_in, *s_out;
     std::string device_;
-    bool shouldBeStoped_;
-    sync_primitives::Lock shouldBeStopedLock_;
+    bool should_be_stopped_;
+    sync_primitives::Lock should_be_stopped_lock_;
 
     void freeStreams();
 
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
-A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter()
-  : current_application_(0) {
+A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter() {
 }
 
 A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
@@ -187,8 +187,8 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
 }
 
 bool A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
-  shouldBeStoped_ = true;
+  sync_primitives::AutoLock auto_lock(should_be_stopped_lock_);
+  should_be_stopped_ = true;
   return true;
 }
 
@@ -196,8 +196,8 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
   LOG4CXX_INFO(logger_, "Main thread of A2DPSourcePlayerThread.");
 
   {
-    sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
-    shouldBeStoped_ = false;
+    sync_primitives::AutoLock auto_lock(should_be_stopped_lock_);
+    should_be_stopped_ = false;
   }
 
   int error;
@@ -259,13 +259,13 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
       break;
     }
 
-    bool shouldBeStoped;
+    bool should_be_stopped;
     {
-      sync_primitives::AutoLock auto_lock(shouldBeStopedLock_);
-      shouldBeStoped = shouldBeStoped_;
+      sync_primitives::AutoLock auto_lock(should_be_stopped_lock_);
+      should_be_stopped = should_be_stopped_;
     }
 
-    if (shouldBeStoped) {
+    if (should_be_stopped) {
       break;
     }
   }

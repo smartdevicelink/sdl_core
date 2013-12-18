@@ -33,29 +33,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libusb/libusb.h>
-
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/usb_device.h"
-#include "transport_manager/usb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+
+#if defined(__QNX__) || defined(__QNXNTO__)
+#include "transport_manager/usb/qnx/usb_connection.h"
+#else
+#include "transport_manager/usb/libusb/usb_connection.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
 
 UsbConnectionFactory::UsbConnectionFactory(
     TransportAdapterController* controller)
-    : controller_(controller),
-      libusb_handler_() {
-}
+    : controller_(controller), usb_handler_() {}
 
 TransportAdapter::Error UsbConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
-void UsbConnectionFactory::SetLibusbHandler(
-    const LibusbHandlerSptr& libusb_handler) {
-  libusb_handler_ = libusb_handler;
+void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
+  usb_handler_ = usb_handler;
 }
 
 TransportAdapter::Error UsbConnectionFactory::CreateConnection(
@@ -67,29 +67,25 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection = new UsbConnection(device_uid, app_handle,
-                                                    controller_,
-                                                    libusb_handler_,
-                                                    usb_device->usb_device());
+  UsbConnection* usb_connection =
+      new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
+                        usb_device->usb_device());
   ConnectionSptr connection(usb_connection);
 
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (!usb_connection->Init()) {
     return TransportAdapter::FAIL;
   }
+  LOG4CXX_INFO(logger_, "Usb connection initialised");
 
   return TransportAdapter::OK;
 }
 
-void UsbConnectionFactory::Terminate() {
-}
+void UsbConnectionFactory::Terminate() {}
 
-bool UsbConnectionFactory::IsInitialised() const {
-  return true;
-}
+bool UsbConnectionFactory::IsInitialised() const { return true; }
 
-UsbConnectionFactory::~UsbConnectionFactory() {
-}
+UsbConnectionFactory::~UsbConnectionFactory() {}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

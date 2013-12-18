@@ -38,16 +38,55 @@
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
 
 namespace hmi_message_handler {
-
 typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+
+namespace impl {
+/*
+* These dummy classes are here to locally impose strong typing on different
+* kinds of messages
+* Currently there is no type difference between incoming and outgoing messages
+* TODO(ik): replace these with globally defined message types
+* when we have them.
+*/
+struct MessageFromHmi: public MessageSharedPointer {
+  MessageFromHmi(const MessageSharedPointer& message)
+      : MessageSharedPointer(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+struct MessageToHmi: public MessageSharedPointer {
+  MessageToHmi(const MessageSharedPointer& message)
+      : MessageSharedPointer(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageToHmi> > ToHmiQueue;
+}
 
 class ToHMIThreadImpl;
 class FromHMIThreadImpl;
 
-class HMIMessageHandlerImpl : public HMIMessageHandler {
+class HMIMessageHandlerImpl
+    : public HMIMessageHandler,
+      public impl::FromHmiQueue::Handler,
+      public impl::ToHmiQueue::Handler {
  public:
   static HMIMessageHandlerImpl* instance();
   ~HMIMessageHandlerImpl();
@@ -61,17 +100,24 @@ class HMIMessageHandlerImpl : public HMIMessageHandler {
  private:
   HMIMessageHandlerImpl();
 
+
+  // threads::MessageLoopThread<*>::Handler implementations
+
+  // CALLED ON messages_from_hmi_ THREAD!
+  virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+  // CALLED ON messages_to_hmi_ THREAD!
+  virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+ private:
+
   HMIMessageObserver* observer_;
   std::set<HMIMessageAdapter*> message_adapters_;
 
-  threads::Thread* to_hmi_thread_;
-  friend class ToHMIThreadImpl;
+  // Construct message threads when everything is already created
 
-  threads::Thread* from_hmi_thread_;
-  friend class FromHMIThreadImpl;
-
-  MessageQueue<MessageSharedPointer> messages_to_hmi_;
-  MessageQueue<MessageSharedPointer> messages_from_hmi_;
+  // Thread that pumps messages coming from hmi.
+  impl::FromHmiQueue messages_from_hmi_;
+  // Thread that pumps messages being passed to hmi.
+  impl::ToHmiQueue messages_to_hmi_;
 
   static log4cxx::LoggerPtr logger_;
 

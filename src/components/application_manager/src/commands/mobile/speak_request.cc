@@ -70,6 +70,7 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+
       ProcessTTSSpeakResponse(event.smart_object());
       break;
     }
@@ -100,8 +101,14 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   }
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::SpeakID;
+
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == code) {
+    const mobile_apis::Result::eType return_code =
+        mobile_apis::Result::WARNINGS;
+  }
+
   SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-               NULL, &(message[strings::msg_params]));
+               "UNSUPPORTED_RESOURCE", &(message[strings::msg_params]));
 }
 
 }  // namespace commands

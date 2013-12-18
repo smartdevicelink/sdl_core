@@ -37,11 +37,6 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
-
-using transport_manager::transport_adapter::BluetoothTransportAdapter;
-using transport_manager::transport_adapter::TcpTransportAdapter;
 
 namespace transport_manager {
 
@@ -62,13 +57,9 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
-  TransportAdapterSptr bluetooth_da_;
-  TransportAdapterSptr tcp_da_;
-  TransportAdapterSptr usb_aoa_da_;
-  explicit TransportManagerDefault(const TransportManagerAttr &config);
+  explicit TransportManagerDefault(const TransportManagerAttr& config);
 
-public:
-
+ public:
   /**
    * @brief Create instance of itself.
    *

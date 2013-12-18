@@ -48,10 +48,13 @@ ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
 void ButtonGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_button_capabilities(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);
 
-  ApplicationManagerImpl::instance()->set_preset_bank_capabilities(
+  hmi_capabilities.set_preset_bank_capabilities(
       (*message_)[strings::msg_params][hmi_response::preset_bank_capabilities]);
 }
 

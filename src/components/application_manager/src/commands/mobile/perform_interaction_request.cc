@@ -51,12 +51,11 @@ PerformInteractionRequest::PerformInteractionRequest(
 : CommandRequestImpl(message),
   timer_(this, &PerformInteractionRequest::onTimer),
   is_keyboard_trigger_source_(false),
-  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM),
-  is_vr_help_item_(false) {
+  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM) {
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
-  subscribe_on_event(hmi_apis::FunctionID::UI_ShowVrHelp);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -176,8 +175,9 @@ void PerformInteractionRequest::Run() {
 
       // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(correlation_id);
-      SendTTSPerformInteractionRequest(app);
       SendVRAddCommandRequest(app);
+      SendTTSPerformInteractionRequest(app);
+      SendUIPerformInteractionRequest(app);
       break;
     }
     default: {
@@ -213,20 +213,9 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ProcessPerformInteractionResponse(event.smart_object());
       break;
     }
-    case hmi_apis::FunctionID::UI_ShowVrHelp: {
-      LOG4CXX_INFO(logger_,"Received UI_ShowVrHelp event");
-      int mode =
-          (*message_)[strings::msg_params][strings::interaction_mode].asInt();
-      Application* app = ApplicationManagerImpl::instance()->application(
-          connection_key());
-      if (app && (InteractionMode::BOTH == mode
-          || InteractionMode::VR_ONLY == mode)) {
-        is_vr_help_item_ = true;
-        SendUIShowVRHelpRequest(app);
-      } else if (app) {
-        is_vr_help_item_ = true;
-        MessageHelper::SendShowVrHelpToHMI(app);
-      }
+    case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
+      LOG4CXX_INFO(logger_,"Received OnAppUnregistered event");
+      ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
     default: {
@@ -245,13 +234,6 @@ void PerformInteractionRequest::onTimeOut() {
     // Unsubscribe from event on UIPerformInteractionResponse to
     // avoid of double execution of SendVrDeleteCommand()
     unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
-
-    if(is_vr_help_item_) {
-      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
-      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-    }
     SendVrDeleteCommand(app);
     app->set_perform_interaction_active(0);
     app->set_perform_interaction_mode(-1);
@@ -328,6 +310,32 @@ void PerformInteractionRequest::ProcessVRNotification(
     }
 }
 
+void PerformInteractionRequest::ProcessAppUnregisteredNotification
+  (const smart_objects::SmartObject& message) {
+ LOG4CXX_INFO
+  (logger_,"PerformInteractionRequest::ProcessAppUnregisteredNotification");
+ const unsigned int app_id = (*message_)[strings::params]
+                                         [strings::connection_key].asUInt();
+ if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
+   Application* app = ApplicationManagerImpl::instance()->application(app_id);
+   if (NULL == app) {
+     LOG4CXX_ERROR(logger_, "NULL pointer");
+     return;
+   }
+   if (app->is_perform_interaction_active()) {
+     if (mobile_apis::InteractionMode::MANUAL_ONLY
+         != app->perform_interaction_mode()) {
+       SendVrDeleteCommand (app);
+     }
+     app->set_perform_interaction_mode(-1);
+     app->DeletePerformInteractionChoiceSetMap();
+     app->set_perform_interaction_active(0);
+   }
+ } else {
+   LOG4CXX_INFO(logger_,"Notification was sent from another application");
+ }
+}
+
 void PerformInteractionRequest::SendVrDeleteCommand (Application* const app) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
   const PerformChoiceSetMap& choice_set_map = app
@@ -358,12 +366,6 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       return;
     }
     if (app->is_perform_interaction_active()) {
-      if(is_vr_help_item_) {
-        smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
-        c_p_request_so[hmi_request::method_name] = "UI.ShowVrHelp";
-        SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      }
       if (mobile_apis::InteractionMode::MANUAL_ONLY
           != app->perform_interaction_mode()) {
         SendVrDeleteCommand (app);
@@ -406,14 +408,6 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
         choice_list[i].asInt());
 
     if (choice_set) {
-      if (InteractionMode::VR_ONLY
-          == (*message_)[strings::msg_params]
-                         [strings::interaction_mode].asInt()) {
-        // save perform interaction choice set
-        app->AddPerformInteractionChoiceSet(choice_list[i].asInt(),
-                                            *choice_set);
-      }
-
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         smart_objects::SmartObject msg_params = smart_objects::SmartObject(
             smart_objects::SmartType_Map);
@@ -424,7 +418,6 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
             smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
             (*choice_set)[strings::choice_set][j][strings::vr_commands];
-
         CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params,
                          false);
       }
@@ -439,18 +432,33 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
+  const int mode  =
+      (*message_)[strings::msg_params][strings::interaction_mode].asInt();
 
-  msg_params[hmi_request::initial_text][hmi_request::field_name] =
-      TextFieldName::INITIAL_INTERACTION_TEXT;
-  msg_params[hmi_request::initial_text][hmi_request::field_text] =
-      (*message_)[strings::msg_params][hmi_request::initial_text];
+  if (mobile_apis::InteractionMode::VR_ONLY != mode) {
+    msg_params[hmi_request::initial_text][hmi_request::field_name] =
+        TextFieldName::INITIAL_INTERACTION_TEXT;
+    msg_params[hmi_request::initial_text][hmi_request::field_text] =
+        (*message_)[strings::msg_params][hmi_request::initial_text];
+  }
+  bool is_vr_help_item = false;
+  if (mobile_apis::InteractionMode::MANUAL_ONLY != mode) {
+    msg_params[strings::vr_help_title] =
+        (*message_)[strings::msg_params][strings::initial_text].asString();
+    if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+      is_vr_help_item = true;
+      msg_params[strings::vr_help] =
+          (*message_)[strings::msg_params][strings::vr_help];
+    }
+  }
 
   msg_params[strings::timeout] = default_timeout_/2;
   msg_params[strings::app_id] = app->app_id();
-
-  msg_params[strings::choice_set] = smart_objects::SmartObject(
+  if (mobile_apis::InteractionMode::VR_ONLY != mode) {
+    msg_params[strings::choice_set] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
-
+  }
+  int index_array_of_vr_help = 0;
   for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
     smart_objects::SmartObject* choice_set = app->FindChoiceSet(
         choice_set_id_list[i].asInt());
@@ -458,17 +466,29 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
       // save perform interaction choice set
       app->AddPerformInteractionChoiceSet(choice_set_id_list[i].asInt(), *choice_set);
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-
-        size_t index = msg_params[strings::choice_set].length();
-        msg_params[strings::choice_set][index] = (*choice_set)[strings::choice_set][j];
-
-        // vrCommands should be added via VR.AddCommand only
-        msg_params[strings::choice_set][index].erase(strings::vr_commands);
+        if (mobile_apis::InteractionMode::VR_ONLY != mode) {
+          size_t index = msg_params[strings::choice_set].length();
+          msg_params[strings::choice_set][index] = (*choice_set)[strings::choice_set][j];
+          // vrCommands should be added via VR.AddCommand only
+          msg_params[strings::choice_set][index].erase(strings::vr_commands);
+        }
+        if (mobile_apis::InteractionMode::MANUAL_ONLY != mode && !is_vr_help_item) {
+          smart_objects::SmartObject& vr_commands =
+              (*choice_set)[strings::choice_set][j][strings::vr_commands];
+          if (0 < vr_commands.length()) {
+            // copy only first synonym
+            smart_objects::SmartObject item(smart_objects::SmartType_Map);
+            item[strings::text] = vr_commands[0].asString();
+            item[strings::position] = index_array_of_vr_help + 1;
+            msg_params[strings::vr_help][index_array_of_vr_help++] = item;
+          }
+        }
       }
     }
   }
   if((*message_)[strings::msg_params].
-        keyExists(hmi_request::interaction_layout)) {
+        keyExists(hmi_request::interaction_layout)
+        && mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[hmi_request::interaction_layout] =
         (*message_)[strings::msg_params][hmi_request::interaction_layout].
         asInt();
@@ -484,21 +504,28 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
 
 void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     Application* const app) {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   if ((*message_)[strings::msg_params].keyExists(strings::help_promt)) {
+
     msg_params[strings::help_promt] =
         (*message_)[strings::msg_params][strings::help_promt];
+
     DeleteParameterFromTTSChunk(msg_params[strings::help_promt]);
   } else {
+
     smart_objects::SmartObject& choice_list =
-          (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-    msg_params[strings::help_promt] = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+    msg_params[strings::help_promt] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
     int index = 0;
     for (int i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject* choice_set = app->FindChoiceSet(
-          choice_list[i].asInt());
+      smart_objects::SmartObject* choice_set =
+          app->FindChoiceSet(choice_list[i].asInt());
+
       if (choice_set) {
         for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
           smart_objects::SmartObject& vr_commands =
@@ -513,20 +540,33 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
       }
     }
   }
+
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_promt)) {
     msg_params[strings::timeout_promt] =
             (*message_)[strings::msg_params][strings::timeout_promt];
+
     DeleteParameterFromTTSChunk(msg_params[strings::timeout_promt]);
   } else {
     msg_params[strings::timeout_promt] = msg_params[strings::help_promt];
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
+      msg_params[strings::initial_prompt] =
+          (*message_)[strings::msg_params][strings::initial_prompt];
+
+      DeleteParameterFromTTSChunk(msg_params[strings::initial_prompt]);
+  }
+
   int mode =
         (*message_)[strings::msg_params][strings::interaction_mode].asInt();
-  if (InteractionMode::BOTH == mode || InteractionMode::MANUAL_ONLY == mode) {
+
+  if (InteractionMode::BOTH == mode ||
+      InteractionMode::MANUAL_ONLY == mode) {
     msg_params[strings::timeout] = default_timeout_/2;
   } else {
     msg_params[strings::timeout] = default_timeout_;
   }
+
   SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params);
 }
 
@@ -536,45 +576,6 @@ void PerformInteractionRequest::DeleteParameterFromTTSChunk
   for (int i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
   }
-}
-
-void PerformInteractionRequest::SendUIShowVRHelpRequest(
-    Application* const app) {
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::vr_help_title] =
-      (*message_)[strings::msg_params][strings::initial_text].asString();
-
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    msg_params[strings::vr_help] =
-        (*message_)[strings::msg_params][strings::vr_help];
-  } else {
-    // copy choice set VR synonyms
-    int index = 0;
-    for (int i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject* choice_set = app->FindChoiceSet(
-          choice_list[i].asInt());
-      if (choice_set) {
-        for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-          smart_objects::SmartObject& vr_commands =
-              (*choice_set)[strings::choice_set][j][strings::vr_commands];
-          if (0 < vr_commands.length()) {
-            // copy only first synonym
-            smart_objects::SmartObject item(smart_objects::SmartType_Map);
-            item[strings::text] = vr_commands[0].asString();
-            item[strings::position] = index + 1;
-            msg_params[strings::vr_help][index++] = item;
-          }
-        }
-      }
-    }
-  }
-
-  CreateHMIRequest(hmi_apis::FunctionID::UI_ShowVrHelp, msg_params, false);
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(

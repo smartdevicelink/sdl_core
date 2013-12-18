@@ -49,9 +49,6 @@ add_subdirectory(./utils)
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
-# --- Mobile message handler
-add_subdirectory(./mobile_message_handler)
-
 # --- Application manager
 add_subdirectory(./application_manager)
 
@@ -64,12 +61,20 @@ add_subdirectory(./hmi_message_handler)
 # --- Config
 add_subdirectory(./config_profile)
 
+if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
 add_subdirectory(./media_manager)
+
+# --- Policies
+add_subdirectory(./policies)
+endif()
 
 IF (${QT_HMI})
 # --- DBus
     add_subdirectory(./dbus)
 # --- Qt HMI
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_subdirectory(./qt_hmi)
+  endif()
 ENDIF (${QT_HMI})
+

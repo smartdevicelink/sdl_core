@@ -6,7 +6,7 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/back_trace.cc
+    ./src/bitstream.cc
     ./src/conditional_variable_posix.cc
     ./src/file_system.cc
     ./src/threads/posix_thread.cc
@@ -14,8 +14,15 @@ set (SOURCES
     ./src/threads/thread_validator.cc
     ./src/lock_posix.cc
     ./src/date_time.cc
-    ./src/signals_linux.cc
+   ./src/signals_linux.cc
 )
 
+if (BUILD_BACKTRACE_SUPPORT)
+    list(APPEND SOURCES
+    ./src/back_trace.cc
+    )
+endif()
+
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx rt)
+target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
+

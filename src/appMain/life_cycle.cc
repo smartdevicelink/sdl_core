@@ -54,11 +54,13 @@ void NameMessageBrokerThread(const System::Thread& thread,
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
   , protocol_handler_(NULL)
-  , mmh_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
   , hmi_handler_(NULL)
+#ifdef MEDIA_MANAGER
   , media_manager_(NULL)
+#endif
+  , policy_manager_(NULL)
 #ifdef QT_HMI
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL) {
@@ -82,42 +84,40 @@ bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
   transport_manager_ =
     transport_manager::TransportManagerDefault::Instance();
-  DCHECK(transport_manager_);
+  DCHECK(transport_manager_ != NULL);
 
   protocol_handler_ =
     new protocol_handler::ProtocolHandlerImpl(transport_manager_);
-  DCHECK(protocol_handler_);
-
-  mmh_ =
-    mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh_);
+  DCHECK(protocol_handler_ != NULL);
 
   connection_handler_ =
     connection_handler::ConnectionHandlerImpl::instance();
-  DCHECK(connection_handler_);
+  DCHECK(connection_handler_ != NULL);
 
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager_);
+  DCHECK(app_manager_ != NULL);
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler_)
+  DCHECK(hmi_handler_ != NULL)
 
-  transport_manager_->SetProtocolHandler(protocol_handler_);
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
-  mmh_->set_protocol_handler(protocol_handler_);
   hmi_handler_->set_message_observer(app_manager_);
 
+#ifdef MEDIA_MANAGER
   media_manager_ = media_manager::MediaManagerImpl::instance();
+#endif
 
   protocol_handler_->set_session_observer(connection_handler_);
-  protocol_handler_->AddProtocolObserver(mmh_);
+#ifdef MEDIA_MANAGER
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
+
+#endif
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
@@ -125,16 +125,23 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
-  app_manager_->set_mobile_message_handler(mmh_);
-  mmh_->AddMobileMessageListener(app_manager_);
+  policy_manager_ = policies::PolicyManagerImpl::instance();
+  DCHECK(policy_manager_);
+
+  policies::PolicyConfiguration policy_config;
+  policy_config.set_pt_file_name("wp1_policy_table.json");
+  policy_manager_->Init(policy_config);
+
+  app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+  app_manager_->set_policy_manager(policy_manager_);
 
   return true;
 }
 
 #ifdef WEB_HMI
-bool LifeCycle::InitMessageBroker() {
+bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
@@ -220,7 +227,7 @@ bool LifeCycle::InitMessageBroker() {
  * Initialize DBus component
  * @return true if success otherwise false.
  */
-bool LifeCycle::InitMessageBroker() {
+bool LifeCycle::InitMessageSystem() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
 
@@ -251,35 +258,34 @@ bool LifeCycle::InitMessageBroker() {
 void LifeCycle::StopComponents(int params) {
   utils::ResetSubscribeToTerminateSignal();
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  instance()->app_manager_->~ApplicationManagerImpl();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
-  instance()->mmh_->RemoveMobileMessageListener(instance()->app_manager_);
-  instance()->app_manager_->~ApplicationManagerImpl();
+  instance()->protocol_handler_->RemoveProtocolObserver(
+    instance()->app_manager_);
+
+  LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
+  instance()->policy_manager_->~PolicyManager();
+
+  instance()->transport_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->connection_handler_);
   instance()->protocol_handler_->set_session_observer(NULL);
   instance()->connection_handler_->~ConnectionHandlerImpl();
 
-  LOG4CXX_INFO(logger_, "Destroying Mobile Message Handler.");
-  instance()->protocol_handler_->RemoveProtocolObserver(instance()->mmh_);
-  delete instance()->mmh_;
-
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  instance()->transport_manager_->SetProtocolHandler(NULL);
-  instance()->transport_manager_->RemoveEventListener(
-    instance()->protocol_handler_);
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
+#ifdef MEDIA_MANAGER
   instance()->media_manager_->SetProtocolHandler(NULL);
   delete instance()->protocol_handler_;
   instance()->media_manager_->~MediaManagerImpl();
+#endif
 
   LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;
 
-  LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and adapter.");
+  LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef QT_HMI
   instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->dbus_adapter_);
   instance()->dbus_adapter_thread_->Stop();

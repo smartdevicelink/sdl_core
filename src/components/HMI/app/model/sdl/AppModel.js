@@ -34,6 +34,20 @@
 SDL.SDLAppModel = Em.Object.extend({
 
         /**
+         * List of subscribed data on VehicleInfo model
+         *
+         * @type {Object}
+         */
+        subscribedData: {},
+
+        /**
+         * Application's container for current processed requests on HMI
+         *
+         * @type {Object}
+         */
+        activeRequests: {},
+
+        /**
          * Application Id
          *
          * @type {Number}
@@ -125,6 +139,13 @@ SDL.SDLAppModel = Em.Object.extend({
         },
 
         /**
+         * Flag to open ShowConstantTBTview when entering to current screen
+         *
+         * @type {Boolean}
+         */
+        tbtActivate: false,
+
+        /**
          * Return current menu commands
          *
          * @return {Array}
@@ -197,7 +218,7 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length < 999) {
+            if (commands.length <= 999) {
 
                 commands[commands.length] = {
                     commandID: request.params.cmdID,
@@ -212,6 +233,7 @@ SDL.SDLAppModel = Em.Object.extend({
                     SDL.OptionsView.commands.refreshItems();
                 }
 
+                console.log(commands.length);
                 FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
                 FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
@@ -253,7 +275,7 @@ SDL.SDLAppModel = Em.Object.extend({
             var commands = this.get('commandsList.' + parentID);
 
             // Magic number is limit of 1000 commands added on one menu
-            if (commands.length < 999) {
+            if (commands.length <= 999) {
 
                 this.commandsList[request.params.menuID] = [];
                 commands[commands.length] = {
@@ -287,33 +309,6 @@ SDL.SDLAppModel = Em.Object.extend({
             }
 
             return SDL.SDLModel.resultCode['SUCCESS'];
-        },
-
-        /**
-         * SDL UI PreformInteraction response handeler open Perform Interaction
-         * screen and show choices
-         *
-         * @param {Object}
-         *            message
-         * @param {Number}
-         *            performInteractionRequestId
-         */
-        onPreformInteraction: function (message, performInteractionRequestId) {
-
-            SDL.InteractionChoicesView.clean();
-
-            if (message) {
-
-                SDL.InteractionChoicesView.activate(message, performInteractionRequestId);
-
-            } else {
-//                SDL.InteractionChoicesView.preformChoices([],
-//                    performInteractionRequestId,
-//                    30000);
-                SDL.InteractionChoicesView.activate("", performInteractionRequestId);
-            }
-
-            SDL.SDLController.VRMove();
         },
 
         /**

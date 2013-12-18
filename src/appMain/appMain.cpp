@@ -53,11 +53,15 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
+#ifdef MEDIA_MANAGER
 #if defined(DEFAULT_MEDIA)
 #include <gst/gst.h>
 #endif
+#endif
 
+#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
+#endif
 // ----------------------------------------------------------------------------
 // Third-Party includes
 #include "networking.h"  // cpplint: Include the directory when naming .h files
@@ -140,16 +144,9 @@ file_str.seekg(0, std::ios::end);
 int length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
-char* raw_data = new char[length + 1];
-if (!raw_data) {
-  LOG4CXX_INFO(logger, "Memory allocation failed.");
-  return false;
-}
+std::string hmi_link;
+std::getline(file_str, hmi_link);
 
-memset(raw_data, 0, length + 1);
-file_str.getline(raw_data, length + 1);
-std::string hmi_link = std::string(raw_data, strlen(raw_data));
-delete[] raw_data;
 
 LOG4CXX_INFO(logger,
              "Input string:" << hmi_link << " length = " << hmi_link.size());
@@ -210,14 +207,6 @@ int main(int argc, char** argv) {
 #if defined(DEFAULT_MEDIA)
   gst_init(&argc, &argv);
 #endif
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!main_namespace::LifeCycle::instance()->InitMessageBroker()) {
-    LOG4CXX_INFO(logger, "InitMessageBroker failed");
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -226,15 +215,24 @@ int main(int argc, char** argv) {
 
   main_namespace::LifeCycle::instance()->StartComponents();
 
+  // --------------------------------------------------------------------------
+  // Third-Party components initialization.
 
-  if (profile::Profile::instance()->server_address() ==
-      std::string(kLocalHostAddress)) {
-    LOG4CXX_INFO(logger, "Start HMI on localhost");
+  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
+    exit(EXIT_FAILURE);
+  }
+  LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-    if (!InitHmi()) {
-      exit(EXIT_FAILURE);
+  if (profile::Profile::instance()->launch_hmi()) {
+    if (profile::Profile::instance()->server_address() ==
+        std::string(kLocalHostAddress)) {
+      LOG4CXX_INFO(logger, "Start HMI on localhost");
+
+      if (!InitHmi()) {
+        exit(EXIT_FAILURE);
+      }
+      LOG4CXX_INFO(logger, "InitHmi successful");
     }
-    LOG4CXX_INFO(logger, "InitHmi successful");
   }
   // --------------------------------------------------------------------------
 

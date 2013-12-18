@@ -40,8 +40,6 @@ namespace commands {
 
 TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message)
     : ResponseFromHMI(message) {
-
-  TTSInterface::Unmute();
 }
 
 TTSSpeakResponse::~TTSSpeakResponse() {

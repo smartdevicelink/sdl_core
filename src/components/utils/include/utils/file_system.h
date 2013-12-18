@@ -46,19 +46,19 @@ namespace file_system {
  */
 uint64_t AvailableSpace();
 
-  /**
-   * @brief Get available app space
-   * @param name of app
-   * @return free app space.
-   */
-   unsigned int AvailableSpaceApp(const std::string& name);
+/**
+ * @brief Get available app space
+ * @param name of app
+ * @return free app space.
+ */
+unsigned int AvailableSpaceApp(const std::string& name);
 
-   /**
-    * @brief Creates directory
-    * @param name path to directory
-    * @return path to created directory.
-    */
-  std::string CreateDirectory(const std::string& name);
+/**
+ * @brief Creates directory
+ * @param name path to directory
+ * @return path to created directory.
+ */
+std::string CreateDirectory(const std::string& name);
 
 /**
   * @brief Checks the file to see whether the file is a directory
@@ -92,6 +92,33 @@ bool FileExists(const std::string& name);
 bool Write(const std::string& file_name,
            const std::vector<unsigned char>& data,
            std::ios_base::openmode mode = std::ios_base::out);
+
+/**
+  * @brief Opens file stream for writing
+  * @param file_name path to file to write data to
+  * @return returns pointer to opened stream in case of success;
+  * otherwise returns NULL
+  */
+std::ofstream* Open(const std::string& file_name,
+                    std::ios_base::openmode mode = std::ios_base::out);
+
+/**
+  * @brief Writes to file stream
+  * @param file_stream file stream to be written to
+  * @param data data to be written to file
+  * @param data_size size of data to be written to file
+  * @return returns pointer to opened stream in case of success;
+  * otherwise returns NULL
+  */
+std::ofstream* Write(std::ofstream* file_stream,
+                     const unsigned char* data,
+                     unsigned int data_size);
+
+/**
+  * @brief Closes file stream
+  * @param file_stream file stream to be closed
+  */
+void Close(std::ofstream* file_stream);
 
 /**
   * @brief Returns full file path

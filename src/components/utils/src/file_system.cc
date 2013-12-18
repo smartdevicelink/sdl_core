@@ -60,19 +60,26 @@ unsigned int SizeDirectory(const std::string& path) {
   unsigned int size = 0;
   int return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element;
+
+#ifndef __QNXNTO__
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
+#else
+  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(path.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new(direntbuffer) dirent;
+#endif
   struct dirent* result = NULL;
   struct stat file_info;
   directory = opendir(path.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, &dir_element, &result);
+    return_code = readdir_r(directory, dir_element, &result);
     for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, &dir_element, &result)) {
-      if (0 == strcmp(dir_element.d_name, "..")
-          || 0 == strcmp(dir_element.d_name, ".")) {
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..")
+          || 0 == strcmp(result->d_name, ".")) {
         continue;
       }
-      std::string full_element_path = path + "/" + dir_element.d_name;
+      std::string full_element_path = path + "/" + result->d_name;
       if (file_system::IsDirectory(full_element_path)) {
         size += SizeDirectory(full_element_path);
       } else {
@@ -83,24 +90,27 @@ unsigned int SizeDirectory(const std::string& path) {
     }
   }
   closedir(directory);
+#ifdef __QNXNTO__
+  delete[] direntbuffer;
+#endif
   return size;
 }
 
 unsigned int file_system::AvailableSpaceApp(const std::string& name) {
   unsigned int available_space_app = profile::Profile::instance()
-  ->space_available();
+                                     ->space_available();
   std::string full_path;
   unsigned int size_of_directory = 0;
   unsigned int available_space = 0;
-  if(DirectoryExists(name)) {
+  if (DirectoryExists(name)) {
     full_path = FullPath(name);
     size_of_directory = SizeDirectory(full_path);
-    if(available_space_app < size_of_directory) {
+    if (available_space_app < size_of_directory) {
       return 0;
     }
     available_space_app -= size_of_directory;
     available_space = AvailableSpace();
-    if(available_space_app > available_space) {
+    if (available_space_app > available_space) {
       return available_space;
     } else {
       return available_space_app;
@@ -164,6 +174,33 @@ bool file_system::Write(
   return false;
 }
 
+std::ofstream* file_system::Open(const std::string& file_name,
+                                 std::ios_base::openmode mode) {
+  std::ofstream* file = new std::ofstream(file_name.c_str(),
+                                          std::ios_base::binary | mode);
+  if (file->is_open()) {
+    return file;
+  }
+  return NULL;
+}
+
+std::ofstream* file_system::Write(std::ofstream* file_stream,
+                                  const unsigned char* data,
+                                  unsigned int data_size) {
+  if (file_stream) {
+    for (size_t i = 0; i < data_size; ++i) {
+      (*file_stream) << data[i];
+    }
+  }
+  return file_stream;
+}
+
+void file_system::Close(std::ofstream* file_stream) {
+  if (file_stream) {
+    file_stream->close();
+  }
+}
+
 std::string file_system::FullPath(const std::string& file) {
   // FILENAME_MAX defined stdio_lim.h was replaced with less value
   // since it seems, that is caused overflow in some cases
@@ -190,22 +227,28 @@ bool file_system::DeleteFile(const std::string& name) {
 void remove_directory_content(const std::string& directory_name) {
   int return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element;
+#ifndef __QNXNTO__
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
+#else
+  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new(direntbuffer) dirent;
+#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
 
   if (NULL != directory) {
-    return_code = readdir_r(directory, &dir_element, &result);
+    return_code = readdir_r(directory, dir_element, &result);
 
     for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, &dir_element, &result)) {
-      if (0 == strcmp(dir_element.d_name, "..")
-          || 0 == strcmp(dir_element.d_name, ".")) {
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..")
+          || 0 == strcmp(result->d_name, ".")) {
         continue;
       }
 
-      std::string full_element_path = directory_name + "/" + dir_element.d_name;
+      std::string full_element_path = directory_name + "/" + result->d_name;
 
       if (file_system::IsDirectory(full_element_path)) {
         remove_directory_content(full_element_path);
@@ -217,6 +260,9 @@ void remove_directory_content(const std::string& directory_name) {
   }
 
   closedir(directory);
+#ifdef __QNXNTO__
+  delete[] direntbuffer;
+#endif
 }
 
 bool file_system::RemoveDirectory(const std::string& directory_name,
@@ -245,24 +291,33 @@ std::vector<std::string> file_system::ListFiles(
 
   int return_code = 0;
   DIR* directory = NULL;
-  struct dirent dir_element;
+#ifndef __QNXNTO__
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
+#else
+  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new(direntbuffer) dirent;
+#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, &dir_element, &result);
+    return_code = readdir_r(directory, dir_element, &result);
 
     for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, &dir_element, &result)) {
-      if (0 == strcmp(dir_element.d_name, "..")
-          || 0 == strcmp(dir_element.d_name, ".")) {
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..")
+          || 0 == strcmp(result->d_name, ".")) {
         continue;
       }
 
-      listFiles.push_back(std::string(dir_element.d_name));
+      listFiles.push_back(std::string(result->d_name));
     }
 
     closedir(directory);
+#ifdef __QNXNTO__
+    delete[] direntbuffer;
+#endif
   }
 
   return listFiles;
@@ -305,22 +360,20 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   std::string::const_iterator it_sym_end = reserved_symbols.end();
 
   std::string converted_path;
-  while(it_path != it_path_end) {
+  while (it_path != it_path_end) {
 
     it_sym = reserved_symbols.begin();
     for (; it_sym != it_sym_end; ++it_sym) {
 
       if (*it_path == *it_sym) {
-        char c = *it_path;
-        int value = static_cast<int>(c);
-        std::stringstream ss;
-        ss << std::hex << value;
-        std::string percent_value = "%" + ss.str();
+        size_t size = 100;
+        char percent_value[size];
+        snprintf(percent_value, size, "%%%x", *it_path);
         converted_path += percent_value;
         ++it_path;
         continue;
       }
-   }
+    }
 
     converted_path += *it_path;
     ++it_path;

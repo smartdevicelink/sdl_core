@@ -109,7 +109,18 @@ SDL.VRPopUp = Em.ContainerView.create( {
         itemsOnPage: 5,
 
         /** Items array */
-        items: new Array()
+        items: [
+            {
+                type: SDL.Button,
+                params: {
+                    //templateName: template,
+                    text: 'Help',
+                    target: 'SDL.SDLController',
+                    action: 'vrHelpAction',
+                    onDown: false
+                }
+            }
+        ]
     } ),
 
     // deactivate VR on change application state

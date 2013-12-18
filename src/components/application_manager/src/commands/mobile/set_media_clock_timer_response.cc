@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_response.h"
-#include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
@@ -43,7 +42,7 @@ namespace commands {
 
 SetMediaClockTimerResponse::SetMediaClockTimerResponse(
   const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+  : CommandResponseImpl(message) {
 }
 
 SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {

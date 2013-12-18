@@ -38,14 +38,12 @@ namespace utils {
 bool SubscribeToTerminateSignal(void (*func)(int p)) {
   void (*prev_func)(int p);
 
-  prev_func = signal(SIGABRT, func);
   prev_func = signal(SIGINT, func);
   return (SIG_ERR != prev_func);
 }
 
 bool ResetSubscribeToTerminateSignal() {
   void (*prev_func)(int p);
-  prev_func = signal(SIGABRT, SIG_DFL);
   prev_func = signal(SIGINT, SIG_DFL);
   return (SIG_ERR != prev_func);
 }
