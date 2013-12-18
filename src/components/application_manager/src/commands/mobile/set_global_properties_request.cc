@@ -285,10 +285,22 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
             && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
-  SendResponse(result,
-               static_cast<mobile_apis::Result::eType>(
-                   std::max(ui_result_, tts_result_)),
-               NULL, &(message[strings::msg_params]));
+  mobile_apis::Result::eType result_code;
+  const char* return_info = NULL;
+
+  if (result) {
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    }
+  } else {
+    result_code = static_cast<mobile_apis::Result::eType>(
+        std::max(ui_result_, tts_result_));
+  }
+
+
+  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+               return_info, &(message[strings::msg_params]));
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
