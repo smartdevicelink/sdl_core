@@ -57,9 +57,9 @@ struct MessageFromHmi: public MessageSharedPointer {
       : MessageSharedPointer(message) {}
   // This method is used by priority queue to decide which
   // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
+  // "bigger" things go out of std::priority_queue first
   bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
+    return (*this)->HasLowerPriorityThan(*that);
   }
 };
 
@@ -68,9 +68,9 @@ struct MessageToHmi: public MessageSharedPointer {
       : MessageSharedPointer(message) {}
   // This method is used by priority queue to decide which
   // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
+  // "bigger" things go out of std::priority_queue first
   bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
+    return (*this)->HasLowerPriorityThan(*that);
   }
 };
 

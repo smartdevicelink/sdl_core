@@ -80,9 +80,9 @@ struct RawFordMessageFromMobile: public RawMessagePtr {
   explicit RawFordMessageFromMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
   // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
+  // on their priority, "bigger" messages come out from priority queue first
   bool operator < (const RawFordMessageFromMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
+    return (*this)->HasLowerPriorityThan(*that);
   }
 };
 
@@ -90,9 +90,9 @@ struct RawFordMessageToMobile: public RawMessagePtr {
   explicit RawFordMessageToMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
   // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
+  // on their priority, "bigger" messages come out from priority queue first
   bool operator < (const RawFordMessageToMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
+    return (*this)->HasLowerPriorityThan(*that);
   }
 };
 

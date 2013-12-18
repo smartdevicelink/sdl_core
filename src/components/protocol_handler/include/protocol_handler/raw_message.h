@@ -106,7 +106,7 @@ class RawMessage {
     /*
      * \brief Compares priorities of two messages based on their service type
      */
-    bool HasHigherPriorityThan(const RawMessage& that) const;
+    bool HasLowerPriorityThan(const RawMessage& that) const;
 
   private:
     /**

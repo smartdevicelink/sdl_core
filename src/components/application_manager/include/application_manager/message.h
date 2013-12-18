@@ -92,9 +92,9 @@ class Message {
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
 
-  // Tells whether |this| message has higher priority
-  // (and must be processed earlier) than |that|
-  bool HasHigherPriorityThan(const Message& that) const;
+  // Tells whether |this| message has lower priority
+  // (and must be processed later) than |that|
+  bool HasLowerPriorityThan(const Message& that) const;
 
  private:
   int function_id_;  // @remark protocol V2.

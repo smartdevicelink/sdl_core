@@ -177,8 +177,8 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
-bool Message::HasHigherPriorityThan(const Message& that) const {
-  return this->priority_ > that.priority_;
+bool Message::HasLowerPriorityThan(const Message& that) const {
+  return this->priority_ < that.priority_;
 }
 
 }  // namespace application_manager
