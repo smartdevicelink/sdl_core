@@ -33,8 +33,6 @@
 
 #include "application_manager/commands/mobile/slider_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -50,38 +48,7 @@ SliderResponse::~SliderResponse() {
 void SliderResponse::Run() {
   LOG4CXX_INFO(logger_, "SliderResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-      ->GetMessageChain(correlation_id);
-
-  const smart_objects::SmartObject request_params = msg_chain->data();
-
-  if (!IsPendingResponseExist()) {
-    const int code = (*message_)[strings::params][hmi_response::code].asInt();
-    if ((mobile_apis::Result::SUCCESS == code) ||
-        (mobile_apis::Result::ABORTED == code)) {
-
-      SendResponse(true);
-    } else {
-
-      (*message_)[strings::msg_params][strings::slider_position] =
-          request_params.getElement(
-          strings::msg_params).getElement(strings::position);
-
-      SendResponse(false);
-    }
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands
