@@ -175,13 +175,13 @@ struct MessageToHmi: public utils::SharedPtr<Message> {
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageFromMobile> > FromMobileQueue;
+               std::queue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageToMobile> > ToMobileQueue;
+               std::queue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+               std::queue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageToHmi> > ToHmiQueue;
+               std::queue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
