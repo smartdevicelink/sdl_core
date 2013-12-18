@@ -137,6 +137,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	private HMILevel prevHMILevel = HMILevel.HMI_NONE;
 	
 	private static boolean waitingForResponse = false;
+    private ProxyServiceEvent mServiceDestroyEvent;
 	
 	public void onCreate() {
 		super.onCreate();
@@ -356,15 +357,26 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.onDestroy()", Log.INFO);
 		else Log.i(TAG, "ProxyService.onDestroy()");
-		
-		disposeSyncProxy();
+
+        // In case service is destroying by System
+		if (mServiceDestroyEvent == null) {
+            disposeSyncProxy();
+        }
+        mServiceDestroyEvent = null;
 		_instance = null;
-		if (embeddedAudioPlayer != null) embeddedAudioPlayer.release();		
+		if (embeddedAudioPlayer != null) {
+            embeddedAudioPlayer.release();
+        }
 		unregisterReceiver(mediaButtonReceiver);	
 		super.onDestroy();
 	}
+
+    public void destroyService(ProxyServiceEvent serviceDestroyEvent) {
+        mServiceDestroyEvent = serviceDestroyEvent;
+        disposeSyncProxy();
+    }
 	
-	public void disposeSyncProxy() {
+	private void disposeSyncProxy() {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.disposeSyncProxy()", Log.INFO);
 		else Log.i(TAG, "ProxyService.disposeSyncProxy()");
@@ -374,6 +386,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				_syncProxy.dispose();
 			} catch (SyncException e) {
                 Log.e(TAG, e.toString());
+                if (mServiceDestroyEvent != null) {
+                    mServiceDestroyEvent.onDisposeError();
+                }
 			}
 			_syncProxy = null;
 		}
@@ -731,8 +746,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		}
 
         if (!isModuleTesting()) {
-            final SyncExceptionCause cause =
-                    ((SyncException) e).getSyncExceptionCause();
+            if (e == null) {
+                return;
+            }
+            final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
             if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
                     (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                     (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
@@ -740,21 +757,28 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
 	}
-	
-	public void reset(){
-	   try {
-		   _syncProxy.resetProxy();
-		} catch (SyncException e1) {
-			e1.printStackTrace();
-			//something goes wrong, & the proxy returns as null, stop the service.
-			//do not want a running service with a null proxy
-			if (_syncProxy == null){
-				stopSelf();
-			}
-		}
-	}
-	
-	/**
+
+    public void reset() {
+        if (_syncProxy == null) {
+            return;
+        }
+        // In case we run exit() - this is a quick marker of exiting.
+        if (mServiceDestroyEvent != null) {
+            return;
+        }
+        try {
+            _syncProxy.resetProxy();
+        } catch (SyncException e1) {
+            e1.printStackTrace();
+            //something goes wrong, & the proxy returns as null, stop the service.
+            //do not want a running service with a null proxy
+            if (_syncProxy == null) {
+                stopSelf();
+            }
+        }
+    }
+
+    /**
 	 * Restarting SyncProxyALM. For example after changing transport type
 	 */
 	public void restart() {
@@ -1399,7 +1423,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
-        final  RegisterAppInterface event = msg;
+        Log.i(TAG, "OnRegisterAppRequest: " + msg.toString());
+        Log.d("TRACE", "OnRegisterAppRequest");
+        //final  RegisterAppInterface event = msg;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) _msgAdapter.logMessage(msg, true);
         else Log.i(TAG, "" + msg.toString());
@@ -1576,16 +1602,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	@Override
-	public void onUnregisterAppInterfaceResponse(
-			UnregisterAppInterfaceResponse response) {
+	public void onUnregisterAppInterfaceResponse(UnregisterAppInterfaceResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
 		
 		if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+			synchronized (_testerMain.getThreadContext()) {
+                _testerMain.getThreadContext().notify();
+            }
 		}
+
+        if (mServiceDestroyEvent != null) {
+            mServiceDestroyEvent.onDisposeComplete();
+        }
 	}
 
 	@Override

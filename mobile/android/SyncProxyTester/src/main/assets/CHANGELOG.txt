@@ -1,5 +1,8 @@
 [CW51]
 * Fix parsing OnAudioPassThru notifications.
+* When SDL core is shut down mobile application receive OnAppInterfaceUnregister
+* Switch off auto-sending PutFile and SetAppIcon after RegisterAppInterface for xml tests run.
+* Fix send RegisterAppInterface request before selecting parameters of registration.
 
 [CW48]
 * SyncProxyAndroid SDK: Update touch-related messages and structures to protocol version 3.0.K.

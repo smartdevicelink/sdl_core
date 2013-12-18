@@ -7,5 +7,6 @@ package com.ford.syncV4.android.service;
  * Time: 3:46 PM
  */
 public interface ProxyServiceEvent {
-
+    public void onDisposeComplete();
+    public void onDisposeError();
 }
