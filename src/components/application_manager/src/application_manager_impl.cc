@@ -1488,14 +1488,13 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   // Saving unregistered app.info to the file system before
   SaveApplications();
 
-  for (std::set<Application*>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
-
+  std::set<Application*>::iterator it = application_list_.begin();
+  while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
     UnregisterApplication((*it)->app_id());
+    it = application_list_.begin();
   }
 }
 
