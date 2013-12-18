@@ -35,12 +35,11 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/timer_thread.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 
