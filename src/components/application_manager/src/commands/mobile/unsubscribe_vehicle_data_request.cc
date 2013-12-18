@@ -145,8 +145,8 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event){
                &(message[strings::msg_params]));
 }
 
-bool SubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed() {
-  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
+bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed() {
+  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
