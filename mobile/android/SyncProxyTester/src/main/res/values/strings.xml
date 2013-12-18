@@ -241,4 +241,6 @@
     <string name="alertManeuver_ttsChunks">TTSChunks (comma-separated)</string>
     <string name="alertManeuver_ttsChunksDefault">TTSChunk1,TTSChunk2,AnotherTTSChunk</string>
 
+    <string name="exit_dialog_title">Exit Application</string>
+
 </resources>
