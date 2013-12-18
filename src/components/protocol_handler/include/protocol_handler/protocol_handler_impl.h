@@ -39,6 +39,7 @@
 #include <map>
 #include <set>
 #include "utils/logger.h"
+#include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
@@ -79,28 +80,22 @@ namespace impl {
 struct RawFordMessageFromMobile: public RawMessagePtr {
   explicit RawFordMessageFromMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
-  // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
-  bool operator < (const RawFordMessageFromMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct RawFordMessageToMobile: public RawMessagePtr {
   explicit RawFordMessageToMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
-  // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
-  bool operator < (const RawFordMessageToMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::queue<RawFordMessageFromMobile> > FromMobileQueue;
+               utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::queue<RawFordMessageToMobile> > ToMobileQueue;
+               utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
 
 }
 

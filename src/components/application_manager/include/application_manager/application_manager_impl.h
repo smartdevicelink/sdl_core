@@ -70,6 +70,7 @@
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
@@ -132,56 +133,40 @@ using namespace threads;
 struct MessageFromMobile: public utils::SharedPtr<Message> {
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageFromMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
   explicit MessageToMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageToMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
-};
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+ };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
   explicit MessageToHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageToHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::queue<MessageFromMobile> > FromMobileQueue;
+    utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageToMobile> > ToMobileQueue;
+    utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageFromHmi> > FromHmiQueue;
+    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageToHmi> > ToHmiQueue;
+    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,

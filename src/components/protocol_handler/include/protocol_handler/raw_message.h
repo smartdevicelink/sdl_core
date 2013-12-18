@@ -39,6 +39,7 @@
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "protocol_handler/service_type.h"
+#include "protocol_handler/message_priority.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -104,9 +105,9 @@ class RawMessage {
     void set_waiting(bool v);
 
     /*
-     * \brief Compares priorities of two messages based on their service type
+     * \brief Priority of this message based on it's service type
      */
-    bool HasHigherPriorityThan(const RawMessage& that) const;
+    MessagePriority Priority() const;
 
   private:
     /**

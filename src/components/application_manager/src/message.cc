@@ -177,10 +177,6 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
-bool Message::HasHigherPriorityThan(const Message& that) const {
-  return this->priority_ > that.priority_;
-}
-
 NsSmartDeviceLink::NsSmartObjects::SmartObject& Message::smart_object() {
   return object_;
 }

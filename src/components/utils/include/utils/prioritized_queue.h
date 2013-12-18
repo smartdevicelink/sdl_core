@@ -1,7 +1,4 @@
 /**
- * \file SmartDeviceLinkRawMessage.cpp
- * \brief SmartDeviceLinkRawMessage class source file.
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,68 +30,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol_handler/raw_message.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 
-#include "protocol_handler/message_priority.h"
+#include <queue>
+#include <vector>
 
-namespace protocol_handler {
+#include "utils/macro.h"
 
-RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data, unsigned int data_size,
-                       unsigned char type)
-  : connection_key_(connectionKey),
-    protocol_version_(protocolVersion),
-    service_type_(ServiceTypeFromByte(type)),
-    waiting_(false),
-    fully_binary_(false),
-    data_size_(data_size) {
-  if (data_size > 0) {
-    data_ = new unsigned char[data_size];
-    for (int i = 0; i < data_size; ++i) {
-      data_[i] = data[i];
-    }
-  } else {
-    data_ = 0;
+namespace utils {
+
+/*
+ * Template queue class that gives out messages respecting their priority
+ * Message class must have size_t PriorityOrder() method implemented
+ */
+template < typename M >
+class PrioritizedQueue {
+ public:
+  typedef M value_type;
+  typedef std::vector< std::queue<value_type> > QueuesList;
+  PrioritizedQueue()
+    : total_size_(0) {
   }
-}
-
-RawMessage::~RawMessage() {
-  if (data_) {
-    delete[] data_;
-    data_ = 0;
+  // All api mimics usual std queue interface
+  void push(const value_type& message) {
+    size_t message_priority = message.PriorityOrder();
+    if (message_priority >= queues_.size())
+      queues_.resize(message_priority + 1);
+    queues_[message_priority].push(message);
+    ++total_size_;
   }
+  size_t size() const {
+    return total_size_;
+  }
+  bool empty() const {
+    return queues_.empty();
+  }
+  value_type front() {
+    DCHECK(!queues_.empty() && !queues_.back().empty());
+    return queues_.back().front();
+  }
+  void pop() {
+    DCHECK(!queues_.empty() && !queues_.back().empty());
+    queues_.back().pop();
+    --total_size_;
+    while (!queues_.empty() && queues_.back().empty())
+      queues_.pop_back();
+  }
+ private:
+  QueuesList queues_;
+  size_t total_size_;
+};
+
 }
 
-int RawMessage::connection_key() const {
-  return connection_key_;
-}
-
-void RawMessage::set_connection_key(unsigned int key) {
-  connection_key_ = key;
-}
-
-unsigned char* RawMessage::data() const {
-  return data_;
-}
-
-unsigned int RawMessage::data_size() const {
-  return data_size_;
-}
-
-unsigned int RawMessage::protocol_version() const {
-  return protocol_version_;
-}
-
-bool RawMessage::IsWaiting() const {
-  return waiting_;
-}
-
-void RawMessage::set_waiting(bool v) {
-  waiting_ = v;
-}
-
-MessagePriority RawMessage::Priority() const {
-  return MessagePriority::FromServiceType(this->service_type());
-}
-
-}  // namespace protocol_handler
+#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
