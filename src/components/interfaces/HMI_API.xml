@@ -2457,11 +2457,8 @@
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
     </param>
-    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
@@ -2514,9 +2511,8 @@
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA	  
-          totalDistance
-	  timeToDestination.
+          ETA
+          totalDistance.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
