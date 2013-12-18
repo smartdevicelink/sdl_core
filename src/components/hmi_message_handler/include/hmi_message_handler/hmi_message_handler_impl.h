@@ -75,9 +75,9 @@ struct MessageToHmi: public MessageSharedPointer {
 };
 
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+               std::queue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageToHmi> > ToHmiQueue;
+               std::queue<MessageToHmi> > ToHmiQueue;
 }
 
 class ToHMIThreadImpl;

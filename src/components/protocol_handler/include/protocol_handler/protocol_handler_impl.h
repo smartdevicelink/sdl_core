@@ -98,9 +98,9 @@ struct RawFordMessageToMobile: public RawMessagePtr {
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::priority_queue<RawFordMessageFromMobile> > FromMobileQueue;
+               std::queue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<RawFordMessageToMobile> > ToMobileQueue;
+               std::queue<RawFordMessageToMobile> > ToMobileQueue;
 
 }
 
