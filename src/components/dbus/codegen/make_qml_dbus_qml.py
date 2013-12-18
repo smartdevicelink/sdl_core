@@ -93,6 +93,7 @@ class Impl(FordXmlParser):
     def write_qml(self, iface, out):
         name = iface.get('name')
         out.write("import QtQuick 2.0\n")
+        out.write("""import "Common.js" as Common\n""")
         out.write("import \"..\"\n\n")
         out.write("Item {\n")
         out.write("  " + name + " {\n")
