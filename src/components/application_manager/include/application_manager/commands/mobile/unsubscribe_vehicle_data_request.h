@@ -71,6 +71,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
+  bool IsAnythingAlreadyUnsubscribed();
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 

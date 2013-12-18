@@ -385,25 +385,25 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params = message[strings::msg_params];
-    bool result_code = false;
-    mobile_apis::Result::eType code =
+    bool result = false;
+    mobile_apis::Result::eType result_code =
         static_cast<mobile_apis::Result::eType>(
             message[strings::params][hmi_response::code].asInt());
-    if (hmi_apis::Common_Result::SUCCESS == code) {
+    if (hmi_apis::Common_Result::SUCCESS == result_code) {
       msg_params[strings::trigger_source] = trigger_source_;
-      result_code = true;
+      result = true;
     }
 
     const char* return_info = NULL;
 
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-        tts_perform_interaction_code_) {
-      code = mobile_apis::Result::WARNINGS;
-      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in any item").c_str();
+      }
     }
 
-    SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-                 return_info, &(msg_params));
+    SendResponse(result, result_code, return_info, &(message[strings::msg_params]));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(

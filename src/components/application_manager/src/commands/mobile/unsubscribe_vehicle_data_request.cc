@@ -119,21 +119,52 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event){
           message[strings::params][hmi_response::code].asInt()
           );
 
-  bool success =
+  bool result =
       hmi_result == hmi_apis::Common_Result::SUCCESS;
 
-  mobile_apis::Result::eType result =
+  mobile_apis::Result::eType result_code =
       hmi_result == hmi_apis::Common_Result::SUCCESS
       ? mobile_apis::Result::SUCCESS
       : static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt()
           );
 
-  SendResponse(success,
-               result,
-               0,
+  const char* return_info = NULL;
+
+  if (result) {
+    if (IsAnythingAlreadyUnsubscribed()) {
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    }
+  }
+
+
+  SendResponse(result,
+               result_code,
+               return_info,
                &(message[strings::msg_params]));
 }
+
+bool SubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed() {
+  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
+
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
+
+  for (; vehicle_data.end() != it; ++it) {
+    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
+
+      if ((*message_)[strings::msg_params][it->first]
+          [strings::result_code].asInt() ==
+          hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 
 }  // namespace commands
 

@@ -170,20 +170,23 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       : navi_alert_maneuver_result_code_;
 
   if (pending_requests_.IsFinal(id)) {
-    bool success = mobile_apis::Result::SUCCESS == result_code;
+    bool result = mobile_apis::Result::SUCCESS == result_code;
 
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
       mobile_apis::Result::eType return_code =
       static_cast<mobile_apis::Result::eType>(result_code);
+
       const char* return_info = NULL;
 
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == return_code) {
-        return_code = mobile_apis::Result::WARNINGS;
-        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      if (result) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+          result_code = mobile_apis::Result::WARNINGS;
+          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+        }
       }
 
-      SendResponse(success, static_cast<mobile_apis::Result::eType>(return_code),
-                   return_info, &(message[strings::msg_params]));
+      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                        return_info, &(message[strings::msg_params]));
     }
   } else {
     LOG4CXX_INFO(logger_,
