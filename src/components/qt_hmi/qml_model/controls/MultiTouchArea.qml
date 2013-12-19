@@ -36,14 +36,12 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 MultiPointTouchArea {
-    property int created: Date.now()
-    minimumTouchPoints: 1
-    maximumTouchPoints: 10
+    readonly property int created: Date.now()
 
-    onPressed: sdlUI.onTouchEvent(Common.BEGIN, fillEvent(touchPoints))
-    onReleased: sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
-    onCanceled: sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
-    onUpdated: sdlUI.onTouchEvent(Common.MOVE, fillEvent(touchPoints))
+    signal pressed(var touchPoints)
+    signal released(var touchPoints)
+    signal canceled(var touchPoints)
+    signal updated(var touchPoints)
 
     function fillEvent(touchPoints) {
         var event = []
@@ -51,9 +49,29 @@ MultiPointTouchArea {
             event.push({
                            id: touchPoints[i].pointId,
                            ts: [Date.now() - created],
-                           c: [{ x: touchPoints.x, y: touchPoints.y }]
+                           c: [{ x: touchPoints.x, y: touchPoints.y }] // TODO(KKolodiy): need cast to int
                        })
         }
         return event
+    }
+
+    minimumTouchPoints: 1
+    maximumTouchPoints: 10
+
+    onPressed: {
+        sdlUI.onTouchEvent(Common.BEGIN, fillEvent(touchPoints))
+        parent.pressed(touchPoints)
+    }
+    onReleased: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.released(touchPoints)
+    }
+    onCanceled: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.canceled(touchPoints)
+    }
+    onUpdated: {
+        sdlUI.onTouchEvent(Common.MOVE, fillEvent(touchPoints))
+        parent.updated(touchPoints)
     }
 }
