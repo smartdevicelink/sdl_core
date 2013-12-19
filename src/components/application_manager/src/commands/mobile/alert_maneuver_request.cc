@@ -165,11 +165,12 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  result_code = (mobile_apis::Result::SUCCESS != tts_speak_result_code_)
-      ? tts_speak_result_code_
-      : navi_alert_maneuver_result_code_;
-
   if (pending_requests_.IsFinal(id)) {
+
+    result_code = (mobile_apis::Result::SUCCESS != tts_speak_result_code_)
+          ? tts_speak_result_code_
+          : navi_alert_maneuver_result_code_;
+
     bool result = mobile_apis::Result::SUCCESS == result_code;
 
     if (mobile_apis::Result::INVALID_ENUM != result_code) {

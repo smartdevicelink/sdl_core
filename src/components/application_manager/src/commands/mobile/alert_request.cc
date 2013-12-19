@@ -153,7 +153,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_) {
+      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_ && result) {
         result_code = ui_alert_result_;
       }
 
