@@ -94,7 +94,8 @@ SDL.NonMediaController = Em.Object.create( {
     onDeleteApplication: function(appID) {
 
         if (this.currentAppId == appID) {
-            if (SDL.States.info.nonMedia.active) {
+            if (SDL.States.info.nonMedia.active
+                || SDL.SDLAppController.model) {
 
                 SDL.SDLAppController.model.set('active', false);
 
