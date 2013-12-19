@@ -138,10 +138,13 @@ struct MessageFromMobile: public utils::SharedPtr<Message> {
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
+  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
+                           bool final_message):
+    utils::SharedPtr<Message>(message), is_final(final_message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  // Signals if connection to mobile must be closed after sending this message
+  bool is_final;
  };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
@@ -383,8 +386,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     ///////////////////////////////////////////////////////
 
     void StartDevicesDiscovery();
+
+    // Put message to the queue to be sent to mobile.
+    // if |final_message| parameter is set connection to mobile will be closed
+    // after processing this message
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message = false);
     bool ManageMobileCommand(
       const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(

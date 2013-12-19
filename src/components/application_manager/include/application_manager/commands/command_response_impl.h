@@ -55,7 +55,8 @@ class CommandResponseImpl : public CommandImpl {
   virtual void Run();
   void SendResponse(bool successe,
                     const mobile_apis::Result::eType& result_code =
-                        mobile_apis::Result::INVALID_ENUM);
+                        mobile_apis::Result::INVALID_ENUM,
+                    bool final_message = false);
   bool IsPendingResponseExist();
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandResponseImpl);

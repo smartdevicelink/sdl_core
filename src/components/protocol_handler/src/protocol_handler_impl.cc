@@ -157,7 +157,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(
-  const RawMessagePtr& message) {
+  const RawMessagePtr& message, bool final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
@@ -165,7 +165,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
     LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
-  raw_ford_messages_to_mobile_.PostMessage(impl::RawFordMessageToMobile(message));
+  raw_ford_messages_to_mobile_.PostMessage(impl::RawFordMessageToMobile(message,
+                                                                        final_message));
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -668,6 +669,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
                     "ProtocolHandler failed to send multiframe messages.");
     }
   }
+  if (message.is_final)
+    transport_manager_->Disconnect(connection_handle);
 }
 
 

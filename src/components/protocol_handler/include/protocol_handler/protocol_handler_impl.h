@@ -85,10 +85,12 @@ struct RawFordMessageFromMobile: public RawMessagePtr {
 };
 
 struct RawFordMessageToMobile: public RawMessagePtr {
-  explicit RawFordMessageToMobile(const RawMessagePtr& message)
-      : RawMessagePtr(message) {}
+  explicit RawFordMessageToMobile(const RawMessagePtr& message, bool final_message)
+      : RawMessagePtr(message), is_final(final_message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  // Signals wether connection to mobile must be closed after processing this message
+  bool is_final;
 };
 
 // Short type names for proiritized message queues
@@ -151,7 +153,8 @@ class ProtocolHandlerImpl
      * \brief Method for sending message to Mobile Application.
      * \param message Message with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const RawMessagePtr& message);
+    void SendMessageToMobileApp(const RawMessagePtr& message,
+                                bool final_message) OVERRIDE;
 
     /**
      * \brief Sends number of processed frames in case of binary nav streaming

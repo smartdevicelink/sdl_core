@@ -69,8 +69,11 @@ class ProtocolHandler {
     /**
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
+     * \param final_message tells whether message's
+     * connection must be closed when message is processed
      */
-    virtual void SendMessageToMobileApp(const RawMessagePtr& message) = 0;
+    virtual void SendMessageToMobileApp(const RawMessagePtr& message,
+                                        bool final_message) = 0;
 
     /**
      * \brief Sends number of processed frames in case of binary nav streaming

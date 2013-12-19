@@ -888,7 +888,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
-  const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToMobile");
 
   if (!message) {
@@ -921,7 +921,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
-  messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send));
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
+                                                        final_message));
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1563,7 +1564,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
     return;
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage);
+  protocol_handler_->SendMessageToMobileApp(rawMessage, message.is_final);
 
   LOG4CXX_INFO(logger_, "Message for mobile given away.");
 
