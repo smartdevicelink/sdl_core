@@ -111,7 +111,8 @@ SDL.SDLVehicleInfoModel = Em.Object
             "wiperStatus": "VEHICLEDATA_WIPERSTATUS",
             "headLampStatus": "VEHICLEDATA_HEADLAMPSTATUS",
             "engineTorque":"VEHICLEDATA_ENGINETORQUE",
-            "accPedalPosition": "VEHICLEDATA_ACCPEDAL"
+            "accPedalPosition": "VEHICLEDATA_ACCPEDAL",
+            "steeringWheelAngle": "VEHICLEDATA_STEERINGWHEEL"
         },
 
         /**
