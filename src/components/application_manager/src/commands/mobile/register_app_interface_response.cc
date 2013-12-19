@@ -42,8 +42,17 @@ void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
+  bool last_message = !success;
+  // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
+  if (!success && (*message_)[strings::msg_params].keyExists(strings::result_code)) {
+    mobile_apis::Result::eType result_code =
+        mobile_apis::Result::eType((*message_)[strings::msg_params][strings::result_code].asInt());
+    if (result_code ==  mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
+      last_message = false;
+    }
+  }
 
-  SendResponse(success, mobile_apis::Result::INVALID_ENUM, !success);
+  SendResponse(success, mobile_apis::Result::INVALID_ENUM, last_message);
 }
 
 }  // namespace commands
