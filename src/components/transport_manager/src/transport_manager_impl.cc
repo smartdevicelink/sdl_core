@@ -312,7 +312,7 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
   // Clear messages for this connection
   // Note that MessageQueue typedef is assumed to be std::list,
   // or there is a problem here. One more point versus typedefs-everywhere
-  MessageQueue::iterator e = message_queue_.begin();
+  auto e = message_queue_.begin();
   while (e != message_queue_.end()) {
     if ((*e)->connection_key() == cid) {
       RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
