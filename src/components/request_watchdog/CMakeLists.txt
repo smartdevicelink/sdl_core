@@ -13,4 +13,3 @@ set (SOURCES
 
 add_library("RequestWatchdog" ${SOURCES})
 target_link_libraries ("RequestWatchdog" Utils)
-target_link_libraries ("RequestWatchdog" log4cxx)

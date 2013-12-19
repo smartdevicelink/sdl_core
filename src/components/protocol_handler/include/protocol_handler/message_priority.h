@@ -1,6 +1,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGE_PRIORITY_H
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MESSAGE_PRIORITY_H
 
+#include <cstddef>
+
 #include "protocol_handler/service_type.h"
 
 namespace protocol_handler {
@@ -18,17 +20,15 @@ class MessagePriority {
 
   // Trivial inline copy constructor
   MessagePriority(const MessagePriority& that): value_(that.value_) {}
-  // Priorities are ordered exactly as their values, so something has
-  // higher priority if it's priority value is higher.
-  // While priority object is tiny, it's faster to pass it by value
-  bool operator< (MessagePriority that) const { return value_ < that.value_; }
-  bool operator> (MessagePriority that) const { return value_ > that.value_; }
+
+  // Ordering value which is used by queues to order messages
+  size_t OrderingValue() { return value_; }
  private:
   // Constructor is private to prevent creation
   // of random priorities in the code please use static constructor if you
   // need priority value
   explicit MessagePriority(int value): value_(value) {}
-  int value_;
+  size_t value_;
 };
 
 } // namespace protocol_handler

@@ -17,6 +17,8 @@ set (LIBRARIES
     SmartObjects
     formatters
     jsoncpp
+    apr-1
+    aprutil-1
 )
 
 create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")

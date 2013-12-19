@@ -36,6 +36,10 @@
 #include <assert.h>
 #include <stddef.h>
 
+#if  defined(__QNX__) || defined(__QNXNTO__)
+#include <atomic.h>
+#endif
+
 #include "utils/macro.h"
 
 namespace utils {
@@ -149,7 +153,7 @@ class SharedPtr {
     ObjectType* operator->(void) const;
 
     ObjectType& operator*() const;
-    explicit operator bool() const;
+    operator bool() const;
     void reset();
     void reset(ObjectType* other);
     ObjectType* get() const;
@@ -251,7 +255,11 @@ utils::SharedPtr<ObjectType>::operator=(
   mReferenceCounter = Other.mReferenceCounter;
 
   if (0 != mReferenceCounter) {
+#if  defined(__QNX__) || defined(__QNXNTO__)
+    atomic_add(mReferenceCounter, 1);
+#else
     __sync_add_and_fetch(mReferenceCounter, 1);
+#endif
   }
 
   return *this;
@@ -294,7 +302,12 @@ utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
 template<typename ObjectType>
 inline void SharedPtr<ObjectType>::dropReference(void) {
   if (0 != mReferenceCounter) {
+#if defined(__QNX__) || defined(__QNXNTO__)
+    if (1 == atomic_sub_value(mReferenceCounter, 1)) {
+#else
     if (0 == __sync_sub_and_fetch(mReferenceCounter, 1)) {
+#endif
+
       delete mObject;
       mObject = 0;
 
@@ -317,3 +330,5 @@ inline bool SharedPtr<ObjectType>::valid() const {
 }  // namespace utils
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
+
+// vim: set ts=2 sw=2 et:

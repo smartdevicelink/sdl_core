@@ -36,7 +36,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
 
 #if defined(OS_POSIX)
-#include <time.h>
+#include <sys/time.h>
 typedef struct timeval TimevalStruct;
 #endif
 

@@ -47,6 +47,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <vector>
+#include <sstream>
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
 

@@ -66,11 +66,15 @@ bool MockDevice::IsSameAs(const Device* other) const {
   return unique_device_id() == other->unique_device_id();
 }
 
+static ApplicationHandle get_handle(const MockApplication& app) {
+  return app.handle;
+}
+
 ApplicationList MockDevice::GetApplicationList() const {
   ApplicationList rc(applications_.size());
   std::transform(
       applications_.begin(), applications_.end(), rc.begin(),
-      [](const MockApplication& app) {return app.handle;});
+      &get_handle);
   return rc;
 }
 

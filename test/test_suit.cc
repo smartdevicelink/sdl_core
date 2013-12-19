@@ -3,6 +3,7 @@
 #include "gmock/gmock.h"
 #include "config_profile/profile.h"
 #include "utils/file_system_tests.h"
+#include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "request_watchdog/request_watchdog_test.h"
 #include "application_manager/formatters_commands.h"

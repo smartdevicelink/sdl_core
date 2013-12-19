@@ -33,174 +33,106 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sstream>
+
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "transport_manager/usb/usb_device.h"
-#include "transport_manager/usb/libusb_handler.h"
+#include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 class AoaInitSequence : public UsbControlTransferSequence {
-  public:
-    AoaInitSequence(libusb_device_handle* device_handle);
-  private:
-    class AoaGetProtocolRequest;
-    class AoaSendIdString;
-    class AoaTurnIntoAccessoryMode;
+ public:
+  AoaInitSequence();
+  virtual ~AoaInitSequence() {}
+
+ private:
+  class AoaGetProtocolRequest;
+  class AoaSendIdString;
+  class AoaTurnIntoAccessoryMode;
 };
 
-bool IsGoogleAccessory(const libusb_device_descriptor& descriptor) {
-  static const uint16_t AOA_VID = 0x18d1;
-  static const uint16_t AOA_PID1 = 0x2d00;
-  static const uint16_t AOA_PID2 = 0x2d01;
-  return descriptor.idVendor == AOA_VID
-         && (descriptor.idProduct == AOA_PID1 || descriptor.idProduct == AOA_PID2);
+bool IsGoogleAccessory(uint16_t vid, uint16_t pid) {
+  return (vid == kAoaVid) && (pid == kAoaPid1 || pid == kAoaPid2);
 }
 
-void UsbDeviceScanner::OnDeviceArrived(libusb_device* device) {
-  LOG4CXX_INFO(
-    logger_,
-    "libusb device arrived (bus number " << static_cast<int>(libusb_get_bus_number(device)) << ", address " << static_cast<int>(libusb_get_device_address(device)) << ")");
-
-  libusb_device_descriptor descriptor;
-  int libusb_ret = libusb_get_device_descriptor(device, &descriptor);
-  if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(logger_,
-                  "libusb_get_device_descriptor failed: " << libusb_ret);
-    return;
-  }
-
-  libusb_device_handle* device_handle;
-  libusb_ret = libusb_open(device, &device_handle);
-  if (libusb_ret != LIBUSB_SUCCESS) {
-    LOG4CXX_ERROR(logger_,
-                  "libusb_open failed: " << libusb_error_name(libusb_ret));
-    return;
-  }
-
-  if (IsGoogleAccessory(descriptor)) {
-    GoogleAccessoryFound(device, descriptor, device_handle);
+void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
+  if (IsGoogleAccessory(device->vendor_id(), device->product_id())) {
+    GoogleAccessoryFound(device);
   } else {
-    TurnIntoAccessoryMode(descriptor, device_handle);
+    TurnIntoAccessoryMode(device);
   }
 }
 
-void UsbDeviceScanner::OnDeviceLeft(libusb_device* device) {
-  LOG4CXX_INFO(
-    logger_,
-    "libusb device left (bus number " << static_cast<int>(libusb_get_bus_number(device)) << ", address " << static_cast<int>(libusb_get_device_address(device)) << ")");
-
+void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
   bool list_changed = false;
-  pthread_mutex_lock(&device_descriptions_mutex_);
-  for (DeviceDescriptions::iterator it = device_descriptions_.begin();
-       it != device_descriptions_.end();) {
-    const UsbDeviceDescription& description = *it;
-    if (libusb_get_bus_number(device) == description.bus_number
-        && libusb_get_device_address(device) == description.address) {
-      it = device_descriptions_.erase(it);
+  pthread_mutex_lock(&devices_mutex_);
+  for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
+    if (device == *it) {
+      devices_.erase(it);
       list_changed = true;
-    } else {
-      ++it;
+      break;
     }
   }
-  pthread_mutex_unlock(&device_descriptions_mutex_);
-  if (list_changed)
-    UpdateList();
+  pthread_mutex_unlock(&devices_mutex_);
+  if (list_changed) UpdateList();
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
-  : controller_(controller) {
-  pthread_mutex_init(&device_descriptions_mutex_, 0);
+    : controller_(controller) {
+  pthread_mutex_init(&devices_mutex_, 0);
 }
 
 UsbDeviceScanner::~UsbDeviceScanner() {
-  pthread_mutex_destroy(&device_descriptions_mutex_);
+  pthread_mutex_destroy(&devices_mutex_);
 }
 
 class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
-    virtual ~AoaGetProtocolRequest() {
+  virtual ~AoaGetProtocolRequest() {}
+  virtual RequestType Type() const { return VENDOR; }
+  virtual uint8_t Request() const { return 51; }
+  virtual uint16_t Value() const { return 0; }
+  virtual uint16_t Index() const { return 0; }
+  virtual uint16_t Length() const { return 2; }
+  virtual bool OnCompleted(unsigned char* data) const {
+    const int protocol_version = data[1] << 8 | data[0];
+    LOG4CXX_INFO(logger_, "AOA protocol version " << protocol_version);
+    if (protocol_version == 0) {
+      // AOA protocol not supported
+      return false;
     }
-    virtual libusb_request_type RequestType() const {
-      return LIBUSB_REQUEST_TYPE_VENDOR;
-    }
-    virtual uint8_t Request() const {
-      return 51;
-    }
-    virtual uint16_t Value() const {
-      return 0;
-    }
-    virtual uint16_t Index() const {
-      return 0;
-    }
-    virtual uint16_t Length() const {
-      return 2;
-    }
-    virtual bool OnCompleted(unsigned char* data) const {
-      const int protocol_version = data[1] << 8 | data[0];
-      LOG4CXX_INFO(logger_, "AOA protocol version " << protocol_version);
-      if (protocol_version == 0) {
-        // AOA protocol not supported
-        return false;
-      }
-      return true;
-    }
+    return true;
+  }
 };
 
 class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
-  public:
-    AoaSendIdString(uint16_t index, const char* string, uint16_t length)
-      : index_(index),
-        string_(string),
-        length_(length) {
-    }
-  private:
-    virtual ~AoaSendIdString() {
-    }
-    virtual libusb_request_type RequestType() const {
-      return LIBUSB_REQUEST_TYPE_VENDOR;
-    }
-    virtual uint8_t Request() const {
-      return 52;
-    }
-    virtual uint16_t Value() const {
-      return 0;
-    }
-    virtual uint16_t Index() const {
-      return index_;
-    }
-    virtual uint16_t Length() const {
-      return length_;
-    }
-    virtual const char* Data() const {
-      return string_;
-    }
-    uint16_t index_;
-    const char* string_;
-    uint16_t length_;
+ public:
+  AoaSendIdString(uint16_t index, const char* string, uint16_t length)
+      : index_(index), string_(string), length_(length) {}
+
+ private:
+  virtual ~AoaSendIdString() {}
+  virtual RequestType Type() const { return VENDOR; }
+  virtual uint8_t Request() const { return 52; }
+  virtual uint16_t Value() const { return 0; }
+  virtual uint16_t Index() const { return index_; }
+  virtual uint16_t Length() const { return length_; }
+  virtual const char* Data() const { return string_; }
+  uint16_t index_;
+  const char* string_;
+  uint16_t length_;
 };
 
 class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
-    virtual ~AoaTurnIntoAccessoryMode() {
-    }
-    virtual libusb_request_type RequestType() const {
-      return LIBUSB_REQUEST_TYPE_VENDOR;
-    }
-    virtual uint8_t Request() const {
-      return 53;
-    }
-    virtual uint16_t Value() const {
-      return 0;
-    }
-    virtual uint16_t Index() const {
-      return 0;
-    }
-    virtual uint16_t Length() const {
-      return 0;
-    }
-    virtual const char* Data() const {
-      return 0;
-    }
+  virtual ~AoaTurnIntoAccessoryMode() {}
+  virtual RequestType Type() const { return VENDOR; }
+  virtual uint8_t Request() const { return 53; }
+  virtual uint16_t Value() const { return 0; }
+  virtual uint16_t Index() const { return 0; }
+  virtual uint16_t Length() const { return 0; }
+  virtual const char* Data() const { return 0; }
 };
 
 static char manufacturer[] = "Ford";
@@ -210,8 +142,7 @@ static char version[] = "1.0";
 static char uri[] = "http://www.ford.com";
 static char serial_num[] = "N000000";
 
-AoaInitSequence::AoaInitSequence(libusb_device_handle* device_handle)
-  : UsbControlTransferSequence(device_handle) {
+AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
   AddTransfer(new AoaGetProtocolRequest);
   AddTransfer(new AoaSendIdString(0, manufacturer, sizeof(manufacturer)));
   AddTransfer(new AoaSendIdString(1, model_name, sizeof(model_name)));
@@ -222,110 +153,26 @@ AoaInitSequence::AoaInitSequence(libusb_device_handle* device_handle)
   AddTransfer(new AoaTurnIntoAccessoryMode);
 }
 
-void UsbDeviceScanner::TurnIntoAccessoryMode(
-  const libusb_device_descriptor& descriptor,
-  libusb_device_handle* device_handle) {
-  LOG4CXX_INFO(
-    logger_,
-    "USB device descriptor VID:" << descriptor.idVendor << " PID:" << descriptor.idProduct << " turning into accessory mode");
-
-  int libusb_ret = 0;
-
-  int configuration;
-  libusb_ret = libusb_get_configuration(device_handle, &configuration);
-  if (LIBUSB_SUCCESS != libusb_ret) {
-     LOG4CXX_INFO(
-       logger_,
-       "libusb_get_configuration failed: " << libusb_error_name(libusb_ret));
-     return;
-  }
-  if (configuration != kUsbConfiguration) {
-    libusb_ret = libusb_set_configuration(device_handle, kUsbConfiguration);
-    if (LIBUSB_SUCCESS != libusb_ret) {
-       LOG4CXX_INFO(
-         logger_,
-         "libusb_set_configuration failed: " << libusb_error_name(libusb_ret));
-       return;
-    }
-  }
-  libusb_ret = libusb_claim_interface(device_handle, 0);
-  if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_INFO(
-      logger_,
-      "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));
-    return;
-  }
-
-  GetLibusbHandler()->StartControlTransferSequence(
-    new AoaInitSequence(device_handle));
+void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
+  LOG4CXX_INFO(logger_, "USB device VID:" << device->vendor_id()
+                                          << " PID:" << device->product_id()
+                                          << " turning into accessory mode");
+  GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
 }
 
-bool FillUsbDeviceDescription(libusb_device* device,
-                              const libusb_device_descriptor& descriptor,
-                              libusb_device_handle* device_handle,
-                              UsbDeviceDescription* description) {
-  int libusb_ret = 0;
-  unsigned char buf[128];
-  libusb_ret = libusb_get_string_descriptor_ascii(device_handle,
-               descriptor.iManufacturer, buf,
-               sizeof(buf));
-  if (libusb_ret < 0) {
-    LOG4CXX_INFO(
-      logger_,
-      "Failed to get USB device manufacturer: " << libusb_error_name(libusb_ret));
-    return false;
-  }
-  description->manufacturer = std::string(reinterpret_cast<char*>(buf));
-
-  libusb_ret = libusb_get_string_descriptor_ascii(device_handle,
-               descriptor.iProduct, buf,
-               sizeof(buf));
-  if (libusb_ret < 0) {
-    LOG4CXX_INFO(
-      logger_,
-      "Failed to get USB device product name: " << libusb_error_name(libusb_ret));
-    return false;
-  }
-  description->product = std::string(reinterpret_cast<char*>(buf));
-
-  libusb_ret = libusb_get_string_descriptor_ascii(device_handle,
-               descriptor.iSerialNumber, buf,
-               sizeof(buf));
-  if (libusb_ret < 0) {
-    LOG4CXX_INFO(
-      logger_,
-      "Failed to get USB device serial number: " << libusb_error_name(libusb_ret));
-    return false;
-  }
-
-  description->usb_device = device;
-  description->serial_number = std::string(reinterpret_cast<char*>(buf));
-  description->vid = descriptor.idVendor;
-  description->pid = descriptor.idProduct;
-  description->bus_number = libusb_get_bus_number(device);
-  description->address = libusb_get_device_address(device);
-
-  return true;
-}
-
-void UsbDeviceScanner::GoogleAccessoryFound(
-  libusb_device* device, const libusb_device_descriptor& descriptor,
-  libusb_device_handle* device_handle) {
+void UsbDeviceScanner::GoogleAccessoryFound(PlatformUsbDevice* device) {
   LOG4CXX_INFO(logger_, "Google accessory found");
 
-  UsbDeviceDescription usb_device_description;
-  if (FillUsbDeviceDescription(device, descriptor, device_handle,
-                               &usb_device_description)) {
-    pthread_mutex_lock(&device_descriptions_mutex_);
-    device_descriptions_.push_back(usb_device_description);
-    pthread_mutex_unlock(&device_descriptions_mutex_);
-    LOG4CXX_INFO(
-      logger_,
-      "Google accessory (bus number " << static_cast<int>(usb_device_description.bus_number) << ", address " << static_cast<int>(usb_device_description.address) << ") identified as: " << usb_device_description.manufacturer << ", " << usb_device_description.product);
-    UpdateList();
-  }
-
-  libusb_close(device_handle);
+  pthread_mutex_lock(&devices_mutex_);
+  devices_.push_back(device);
+  pthread_mutex_unlock(&devices_mutex_);
+  LOG4CXX_INFO(logger_, "Google accessory (bus number "
+                            << static_cast<int>(device->bus_number())
+                            << ", address "
+                            << static_cast<int>(device->address())
+                            << ") identified as: " << device->GetManufacturer()
+                            << ", " << device->GetProductName());
+  UpdateList();
 }
 
 TransportAdapter::Error UsbDeviceScanner::Init() {
@@ -338,30 +185,29 @@ TransportAdapter::Error UsbDeviceScanner::Scan() {
 
 void UsbDeviceScanner::UpdateList() {
   DeviceVector device_vector;
-  pthread_mutex_lock(&device_descriptions_mutex_);
-  for (DeviceDescriptions::const_iterator it = device_descriptions_.begin();
-       it != device_descriptions_.end(); ++it) {
-    const std::string device_name = it->manufacturer + it->product;
+  pthread_mutex_lock(&devices_mutex_);
+  for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
+       ++it) {
+    const std::string device_name =
+        (*it)->GetManufacturer() + " " + (*it)->GetProductName();
     std::ostringstream oss;
-    oss << it->manufacturer << ":" << it->product << ":" << it->serial_number
-        << ":" << static_cast<int>(it->bus_number) << ":"
-        << static_cast<int>(it->address);
+    oss << (*it)->GetManufacturer() << ":" << (*it)->GetProductName() << ":"
+        << (*it)->GetSerialNumber() << ":"
+        << static_cast<int>((*it)->bus_number()) << ":"
+        << static_cast<int>((*it)->address());
     const DeviceUID device_uid = oss.str();
-    DeviceSptr device(new UsbDevice(it->usb_device, device_name, device_uid));
+    DeviceSptr device(new UsbDevice(*it, device_name, device_uid));
     device_vector.push_back(device);
   }
-  pthread_mutex_unlock(&device_descriptions_mutex_);
+  pthread_mutex_unlock(&devices_mutex_);
 
   LOG4CXX_INFO(logger_, "USB search done " << device_vector.size());
   controller_->SearchDeviceDone(device_vector);
 }
 
-void UsbDeviceScanner::Terminate() {
-}
+void UsbDeviceScanner::Terminate() {}
 
-bool UsbDeviceScanner::IsInitialised() const {
-  return true;
-}
+bool UsbDeviceScanner::IsInitialised() const { return true; }
 
 }  // namespace
 }  // namespace

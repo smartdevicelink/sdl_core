@@ -41,7 +41,9 @@ namespace commands {
 void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
-  SendResponse((*message_)[strings::msg_params][strings::success].asBool());
+  bool success = (*message_)[strings::msg_params][strings::success].asBool();
+
+  SendResponse(success, mobile_apis::Result::INVALID_ENUM, !success);
 }
 
 }  // namespace commands

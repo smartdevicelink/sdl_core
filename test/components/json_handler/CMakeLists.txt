@@ -29,6 +29,8 @@ set(LIBRARIES
     jsoncpp
     formatters
     SmartObjects
+    apr-1
+    aprutil-1
 )
 
 create_test("test_JSONHandler_JSONRPCFullScenario" "./src/test_json_rpc_full_scenario.cpp" "${LIBRARIES}")

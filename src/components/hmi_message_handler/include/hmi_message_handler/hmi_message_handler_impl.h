@@ -38,6 +38,7 @@
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
 
@@ -55,29 +56,21 @@ namespace impl {
 struct MessageFromHmi: public MessageSharedPointer {
   MessageFromHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public MessageSharedPointer {
   MessageToHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 typedef threads::MessageLoopThread<
-               std::queue<MessageFromHmi> > FromHmiQueue;
+    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageToHmi> > ToHmiQueue;
+    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ToHMIThreadImpl;

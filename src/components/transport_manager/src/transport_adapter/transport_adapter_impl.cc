@@ -374,7 +374,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 
   if (device_disconnected) {
     pthread_mutex_lock(&devices_mutex_);
-    DeviceMap::const_iterator it = devices_.find(device_id);
+    DeviceMap::iterator it = devices_.find(device_id); //ykazakov: there is no erase for const iterator for QNX
     if (it != devices_.end()) {
       DeviceSptr device = it->second;
       if (!device->keep_on_disconnect()) {

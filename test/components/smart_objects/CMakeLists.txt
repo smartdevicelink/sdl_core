@@ -13,6 +13,11 @@ include_directories (
 )
 
 # Libraries are the same for all SmartObject test
+set(RTLIB rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+set(RTLIB )
+endif()
+
 set (LIBRARIES
     gtest
     gtest_main
@@ -21,7 +26,9 @@ set (LIBRARIES
     SmartObjects
     formatters
     jsoncpp
-    rt
+    apr-1
+    aprutil-1
+    ${RTLIB}
 )
 
 set (SOURCES
@@ -47,3 +54,4 @@ create_test("test_SmartObject_InvalidTest" "./SmartObjectInvalidTest.cc" "${LIBR
 create_test("test_SmartObject_ConvertionTimeTest" "./SmartObjectConvertionTimeTest.cc" "${LIBRARIES}")
 create_test("test_TSharedPtrTest" "./TSharedPtrTest.cc" "${LIBRARIES}")
 
+# vim: set ts=2 sw=2 et:

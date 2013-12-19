@@ -41,12 +41,12 @@ CSmartSchema::CSmartSchema(utils::SharedPtr<ISchemaItem> SchemaItem)
     : mSchemaItem(SchemaItem) {
 }
 
-Errors::eType CSmartSchema::validate(const SmartObject& object) {
+Errors::eType CSmartSchema::validate(const SmartObject& object) const {
   return mSchemaItem->validate(object);
 }
 
-void CSmartSchema::setSchemaItem(utils::SharedPtr<ISchemaItem> SchemaItem) {
-  mSchemaItem = SchemaItem;
+void CSmartSchema::setSchemaItem(utils::SharedPtr<ISchemaItem> schemaItem) {
+  mSchemaItem = schemaItem;
 }
 
 void CSmartSchema::applySchema(SmartObject& Object) {

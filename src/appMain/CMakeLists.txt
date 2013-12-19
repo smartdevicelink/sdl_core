@@ -1,3 +1,10 @@
+IF (${WEB_HMI})
+set (BROKER_LIBRARIES
+  MessageBrokerClient
+  MessageBrokerServer
+)
+ENDIF (${WEB_HMI})
+
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
 # info: cmake --help-policy CMP0015
@@ -26,22 +33,37 @@ set(LIBRARIES
   TransportManager
   HMIMessageHandler
   MessageBroker
-  MessageBrokerClient
-  MessageBrokerServer
+  ${BROKER_LIBRARIES}
   Utils
   encryption
   jsoncpp
-  bluetooth
-  pthread
-  rt
-  avahi-client
-  avahi-common
   ConfigProfile
   RequestWatchdog
   policies
-  MediaManager
-  Libusb-1.0.16
+  apr-1
+  aprutil-1
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
+endif()
+
+
+if (BUILD_MEDIA_MANAGER)
+	LIST(APPEND LIBRARIES MediaManager)
+endif()
+
+if (BUILD_BT_SUPPORT)
+	list(APPEND LIBRARIES bluetooth)
+endif()
+if (BUILD_AVAHI_SUPPORT)
+	list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
+endif()
 
 include_directories (
   ./
@@ -60,7 +82,10 @@ include_directories (
   ../components/policies/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
+  ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
 )
 
@@ -84,7 +109,28 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+IF (${QT_HMI})
+  execute_process(
+    COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlscene
+    OUTPUT_VARIABLE qmlscene_binary
+  )
+  set(main_qml "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model/MainWindow.qml")
+  set(plugins_dir "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model")
+  file(WRITE start_hmi_tmp/start_hmi.sh
+             "#!/bin/sh\n${qmlscene_binary} ${main_qml} -I ${plugins_dir}\n")
+  file(COPY start_hmi_tmp/start_hmi.sh
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+            GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+       NO_SOURCE_PERMISSIONS)
+  file(REMOVE_RECURSE start_hmi_tmp)
+ENDIF (${QT_HMI})
+
+IF (${WEB_HMI})
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+ENDIF (${WEB_HMI})
+
+
 
 install (TARGETS ${PROJECT} DESTINATION bin)
 

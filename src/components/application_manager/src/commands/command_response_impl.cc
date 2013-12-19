@@ -57,7 +57,7 @@ void CommandResponseImpl::Run() {
 }
 
 void CommandResponseImpl::SendResponse(
-    bool success, const mobile_apis::Result::eType& result_code) {
+    bool success, const mobile_apis::Result::eType& result_code, bool final_message) {
   LOG4CXX_INFO(logger_, "Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
@@ -80,7 +80,8 @@ void CommandResponseImpl::SendResponse(
       }
     }
   }
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_, final_message);
 }
 
 bool CommandResponseImpl::IsPendingResponseExist() {

@@ -45,9 +45,12 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-#include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -67,6 +70,7 @@
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
@@ -129,56 +133,43 @@ using namespace threads;
 struct MessageFromMobile: public utils::SharedPtr<Message> {
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageFromMobile& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageToMobile& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
-};
+  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
+                           bool final_message):
+    utils::SharedPtr<Message>(message), is_final(final_message) {}
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  // Signals if connection to mobile must be closed after sending this message
+  bool is_final;
+ };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
   explicit MessageToHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "bigger" things go out of std::priority_queue first
-  bool operator <(const MessageToHmi& that) const {
-    return (*this)->HasLowerPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::queue<MessageFromMobile> > FromMobileQueue;
+    utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageToMobile> > ToMobileQueue;
+    utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageFromHmi> > FromHmiQueue;
+    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::queue<MessageToHmi> > ToHmiQueue;
+    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
@@ -395,8 +386,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     ///////////////////////////////////////////////////////
 
     void StartDevicesDiscovery();
+
+    // Put message to the queue to be sent to mobile.
+    // if |final_message| parameter is set connection to mobile will be closed
+    // after processing this message
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message = false);
     bool ManageMobileCommand(
       const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(
@@ -584,8 +579,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
+#ifdef MEDIA_MANAGER
+  media_manager::MediaManager* media_manager_;
+#endif
 
-    media_manager::MediaManager*            media_manager_;
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
     protocol_handler::ProtocolHandler*      protocol_handler_;

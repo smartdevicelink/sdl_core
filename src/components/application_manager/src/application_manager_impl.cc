@@ -80,8 +80,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
     request_ctrl_(),
     hmi_capabilities_(this),
-    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL) {
+    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET)
+#ifdef MEDIA_MANAGER
+    , media_manager_(NULL)
+#endif
+{
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
 
   if (!policies_manager_.Init()) {
@@ -89,7 +92,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     return;
   }
 
+#ifdef MEDIA_MANAGER
   media_manager_ = media_manager::MediaManagerImpl::instance();
+#endif
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -120,9 +125,11 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   message_chaining_.clear();
 
+#ifdef MEDIA_MANAGER
   if (media_manager_) {
     media_manager_ = NULL;
   }
+#endif
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -618,13 +625,14 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
     int correlation_id, int max_duration, int sampling_rate,
     int bits_per_sample, int audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-
+#ifdef MEDIA_MANAGER
   if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       std::string("record.wav"),
       max_duration);
   }
+#endif
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
@@ -677,10 +685,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
 void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
-
-  if (NULL != media_manager_) {
+#ifdef MEDIA_MANAGER
+if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
   }
+#endif
 }
 
 std::string ApplicationManagerImpl::GetDeviceName(
@@ -814,9 +823,11 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
     application_manager::MessageHelper::SendNaviStartStream(
       url, session_key);
 
+#ifdef MEDIA_MANAGER
     if (media_manager_) {
       media_manager_->StartVideoStreaming(session_key);
     }
+#endif
 
     // !!!!!!!!!!!!!!!!!!!!!!!
     // TODO(DK): add check if navi streaming allowed for this app.
@@ -840,7 +851,9 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       application_manager::MessageHelper::SendNaviStopStream(session_key);
-      media_manager_->StopVideoStreaming(session_key);
+#ifdef MEDIA_MANAGER
+    media_manager_->StopVideoStreaming(session_key);
+#endif
       break;
     }
     default:
@@ -875,7 +888,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
-  const utils::SharedPtr<smart_objects::SmartObject>& message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToMobile");
 
   if (!message) {
@@ -908,7 +921,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
-  messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send));
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
+                                                        final_message));
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1075,12 +1089,20 @@ void ApplicationManagerImpl::SendMessageToHMI(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
+#ifdef WEB_HMI
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+  message_to_send->set_smart_object(*message);
+#endif  // QT_HMI
+
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
+
 }
 
 bool ApplicationManagerImpl::ManageHMICommand(
@@ -1370,10 +1392,16 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
     return;
   }
 
+#ifdef WEB_HMI
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+#endif  // WEB_HMI
+
+#ifdef QT_HMI
+  *smart_object = message->smart_object();
+#endif  // QT_HMI
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
   if (!ManageHMICommand(smart_object)) {
@@ -1430,7 +1458,7 @@ void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
 
 const unsigned int ApplicationManagerImpl::application_id
 (const int correlation_id) {
-  std::map<const int, const unsigned int>::iterator it =
+  std::map<const int, const unsigned int>::iterator it = //ykazakov: there is no erase for const iterator for QNX
     appID_list_.find(correlation_id);
   if (appID_list_.end() != it) {
     const unsigned int app_id = it->second;
@@ -1461,14 +1489,13 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   // Saving unregistered app.info to the file system before
   SaveApplications();
 
-  for (std::set<Application*>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
-
+  std::set<Application*>::iterator it = application_list_.begin();
+  while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
     UnregisterApplication((*it)->app_id());
+    it = application_list_.begin();
   }
 }
 
@@ -1537,7 +1564,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
     return;
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage);
+  protocol_handler_->SendMessageToMobileApp(rawMessage, message.is_final);
 
   LOG4CXX_INFO(logger_, "Message for mobile given away.");
 

@@ -51,8 +51,19 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
+
+#ifndef TCP_KEEPIDLE
+#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
+#define TCP_KEEPINTVL  5  /* Interval between keepalives */
+#define TCP_KEEPCNT  6  /* Number of keepalives before death */
+#endif
+
 namespace transport_manager {
 namespace transport_adapter {
+
+#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
+#define TCP_KEEPINTVL  5  /* Interval between keepalives */
+#define TCP_KEEPCNT  6  /* Number of keepalives before death */
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port)
@@ -98,6 +109,7 @@ void TcpClientListener::Thread() {
     const int connection_fd = accept(socket_,
                                      (struct sockaddr*) &client_address,
                                      &client_address_size);
+    if (thread_stop_requested_) break;
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
@@ -192,7 +204,15 @@ TransportAdapter::Error TcpClientListener::StopListening() {
     return TransportAdapter::BAD_STATE;
 
   thread_stop_requested_ = true;
-  shutdown(socket_, SHUT_RDWR);
+  int byebyesocket = socket(AF_INET, SOCK_STREAM, 0);
+  sockaddr_in server_address;
+  memset(&server_address, 0, sizeof(server_address));
+  server_address.sin_family = AF_INET;
+  server_address.sin_port = htons(port_);
+  server_address.sin_addr.s_addr = INADDR_ANY;
+  connect(byebyesocket, (sockaddr*)&server_address, sizeof(server_address));
+  shutdown(byebyesocket, SHUT_RDWR);
+  close(byebyesocket);
   pthread_join(thread_, 0);
   LOG4CXX_INFO(logger_, "Tcp client listener thread terminated");
   close(socket_);

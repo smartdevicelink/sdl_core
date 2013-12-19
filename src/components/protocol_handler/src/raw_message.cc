@@ -93,9 +93,8 @@ void RawMessage::set_waiting(bool v) {
   waiting_ = v;
 }
 
-bool RawMessage::HasLowerPriorityThan(const RawMessage& that) const {
-  return MessagePriority::FromServiceType(this->service_type()) <
-      MessagePriority::FromServiceType(that.service_type());
+MessagePriority RawMessage::Priority() const {
+  return MessagePriority::FromServiceType(this->service_type());
 }
 
 }  // namespace protocol_handler
