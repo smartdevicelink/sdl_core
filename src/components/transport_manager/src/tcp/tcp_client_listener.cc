@@ -109,6 +109,7 @@ void TcpClientListener::Thread() {
     const int connection_fd = accept(socket_,
                                      (struct sockaddr*) &client_address,
                                      &client_address_size);
+    if (thread_stop_requested_) break;
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
