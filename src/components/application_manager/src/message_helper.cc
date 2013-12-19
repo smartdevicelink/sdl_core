@@ -1269,7 +1269,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 }
 
 // TODO(AK): change printf to logger
-bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
+bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   static unsigned int tab = 0;
   std::string tab_buffer;
 
@@ -1287,7 +1287,7 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
         ++tab;
 
         printf("\n%s%d: ", tab_buffer.c_str(), i);
-        if (!PrintSmartObject(object[i])) {
+        if (!PrintSmartObject(object.getElement(i))) {
           printf("\n");
           return false;
         }
@@ -1302,7 +1302,7 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
         ++tab;
 
         printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
-        if (!PrintSmartObject(object[*key])) {
+        if (!PrintSmartObject(object[(*key).c_str()])) {
           printf("\n");
           return false;
         }
