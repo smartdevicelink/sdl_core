@@ -149,8 +149,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
   }
+  const unsigned int MAX_HEADER_SIZE = 12;
 
-  const uint MAX_HEADER_SIZE = 12;
   unsigned int jsonSize = message->json_message().length();
   unsigned int binarySize = 0;
   if (message->has_binary_data()) {

@@ -1430,7 +1430,7 @@ void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
 
 const unsigned int ApplicationManagerImpl::application_id
 (const int correlation_id) {
-  std::map<const int, const unsigned int>::const_iterator it =
+  std::map<const int, const unsigned int>::iterator it =
     appID_list_.find(correlation_id);
   if (appID_list_.end() != it) {
     const unsigned int app_id = it->second;
