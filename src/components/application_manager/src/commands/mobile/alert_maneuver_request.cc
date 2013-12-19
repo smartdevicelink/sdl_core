@@ -43,7 +43,9 @@ namespace commands {
 
 AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
  : CommandRequestImpl(message),
-   result_(mobile_apis::Result::INVALID_ENUM) {
+   result_(mobile_apis::Result::INVALID_ENUM),
+   tts_speak_result_code_(mobile_apis::Result::INVALID_ENUM),
+   navi_alert_maneuver_result_code_(mobile_apis::Result::INVALID_ENUM) {
 }
 
 AlertManeuverRequest::~AlertManeuverRequest() {
@@ -133,13 +135,13 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "AlertManeuverRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
-  mobile_apis::Result::eType result_code;
-  hmi_apis::FunctionID::eType id = event.id();
-  switch (id) {
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  hmi_apis::FunctionID::eType event_id = event.id();
+  switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
 
-      pending_requests_.Remove(id);
+      pending_requests_.Remove(event_id);
 
       navi_alert_maneuver_result_code_ =
           static_cast<mobile_apis::Result::eType>(
@@ -150,7 +152,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
 
-      pending_requests_.Remove(id);
+      pending_requests_.Remove(event_id);
 
       tts_speak_result_code_ =
           static_cast<mobile_apis::Result::eType>(
@@ -165,7 +167,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (pending_requests_.IsFinal(id)) {
+  if (pending_requests_.IsFinal(event_id)) {
 
     result_code = (mobile_apis::Result::SUCCESS != tts_speak_result_code_)
           ? tts_speak_result_code_
@@ -174,20 +176,20 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     bool result = mobile_apis::Result::SUCCESS == result_code;
 
     if (mobile_apis::Result::INVALID_ENUM != result_code) {
-      mobile_apis::Result::eType return_code =
-      static_cast<mobile_apis::Result::eType>(result_code);
-
       const char* return_info = NULL;
 
       if (result) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+            static_cast<hmi_apis::Common_Result::eType>(result_code)) {
           result_code = mobile_apis::Result::WARNINGS;
           return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
         }
       }
 
-      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                        return_info, &(message[strings::msg_params]));
+      SendResponse(result,
+                   result_code,
+                   return_info,
+                   &(message[strings::msg_params]));
     }
   } else {
     LOG4CXX_INFO(logger_,

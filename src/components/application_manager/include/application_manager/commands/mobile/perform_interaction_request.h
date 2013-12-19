@@ -49,17 +49,6 @@ namespace commands {
 class PerformInteractionRequest : public CommandRequestImpl  {
 
  public:
-
-  /*
-   * @brief Typedef for InteractionMode
-   */
-  typedef enum {
-    MANUAL_ONLY = 0,
-    VR_ONLY,
-    BOTH,
-    INVALID_ENUM
-  } InteractionMode;
-
   /**
    * @brief PerformInteractionRequest class constructor
    *
@@ -168,7 +157,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param array of structure of TTS
    *
    */
-  void DeleteParameterFromTTSChunk(smart_objects::SmartObject& array_tts_chunk);
+  void DeleteParameterFromTTSChunk(smart_objects::SmartObject* array_tts_chunk);
 
   /*
    * @brief Sends UI Show VR help request to HMI

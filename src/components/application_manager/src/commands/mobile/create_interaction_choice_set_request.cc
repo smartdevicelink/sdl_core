@@ -139,7 +139,10 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         const smart_objects::SmartArray* curr_choice_set =
             (*app_choice_set)[strings::choice_set].asArray();
 
-        if ( std::any_of(curr_choice_set->begin(), curr_choice_set->end(), c)) {
+        if (0 != std::count_if(
+            curr_choice_set->begin(),
+            curr_choice_set->end(),
+            c)) {
           LOG4CXX_ERROR(logger_, "Incoming choice ID already exists.");
           return mobile_apis::Result::INVALID_ID;
         }
@@ -200,7 +203,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
   }
 
- return  mobile_apis::Result::SUCCESS;
+  return mobile_apis::Result::SUCCESS;
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(

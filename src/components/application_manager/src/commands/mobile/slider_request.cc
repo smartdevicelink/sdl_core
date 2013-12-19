@@ -120,7 +120,10 @@ void SliderRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_Slider: {
       LOG4CXX_INFO(logger_, "Received UI_Slider event");
 
-      const int code = message[strings::params][hmi_response::code].asInt();
+      mobile_apis::Result::eType code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
       if ((mobile_apis::Result::SUCCESS == code) ||
           (mobile_apis::Result::ABORTED == code)) {
         SendResponse(true,
