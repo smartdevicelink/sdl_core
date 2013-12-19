@@ -228,7 +228,7 @@ SDL.SDLAppModel = Em.Object.extend({
                     icon     : request.params.cmdIcon ? request.params.cmdIcon.value : null
                 };
 
-                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                if (SDL.SDLController.getApplicationModel(request.params.appID)) {
                     SDL.SDLAppController.buttonsSort(parentID, this.appID);
                     SDL.OptionsView.commands.refreshItems();
                 }
@@ -285,7 +285,7 @@ SDL.SDLAppModel = Em.Object.extend({
                     position: request.params.menuParams.position ? request.params.menuParams.position : 0
                 };
 
-                if (SDL.SDLAppController.model.appID === request.params.appID) {
+                if (SDL.SDLController.getApplicationModel(request.params.appID)) {
                     SDL.SDLAppController.buttonsSort(parentID, this.appID);
                     SDL.OptionsView.commands.refreshItems();
                 }
