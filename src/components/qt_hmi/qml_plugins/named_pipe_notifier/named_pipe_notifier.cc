@@ -33,27 +33,28 @@
  */
 
 #include <fcntl.h>
-
-#define WITH_SELECT 0
-
-#if WITH_SELECT
 #include <sys/select.h>
-#endif
+#include <sys/stat.h>
+#include <errno.h>
 
 #include "named_pipe_notifier.h"
 
 void NamedPipeNotifier::run (void) {
-    while (true) {
-// for some reason ::select() does not block for named pipes
-// that's why we use blocking ::open()
-        int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
-#if WITH_SELECT
-        ::fd_set readfds;
-        FD_ZERO(&readfds);
-        FD_SET(fd, &readfds);
-        if (::select(fd + 1, &readfds, 0, 0, 0) > 0)
-#endif
-            emit readyRead();
-        ::close(fd);
+    int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
+    if (-1 == fd) { // if open() fails
+        if ((errno != ENOENT) // we can only manage lack of pipe
+        || (-1 == ::mkfifo(name_.toLocal8Bit().constData(), 0666))
+        || (-1 == (fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY)))) {
+            emit openFailed();
+            return;
+        }
     }
+    ::fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(fd, &readfds);
+// this select() is supposed to block till pipe is empty
+    if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
+        emit readyRead();
+    }
+    ::close(fd);
 }

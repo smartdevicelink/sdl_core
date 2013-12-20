@@ -54,6 +54,7 @@ protected:
     virtual void run (void);
 signals:
     void readyRead (void);
+    void openFailed (void);
 };
 
 #endif

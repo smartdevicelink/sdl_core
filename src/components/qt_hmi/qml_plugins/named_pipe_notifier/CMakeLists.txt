@@ -41,7 +41,7 @@ set(target named_pipe_notifier)
 
 add_library(${target} SHARED ${SOURCES})
 
-qt5_use_modules(${target} Core Qml Quick)
+qt5_use_modules(${target} Core Qml)
 
 set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model)
 set(destination ${model_dir}/com/ford/sdl/hmi/named_pipe_notifier)
@@ -55,4 +55,4 @@ install(TARGETS ${target}
 install(FILES qmldir DESTINATION ${destination})
 
 add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.named_pipe_notifier 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.named_pipe_notifier 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null || true)

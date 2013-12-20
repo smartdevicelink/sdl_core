@@ -35,6 +35,7 @@
 #include <qqml.h>
 
 #include "named_pipe_notifier_plugin.h"
+#include "named_pipe_notifier.h"
 
 void NamedPipeNotifierPlugin::registerTypes (const char* uri) {
     qmlRegisterType<NamedPipeNotifier>(uri, 1, 0, "NamedPipeNotifier");

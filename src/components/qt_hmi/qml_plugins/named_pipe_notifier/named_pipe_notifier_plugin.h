@@ -37,15 +37,11 @@
 
 #include <QQmlExtensionPlugin>
 
-#include "named_pipe_notifier.h"
-
 class NamedPipeNotifierPlugin : public QQmlExtensionPlugin {
 Q_OBJECT
 Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 public:
     void registerTypes (const char* uri);
 };
-
-//QML_DECLARE_TYPE(NamedPipeNotifier)
 
 #endif
