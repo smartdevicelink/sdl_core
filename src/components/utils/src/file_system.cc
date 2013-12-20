@@ -42,8 +42,11 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <stdint.h>
+
 #include "utils/file_system.h"
 #include "config_profile/profile.h"
+
 
 uint64_t file_system::AvailableSpace() {
   char currentAppPath[FILENAME_MAX];

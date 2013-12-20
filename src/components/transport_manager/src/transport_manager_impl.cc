@@ -653,7 +653,7 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
-  for (auto it = connections_.begin(); it != connections_.end(); ++it) {
+  for (std::vector<ConnectionInternal>::iterator it = connections_.begin(); it != connections_.end(); ++it) {
     if (it->device == device && it->application == application) {
       return &*it;
     }

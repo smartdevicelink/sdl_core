@@ -46,7 +46,7 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
     public NsMessageBroker::CMessageBrokerController,
     public threads::SingleThreadValidator {
  public:
-  MessageBrokerAdapter(HMIMessageHandler* handler, const std::string&
+  MessageBrokerAdapter(HMIMessageHandler* handler_param, const std::string&
                                 server_address, uint16_t port);
   ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
