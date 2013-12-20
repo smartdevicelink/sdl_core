@@ -39,7 +39,7 @@
 
 class NamedPipeNotifier : public QThread {
 Q_OBJECT
-Q_PROPERTY(QString name READ name WRITE set_name)
+Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
     QString name_;
 public:
     explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {
@@ -53,6 +53,7 @@ public:
 protected:
     virtual void run(void);
 signals:
+    void nameChanged(void);
     void readyRead(void);
     void openFailed(void);
 };
