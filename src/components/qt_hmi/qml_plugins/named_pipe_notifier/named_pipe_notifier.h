@@ -48,7 +48,10 @@ public:
         return name_;
     }
     void set_name(const QString& name) {
-        name_ = name;
+        if (name_ != name) {
+            name_ = name;
+            emit nameChanged();
+        }
     }
 protected:
     virtual void run(void);
