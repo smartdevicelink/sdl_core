@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/file_system.h"
+
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -42,9 +44,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <stdint.h>
 
-#include "utils/file_system.h"
 #include "config_profile/profile.h"
 
 

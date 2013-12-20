@@ -31,11 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/commands/mobile/register_app_interface_request.h"
+
 #include <unistd.h>
 
 #include <string.h>
 #include <algorithm>
-#include "application_manager/commands/mobile/register_app_interface_request.h"
+
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
