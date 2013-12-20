@@ -48,7 +48,6 @@ UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {
 void UIEndAudioPassThruResponse::Run() {
   LOG4CXX_INFO(logger_, "UIEndAudioPassThruResponse::Run");
 
-
   event_engine::Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*message_);
   event.raise();
