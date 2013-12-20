@@ -10,4 +10,4 @@ else
 	WORDSIZE=-d__WORDSIZE=32
 fi
 
-${FLINT_BINARY} "$@"
+./${FLINT_BINARY} "$@"
