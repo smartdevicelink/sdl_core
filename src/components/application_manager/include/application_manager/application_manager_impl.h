@@ -207,15 +207,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool UnregisterApplication(const unsigned int& app_id);
 
     /*
-     * @brief Checks if application with app_id registered
-     *
-     * @param app_id Application id
-     *
-     * @return true if application registered false if it is not
-     */
-    bool IsApplicationRegistered(int app_id);
-
-    /*
      * @brief Sets unregister reason for closing all registered applications
      * duringHU switching off
      *

@@ -118,11 +118,13 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
-
-  UnregisterAllApplications();
-
-
-
+  try {
+    UnregisterAllApplications();
+  }
+  catch(...) {
+    LOG4CXX_ERROR(logger_,
+                  "An error occured during unregistering applications.");
+  }
   message_chaining_.clear();
 
 #ifdef MEDIA_MANAGER
@@ -223,7 +225,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(connection_handler_);
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+          connection_handler_);
     if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
         &sessions_list, &device_id)
         == -1) {
@@ -660,17 +663,17 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
   LOG4CXX_INFO_EXT(logger_, "Fill smart object");
 
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::message_type] =
+  (*on_audio_pass)[strings::params][strings::message_type] =
     application_manager::MessageType::kNotification;
 
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::connection_key] =
+  (*on_audio_pass)[strings::params][strings::connection_key] =
     static_cast<int>(session_key);
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::function_id] =
+  (*on_audio_pass)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnAudioPassThruID;
 
   LOG4CXX_INFO_EXT(logger_, "Fill binary data");
   // binary data
-  (*on_audio_pass)[application_manager::strings::params][application_manager::strings::binary_data] =
+  (*on_audio_pass)[strings::params][strings::binary_data] =
     smart_objects::SmartObject(binaryData);
 
   LOG4CXX_INFO_EXT(logger_, "After fill binary data");
@@ -699,7 +702,8 @@ std::string ApplicationManagerImpl::GetDeviceName(
   std::string device_name = "";
   std::list<unsigned int> applications_list;
   connection_handler::ConnectionHandlerImpl* con_handler_impl =
-    static_cast<connection_handler::ConnectionHandlerImpl*>(connection_handler_);
+    static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_);
   if (con_handler_impl->GetDataOnDeviceID(handle, &device_name,
                                           &applications_list) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to extract device name for id " << handle);
@@ -722,7 +726,8 @@ void ApplicationManagerImpl::OnMessageReceived(
 
   utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
   if (outgoing_message) {
-    messages_from_mobile_.PostMessage(impl::MessageFromMobile(outgoing_message));
+    messages_from_mobile_.PostMessage(
+        impl::MessageFromMobile(outgoing_message));
   } else {
     LOG4CXX_WARN(logger_, "Incorrect message received");
   }
@@ -861,7 +866,8 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
-  const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message) {
+  const utils::SharedPtr<smart_objects::SmartObject>& message,
+  bool final_message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendMessageToMobile");
 
   if (!message) {
@@ -938,13 +944,15 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
        (protocol_type == commands::CommandImpl::mobile_protocol_type_)) &&
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
-
     app = ApplicationManagerImpl::instance()->application(connection_key);
     if (NULL == app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
-        MessageHelper::CreateNegativeResponse(connection_key, function_id,
-                                              correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+        MessageHelper::CreateNegativeResponse(
+            connection_key,
+            function_id,
+            correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
     }
@@ -976,7 +984,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   if (command->Init()) {
     if ((*message)[strings::params][strings::message_type].asInt() ==
         mobile_apis::messageType::request) {
-
       // get application hmi level
       mobile_api::HMILevel::eType app_hmi_level =
         mobile_api::HMILevel::INVALID_ENUM;
@@ -990,13 +997,16 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       if (result == request_controller::RequestController::SUCCESS) {
         LOG4CXX_INFO(logger_, "Perform request");
       } else if (result ==
-                 request_controller::RequestController::TOO_MANY_PENDING_REQUESTS) {
+                 request_controller::RequestController::
+                 TOO_MANY_PENDING_REQUESTS) {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
                           "TOO_MANY_PENDING_REQUESTS");
 
         smart_objects::SmartObject* response =
-          MessageHelper::CreateNegativeResponse(connection_key, function_id,
-                                                correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+          MessageHelper::CreateNegativeResponse(
+              connection_key,
+              function_id,
+              correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return false;
@@ -1012,7 +1022,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         UnregisterApplication(connection_key);
         return false;
       } else if (result ==
-                 request_controller::RequestController::NONE_HMI_LEVEL_MANY_REQUESTS) {
+                 request_controller::RequestController::
+                 NONE_HMI_LEVEL_MANY_REQUESTS) {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
                           "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
 
@@ -1075,7 +1086,6 @@ void ApplicationManagerImpl::SendMessageToHMI(
 #endif  // QT_HMI
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
-
 }
 
 bool ApplicationManagerImpl::ManageHMICommand(
@@ -1153,11 +1163,15 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
 
       if (!formatters::CFormatterJsonSDLRPCv2::fromString(
-            message.json_message(), output, message.function_id(), message.type(),
-            message.correlation_id()) || !mobile_so_factory().attachSchema(output)
-          || ((output.validate() != smart_objects::Errors::OK)
-              && (output.validate()
-                  != smart_objects::Errors::UNEXPECTED_PARAMETER))) {
+            message.json_message(),
+            output,
+            message.function_id(),
+            message.type(),
+            message.correlation_id())
+      || !mobile_so_factory().attachSchema(output)
+      || ((output.validate() != smart_objects::Errors::OK)
+          && (output.validate() !=
+              smart_objects::Errors::UNEXPECTED_PARAMETER))) {
         LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(
@@ -1431,7 +1445,8 @@ void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
 
 const unsigned int ApplicationManagerImpl::application_id
 (const int correlation_id) {
-  std::map<const int, const unsigned int>::iterator it = //ykazakov: there is no erase for const iterator for QNX
+  // ykazakov: there is no erase for const iterator for QNX
+  std::map<const int, const unsigned int>::iterator it =
     appID_list_.find(correlation_id);
   if (appID_list_.end() != it) {
     const unsigned int app_id = it->second;
@@ -1496,16 +1511,6 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   return true;
 }
 
-bool ApplicationManagerImpl::IsApplicationRegistered(int connection_key) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::IsApplicationRegistered");
-
-  if (applications_.find(connection_key) == applications_.end()) {
-    return false;
-  }
-
-  return true;
-}
-
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
   LOG4CXX_INFO(logger_, "Received message from Mobile side");
 
@@ -1533,14 +1538,14 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   }
 
   if (!protocol_handler_) {
-    LOG4CXX_WARN(logger_, "Protocol Handler is not set; cannot send message to mobile.");
+    LOG4CXX_WARN(logger_,
+                 "Protocol Handler is not set; cannot send message to mobile.");
     return;
   }
 
   protocol_handler_->SendMessageToMobileApp(rawMessage, message.is_final);
 
   LOG4CXX_INFO(logger_, "Message for mobile given away.");
-
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromHmi& message) {
@@ -1569,8 +1574,7 @@ void ApplicationManagerImpl::Mute() {
   mobile_apis::AudioStreamingState::eType state =
       hmi_capabilities_.attenuated_supported()
       ? mobile_apis::AudioStreamingState::ATTENUATED
-      : mobile_apis::AudioStreamingState::NOT_AUDIBLE
-      ;
+      : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
   std::set<Application*>::const_iterator it = application_list_.begin();
   std::set<Application*>::const_iterator itEnd = application_list_.end();
@@ -1588,8 +1592,7 @@ void ApplicationManagerImpl::Unmute() {
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(
-        mobile_apis::AudioStreamingState::AUDIBLE
-      );
+        mobile_apis::AudioStreamingState::AUDIBLE);
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }
@@ -1603,14 +1606,19 @@ void ApplicationManagerImpl::SaveApplications() const {
 
   std::string app_data;
   for (; it != it_end; ++it) {
-
     size_t msg_size = 1024;
     char message[msg_size];
 
+    if (0 == connection_handler_) {
+      LOG4CXX_ERROR(logger_,
+                    "Unable to get necessary parameters during saving "
+                    "applications information.");
+      return;
+    }
+
     connection_handler::ConnectionHandlerImpl* conn_handler =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_
-      );
+        connection_handler_);
 
     unsigned int device_id = 0;
     std::string mac_adddress;
@@ -1643,11 +1651,10 @@ void ApplicationManagerImpl::SaveApplications() const {
       strings::app_id, app->mobile_app_id()->asInt(),
       strings::connection_key, it->first,
       strings::hmi_level, static_cast<int>(app->hmi_level()),
-      "mac_address", mac_adddress.c_str()
-    );
+      "mac_address", mac_adddress.c_str());
 
     app_data = message;
-  } // end of app.list
+  }  // end of app.list
 
   const std::string& storage =
     profile::Profile::instance()->app_info_storage();
@@ -1659,8 +1666,7 @@ void ApplicationManagerImpl::SaveApplications() const {
     file_system::Write(
       &file,
       reinterpret_cast<const unsigned char*>(app_data.c_str()),
-      app_data.size()
-    );
+      app_data.size());
   } else {
     LOG4CXX_ERROR(logger_,
                   "There is an error occurs during saving application info.");
