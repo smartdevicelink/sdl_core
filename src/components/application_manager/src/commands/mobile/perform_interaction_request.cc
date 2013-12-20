@@ -369,6 +369,42 @@ void PerformInteractionRequest::SendVrDeleteCommand(Application* const app) {
   }
 }
 
+//void PerformInteractionRequest::ProcessPerformInteractionResponse(
+//    const smart_objects::SmartObject& message) {
+//  LOG4CXX_INFO(logger_,
+//               "PerformInteractionRequest::ProcessPerformInteractionResponse");
+//  Application* app = ApplicationManagerImpl::instance()->application(
+//        (*message_)[strings::params][strings::connection_key].asUInt());
+//    if (NULL == app) {
+//      LOG4CXX_ERROR(logger_, "NULL pointer");
+//      return;
+//    }
+//    if (app->is_perform_interaction_active()) {
+//      if (mobile_apis::InteractionMode::MANUAL_ONLY
+//          != app->perform_interaction_mode()) {
+//        SendVrDeleteCommand (app);
+//      }
+//      app->set_perform_interaction_mode(-1);
+//      app->DeletePerformInteractionChoiceSetMap();
+//      app->set_perform_interaction_active(0);
+//    }
+//    (*message_)[strings::params][strings::function_id] =
+//            mobile_apis::FunctionID::PerformInteractionID;
+//    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+//        smart_objects::SmartType_Map);
+//    msg_params = message[strings::msg_params];
+//    bool result_code = false;
+//    const hmi_apis::Common_Result::eType code =
+//        static_cast<hmi_apis::Common_Result::eType>(
+//            message[strings::params][hmi_response::code].asInt());
+//    if (hmi_apis::Common_Result::SUCCESS == code) {
+//      msg_params[strings::trigger_source] = trigger_source_;
+//      result_code = true;
+//    }
+//    SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
+//                   NULL, &(msg_params));
+//}
+
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
@@ -403,7 +439,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     }
 
     const char* return_info = NULL;
-    mobile_apis::Result::eType result_code =
+     mobile_apis::Result::eType result_code =
         static_cast<mobile_apis::Result::eType>(hmi_response_code);
     if (result) {
       if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
@@ -417,7 +453,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     SendResponse(result,
                  result_code,
                  return_info,
-                 &(message[strings::msg_params]));
+                 &(msg_params));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
