@@ -114,6 +114,15 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void ProcessVRNotification(const smart_objects::SmartObject& message);
 
   /*
+   * @brief Function will be called when event AppUnregistered comes
+   *
+   * @param message which will be sent to mobile side
+   *
+   */
+  void ProcessAppUnregisteredNotification
+  (const smart_objects::SmartObject& message);
+
+  /*
    * @brief Sends VRDeleteCommand request to HMI
    *
    * @param app_id Application ID
@@ -212,7 +221,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   bool is_keyboard_trigger_source_;
   mobile_apis::TriggerSource::eType trigger_source_;
-  bool is_vr_help_item_;
 };
 
 }  // namespace commands

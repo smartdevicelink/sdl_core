@@ -37,7 +37,8 @@ namespace media_manager {
 log4cxx::LoggerPtr MediaAdapterImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaAdapterImpl"));
 
-MediaAdapterImpl::MediaAdapterImpl() {
+MediaAdapterImpl::MediaAdapterImpl()
+  : current_application_(0) {
 }
 
 MediaAdapterImpl::~MediaAdapterImpl() {
@@ -46,13 +47,11 @@ MediaAdapterImpl::~MediaAdapterImpl() {
 
 void MediaAdapterImpl::AddListener(const MediaListenerPtr& listener) {
   LOG4CXX_INFO(logger_, "MediaAdapterImpl::AddListener");
-  DCHECK(listener);
   media_listeners_.insert(listener);
 }
 
 void MediaAdapterImpl::RemoveListener(const MediaListenerPtr& listener) {
   LOG4CXX_INFO(logger_, "MediaAdapterImpl::RemoveListener");
-  DCHECK(listener);
   media_listeners_.erase(listener);
 }
 

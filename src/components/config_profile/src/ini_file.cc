@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdint.h>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -300,7 +301,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     line_ptr++;
 
     /* cut leading stuff */
-    len = strlen(line_ptr);
+    uint16_t len = strlen(line_ptr);
     for (int i = 0; i < len; i++) {
       if ((*line_ptr == ' ') ||
           (*line_ptr ==   9) ||  // TAB
@@ -365,7 +366,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
-      len = strlen(line_ptr);
+      uint16_t len = strlen(line_ptr);
       /* cut trailing stuff */
       for (int i = 0; i < len; i++) {
         if ((*line_ptr == ' ') ||

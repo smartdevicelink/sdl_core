@@ -5,14 +5,15 @@ include_directories (
   ../protocol_handler/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
-  ../mobile_message_handler/include
   ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
   ../transport_manager/include/
+  ../policies/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
+  ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
@@ -25,12 +26,9 @@ set (SOURCES
 ./src/message_helper.cc
 ./src/hmi_command_factory.cc
 ./src/hmi_capabilities.cc
-./src/from_mobile_thread_impl.cc
-./src/to_mobile_thread_impl.cc
-./src/from_hmh_thread_impl.cc
-./src/to_hmh_thread_impl.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/mobile_message_handler.cc
 )
 
 set (POLICIES_MANAGER
@@ -48,7 +46,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/command_request_impl.cc
 ./src/commands/command_response_impl.cc
 ./src/commands/command_notification_impl.cc
-./src/commands/tts_interface.cc
+./src/commands/pending.cc
 ./src/commands/mobile/add_command_request.cc
 ./src/commands/mobile/add_command_response.cc
 ./src/commands/mobile/add_sub_menu_request.cc
@@ -240,18 +238,18 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_media_clock_timer_response.cc
 ./src/commands/hmi/ui_show_request.cc
 ./src/commands/hmi/ui_show_response.cc
-./src/commands/hmi/ui_show_vr_help_request.cc
-./src/commands/hmi/ui_show_vr_help_response.cc
 ./src/commands/hmi/vi_is_ready_request.cc
 ./src/commands/hmi/vi_is_ready_response.cc
 ./src/commands/hmi/vi_read_did_request.cc
 ./src/commands/hmi/vi_read_did_response.cc
-./src/commands/hmi/vi_get_vehicle_data_request.cc
-./src/commands/hmi/vi_get_vehicle_data_response.cc
 ./src/commands/hmi/vi_get_dtcs_request.cc
 ./src/commands/hmi/vi_get_dtcs_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
+./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_subscribe_vehicle_data_response.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
 ./src/commands/hmi/navi_alert_maneuver_request.cc
@@ -268,6 +266,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
+./src/commands/hmi/on_tts_started_notification.cc
+./src/commands/hmi/on_tts_stopped_notification.cc
 ./src/commands/hmi/on_vr_started_notification.cc
 ./src/commands/hmi/on_vr_stopped_notification.cc
 ./src/commands/hmi/on_vr_command_notification.cc
@@ -280,7 +280,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
 ./src/commands/hmi/on_show_notification.cc
-./src/commands/hmi/on_vi_vehicle_data_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc

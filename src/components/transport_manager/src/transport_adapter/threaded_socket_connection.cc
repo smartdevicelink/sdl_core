@@ -178,7 +178,7 @@ TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
 void ThreadedSocketConnection::Thread() {
   LOG4CXX_TRACE_ENTER(logger_);
   controller_->ConnectionCreated(this, device_uid_, app_handle_);
-  ConnectError* connect_error = nullptr;
+  ConnectError* connect_error = NULL;
   if (Establish(&connect_error)) {
     LOG4CXX_INFO(logger_, "Connection established (#" << pthread_self() << ")");
     controller_->ConnectDone(device_handle(), application_handle());
@@ -246,18 +246,17 @@ void ThreadedSocketConnection::Transmit() {
   do {
     bytes_read = read(read_fd_, buffer, sizeof(buffer));
   } while (bytes_read > 0);
+  if ((bytes_read < 0) && (EAGAIN != errno)) {
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
+    Abort();
+    LOG4CXX_INFO(logger_, "exit");
+    return;
+  }
 
   // send data if possible
   if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
     LOG4CXX_INFO(logger_, "frames_to_send_ not empty()  (#" << pthread_self() << ")");
-
-    if ((bytes_read < 0) && (EAGAIN != errno)) {
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
-      LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-      Abort();
-      LOG4CXX_INFO(logger_, "exit");
-      return;
-    }
 
     // send data
     const bool send_ok = Send();

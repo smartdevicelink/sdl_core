@@ -49,15 +49,37 @@ namespace request_watchdog {
 
 class RequestWatchdog : public Watchdog {
   public:
+
     static Watchdog* instance();
 
     virtual void AddListener(WatchdogSubscriber* subscriber);
     virtual void RemoveListener(WatchdogSubscriber* subscriber);
     virtual void removeAllListeners();
 
+    /*
+     * @brief Adds request
+     *
+     * @brief requestInfo Request info (connection key, request correlation id,
+     * request id, watchdog timeout for request, current application hmi level
+     */
     virtual void addRequest(RequestInfo* requestInfo);
+
+    /*
+     * @brief Removes corresponding request
+     *
+     * @brief connection_key    Application connection key
+     * @brief correlation_id    Mobile request correlation ID
+     */
     virtual void removeRequest(int connection_key,
                                int correlation_id);
+
+    /*
+     * @brief Update request watchdog timeout
+     *
+     * @brief connection_key    Application connection key
+     * @brief correlation_id    Mobile request correlation ID
+     * @brief new_timeout_value New value of request watchdog timeout
+     */
     virtual void updateRequestTimeout(int connection_key,
                                       int correlation_id,
                                       int new_timeout_value);
@@ -78,6 +100,27 @@ class RequestWatchdog : public Watchdog {
                                 const unsigned int& app_time_scale,
                                 const unsigned int& max_request_per_time_scale);
 
+    /*
+     * @brief Check if amount of requests during time scale for application in
+     * specified hmi level doesn't exceed limit.
+     *
+     * @brief hmi_level      Application hmi level(NONE)
+     * @brief connection_key Application ID
+     * @brief app_time_scale Configured time scale for application
+     * @brief max_request_per_time_scale Configured max request amount for
+     * application time scale
+     *
+     * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
+     */
+    virtual bool checkHMILevelTimeScaleMaxRequest(
+                                const int& hmi_level,
+                                const int& connection_key,
+                                const unsigned int& app_time_scale,
+                                const unsigned int& max_request_per_time_scale);
+
+    /*
+     * @brief Removes all requests
+     */
     virtual void removeAllRequests();
 
     virtual int getRegesteredRequestsNumber();
@@ -86,16 +129,36 @@ class RequestWatchdog : public Watchdog {
 
   private:
 
+    RequestWatchdog();
+
+    void notifySubscribers(const RequestInfo& requestInfo);
+
+    void startDispatcherThreadIfNeeded();
+
+    void stopDispatcherThreadIfNeeded();
+
+    friend class QueueDispatcherThreadDelegate;
+
+    class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
+      public:
+        QueueDispatcherThreadDelegate();
+
+        void threadMain();
+
+      private:
+        DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
+    };
+
     /*
-    * @brief
-    *
-    * return TRUE
-    */
+     * @brief Structure used in std algorithms to determine amount of request
+     * during time scale
+     */
     struct TimeScale {
-      explicit TimeScale(const TimevalStruct& start, const TimevalStruct& end, int connection_key)
-      :start_(start),
-       end_(end),
-       connection_key_(connection_key) {};
+      explicit TimeScale(const TimevalStruct& start, const TimevalStruct& end,
+                         const int& connection_key)
+      : start_(start),
+        end_(end),
+        connection_key_(connection_key) {};
 
       bool operator()(std::pair<RequestInfo*, TimevalStruct> mapEntry) {
         bool result = false;
@@ -113,35 +176,44 @@ class RequestWatchdog : public Watchdog {
       int connection_key_;
     };
 
-    RequestWatchdog();
+    /*
+     * @brief Structure used in std algorithms to determine amount of request
+     * during time scale for application in defined hmi level
+     */
+    struct HMILevelTimeScale {
+      explicit HMILevelTimeScale(
+                          const TimevalStruct& start, const TimevalStruct& end,
+                          const int& connection_key, const int& hmi_level)
+      : start_(start),
+        end_(end),
+        connection_key_(connection_key),
+        hmi_level_(hmi_level) {};
 
-    static const int DEFAULT_CYCLE_TIMEOUT = 250000;
-    static log4cxx::LoggerPtr logger_;
+      bool operator()(std::pair<RequestInfo*, TimevalStruct> mapEntry) {
+        bool result = false;
+        if (mapEntry.first->connectionID_ == connection_key_ &&
+            mapEntry.first->app_hmi_level_ == hmi_level_) {
+          if (mapEntry.second.tv_sec >= start_.tv_sec &&
+              mapEntry.second.tv_sec <= end_.tv_sec) {
+            result = true;
+          }
+        }
+        return result;
+      };
 
-    void notifySubscribers(const RequestInfo& requestInfo);
-
-    void startDispatcherThreadIfNeeded();
-    void stopDispatcherThreadIfNeeded();
-
-    std::list<WatchdogSubscriber*> subscribers_;
-    sync_primitives::Lock subscribersLock_;
-
-    std::map<RequestInfo*, TimevalStruct> requests_;
-    sync_primitives::Lock requestsLock_;
-
-    friend class QueueDispatcherThreadDelegate;
-
-    class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
-      public:
-        QueueDispatcherThreadDelegate();
-
-        void threadMain();
-
-      private:
-        DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
+      TimevalStruct start_;
+      TimevalStruct end_;
+      int connection_key_;
+      int hmi_level_;
     };
 
-    threads::Thread queueDispatcherThread;
+    static const int                      DEFAULT_CYCLE_TIMEOUT = 250000;
+    static log4cxx::LoggerPtr             logger_;
+    std::list<WatchdogSubscriber*>        subscribers_;
+    sync_primitives::Lock                 subscribersLock_;
+    std::map<RequestInfo*, TimevalStruct> requests_;
+    sync_primitives::Lock                 requestsLock_;
+    threads::Thread                       queueDispatcherThread;
 
     DISALLOW_COPY_AND_ASSIGN(RequestWatchdog);
 };

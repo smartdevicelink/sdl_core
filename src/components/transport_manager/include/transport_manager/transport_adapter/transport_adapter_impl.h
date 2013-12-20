@@ -58,18 +58,21 @@ class ClientConnectionListener;
 /*
  * @brief Implementation of device adapter class.
  **/
-class TransportAdapterImpl : public TransportAdapter, public TransportAdapterController {
+class TransportAdapterImpl : public TransportAdapter,
+                             public TransportAdapterController {
  protected:
   /**
    * @brief Constructor.
    *
    * @param device_scanner Pointer to device scanner.
-   * @param server_connection_factory Pointer to the factory that create connections from server.
-   * @param client_connection_listener Pointer to the listener of client connection.
+   * @param server_connection_factory Pointer to the factory that create
+   *connections from server.
+   * @param client_connection_listener Pointer to the listener of client
+   *connection.
    **/
   TransportAdapterImpl(DeviceScanner* device_scanner,
-                    ServerConnectionFactory* server_connection_factory,
-                    ClientConnectionListener* client_connection_listener);
+                       ServerConnectionFactory* server_connection_factory,
+                       ClientConnectionListener* client_connection_listener);
 
   /**
    * @brief Destructor.
@@ -90,7 +93,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * Called from transport manager to start device adapter.
    *
-   * @return Error information about possible reason of starting client listener failure.
+   * @return Error information about possible reason of starting client listener
+   *failure.
    **/
   virtual TransportAdapter::Error Init();
 
@@ -99,14 +103,7 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * @param listener Pointer to the device adapter listener.
    */
-  virtual void AddListener(TransportAdapterListener *listener);
-
-  /**
-   * @brief Remove listener from the container(list) of device adapter listeners.
-   *
-   * @param listener Pointer to the device adapter listener.
-   */
-  virtual void RemoveListener(TransportAdapterListener *listener);
+  virtual void AddListener(TransportAdapterListener* listener);
 
   /**
    * @brief Start scanning for new devices.
@@ -123,10 +120,11 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    * @param device_handle Device unique identifier to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return Error information about possible reason of connecting to device failure.
+   * @return Error information about possible reason of connecting to device
+   *failure.
    **/
   virtual TransportAdapter::Error Connect(const DeviceUID& device_handle,
-                                       const ApplicationHandle& app_handle);
+                                          const ApplicationHandle& app_handle);
 
   /**
    * @brief Disconnect from specified session.
@@ -136,17 +134,19 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * @return Error information about possible reason of disconnecting failure.
    **/
-  virtual TransportAdapter::Error Disconnect(const DeviceUID& device_handle,
-                                          const ApplicationHandle& app_handle);
+  virtual TransportAdapter::Error Disconnect(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle);
 
   /**
    * @brief Disconnect from all sessions on specified device.
    *
    * @param device_handle Device handle to Disconnect.
    *
-   * @return Error information about possible reason of disconnecting from specified device failure.
+   * @return Error information about possible reason of disconnecting from
+   *specified device failure.
    **/
-  virtual TransportAdapter::Error DisconnectDevice(const DeviceUID& device_handle);
+  virtual TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle);
 
   /**
    * @brief Send frame of data.
@@ -158,20 +158,22 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    * @return Error information about possible reason of sending data failure
    **/
   virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
-                                        const ApplicationHandle& app_handle,
-                                        const RawMessageSptr data);
+                                           const ApplicationHandle& app_handle,
+                                           const RawMessageSptr data);
 
   /**
    * @brief Start client listener.
    *
-   * @return Error information about possible reason of starting client listener failure.
+   * @return Error information about possible reason of starting client listener
+   *failure.
    */
   virtual TransportAdapter::Error StartClientListening();
 
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener failure.
+   * @return Error information about possible reason of stopping client listener
+   *failure.
    */
   virtual TransportAdapter::Error StopClientListening();
 
@@ -204,14 +206,15 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
   virtual DeviceList GetDeviceList() const;
 
   /**
-   * @brief Get container(vector) of application unique identifiers that available at specified device.
+   * @brief Get container(vector) of application unique identifiers that
+   *available at specified device.
    *
    * @param device_handle Device unique identifier.
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(
-      const DeviceUID& device_handle) const;
+  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
+      const;
 
   /**
    * @brief Find device in the internal container(map).
@@ -223,7 +226,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
   virtual DeviceSptr FindDevice(const DeviceUID& device_handle) const;
 
   /**
-   * @brief Search for device in container of devices, if it is not there - adds it.
+   * @brief Search for device in container of devices, if it is not there - adds
+   *it.
    *
    * @param devices Container(vector) of smart pointers to devices.
    */
@@ -266,7 +270,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
                                   const ApplicationHandle& app_handle);
 
   /**
-   * @brief Set specified connection state to FINILIZING and launch OnUnexpectedDisconnect event in the device adapter listener.
+   * @brief Set specified connection state to FINILIZING and launch
+   *OnUnexpectedDisconnect event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -277,7 +282,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
                                  const CommunicationError& error);
 
   /**
-   * @brief Set state of specified connection - ESTABLISHED and launch OnConnectDone event in device adapter listener.
+   * @brief Set state of specified connection - ESTABLISHED and launch
+   *OnConnectDone event in device adapter listener.
    *
    * @param devcie_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -286,7 +292,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
                            const ApplicationHandle& app_handle);
 
   /**
-   * @brief Delete connection from the container of connections and launch OnConnectFailed event in the device adapter listener.
+   * @brief Delete connection from the container of connections and launch
+   *OnConnectFailed event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -296,7 +303,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
                              const ConnectError& error);
 
   /**
-   * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.
+   * @brief Delete specified connection from the container(map) of connections
+   *and launch event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -357,10 +365,9 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
    *
    * @return String with name.
    */
-  virtual std::string DeviceName(const DeviceUID &device_id) const;
+  virtual std::string DeviceName(const DeviceUID& device_id) const;
 
  private:
-
   /**
    * @brief Find connection that has state - ESTABLISHED.
    *
@@ -383,7 +390,8 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
   bool initialised_;
 
   /**
-   * @brief Type definition of container(map) that holds device unique identifier(key value) and smart pointer to the device(mapped value).
+   * @brief Type definition of container(map) that holds device unique
+   *identifier(key value) and smart pointer to the device(mapped value).
    **/
   typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
 
@@ -402,10 +410,13 @@ class TransportAdapterImpl : public TransportAdapter, public TransportAdapterCon
   };
 
   /**
-   * @brief Type definition of container(map) that holds pair<device unique identifier, handle of application>(key value) and structure that holds information
+   * @brief Type definition of container(map) that holds pair<device unique
+   * identifier, handle of application>(key value) and structure that holds
+   * information
    * about connection(mapped value).
    */
-  typedef std::map<std::pair<DeviceUID, ApplicationHandle>, ConnectionInfo> ConnectionMap;
+  typedef std::map<std::pair<DeviceUID, ApplicationHandle>, ConnectionInfo>
+      ConnectionMap;
 
   /**
    * @brief Map of device handle to device.
@@ -451,4 +462,5 @@ extern log4cxx::LoggerPtr logger_;
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_
+#endif  // #ifndef \
+        // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_

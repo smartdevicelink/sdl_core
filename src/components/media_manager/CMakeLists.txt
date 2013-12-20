@@ -26,6 +26,7 @@ else(DEFAULT_MEDIA_FLAG)
 set(default_includes
 )
 set(default_sources
+  ./src/video_stream_to_file_adapter.cc
 )
 set(LIBRARIES
 )
@@ -40,7 +41,6 @@ include_directories (
   ../application_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include/
-  ../mobile_message_handler/include/
   ../request_watchdog/include/
   ../formatters/include
   ../config_profile/include/

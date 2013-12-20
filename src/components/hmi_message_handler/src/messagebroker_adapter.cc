@@ -33,6 +33,7 @@
 #include <string>
 
 #include "hmi_message_handler/messagebroker_adapter.h"
+#include "config_profile/profile.h"
 
 namespace hmi_message_handler {
 
@@ -93,6 +94,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnCommand");
   MessageBrokerController::subscribeTo("VR.OnCommand");
   MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
@@ -114,6 +116,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
   MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
   MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
+  MessageBrokerController::subscribeTo("TTS.Started");
+  MessageBrokerController::subscribeTo("TTS.Stopped");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
@@ -144,7 +148,10 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
     return;
   }
 
-  application_manager::Message* message = new application_manager::Message;
+  // Messages from HMI (sent through message broker) have no priority so far
+  // assign default priority
+  application_manager::Message* message = new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault);
   // message->set_message_type()
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);

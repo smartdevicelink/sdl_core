@@ -90,6 +90,10 @@ SDL.StatusMediaView = Em.ContainerView
             }),
         actionUp: function(event) {
 
-            SDL.States.goToStates(SDL.MediaController.activeState);
+            if (SDL.MediaController.activeState === 'media.sdlmedia') {
+                SDL.SDLMediaController.activateCurrentApp();
+            } else {
+                SDL.States.goToStates(SDL.MediaController.activeState);
+            }
         }
     });

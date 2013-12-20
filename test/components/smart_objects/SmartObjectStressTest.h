@@ -31,6 +31,8 @@
 #ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTSTRESSTEST_H_
 #define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTSTRESSTEST_H_
 
+#include <sstream>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -55,7 +57,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         std::string to_string(const int value) const
         {
-            return std::to_string(value);
+            std::ostringstream oss;
+	    oss << value;
+            return oss.str();
         }
 
         std::string to_string(const double value) const

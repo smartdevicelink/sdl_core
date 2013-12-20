@@ -42,20 +42,22 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
-// TODO(AK): add comment here.
 #define DCHECK(condition) \
-  if (!condition) { \
-    printf("Check failed: " #condition); \
+  if (!(condition)) { \
+    printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
+    printf("[Check failed: " #condition); \
+    printf("]\n\n"); \
     assert(false); \
   }
 
-#define CHECK(condition) \
-  if (!condition) { \
-    printf("Check failed: " #condition); \
-    assert(false); \
-  }
-
-// TODO(AK): add comment here.
 #define NOTREACHED() DCHECK(false)
+
+// Allows to perform static check that virtual function from base class is
+// actually being overriden if compiler support is available
+#if __cplusplus >= 201103L
+#define OVERRIDE override
+#else
+#define OVERRIDE
+#endif
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_

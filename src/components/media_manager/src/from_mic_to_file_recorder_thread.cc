@@ -31,6 +31,7 @@
 */
 
 #include <unistd.h>
+
 #include "./from_mic_to_file_recorder_thread.h"
 
 namespace media_manager {

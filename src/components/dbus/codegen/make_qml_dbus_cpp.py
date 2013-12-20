@@ -437,13 +437,8 @@ class Impl(FordXmlParser):
                 out.write("LOG4CXX_DEBUG(logger_, \"Input arguments:\\n\" << in_arg);\n")
                 method_name = request.get('name')[:1].lower() + request.get('name')[1:]
 
-                # FIXME (dchmerev@luxoft.com): Hardcoded exception
-                if method_name == 'endAudioPassThru':
-                    out.write("message.setDelayedReply(true);\n")
-                    out.write("QDBusMessage msg = message.createReply();\n")
-                    out.write("msg << 0;\n")
-                    out.write("msg << QString(\"\");\n")
-                    out.write("QDBusConnection::sessionBus().send(msg);\n")
+                out.write("dbusController->message = &message;\n")
+                out.write("dbusController->fill = &fill{0}{1}Reply;\n".format(classname, request.get("name")))
 
                 out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name))
                 with CodeBlock(out) as out:
@@ -452,9 +447,12 @@ class Impl(FordXmlParser):
                     out.write("return ret;\n")
                 out.write("}\n")
 
-                # FIXME (dchmerev@luxoft.com)
-                if method_name == 'endAudioPassThru':
-                    out.write("return ret;");
+                out.write("dbusController->message = NULL;\n")
+                out.write("dbusController->fill = NULL;\n")
+                out.write("if (message.isDelayedReply()) {\n")
+                with CodeBlock(out) as out:
+                    out.write("return ret;\n")
+                out.write("}\n")
 
                 out.write("QVariantMap out_arg;\n")
                 out.write("if (out_arg_v.type() == QVariant::Map) {\n")

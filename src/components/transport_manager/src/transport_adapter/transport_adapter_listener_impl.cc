@@ -42,17 +42,14 @@
 
 namespace transport_manager {
 
-TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {
-}
+TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
-    TransportManagerImpl *tm, TransportAdapterSptr ta)
-    : transport_manager_impl_(tm),
-      transport_adapter_(ta) {
-}
+    TransportManagerImpl* tm, TransportAdapter* ta)
+    : transport_manager_impl_(tm), transport_adapter_(ta) {}
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
-    const transport_adapter::TransportAdapter *transport_adapter) {
+    const transport_adapter::TransportAdapter* transport_adapter) {
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
       transport_adapter_, "", 0, RawMessageSptr(), new BaseError());
@@ -63,7 +60,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
 void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     const transport_adapter::TransportAdapter* transport_adapter,
     const SearchDeviceError& error) {
-  SearchDeviceError *err = new SearchDeviceError(error);
+  SearchDeviceError* err = new SearchDeviceError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
       transport_adapter_, "", 0, RawMessageSptr(), err);
@@ -72,7 +69,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
 }
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
-    const TransportAdapter *transport_adapter) {
+    const TransportAdapter* transport_adapter) {
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
       transport_adapter_, "", 0, RawMessageSptr(), NULL);
@@ -94,7 +91,7 @@ void TransportAdapterListenerImpl::OnConnectDone(
 void TransportAdapterListenerImpl::OnConnectFailed(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const ConnectError& error) {
-  ConnectError *err = new ConnectError(error);
+  ConnectError* err = new ConnectError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
       transport_adapter_, device, app_id, RawMessageSptr(), err);
@@ -115,7 +112,7 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
 void TransportAdapterListenerImpl::OnDisconnectFailed(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const DisconnectError& error) {
-  DisconnectError *err = new DisconnectError(error);
+  DisconnectError* err = new DisconnectError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
       transport_adapter_, device, app_id, RawMessageSptr(), err);
@@ -124,15 +121,11 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceDone(
-    const TransportAdapter* transport_adapter, const DeviceUID& device) {
-
-}
+    const TransportAdapter* transport_adapter, const DeviceUID& device) {}
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
-    const DisconnectDeviceError& error) {
-
-}
+    const DisconnectDeviceError& error) {}
 
 void TransportAdapterListenerImpl::OnDataReceiveDone(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
@@ -146,10 +139,8 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
 
 void TransportAdapterListenerImpl::OnDataReceiveFailed(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id,
-
-    const DataReceiveError& error) {
-  DataReceiveError *err = new DataReceiveError(error);
+    const ApplicationHandle& app_id, const DataReceiveError& error) {
+  DataReceiveError* err = new DataReceiveError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
       transport_adapter_, device, app_id, RawMessageSptr(), err);
@@ -170,7 +161,7 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
     const TransportAdapter* transport_adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessageSptr data_container,
     const DataSendError& error) {
-  DataSendError *err = new DataSendError(error);
+  DataSendError* err = new DataSendError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
       transport_adapter_, device, app_id, data_container, err);
@@ -180,8 +171,7 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
 
 void TransportAdapterListenerImpl::OnConnectRequested(
     const TransportAdapter* transport_adapter, const DeviceUID& device_handle,
-    const ApplicationHandle& app_handle) {
-}
+    const ApplicationHandle& app_handle) {}
 
 void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     const transport_adapter::TransportAdapter* transport_adapter,
@@ -206,4 +196,3 @@ void TransportAdapterListenerImpl::OnCommunicationError(
 }
 
 }  // namespace transport_manager
-

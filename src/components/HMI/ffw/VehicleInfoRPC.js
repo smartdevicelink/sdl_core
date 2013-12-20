@@ -156,6 +156,20 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                 break;
             }
 
+            case "VehicleInfo.SubscribeVehicleData": {
+
+                SDL.SDLVehicleInfoModel.SubscribeVehicleData(request);
+
+                break;
+            }
+
+            case "VehicleInfo.UnsubscribeVehicleData": {
+
+                SDL.SDLVehicleInfoModel.UnsubscribeVehicleData(request);
+
+                break;
+            }
+
             case "VehicleInfo.GetVehicleType": {
 
                 SDL.SDLVehicleInfoModel.getVehicleType(request.id);
@@ -193,7 +207,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
     /**
      * Send error response from onRPCRequest
-     * 
+     *
      * @param {Number}
      *            resultCode
      * @param {Number}
@@ -219,6 +233,63 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     }
                 }
             };
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * Send response from onRPCRequest
+     *
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
+     */
+    sendVIResult: function(resultCode, id, method) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {
+                    "code": resultCode,
+                    "method": method
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * Send response from onRPCRequest
+     *
+     * @param {Number} resultCode
+     * @param {Number} id
+     * @param {String} method
+     * @param {Object} data
+     */
+    sendVISubscribeVehicleDataResult: function(resultCode, id, method, data) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": data
+            };
+
+            JSONMessage.result.code = resultCode;
+            JSONMessage.result.method = method;
+
             this.client.send(JSONMessage);
         }
     },

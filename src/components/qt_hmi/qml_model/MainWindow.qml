@@ -126,7 +126,7 @@ Rectangle {
 
                 property string currentLocation
                 function go(path, appId) {
-                    console.debug("enter:", path, appId)
+                    console.debug("enter:", path, ", appId:", appId)
                     if (path) {
                         if (currentLocation !== path) {
                             viewTransitionStack.push({ uri: source.toString(), applicationContext: false })
@@ -168,24 +168,28 @@ Rectangle {
 
         InteractionPopup {
             id: interactionPopup
+            popUpName: "UI.PerformInteraction"
             anchors.centerIn: parent
             visible: false
         }
 
         SliderPopup {
             id: sliderPopup
+            popUpName: "UI.Slider"
             anchors.centerIn: parent
             visible: false
         }
 
         PerformAudioPassThruPopup {
             id: performAudioPassThruPopup
+            popUpName: "UI.PerformAudioPassThru"
             anchors.centerIn: parent
             visible: false
         }
 
         AlertWindow {
             id: alertWindow
+            popUpName: "UI.Alert"
             objectName: "AlertWindow"
             anchors.fill: parent
             visible: false
@@ -193,6 +197,7 @@ Rectangle {
 
         VRHelpPopup {
             id: vrHelpPopup
+            popUpName: "UI.VrHelp"
             anchors.centerIn: parent
             visible: false
         }

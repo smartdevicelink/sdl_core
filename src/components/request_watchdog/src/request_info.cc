@@ -37,12 +37,14 @@
 
 namespace request_watchdog {
 
-RequestInfo::RequestInfo(int FunctionId, int ConnectionID
-                         , int CorrelationId, int CustomTimeout)
-  : functionID_(FunctionId),
-    connectionID_(ConnectionID),
-    correlationID_(CorrelationId),
-    customTimeout_(CustomTimeout),
+RequestInfo::RequestInfo(const int& function_id, const int& connection_id,
+                         const int& correlation_id, const int& custom_timeout,
+                         const int& app_hmi_level)
+  : functionID_(function_id),
+    connectionID_(connection_id),
+    correlationID_(correlation_id),
+    customTimeout_(custom_timeout),
+    app_hmi_level_(app_hmi_level),
     delayed_delete_(false)
 {}
 

@@ -83,59 +83,110 @@ void AlertManeuverRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    msg_params[hmi_request::soft_buttons] =
-        (*message_)[strings::msg_params][strings::soft_buttons];
-  }
-
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params,
-                 true);
+  // Checking parameters and how many HMI requests should be sent
+  bool tts_is_ok = false;
 
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
-      // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-
-      msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
-          smart_objects::SmartType_Array);
-      msg_params[hmi_request::tts_chunks] =
-          (*message_)[strings::msg_params][strings::tts_chunks];
-
-      msg_params[strings::app_id] = app->app_id();
-      CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params);
+      pending_requests_.Add(hmi_apis::FunctionID::TTS_Speak);
+      tts_is_ok = true;
     }
+  }
+
+  bool soft_buttons_is_ok = false;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
+    soft_buttons_is_ok = true;
+  }
+
+  // Sending requests to HMI
+  if (soft_buttons_is_ok) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+
+    msg_params[hmi_request::soft_buttons] =
+            (*message_)[strings::msg_params][strings::soft_buttons];
+
+    SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
+                   &msg_params,
+                   true);
+  }
+
+  if (tts_is_ok) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+
+    msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+
+    msg_params[hmi_request::tts_chunks] =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+
+    msg_params[strings::app_id] = app->app_id();
+    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
   }
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ShowRequest::on_event");
+  LOG4CXX_INFO(logger_, "AlertManeuverRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
-  switch (event.id()) {
+  mobile_apis::Result::eType result_code;
+  hmi_apis::FunctionID::eType id = event.id();
+  switch (id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
 
-      mobile_apis::Result::eType result_code =
+      pending_requests_.Remove(id);
+
+      result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != result_) {
-        result_code = result_;
-      }
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      pending_requests_.Remove(id);
+
+      result_code =
+          static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
       break;
     }
     default: {
       LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
-      break;
+      SendResponse(false, result_code, "Received unknown event");
+      return;
     }
+  }
+
+  if (mobile_apis::Result::INVALID_ENUM == result_) {
+    result_= result_code;
+  } else if (mobile_apis::Result::SUCCESS == result_) {
+    result_ =
+        result_ == result_code
+        ? mobile_apis::Result::SUCCESS
+        : result_code
+        ;
+  }
+
+  if (pending_requests_.IsFinal(id)) {
+    bool success = mobile_apis::Result::SUCCESS == result_code;
+
+    if (mobile_apis::Result::INVALID_ENUM != result_) {
+      result_code = result_;
+    }
+
+    SendResponse(success, result_code, NULL, &(message[strings::msg_params]));
+  } else {
+    LOG4CXX_INFO(logger_,
+                "There are some pending responses from HMI."
+                "AlertManeuverRequest still waiting.");
   }
 }
 

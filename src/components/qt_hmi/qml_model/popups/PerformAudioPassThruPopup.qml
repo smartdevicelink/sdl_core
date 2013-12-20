@@ -55,22 +55,22 @@ ContextPopup {
         console.debug("enter", reason)
         timer.stop()
         dataContainer.uiAudioPassThru.timeout = 0
-        hide()
         dataContainer.uiAudioPassThru.running = false
         switch (reason) {
         case Common.Result.ABORTED:
             console.debug("exit with abort")
             DBus.sendError(async, Common.Result.ABORTED)
-            return
+            break;
         case Common.Result.SUCCESS:
             console.debug("exit with success")
             DBus.sendReply(async, {})
-            return
+            break;
         case Common.Result.RETRY:
             console.debug("exit with retry")
             DBus.sendError(async, Common.Result.RETRY)
-            return
+            break;
         }
+        hide()
     }
 
 
@@ -137,7 +137,8 @@ ContextPopup {
             }
         }
 
-        BackButton {
+        OvalButton {
+            text: "Close"
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 console.debug("enter")

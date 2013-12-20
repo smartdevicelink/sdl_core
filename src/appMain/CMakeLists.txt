@@ -25,6 +25,7 @@ set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
+  v4_protocol_v1_2_no_extra
   SmartObjects
   formatters
   ProtocolHandler
@@ -32,27 +33,42 @@ set(LIBRARIES
   TransportManager
   HMIMessageHandler
   MessageBroker
-  ${BROKER_LIBRARIES}  
+  ${BROKER_LIBRARIES}
   Utils
   encryption
   jsoncpp
-  bluetooth
-  pthread
-  rt
-  avahi-client
-  avahi-common
   ConfigProfile
-  MobileMessageHandler
   RequestWatchdog
-  MediaManager
-  Libusb-1.0.16
+  policies
+  apr-1
+  aprutil-1
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
+endif()
+
+
+if (BUILD_MEDIA_MANAGER)
+	LIST(APPEND LIBRARIES MediaManager)
+endif()
+
+if (BUILD_BT_SUPPORT)
+	list(APPEND LIBRARIES bluetooth)
+endif()
+if (BUILD_AVAHI_SUPPORT)
+	list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
+endif()
 
 include_directories (
   ./
   ../components/protocol_handler/include/
   ../thirdPartyLibs/jsoncpp/include/
-  ../components/mobile_message_handler/include
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
@@ -63,7 +79,7 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
-  ../utils/include/
+  ../components/policies/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/
@@ -90,6 +106,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 IF (${QT_HMI})
   execute_process(

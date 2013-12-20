@@ -81,8 +81,12 @@ ContextPopup {
         anchors.margins: Constants.popupMargin
         width: Constants.ovalButtonWidth
         text: "Close"
-        onClicked: hide()
+        onClicked: complete()
     }
 
     property alias title: title.text
+
+    function complete(reason, data) {
+        hide()
+    }
 }

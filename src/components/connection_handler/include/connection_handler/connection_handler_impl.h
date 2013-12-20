@@ -46,6 +46,7 @@
 #include "utils/macro.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
@@ -95,6 +96,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param DeviceList New list of available devices.
      **/
     virtual void OnDeviceFound(const transport_manager::DeviceInfo& device_info);
+    virtual void OnDeviceAdded(const transport_manager::DeviceInfo& device_info);
+    virtual void OnDeviceRemoved(const transport_manager::DeviceInfo& device_info);
 
     virtual void OnScanDevicesFinished();
     virtual void OnScanDevicesFailed(
@@ -120,16 +123,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
-    virtual void OnTMMessageReceived(
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageReceiveFailed(
-      transport_manager::ConnectionUID connection_id,
-      const transport_manager::DataReceiveError& error);
-    virtual void OnTMMessageSendFailed(
-      const transport_manager::DataSendError& error,
-      const transport_manager::RawMessageSptr message);
-    virtual void OnTMMessageSend(const transport_manager::RawMessageSptr message);
-
     /**
      * \brief Informs about failure during DisconnectDevice procedure of TM
      * \param device Information about disconnected device

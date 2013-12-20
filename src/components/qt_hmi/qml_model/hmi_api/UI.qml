@@ -121,12 +121,12 @@ Item {
         ]
         var fieldSubstrings = filter(showStrings, showFields)
         var showData = { hmiUIText: {} }
-        if (fieldSubstrings[Common.TextFieldName.mainField1]) { showData.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField2]) { showData.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField3]) { showData.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField4]) { showData.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]; }
-        if (fieldSubstrings[Common.TextFieldName.statusBar]) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
-        if (fieldSubstrings[Common.TextFieldName.mediaTrack]) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField1] !== undefined) { showData.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField2] !== undefined) { showData.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField3] !== undefined) { showData.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField4] !== undefined) { showData.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]; }
+        if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
+        if (fieldSubstrings[Common.TextFieldName.mediaTrack] !== undefined) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
         if (graphic) { showData.hmiUIText.image = graphic.value; }
         if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
         if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
@@ -166,8 +166,7 @@ Item {
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: { {", startTime.hours, ", ", startTime.minutes, ", ", startTime.seconds, "}, ",
-                      endTime,", ", updateMode, ", ", appID, "}")
+        console.debug("enter: {", startTime, ", ", endTime, ", ", updateMode, ", ", appID, "}")
 
         var app = dataContainer.getApplication(appID)
         var newStartTime
@@ -397,17 +396,42 @@ Item {
             console.debug("rejected")
             throw Common.Result.REJECTED
         }
+        DBus.sendReply({__retCode: Common.Result.SUCCESS})
         performAudioPassThruPopup.complete(Common.Result.SUCCESS)
         console.debug("exit")
     }
 
-    function closePopUp () {
+    function closePopUp (methodName) {
         console.debug("enter")
-        if (dataContainer.activePopup) {
-            //close pop-up that is currently active with ABORT code
-            dataContainer.activePopup.complete(Common.Result.ABORT)
+        var popUpToClose
+
+        if (dataContainer.activePopup.length === 0) {
+            return { __retCode: Common.Result.ABORT, __message: "No active PopUps"}
         }
-        //response to this callwith SUCCESS code
+
+        if (methodName !== undefined) {
+            popUpToClose = methodName
+        } else {
+            popUpToClose = dataContainer.activePopup[dataContain.activePopUp.length - 1]
+        }
+
+        switch (popUpToClose) {
+            case "UI.PerformInteraction":
+                interactionPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.Slider":
+                sliderPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.PerformAudioPassThru":
+                performAudioPassThruPopup.complete(Common.Result.SUCCESS)
+                break
+            case "UI.Alert":
+                alertWindow.complete(Common.Result.SUCCESS)
+                break
+            case "UI.VrHelp":
+                vrHelpPopup.complete(Common.Result.SUCCESS)
+                break
+        }
         console.debug("exit")
     }
 

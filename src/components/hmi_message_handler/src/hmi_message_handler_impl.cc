@@ -32,8 +32,6 @@
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "config_profile/profile.h"
-#include "./to_hmi_thread_impl.h"
-#include "./from_hmi_thread_impl.h"
 
 namespace hmi_message_handler {
 
@@ -47,52 +45,35 @@ HMIMessageHandlerImpl* HMIMessageHandlerImpl::instance() {
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),
-      to_hmi_thread_(NULL),
-      from_hmi_thread_(NULL) {
-  to_hmi_thread_ = new threads::Thread("hmi_message_handler::ToHMIThreadImpl",
-                                       new ToHMIThreadImpl(this));
-  to_hmi_thread_->startWithOptions(
-      threads::ThreadOptions(
-          profile::Profile::instance()->thread_min_stach_size()));
-
-  from_hmi_thread_ = new threads::Thread(
-      "hmi_message_handler::FromHMIThreadImpl", new FromHMIThreadImpl(this));
-  from_hmi_thread_->startWithOptions(
-      threads::ThreadOptions(
-          profile::Profile::instance()->thread_min_stach_size()));
+      messages_to_hmi_("hmi_message_handler::ToHMIThreadImpl", this,
+                 threads::ThreadOptions(
+                     profile::Profile::instance()->thread_min_stach_size())),
+      messages_from_hmi_("hmi_message_handler::FromHMIThreadImpl", this,
+                 threads::ThreadOptions(
+                     profile::Profile::instance()->thread_min_stach_size())) {
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~HMIMessageHandlerImpl()");
   observer_ = NULL;
-  message_adapters_.clear();
-
-  if (to_hmi_thread_) {
-    to_hmi_thread_->stop();
-    delete to_hmi_thread_;
-    to_hmi_thread_ = NULL;
-  }
-
-  if (from_hmi_thread_) {
-    from_hmi_thread_->stop();
-    delete from_hmi_thread_;
-    from_hmi_thread_ = NULL;
+  if (!message_adapters_.empty()) {
+    LOG4CXX_WARN(logger_, "Not all HMIMessageAdapter have unsubscribed from"
+                         " HMIMessageHandlerImpl");
   }
 }
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnMessageReceived()");
-  DCHECK(message);
   if (!observer_) {
     LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
   }
-  messages_from_hmi_.push(message);
+  messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
 void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~sendMessageToHMI()");
-  messages_to_hmi_.push(message);
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
 
 void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver* observer) {
@@ -117,8 +98,30 @@ void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::RemoveHMIMessageAdapter()");
-  DCHECK(adapter);
+  DCHECK(adapter != NULL);
   message_adapters_.erase(adapter);
 }
+
+void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi& message) {
+  LOG4CXX_INFO(logger_, "Received message from hmi");
+
+  if (!observer_) {
+    LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
+    return;
+  }
+
+  observer_->OnMessageReceived(message);
+  LOG4CXX_INFO(logger_, "Message from hmi given away.");
+
+}
+void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi& message) {
+  for (std::set<HMIMessageAdapter*>::iterator it =
+      message_adapters_.begin();
+      it != message_adapters_.end();
+      ++it) {
+    (*it)->SendMessageToHMI(message);
+  }
+}
+
 
 }  //  namespace hmi_message_handler

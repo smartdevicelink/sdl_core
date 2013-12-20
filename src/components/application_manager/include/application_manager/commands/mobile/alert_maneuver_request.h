@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/pending.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -73,6 +74,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
 
  private:
   mobile_apis::Result::eType  result_;
+  Pending pending_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };

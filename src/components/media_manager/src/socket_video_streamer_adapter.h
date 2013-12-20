@@ -44,7 +44,7 @@ namespace media_manager {
 class SocketVideoStreamerAdapter : public MediaAdapterImpl {
   public:
     SocketVideoStreamerAdapter();
-    ~SocketVideoStreamerAdapter();
+    virtual ~SocketVideoStreamerAdapter();
     virtual void SendData(int application_key,
                           const protocol_handler::RawMessagePtr& message);
     virtual void StartActivity(int application_key);
@@ -106,16 +106,13 @@ class SocketVideoStreamerAdapter : public MediaAdapterImpl {
         DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
     };
 
-
     int port_;
     std::string ip_;
     int socket_;
     bool is_ready_;
-    volatile int current_application_;
     VideoStreamer* delegate_;
     threads::Thread* thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
-    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(SocketVideoStreamerAdapter);
 };

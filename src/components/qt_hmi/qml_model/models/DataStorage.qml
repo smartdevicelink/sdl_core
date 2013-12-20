@@ -537,7 +537,7 @@ QtObject {
         sdlUI.onDriverDistraction(driverDistractionState);
     }
     property bool activeTTS: false
-    property var activePopup
+    property var activePopup: [] // Stack of names of active pop ups
     property int popups: 0
 
     property bool activeAlert: false

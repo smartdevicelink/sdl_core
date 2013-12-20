@@ -51,17 +51,20 @@ class Impl(FordXmlParser):
         name = request.get('name')
         name = name[:1].lower() + name[1:]
         out.write("  function " + name + "(params) {\n")
-	out.write("      try {\n")
-        out.write("          return sdl" + ifacename + "." + name + "(")
+        out.write("    try {\n")
+        out.write("      if(\"{0}\" in sdl{1})\n".format(name, ifacename))
+        out.write("        return sdl{0}.{1}(" .format(ifacename, name))
         params = request.findall('param')
         for i in range(len(params)):
             out.write('params.' + params[i].get('name'))
             if i <> len(params) - 1:
                 out.write(', ')
         out.write(")\n")
-        out.write("      } catch(err) {\n")
-        out.write("""          return { "__errno": err }\n""")
-        out.write("      }\n")
+        out.write("      else\n")
+        out.write("""        return { "__errno": Common.Result.UNSUPPORTED_REQUEST }\n""")
+        out.write("    } catch(err) {\n")
+        out.write("""        return { "__errno": err }\n""")
+        out.write("    }\n")
         out.write("  }\n\n")
 
 
@@ -90,6 +93,7 @@ class Impl(FordXmlParser):
     def write_qml(self, iface, out):
         name = iface.get('name')
         out.write("import QtQuick 2.0\n")
+        out.write("""import "Common.js" as Common\n""")
         out.write("import \"..\"\n\n")
         out.write("Item {\n")
         out.write("  " + name + " {\n")

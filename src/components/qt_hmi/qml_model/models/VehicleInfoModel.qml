@@ -105,8 +105,8 @@ QtObject {
         'innerRightRear': { status: Common.ComponentVolumeStatus.CVS_UNKNOWN }
     }
     property var gps: {
-        'longitudeDegrees': 423293,
-        'latitudeDegrees': -830464,
+        'longitudeDegrees': 42.3293,
+        'latitudeDegrees': -83.0464,
         'utcYear': 2013,
         'utcMonth': 2,
         'utcDay': 14,
@@ -114,9 +114,9 @@ QtObject {
         'utcMinutes': 16,
         'utcSeconds': 54,
         'compassDirection': Common.CompassDirection.SOUTHWEST,
-        'pdop': 15,
+        'pdop': 4,
         'hdop': 5,
-        'vdop': 30,
+        'vdop': 6,
         'actual': false,
         'satellites': 8,
         'dimension': Common.Dimension.Dimension_2D,
