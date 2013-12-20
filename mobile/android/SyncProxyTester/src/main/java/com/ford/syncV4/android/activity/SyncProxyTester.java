@@ -3091,6 +3091,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 }
                             });
 
+                            /**
+                             * Process a possibility to exclude Footer from Slider request
+                             */
+                            final boolean[] isUseFooterInSlider = {true};
+                            final CheckBox useFooterInSliderCheckBox = (CheckBox) layout.findViewById(R.id.use_footer_in_slider_checkbox);
+                            isUseFooterInSlider[0] = useFooterInSliderCheckBox.isChecked();
+                            useFooterInSliderCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                                    isUseFooterInSlider[0] = b;
+                                    chkDynamicFooter.setEnabled(b);
+                                    txtSliderFooter.setEnabled(b);
+                                }
+                            });
+
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -3102,15 +3117,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
                                         msg.setSliderHeader(txtSliderHeader.getText().toString());
 
-                                        Vector<String> footerelements = null;
-                                        String footer = txtSliderFooter.getText().toString();
-                                        if (chkDynamicFooter.isChecked()) {
-                                            footerelements = new Vector<String>(Arrays.asList(footer.split(JOIN_STRING)));
-                                        } else {
-                                            footerelements = new Vector<String>();
-                                            footerelements.add(footer);
+                                        /**
+                                         * Do not set Footer
+                                         */
+                                        if (isUseFooterInSlider[0]) {
+                                            Vector<String> footerElements;
+                                            String footer = txtSliderFooter.getText().toString();
+                                            if (chkDynamicFooter.isChecked()) {
+                                                footerElements = new Vector<String>(Arrays.asList(footer.split(JOIN_STRING)));
+                                            } else {
+                                                footerElements = new Vector<String>();
+                                                footerElements.add(footer);
+                                            }
+                                            msg.setSliderFooter(footerElements);
                                         }
-                                        msg.setSliderFooter(footerelements);
 
                                         msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                         msg.setCorrelationID(autoIncCorrId++);
