@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+MACHINE_TYPE=`uname -m`
+
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+	FLINT_BINARY=flint_x64
+	WORDSIZE=-d__WORDSIZE=64
+else
+	FLINT_BINARY=flint_x86
+	WORDSIZE=-d__WORDSIZE=32
+fi
+
+${FLINT_BINARY} "$@"
