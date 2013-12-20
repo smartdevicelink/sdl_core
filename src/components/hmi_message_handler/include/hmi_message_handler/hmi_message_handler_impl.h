@@ -43,7 +43,7 @@
 #include "utils/threads/thread.h"
 
 namespace hmi_message_handler {
-typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+
 
 namespace impl {
 /*

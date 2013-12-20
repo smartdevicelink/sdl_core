@@ -45,10 +45,10 @@ log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ProtocolHandler"));
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
-  transport_manager::TransportManager* transport_manager)
+  transport_manager::TransportManager* tm)
   : protocol_observers_(),
     session_observer_(0),
-    transport_manager_(transport_manager),
+    transport_manager_(tm),
     kPeriodForNaviAck(5),
     raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                       threads::ThreadOptions(threads::Thread::kMinStackSize)),

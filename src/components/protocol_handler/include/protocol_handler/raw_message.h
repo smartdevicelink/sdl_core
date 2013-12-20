@@ -63,7 +63,7 @@ class RawMessage {
      * \param dataSize Message size
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
-               unsigned char* data, unsigned int dataSize,
+               unsigned char* data_param, unsigned int dataSize,
                unsigned char type = ServiceType::kRpc);
 
     /**

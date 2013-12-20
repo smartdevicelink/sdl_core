@@ -120,7 +120,7 @@ class ProtocolHandlerImpl
      * message exchange.
      */
     explicit ProtocolHandlerImpl(
-      transport_manager::TransportManager* transport_manager);
+      transport_manager::TransportManager* tm);
 
     /**
      * \brief Destructor

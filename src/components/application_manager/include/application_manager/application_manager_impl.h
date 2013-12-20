@@ -413,8 +413,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                                      RawMessagePtr& message);
 
     void OnMessageReceived(
-      utils::SharedPtr<application_manager::Message> message);
-    void OnErrorSending(utils::SharedPtr<application_manager::Message> message);
+      hmi_message_handler::MessageSharedPointer message);
+    void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);

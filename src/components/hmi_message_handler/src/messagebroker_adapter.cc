@@ -54,7 +54,7 @@ MessageBrokerAdapter::~MessageBrokerAdapter() {
 }
 
 void MessageBrokerAdapter::SendMessageToHMI(
-    utils::SharedPtr<application_manager::Message> message) {
+     hmi_message_handler::MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
   /*if (!message) {
    // TODO(PV): LOG
@@ -150,8 +150,8 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
 
   // Messages from HMI (sent through message broker) have no priority so far
   // assign default priority
-  application_manager::Message* message = new application_manager::Message(
-      protocol_handler::MessagePriority::kDefault);
+  hmi_message_handler::MessageSharedPointer message = hmi_message_handler::MessageSharedPointer(new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault));
   // message->set_message_type()
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);

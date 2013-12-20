@@ -761,7 +761,7 @@ void ApplicationManagerImpl::OnMobileMessageSent(
 }
 
 void ApplicationManagerImpl::OnMessageReceived(
-  utils::SharedPtr<application_manager::Message> message) {
+  hmi_message_handler::MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
 
   if (!message) {
@@ -774,7 +774,7 @@ void ApplicationManagerImpl::OnMessageReceived(
 }
 
 void ApplicationManagerImpl::OnErrorSending(
-  utils::SharedPtr<application_manager::Message> message) {
+  hmi_message_handler::MessageSharedPointer message) {
   return;
 }
 

@@ -254,7 +254,7 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerPort", value))
       && ('\0' != *value)) {
-    server_port_ = atoi(value);
+    server_port_ = std::stoi(value);
     LOG4CXX_INFO(logger_, "Set server port to " << server_port_);
   }
 
