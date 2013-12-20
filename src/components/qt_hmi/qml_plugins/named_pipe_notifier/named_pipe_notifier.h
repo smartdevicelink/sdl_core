@@ -39,22 +39,22 @@
 
 class NamedPipeNotifier : public QThread {
 Q_OBJECT
-Q_PROPERTY(QString name READ name WRITE setName)
+Q_PROPERTY(QString name READ name WRITE set_name)
     QString name_;
 public:
-    explicit NamedPipeNotifier (QObject* parent = 0) : QThread(parent) {
+    explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {
     }
-    const QString& name (void) const {
+    const QString& name(void) const {
         return name_;
     }
-    void setName (const QString& name) {
+    void set_name(const QString& name) {
         name_ = name;
     }
 protected:
-    virtual void run (void);
+    virtual void run(void);
 signals:
-    void readyRead (void);
-    void openFailed (void);
+    void readyRead(void);
+    void openFailed(void);
 };
 
 #endif

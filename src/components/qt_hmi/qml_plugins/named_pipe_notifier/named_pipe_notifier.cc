@@ -37,9 +37,12 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#include <QTextStream>
+
 #include "named_pipe_notifier.h"
 
-void NamedPipeNotifier::run (void) {
+void NamedPipeNotifier::run(void) {
+    QTextStream(stdout) << "open...\n";
     int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
     if (-1 == fd) { // if open() fails
         if ((errno != ENOENT) // we can only manage lack of pipe
@@ -53,8 +56,10 @@ void NamedPipeNotifier::run (void) {
     FD_ZERO(&readfds);
     FD_SET(fd, &readfds);
 // this select() is supposed to block till pipe is empty
+    QTextStream(stdout) << "select...\n";
     if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
         emit readyRead();
     }
     ::close(fd);
+    QTextStream(stdout) << "exit\n";
 }
