@@ -77,7 +77,7 @@ var panelTextColor = "white"
 // Audio pass thru PopUp text color
 var audioPassThruTextColor = "white"
 
-// Semi sransparent color of item in SDL Navi menu
+// Semi transparent color of item in SDL Navi menu
 var sdlNaviTransparentItemColor = "#30C0C0C0"
 
 //--------------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ var margin = 20
 // Offset from the edges of the popup
 var popupMargin = 15
 
-// Spacing betwee items in SDLNavi view
+// Spacing between items in SDLNavi view
 var sdlNaviSpacing = 5
 
 // Spacing between contacts at contact screen view.

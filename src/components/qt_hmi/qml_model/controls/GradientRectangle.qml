@@ -43,6 +43,7 @@ Rectangle {
     property alias text: text.text
     property int customButtonID
     property bool isCustomButton: false
+    property bool clickProcessed
     signal pressed()
     signal released()
 
@@ -80,7 +81,6 @@ Rectangle {
         repeat: false
         triggeredOnStart: false
     }
-    property bool clickProcessed
 
     onPressed: {
         if (isCustomButton) {

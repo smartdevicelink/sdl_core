@@ -37,6 +37,7 @@ import "../controls"
 import "../models"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 GeneralView {
     Column {
@@ -105,7 +106,7 @@ GeneralView {
                         anchors.leftMargin: Constants.margin
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
-                            if (dataContainer.currentApplication.checkAppType(Common.AppHMIType.NAVIGATION)) {
+                            if (Internal.checkBit(Common.AppHMIType.NAVIGATION)) {
                                 contentLoader.go("./views/SDLNavi.qml", dataContainer.currentApplication.appId)
                             } else if (dataContainer.currentApplication.isMediaApplication) {
                                 contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)

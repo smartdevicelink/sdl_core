@@ -86,11 +86,7 @@ QtObject {
         customPresets = null
         languageTTSVR = -1
         hmiUITextAlignment = null
-        appType = null
+        appType = 0
         console.debug("exit")
-    }
-
-    function checkAppType(value) {
-        return (appType & (1 << value))
     }
 }
