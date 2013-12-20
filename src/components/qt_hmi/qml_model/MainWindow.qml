@@ -276,7 +276,10 @@ Rectangle {
             var appTypeToAdd = 0
             if (application.appType !== undefined) {
                 for (var index in application.appType) {
-                  appTypeToAdd |= 1 << application.appType[index]
+                    if (application.appType[index] > 31) {
+                        return { __retCode: Common.Result.GENERIC_ERROR, __message: "Apptype value > 31" }
+                    }
+                    appTypeToAdd |= 1 << application.appType[index]
                 }
             }
 

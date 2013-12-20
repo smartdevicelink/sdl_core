@@ -63,8 +63,8 @@ var MediaClockRunningMode = {
     MCR_STOPPED: 1
 }
 
-function checkBit(bitPosition) {
-    return (appType & (1 << bitPosition))
+function checkBit(value, bitPosition) {
+    return (value & (1 << bitPosition))
 }
 
 function getArrayForPresetRow() {
