@@ -1,4 +1,5 @@
 [CW51]
++ Add ability to SPT to Slider request without sliderFooter
 * Fix parsing OnAudioPassThru notifications.
 * When SDL core is shut down mobile application receive OnAppInterfaceUnregister
 * Switch off auto-sending PutFile and SetAppIcon after RegisterAppInterface for xml tests run.
