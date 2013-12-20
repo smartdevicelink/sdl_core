@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * \file named_pipe_notifier_plugin.h
+ * \brief NamedPipeNotifierPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,19 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import QtQuick 2.0
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_PLUGIN_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_PLUGIN_H_
 
-QtObject {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property string timeToDestination: ""
-    property var turnIcon
-    property var nextTurnIcon
+#include <QQmlExtensionPlugin>
 
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property int appID: -1
-}
+class NamedPipeNotifierPlugin : public QQmlExtensionPlugin {
+Q_OBJECT
+Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+public:
+    void registerTypes(const char* uri);
+};
+
+#endif

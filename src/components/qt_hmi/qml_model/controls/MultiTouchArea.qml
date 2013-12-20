@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * @file MultiTouchArea.qml
+ * @brief Area for multitouch.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,18 +33,45 @@
  */
 
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
-QtObject {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property string timeToDestination: ""
-    property var turnIcon
-    property var nextTurnIcon
+MultiPointTouchArea {
+    readonly property int created: Date.now()
 
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property int appID: -1
+    signal pressed(var touchPoints)
+    signal released(var touchPoints)
+    signal canceled(var touchPoints)
+    signal updated(var touchPoints)
+
+    function fillEvent(touchPoints) {
+        var event = []
+        for (var i = 0; i < touchPoints.length; ++i) {
+            event.push({
+                           id: touchPoints[i].pointId,
+                           ts: [Date.now() - created],
+                           c: [{ x: touchPoints.x, y: touchPoints.y }] // TODO(KKolodiy): need cast to int
+                       })
+        }
+        return event
+    }
+
+    minimumTouchPoints: 1
+    maximumTouchPoints: 10
+
+    onPressed: {
+        sdlUI.onTouchEvent(Common.BEGIN, fillEvent(touchPoints))
+        parent.pressed(touchPoints)
+    }
+    onReleased: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.released(touchPoints)
+    }
+    onCanceled: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.canceled(touchPoints)
+    }
+    onUpdated: {
+        sdlUI.onTouchEvent(Common.MOVE, fillEvent(touchPoints))
+        parent.updated(touchPoints)
+    }
 }

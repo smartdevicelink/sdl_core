@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * @file named_pipe_notifier.cc
+ * @brief NamedPipeNotifier class implementation file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,19 +32,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import QtQuick 2.0
+#include <fcntl.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <errno.h>
 
-QtObject {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property string timeToDestination: ""
-    property var turnIcon
-    property var nextTurnIcon
+#include "named_pipe_notifier.h"
 
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property int appID: -1
+void NamedPipeNotifier::run(void) {
+    int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
+    if (-1 == fd) { // if open() fails
+        if ((errno != ENOENT) // we can only manage lack of pipe
+        || (-1 == ::mkfifo(name_.toLocal8Bit().constData(), 0666))
+        || (-1 == (fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY)))) {
+            emit openFailed();
+            return;
+        }
+    }
+    ::fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(fd, &readfds);
+// this select() is supposed to block till pipe is empty
+    if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
+        emit readyRead();
+    }
 }

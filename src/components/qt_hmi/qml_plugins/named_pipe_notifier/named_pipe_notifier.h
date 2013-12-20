@@ -1,6 +1,6 @@
 /**
- * @file NavigationModel.qml
- * @brief Model for Navigation.
+ * \file named_pipe_notifier.h
+ * \brief NamedPipeNotifier class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,19 +32,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import QtQuick 2.0
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_H_
 
-QtObject {
-    property string text1: ""
-    property string text2: ""
-    property string totalDistance: ""
-    property string eta: ""
-    property string timeToDestination: ""
-    property var turnIcon
-    property var nextTurnIcon
+#include <QThread>
 
-    property real distanceToManeuver: 0
-    property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
-    property int appID: -1
-}
+class NamedPipeNotifier : public QThread {
+Q_OBJECT
+Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
+    QString name_;
+public:
+    explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {
+    }
+    const QString& name(void) const {
+        return name_;
+    }
+    void set_name(const QString& name) {
+        if (name_ != name) {
+            name_ = name;
+            emit nameChanged();
+        }
+    }
+protected:
+    virtual void run(void);
+signals:
+    void nameChanged(void);
+    void readyRead(void);
+    void openFailed(void);
+};
+
+#endif

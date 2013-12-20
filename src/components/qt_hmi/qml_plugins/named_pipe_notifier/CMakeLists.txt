@@ -28,14 +28,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- DBus plugin
-add_subdirectory(./dbus_adapter)
+cmake_minimum_required(VERSION 2.8.9)
 
-# --- Hmi Framework plugin
-add_subdirectory(./hw_buttons)
+set(CMAKE_AUTOMOC ON)
 
-# --- Log4cxx plugin
-add_subdirectory(./log4cxx)
+set(SOURCES
+  named_pipe_notifier.cc
+  named_pipe_notifier_plugin.cc
+)
 
-# --- NamedPipeNotifier plugin
-add_subdirectory(./named_pipe_notifier)
+set(target NamedPipeNotifier)
+
+add_library(${target} SHARED ${SOURCES})
+
+qt5_use_modules(${target} Core Qml)
+
+set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model)
+set(destination ${model_dir}/com/ford/sdl/hmi/named_pipe_notifier)
+
+install(TARGETS ${target}
+  DESTINATION ${destination}
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+install(FILES qmldir DESTINATION ${destination})
+
+add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
+add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.named_pipe_notifier 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null || true)
