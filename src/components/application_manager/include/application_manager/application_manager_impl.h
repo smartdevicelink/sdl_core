@@ -45,14 +45,15 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
-#include "media_manager/media_manager_impl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
-#include "mobile_message_handler/mobile_message_observer.h"
+
+#ifdef MEDIA_MANAGER
+#include "media_manager/media_manager_impl.h"
+#endif
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-
 
 #include "formatters/CSmartFactory.hpp"
 
@@ -60,11 +61,17 @@
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
+#include "protocol_handler/service_type.h"
+
 #include "utils/macro.h"
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
@@ -108,12 +115,83 @@ typedef std::map<unsigned int, HMIRequest> MobileRequest;
  */
 typedef std::map<unsigned int, MobileRequest> MessageChain;
 
+class ApplicationManagerImpl;
+
+namespace impl {
+using namespace threads;
+
+/*
+ * These dummy classes are here to locally impose strong typing on different
+ * kinds of messages
+ * Currently there is no type difference between incoming and outgoing messages
+ * And due to ApplicationManagerImpl works as message router it has to distinguish
+ * messages passed from it's different connection points
+ * TODO(ik): replace these with globally defined message types
+ * when we have them.
+ */
+struct MessageFromMobile: public utils::SharedPtr<Message> {
+  explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+struct MessageToMobile: public utils::SharedPtr<Message> {
+  explicit MessageToMobile(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageToMobile& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+struct MessageFromHmi: public utils::SharedPtr<Message> {
+  explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageFromHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+struct MessageToHmi: public utils::SharedPtr<Message> {
+  explicit MessageToHmi(const utils::SharedPtr<Message>& message):
+    utils::SharedPtr<Message>(message) {}
+  // This method is used by priority queue to decide which
+  // message should be popped out of the queue first
+  // "smaller" things go out of std::priority_queue first
+  bool operator <(const MessageToHmi& that) const {
+    return (*this)->HasHigherPriorityThan(*that);
+  }
+};
+
+// Short type names for proiritized message queues
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageFromMobile> > FromMobileQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageToMobile> > ToMobileQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+typedef threads::MessageLoopThread<
+               std::priority_queue<MessageToHmi> > ToHmiQueue;
+}
+
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
-  public mobile_message_handler::MobileMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
-  public HMICapabilities {
+  public impl::FromMobileQueue::Handler,
+  public impl::ToMobileQueue::Handler,
+  public impl::FromHmiQueue::Handler,
+  public impl::ToHmiQueue::Handler {
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -129,12 +207,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    /**
-     * @brief Checks if all HMI capabilities received
-     *
-     * @return TRUE if all information received, otherwise FALSE
-     */
-    bool IsHMICapabilitiesInitialized();
+    HMICapabilities& hmi_capabilities();
 
     Application* RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -142,18 +215,32 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
-     *
-     * @return operation result
      */
-    bool UnregisterApplication(int app_id);
+    bool UnregisterApplication(const unsigned int& app_id);
+
+    /*
+     * @brief Checks if application with app_id registered
+     *
+     * @param app_id Application id
+     *
+     * @return true if application registered false if it is not
+     */
+    bool IsApplicationRegistered(int app_id);
+
+    /*
+     * @brief Sets unregister reason for closing all registered applications
+     * duringHU switching off
+     *
+     * @param reason Describes the reason for HU switching off
+     */
+    void SetUnregisterAllApplicationsReason(
+        mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
     /*
      * @brief Closes all registered applications
-     *
-     * @param hmi_off Describes if the reason for exiting
-     *  applications was HU switching off
      */
-    void UnregisterAllApplications(bool hmi_off = false);
+    void UnregisterAllApplications();
+
     bool RemoveAppDataFromHMI(Application* application);
     bool LoadAppDataToHMI(Application* application);
     bool ActivateApplication(Application* application);
@@ -262,56 +349,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     void set_vr_session_started(const bool& state);
 
     /*
-     * @brief Retrieves currently active UI language
-     *
-     * @return Currently active UI language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_ui_language() const;
-
-    /*
-     * @brief Sets currently active UI language
-     *
-     * @param language Currently active UI language
-     */
-    void set_active_ui_language(const hmi_apis::Common_Language::eType& language);
-
-    /*
-     * @brief Retrieves currently active VR language
-     *
-     * @return Currently active VR language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_vr_language() const;
-
-    /*
-     * @brief Sets currently active VR language
-     *
-     * @param language Currently active VR language
-     */
-    void set_active_vr_language(const hmi_apis::Common_Language::eType& language);
-
-    /*
-     * @brief Retrieves currently active TTS language
-     *
-     * @return Currently active TTS language
-     */
-    inline const hmi_apis::Common_Language::eType&
-    active_tts_language() const;
-
-    /*
-     * @brief Sets currently active TTS language
-     *
-     * @param language Currently active TTS language
-     */
-    void set_active_tts_language(
-      const hmi_apis::Common_Language::eType& language);
-
-    void set_vehicle_type(const smart_objects::SmartObject& vehicle_type);
-
-    const smart_objects::SmartObject* vehicle_type() const;
-
-    /*
      * @brief Retrieves SDL access to all mobile apps
      *
      * @return Currently active state of the access
@@ -351,17 +388,12 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
-    virtual void set_is_vr_cooperating(bool value);
-    virtual void set_is_tts_cooperating(bool value);
-    virtual void set_is_ui_cooperating(bool value);
-    virtual void set_is_navi_cooperating(bool value);
-    virtual void set_is_ivi_cooperating(bool value);
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
-    void set_mobile_message_handler(
-      mobile_message_handler::MobileMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
+    virtual void set_policy_manager(policies::PolicyManager* policy_manager);
+    void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////
 
@@ -376,16 +408,6 @@ class ApplicationManagerImpl : public ApplicationManager,
       const utils::SharedPtr<smart_objects::SmartObject>& message);
 
     /////////////////////////////////////////////////////////
-    /*
-     * @brief Overridden mobile message handler method
-     * for incoming mobile messages
-     *
-     * @param message Incoming mobile message
-     *
-     */
-    virtual void OnMobileMessageReceived(const MobileMessage& message);
-
-
     /*
      * @brief Overriden ProtocolObserver method
      */
@@ -407,11 +429,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int session_key,
                                   int first_session_key,
-                                  connection_handler::ServiceType type);
+                                  protocol_handler::ServiceType type);
 
     void OnSessionEndedCallback(int session_key,
                                 int first_session_key,
-                                connection_handler::ServiceType type);
+                                protocol_handler::ServiceType type);
 
     /**
      * @ Add notification to collection
@@ -504,6 +526,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                             smart_objects::SmartObject& output);
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
+    utils::SharedPtr<Message> ConvertRawMsgToMessage(
+      const protocol_handler::RawMessagePtr& message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
@@ -511,10 +535,29 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveMobileRequestFromMessageChain(unsigned int mobile_correlation_id,
         unsigned int connection_key);
 
-    /**
-     * @brief Unregister application in SDL
+    /*
+     * @brief Save unregistered applications info to the file system
      */
-    void UnregisterAppInterface(const unsigned int& app_id);
+    void SaveApplications() const;
+
+    // threads::MessageLoopThread<*>::Handler implementations
+    /*
+     * @brief Handles for threads pumping different types
+     * of messages. Beware, each is called on different thread!
+     */
+    // CALLED ON messages_from_mobile_ thread!
+    virtual void Handle(const impl::MessageFromMobile& message) OVERRIDE;
+
+    // CALLED ON messages_to_mobile_ thread!
+    virtual void Handle(const impl::MessageToMobile& message) OVERRIDE;
+
+    // CALLED ON messages_from_hmi_ thread!
+    virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+
+    // CALLED ON messages_to_hmi_ thread!
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+
+  private:
 
     // members
     /**
@@ -544,40 +587,43 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
-    hmi_apis::Common_Language::eType ui_language_;
-    hmi_apis::Common_Language::eType vr_language_;
-    hmi_apis::Common_Language::eType tts_language_;
-    smart_objects::SmartObject* vehicle_type_;
-    media_manager::MediaManager* media_manager_;
+#ifdef MEDIA_MANAGER
+  media_manager::MediaManager* media_manager_;
+#endif
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
-    mobile_message_handler::MobileMessageHandler* mobile_handler_;
-    connection_handler::ConnectionHandler* connection_handler_;
+    connection_handler::ConnectionHandler*  connection_handler_;
+    protocol_handler::ProtocolHandler*      protocol_handler_;
+    policies::PolicyManager*                policy_manager_;
+    request_controller::RequestController   request_ctrl_;
+    HMICapabilities                         hmi_capabilities_;
 
-
+    // TODO(YS): Remove old implementation
     policies_manager::PoliciesManager policies_manager_;
 
-    MessageQueue<utils::SharedPtr<Message>> messages_from_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_mobile_;
-    MessageQueue<utils::SharedPtr<Message>> messages_from_hmh_;
-    MessageQueue<utils::SharedPtr<Message>> messages_to_hmh_;
-
-    threads::Thread* from_mobile_thread_;
-    friend class FromMobileThreadImpl;
-    threads::Thread* to_mobile_thread_;
-    friend class ToMobileThreadImpl;
-    threads::Thread* from_hmh_thread_;
-    friend class FromHMHThreadImpl;
-    threads::Thread* to_hmh_thread_;
-    friend class ToHMHThreadImpl;
-
-    hmi_apis::HMI_API* hmi_so_factory_;
-    mobile_apis::MOBILE_API* mobile_so_factory_;
+    hmi_apis::HMI_API*                      hmi_so_factory_;
+    mobile_apis::MOBILE_API*                mobile_so_factory_;
 
     static log4cxx::LoggerPtr logger_;
     static unsigned int message_chain_current_id_;
     static const unsigned int message_chain_max_id_;
-    request_controller::RequestController         request_ctrl;
+
+    // The reason of HU shutdown
+    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
+
+    // Construct message threads when everything is already created
+
+    // Thread that pumps messages coming from mobile side.
+    impl::FromMobileQueue messages_from_mobile_;
+    // Thread that pumps messages being passed to mobile side.
+    impl::ToMobileQueue messages_to_mobile_;
+    // Thread that pumps messages coming from HMI.
+    impl::FromHmiQueue messages_from_hmi_;
+    // Thread that pumps messages being passed to HMI.
+    impl::ToHmiQueue messages_to_hmi_;
+
+    // Lock for applications list
+    sync_primitives::Lock applications_list_lock_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
@@ -592,21 +638,6 @@ bool ApplicationManagerImpl::vr_session_started() const {
 
 bool ApplicationManagerImpl::driver_distraction() const {
   return is_distracting_driver_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_ui_language() const {
-  return ui_language_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_vr_language() const {
-  return vr_language_;
-}
-
-inline const hmi_apis::Common_Language::eType&
-ApplicationManagerImpl::active_tts_language() const {
-  return tts_language_;
 }
 
 inline bool ApplicationManagerImpl::all_apps_allowed() const {

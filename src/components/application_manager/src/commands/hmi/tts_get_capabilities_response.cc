@@ -47,7 +47,10 @@ TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {
 void TTSGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSGetCapabilitiesResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_speech_capabilities(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_speech_capabilities(
    (*message_)[strings::msg_params][hmi_response::capabilities]);
 }
 

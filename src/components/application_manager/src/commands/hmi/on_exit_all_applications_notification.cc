@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
+#include "utils/signals.h"
 
 namespace application_manager {
 
@@ -52,7 +53,33 @@ void OnExitAllApplicationsNotification::Run() {
       static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
 
-  ApplicationManagerImpl::instance()->UnregisterAllApplications(reason);
+  mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
+      mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
+
+  switch (reason) {
+    case hmi_apis::Common_ApplicationsCloseReason::IGNITION_OFF: {
+      mob_reason = mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF;
+      break;
+    }
+    case hmi_apis::Common_ApplicationsCloseReason::MASTER_RESET: {
+      mob_reason = mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET;
+      break;
+    }
+    case hmi_apis::Common_ApplicationsCloseReason::FACTORY_DEFAULTS: {
+      mob_reason = mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS;
+      break;
+    }
+    default : {
+      LOG4CXX_ERROR(logger_, "Unkown Application close reason" << reason);
+      return;
+    }
+  }
+
+  ApplicationManagerImpl::instance()->SetUnregisterAllApplicationsReason(
+      mob_reason);
+
+  // notify life cycle to stop SDL
+  utils::ForwardSignal();
 }
 
 }  // namespace commands

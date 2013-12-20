@@ -58,6 +58,8 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    **/
   virtual ~PerformAudioPassThruRequest();
 
+  bool Init();
+
   /**
    * @brief Execute command
    **/

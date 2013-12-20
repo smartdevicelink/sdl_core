@@ -38,23 +38,13 @@
 
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
+#include "protocol_handler/service_type.h"
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
-
-/**
-  * \brief Enum describing possible types of sessions: RPC for API messages,
-  Navi for video streaming.
-  */
-enum ServiceType {
-  kUnknownSession = -1,
-  kRPCSession = 0x07,
-  kNaviSession = 0x0B,
-  kBulkSession = 0x0F
-};
 
 /**
  * \class ConnectionHandlerObserver
@@ -91,8 +81,10 @@ class ConnectionHandlerObserver {
      * \param firstSessionKey Session key of first session in this connection.
      */
     virtual bool OnSessionStartedCallback(
-      connection_handler::DeviceHandle device_handle, int session_key,
-      int first_session_key, ServiceType type = ServiceType::kRPCSession) = 0;
+        connection_handler::DeviceHandle device_handle, int session_key,
+        int first_session_key,
+        protocol_handler::ServiceType type =
+            protocol_handler::kRpc) = 0;
 
     /**
      * \brief Callback function used by connection_handler
@@ -103,7 +95,8 @@ class ConnectionHandlerObserver {
     virtual void OnSessionEndedCallback(
       int session_key,
       int first_session_key,
-      ServiceType type = ServiceType::kRPCSession) = 0;
+      protocol_handler::ServiceType type =
+          protocol_handler::kRpc) = 0;
 
   protected:
     /**

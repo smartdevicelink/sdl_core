@@ -706,7 +706,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	}
 
 	@Override
-	public void onProxyClosed(String info, Exception e) {
+	public void onProxyClosed(final String info, Exception e) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e);
 		else Log.e(TAG, "onProxyClosed: " + info, e);
@@ -721,7 +721,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				mainActivity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						mainActivity.onProxyClosed();
+						mainActivity.onProxyClosed(info);
 					}
 				});
 			} else {
@@ -1409,7 +1409,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         Log.i(TAG, "onAppUnregisteredAfterLanguageChange " + msg.toString());
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         final String message =
-                String.format("reregistering with languages %s/%s",
+                String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
                         msg.getLanguage(), msg.getHmiDisplayLanguage());
         if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
         else Log.i(TAG, message);

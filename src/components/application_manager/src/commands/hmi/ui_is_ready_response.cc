@@ -45,16 +45,17 @@ UIIsReadyResponse::~UIIsReadyResponse() {
 
 void UIIsReadyResponse::Run() {
   LOG4CXX_INFO(logger_, "UIIsReadyResponse::Run");
-
-  DCHECK(message_);
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;
-
   if (object[strings::msg_params].keyExists(strings::available)) {
     is_available = object[strings::msg_params][strings::available].asBool();
   }
-  ApplicationManagerImpl::instance()->set_is_ui_cooperating(is_available);
+
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_is_ui_cooperating(is_available);
 }
 
 }  // namespace commands

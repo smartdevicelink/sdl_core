@@ -148,7 +148,7 @@ void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
     return;
   }
 
-  application_manager::Message* message = new application_manager::Message;
+  application_manager::Message* message = new application_manager::Message(protocol_handler::MessagePriority::kDefault);//todo: ykazakov constant is a temp solution to finish merge MessagePriority::FromServiceType(message.servicetype) shall be used instead
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);

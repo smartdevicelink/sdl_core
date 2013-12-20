@@ -68,8 +68,10 @@ void MockDeviceScanner::Terminate() {
 
 void MockDeviceScanner::reset() {
   is_search_failed_ = false;
-  for (auto d : devices_) {
-    static_cast<MockDevice*>(d.get())->Stop();
+  for (DeviceVector::iterator it = devices_.begin();
+      it != devices_.end();
+      ++it) {
+    static_cast<MockDevice*>(it->get())->Stop();
   }
   devices_.clear();
 }
@@ -100,3 +102,5 @@ void MockDeviceScanner::RemoveDevice(const std::string& name) {
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
+
+// vim: set ts=2 sw=2 et:

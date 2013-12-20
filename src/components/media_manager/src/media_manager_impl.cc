@@ -32,12 +32,16 @@
 
 #include "config_profile/profile.h"
 #include "media_manager/media_manager_impl.h"
-#include "media_manager/a2dp_source_player_adapter.h"
-#include "media_manager/from_mic_recorder_adapter.h"
 #include "media_manager/from_mic_recorder_listener.h"
 #include "media_manager/video_streamer_listener.h"
+#if defined(DEFAULT_MEDIA)
+#include "media_manager/a2dp_source_player_adapter.h"
+#include "media_manager/from_mic_recorder_adapter.h"
 #include "./socket_video_streamer_adapter.h"
 #include "./pipe_video_streamer_adapter.h"
+#else
+#include "./video_stream_to_file_adapter.h"
+#endif
 
 namespace media_manager {
 
@@ -90,13 +94,15 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new PipeVideoStreamerAdapter();
   }
+#else
+  video_streamer_ = new VideoStreamToFileAdapter(
+    profile::Profile::instance()->video_stream_file());
 #endif
   video_streamer_listener_ = new VideoStreamerListener();
-#if defined(DEFAULT_MEDIA)
+
   if (NULL != video_streamer_) {
     video_streamer_->AddListener(video_streamer_listener_);
   }
-#endif
 }
 
 void MediaManagerImpl::PlayA2DPSource(int application_key) {
@@ -117,9 +123,10 @@ void MediaManagerImpl::StartMicrophoneRecording(
   int application_key,
   const std::string& output_file,
   int duration) {
-  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording");
-  from_mic_listener_ = new FromMicRecorderListener(output_file);
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
+               << output_file);
 #if defined(DEFAULT_MEDIA)
+  from_mic_listener_ = new FromMicRecorderListener(output_file);
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -128,6 +135,9 @@ void MediaManagerImpl::StartMicrophoneRecording(
     ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
   }
+#else
+  const char* predefined_rec_file = "audio.8bit.wav";
+  from_mic_listener_ = new FromMicRecorderListener(predefined_rec_file);
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }
@@ -161,8 +171,8 @@ void MediaManagerImpl::StopVideoStreaming(int application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
-  DCHECK(!(!message));
-  if (message->is_fully_binary()) {
+  if (message->service_type()
+      == protocol_handler::kMovileNav) {
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
     }

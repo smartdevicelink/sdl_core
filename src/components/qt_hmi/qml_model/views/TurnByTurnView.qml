@@ -78,13 +78,13 @@ GeneralView {
                     }
 
                     Repeater {
-                        model: dataContainer.navigationModel.softButtons ?
-                                   dataContainer.navigationModel.softButtons.count :
+                        model: dataContainer.currentApplication.navigationSoftButtons ?
+                                   dataContainer.currentApplication.navigationSoftButtons.count :
                                    0
                         delegate:
                             SoftButton {
-                                appId: dataContainer.navigationModel.appId
-                                button: dataContainer.navigationModel.softButtons.get(index)
+                                appId: dataContainer.currentApplication.appId
+                                button: dataContainer.currentApplication.navigationSoftButtons.get(index)
                        }
                     }
                 }
@@ -104,11 +104,11 @@ GeneralView {
                     height: 3/4 * parent.height
                     spacing: Constants.margin
 
-                    Image {
+                    Icon {
                         id: image
                         height: parent.height
                         width: height
-                        source: dataContainer.navigationModel.turnIcon
+                        source: dataContainer.currentApplication.navigationModel.turnIcon
                     }
 
                     Column {
@@ -123,45 +123,45 @@ GeneralView {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: Constants.primaryColor
-                            text: dataContainer.navigationModel.text1
+                            text: dataContainer.currentApplication.navigationModel.text1
                             font.pixelSize: Constants.fontSize
-                            visible: dataContainer.navigationModel.text1
+                            visible: dataContainer.currentApplication.navigationModel.text1
                         }
 
                         Text {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: Constants.primaryColor
-                            text: dataContainer.navigationModel.text2
+                            text: dataContainer.currentApplication.navigationModel.text2
                             font.pixelSize: Constants.fontSize
-                            visible: dataContainer.navigationModel.text2
+                            visible: dataContainer.currentApplication.navigationModel.text2
                         }
 
                         Text {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: Constants.primaryColor
-                            text: "Total distance: " + dataContainer.navigationModel.totalDistance
+                            text: "Total distance: " + dataContainer.currentApplication.navigationModel.totalDistance
                             font.pixelSize: Constants.fontSize
-                            visible: dataContainer.navigationModel.totalDistance
+                            visible: dataContainer.currentApplication.navigationModel.totalDistance
                         }
 
                         Text {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: Constants.primaryColor
-                            text: "Time to destination: " + dataContainer.navigationModel.timeToDestination
+                            text: "Time to destination: " + dataContainer.currentApplication.navigationModel.timeToDestination
                             font.pixelSize: Constants.fontSize
-                            visible: dataContainer.navigationModel.timeToDestination
+                            visible: dataContainer.currentApplication.navigationModel.timeToDestination
                         }
 
                         Text {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: Constants.primaryColor
-                            text: "ETA: " + dataContainer.navigationModel.eta
+                            text: "ETA: " + dataContainer.currentApplication.navigationModel.eta
                             font.pixelSize: Constants.fontSize
-                            visible: dataContainer.navigationModel.eta
+                            visible: dataContainer.currentApplication.navigationModel.eta
                         }
                     }
                 }
@@ -175,7 +175,8 @@ GeneralView {
                        id: coveredDistance
                        anchors.verticalCenter: parent.verticalCenter
                        height: Constants.distanceBarHeight
-                       width: dataContainer.navigationModel.distanceToManeuver / dataContainer.navigationModel.distanceToManeuverScale * parent.width
+                       width: dataContainer.currentApplication.navigationModel.distanceToManeuver /
+                              dataContainer.currentApplication.navigationModel.distanceToManeuverScale * parent.width
                        color: "white"
                     }
 

@@ -9,19 +9,22 @@ include_directories (
   ../protocol_handler/include
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/MessageBroker/include
+  ../config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}/
 )
 
+set (DBUS_SOURCE)
+IF (${QT_HMI})
+set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
+ENDIF (${QT_HMI})
 set (SOURCES
 ./src/hmi_message_handler_impl.cc
 ./src/messagebroker_adapter.cc
 ./src/hmi_message_adapter.cc
-./src/to_hmi_thread_impl.cc
-./src/from_hmi_thread_impl.cc
-./src/dbus_message_adapter.cc
+${DBUS_SOURCE}
 )
 
 IF (${QT_HMI})

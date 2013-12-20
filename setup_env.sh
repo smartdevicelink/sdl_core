@@ -144,7 +144,7 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
-#INSTALL_CMAKE becomes "true" if no cmake or lower version "2.8.9"
+#INSTALL_CMAKE becomes "true" if no cmake  at all or lower version "2.8.9" is present
 INSTALL_CMAKE=false
 
 if dpkg -s cmake | grep installed > /dev/null; then		

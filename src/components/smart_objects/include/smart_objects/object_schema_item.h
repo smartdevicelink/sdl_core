@@ -39,6 +39,7 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 /**
@@ -123,7 +124,7 @@ class CObjectSchemaItem : public ISchemaItem {
   virtual ~CObjectSchemaItem() {
   }
 
- private:
+ protected:
   /**
    * @brief Constructor.
    *

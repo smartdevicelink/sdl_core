@@ -47,7 +47,10 @@ VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {
 void VRGetCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "VRGetCapabilitiesResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_vr_capabilities(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_vr_capabilities(
     (*message_)[strings::msg_params][strings::vr_capabilities]);
 }
 

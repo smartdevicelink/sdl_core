@@ -43,19 +43,14 @@ namespace transport_adapter {
 
 class UsbDevice : public Device {
  public:
-  UsbDevice(libusb_device* libusb_device, const std::string& name,
+  UsbDevice(PlatformUsbDevice* usb_device, const std::string& name,
             const DeviceUID& unique_device_id)
-      : Device(name, unique_device_id),
-        usb_device_(libusb_device) {
-  }
+      : Device(name, unique_device_id), usb_device_(usb_device) {}
 
-  libusb_device* usb_device() const {
-    return usb_device_;
-  }
+  PlatformUsbDevice* usb_device() const { return usb_device_; }
 
  protected:
-  virtual ~UsbDevice() {
-  }
+  virtual ~UsbDevice() {}
 
   virtual bool IsSameAs(const Device* other_device) const {
     return unique_device_id() == other_device->unique_device_id();
@@ -68,10 +63,10 @@ class UsbDevice : public Device {
   }
 
  private:
-  libusb_device* usb_device_;
+  PlatformUsbDevice* usb_device_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE

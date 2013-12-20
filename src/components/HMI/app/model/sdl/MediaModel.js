@@ -37,6 +37,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
             this._super();
 
+            var subscribeVIData = {};
+
+            for (var key in SDL.SDLVehicleInfoModel.vehicleData) {
+                subscribeVIData[key] = false;
+            }
+
+            this.set('subscribedData', subscribeVIData);
+
             // init properties here
             this.set('appInfo', Em.Object.create({
                 field1       : '<field1>',
@@ -55,6 +63,11 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 alignment    : "text-align:center"
             }));
 
+            this.set('activeRequests', Em.Object.create({
+                uiPerformInteraction: null
+            }));
+
+            this.set('tbtActivate', false);
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);

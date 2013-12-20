@@ -69,6 +69,10 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    */
   virtual void OnDeviceFound(const DeviceInfo& device_info) {
   }
+  virtual void OnDeviceAdded(const DeviceInfo& device_info) {
+  }
+  virtual void OnDeviceRemoved(const DeviceInfo& device_info) {
+  }
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.
@@ -168,7 +172,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend() {
+  virtual void OnTMMessageSend(const RawMessageSptr message) {
   }
 
   /**

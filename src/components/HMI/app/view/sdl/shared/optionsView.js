@@ -65,39 +65,43 @@ SDL.OptionsView = SDL.SDLAbstractView.create({
          */
 
         refreshItems: function() {
-            var commands = SDL.SDLAppController.model.get('currentCommandsList'), 
-                i, 
-                len,
-                template;
 
-            this.items = [];
+            if (SDL.SDLAppController.model) {
 
-            len = commands.length;
+                var commands = SDL.SDLAppController.model.get('currentCommandsList'),
+                    i,
+                    len,
+                    template;
 
-            for(i = 0; i < len; i++){
-                
-                if(commands[i].menuID >= 0){
-                    template = 'arrow';
-                }else{
-                    template = commands[i].icon ? 'rightText' : 'text';
-                }
-                
-                this.items.push({
-                    type: SDL.Button,
-                    params: {
-                        templateName: template,
-                        text: commands[i].name,
-                        commandID: commands[i].commandID,
-                        menuID: commands[i].menuID,
-                        icon: commands[i].icon,
-                        target: 'SDL.SDLAppController',
-                        action: 'onCommand',
-                        onDown: false
+                this.items = [];
+
+                len = commands.length;
+
+                for(i = 0; i < len; i++){
+
+                    if(commands[i].menuID >= 0){
+                        template = 'arrow';
+                    }else{
+                        template = commands[i].icon ? 'rightText' : 'text';
                     }
-                })
-            }
 
-            this.list.refresh();
+                    this.items.push({
+                        type: SDL.Button,
+                        params: {
+                            templateName: template,
+                            text: commands[i].name,
+                            commandID: commands[i].commandID,
+                            menuID: commands[i].menuID,
+                            icon: commands[i].icon,
+                            target: 'SDL.SDLAppController',
+                            action: 'onCommand',
+                            onDown: false
+                        }
+                    })
+                }
+
+                this.list.refresh();
+            }
 
         }.observes('SDL.SDLAppController.model.currentSubMenuId', 'SDL.SDLAppController.model.currentCommandsList.@each')
     }),

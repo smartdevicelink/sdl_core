@@ -87,10 +87,6 @@ class MobileMessageHandlerTester :
      */
     void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) {}
 
-    unsigned int GetPacketSize(unsigned int size, unsigned char* data) {
-      return 0;
-    }
-
     void SendFramesNumber(int connection_key, int number_of_frames) {}
 
     MobileMessageHandlerTester()
@@ -100,7 +96,7 @@ class MobileMessageHandlerTester :
     bool init(const MobileMessage& message) {
       message_ = message;
       mmh_ = mobile_message_handler::MobileMessageHandlerImpl::instance();
-      DCHECK(mmh_);
+      DCHECK(mmh_ != NULL);
 
       return true;
     }
@@ -137,7 +133,7 @@ class MobileMessageHandlerTestObserverThread : public threads::ThreadDelegate {
     void threadMain() {
       mobile_message_handler::MobileMessageHandlerImpl* mmh =
         mobile_message_handler::MobileMessageHandlerImpl::instance();
-      DCHECK(mmh);
+      DCHECK(mmh != NULL);
 
       mmh->SendMessageToMobileApp(message_);
       sync_primitives::AutoLock auto_lock(lock);
@@ -171,7 +167,7 @@ TEST(mobile_message_handler_test, component_test) {
 
   mobile_message_handler::MobileMessageHandlerImpl* mmh =
     mobile_message_handler::MobileMessageHandlerImpl::instance();
-  DCHECK(mmh);
+  DCHECK(mmh != NULL);
   mmh->set_protocol_handler(&observer);
   mmh->AddMobileMessageListener(&observer);
 

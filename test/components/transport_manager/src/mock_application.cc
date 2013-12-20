@@ -58,7 +58,7 @@ void *applicationWorker(void *p) {
   }
   delete[] buf;
   delete data;
-  return nullptr;
+  return NULL;
 }
 
 void * applicationListener(void *p) {
@@ -70,7 +70,7 @@ void * applicationListener(void *p) {
   app->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (app->sockfd == -1) {
     // TODO: indicate error
-    return nullptr;
+    return NULL;
   }
   sockaddr_un my_addr;
   memset(&my_addr, 0, sizeof(my_addr));
@@ -79,12 +79,12 @@ void * applicationListener(void *p) {
   int res = bind(app->sockfd, reinterpret_cast<sockaddr*>(&my_addr),
                  sizeof(my_addr));
   if (res == -1) {
-    return nullptr;
+    return NULL;
   }
 
   res = listen(app->sockfd, 5);
   if (res == -1) {
-    return nullptr;
+    return NULL;
   }
 
   pthread_mutex_lock(&app->ready_mutex);
@@ -101,13 +101,13 @@ void * applicationListener(void *p) {
       pthread_t t;
       workerData* data = new workerData();
       data->sockfd = peer_socket;
-      pthread_create(&t, nullptr, &applicationWorker, data);
+      pthread_create(&t, NULL, &applicationWorker, data);
     }
   }
 
   unlink(app->socket_name().c_str());
 
-  return nullptr;
+  return NULL;
 }
 }
 
@@ -128,8 +128,8 @@ MockApplication::MockApplication(const MockDevice *device, ApplicationHandle id)
 
 void MockApplication::Start() {
 
-  pthread_cond_init(&ready_cond, nullptr);
-  pthread_mutex_init(&ready_mutex, nullptr);
+  pthread_cond_init(&ready_cond, NULL);
+  pthread_mutex_init(&ready_mutex, NULL);
 
   pthread_mutex_lock(&ready_mutex);
   pthread_create(&workerThread, NULL, &applicationListener, this);
@@ -141,7 +141,7 @@ void MockApplication::Stop() {
   active = false;
   shutdown(sockfd, SHUT_RDWR);
   close(sockfd);
-  pthread_join(workerThread, nullptr);
+  pthread_join(workerThread, NULL);
 }
 
 }  // namespace transport_manager

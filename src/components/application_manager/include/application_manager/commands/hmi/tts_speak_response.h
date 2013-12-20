@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_SPEAK_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
-#include "application_manager/commands/tts_interface.h"
 
 namespace application_manager {
 
@@ -44,8 +43,7 @@ namespace commands {
  * @brief TTSSpeakResponse command class
  **/
 class TTSSpeakResponse
-    : public ResponseFromHMI,
-      public TTSInterface {
+    : public ResponseFromHMI {
  public:
   /**
    * @brief TTSSpeakResponse class constructor

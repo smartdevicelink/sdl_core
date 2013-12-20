@@ -39,13 +39,15 @@
 namespace request_watchdog {
 
 struct RequestInfo {
-  RequestInfo(int FunctionId, int ConnectionID
-            , int CorrelationId, int CustomTimeout);
+  RequestInfo(const int& function_id, const int& connection_id,
+              const int& correlation_id, const int& custom_timeout,
+              const int& app_hmi_level);
 
   int functionID_;
   int connectionID_;
   int correlationID_;
   int customTimeout_;
+  int app_hmi_level_;
   bool delayed_delete_;
 
   friend bool operator==(const RequestInfo& left, const RequestInfo& right);

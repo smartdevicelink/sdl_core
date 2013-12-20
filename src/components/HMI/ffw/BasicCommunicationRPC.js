@@ -390,14 +390,13 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         ExitApplication: function(appID) {
 
-            Em.Logger.log("FFW.BasicCommunication.ExitApplication");
+            Em.Logger.log("FFW.BasicCommunication.OnExitApplication");
 
             // send request
 
             var JSONMessage = {
-                "id": this.client.idStart,
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.ExitApplication",
+                "method": "BasicCommunication.OnExitApplication",
                 "params": {
                     "appID": appID
                 }
@@ -412,14 +411,13 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         ExitAllApplications: function(reason) {
 
-            Em.Logger.log("FFW.BasicCommunication.ExitAllApplicationsResponse");
+            Em.Logger.log("FFW.BasicCommunication.OnExitAllApplications");
 
             // send request
 
             var JSONMessage = {
-                "id": this.getAppListRequestID,
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.ExitAllApplications",
+                "method": "BasicCommunication.OnExitAllApplications",
                 "params": {
                     "reason": reason
                 }

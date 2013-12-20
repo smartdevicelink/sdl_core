@@ -158,11 +158,14 @@ void ResetGlobalPropertiesRequest::Run() {
       key_board_properties[hmi_request::keyboard_layout] = hmi_apis::
           Common_KeyboardLayout::QWERTY;
       key_board_properties[hmi_request::send_dynamic_entry] = false;
-      smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(
+
+      // Look for APPLINK-4432 for details.
+      /*smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(
             smart_objects::SmartType_Array);
       limited_character_list[0] = "";
       key_board_properties[hmi_request::limited_character_list] =
-        limited_character_list;
+        limited_character_list;*/
+
       key_board_properties[hmi_request::auto_complete_text] = "";
       msg_params[hmi_request::keyboard_properties] = key_board_properties;
     }

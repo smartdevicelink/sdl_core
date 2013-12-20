@@ -37,10 +37,10 @@
 
 namespace transport_manager {
 
-TransportAdapterEvent::TransportAdapterEvent(int type, TransportAdapterSptr transport_adapter,
-                                       const DeviceUID &device_handle,
-                                       const ApplicationHandle& application_id,
-                                       RawMessageSptr data, BaseError *error)
+TransportAdapterEvent::TransportAdapterEvent(
+    int type, transport_adapter::TransportAdapter *transport_adapter,
+    const DeviceUID &device_handle, const ApplicationHandle &application_id,
+    RawMessageSptr data, BaseError *error)
     : event_type_(type),
       application_id_(application_id),
       transport_adapter_(transport_adapter),
@@ -49,15 +49,12 @@ TransportAdapterEvent::TransportAdapterEvent(int type, TransportAdapterSptr tran
   set_error(error);
 }
 
-TransportAdapterEvent::~TransportAdapterEvent() {
-}
+TransportAdapterEvent::~TransportAdapterEvent() {}
 
-void TransportAdapterEvent::set_event_type(int type) {
-  event_type_ = type;
-}
+void TransportAdapterEvent::set_event_type(int type) { event_type_ = type; }
 
 void TransportAdapterEvent::set_transport_adapter(
-    transport_adapter::TransportAdapterSptr transport_adapter) {
+    transport_adapter::TransportAdapter *transport_adapter) {
   transport_adapter_ = transport_adapter;
 }
 void TransportAdapterEvent::set_data(RawMessageSptr data) {
@@ -68,21 +65,18 @@ void TransportAdapterEvent::set_error(BaseError *error) {
   event_error_ = error;
 }
 
-int TransportAdapterEvent::event_type(void) const {
-  return event_type_;
-}
+int TransportAdapterEvent::event_type(void) const { return event_type_; }
 
 ApplicationHandle TransportAdapterEvent::application_id(void) const {
   return application_id_;
 }
 
-TransportAdapterSptr TransportAdapterEvent::transport_adapter(void) const {
+transport_adapter::TransportAdapter *TransportAdapterEvent::transport_adapter(
+    void) const {
   return transport_adapter_;
 }
 
-RawMessageSptr TransportAdapterEvent::data(void) const {
-  return event_data_;
-}
+RawMessageSptr TransportAdapterEvent::data(void) const { return event_data_; }
 
 const DeviceUID &TransportAdapterEvent::device_uid() const {
   return device_uid_;
@@ -92,24 +86,4 @@ BaseError *TransportAdapterEvent::event_error(void) const {
   return event_error_;
 }
 
-bool TransportAdapterEvent::operator ==(const TransportAdapterEvent &other) {
-  if (this->event_type_ == other.event_type_
-      && this->application_id_ == other.application_id_
-      && this->transport_adapter_ == other.transport_adapter_) {
-
-    if (!this->event_data_.valid() && !other.event_data_.valid())
-      return true;
-
-    if (this->event_data_.valid() && other.event_data_.valid()
-        && this->event_data_.get()
-            == other.event_data_.get()) {
-      return true;
-    }
-    return false;
-  } else {
-    return false;
-  }
-}
-
 }  // namespace transport_manager
-

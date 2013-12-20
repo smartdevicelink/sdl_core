@@ -766,6 +766,38 @@
   <element name="IGNORED" internal_name="VDRC_IGNORED"/>
 </enum>
 
+<enum name="VehicleDataType">
+  <description>Defines the data types that can be published and subscribed to.</description>
+  <element name="VEHICLEDATA_GPS">
+    <description>Notifies GPSData may be subscribed</description>
+  </element>
+  <element name="VEHICLEDATA_SPEED" />
+  <element name="VEHICLEDATA_RPM" />
+  <element name="VEHICLEDATA_FUELLEVEL" />
+  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+  <element name="VEHICLEDATA_FUELCONSUMPTION" />
+  <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_PRNDL" />
+  <element name="VEHICLEDATA_TIREPRESSURE" />
+  <element name="VEHICLEDATA_ODOMETER" />
+  <element name="VEHICLEDATA_BELTSTATUS" />
+  <element name="VEHICLEDATA_BODYINFO" />
+  <element name="VEHICLEDATA_DEVICESTATUS" />
+  <element name="VEHICLEDATA_ECALLINFO" />
+  <element name="VEHICLEDATA_AIRBAGSTATUS" />
+  <element name="VEHICLEDATA_EMERGENCYEVENT" />
+  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
+  <element name="VEHICLEDATA_MYKEY" />
+  <element name="VEHICLEDATA_BRAKING" />
+  <element name="VEHICLEDATA_WIPERSTATUS" />
+  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+  <element name="VEHICLEDATA_BATTVOLTAGE" />
+  <element name="VEHICLEDATA_ENGINETORQUE" />
+  <element name="VEHICLEDATA_ACCPEDAL" />
+  <element name="VEHICLEDATA_STEERINGWHEEL" />
+</enum>
+
 <enum name="WiperStatus">
   <description>Reflects the status of the wipers.</description>
   <element name="OFF">
@@ -1001,6 +1033,16 @@
     <param name="upDownAvailable" type="Boolean" mandatory="true">
         <description>The button supports "button down" and "button up". Whenever the button is pressed, onButtonEvent(DOWN) should be invoked. Whenever the button is released, onButtonEvent(UP) should be invoked.</description>
     </param>
+</struct>
+
+<struct name="VehicleDataResult">
+  <description>Individual published data request result</description>
+  <param name="dataType" type="Common.VehicleDataType">
+    <description>Defined published data element type.</description>
+  </param>
+  <param name="resultCode" type="Common.VehicleDataResultCode">
+    <description>Published data result code.</description>
+  </param>
 </struct>
 
 <struct name="TouchCoord">
@@ -1898,6 +1940,12 @@
     <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
     </param>
   </function>
+  <function name="Started" messagetype="notification">
+    <description>Must be initiated  by TTS module to let SDL know that TTS session has started.</description>
+  </function>
+  <function name="Stopped" messagetype="notification">
+    <description>Must be initiated by TTS module to let SDL know that TTS session has stopped.</description>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
@@ -1910,6 +1958,13 @@
     <description>Sets some properties for the application initiated request.</description>
     <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
+    </param>
+    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true">
+      <description>
+      	This is the intial prompt spoken to the user at the start of an interaction.
+      	An array of text chunks of type TTSChunk. See TTSChunk.
+      	The array must have at least one item.
+      </description>
     </param>
     <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
@@ -2116,12 +2171,15 @@
     <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
-    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The list of choices to be used for the interaction with the user</description>
     </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
-      <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
-      <description>If omitted on supported displays, the default system-generated help items should be used.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
     </param>
     <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
       <description>Timeout in milliseconds.</description>
@@ -2190,21 +2248,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="ShowVrHelp" messagetype="request">
-    <description>Request from SDL to show help about available VR commands.</description>
-    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-      <description>VR Help Title text.</description>
-      <description>If omitted on supported displays, the default HU system help title should be used.</description>
-    </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that concerns this RPC.</description>
-    </param>
-  </function>
-  <function name="ShowVrHelp" messagetype="response">
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notification must be initiated by HMI on user choosing menu item.</description>
@@ -2418,11 +2461,8 @@
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
     </param>
-    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
@@ -2476,7 +2516,7 @@
           navigationText1
           navigationText2
           ETA
-          totalDistance
+          totalDistance.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">

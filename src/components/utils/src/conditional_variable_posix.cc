@@ -31,6 +31,8 @@
  */
 #include "utils/conditional_variable.h"
 
+#include <errno.h>
+
 #include "utils/lock.h"
 #include "utils/logger.h"
 

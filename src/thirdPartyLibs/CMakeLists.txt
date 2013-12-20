@@ -7,5 +7,8 @@ add_subdirectory(./MessageBroker)
 # --- encryption
 add_subdirectory(./encryption)
 
-# --- LibUSB-1.0.16
+if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 add_subdirectory(./libusbx-1.0.16)
+endif()
+endif()

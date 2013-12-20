@@ -126,9 +126,7 @@ SDL.SDLAppController = Em.Object.create({
 
         SDL.SDLModel.uiShowKeyboard();
 
-        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"],
-            element.performInteractionRequestID,
-            element.choiceID);
+        FFW.UI.interactionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.choiceID);
 
         SDL.InteractionChoicesView.deactivate("SUCCESS");
     },
@@ -152,6 +150,8 @@ SDL.SDLAppController = Em.Object.create({
         }
 
         SDL.SDLAppController.onSubMenu('top');
+        SDL.SDLAppController.model.set('tbtActivate', false);
+        this.model = null;
     },
 
     /**

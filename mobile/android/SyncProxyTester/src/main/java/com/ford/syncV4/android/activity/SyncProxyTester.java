@@ -4051,9 +4051,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Called when a connection to a SYNC device has been closed.
      */
-    public void onProxyClosed() {
+    public void onProxyClosed(String message) {
         resetAdapters();
-        _msgAdapter.logMessage("Disconnected", true);
+        _msgAdapter.logMessage("Disconnected: " + message, true);
     }
 
     void sendCreateInteractionChoiceSet(Vector<Choice> choices) {

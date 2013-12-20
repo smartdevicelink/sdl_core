@@ -39,55 +39,40 @@
 #include <list>
 
 #include <pthread.h>
-#include <libusb/libusb.h>
 
 #include "transport_manager/transport_adapter/device_scanner.h"
-#include "transport_manager/usb/libusb_handler.h"
+#include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 
 namespace transport_adapter {
 
-class AoaInitSequence;
-
-struct UsbDeviceDescription {
-  libusb_device* usb_device;
-  uint16_t vid;
-  uint16_t pid;
-  uint8_t bus_number;
-  uint8_t address;
-  std::string manufacturer;
-  std::string product;
-  std::string serial_number;
-};
-
-class UsbDeviceScanner : public DeviceScanner, public LibusbListener {
+class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
  public:
   UsbDeviceScanner(class TransportAdapterController* controller);
   virtual ~UsbDeviceScanner();
+
  protected:
   virtual TransportAdapter::Error Init();
   virtual TransportAdapter::Error Scan();
   virtual void Terminate();
   virtual bool IsInitialised() const;
-  virtual void OnDeviceArrived(libusb_device* device);
-  virtual void OnDeviceLeft(libusb_device* device);
+  virtual void OnDeviceArrived(PlatformUsbDevice* device);
+  virtual void OnDeviceLeft(PlatformUsbDevice* device);
+
  private:
   void UpdateList();
-  void TurnIntoAccessoryMode(const libusb_device_descriptor& descriptor,
-                             libusb_device_handle* device_handle);
-  void GoogleAccessoryFound(libusb_device* device,
-                            const libusb_device_descriptor& descriptor,
-                            libusb_device_handle* device_handle);
+  void TurnIntoAccessoryMode(PlatformUsbDevice* device);
+  void GoogleAccessoryFound(PlatformUsbDevice* device);
 
   TransportAdapterController* controller_;
 
-  typedef std::list<UsbDeviceDescription> DeviceDescriptions;
-  DeviceDescriptions device_descriptions_;
-  pthread_mutex_t device_descriptions_mutex_;
+  typedef std::list<PlatformUsbDevice*> Devices;
+  Devices devices_;
+  pthread_mutex_t devices_mutex_;
 };
 
 }  // namespace
 }  // namespace
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_DEVICE_SCANNER
