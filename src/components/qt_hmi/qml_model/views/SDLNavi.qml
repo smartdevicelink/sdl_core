@@ -33,9 +33,11 @@
  */
 
 import QtQuick 2.0
+import QtMultimedia 5.0
 import "../controls"
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
+import com.ford.sdl.hmi.named_pipe_notifier 1.0
 
 GeneralView {
     applicationContext: true
@@ -43,6 +45,33 @@ GeneralView {
     Item {
         anchors.fill: parent
         id: wholeWindow
+
+        Video {
+            id: player
+            anchors.fill: parent
+
+            NamedPipeNotifier {
+                id: notifier
+// we need absolute path here
+// because relative paths differ for Video and NamedPipeNotifier
+// we use url.toString() to obtain absolute path
+// and we use substring() to remove "file://" prefix
+                property url pipe: "../../../../appMain/video_stream_pipe"
+                name: pipe.toString().substring(7)
+                onReadyRead: {
+                    player.source = pipe.toString().substring(7)
+                    player.play()
+                }
+            }
+
+            Component.onCompleted: {
+                notifier.start()
+            }
+            onStopped: {
+                notifier.start()
+
+            }
+        }
 
         Row {
             // Top items
