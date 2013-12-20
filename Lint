@@ -125,20 +125,20 @@ elif [ "$SCOPE" == "FILE" ]; then
 	echo -e '\t' "Lining scope is limitted to file " $FILE_PATH
 elif [ "$SCOPE" == "ALL" ]; then
 	
-	echo "You a going to Lint the whole project. It takes a lot of time."
-	echo -n "Are you sure? [Y/n] "
+#	echo "You a going to Lint the whole project. It takes a lot of time."
+#	echo -n "Are you sure? [Y/n] "
 
-	read item
-	case "$item" in
-		y|Y)
-			;;
-		n|N)
-			exit 0
-			;;
-		*) 
-			exit 0
-			;;
-	esac
+#	read item
+#	case "$item" in
+#		y|Y)
+#			;;
+#		n|N)
+#			exit 0
+#			;;
+#		*) 
+#			exit 0
+#			;;
+#	esac
 
 	echo -e '\t' "Lining scope is set to all project files"
 fi
