@@ -159,10 +159,10 @@ void ResetGlobalPropertiesRequest::Run() {
     if (is_key_board_properties) {
       smart_objects::SmartObject key_board_properties = smart_objects::
           SmartObject(smart_objects::SmartType_Map);
-      key_board_properties[strings::language] = hmi_apis::
-          Common_Language::EN_US;
-      key_board_properties[hmi_request::keyboard_layout] = hmi_apis::
-          Common_KeyboardLayout::QWERTY;
+      key_board_properties[strings::language] = static_cast<int>
+      (hmi_apis::Common_Language::EN_US);
+      key_board_properties[hmi_request::keyboard_layout] = static_cast<int>
+      (hmi_apis::Common_KeyboardLayout::QWERTY);
       key_board_properties[hmi_request::send_dynamic_entry] = false;
 
       // Look for APPLINK-4432 for details.
