@@ -37,7 +37,7 @@ set(SOURCES
   named_pipe_notifier_plugin.cc
 )
 
-set(target named_pipe_notifier)
+set(target NamedPipeNotifier)
 
 add_library(${target} SHARED ${SOURCES})
 

@@ -1,2 +1,2 @@
 module com.ford.sdl.hmi.named_pipe_notifier
-plugin named_pipe_notifier
+plugin NamedPipeNotifier

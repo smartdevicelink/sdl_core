@@ -56,5 +56,4 @@ void NamedPipeNotifier::run(void) {
     if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
         emit readyRead();
     }
-    ::close(fd);
 }
