@@ -43,7 +43,7 @@ QtObject {
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
-    property var appType
+    property int appType
     property int hmiUITextAlignment
 
     // media player
@@ -86,6 +86,11 @@ QtObject {
         customPresets = null
         languageTTSVR = -1
         hmiUITextAlignment = null
+        appType = null
         console.debug("exit")
+    }
+
+    function checkAppType(value) {
+        return (appType & (1 << value))
     }
 }

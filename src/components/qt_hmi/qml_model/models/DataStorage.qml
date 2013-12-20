@@ -71,6 +71,7 @@ QtObject {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
                 var application = applicationList.get(i)
+
                 currentApplication.appName = application.appName
                 currentApplication.appType = application.appType
                 currentApplication.appIcon.source = application.icon
@@ -159,7 +160,6 @@ QtObject {
             softButtons: []
             // This place is for adding new properties
         })
-
         if (app.isMediaApplication) {
             musicSourceModel.insert(0, {
                 "title": app.appName,

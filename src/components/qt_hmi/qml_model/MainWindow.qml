@@ -273,6 +273,13 @@ Rectangle {
         id: sdlProxy
 
         onAppRegistered: {
+            var appTypeToAdd = 0
+            if (application.appType !== undefined) {
+                for (var index in application.appType) {
+                  appTypeToAdd |= 1 << application.appType[index]
+                }
+            }
+
             dataContainer.addApplication(
             {
                 appName: application.appName,
@@ -282,7 +289,7 @@ Rectangle {
                 appId: application.appId,
                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                 isMediaApplication: application.isMediaApplication,
-                appType: application.appType,
+                appType: appTypeToAdd,
                 hmiUIText: { },
                 mediaClock: {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
