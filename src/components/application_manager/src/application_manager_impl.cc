@@ -731,33 +731,6 @@ void ApplicationManagerImpl::OnMessageReceived(
 void ApplicationManagerImpl::OnMobileMessageSent(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
-
-  utils::SharedPtr<Message> app_msg = ConvertRawMsgToMessage(message);
-  if (!app_msg) {
-    LOG4CXX_WARN(logger_, "Incorrect message in callback OnMobileMessageSent");
-    return;
-  }
-
-  unsigned int key = app_msg->connection_key();
-
-  // Application connection should be closed if RegisterAppInterface failed and
-  // RegisterAppInterfaceResponse with success == false was sent to the mobile
-  if (false == IsApplicationRegistered(key)) {
-    LOG4CXX_INFO(logger_, "Application isn't registered");
-
-    if (static_cast<mobile_apis::FunctionID::eType>(app_msg->function_id()) == mobile_apis::FunctionID::RegisterAppInterfaceID) {
-      LOG4CXX_INFO(logger_, "Function id is RegisterAppInterfaceID");
-
-      if (app_msg->type() == MessageType::kResponse) {
-        LOG4CXX_INFO(logger_, "Message type is kResponse");
-
-        if (NULL != connection_handler_) {
-          static_cast<connection_handler::ConnectionHandlerImpl*>
-          (connection_handler_)->CloseConnection(key);
-        }
-      }
-    }
-  }
 }
 
 void ApplicationManagerImpl::OnMessageReceived(
@@ -1530,7 +1503,7 @@ bool ApplicationManagerImpl::IsApplicationRegistered(int connection_key) {
     return false;
   }
 
-  return false;
+  return true;
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
