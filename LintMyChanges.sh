@@ -35,7 +35,7 @@ echo "--i\"/usr/include/dbus-1.0\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/lib/i386-linux-gnu/dbus-1.0/include\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 echo "--i\"/usr/lib/x86_64-linux-gnu/dbus-1.0/include\"" >> ./tools/FlexeLint/gcc-include-path.lnt
 
-EXLUDE_FROM_SOURCE_CODE_PATH="./src/components/qt_hmi/\|./src/components/dbus/\|./src/components/transport_manager/include/transport_manager/usb/qnx/"
+EXLUDE_FROM_SOURCE_CODE_PATH="./src/components/qt_hmi/\|./src/components/dbus/\|./src/components/transport_manager/src/usb/qnx/"
 
 if [ "$CHECKSCOPE" == "ALL" ]; then
   find ./src/components/ ./src/appMain/  \( -name "*.cc" -o -name "*.cpp" \) | awk '{print "../../" $0}' | grep -v $EXLUDE_FROM_SOURCE_CODE_PATH > ./tools/FlexeLint/sdl-modules.lnt
