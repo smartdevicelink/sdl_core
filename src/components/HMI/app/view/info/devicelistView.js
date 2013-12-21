@@ -97,6 +97,8 @@ SDL.DeviceListView = Em.ContainerView.create( {
      */
     ShowDeviceList: function(params) {
 
+        this.clearDeviceList();
+
         var i, len = params.deviceList.length;
         for (i = 0; i < len; i++) {
             this.get('listOfDevices.list.childViews').pushObject(SDL.Button
@@ -123,7 +125,6 @@ SDL.DeviceListView = Em.ContainerView.create( {
 
         this.get('listOfDevices.list').removeAllChildren();
         this.listOfDevices.rerender();
-        FFW.BasicCommunication.OnStartDeviceDiscovery();
     },
 
     /**

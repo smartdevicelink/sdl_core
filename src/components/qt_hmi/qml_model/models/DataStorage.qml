@@ -70,14 +70,52 @@ QtObject {
             if(applicationList.get(i).appId === appId) {
                 currentApplication.appId = appId
                 var application = applicationList.get(i)
+
                 currentApplication.appName = application.appName
                 currentApplication.appType = application.appType
                 currentApplication.appIcon.source = application.icon
                 currentApplication.playPauseState = application.playPauseState
                 currentApplication.options = application.options
                 currentApplication.softButtons = application.softButtons
+                currentApplication.navigationSoftButtons = application.navigationSoftButtons
+                currentApplication.alertManeuverSoftButtons = application.alertManeuverSoftButtons
                 currentApplication.customPresets = application.customPresets
 
+                if (application.navigationModel.text1 !== undefined) {
+                    currentApplication.navigationModel.text1 = application.navigationModel.text1
+                }
+                if (application.navigationModel.text2 !== undefined) {
+                    currentApplication.navigationModel.text2 = application.navigationModel.text2
+                }
+                if (application.navigationModel.totalDistance !== undefined) {
+                    currentApplication.navigationModel.totalDistance = application.navigationModel.totalDistance
+                }
+                if (application.navigationModel.eta !== undefined) {
+                    currentApplication.navigationModel.eta = application.navigationModel.eta
+                }
+                if (application.navigationModel.timeToDestination !== undefined) {
+                    currentApplication.navigationModel.timeToDestination = application.navigationModel.timeToDestination
+                }
+                if (application.navigationModel.turnIcon !== undefined) {
+                    currentApplication.navigationModel.turnIcon = application.navigationModel.turnIcon
+                }
+                if (application.navigationModel.nextTurnIcon !== undefined) {
+                    currentApplication.navigationModel.nextTurnIcon = application.navigationModel.nextTurnIcon
+                }
+                if (application.navigationModel.distanceToManeuver !== undefined) {
+                    currentApplication.navigationModel.distanceToManeuver = application.navigationModel.distanceToManeuver
+                    console.debug(currentApplication.navigationModel.distanceToManeuver)
+                }
+                if (application.navigationModel.distanceToManeuverScale !== undefined) {
+                    currentApplication.navigationModel.distanceToManeuverScale = application.navigationModel.distanceToManeuverScale
+                }
+                if (application.navigationModel.maneuverComplete !== undefined) {
+                    currentApplication.navigationModel.maneuverComplete = application.navigationModel.maneuverComplete
+                }
+                if (application.navigationModel.appID !== undefined) {
+                    currentApplication.navigationModel.appID = application.navigationModel.appID
+                    console.debug(currentApplication.navigationModel.appID)
+                }
                 if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
                 }
@@ -176,10 +214,30 @@ QtObject {
             vrHelpTitleDefault: app.vrHelpTitleDefault,
             menuTitle: "",
             keyboardProperties: [],
-            vrHelpItems: app.vrHelpItems
+            vrHelpItems: app.vrHelpItems,
+            navigationSoftButtons: [],
+            alertManeuverSoftButtons: [],
+            navigationModel: {
+                           appID: -1,
+                           text1: "",
+                           text2: "",
+                           totalDistance: "",
+                           eta: "",
+                           timeToDestination: "",
+                           turnIcon: {
+                               value: "",
+                               imageType: -1
+                           },
+                           nextTurnIcon: {
+                               value: "",
+                               imageType: -1
+                           },
+                           distanceToManeuver: 0,
+                           distanceToManeuverScale: 0,
+                           maneuverComplete: null
+            }
             // This place is for adding new properties
         })
-
         if (app.isMediaApplication) {
             musicSourceModel.insert(0, {
                 "title": app.appName,
@@ -489,7 +547,6 @@ QtObject {
     //        }
     //    }
 
-    property NavigationModel navigationModel: NavigationModel { }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false

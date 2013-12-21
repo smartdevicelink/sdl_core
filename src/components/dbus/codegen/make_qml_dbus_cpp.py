@@ -286,6 +286,10 @@ class Impl(FordXmlParser):
         in_params = [self.make_param_desc(x, interface) for x in request.findall('param')]
         out_params = [self.make_param_desc(x, interface) for x in response.findall('param')]
 
+        signature_len = len(''.join(map(lambda x: self.convert_to_dbus_type(x), in_params + out_params)))
+        if signature_len > 255:
+            raise RuntimeError("Too long signature of {0} method. Maximum valid length is 255, actual is {1}", request.get('name'), signature_len)
+
         return "int {0}{1} ({2}{3}const QDBusMessage& message, QString& userMessage_out{4}{5})".format(
                                         interface + "Adaptor::" if add_classname else "",
                                         request.get('name'),

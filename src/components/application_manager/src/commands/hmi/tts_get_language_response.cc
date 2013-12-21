@@ -46,7 +46,10 @@ TTSGetLanguageResponse::~TTSGetLanguageResponse() {
 void TTSGetLanguageResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSGetLanguageResponse::Run");
 
-  ApplicationManagerImpl::instance()->set_active_tts_language(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));
 }

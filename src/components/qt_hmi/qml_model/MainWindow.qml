@@ -126,7 +126,7 @@ Rectangle {
 
                 property string currentLocation
                 function go(path, appId) {
-                    console.debug("enter:", path, appId)
+                    console.debug("enter:", path, ", appId:", appId)
                     if (path) {
                         if (currentLocation !== path) {
                             viewTransitionStack.push({ uri: source.toString(), applicationContext: false })
@@ -273,6 +273,16 @@ Rectangle {
         id: sdlProxy
 
         onAppRegistered: {
+            var appTypeToAdd = 0
+            if (application.appType !== undefined) {
+                for (var index in application.appType) {
+                    if (application.appType[index] > 31) {
+                        return { __retCode: Common.Result.GENERIC_ERROR, __message: "Apptype value > 31" }
+                    }
+                    appTypeToAdd |= 1 << application.appType[index]
+                }
+            }
+
             dataContainer.addApplication(
             {
                 appName: application.appName,
@@ -282,7 +292,7 @@ Rectangle {
                 appId: application.appId,
                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                 isMediaApplication: application.isMediaApplication,
-                appType: application.appType,
+                appType: appTypeToAdd,
                 hmiUIText: { },
                 mediaClock: {
                     "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,

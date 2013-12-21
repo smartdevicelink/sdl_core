@@ -39,22 +39,23 @@ QtObject {
     property int appId
     property string appName
     property string ngnMediaScreenAppName
-    property Icon appIcon: Icon { }
-    property Icon menuIcon: Icon { } //!
+    property Icon appIcon: Icon { }    
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
-    property var appType
+    property int appType
     property int hmiUITextAlignment
     property string vrHelpTitle //!
     property string vrHelpTitleDefault: "VR HELP" //!
     property string vrHelpTitlePerformInteraction //!
     property string menuTitle //!
+    property Icon menuIcon: Icon { } //!
 
     // media player
     property string playPauseState
     property ApplicationData hmiUIText: ApplicationData { }
     property MediaClockModel mediaClock: MediaClockModel { }
+    property NavigationModel navigationModel: NavigationModel { }
 
     property string helpPrompt
     property string timeoutPrompt
@@ -67,6 +68,8 @@ QtObject {
     property ListModel turnList
     property ListModel softButtons
     property ListModel turnListSoftButtons
+    property ListModel navigationSoftButtons
+    property ListModel alertManeuverSoftButtons
     property ListModel customPresets
     property int languageTTSVR
     // This place is for adding new properties
@@ -90,11 +93,14 @@ QtObject {
         currentSubMenu = options
         turnList = null
         softButtons = null
+        navigationSoftButtons = null
+        alertManeuverSoftButtons = null
         turnListSoftButtons = null
         customPresets = null
         languageTTSVR = -1
         hmiUITextAlignment = null
         ///!!!!!!!!!!!!!!!!!!! ВР хелп в дефолт
+        appType = 0
         console.debug("exit")
     }
 }

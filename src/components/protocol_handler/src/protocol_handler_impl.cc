@@ -37,8 +37,6 @@
 
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "protocol_handler/message_from_mobile_app_handler.h"
-#include "protocol_handler/messages_to_mobile_app_handler.h"
 #include "utils/macro.h"
 
 namespace protocol_handler {
@@ -51,36 +49,21 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
   : protocol_observers_(),
     session_observer_(0),
     transport_manager_(transport_manager),
-    handle_messages_from_mobile_app_(NULL),
-    handle_messages_to_mobile_app_(NULL),
-    kPeriodForNaviAck(5) {
+    kPeriodForNaviAck(5),
+    raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
+                      threads::ThreadOptions(threads::Thread::kMinStackSize)),
+    raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
+                      threads::ThreadOptions(threads::Thread::kMinStackSize)) {
   LOG4CXX_TRACE_ENTER(logger_);
-
-  handle_messages_from_mobile_app_ = new threads::Thread(
-    "MessagesFromMobileAppHandler", new MessagesFromMobileAppHandler(this));
-  handle_messages_from_mobile_app_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
-
-  handle_messages_to_mobile_app_ = new threads::Thread(
-    "MessagesToMobileAppHandler", new MessagesToMobileAppHandler(this));
-  handle_messages_to_mobile_app_->startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 ProtocolHandlerImpl::~ProtocolHandlerImpl() {
-  handle_messages_from_mobile_app_->stop();
-  delete handle_messages_from_mobile_app_;
-  handle_messages_from_mobile_app_ = NULL;
-
-  handle_messages_to_mobile_app_->stop();
-  delete handle_messages_to_mobile_app_;
-  handle_messages_to_mobile_app_ = NULL;
-
-  protocol_observers_.clear();
-  session_observer_ = 0;
-  transport_manager_ = 0;
+  if (!protocol_observers_.empty()) {
+    LOG4CXX_WARN(logger_, "Not all observers have unsubscribed"
+                            " from ProtocolHandlerImpl");
+  }
 }
 
 void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
@@ -182,42 +165,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
     LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
-  messages_to_mobile_app_.push(message);
+  raw_ford_messages_to_mobile_.PostMessage(impl::RawFordMessageToMobile(message));
   LOG4CXX_TRACE_EXIT(logger_);
-}
-
-unsigned int ProtocolHandlerImpl::GetPacketSize(
-  unsigned int data_size, unsigned char* first_bytes) {
-  DCHECK(first_bytes);
-  unsigned char offset = sizeof(uint32_t);
-  if (data_size < 2 * offset) {
-    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
-    return 0;
-  }
-
-  unsigned char* received_bytes = first_bytes;
-  DCHECK(received_bytes);
-
-  unsigned char version = received_bytes[0] >> 4u;
-  uint32_t frame_body_size = received_bytes[offset++] << 24u;
-  frame_body_size |= received_bytes[offset++] << 16u;
-  frame_body_size |= received_bytes[offset++] << 8u;
-  frame_body_size |= received_bytes[offset++];
-
-  unsigned int required_size = frame_body_size;
-  switch (version) {
-    case PROTOCOL_VERSION_1:
-      required_size += PROTOCOL_HEADER_V1_SIZE;
-      break;
-    case PROTOCOL_VERSION_2:
-      required_size += PROTOCOL_HEADER_V2_SIZE;
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
-      return 0;
-  }
-
-  return required_size;
 }
 
 void ProtocolHandlerImpl::OnTMMessageReceived(
@@ -228,7 +177,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(
     LOG4CXX_INFO_EXT(logger_,
                      "Received from TM " << message->data()
                      << " with connection id " << message->connection_key());
-    messages_from_mobile_app_.push(message);
+    raw_ford_messages_from_mobile_.PostMessage(impl::RawFordMessageFromMobile(message));
   } else {
     LOG4CXX_ERROR(
       logger_,
@@ -242,7 +191,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(
 void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
   const transport_manager::DataReceiveError& error) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.")
+  LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.");
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
@@ -254,17 +203,12 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 }
 
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
-  // TODO(PV): implement if needed.
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
-  // TODO(PK): Check if it RegisterAppInterfaceResponse with error was sent
-  if(false) {
-    for (ProtocolObservers::iterator it = protocol_observers_.begin();
-        protocol_observers_.end() != it;
-        ++it) {
-      // TODO(PK): Paste valid app_id taken from message
-      (*it)->OnMobileMessageSent(NULL /*Valid message*/);
-    }
+  for (ProtocolObservers::iterator it = protocol_observers_.begin();
+       protocol_observers_.end() != it;
+       ++it) {
+    (*it)->OnMobileMessageSent(message);
   }
 }
 
@@ -468,13 +412,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
                                   connection_key,
                                   packet->version(),
                                   packet->data(),
-                                  packet->data_size()));
-
-      if (SERVICE_TYPE_NAVI == packet->service_type()) {
-        LOG4CXX_INFO(logger_, "Streaming message received of size " <<
-                     packet->data_size() << " body: " << packet->data());
-        HandleStreamingMessage(connection_id, connection_key, raw_message);
-      }
+                                  packet->data_size(),
+                                  packet->service_type()));
 
       NotifySubscribers(raw_message);
       break;
@@ -655,14 +594,82 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandlerImpl::HandleStreamingMessage(
-  ConnectionID connection_id ,
-  int connection_key,
-  RawMessagePtr recieved_msg) {
-  recieved_msg->set_fully_binary(true);
+void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile& message) {
+  LOG4CXX_INFO_EXT(
+      logger_,
+      "Message " << message->data() << " from mobile app received of size "
+                 << message->data_size());
 
-  return RESULT_OK;
+  if ((0 != message->data()) && (0 != message->data_size())
+      && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE
+          >= message->data_size())) {
+    ProtocolPacket* packet = new ProtocolPacket;
+    LOG4CXX_INFO_EXT(logger_, "Data: " << packet->data());
+    if (packet->deserializePacket(message->data(), message->data_size())
+        == RESULT_FAIL) {
+      LOG4CXX_ERROR(logger_, "Failed to parse received message.");
+      delete packet;
+    } else {
+      LOG4CXX_INFO_EXT(logger_, "Packet: dataSize " << packet->data_size());
+      HandleMessage(message->connection_key(), packet);
+    }
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "handleMessagesFromMobileApp() - incorrect or NULL data");
+  }
 }
+
+void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
+  LOG4CXX_INFO_EXT(
+      logger_,
+      "Message to mobile app: connection "
+                              << message->connection_key()
+                              << "; dataSize: " << message->data_size()
+                              << " ; protocolVersion "
+                              << message->protocol_version());
+
+  unsigned int maxDataSize = 0;
+  if (PROTOCOL_VERSION_1 == message->protocol_version()) {
+    maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
+  } else if (PROTOCOL_VERSION_2 == message->protocol_version()) {
+    maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
+  }
+
+  if (!session_observer_) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Cannot handle message to mobile app:" << " ISessionObserver doesn't exist.");
+    return;
+  }
+  unsigned int connection_handle = 0;
+  unsigned char sessionID = 0;
+  session_observer_->PairFromKey(message->connection_key(),
+                                           &connection_handle, &sessionID);
+
+  if (message->data_size() <= maxDataSize) {
+    RESULT_CODE result = SendSingleFrameMessage(
+        connection_handle, sessionID, message->protocol_version(),
+        SERVICE_TYPE_RPC, message->data_size(), message->data(), false);
+    if (result != RESULT_OK) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtocolHandler failed to send single frame message.");
+    }
+  } else {
+    LOG4CXX_INFO_EXT(
+        logger_,
+        "Message will be sent in multiple frames; max size is " << maxDataSize);
+
+    RESULT_CODE result = SendMultiFrameMessage(
+        connection_handle, sessionID, message->protocol_version(),
+        SERVICE_TYPE_RPC, message->data_size(), message->data(), false,
+        maxDataSize);
+    if (result != RESULT_OK) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtocolHandler failed to send multiframe messages.");
+    }
+  }
+}
+
 
 void ProtocolHandlerImpl::SendFramesNumber(int connection_key,
     int number_of_frames) {

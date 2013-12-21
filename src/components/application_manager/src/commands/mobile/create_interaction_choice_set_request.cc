@@ -209,10 +209,10 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
 
   smart_objects::SmartArray* vr_cmds_1 =
       choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1);
+  DCHECK(vr_cmds_1 != NULL);
   smart_objects::SmartArray* vr_cmds_2 =
       choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2);
+  DCHECK(vr_cmds_2 != NULL);
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(), vr_cmds_1->end(),

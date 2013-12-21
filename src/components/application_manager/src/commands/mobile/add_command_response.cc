@@ -59,7 +59,6 @@ void AddCommandResponse::Run() {
       return;
     }
   }
-
   const unsigned int correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
@@ -92,8 +91,9 @@ void AddCommandResponse::Run() {
         data[strings::msg_params][strings::cmd_id].asInt());
 
     if (!command) {
-      if ((data[strings::msg_params].keyExists(strings::menu_params))
-          || (data[strings::msg_params].keyExists(strings::vr_commands))) {
+      if (((data[strings::msg_params].keyExists(strings::menu_params))
+          || (data[strings::msg_params].keyExists(strings::vr_commands))) &&
+          (hmi_apis::Common_Result::REJECTED != result_ui)) {
         app->AddCommand(data[strings::msg_params][strings::cmd_id].asInt(),
                         data[strings::msg_params]);
       }
@@ -105,6 +105,9 @@ void AddCommandResponse::Run() {
           || ((hmi_apis::Common_Result::INVALID_ENUM == result_ui)
               && (hmi_apis::Common_Result::SUCCESS == result_vr))) {
         SendResponse(true);
+      } else if (hmi_apis::Common_Result::REJECTED == result_ui) {
+        (*message_)[strings::params][hmi_response::code] = result_ui;
+        SendResponse(false);
       } else {
         // TODO: Check Response result code
         SendResponse(false);

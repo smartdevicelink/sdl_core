@@ -77,6 +77,9 @@ var panelTextColor = "white"
 // Audio pass thru PopUp text color
 var audioPassThruTextColor = "white"
 
+// Semi transparent color of item in SDL Navi menu
+var sdlNaviTransparentItemColor = "#30C0C0C0"
+
 //--------------------------------------------------------------------------------------
 
 // Font sizes of different elements
@@ -165,6 +168,9 @@ var margin = 20
 // Offset from the edges of the popup
 var popupMargin = 15
 
+// Spacing between items in SDLNavi view
+var sdlNaviSpacing = 5
+
 // Spacing between contacts at contact screen view.
 var contactListSpacing = 30
 
@@ -176,6 +182,9 @@ var warningScreenDuration = 1000
 
 // Timer to check how long preset button is pressed.
 var presetButtonTimer = 800
+
+// Timer to check got long custom button is pressed.
+var customButtonTimer = 2000
 
 // Spacing between icon and item in list
 var iconItemListSpacing = 20

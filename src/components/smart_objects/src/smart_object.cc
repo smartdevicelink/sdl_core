@@ -1,3 +1,7 @@
+/**
+ * @file SmartObject.cpp
+ * @brief SmartObject source file.
+ */
 // Copyright (c) 2013, Ford Motor Company
 // All rights reserved.
 //
@@ -31,10 +35,12 @@
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
-
+#include <stdlib.h>
+#include <cstdio>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <iterator>
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -512,7 +518,9 @@ std::string SmartObject::convert_string(void) const {
       retval = *(m_data.str_value);
       break;
     case SmartType_Integer:
-      retval = std::to_string(static_cast<int>(m_data.int_value));
+      char val[20];
+      sprintf(val, "%d", m_data.int_value);
+      retval = std::string(val);
       break;
     case SmartType_Character:
       retval = std::string(1, m_data.char_value);
@@ -643,7 +651,7 @@ SmartObject& SmartObject::operator[](int Index) {
   return handle_array_access(Index);
 }
 
-const SmartObject& SmartObject::operator[](int Index) const{
+const SmartObject& SmartObject::operator[](int Index) const {
   return getElement(Index);
 }
 
@@ -685,9 +693,18 @@ SmartObject& SmartObject::operator[](const std::string Key) {
   return handle_map_access(Key);
 }
 
+const SmartObject& SmartObject::operator[] (const std::string Key) const {
+  return getElement(Key);
+}
+
 SmartObject& SmartObject::operator[](char* Key) {
   std::string str(Key);
   return handle_map_access(str);
+}
+ 
+const SmartObject& SmartObject::operator[](char* Key) const {
+  std::string str(Key);
+  return getElement(str);
 }
 
 SmartObject& SmartObject::operator[](const char* Key) {
@@ -925,16 +942,24 @@ SmartType SmartObject::getType() const {
   return m_type;
 }
 
+std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform(const SmartMap::value_type &pair) {
+    return pair.first;
+}
+
 std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
-  if (m_type == SmartType_Map) {
-    std::transform(m_data.map_value->begin(), m_data.map_value->end(),
-                   std::inserter(keys, keys.end()),
-                   [](const SmartMap::value_type &pair) {return pair.first;});
-  }
-
-  return keys;
+  if(m_type == SmartType_Map)
+    {
+        std::transform(
+            m_data.map_value->begin(),
+            m_data.map_value->end(),
+            std::inserter(keys, keys.end()),
+            //operator[](const SmartMap::value_type &pair){return pair.first;}
+            &NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform
+        );
+    }
+    return keys;
 }
 
 bool SmartObject::keyExists(const std::string & Key) const {
@@ -961,10 +986,6 @@ bool SmartObject::erase(const std::string & Key) {
   }
 
   return (1 == m_data.map_value->erase(Key));
-}
-
-bool SmartObject::isValid() {
-  return (Errors::OK == m_schema.validate(*this));
 }
 
 bool SmartObject::isValid() const {

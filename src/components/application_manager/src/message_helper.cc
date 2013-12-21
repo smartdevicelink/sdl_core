@@ -71,6 +71,30 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
 
 namespace application_manager {
 
+namespace {
+
+bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
+  using namespace smart_objects;
+  for (size_t i = 0; i < soft_buttons.length(); ++i) {
+    SmartObject& button = soft_buttons[i];
+
+    // Check if image parameter is valid
+    if (button.keyExists(strings::image)) {
+      SmartObject& buttonImage = button[strings::image];
+
+      // Image name must not be empty
+      std::string file_name = buttonImage[strings::value].asString();
+      file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end());
+      if (file_name.empty()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+}
+
 const VehicleData MessageHelper::vehicle_data_ =
 { {strings::gps, VehicleDataType::GPS},
   {strings::speed, VehicleDataType::SPEED },
@@ -489,75 +513,6 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
   return result;
 }
 
-void MessageHelper::SendShowVrHelpToHMI(const Application* app) {
-  smart_objects::SmartObject* show_vr_help = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-
-  if (!show_vr_help) {
-    return;
-  }
-
-  smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
-  if (!app) {
-    ui_msg_params[strings::vr_help_title] = profile::Profile::instance()
-                                            ->vr_help_title();
-
-    smart_objects::SmartObject* vr_commands_array = CreateGeneralVrCommand();
-    if (!vr_commands_array) {
-      return;
-    }
-
-    ui_msg_params[strings::vr_help] = smart_objects::SmartObject(
-                                        smart_objects::SmartType_Array);
-
-    int help_size = vr_commands_array->length();
-    for (int i = 0; i < help_size; ++i) {
-      smart_objects::SmartObject item(smart_objects::SmartType_Map);
-      item[strings::text] = (*vr_commands_array).getElement(i);
-      item[strings::position] = i + 1;
-
-      ui_msg_params[strings::vr_help][i++] = item;
-    }
-
-    const std::set<Application*>& apps = ApplicationManagerImpl::instance()
-                                         ->applications();
-
-    int i = help_size;
-    std::set<Application*>::const_iterator it = apps.begin();
-    for (; apps.end() != it; ++it) {
-      if ((*it)->vr_synonyms()) {
-        smart_objects::SmartObject item(smart_objects::SmartType_Map);
-        item[strings::text] = (*((*it)->vr_synonyms())).getElement(0);
-        item[strings::position] = i + 1;
-        ui_msg_params[strings::vr_help][i++] = item;
-      }
-    }
-  } else {
-    smart_objects::SmartObject* vr_help = CreateAppVrHelp(app);
-    if (!vr_help) {
-      return;
-    }
-    ui_msg_params = *vr_help;
-    ui_msg_params[strings::app_id] = app->app_id();
-  }
-
-  (*show_vr_help)[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::UI_ShowVrHelp;
-  (*show_vr_help)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*show_vr_help)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*show_vr_help)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*show_vr_help)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*show_vr_help)[strings::msg_params] = ui_msg_params;
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(show_vr_help);
-}
-
 void MessageHelper::SendShowRequestToHMI(const Application* app) {
   if (!app) {
     return;
@@ -700,8 +655,10 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
 void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
   hmi_apis::Common_Language::eType app_common_language =
       ToCommonLanguage(app->language());
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_vr_language()
+  const HMICapabilities& hmi_capabilities =
+  ApplicationManagerImpl::instance()->hmi_capabilities();
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_vr_language()
       != app_common_language) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
@@ -713,9 +670,8 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
     ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_tts_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_tts_language() != app_common_language) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
@@ -726,9 +682,8 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
     ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language()
-      && ApplicationManagerImpl::instance()->active_ui_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
+      hmi_capabilities.active_ui_language()!= app_common_language) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
@@ -819,6 +774,7 @@ void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
 void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   SendDeleteCommandRequestToHMI(app);
   SendDeleteSubMenuRequestToHMI(app);
+  SendRemoveVrCommandsOnUnregisterApp(app);
   ResetGlobalproperties(app);
 }
 
@@ -1163,7 +1119,9 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  if (!ApplicationManagerImpl::instance()->VerifyImageType(
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+  if (!hmi_capabilities.VerifyImageType(
       static_cast<mobile_apis::ImageType::eType>(image[strings::image_type]
           .asInt()))) {
     return mobile_apis::Result::UNSUPPORTED_RESOURCE;
@@ -1194,8 +1152,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     return mobile_apis::Result::SUCCESS;
   }
 
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* soft_button_capabilities =
-     ApplicationManagerImpl::instance()->soft_button_capabilities();
+      hmi_capabilities.soft_button_capabilities();
   bool image_supported = false;
   if (soft_button_capabilities) {
     image_supported =
@@ -1205,8 +1165,13 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject& request_soft_buttons =
       message_params[strings::soft_buttons];
 
+  // Check whether soft buttons request is well-formed
+  if (!ValidateSoftButtons(request_soft_buttons))
+    return mobile_apis::Result::INVALID_DATA;
+
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
+  bool flag_unsuported_resource = false;
 
   int j = 0;
   for (int i = 0; i < request_soft_buttons.length(); ++i) {
@@ -1224,8 +1189,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
             if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
                 verification_result) {
               request_soft_buttons[i].erase(strings::image);
+              flag_unsuported_resource = true;
+            } else {
+              return mobile_apis::Result::INVALID_DATA;
             }
-            return verification_result;
           }
         } else {
           return mobile_apis::Result::INVALID_DATA;
@@ -1243,33 +1210,31 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
-        bool text_exist = false;
 
         if (request_soft_buttons[i].keyExists(strings::text)) {
-          text_exist = VerifySoftButtonText(request_soft_buttons[i]);
+          VerifySoftButtonText(request_soft_buttons[i]);
+        } else {
+          return  mobile_apis::Result::INVALID_DATA;
         }
 
         bool image_exist = false;
         if (image_supported) {
           image_exist = request_soft_buttons[i].keyExists(strings::image);
+          if (!image_exist) {
+            return mobile_apis::Result::INVALID_DATA;
+          }
         }
-
-        if ((!image_exist) && (!text_exist)) {
-          return mobile_apis::Result::INVALID_DATA;
-        }
-
         if (image_exist) {
           mobile_apis::Result::eType verification_result = VerifyImage(
               request_soft_buttons[i][strings::image], app);
 
           if (mobile_apis::Result::SUCCESS != verification_result) {
-            request_soft_buttons[i].erase(strings::image);
-            if (!text_exist) {
-              return mobile_apis::Result::INVALID_DATA;
-            }
             if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
                 verification_result) {
-              return verification_result;
+              request_soft_buttons[i].erase(strings::image);
+              flag_unsuported_resource = true;
+            } else  {
+              return mobile_apis::Result::INVALID_DATA;
             }
           }
         }
@@ -1296,50 +1261,11 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   if (0 == request_soft_buttons.length()) {
     message_params.erase(strings::soft_buttons);
   }
-
-  return mobile_apis::Result::SUCCESS;
-}
-
-// TODO(VS): change printf to logger
-bool MessageHelper::VerifyApplicationName(
-  smart_objects::SmartObject& msg_params) {
-
-  if (msg_params.keyExists(strings::tts_name)) {
-    for (int i = 0; i < msg_params[strings::tts_name].length(); ++i) {
-
-      const std::string& tts_name =
-            msg_params[strings::tts_name][i][strings::text].asString();
-
-        if ((tts_name[0] == '\n') || (tts_name[0] == ' ') ||
-            ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
-          printf("Invalid characters in tts name.\n");
-          return false;
-        }
-      }
+  if (flag_unsuported_resource) {
+    return mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  } else {
+    return mobile_apis::Result::SUCCESS;
   }
-
-  const std::string& name = msg_params[strings::app_name].asString();
-
-  // Expecting for some chars different from newlines and spaces in the appName
-  std::string name_copy = name;
-  std::string::iterator name_copy_new_end =
-      std::remove_if(
-          name_copy.begin(),
-          std::remove(name_copy.begin(), name_copy.end(), ' '),
-          [](char c){return 13 == static_cast<int>(c);});
-
-  if (std::string(name_copy.begin(), name_copy_new_end).empty()) {
-    printf("Application name is empty.\n");
-    return false;
-  }
-
-  if ((name[0] == '\n') ||
-      ((name[0] == '\\') && (name[1] == 'n'))) {
-    printf("Invalid characters in application name.\n");
-    return false;
-  }
-
-  return true;
 }
 
 // TODO(AK): change printf to logger

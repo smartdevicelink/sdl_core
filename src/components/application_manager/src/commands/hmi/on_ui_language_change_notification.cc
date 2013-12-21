@@ -50,7 +50,10 @@ OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_INFO(logger_, "OnUILanguageChangeNotification::Run");
 
-  ApplicationManagerImpl::instance()->set_active_ui_language(
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  hmi_capabilities.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
@@ -58,7 +61,7 @@ void OnUILanguageChangeNotification::Run() {
       (*message_)[strings::msg_params][strings::language];
 
   (*message_)[strings::msg_params][strings::language] =
-      ApplicationManagerImpl::instance()->active_vr_language();
+      hmi_capabilities.active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnLanguageChangeID;
@@ -67,22 +70,21 @@ void OnUILanguageChangeNotification::Run() {
       ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
+  while (applications.end() != it) {
     Application* app = *it;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
     if (app->ui_language() != (*message_)[strings::msg_params]
         [strings::hmi_display_language].asInt()) {
-      MessageHelper::SendDeleteCommandRequestToHMI(app);
-      MessageHelper::SendRemoveVrCommandsOnUnregisterApp(app);
 
-      MessageHelper::SendOnAppUnregNotificationToHMI(app);
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
       ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
     }
+
+    it = applications.begin();
   }
 }
 

@@ -45,7 +45,7 @@ namespace transport_manager {
 
 MockTransportAdapter::MockTransportAdapter()
     : TransportAdapterImpl(new MockDeviceScanner(this),
-                        new MockConnectionFactory(this), nullptr) {}
+                        new MockConnectionFactory(this), NULL) {}
 
 void MockTransportAdapter::reset() {
   get_device_scanner()->reset();

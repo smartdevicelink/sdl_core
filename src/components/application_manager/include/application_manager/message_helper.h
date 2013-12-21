@@ -195,7 +195,6 @@ class MessageHelper {
     static void SendGlobalPropertiesToHMI(const Application* app);
 
     static smart_objects::SmartObject* CreateAppVrHelp(const Application* app);
-    static void SendShowVrHelpToHMI(const Application* app);
 
     static void SendShowRequestToHMI(const Application* app);
     static void SendShowConstantTBTRequestToHMI(const Application* app);
@@ -267,17 +266,6 @@ class MessageHelper {
     static mobile_apis::Result::eType ProcessSoftButtons(
                                   smart_objects::SmartObject& message_params,
                                   const Application* app);
-
-    /*
-     * @brief Verify application and tts name in RefisterAppInterface request msg_params
-     *
-     * @param message msg_params
-     *
-     *
-     * @return verification result
-     *
-     */
-    static bool VerifyApplicationName(smart_objects::SmartObject& msg_params);
 
     static bool PrintSmartObject(smart_objects::SmartObject& object);
 

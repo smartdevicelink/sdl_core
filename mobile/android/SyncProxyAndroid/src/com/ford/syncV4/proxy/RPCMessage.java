@@ -1,6 +1,8 @@
 package com.ford.syncV4.proxy;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Set;
 
 import com.ford.syncV4.proxy.constants.Names;
 
@@ -28,13 +30,13 @@ public class RPCMessage extends RPCStruct  {
 		function.put(Names.function_name, functionName);
 	}
 
-	public RPCMessage(Hashtable hash) {
-		store = hash;
-		messageType = (String)hash.keys().nextElement();
+    public RPCMessage(Hashtable hash) {
+        store = hash;
+        messageType = getMessageTypeName(hash.keySet());
 
-		function = (Hashtable)hash.get(messageType);
-		parameters = (Hashtable)function.get(Names.parameters);
-	}
+        function = (Hashtable)hash.get(messageType);
+        parameters = (Hashtable)function.get(Names.parameters);
+    }
 
 	protected String messageType;
 	protected Hashtable parameters;

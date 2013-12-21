@@ -34,7 +34,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
-#include <string.h>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
@@ -80,13 +79,39 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
+
+  /*
+   * @brief Check new ID along with known mobile application ID
+   *
+   * return TRUE if ID is known already, otherwise - FALSE
+   */
+  bool IsApplicationRegistered();
+
+  /*
+   * @brief Check for some request param. names restrictions, e.g. for
+   * newline characters
+   *
+   * return SUCCESS if param name pass the check, otherwise - error code
+   * will be returned
+   */
+  mobile_apis::Result::eType CheckRestrictions() const;
+
+  /*
+   * @brief Removes hidden symbols and spaces
+   *
+   * return cleared copy of param name
+   */
+  std::string ClearParamName(std::string param_name) const;
+
+
   /*
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
    *
-   * return TRUE if there is coincidence of app.name/TTS/VR synonyms, otherwise FALSE
+   * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
+   * otherwise appropriate error code returns
   */
-  bool CheckCoincidence();
+  mobile_apis::Result::eType CheckCoincidence();
 
   /*
    * @brief Predicate for using with CheckCoincidence method to compare with TTS SO
@@ -99,8 +124,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
     {};
 
     bool operator()(smart_objects::SmartObject obj) {
-      const std::string text = obj[strings::text].asString();
-      return !(strcasecmp(text.c_str(), newItem_.c_str()));
+      return obj[strings::text] == newItem_;
     };
 
     const std::string &newItem_;
@@ -117,8 +141,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       {};
 
       bool operator()(smart_objects::SmartObject obj) {
-        const std::string vr_synonym = obj.asString();
-        return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
+        return obj == newItem_;
       };
 
       const std::string &newItem_;

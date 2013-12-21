@@ -6,10 +6,10 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/watchdog.cc
     ./src/request_watchdog.cc
     ./src/request_info.cc
 )
 
 add_library("RequestWatchdog" ${SOURCES})
 target_link_libraries ("RequestWatchdog" Utils)
-target_link_libraries ("RequestWatchdog" log4cxx)

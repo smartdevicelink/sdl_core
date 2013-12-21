@@ -38,6 +38,7 @@
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
+#include "protocol_handler/service_type.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -61,7 +62,8 @@ class RawMessage {
      * \param dataSize Message size
      */
     RawMessage(int connectionKey, unsigned int protocolVersion,
-               unsigned char* data, unsigned int dataSize);
+               unsigned char* data, unsigned int dataSize,
+               unsigned char type = ServiceType::kRpc);
 
     /**
      * \brief Destructor
@@ -90,17 +92,21 @@ class RawMessage {
      */
     unsigned int protocol_version() const;
 
+    /**
+     * \brief Getter for service type
+     */
+    ServiceType service_type() const {
+      return service_type_;
+    }
+
     bool IsWaiting() const;
 
     void set_waiting(bool v);
 
-    bool is_fully_binary() const {
-      return fully_binary_;
-    }
-
-    void set_fully_binary(bool is_binary) {
-      fully_binary_ = is_binary;
-    }
+    /*
+     * \brief Compares priorities of two messages based on their service type
+     */
+    bool HasHigherPriorityThan(const RawMessage& that) const;
 
   private:
     /**
@@ -124,6 +130,11 @@ class RawMessage {
      * used for tranferring message.
      */
     unsigned int protocol_version_;
+
+    /**
+     * \brief Type of service message belongs to
+     */
+    ServiceType service_type_;
 
     /**
      * specifies current state of message in queue. if false message is "ready to be processed"

@@ -30,20 +30,25 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "config_profile/ini_file.h"
 #include "config_profile/profile.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-#include <string.h>
-
+#include <stdlib.h>
+#include <stdlib.h>
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Profile"));
 
 namespace profile {
 Profile::Profile()
   : config_file_name_("smartDeviceLink.ini")
+  , launch_hmi_(true)
   , policies_file_name_("policy_table.json")
+  , hmi_capabilities_file_name_("hmi_capabilities.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
   , navi_server_port_(5050)
@@ -55,12 +60,15 @@ Profile::Profile()
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
   , space_available_(104857600)
+  , app_hmi_level_none_time_scale_max_requests_(100)
+  , app_hmi_level_none_requests_time_scale_(10)
   , app_time_scale_max_requests_(100)
   , app_requests_time_scale_(10)
   , pending_requests_amount_(1000)
   , put_file_in_none_(5)
   , delete_file_in_none_(5)
-  , list_files_in_none_(5) {
+  , list_files_in_none_(5)
+  , app_info_storage_("app_info.dat") {
   UpdateValues();
 }
 
@@ -84,8 +92,16 @@ const std::string& Profile::config_file_name() const {
   return config_file_name_;
 }
 
+bool Profile::launch_hmi() const {
+  return launch_hmi_;
+}
+
 const std::string& Profile::policies_file_name() const {
   return policies_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_file_name() const {
+  return hmi_capabilities_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -148,6 +164,19 @@ const std::string& Profile::named_pipe_path() const {
   return named_pipe_path_;
 }
 
+const unsigned int& Profile::app_hmi_level_none_time_scale() const {
+  return app_hmi_level_none_requests_time_scale_;
+}
+
+const unsigned int& Profile::app_hmi_level_none_time_scale_max_requests() const
+{
+  return app_hmi_level_none_time_scale_max_requests_;
+}
+
+const std::string& Profile::video_stream_file() const {
+  return video_stream_file_;
+}
+
 const unsigned int& Profile::app_time_scale() const {
   return app_requests_time_scale_;
 }
@@ -172,11 +201,27 @@ const unsigned int& Profile::list_files_in_none() const {
   return list_files_in_none_;
 }
 
+const std::string& Profile::app_info_storage() const {
+  return app_info_storage_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
   char value[INI_LINE_LEN + 1];
   *value = '\0';
+
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "LaunchHMI", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      launch_hmi_ = true;
+    } else {
+      launch_hmi_ = false;
+    }
+    LOG4CXX_INFO(logger_, "Set launch HMI to " << launch_hmi_);
+  }
+
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "HMI", "ServerAddress", value))
       && ('\0' != *value)) {
@@ -189,7 +234,16 @@ void Profile::UpdateValues() {
                            "MAIN", "PoliciesTable", value))
       && ('\0' != *value)) {
     policies_file_name_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << policies_file_name_);
+    LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "HMICapabilities", value))
+      && ('\0' != *value)) {
+    hmi_capabilities_file_name_ = value;
+    LOG4CXX_INFO(logger_, "Set hmi capabilities file to " <<
+                 hmi_capabilities_file_name_);
   }
 
   *value = '\0';
@@ -247,6 +301,14 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "VideoStreamFile", value))
+      && ('\0' != *value)) {
+    video_stream_file_ = value;
+    LOG4CXX_INFO(logger_, "Set video stream file to " << video_stream_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "MixingAudioSupported", value))
       && ('\0' != *value)) {
     if (0 == strcmp("true", value)) {
@@ -275,7 +337,7 @@ void Profile::UpdateValues() {
       put_file_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of PutFile requests for one "
-        "application in NONE to " << put_file_in_none_);
+                 "application in NONE to " << put_file_in_none_);
   }
 
   *value = '\0';
@@ -287,7 +349,7 @@ void Profile::UpdateValues() {
       delete_file_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of DeleteFile requests for one "
-        "application in NONE to " << delete_file_in_none_);
+                 "application in NONE to " << delete_file_in_none_);
   }
 
   *value = '\0';
@@ -299,7 +361,7 @@ void Profile::UpdateValues() {
       list_files_in_none_ = 5;
     }
     LOG4CXX_INFO(logger_, "Max allowed number of ListFiles requests for one "
-        "application in NONE to " << list_files_in_none_);
+                 "application in NONE to " << list_files_in_none_);
   }
 
   *value = '\0';
@@ -395,6 +457,24 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
+                          "MAIN", "AppHMILevelNoneTimeScaleMaxRequests", value))
+      && ('\0' != *value)) {
+    app_hmi_level_none_time_scale_max_requests_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set max amount of requests per application"
+                " time scale " <<  app_hmi_level_none_time_scale_max_requests_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "AppHMILevelNoneRequestsTimeScale", value))
+      && ('\0' != *value)) {
+    app_hmi_level_none_requests_time_scale_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set Application time scale for max amount"
+                 " of requests " << app_hmi_level_none_requests_time_scale_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "PendingRequestsAmount", value))
       && ('\0' != *value)) {
     pending_requests_amount_ = atoi(value);
@@ -405,6 +485,15 @@ void Profile::UpdateValues() {
                  pending_requests_amount_);
   }
 
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "AppInfo", "AppInfoStorage", value))
+      && ('\0' != *value)) {
+    app_info_storage_ = value;
+    LOG4CXX_INFO(logger_,
+                 "Set Application information storage to "
+                 << app_info_storage_);
+  }
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

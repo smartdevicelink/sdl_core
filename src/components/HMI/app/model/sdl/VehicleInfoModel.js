@@ -88,6 +88,32 @@ SDL.SDLVehicleInfoModel = Em.Object
             trim: "SE"
         },
 
+        eVehicleDataType:{
+            "gps" :"VEHICLEDATA_GPS",
+            "speed": "VEHICLEDATA_SPEED",
+            "rpm": "VEHICLEDATA_RPM",
+            "fuelLevel": "VEHICLEDATA_FUELLEVEL",
+            "fuelLevel_State": "VEHICLEDATA_FUELLEVEL_STATE",
+            "instantFuelConsumption": "VEHICLEDATA_FUELCONSUMPTION",
+            "externalTemperature": "VEHICLEDATA_EXTERNTEMP",
+            "prndl": "VEHICLEDATA_PRNDL",
+            "tirePressure": "VEHICLEDATA_TIREPRESSURE",
+            "odometer": "VEHICLEDATA_ODOMETER",
+            "beltStatus": "VEHICLEDATA_BELTSTATUS",
+            "bodyInformation": "VEHICLEDATA_BODYINFO",
+            "deviceStatus": "VEHICLEDATA_DEVICESTATUS",
+            "eCallInfo": "VEHICLEDATA_ECALLINFO",
+            "airbagStatus": "VEHICLEDATA_AIRBAGSTATUS",
+            "emergencyEvent": "VEHICLEDATA_EMERGENCYEVENT",
+            "clusterModes": "VEHICLEDATA_CLUSTERMODESTATUS",
+            "myKey": "VEHICLEDATA_MYKEY",
+            "driverBraking": "VEHICLEDATA_BRAKING",
+            "wiperStatus": "VEHICLEDATA_WIPERSTATUS",
+            "headLampStatus": "VEHICLEDATA_HEADLAMPSTATUS",
+            "engineTorque":"VEHICLEDATA_ENGINETORQUE",
+            "accPedalPosition": "VEHICLEDATA_ACCPEDAL"
+        },
+
         /**
          * Stored VehicleInfo Data
          * 
@@ -318,6 +344,60 @@ SDL.SDLVehicleInfoModel = Em.Object
 
         /**
          * Function returns response message to VehicleInfoRPC
+         *
+         * @type {Object} message
+         */
+        SubscribeVehicleData: function(message) {
+            if (SDL.SDLController.getApplicationModel(message.params.appID)) {
+
+                var subscribeVIData = {};
+                for (var key in message.params) {
+                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
+                        SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = message.params[key];
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "SUCCESS"
+                        };
+                    } else if (key != 'appID' && message.params[key]) {
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                        }
+                    }
+                }
+            }
+            FFW.VehicleInfo.sendVISubscribeVehicleDataResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, subscribeVIData);
+        },
+
+        /**
+         * Function returns response message to VehicleInfoRPC
+         *
+         * @type {Object} message
+         */
+        UnsubscribeVehicleData: function(message) {
+            if (SDL.SDLController.getApplicationModel(message.params.appID)) {
+
+                var subscribeVIData = {};
+                for (var key in message.params) {
+                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
+                        SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "SUCCESS"
+                        };
+                    } else if (key != 'appID' && message.params[key]) {
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
+                        }
+                    }
+                }
+            }
+            FFW.VehicleInfo.sendVISubscribeVehicleDataResult(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, subscribeVIData);
+        },
+
+        /**
+         * Function returns response message to VehicleInfoRPC
          * 
          * @type {Object} message
          */
@@ -340,18 +420,9 @@ SDL.SDLVehicleInfoModel = Em.Object
             text += "are not avaliable";
 
             if (result) {
-                FFW.VehicleInfo
-                    .sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"],
-                        message.id,
-                        message.method,
-                        data);
+                FFW.VehicleInfo.sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, data);
             } else {
-                FFW.VehicleInfo
-                    .sendGetVehicleDataError(SDL.SDLModel.resultCode["DATA_NOT_AVAILABLE"],
-                        message.id,
-                        message.method,
-                        text,
-                        data);
+                FFW.VehicleInfo.sendGetVehicleDataError(SDL.SDLModel.resultCode["DATA_NOT_AVAILABLE"], message.id, message.method, text, data);
             }
         },
 
@@ -361,9 +432,18 @@ SDL.SDLVehicleInfoModel = Em.Object
          */
         onVehicleDataChanged: function() {
 
-            var jsonData = {};
-            jsonData["prndl"] = this.vehicleData["prndl"];
-            FFW.VehicleInfo.OnVehicleData(jsonData);
+            var appID = null;
+
+            for (var i = 0; i < SDL.SDLModel.registeredApps.length; i++) {
+                appID = SDL.SDLModel.registeredApps[i].appID;
+                if (SDL.SDLController.getApplicationModel(appID).subscribedData["prndl"]) {
+
+                    var jsonData = {};
+                    jsonData["prndl"] = this.vehicleData["prndl"];
+                    FFW.VehicleInfo.OnVehicleData(jsonData);
+                    return;
+                }
+            }
 
         }.observes('this.vehicleData.prndl')
     });

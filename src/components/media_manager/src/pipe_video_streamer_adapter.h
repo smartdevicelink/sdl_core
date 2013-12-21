@@ -48,10 +48,8 @@ class PipeVideoStreamerAdapter : public MediaAdapterImpl {
     virtual bool is_app_performing_activity(int application_key);
 
   private:
-    static log4cxx::LoggerPtr logger_;
     int pipe_fd_;
     std::string named_pipe_path_;
-    int current_application_;
     DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
 };
 

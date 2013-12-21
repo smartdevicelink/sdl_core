@@ -46,10 +46,14 @@ namespace str = strings;
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
-  default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
+}
+
+bool PerformAudioPassThruRequest::Init() {
+  default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
+  return true;
 }
 
 void PerformAudioPassThruRequest::Run() {

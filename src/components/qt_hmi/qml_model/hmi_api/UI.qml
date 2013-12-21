@@ -121,12 +121,12 @@ Item {
         ]
         var fieldSubstrings = filter(showStrings, showFields)
         var showData = { hmiUIText: {} }
-        if (fieldSubstrings[Common.TextFieldName.mainField1]) { showData.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField2]) { showData.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField3]) { showData.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]; }
-        if (fieldSubstrings[Common.TextFieldName.mainField4]) { showData.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]; }
-        if (fieldSubstrings[Common.TextFieldName.statusBar]) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
-        if (fieldSubstrings[Common.TextFieldName.mediaTrack]) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField1] !== undefined) { showData.hmiUIText.mainField1 = fieldSubstrings[Common.TextFieldName.mainField1]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField2] !== undefined) { showData.hmiUIText.mainField2 = fieldSubstrings[Common.TextFieldName.mainField2]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField3] !== undefined) { showData.hmiUIText.mainField3 = fieldSubstrings[Common.TextFieldName.mainField3]; }
+        if (fieldSubstrings[Common.TextFieldName.mainField4] !== undefined) { showData.hmiUIText.mainField4 = fieldSubstrings[Common.TextFieldName.mainField4]; }
+        if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
+        if (fieldSubstrings[Common.TextFieldName.mediaTrack] !== undefined) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
         if (graphic) { showData.hmiUIText.image = graphic.value; }
         if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
         if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
@@ -166,8 +166,7 @@ Item {
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: { {", startTime.hours, ", ", startTime.minutes, ", ", startTime.seconds, "}, ",
-                      endTime,", ", updateMode, ", ", appID, "}")
+        console.debug("enter: {", startTime, ", ", endTime, ", ", updateMode, ", ", appID, "}")
 
         var app = dataContainer.getApplication(appID)
         var newStartTime

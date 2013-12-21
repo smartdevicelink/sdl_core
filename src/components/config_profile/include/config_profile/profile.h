@@ -70,6 +70,11 @@ class Profile {
     void config_file_name(const std::string& fileName);
 
     /**
+      * @brief Returns true if HMI should be started, otherwise false
+      */
+    bool launch_hmi() const;
+
+    /**
      * @brief Returns server address
      */
     const std::string& server_address() const;
@@ -88,6 +93,11 @@ class Profile {
      * @brief Returns policies file name
      */
     const std::string& policies_file_name() const;
+
+    /**
+     * @brief Returns hmi capabilities file name
+     */
+    const std::string& hmi_capabilities_file_name() const;
 
     /**
      * @brief Returns help promt vector
@@ -151,6 +161,24 @@ class Profile {
     const std::string& named_pipe_path() const;
 
     /**
+     * @brief Returns time scale for max amount of requests for application
+     * in hmi level none.
+     */
+    const unsigned int& app_hmi_level_none_time_scale() const;
+
+    /**
+      * @brief Returns path to testing file to which redirects video stream
+      */
+    const std::string& video_stream_file() const;
+
+    /**
+     * @brief Returns allowable max amount of requests per time scale for
+     * application in hmi level none
+     *
+     */
+    const unsigned int& app_hmi_level_none_time_scale_max_requests() const;
+
+    /**
      * @brief Returns application time scale for max amount of requests per it.
      */
     const unsigned int& app_time_scale() const;
@@ -183,6 +211,11 @@ class Profile {
      * application in NONE
      */
     const unsigned int& list_files_in_none() const;
+
+    /*
+     * @brief Returns file name for storing applications data
+     */
+    const std::string& app_info_storage() const;
 
     // Members section
 
@@ -236,11 +269,13 @@ class Profile {
                    const char* const pKey) const;
 
     // Members section
+    bool                            launch_hmi_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        navi_server_port_;
     std::string                     policies_file_name_;
+    std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_promt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;
@@ -253,12 +288,16 @@ class Profile {
     unsigned int                    space_available_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
+    unsigned int                    app_hmi_level_none_time_scale_max_requests_;
+    unsigned int                    app_hmi_level_none_requests_time_scale_;
+    std::string                     video_stream_file_;
     unsigned int                    app_time_scale_max_requests_;
     unsigned int                    app_requests_time_scale_;
     unsigned int                    pending_requests_amount_;
     unsigned int                    put_file_in_none_;
     unsigned int                    delete_file_in_none_;
     unsigned int                    list_files_in_none_;
+    std::string                     app_info_storage_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

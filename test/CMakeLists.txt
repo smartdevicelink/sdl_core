@@ -13,7 +13,6 @@ include_directories (
   ../src/components/formatters/include
   ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../src/components/application_manager/include
-  ../src/components/mobile_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
@@ -37,10 +36,10 @@ include_directories (
   ../test/components/application_manager
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}
-  /usr/lib/i386-linux-gnu/glib-2.0/include
-  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
-  ${GSTREAMER_gst_INCLUDE_DIR}
-  ${GLIB_glib_2_INCLUDE_DIR}
+#  /usr/lib/i386-linux-gnu/glib-2.0/include
+#  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
+#  ${GSTREAMER_gst_INCLUDE_DIR}
+#  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
 set(LIBRARIES
@@ -49,31 +48,37 @@ set(LIBRARIES
     gmock
     gmock_main
     RequestWatchdog
-    MediaManager
+#   MediaManager
     formatters
     HMI_API
     SmartObjects
     ApplicationManager
-    MobileMessageHandler
     ProtocolHandler
     Utils
     ConfigProfile
     #test_JSONHandler_v4_protocol_v2_0_revP
     # test_json_handler
     test_SmartObjectTest
-    test_FormattersCommandsTest
-    test_UtilsTest
-    test_RequestWatchdogTest
-    test_ProtocolHandlerTest
+    #test_FormattersCommandsTest
+    #test_UtilsTest
+    #test_RequestWatchdogTest
+    #test_ProtocolHandlerTest
     test_JSONCPPTest
     #test_MobileMessageHandlerTest
     MOBILE_API
     jsoncpp
-    rt
-    ${GSTREAMER_gstreamer_LIBRARY}
-    Libusb-1.0.16
+#   rt
+   # ${GSTREAMER_gstreamer_LIBRARY}
 )
+
+if (BUILD_USB_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES Libusb-1.0.16)
+endif()
+endif()
 
 add_executable("test_suit" "./test_suit.cc")
 target_link_libraries("test_suit" ${LIBRARIES})
 
+
+# vim: set ts=2 sw=2 et:

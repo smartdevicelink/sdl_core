@@ -67,6 +67,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
     SUCCESS = 0,
     TOO_MANY_REQUESTS,
     TOO_MANY_PENDING_REQUESTS,
+    NONE_HMI_LEVEL_MANY_REQUESTS
   };
 
   // Methods
@@ -85,12 +86,14 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
   /*
    * @brief Check if max request amount wasn't exceed and adds request to queue.
    *
-   * @param request Active mobile request
+   * @param request     Active mobile request
+   * @param hmi_level   Current application hmi_level
    *
    * @return Result code
    *
    */
-  TResult addRequest(const Request& request);
+  TResult addRequest(const Request& request,
+                     const mobile_apis::HMILevel::eType& hmi_level);
 
   /*
    * @brief Removes request from queue
@@ -98,7 +101,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param mobile_corellation_id Active mobile request correlation ID
    *
    */
-  void terminateRequest(unsigned int mobile_correlation_id);
+  void terminateRequest(const unsigned int& mobile_correlation_id);
 
   /*
    * @brief Removes all requests from queue for specified application
@@ -106,7 +109,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param app_id Mobile application ID
    *
    */
-  void terminateAppRequests(unsigned int app_id);
+  void terminateAppRequests(const unsigned int& app_id);
 
   /**
    * @ Updates request timeout
@@ -115,9 +118,9 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout to be set
    */
-  void updateRequestTimeout(unsigned int connection_key,
-                            unsigned int mobile_correlation_id,
-                            unsigned int new_timeout);
+  void updateRequestTimeout(const unsigned int& connection_key,
+                            const unsigned int& mobile_correlation_id,
+                            const unsigned int& new_timeout);
 
   /*
    * @brief Notify subscriber that expired entry should be removed
@@ -125,7 +128,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    *
    * @param RequestInfo Request related information
    */
-  void onTimeoutExpired(request_watchdog::RequestInfo info);
+  void onTimeoutExpired(const request_watchdog::RequestInfo& info);
 
  protected:
 

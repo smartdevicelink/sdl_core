@@ -50,18 +50,7 @@ SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {
 
 void SubscribeVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataResponse::Run");
-
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  // TODO(DK): Some logic
-  SendResponse(true);
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

@@ -55,7 +55,8 @@ class Device {
    **/
   Device(const std::string& name, const DeviceUID& unique_device_id)
     : name_(name),
-      unique_device_id_(unique_device_id) {}
+      unique_device_id_(unique_device_id),
+      keep_on_disconnect_(false) {}
   /**
    * @brief Destructor.
    **/
@@ -86,6 +87,21 @@ class Device {
     return name_;
   }
 
+  /**
+   * @brief Get @link keep_on_disconnect_ @endlink value
+   */
+  bool keep_on_disconnect() const {
+    return keep_on_disconnect_;
+  }
+
+  /**
+   * @brief Set @link keep_on_disconnect_ @endlink value
+   * @param keep_on_disconnect new value
+   */
+  void set_keep_on_disconnect(bool keep_on_disconnect) {
+    keep_on_disconnect_ = keep_on_disconnect;
+  }
+
  private:
   /**
    * @brief Device user-friendly name.
@@ -96,6 +112,11 @@ class Device {
    * @brief Unique device identifier across all devices.
    **/
   DeviceUID unique_device_id_;
+
+  /**
+   * @brief If true, device will remain in list even if all its connections finished.
+   **/
+  bool keep_on_disconnect_;
 };
 
 typedef utils::SharedPtr<Device> DeviceSptr;

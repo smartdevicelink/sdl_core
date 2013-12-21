@@ -47,7 +47,7 @@ class WatchdogSubscriber {
    * itself using Watchdog::removeRequest(int connection_key,
                                int correlation_id)
   */
-  virtual void onTimeoutExpired(RequestInfo) = 0;
+  virtual void onTimeoutExpired(const RequestInfo& info) = 0;
 
   virtual ~WatchdogSubscriber() {
   }

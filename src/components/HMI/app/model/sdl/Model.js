@@ -34,9 +34,26 @@
 SDL.SDLModel = Em.Object.create({
 
     /**
-     * TimeStamp of current started HMI session
+     * Data came from UI.PerformInteractionRequest for ShowVRHelpItems popup
      *
      * @type {Object}
+     */
+    interactionData: {
+        'vrHelpTitle': null,
+        'vrHelp': null
+    },
+
+    /**
+     * IScroll object to manage scroll on PerformInteraction view
+     *
+     * @type {Object}
+     */
+    interactionListWrapper: null,
+
+    /**
+     * TimeStamp of current started HMI session
+     *
+     * @type {Number}
      */
     timeStamp: null,
 
@@ -460,7 +477,7 @@ SDL.SDLModel = Em.Object.create({
     startStream: function(params) {
 
         SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-        this.playVideo();
+        SDL.SDLModel.playVideo();
     },
 
     /**
@@ -468,10 +485,25 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      */
-    stopStream: function(params) {
+    stopStream: function(appID) {
 
-        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', null);
-        this.pauseVideo();
+        var createVideoView =  Ember.View.create({
+                templateName: "video",
+                template: Ember.Handlebars.compile('<video id="html5Player"></video>')
+            }),
+            videoChild = null;
+
+        SDL.MediaNavigationView.removeChild(SDL.MediaNavigationView.get('videoView'));
+        SDL.MediaNavigationView.rerender();
+
+        SDL.SDLController.getApplicationModel(appID).set('navigationStream', null);
+
+        //this.pauseVideo();
+
+        videoChild = SDL.MediaNavigationView.createChildView(createVideoView);
+
+        SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
+        SDL.MediaNavigationView.set('videoView', videoChild);
     },
 
     /**
@@ -504,7 +536,11 @@ SDL.SDLModel = Em.Object.create({
     tbtActivate: function(params) {
 
         SDL.SDLController.getApplicationModel(params.appID).set('constantTBTParams', params);
-        SDL.TurnByTurnView.activate(params.appID);
+        SDL.SDLController.getApplicationModel(params.appID).set('tbtActivate', true);
+
+        if (SDL.SDLAppController.model) {
+            SDL.SDLController.activateTBT();
+        }
     },
 
     /**
@@ -514,20 +550,20 @@ SDL.SDLModel = Em.Object.create({
      */
     tbtTurnListUpdate: function(params) {
 
-    SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-    SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
-    SDL.TBTTurnList.updateList(params.appID);
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.TBTTurnList.updateList(params.appID);
     },
 
-        /**
-         * Method to VRHelpList on UI with request parameters
-         * It opens VrHelpList PopUp with current list of readable VR commands
-         *
-         * @param {Object}
-         */
-        ShowVrHelp: function(params) {
+    /**
+     * Method to VRHelpList on UI with request parameters
+     * It opens VrHelpList PopUp with current list of readable VR commands
+     *
+     * @param {Object}
+     */
+    ShowVrHelp: function(vrHelpTitle, vrHelp) {
 
-        SDL.VRHelpListView.showVRHelp(params);
+        SDL.VRHelpListView.showVRHelp(vrHelpTitle, vrHelp);
     },
 
     /**
@@ -587,6 +623,9 @@ SDL.SDLModel = Em.Object.create({
 
         if (SDL.SDLController.getApplicationModel(params.appID)) {
 
+            if (SDL.SDLController.getApplicationModel(params.appID).activeRequests.uiPerformInteraction) {
+                SDL.InteractionChoicesView.deactivate("ABORTED");
+            }
             SDL.SDLController.unregisterApplication(params.appID);
         }
     },
@@ -675,21 +714,26 @@ SDL.SDLModel = Em.Object.create({
      */
     onSDLSetAppIcon: function (message, id, method) {
 
-        var img = new Image();
-        img.onload = function () {
+        if (!SDL.SDLController.getApplicationModel(message.appID)){
+            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["APPLICATION_NOT_REGISTERED"], id, method);
+        } else {
 
-            // code to set the src on success
-            SDL.SDLController.getApplicationModel(message.appID).set('appIcon', message.syncFileName.value);
-            FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], id, method);
-        };
-        img.onerror = function (event) {
+            var img = new Image();
+            img.onload = function () {
 
-            // doesn't exist or error loading
-            FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
-            return false;
-        };
+                // code to set the src on success
+                SDL.SDLController.getApplicationModel(message.appID).set('appIcon', message.syncFileName.value);
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], id, method);
+            };
+            img.onerror = function (event) {
 
-        img.src = message.syncFileName.value;
+                // doesn't exist or error loading
+                FFW.UI.sendError(SDL.SDLModel.resultCode["INVALID_DATA"], id, method, 'Image does not exist!');
+                return false;
+            };
+
+            img.src = message.syncFileName.value;
+        }
     },
 
     /**
@@ -728,18 +772,24 @@ SDL.SDLModel = Em.Object.create({
      * @param {Number}
      *            performInteractionRequestId Id of current handled request
      */
-    uiPerformInteraction: function (message, performInteractionRequestId) {
+    uiPerformInteraction: function (message) {
 
-        if (!message) {
-            SDL.SDLAppController.model.onPreformInteraction(message, performInteractionRequestId);
+        if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
+            SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
-
-            if (!SDL.InteractionChoicesView.active) {
-                SDL.SDLController.getApplicationModel(message.appID).onPreformInteraction(message, performInteractionRequestId);
-            } else {
-                SDL.SDLController.interactionChoiseCloseResponse(this.resultCode["ABORTED"], performInteractionRequestId);
-            }
+            SDL.SDLController.interactionChoiseCloseResponse(message.appID, SDL.SDLModel.resultCode['REJECTED']);
+            return;
         }
+
+        if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
+
+            SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
+            SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
+        }
+
+        SDL.InteractionChoicesView.activate(message);
+
+        SDL.SDLController.VRMove();
     },
 
     /**
@@ -922,7 +972,9 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.TurnByTurnView.deactivate();
 
-            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            //if (!SDL.SDLController.getApplicationModel(appID).unregistered) {
+                FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            //}
         }
     }
 });

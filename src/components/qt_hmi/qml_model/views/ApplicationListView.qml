@@ -35,7 +35,9 @@
 import QtQuick 2.0
 import "../controls"
 import "../models"
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 GeneralView {
     Column {
@@ -104,8 +106,18 @@ GeneralView {
                         anchors.leftMargin: Constants.margin
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
-                            dataContainer.currentApplication.isMediaApplication ? contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
-                                                                                : contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
+                            if (Internal.checkBit(dataContainer.currentApplication.appType, Common.AppHMIType.NAVIGATION)) {
+                                if (dataContainer.currentApplication.isMediaApplication) {
+                                    contentLoader.go("./views/SDLNavi.qml", dataContainer.currentApplication.appId)
+                                }
+                                else {
+                                    contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
+                                }
+                            } else if (dataContainer.currentApplication.isMediaApplication) {
+                                contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
+                            } else {
+                                contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
+                            }
                         }
                     }
                 }

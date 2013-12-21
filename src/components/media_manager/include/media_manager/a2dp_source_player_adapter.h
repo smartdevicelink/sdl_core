@@ -33,8 +33,9 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
+#include <map>
 #include "protocol_handler/raw_message.h"
-#include "media_manager/media_adapter.h"
+#include "media_manager/media_adapter_impl.h"
 #include "utils/logger.h"
 
 namespace threads {
@@ -43,7 +44,7 @@ class Thread;
 
 namespace media_manager {
 
-class A2DPSourcePlayerAdapter : public MediaAdapter {
+class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   public:
     A2DPSourcePlayerAdapter();
     ~A2DPSourcePlayerAdapter();
@@ -57,10 +58,7 @@ class A2DPSourcePlayerAdapter : public MediaAdapter {
     class A2DPSourcePlayerThread;
 
     std::map<int, threads::Thread*> sources_;
-
-    //A2DPSourcePlayerThread* thread_;
     static log4cxx::LoggerPtr logger_;
-    int current_application_;
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 
