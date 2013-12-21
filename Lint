@@ -25,7 +25,7 @@ function print_usage {
 	echo -e '\t' "is the default)"
 	echo -e '\t' "w4 - All messages."
 	echo
-	echo "\"MISRA=ON|MISRA=OFF]\" Turns custom MISRA configuration ON"
+	echo "\"MISRA=ON|MISRA=OFF\" Turns custom MISRA configuration ON"
 	echo -e '\t' "and OFF respectively (OFF by defaul)"
 	echo
 	echo
@@ -115,6 +115,7 @@ done
 
 if [ "${BUILD_PATH}" == "" ]; then
 	echo "Mandatory parameter BUILD_PATH is missing"
+	print_usage
 	exit 1;
 fi
 
