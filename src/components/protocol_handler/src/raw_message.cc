@@ -50,7 +50,7 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
     data_size_(data_size_param) {
   if (data_size_param > 0) {
     data_ = new unsigned char[data_size_param];
-    for (int i = 0; i < data_size_param; ++i) {
+    for (unsigned int i = 0; i < data_size_param; ++i) {
       data_[i] = data_param[i];
     }
   } else {
