@@ -1,6 +1,6 @@
 /**
- * \file named_pipe_notifier.h
- * \brief NamedPipeNotifier class header file.
+ * @file MultiTouchArea.qml
+ * @brief Area for multitouch.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,34 +32,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
+import QtQuick 1.1
+import "../hmi_api/Common.js" as Common
 
-#include <QThread>
+MultiPointTouchArea {
+    readonly property int created: Date.now()
 
-class NamedPipeNotifier : public QThread {
-  Q_OBJECT
-  Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
-  QString name_;
+    signal pressed(var touchPoints)
+    signal released(var touchPoints)
+    signal canceled(var touchPoints)
+    signal updated(var touchPoints)
 
- public:
-  explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {}
-
-  const QString& name() const { return name_; }
-  void set_name(const QString& name) {
-    if (name_ != name) {
-      name_ = name;
-      emit nameChanged();
+    function fillEvent(touchPoints) {
+        var event = []
+        for (var i = 0; i < touchPoints.length; ++i) {
+            event.push({
+                           id: touchPoints[i].pointId,
+                           ts: [Date.now() - created],
+                           c: [{ x: touchPoints.x, y: touchPoints.y }] // TODO(KKolodiy): need cast to int
+                       })
+        }
+        return event
     }
-  }
 
- protected:
-  virtual void run();
+    minimumTouchPoints: 1
+    maximumTouchPoints: 10
 
- signals:
-  void nameChanged();
-  void readyRead();
-  void openFailed();
-};
-
-#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
+    onPressed: {
+        sdlUI.onTouchEvent(Common.BEGIN, fillEvent(touchPoints))
+        parent.pressed(touchPoints)
+    }
+    onReleased: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.released(touchPoints)
+    }
+    onCanceled: {
+        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
+        parent.canceled(touchPoints)
+    }
+    onUpdated: {
+        sdlUI.onTouchEvent(Common.MOVE, fillEvent(touchPoints))
+        parent.updated(touchPoints)
+    }
+}

@@ -1,6 +1,6 @@
 /**
- * \file named_pipe_notifier.h
- * \brief NamedPipeNotifier class header file.
+ * @file qt_version.h
+ * @brief Defines for check Qt version.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,34 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_QT_VERSION_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_QT_VERSION_H_
 
-#include <QThread>
+#include <qglobal.h>
 
-class NamedPipeNotifier : public QThread {
-  Q_OBJECT
-  Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
-  QString name_;
+#define QT_4 ((QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)))
 
- public:
-  explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {}
+#define QT_5 ((QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)))
 
-  const QString& name() const { return name_; }
-  void set_name(const QString& name) {
-    if (name_ != name) {
-      name_ = name;
-      emit nameChanged();
-    }
-  }
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_QT_VERSION_H_
 
- protected:
-  virtual void run();
-
- signals:
-  void nameChanged();
-  void readyRead();
-  void openFailed();
-};
-
-#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
