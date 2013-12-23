@@ -59,7 +59,7 @@ void VIGetVehicleDataResponse::Run() {
   smart_objects::SmartObject& result = *result_so;
 
   if ((*message_)[strings::params][strings::message_type]
-      == hmi_apis::messageType::error_response) {
+      == static_cast<int>(hmi_apis::messageType::error_response)) {
     if ((*message_)[strings::params].keyExists(strings::data)) {
       result[strings::msg_params] = (*message_)[strings::params][strings::data];
       result[strings::params][hmi_response::code] =
@@ -77,7 +77,7 @@ void VIGetVehicleDataResponse::Run() {
     }
 
     result[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::GetVehicleDataID;
+        static_cast<int>(mobile_apis::FunctionID::GetVehicleDataID);
 
     SendResponseToMobile(result_so);
   } else {

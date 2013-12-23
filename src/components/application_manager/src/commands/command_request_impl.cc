@@ -214,7 +214,8 @@ void CommandRequestImpl::CreateHMINotification(
   }
   NsSmartDeviceLink::NsSmartObjects::SmartObject& notify = *result;
 
-  notify[strings::params][strings::message_type] = MessageType::kNotification;
+  notify[strings::params][strings::message_type] =
+      static_cast<int>(application_manager::MessageType::kNotification);
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;

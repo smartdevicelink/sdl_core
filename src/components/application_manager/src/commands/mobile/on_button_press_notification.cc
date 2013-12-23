@@ -70,7 +70,8 @@ void OnButtonPressNotification::Run() {
 
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
         || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-            && mobile_apis::ButtonName::OK != btn_id)) {
+            && static_cast<unsigned int>(mobile_apis::ButtonName::OK) !=
+                btn_id)) {
       SendButtonPress(subscribed_app);
     } else {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
@@ -95,7 +96,7 @@ void OnButtonPressNotification::SendButtonPress(const Application* app) {
   (*on_btn_press)[strings::params][strings::connection_key] = app->app_id();
 
   (*on_btn_press)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnButtonPressID;
+      static_cast<int>(mobile_apis::FunctionID::eType::OnButtonPressID);
 
   (*on_btn_press)[strings::msg_params][strings::button_name] =
       (*message_)[strings::msg_params][hmi_response::button_name];

@@ -78,7 +78,7 @@ void UIAddCommandResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::AddCommandID;
+      static_cast<int>(mobile_apis::FunctionID::AddCommandID);
 
   SendResponseToMobile(message_);
 }

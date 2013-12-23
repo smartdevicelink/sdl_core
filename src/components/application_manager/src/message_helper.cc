@@ -149,8 +149,8 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::audio_streaming_state] =
     application_impl.audio_streaming_state();
 
-  message[strings::msg_params][strings::system_context] = application_impl
-      .system_context();
+  message[strings::msg_params][strings::system_context] =
+      static_cast<int>(application_impl.system_context());
 
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
