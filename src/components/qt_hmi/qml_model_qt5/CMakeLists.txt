@@ -38,7 +38,7 @@ set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/QT_HMI_API.xml)
 set(proxy_dir ${CMAKE_CURRENT_BINARY_DIR}/hmi_api)
-set(qml_dirs hmi_api controls models popups res views)
+set(qml_dirs hmi_api controls models popups views)
 set(qml_files MainWindow.qml)
 
 add_custom_target(qml_auto ALL
@@ -55,6 +55,10 @@ add_custom_target(qml_auto ALL
     from:
     ${api_xml} ..."
 )
+
+add_custom_target(qml_copy_resources ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../res ${CMAKE_CURRENT_BINARY_DIR}/res
+  COMMENT "Copying resources")
 
 if(NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   foreach(qml_dir ${qml_dirs})
