@@ -28,10 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+add_subdirectory(./qml_plugins)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    add_subdirectory(./qml_plugins_qt4)
     add_subdirectory(./qml_model_qt4)
 else ()
-    add_subdirectory(./qml_plugins_qt5)
     add_subdirectory(./qml_model_qt5)
 endif ()

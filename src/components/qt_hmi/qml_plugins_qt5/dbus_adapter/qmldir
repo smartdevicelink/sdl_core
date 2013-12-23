@@ -1,3 +1,0 @@
-module com.ford.sdl.hmi.dbus_adapter
-plugin DbusAdapter
-
