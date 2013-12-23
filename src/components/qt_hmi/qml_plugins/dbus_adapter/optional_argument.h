@@ -32,44 +32,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONALARGUMENT_H_
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONAL_ARGUMENT_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONAL_ARGUMENT_H_
 
-#include <QDBusArgument>
+#include "qt_version.h"
+#include <QtDBus/QDBusArgument>
 
 template<class T>
-struct OptionalArgument
-{
-    T val;
-    bool presence;
-    OptionalArgument(const T& value)
-        : val(value),
-          presence(true)
-    { }
-    OptionalArgument()
-        : presence(false)
-    { }
+struct OptionalArgument {
+  T val;
+  bool presence;
+  explicit OptionalArgument(const T& value)
+      : val(value),
+        presence(true) {}
+  OptionalArgument()
+      : presence(false) {}
 };
 
 template<class T>
 inline
-QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg << o.presence << o.val;
-    arg.endStructure();
-    return arg;
+QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o) {
+  arg.beginStructure();
+  arg << o.presence << o.val;
+  arg.endStructure();
+  return arg;
 }
 
 template<class T>
 inline
-const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o)
-{
-    arg.beginStructure();
-    arg >> o.presence >> o.val;
-    arg.endStructure();
-    return arg;
+const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o) {
+  arg.beginStructure();
+  arg >> o.presence >> o.val;
+  arg.endStructure();
+  return arg;
 }
+
+#if QT_4
+Q_DECLARE_METATYPE(QList<int>)
+#endif // QT_4
 
 Q_DECLARE_METATYPE(OptionalArgument<int>)
 Q_DECLARE_METATYPE(OptionalArgument<QString>)
@@ -80,4 +80,4 @@ Q_DECLARE_METATYPE(OptionalArgument<QList<int> >)
 Q_DECLARE_METATYPE(OptionalArgument<QStringList>)
 Q_DECLARE_METATYPE(OptionalArgument<QList<bool> >)
 Q_DECLARE_METATYPE(OptionalArgument<QList<double> >)
-#endif // OPTIONALARGUMENT_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_OPTIONAL_ARGUMENT_H_

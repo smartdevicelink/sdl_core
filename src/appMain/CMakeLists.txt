@@ -109,28 +109,46 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-IF (${QT_HMI})
-  execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlscene
-    OUTPUT_VARIABLE qmlscene_binary
-  )
-  set(main_qml "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model/MainWindow.qml")
-  set(plugins_dir "${CMAKE_BINARY_DIR}/src/components/qt_hmi/qml_model")
-  file(WRITE start_hmi_tmp/start_hmi.sh
-             "#!/bin/sh\n${qmlscene_binary} ${main_qml} -I ${plugins_dir}\n")
-  file(COPY start_hmi_tmp/start_hmi.sh
-       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-            GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-       NO_SOURCE_PERMISSIONS)
-  file(REMOVE_RECURSE start_hmi_tmp)
-ENDIF (${QT_HMI})
+if (${QT_HMI})
+  set(main_qml "hmi/MainWindow.qml")
+  set(plugins_dir "hmi/plugins")
 
-IF (${WEB_HMI})
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
-ENDIF (${WEB_HMI})
+  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    set(start_command "./start-qml.sh")
+    set(command_arguments "${main_qml} ${plugins_dir}")
+  else ()
+    execute_process(
+      COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version} -b qmlscene
+      OUTPUT_VARIABLE start_command
+    )
+    set(command_arguments "${main_qml} -I ${plugins_dir}")
+  endif ()
 
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
+    "#!/bin/sh\n${start_command} ${command_arguments}\n")
+elseif (${WEB_HMI})
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
+    "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+endif ()
 
-
-install (TARGETS ${PROJECT} DESTINATION bin)
-
+# Install rules
+install(TARGETS ${PROJECT} DESTINATION bin)
+install(
+  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini policy_table.json
+    hmi_capabilities.json wp1_policy_table.json
+  DESTINATION bin
+)
+if (${WEB_HMI})
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
+  endif ()
+elseif (${QT_HMI})
+  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    install(FILES start-qml.sh DESTINATION bin
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+        GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  endif ()
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh DESTINATION bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif ()

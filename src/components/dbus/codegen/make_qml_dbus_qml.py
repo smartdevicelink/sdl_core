@@ -45,6 +45,8 @@ from copy import copy
 from ford_xml_parser import FordXmlParser
 
 namespace = 'dbus_qml'
+qt_quick_version = '1.1'
+type_variant_name = 'variant'
 
 class Impl(FordXmlParser):
     def write_function(self, ifacename, request, response, out):
@@ -69,12 +71,12 @@ class Impl(FordXmlParser):
 
 
     def write_signal_param(self, param, out):
-        if param.array or param.struct or not param.mandatory: typ = 'var'
+        if param.array or param.struct or not param.mandatory: typ = type_variant_name
         elif param.type == 'Integer' or param.enum: typ = 'int'
         elif param.type == 'String': typ = 'string'
         elif param.type == 'Boolean': typ = 'bool'
-        elif param.type == 'Float': typ = 'real'
-        else: typ = 'var'
+        elif param.type == 'Float': typ = 'double'
+        else: typ = type_variant_name
         out.write(typ + ' ' + param.name)
 
 
@@ -91,8 +93,9 @@ class Impl(FordXmlParser):
 
 
     def write_qml(self, iface, out):
+        global qt_quick_version
         name = iface.get('name')
-        out.write("import QtQuick 2.0\n")
+        out.write("import QtQuick %s\n" % qt_quick_version)
         out.write("""import "Common.js" as Common\n""")
         out.write("import \"..\"\n\n")
         out.write("Item {\n")
@@ -168,8 +171,16 @@ def write_header(out):
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus QML part")
 arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
+arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.1.0")
 arg_parser.add_argument('--outdir', required=True, help="path to directory where output files with pattern name <intarface name>Proxy.qml will be saved, e.g. BasicCommunicationProxy.qml, ButtonsProxy.qml VRProxy.qml")
 args = arg_parser.parse_args()
+
+if args.version == "4.8.5":
+    qt_quick_version = "1.1"
+    type_variant_name = "variant"
+elif args.version == "5.1.0":
+    qt_quick_version = "2.0"
+    type_variant_name = "var"
 
 if not path.isdir(args.outdir):
     makedirs(args.outdir)

@@ -69,12 +69,10 @@ add_subdirectory(./media_manager)
 add_subdirectory(./policies)
 endif()
 
-IF (${QT_HMI})
+if (${QT_HMI})
 # --- DBus
     add_subdirectory(./dbus)
 # --- Qt HMI
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_subdirectory(./qt_hmi)
-  endif()
-ENDIF (${QT_HMI})
+endif ()
 
