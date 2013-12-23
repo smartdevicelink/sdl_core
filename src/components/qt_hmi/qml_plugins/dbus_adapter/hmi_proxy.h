@@ -44,21 +44,21 @@ typedef QDeclarativeItem Item;
 #elif QT_5
 #  include <QtQuick/QQuickItem>
 typedef QQuickItem Item;
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
 class HmiProxy : public Item {
-    Q_OBJECT
-    Q_DISABLE_COPY(HmiProxy)
-    
-public:
-    explicit HmiProxy(Item *parent = 0);
-    static ApiAdaptors api_adaptors_;
+  Q_OBJECT
+  Q_DISABLE_COPY(HmiProxy)
 
-protected:
-    virtual void componentComplete();
+ public:
+  explicit HmiProxy(Item *parent = 0);
+  static ApiAdaptors api_adaptors_;
+
+ protected:
+  virtual void componentComplete();
 };
 
 QML_DECLARE_TYPE(HmiProxy)
 
-#endif // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
 

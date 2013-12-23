@@ -42,30 +42,30 @@
 #  include <QtGui/QImage>
 #  include <QtCore/QEvent>
 #  define IMAGE "QQuickImage"
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
-MaskedContainer::MaskedContainer(Item *parent):
-    Item(parent),
-    mask(NULL)
-{
-    setAcceptedMouseButtons(Qt::LeftButton);
+MaskedContainer::MaskedContainer(Item *parent)
+    : Item(parent),
+      mask_(NULL) {
+  setAcceptedMouseButtons(Qt::LeftButton);
 }
 
 void MaskedContainer::componentComplete() {
     Item::componentComplete();
 
-    for (QObjectList::ConstIterator it = children().begin(); it != children().end(); ++it) {
+    for (QObjectList::ConstIterator it = children().begin();
+         it != children().end(); ++it) {
         Item *item = qobject_cast<Item*>(*it);
         if (item && item->inherits(IMAGE) && item->isVisible()) {
-            images.push_back(item);
+            images_.push_back(item);
         }
     }
 
     int height = this->height();
     int width  =this->width();
 
-    for (int i = 0; i < images.size(); ++i) {
-        Item *item = images[i];
+    for (int i = 0; i < images_.size(); ++i) {
+        Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();
         int itemX = item->x();
@@ -79,11 +79,11 @@ void MaskedContainer::componentComplete() {
     setHeight(height);
     setWidth(width);
 
-    mask = new int[height * width];
-    std::fill(mask, mask + height * width, -1);
+    mask_ = new int[height * width];
+    std::fill(mask_, mask_ + height * width, -1);
 
-    for (int i = 0; i < images.size(); ++i) {
-        Item *item = images[i];
+    for (int i = 0; i < images_.size(); ++i) {
+        Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();
         int itemX = item->x();
@@ -95,7 +95,7 @@ void MaskedContainer::componentComplete() {
         for (int x = 0; x < itemWidth; ++x) {
             for (int y = 0; y < itemHeight; ++y) {
                 if (qAlpha(bits[y * itemWidth + x]) > 128) {
-                    mask[(itemY + y) * width + (x + itemX)] = i;
+                    mask_[(itemY + y) * width + (x + itemX)] = i;
                 }
             }
         }
@@ -103,28 +103,20 @@ void MaskedContainer::componentComplete() {
 }
 
 void MaskedContainer::mousePressEvent(MouseEvent *mouse) {
-  qreal x, y;
 #if QT_4
-  x = mouse->pos().x();
-  y = mouse->pos().y();
+  qreal x = mouse->pos().x();
+  qreal y = mouse->pos().y();
 #elif QT_5
-  x = mouse->x();
-  y = mouse->y();
-#endif // QT_VERSION
+  int x = mouse->x();
+  int y = mouse->y();
+#endif  // QT_VERSION
 
   if (width() * y + x > width() * height()) {
     mouse->ignore();
   } else {
-    int i;
-#if QT_4
-    i = static_cast<int>(y * width() + x);
-#elif QT_5
-    i = y * static_cast<int>(width()) + x;
-#endif // QT_VERSION
-
-    int idx = mask[i];
+    int idx = mask_[indexOfMask(x, y)];
     if (idx >= 0) {
-      AttributedMouseEvent ev(images[idx]);
+      AttributedMouseEvent ev(images_[idx]);
       emit pressed(&ev);
       grabMouse();
       mouse->accept();
@@ -135,28 +127,20 @@ void MaskedContainer::mousePressEvent(MouseEvent *mouse) {
 }
 
 void MaskedContainer::mouseReleaseEvent(MouseEvent *mouse) {
-  qreal x, y;
 #if QT_4
-  x = mouse->pos().x();
-  y = mouse->pos().y();
+  qreal x = mouse->pos().x();
+  qreal y = mouse->pos().y();
 #elif QT_5
-  x = mouse->x();
-  y = mouse->y();
-#endif // QT_VERSION
+  int x = mouse->x();
+  int y = mouse->y();
+#endif  // QT_VERSION
 
   if (width() * y + x > width() * height()) {
     return;
   } else {
-    int i;
-#if QT_4
-    i = static_cast<int>(y * width() + x);
-#elif QT_5
-    i = y * static_cast<int>(width()) + x;
-#endif // QT_VERSION
-
-    int idx = mask[i];
+    int idx = mask_[indexOfMask(x, y)];
     if (idx >= 0) {
-      AttributedMouseEvent ev(images[idx]);
+      AttributedMouseEvent ev(images_[idx]);
       emit released(&ev);
     } else {
       emit released(NULL);
@@ -166,6 +150,6 @@ void MaskedContainer::mouseReleaseEvent(MouseEvent *mouse) {
 }
 
 MaskedContainer::~MaskedContainer() {
-  delete[] mask;
+  delete[] mask_;
 }
 

@@ -37,14 +37,19 @@
 SdlProxy::SdlProxy(Item *parent)
     : Item(parent) {
 
-  QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
-                                        "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication)));
-  QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
-                                        "OnAppUnregistered", this, SIGNAL(appUnregistered(int)));
-  QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
-                                        "PlayTone", this, SIGNAL(playTone()));
-  QDBusConnection::sessionBus().connect("com.ford.sdl.core", "/", "com.ford.sdl.core.UI",
-                                        "ShowNotification", this, SLOT(OnShowNotification(Common_TextFieldStruct, OptionalArgument<Common_Image>, int)));
+  QDBusConnection::sessionBus().connect(
+              "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
+              "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication)));
+  QDBusConnection::sessionBus().connect(
+              "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
+              "OnAppUnregistered", this, SIGNAL(appUnregistered(int)));
+  QDBusConnection::sessionBus().connect(
+              "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
+              "PlayTone", this, SIGNAL(playTone()));
+  QDBusConnection::sessionBus().connect(
+              "com.ford.sdl.core", "/", "com.ford.sdl.core.UI", "ShowNotification",
+              this, SLOT(OnShowNotification(Common_TextFieldStruct,
+                                            OptionalArgument<Common_Image>, int)));
 }
 
 void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
@@ -57,9 +62,8 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
 
   if (app.appType.presence) {
     QList<QVariant> appType;
-    for(QList<int>::const_iterator it = app.appType.val.begin();
-      it != app.appType.val.end();
-      ++it) {
+    for (QList<int>::const_iterator it = app.appType.val.begin();
+      it != app.appType.val.end(); ++it) {
         appType.append(QVariant::fromValue(*it));
     }
     appMap["appType"] = appType;
@@ -76,7 +80,9 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
   emit appRegistered(QVariant(appMap));
 }
 
-void SdlProxy::OnShowNotification(Common_TextFieldStruct text, OptionalArgument<Common_Image> image, int timeout) {
+void SdlProxy::OnShowNotification(Common_TextFieldStruct text,
+                                  OptionalArgument<Common_Image> image,
+                                  int timeout) {
   QVariantMap txtMap;
   QVariant img;
 

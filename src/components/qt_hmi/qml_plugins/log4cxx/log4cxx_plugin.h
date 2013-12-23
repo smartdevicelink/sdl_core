@@ -37,11 +37,11 @@
 
 #include <qglobal.h>
 
-#define QT_4 ( (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
-  (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)) )
+#define QT_4 ((QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)))
 
-#define QT_5 ( (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
-  (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)) )
+#define QT_5 ((QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)))
 
 #if QT_4
 #  include <QtDeclarative/qdeclarative.h>
@@ -51,14 +51,13 @@ typedef QDeclarativeExtensionPlugin ExtensionPlugin;
 #  include <QtQml/qqml.h>
 #  include <QtQml/QQmlExtensionPlugin>
 typedef QQmlExtensionPlugin ExtensionPlugin;
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
-class Logger : public QObject 
-{
+class Logger : public QObject {
   Q_OBJECT
   Q_DISABLE_COPY(Logger)
 
-public:
+ public:
   explicit Logger(QObject *parent = 0) : QObject(parent) {}
 };
 
@@ -66,9 +65,9 @@ class Log4cxxPlugin : public ExtensionPlugin {
   Q_OBJECT
 #if QT_5
   Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
-#endif // QT_5
-    
-public:
+#endif  // QT_5
+
+ public:
   void registerTypes(const char *uri);
 };
 

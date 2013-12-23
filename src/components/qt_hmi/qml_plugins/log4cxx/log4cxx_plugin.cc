@@ -86,7 +86,7 @@ void smartLogger(QtMsgType type, const QMessageLogContext &context,
     break;
   }
 }
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
 void Log4cxxPlugin::registerTypes(const char *uri) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
@@ -95,7 +95,7 @@ void Log4cxxPlugin::registerTypes(const char *uri) {
   qInstallMsgHandler(smartLogger);
 #elif QT_5
   qInstallMessageHandler(smartLogger);
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
   // @uri com.ford.sdl.hmi.log4cxx
   qmlRegisterType<Logger>(uri, 1, 0, "Logger");
@@ -105,4 +105,4 @@ void Log4cxxPlugin::registerTypes(const char *uri) {
 
 #if QT_4
 Q_EXPORT_PLUGIN2(QmlLog4cxx, Log4cxxPlugin)
-#endif // QT_4
+#endif  // QT_4

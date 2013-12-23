@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DBUS_CONTROLLER_H
-#define DBUS_CONTROLLER_H
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_DBUS_CONTROLLER_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_DBUS_CONTROLLER_H_
 
 #include <QtDBus/QDBusMessage>
 #include <QtCore/QObject>
@@ -48,8 +48,8 @@ class DBusController: public QObject {
   };
   Q_OBJECT
 
-public:
-  explicit DBusController(QObject *parent=0);
+ public:
+  explicit DBusController(QObject *parent = 0);
   void addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid);
   Q_INVOKABLE void sendReply(QVariant asyncObject, QVariant data);
   Q_INVOKABLE void sendReply(QVariant data);
@@ -57,8 +57,8 @@ public:
   const QDBusMessage* message;
   fillRoutine fill;
 
-private:
-  std::map<int, delayedReply> replies;
+ private:
+  std::map<int, delayedReply> replies_;
 };
 
-#endif // DBUS_CONTROLLER_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_DBUS_CONTROLLER_H_

@@ -35,9 +35,10 @@
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_
 
-#include "qt_version.h"
 #include <vector>
 #include <QtCore/QString>
+
+#include "qt_version.h"
 
 #if QT_4
 #  include <QtDeclarative/QDeclarativeItem>
@@ -54,25 +55,35 @@ typedef QMouseEvent MouseEvent;
 class MaskedContainer : public Item {
   Q_OBJECT
   Q_DISABLE_COPY(MaskedContainer)
-    
-public:
-  MaskedContainer(Item *parent = 0);
+
+ public:
+  explicit MaskedContainer(Item *parent = 0);
   ~MaskedContainer();
 
-signals:
+ signals:
   void pressed(AttributedMouseEvent *attr);
   void released(AttributedMouseEvent *attr);
 
-protected:
+ protected:
   virtual void componentComplete();
   virtual void mousePressEvent(MouseEvent *event);
   virtual void mouseReleaseEvent(MouseEvent *event);
 
-private:
-  std::vector<Item*> images;
-  int *mask;
+ private:
+  std::vector<Item*> images_;
+  int *mask_;
+
+#if QT_4
+  int indexOfMask(qreal x, qreal y) const {
+    return static_cast<int>(y * width() + x);
+  }
+#elif QT_5
+  int indexOfMask(int x, int y) const {
+    return y * static_cast<int>(width()) + x;
+  }
+#endif  // QT_VERSION
 };
 
 QML_DECLARE_TYPE(MaskedContainer)
 
-#endif // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_

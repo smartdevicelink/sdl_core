@@ -45,29 +45,31 @@ typedef QDeclarativeItem Item;
 #elif QT_5
 #  include <QtQuick/QQuickItem>
 typedef QQuickItem Item;
-#endif // QT_VERSION
+#endif  // QT_VERSION
 
 class SdlProxy: public Item {
   Q_OBJECT
   Q_DISABLE_COPY(SdlProxy)
 
-public:
+ public:
   explicit SdlProxy(Item* parent = 0);
 
-private:
+ private:
   QDBusInterface *sdlBasicCommunicationInterface;
 
-signals:
+ signals:
   void appRegistered(QVariant application);
   void appUnregistered(int appId);
   void playTone();
   void showNotification(QVariant text, QVariant icon, int timeout);
 
-private slots:
+ private slots:
   void OnAppRegistered(Common_HMIApplication);
-  void OnShowNotification(Common_TextFieldStruct text, OptionalArgument<Common_Image> image, int timeout);
+  void OnShowNotification(Common_TextFieldStruct text,
+                          OptionalArgument<Common_Image> image,
+                          int timeout);
 };
 
 QML_DECLARE_TYPE(SdlProxy)
 
-#endif // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_

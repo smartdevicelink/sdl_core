@@ -30,11 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef STREAM_QVARIANT_H
-#define STREAM_QVARIANT_H
-#include <sstream>
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_STREAM_QVARIANT_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_STREAM_QVARIANT_H_
+
 #include <QtCore/QVariant>
+#include <sstream>
 
-std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os, const QVariant& value);
+std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os,
+                                     const QVariant& value);
 
-#endif // STREAM_QVARIANT_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_STREAM_QVARIANT_H_

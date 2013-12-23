@@ -54,42 +54,40 @@
 #  include <QtQml/QQmlContext>
 #  include <QtQml/QQmlListReference>
 #  include <QtQml/QQmlEngine>
-#endif // QT_VERSION
+#endif  // QT_VERSION
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
                               log4cxx::Logger::getLogger("DBusPlugin"));
 
-void DbusPlugin::registerTypes(const char *uri)
-{
-    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+void DbusPlugin::registerTypes(const char *uri) {
+  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-    // @uri sdl.core.api
-    qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
-    qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
+  // @uri sdl.core.api
+  qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
+  qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
 
-    RegisterDbusMetatypes();
-    qDBusRegisterMetaType<OptionalArgument<int> >();
-    qDBusRegisterMetaType<OptionalArgument<QList<int> > >();
-    qDBusRegisterMetaType<OptionalArgument<QString> >();
-    qDBusRegisterMetaType<OptionalArgument<QStringList> >();
-    qDBusRegisterMetaType<OptionalArgument<bool> >();
-    qDBusRegisterMetaType<OptionalArgument<QList<bool> > >();
-    qDBusRegisterMetaType<OptionalArgument<double> >();
-    qDBusRegisterMetaType<OptionalArgument<QList<double> > >();
+  RegisterDbusMetatypes();
+  qDBusRegisterMetaType<OptionalArgument<int> >();
+  qDBusRegisterMetaType<OptionalArgument<QList<int> > >();
+  qDBusRegisterMetaType<OptionalArgument<QString> >();
+  qDBusRegisterMetaType<OptionalArgument<QStringList> >();
+  qDBusRegisterMetaType<OptionalArgument<bool> >();
+  qDBusRegisterMetaType<OptionalArgument<QList<bool> > >();
+  qDBusRegisterMetaType<OptionalArgument<double> >();
+  qDBusRegisterMetaType<OptionalArgument<QList<double> > >();
 
-    HmiProxy::api_adaptors_.Init(this);
+  HmiProxy::api_adaptors_.Init(this);
 
-    QDBusConnection::sessionBus().registerObject("/", this);
-    QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
+  QDBusConnection::sessionBus().registerObject("/", this);
+  QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
 
-    dbusController = new DBusController();
-    HmiProxy::api_adaptors_.SetDBusController(dbusController);
+  dbusController_ = new DBusController();
+  HmiProxy::api_adaptors_.SetDBusController(dbusController_);
 }
 
-void DbusPlugin::initializeEngine(Engine *engine, const char *uri)
-{
-    engine->rootContext()->setContextProperty("DBus", dbusController);
+void DbusPlugin::initializeEngine(Engine *engine, const char *uri) {
+    engine->rootContext()->setContextProperty("DBus", dbusController_);
 }
 
 #if QT_4
 Q_EXPORT_PLUGIN2(DbusAdapter, DbusPlugin)
-#endif // QT_4
+#endif  // QT_4
