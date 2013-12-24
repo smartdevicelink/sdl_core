@@ -56,7 +56,7 @@ GeneralView {
 // because relative paths differ for Video and NamedPipeNotifier
 // we use url.toString() to obtain absolute path
 // and we use substring() to remove "file://" prefix
-                property url pipe: "../../../../appMain/video_stream_pipe"
+                property url pipe: "/tmp/video_stream_pipe"
                 name: pipe.toString().substring(7)
                 onReadyRead: {
                     player.source = pipe.toString().substring(7)
