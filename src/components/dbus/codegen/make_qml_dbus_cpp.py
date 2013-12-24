@@ -44,6 +44,9 @@ from copy import copy
 from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
+prefix_class_item = 'Declarative'
+invoke_type_connection = 'Direct'
+
 def defaultValue(param):
     if param.type == "Integer":
         return "0"
@@ -286,6 +289,10 @@ class Impl(FordXmlParser):
         in_params = [self.make_param_desc(x, interface) for x in request.findall('param')]
         out_params = [self.make_param_desc(x, interface) for x in response.findall('param')]
 
+        signature_len = len(''.join(map(lambda x: self.convert_to_dbus_type(x), in_params + out_params)))
+        if signature_len > 255:
+            raise RuntimeError("Too long signature of {0} method. Maximum valid length is 255, actual is {1}", request.get('name'), signature_len)
+
         return "int {0}{1} ({2}{3}const QDBusMessage& message, QString& userMessage_out{4}{5})".format(
                                         interface + "Adaptor::" if add_classname else "",
                                         request.get('name'),
@@ -338,6 +345,7 @@ class Impl(FordXmlParser):
 
 
     def write_adaptor_declaration(self, interface_el, notifications, request_responses, out):
+        global prefix_class_item
         def glue_strings(strings):
             ret = list()
             curstr = ''
@@ -360,7 +368,7 @@ class Impl(FordXmlParser):
         out.write("  )\n")
         out.write(" public:\n")
         out.write("  explicit " + ifacename + "Adaptor(QObject *parent = 0);\n")
-        out.write("  void SetApi(QQuickItem*);\n")
+        out.write("  void SetApi(Q%sItem*);\n" % prefix_class_item)
         out.write("  DBusController *dbusController;\n")
         out.write(" public slots:\n")
         for (request, response) in request_responses:
@@ -375,15 +383,16 @@ class Impl(FordXmlParser):
             signature = self.make_qml_signal_signature(n, ifacename, n.get('name') + '_qml', False)
             out.write("  " + signature + ";\n")
         out.write(" private:\n")
-        out.write("  QQuickItem* api_;\n")
+        out.write("  Q%sItem* api_;\n" % prefix_class_item)
         out.write("};\n\n");
 
     def write_adaptor_definition(self, interface_el, notifications, request_responses, out):
+        global prefix_class_item
         iface_name = interface_el.get('name')
         classname = iface_name + 'Adaptor'
         out.write("{0}::{0}(QObject* parent) : QDBusAbstractAdaptor(parent) {{}}\n".format(classname))
 
-        out.write("void {0}::SetApi(QQuickItem* api) {{\n".format(classname))
+        out.write("void {0}::SetApi(Q{1}Item* api) {{\n".format(classname, prefix_class_item))
         with CodeBlock(out) as out:
             out.write("api_ = api;\n")
             for n in notifications:
@@ -440,7 +449,7 @@ class Impl(FordXmlParser):
                 out.write("dbusController->message = &message;\n")
                 out.write("dbusController->fill = &fill{0}{1}Reply;\n".format(classname, request.get("name")))
 
-                out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name))
+                out.write("""if (!QMetaObject::invokeMethod(api_, "{0}", Qt::{1}Connection, Q_RETURN_ARG(QVariant, out_arg_v), Q_ARG(QVariant, QVariant(in_arg)))) {{\n""".format(method_name, invoke_type_connection))
                 with CodeBlock(out) as out:
                     out.write("RaiseDbusError(this, InvalidData);\n")
                     out.write("LOG4CXX_ERROR(logger_, \"Can't invoke method " + method_name +"\");\n    ")
@@ -562,6 +571,7 @@ class Impl(FordXmlParser):
 
 
     def make_api_adaptors_class(self, out):
+        global prefix_class_item
         out.write("struct ApiAdaptors {\n")
         interfaces = self.el_tree.findall('interface')
         def filt(iface):
@@ -586,7 +596,7 @@ class Impl(FordXmlParser):
         for interface_el in interfaces:
             name = interface_el.get('name') + 'Adaptor'
             chname = interface_el.get('name')
-            out.write("    " + name + "_->SetApi(p->findChild<QQuickItem*>(\"" + chname + "\"));\n")
+            out.write("    " + name + ("_->SetApi(p->findChild<Q%sItem*>(\"" % prefix_class_item) + chname + "\"));\n")
         out.write("  }\n")
         out.write("  void SetDBusController(DBusController* dc) {\n")
         for interface_el in interfaces:
@@ -600,8 +610,16 @@ class Impl(FordXmlParser):
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
 arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
+arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.1.0")
 arg_parser.add_argument('--outdir', required=True, help="path to directory where output files qml_dbus.cc, qml_dbus.h will be saved")
 args = arg_parser.parse_args()
+
+if args.version == "4.8.5":
+    prefix_class_item = 'Declarative'
+    invoke_type_connection = 'Direct'
+elif args.version == "5.1.0":
+    prefix_class_item = 'Quick'
+    invoke_type_connection = 'BlockingQueued'
 
 header_name = 'qml_dbus.h'
 source_name = 'qml_dbus.cc'
@@ -654,12 +672,12 @@ header_out.write("""/**
 """)
 header_out.write("#ifndef SRC_COMPONENTS_DBUS_QML_DBUS_H_\n");
 header_out.write("#define SRC_COMPONENTS_DBUS_QML_DBUS_H_\n\n");
-header_out.write("#include <QDBusArgument>\n");
-header_out.write("#include <QDBusMessage>\n");
-header_out.write("#include <QDBusConnection>\n");
-header_out.write("#include <QDBusAbstractAdaptor>\n");
-header_out.write("#include <QDBusMetaType>\n");
-header_out.write("#include <QQuickItem>\n");
+header_out.write("#include <QtDBus/QDBusArgument>\n");
+header_out.write("#include <QtDBus/QDBusMessage>\n");
+header_out.write("#include <QtDBus/QDBusConnection>\n");
+header_out.write("#include <QtDBus/QDBusAbstractAdaptor>\n");
+header_out.write("#include <QtDBus/QDBusMetaType>\n");
+header_out.write("#include <Qt%s/Q%sItem>\n" % (prefix_class_item, prefix_class_item));
 header_out.write("#include \"qml_dbus_common.h\"\n\n");
 header_out.write("#include \"dbus_controller.h\"\n\n");
 impl.make_dbus_type_declarations(header_out)
@@ -714,5 +732,3 @@ source_out.write("extern log4cxx::LoggerPtr logger_;\n\n")
 impl.make_dbus_type_definitions(source_out)
 impl.make_dbus_adaptor_definitions(source_out)
 impl.make_dbus_register_metatypes_definition(source_out)
-
-# vim: set ts=4 sw=4 et:

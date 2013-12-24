@@ -32,33 +32,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_H_
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_
 
 #include <QThread>
 
 class NamedPipeNotifier : public QThread {
-Q_OBJECT
-Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
-    QString name_;
-public:
-    explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {
+  Q_OBJECT
+  Q_PROPERTY(QString name READ name WRITE set_name NOTIFY nameChanged)
+  QString name_;
+
+ public:
+  explicit NamedPipeNotifier(QObject* parent = 0) : QThread(parent) {}
+
+  const QString& name() const { return name_; }
+  void set_name(const QString& name) {
+    if (name_ != name) {
+      name_ = name;
+      emit nameChanged();
     }
-    const QString& name(void) const {
-        return name_;
-    }
-    void set_name(const QString& name) {
-        if (name_ != name) {
-            name_ = name;
-            emit nameChanged();
-        }
-    }
-protected:
-    virtual void run(void);
-signals:
-    void nameChanged(void);
-    void readyRead(void);
-    void openFailed(void);
+  }
+
+ protected:
+  virtual void run();
+
+ signals:
+  void nameChanged();
+  void readyRead();
+  void openFailed();
 };
 
-#endif
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_NAMED_PIPE_NOTIFIER_NAMED_PIPE_NOTIFIER_H_

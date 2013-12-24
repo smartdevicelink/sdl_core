@@ -39,21 +39,21 @@
 
 #include "named_pipe_notifier.h"
 
-void NamedPipeNotifier::run(void) {
-    int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
-    if (-1 == fd) { // if open() fails
-        if ((errno != ENOENT) // we can only manage lack of pipe
-        || (-1 == ::mkfifo(name_.toLocal8Bit().constData(), 0666))
-        || (-1 == (fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY)))) {
-            emit openFailed();
-            return;
-        }
+void NamedPipeNotifier::run() {
+  int fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY);
+  if (-1 == fd) {  // if open() fails
+    if ((errno != ENOENT)  // we can only manage lack of pipe
+      || (-1 == ::mkfifo(name_.toLocal8Bit().constData(), 0666))
+      || (-1 == (fd = ::open(name_.toLocal8Bit().constData(), O_RDONLY)))) {
+      emit openFailed();
+      return;
     }
-    ::fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(fd, &readfds);
+  }
+  ::fd_set readfds;
+  FD_ZERO(&readfds);
+  FD_SET(fd, &readfds);
 // this select() is supposed to block till pipe is empty
-    if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
-        emit readyRead();
-    }
+  if (::select(fd + 1, &readfds, 0, 0, 0) > 0) {
+    emit readyRead();
+  }
 }
