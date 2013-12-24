@@ -45,11 +45,11 @@ QtObject {
     property bool isMediaApplication
     property int appType
     property int hmiUITextAlignment
-    property string vrHelpTitle //!
-    property string vrHelpTitleDefault: "VR HELP" //!
-    property string vrHelpTitlePerformInteraction //!
-    property string menuTitle //!
-    property Icon menuIcon: Icon { } //!
+    property string vrHelpTitle
+    property string vrHelpTitleDefault
+    property string vrHelpTitlePerformInteraction
+    property string menuTitle
+    property Icon menuIcon: Icon { }
 
     // media player
     property string playPauseState
@@ -60,8 +60,8 @@ QtObject {
     property string helpPrompt
     property string timeoutPrompt
     property ListModel vrHelpItems: ListModel { }
-    property ListModel vrHelpItemsDefault: VrHelpItemsDefault { } //!
-    property ListModel vrHelpItemsPerformInteraction: ListModel {  } // !
+    property ListModel vrHelpItemsDefault: VrHelpItemsDefault { }
+    property ListModel vrHelpItemsPerformInteraction: ListModel {  }
     property ListModel options: ListModel { }
     property ListModel currentSubMenu: options
     property ListModel turnList
@@ -98,7 +98,6 @@ QtObject {
         customPresets = null
         languageTTSVR = -1
         hmiUITextAlignment = null
-        ///!!!!!!!!!!!!!!!!!!! ВР хелп в дефолт
         appType = 0
         console.debug("exit")
     }
