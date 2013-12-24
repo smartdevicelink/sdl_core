@@ -55,7 +55,7 @@ struct AppFile {
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
-  explicit ApplicationImpl(unsigned int app_id);
+  explicit ApplicationImpl(unsigned int application_id);
   ~ApplicationImpl();
 
   /**
@@ -88,7 +88,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
 
-  void set_version(const Version& version);
+  void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
   void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
@@ -106,9 +106,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool AddFile(const std::string& file_name, bool is_persistent);
   bool DeleteFile(const std::string& file_name);
 
-  bool SubscribeToButton(unsigned int btn_name);
-  bool IsSubscribedToButton(unsigned int btn_name);
-  bool UnsubscribeFromButton(unsigned int btn_name);
+  bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
+  bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
+  bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
   bool SubscribeToIVI(unsigned int vehicle_info_type_);
   bool IsSubscribedToIVI(unsigned int vehicle_info_type_);
@@ -138,7 +138,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   connection_handler::DeviceHandle device_;
 
   std::vector<AppFile> app_files_;
-  std::set<unsigned int> subscribed_buttons_;
+  std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<unsigned int> subscribed_vehicle_info_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };

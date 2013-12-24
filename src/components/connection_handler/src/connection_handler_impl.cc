@@ -259,7 +259,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   }
 }
 
-unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
+ int ConnectionHandlerImpl::OnSessionStartedCallback(
   transport_manager::ConnectionUID connection_handle,
   unsigned char service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
@@ -442,13 +442,13 @@ int ConnectionHandlerImpl::GetDataOnDeviceID(
 }
 
 void ConnectionHandlerImpl::set_transport_manager(
-  transport_manager::TransportManager* transport_manager) {
+  transport_manager::TransportManager* transport_mngr) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_transport_manager()");
-  if (!transport_manager) {
+  if (!transport_mngr) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  transport_manager_ = transport_manager;
+  transport_manager_ = transport_mngr;
 }
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::StartDevicesDiscovery()");

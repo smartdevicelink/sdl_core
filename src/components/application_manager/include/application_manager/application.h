@@ -366,9 +366,9 @@ class Application : public virtual InitialApplicationData,
     virtual bool AddFile(const std::string& file_name, bool is_persistent) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
 
-    virtual bool SubscribeToButton(unsigned int btn_name) = 0;
-    virtual bool IsSubscribedToButton(unsigned int btn_name) = 0;
-    virtual bool UnsubscribeFromButton(unsigned int btn_name) = 0;
+    virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;
+    virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;
+    virtual bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) = 0;
 
     virtual bool SubscribeToIVI(unsigned int vehicle_info_type_) = 0;
     virtual bool IsSubscribedToIVI(unsigned int vehicle_info_type_) = 0;

@@ -220,10 +220,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
-    bool RemoveAppDataFromHMI(Application* application);
-    bool LoadAppDataToHMI(Application* application);
-    bool ActivateApplication(Application* application);
-    void DeactivateApplication(Application* application);
+    bool RemoveAppDataFromHMI(Application* app);
+    bool LoadAppDataToHMI(Application* app);
+    bool ActivateApplication(Application* applic);
+    void DeactivateApplication(Application* app);
     void ConnectToDevice(unsigned int id);
     void OnHMIStartedCooperation();
 
@@ -493,7 +493,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * \return bool Indicates whether message is allowed for application
      */
     bool CheckPolicies(smart_objects::SmartObject* message,
-                       Application* application);
+                       Application* app);
 
     /**
      * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority

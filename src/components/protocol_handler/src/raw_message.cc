@@ -40,17 +40,17 @@
 namespace protocol_handler {
 
 RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data_param, unsigned int data_size_param,
+                       unsigned char* data_param, unsigned int data_sz,
                        unsigned char type)
   : connection_key_(connectionKey),
     protocol_version_(protocolVersion),
     service_type_(ServiceTypeFromByte(type)),
     waiting_(false),
     fully_binary_(false),
-    data_size_(data_size_param) {
-  if (data_size_param > 0) {
-    data_ = new unsigned char[data_size_param];
-    for (unsigned int i = 0; i < data_size_param; ++i) {
+    data_size_(data_sz) {
+  if (data_sz > 0) {
+    data_ = new unsigned char[data_sz];
+    for (unsigned int i = 0; i < data_sz; ++i) {
       data_[i] = data_param[i];
     }
   } else {
