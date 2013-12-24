@@ -54,6 +54,7 @@ PerformInteractionRequest::PerformInteractionRequest(
   trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM),
   tts_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM) {
 
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
   subscribe_on_event(
@@ -201,6 +202,13 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::on_event");
 
   switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+        correlation_id(),
+      default_timeout());
+      break;
+    }
     case hmi_apis::FunctionID::VR_OnCommand: {
       LOG4CXX_INFO(logger_, "Received VR_OnCommand event");
       ProcessVRNotification(event.smart_object());
