@@ -169,6 +169,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ip_address_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
@@ -193,6 +194,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/port_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 

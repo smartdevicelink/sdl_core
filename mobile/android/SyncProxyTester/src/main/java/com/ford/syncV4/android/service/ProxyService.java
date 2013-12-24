@@ -281,6 +281,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				int tcpPort = settings.getInt(
 						Const.Transport.PREFS_KEY_TRANSPORT_PORT,
 						Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
+                boolean mIsNSD = settings.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false);
 
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
@@ -296,6 +297,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
                     case Const.Transport.KEY_TCP:
                         config = new TCPTransportConfig(tcpPort, ipAddress);
+                        ((TCPTransportConfig)config).setIsNSD(mIsNSD);
                         appID = APPID_TCP;
                         break;
 

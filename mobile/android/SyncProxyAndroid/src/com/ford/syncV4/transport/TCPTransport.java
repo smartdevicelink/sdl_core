@@ -87,6 +87,7 @@ public class TCPTransport extends SyncTransport {
     public TCPTransport(TCPTransportConfig tcpTransportConfig, ITransportListener transportListener) {
         super(transportListener);
         this.mConfig = tcpTransportConfig;
+        logInfo("TRACE: " + mConfig.getIsNSD());
     }
 
     /**

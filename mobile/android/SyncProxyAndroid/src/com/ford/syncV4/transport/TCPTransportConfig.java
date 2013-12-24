@@ -15,6 +15,12 @@ public class TCPTransportConfig extends BaseTransportConfig {
 	 */
 	private final String mIpAddress;
 
+    /**
+     * Indicates weather TCP connection use Network Service Discovery (NSD) or not. NSD is used
+     * for the case of SDL using any available devices to connect to.
+     */
+    private Boolean mIsNSD;
+
 	/**
 	 * Constructor. Objects of this class must be created for known port and IP address value.
 	 *
@@ -55,11 +61,25 @@ public class TCPTransportConfig extends BaseTransportConfig {
 		return TransportType.TCP;
 	}
 
+    /**
+     * Get weather TCP connection use Network Service Discovery (NSD) or not.
+     * @return Value of the isNSD field
+     */
+    public Boolean getIsNSD() {
+        return mIsNSD;
+    }
+
+    /**
+     * Set weather TCP connection use Network Service Discovery (NSD) or not.
+     * @param mIsNSD
+     */
+    public void setIsNSD(Boolean mIsNSD) {
+        this.mIsNSD = mIsNSD;
+    }
+
     @Override
     public String toString() {
-        return "TCPTransportConfig{" +
-                "Port=" + mPort +
-                ", IpAddress='" + mIpAddress + '\'' +
-                '}';
+        return "TCPTransportConfig{Port=" + mPort + ", IpAddress=" + mIpAddress + ", isNSD=" +
+                mIsNSD + "}";
     }
 }
