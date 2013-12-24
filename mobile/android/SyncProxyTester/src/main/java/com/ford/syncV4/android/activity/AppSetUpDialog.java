@@ -14,8 +14,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
@@ -66,12 +68,15 @@ public class AppSetUpDialog extends DialogFragment {
                 R.id.selectprotocol_radioGroupTransport);
         final EditText ipAddressEditText = (EditText) view.findViewById(R.id.selectprotocol_ipAddr);
         final EditText tcpPortEditText = (EditText) view.findViewById(R.id.selectprotocol_tcpPort);
+        final LinearLayout nsdUseLayout = (LinearLayout) view.findViewById(R.id.nsd_use_layout);
+        final ToggleButton mNSDUseToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
 
         final CheckBox autoSetAppIconCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkAutoSetAppIcon);
 
         ipAddressEditText.setEnabled(false);
         tcpPortEditText.setEnabled(false);
+        nsdUseLayout.setVisibility(View.GONE);
 
         transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -79,6 +84,7 @@ public class AppSetUpDialog extends DialogFragment {
                 boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
                 ipAddressEditText.setEnabled(transportOptionsEnabled);
                 tcpPortEditText.setEnabled(transportOptionsEnabled);
+                nsdUseLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -117,8 +123,6 @@ public class AppSetUpDialog extends DialogFragment {
         appNameEditText.setText(appName);
         langSpinner.setSelection(langAdapter.getPosition(lang));
         hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
-        transportGroup.check(transportType == Const.Transport.KEY_TCP ? R.id.selectprotocol_radioWiFi
-                        : R.id.selectprotocol_radioBT);
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
 
@@ -172,6 +176,7 @@ public class AppSetUpDialog extends DialogFragment {
                                 .edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
+                                .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDUseToggle.isChecked())
                                 .putInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE, videoSource)
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)

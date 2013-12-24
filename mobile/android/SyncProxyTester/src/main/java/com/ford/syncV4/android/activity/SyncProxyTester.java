@@ -586,22 +586,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Displays the current protocol properties in the activity's title.
      */
     private void showProtocolPropertiesInTitle() {
-        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
-                0);
+        final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
         int protocolVersion = getCurrentProtocolVersion();
-        boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
-                Const.PREFS_DEFAULT_ISMEDIAAPP);
+        boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
         String transportType = null;
         switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
             case Const.Transport.KEY_TCP:
                 transportType = "WiFi";
                 break;
-
             case Const.Transport.KEY_BLUETOOTH:
                 transportType = "BT";
                 break;
-
             case Const.Transport.KEY_USB:
                 transportType = "USB";
                 break;
