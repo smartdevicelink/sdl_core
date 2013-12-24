@@ -104,7 +104,6 @@ QtObject {
                 }
                 if (application.navigationModel.distanceToManeuver !== undefined) {
                     currentApplication.navigationModel.distanceToManeuver = application.navigationModel.distanceToManeuver
-                    console.debug(currentApplication.navigationModel.distanceToManeuver)
                 }
                 if (application.navigationModel.distanceToManeuverScale !== undefined) {
                     currentApplication.navigationModel.distanceToManeuverScale = application.navigationModel.distanceToManeuverScale
@@ -114,7 +113,6 @@ QtObject {
                 }
                 if (application.navigationModel.appID !== undefined) {
                     currentApplication.navigationModel.appID = application.navigationModel.appID
-                    console.debug(currentApplication.navigationModel.appID)
                 }
                 if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1

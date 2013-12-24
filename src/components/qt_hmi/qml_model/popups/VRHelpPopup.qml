@@ -46,7 +46,7 @@ ContextPopup {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
         text: {
-            if (interactionPopup.visible) {
+            if (interactionPopup.performInteractionIsActiveNow) {
                 return dataContainer.currentApplication.vrHelpTitlePerformInteraction
             } else {
                 if (dataContainer.currentApplication.vrHelpTitle) {
@@ -68,7 +68,7 @@ ContextPopup {
         anchors.margins: Constants.popupMargin
 
         model: {
-            if (interactionPopup.visible) {
+            if (interactionPopup.performInteractionIsActiveNow) {
                 return dataContainer.currentApplication.vrHelpItemsPerformInteraction
             } else {
                 if (dataContainer.currentApplication.vrHelpItems.count > 0) {

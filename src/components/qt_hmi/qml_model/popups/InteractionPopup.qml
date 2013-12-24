@@ -45,6 +45,7 @@ ContextPopup {
     property int appID
     property int interactionLayout
     property var async
+    property bool performInteractionIsActiveNow
 
     Text {
         id: initialText
@@ -87,12 +88,13 @@ ContextPopup {
         var app = dataContainer.getApplication(appID)
         var dataToUpdate = {}
 
+        performInteractionIsActiveNow = true
         initialText.text = initialText.fieldText
         this.timeout = timeout
         this.appID = appID
 
-        if (choiceSet !== undefined) {
-            this.choiceSet.clear()
+        this.choiceSet.clear()
+        if (choiceSet !== undefined) {            
             for (var choiceIndex in choiceSet) {
                 this.choiceSet.append({
                     choiceID: choiceSet[choiceIndex].choiceID,
@@ -102,16 +104,14 @@ ContextPopup {
                     tetriaryText: choiceSet[choiceIndex].tetriaryText ? choiceSet[choiceIndex].tetriaryText: "",
                     secondaryImage: choiceSet[choiceIndex].secondaryImage ? choiceSet[choiceIndex].secondaryImage : ""
                 })
-
             }
-        }/* else {
-            DBus.sendReply( { __retCode: Common.Result.INVALID_DATA, __message: "UI:PI ChoiceSet - no choices" } )
-        }*/
+        }
         if (vrHelpTitle !== undefined) {
             dataToUpdate.vrHelpTitlePerformInteraction = vrHelpTitle
         }
+
+        app.vrHelpItemsPerformInteraction.clear()
         if (vrHelp !== undefined) {
-            app.vrHelpItemsPerformInteraction.clear()
             for (var ItemIndex in vrHelp) {
                 app.vrHelpItemsPerformInteraction.append({
                     text: vrHelp[ItemIndex].text,
@@ -125,7 +125,9 @@ ContextPopup {
         }
         dataContainer.setApplicationProperties(appID, dataToUpdate)
         async = new Async.AsyncCall()
-        activate()
+        if (piPopUp.choiceSet.count !== 0) {
+            activate()
+        }
         console.debug("exit")
         return async
     }
@@ -153,6 +155,7 @@ ContextPopup {
         }
         timer.stop()
         hide()
+        performInteractionIsActiveNow = false
         console.debug("exit")
     }
 }
