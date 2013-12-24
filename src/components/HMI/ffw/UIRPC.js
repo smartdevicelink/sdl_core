@@ -327,6 +327,8 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.GetCapabilities":
                 {
+
+                    Em.Logger.log("FFW." + request.method + "Response");
                     // send repsonse
                     var JSONMessage = {
                         "jsonrpc": "2.0",
@@ -393,6 +395,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.IsReady":
                 {
 
+                    Em.Logger.log("FFW." + request.method + "Response");
                     // send repsonse
                     var JSONMessage = {
                         "jsonrpc": "2.0",
@@ -413,6 +416,8 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLController.closePopUp();
 
+
+                    Em.Logger.log("FFW." + request.method + "Response");
                     // send repsonse
                     var JSONMessage = {
                         "jsonrpc": "2.0",
@@ -555,6 +560,9 @@ FFW.UI = FFW.RPCObserver.create({
      *            sliderPosition
      */
     sendSliderResult: function (resultCode, sliderRequestID, sliderPosition) {
+
+
+        Em.Logger.log("FFW.UI.SliderResponse");
 
         if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
 
