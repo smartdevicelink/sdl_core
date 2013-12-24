@@ -29,29 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
+
+#ifndef HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#define HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+
 #include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 namespace commands {
+/**
+ * @brief VISubscriveVehicleDataResponseTemplate command class
+ **/
+template<event_engine::Event::EventID eventID>
+class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
+ public:
+  /**
+   * @brief VISubscriveVehicleDataResponseTemplate class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VISubscribeVehicleDataResponseTemplate(
+      const MessageSharedPtr& message)
+      : ResponseFromHMI(message) {
+  }
 
-VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
-
-VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {
-}
-
-void VIUnsubscribeVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIUnsubscribeVehicleDataResponse::Run");
-  event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData
-      );
-  event.set_smart_object(*message_);
-  event.raise();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VISubscribeVehicleDataResponse::Run");
+    event_engine::Event event(eventID);
+    event.set_smart_object(*message_);
+    event.raise();
+  }
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VISubscribeVehicleDataResponseTemplate<eventID>);
+};
 
 }  // namespace commands
 }  // namespace application_manager
+#endif  // HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_

@@ -29,29 +29,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
+
+#ifndef HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+
 #include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 namespace commands {
 
-VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+/**
+ * @brief VIUnsubscriveVehicleDataRequestTemplate command class
+ *
+ * Template class for sending 1 unsubscribe thin request
+ **/
+template<event_engine::Event::EventID eventID>
+class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
+ public:
+  /**
+   * @brief VIUnsubscriveVehicleDataRequestTemplate class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VIUnsubscribeVehicleDataRequestTemplate(
+      const MessageSharedPtr& message)
+      : RequestToHMI(message) {
+  }
 
-VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {
-}
+  /**
+   * @brief Execute command with sending DBus thin request to HMI
+   **/
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VIUnsubscriveVehicleDataRequestTemplate::Run");
+    SendRequest();
+  }
 
-void VIUnsubscribeVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIUnsubscribeVehicleDataResponse::Run");
-  event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData
-      );
-  event.set_smart_object(*message_);
-  event.raise();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataRequestTemplate<eventID>);
+};
 
 }  // namespace commands
 }  // namespace application_manager
+#endif  // HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_

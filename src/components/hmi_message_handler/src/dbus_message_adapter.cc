@@ -97,12 +97,16 @@ void DBusMessageAdapter::SubscribeTo() {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::subscribeTo");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonEvent");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonPress");
+  DBusMessageController::SubscribeTo("UI", "ShowNotification");
   DBusMessageController::SubscribeTo("UI", "OnCommand");
   DBusMessageController::SubscribeTo("UI", "OnDriverDistraction");
   DBusMessageController::SubscribeTo("UI", "OnSystemContext");
-  DBusMessageController::SubscribeTo("UI", "OnAppActivated");
   DBusMessageController::SubscribeTo("UI", "OnLanguageChange");
+  DBusMessageController::SubscribeTo("UI", "OnKeyboardInput");
+  DBusMessageController::SubscribeTo("UI", "OnTouchEvent");
   DBusMessageController::SubscribeTo("UI", "OnResetTimeout");
+  DBusMessageController::SubscribeTo("VR", "Started");
+  DBusMessageController::SubscribeTo("VR", "Stopped");
   DBusMessageController::SubscribeTo("VR", "OnCommand");
   DBusMessageController::SubscribeTo("VR", "OnLanguageChange");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnReady");
@@ -111,9 +115,13 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnUpdateDeviceList");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnFindApplications");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnAppActivated");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnAppRegistered");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnAppUnregistered");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitApplication");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitAllApplications");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnDeviceChosen");  
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnDeviceChosen");
+  DBusMessageController::SubscribeTo("TTS", "Started");
+  DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnGpsData");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnSpeed");
@@ -135,8 +143,12 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("VehicleInfo", "OnEngineTorque");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnAccPedalPosition");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnSteeringWheelAngle");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnECallInfo");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnAirbagStatus");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnEmergencyEvent");
+  DBusMessageController::SubscribeTo("VehicleInfo", "OnClusterModeStatus");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnMyKey");
-  DBusMessageController::SubscribeTo("Navigation", "OnTBTClientState");
+  DBusMessageController::SubscribeTo("Navigation",  "OnTBTClientState");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
