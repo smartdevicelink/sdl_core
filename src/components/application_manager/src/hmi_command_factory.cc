@@ -143,48 +143,8 @@
 #endif // #ifdef WEB_HMI
 
 #ifdef QT_HMI
-#include "application_manager/commands/hmi/vi_get_gps_data_request.h"
-#include "application_manager/commands/hmi/vi_get_gps_data_response.h"
-#include "application_manager/commands/hmi/vi_get_speed_request.h"
-#include "application_manager/commands/hmi/vi_get_speed_response.h"
-#include "application_manager/commands/hmi/vi_get_rpm_request.h"
-#include "application_manager/commands/hmi/vi_get_rpm_response.h"
-#include "application_manager/commands/hmi/vi_get_fuel_level_request.h"
-#include "application_manager/commands/hmi/vi_get_fuel_level_response.h"
-#include "application_manager/commands/hmi/vi_get_fuel_level_state_request.h"
-#include "application_manager/commands/hmi/vi_get_fuel_level_state_response.h"
-#include "application_manager/commands/hmi/vi_get_instant_fuel_consumption_request.h"
-#include "application_manager/commands/hmi/vi_get_instant_fuel_consumption_response.h"
-#include "application_manager/commands/hmi/vi_get_external_temperature_request.h"
-#include "application_manager/commands/hmi/vi_get_external_temperature_response.h"
-#include "application_manager/commands/hmi/vi_get_vin_request.h"
-#include "application_manager/commands/hmi/vi_get_vin_response.h"
-#include "application_manager/commands/hmi/vi_get_prndl_request.h"
-#include "application_manager/commands/hmi/vi_get_prndl_response.h"
-#include "application_manager/commands/hmi/vi_get_tire_pressure_request.h"
-#include "application_manager/commands/hmi/vi_get_tire_pressure_response.h"
-#include "application_manager/commands/hmi/vi_get_odometer_request.h"
-#include "application_manager/commands/hmi/vi_get_odometer_response.h"
-#include "application_manager/commands/hmi/vi_get_belt_status_request.h"
-#include "application_manager/commands/hmi/vi_get_belt_status_response.h"
-#include "application_manager/commands/hmi/vi_get_body_information_request.h"
-#include "application_manager/commands/hmi/vi_get_body_information_response.h"
-#include "application_manager/commands/hmi/vi_get_device_status_request.h"
-#include "application_manager/commands/hmi/vi_get_device_status_response.h"
-#include "application_manager/commands/hmi/vi_get_driver_braking_request.h"
-#include "application_manager/commands/hmi/vi_get_driver_braking_response.h"
-#include "application_manager/commands/hmi/vi_get_wiper_status_request.h"
-#include "application_manager/commands/hmi/vi_get_wiper_status_response.h"
-#include "application_manager/commands/hmi/vi_get_head_lamp_status_request.h"
-#include "application_manager/commands/hmi/vi_get_head_lamp_status_response.h"
-#include "application_manager/commands/hmi/vi_get_engine_torque_request.h"
-#include "application_manager/commands/hmi/vi_get_engine_torque_response.h"
-#include "application_manager/commands/hmi/vi_get_acc_pedal_position_request.h"
-#include "application_manager/commands/hmi/vi_get_acc_pedal_position_response.h"
-#include "application_manager/commands/hmi/vi_get_steering_wheel_angle_request.h"
-#include "application_manager/commands/hmi/vi_get_steering_wheel_angle_response.h"
-#include "application_manager/commands/hmi/vi_get_my_key_request.h"
-#include "application_manager/commands/hmi/vi_get_my_key_response.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
+#include "application_manager/commands/hmi/vi_get_vehicle_data_response_template.h"
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_request_template.h"
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_response_template.h"
 #include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_request_template.h"
@@ -655,173 +615,288 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
 #endif // #ifdef WEB_HMI
 #ifdef QT_HMI
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
-      if (is_response) {
-        command.reset(new commands::VIGetGpsDataResponse(message));
-      } else {
-        command.reset(new commands::VIGetGpsDataRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VISubscribeVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetGpsData>(message));
+      else
+        command.reset(
+            new commands::VISubscribeVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetGpsData>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetSpeed: {
-      if (is_response) {
-        command.reset(new commands::VIGetSpeedResponse(message));
-      } else {
-        command.reset(new commands::VIGetSpeedRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetSpeed>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetSpeed>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetRpm: {
-      if (is_response) {
-        command.reset(new commands::VIGetRpmResponse(message));
-      } else {
-        command.reset(new commands::VIGetRpmRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetRpm>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetRpm>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevel: {
-      if (is_response) {
-        command.reset(new commands::VIGetFuelLevelResponse(message));
-      } else {
-        command.reset(new commands::VIGetFuelLevelRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetFuelLevel>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetFuelLevel>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState: {
-      if (is_response) {
-        command.reset(new commands::VIGetFuelLevelStateResponse(message));
-      } else {
-        command.reset(new commands::VIGetFuelLevelStateRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption: {
-      if (is_response) {
+      if (is_response)
         command.reset(
-            new commands::VIGetInstantFuelConsumptionResponse(message));
-      } else {
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption>(
+                message));
+      else
         command.reset(
-            new commands::VIGetInstantFuelConsumptionRequest(message));
-      }
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption>(
+                message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature: {
-      if (is_response) {
-        command.reset(new commands::VIGetExternalTemperatureResponse(message));
-      } else {
-        command.reset(new commands::VIGetExternalTemperatureRequest(message));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::VehicleInfo_GetVin: {
-      if (is_response) {
-        command.reset(new commands::VIGetVinResponse(message));
-      } else {
-        command.reset(new commands::VIGetVinRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature>(
+                message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature>(
+                message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetPrndl: {
-      if (is_response) {
-        command.reset(new commands::VIGetPrndlResponse(message));
-      } else {
-        command.reset(new commands::VIGetPrndlRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetPrndl>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetPrndl>(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetVin: {
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetVin>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetVin>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetTirePressure: {
-      if (is_response) {
-        command.reset(new commands::VIGetTirePressureResponse(message));
-      } else {
-        command.reset(new commands::VIGetTirePressureRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetTirePressure>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetTirePressure>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
-      if (is_response) {
-        command.reset(new commands::VIGetOdometerResponse(message));
-      } else {
-        command.reset(new commands::VIGetOdometerRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetOdometer>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetOdometer>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBeltStatus: {
-      if (is_response) {
-        command.reset(new commands::VIGetBeltStatusResponse(message));
-      } else {
-        command.reset(new commands::VIGetBeltStatusRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetBeltStatus>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetBeltStatus>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetBodyInformation: {
-      if (is_response) {
-        command.reset(new commands::VIGetBodyInformationResponse(message));
-      } else {
-        command.reset(new commands::VIGetBodyInformationRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetBodyInformation>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetBodyInformation>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus: {
-      if (is_response) {
-        command.reset(new commands::VIGetDeviceStatusResponse(message));
-      } else {
-        command.reset(new commands::VIGetDeviceStatusRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetDriverBraking: {
-      if (is_response) {
-        command.reset(new commands::VIGetDriverBrakingResponse(message));
-      } else {
-        command.reset(new commands::VIGetDriverBrakingRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetDriverBraking>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetDriverBraking>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetWiperStatus: {
-      if (is_response) {
-        command.reset(new commands::VIGetWiperStatusResponse(message));
-      } else {
-        command.reset(new commands::VIGetWiperStatusRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetWiperStatus>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetWiperStatus>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus: {
-      if (is_response) {
-        command.reset(new commands::VIGetHeadLampStatusResponse(message));
-      } else {
-        command.reset(new commands::VIGetHeadLampStatusRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetEngineTorque: {
-      if (is_response) {
-        command.reset(new commands::VIGetEngineTorqueResponse(message));
-      } else {
-        command.reset(new commands::VIGetEngineTorqueRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetEngineTorque>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetEngineTorque>(message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition: {
-      if (is_response) {
-        command.reset(new commands::VIGetAccPedalPositionResponse(message));
-      } else {
-        command.reset(new commands::VIGetAccPedalPositionRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition>(
+                message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition>(
+                message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle: {
-      if (is_response) {
-        command.reset(new commands::VIGetSteeringWheelAngleResponse(message));
-      } else {
-        command.reset(new commands::VIGetSteeringWheelAngleRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle>(
+                message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle>(
+                message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetECallInfo: {
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetECallInfo>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetECallInfo>(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus: {
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus>(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent: {
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent>(message));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus: {
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus>(
+                message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus>(
+                message));
       break;
     }
     case hmi_apis::FunctionID::VehicleInfo_GetMyKey: {
-      if (is_response) {
-        command.reset(new commands::VIGetMyKeyResponse(message));
-      } else {
-        command.reset(new commands::VIGetMyKeyRequest(message));
-      }
+      if (is_response)
+        command.reset(
+            new commands::VIGetVehicleDataResponseTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetMyKey>(message));
+      else
+        command.reset(
+            new commands::VIGetVehicleDataRequestTemplate<
+                hmi_apis::FunctionID::VehicleInfo_GetMyKey>(message));
       break;
     }
 #endif // #ifdef QT_HMI
@@ -974,6 +1049,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
           command.reset(new commands::VISubscribeVehicleDataRequest(message));
         }
         break;
+      }
 #endif // #ifdef WEB_HMI
 #ifdef QT_HMI
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {
