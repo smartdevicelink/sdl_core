@@ -111,7 +111,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
       }
   }
 
-  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(result_code),
+  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
                return_info, &(message[strings::msg_params]));
 }
 
