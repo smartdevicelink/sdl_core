@@ -126,6 +126,14 @@ class MessageHelper {
     static void SendHMIStatusNotification(const Application& application_impl);
 
     /**
+     * @brief Sends speak request to HMI
+     *
+     *@param application_impl application
+     *
+     **/
+    static void SendTTSChunksToHMI(const Application& application_impl);
+
+    /**
      * @brief Sends OnAppRegistered notification to HMI
      *
      *@param application_impl application with changed HMI status

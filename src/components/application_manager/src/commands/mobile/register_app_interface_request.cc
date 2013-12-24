@@ -141,6 +141,7 @@ void RegisterAppInterfaceRequest::Run() {
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     MessageHelper::SendHMIStatusNotification(*app);
     MessageHelper::SendVrCommandsOnRegisterAppToHMI(app);
+    MessageHelper::SendTTSChunksToHMI(*app);
   }
 }
 
