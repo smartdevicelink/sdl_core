@@ -242,5 +242,6 @@
     <string name="alertManeuver_ttsChunksDefault">TTSChunk1,TTSChunk2,AnotherTTSChunk</string>
 
     <string name="exit_dialog_title">Exit Application</string>
+    <string name="app_setup_dialog_title">Please set up application properties</string>
 
 </resources>
