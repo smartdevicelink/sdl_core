@@ -122,6 +122,7 @@ bool VideoStreamToFileAdapter::is_app_performing_activity(int application_key) {
 void VideoStreamToFileAdapter::CloseCurrent() {
   if (file_stream_) {
     file_system::Close(file_stream_);
+    file_system::DeleteFile(file_name_);
     delete file_stream_;
     file_stream_ = NULL;
   }

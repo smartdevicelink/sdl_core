@@ -73,7 +73,7 @@ void UIDeleteCommandResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::DeleteCommandID;
+      static_cast<int>(mobile_apis::FunctionID::DeleteCommandID);
 
   SendResponseToMobile(message_);
 }

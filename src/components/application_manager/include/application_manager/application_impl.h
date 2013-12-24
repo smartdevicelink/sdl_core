@@ -99,7 +99,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
       const mobile_api::SystemContext::eType& system_context);
   void set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state);
-  bool set_app_icon_path(const std::string& file_name);
+  bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
 

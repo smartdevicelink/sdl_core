@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/file_system.h"
+
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -42,8 +44,9 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include "utils/file_system.h"
+
 #include "config_profile/profile.h"
+
 
 uint64_t file_system::AvailableSpace() {
   char currentAppPath[FILENAME_MAX];

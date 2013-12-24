@@ -45,7 +45,13 @@ namespace application_manager {
 namespace commands {
 
 AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    : CommandRequestImpl(message),
+      is_ui_send_(false),
+      is_vr_send_(false),
+      is_ui_received_(false),
+      is_vr_received_(false),
+      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      vr_result_(hmi_apis::Common_Result::INVALID_ENUM)  {
 }
 
 AddCommandRequest::~AddCommandRequest() {
@@ -87,8 +93,8 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  // we should specify amount of required responses in the 1st request
-  unsigned int chaining_counter = 0;
+  bool data_exist =  false;
+
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     if (!CheckCommandName(app)) {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
@@ -102,7 +108,7 @@ void AddCommandRequest::Run() {
         return;
       }
     }
-    ++chaining_counter;
+    data_exist = true;
   }
 
   if (((*message_)[strings::msg_params].keyExists(strings::vr_commands))
@@ -118,10 +124,10 @@ void AddCommandRequest::Run() {
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
-    ++chaining_counter;
+    data_exist = true;
   }
 
-  if (!chaining_counter) {
+  if (!data_exist) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -145,8 +151,9 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
-    CreateHMIRequest(hmi_apis::FunctionID::UI_AddCommand, msg_params, true,
-                     chaining_counter);
+    is_ui_send_ = true;
+
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &msg_params, true);
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
@@ -158,7 +165,9 @@ void AddCommandRequest::Run() {
         (*message_)[strings::msg_params][strings::vr_commands];
     msg_params[strings::app_id] = app->app_id();
 
-    CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params, true);
+    is_vr_send_ = true;
+
+    SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
   }
 }
 
@@ -254,6 +263,86 @@ bool AddCommandRequest::CheckCommandParentId(const Application* app) {
     return false;
   }
   return true;
+}
+
+void AddCommandRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "AddCommandRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_AddCommand: {
+      LOG4CXX_INFO(logger_, "Received UI_AddCommand event");
+      is_ui_received_ = true;
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
+           (*message_)[strings::msg_params].erase(strings::menu_params);
+         }
+      break;
+    }
+    case hmi_apis::FunctionID::VR_AddCommand: {
+      LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
+      is_vr_received_ = true;
+      vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
+        (*message_)[strings::msg_params].erase(strings::vr_commands);
+      }
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
+
+  if (!IsPendingResponseExist()) {
+    Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+
+    if (NULL == application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    smart_objects::SmartObject* command = application->FindCommand(
+        (*message_)[strings::msg_params][strings::cmd_id].asInt());
+
+    if (!command) {
+      if ((((*message_)[strings::msg_params].keyExists(strings::menu_params)) ||
+          ((*message_)[strings::msg_params].keyExists(strings::vr_commands))) &&
+           (hmi_apis::Common_Result::REJECTED != ui_result_)) {
+        application->AddCommand((*message_)[strings::msg_params]
+                                      [strings::cmd_id].asInt(),
+                                      (*message_)[strings::msg_params]);
+      }
+
+      mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+
+      bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+                     (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
+                     ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_)) ||
+                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
+                     (hmi_apis::Common_Result::SUCCESS == vr_result_));
+
+      if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
+        result_code = static_cast<mobile_apis::Result::eType>(vr_result_);
+      } else {
+        result_code = static_cast<mobile_apis::Result::eType>(
+            std::max(ui_result_, vr_result_));
+      }
+
+      SendResponse(result, result_code,
+                   NULL, &(message[strings::msg_params]));
+    }
+  }
+}
+
+bool AddCommandRequest::IsPendingResponseExist() {
+  return is_ui_send_ != is_ui_received_ || is_vr_send_ != is_vr_received_;
 }
 
 }  // namespace commands

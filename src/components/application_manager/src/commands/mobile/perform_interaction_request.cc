@@ -51,11 +51,13 @@ PerformInteractionRequest::PerformInteractionRequest(
 : CommandRequestImpl(message),
   timer_(this, &PerformInteractionRequest::onTimer),
   is_keyboard_trigger_source_(false),
-  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM) {
+  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM),
+  tts_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM) {
 
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
-  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
+  subscribe_on_event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -73,9 +75,12 @@ bool PerformInteractionRequest::Init() {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
-  int mode =
-      (*message_)[strings::msg_params][strings::interaction_mode].asInt();
-  if (InteractionMode::BOTH == mode || InteractionMode::MANUAL_ONLY == mode) {
+  mobile_apis::InteractionMode::eType mode =
+      static_cast<mobile_apis::InteractionMode::eType>(
+      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
+
+  if (mobile_apis::InteractionMode::BOTH == mode ||
+      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
       default_timeout_ *= 2;
     }
   return true;
@@ -84,7 +89,7 @@ bool PerformInteractionRequest::Init() {
 void PerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
 
-  //timer_.start(2);
+  // timer_.start(2);
 
   Application* app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -128,11 +133,14 @@ void PerformInteractionRequest::Run() {
 
   int mode =
       (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+
   app->set_perform_interaction_mode(mode);
 
+  mobile_apis::InteractionMode::eType interaction_mode =
+      static_cast<mobile_apis::InteractionMode::eType>(mode);
 
-  switch (mode) {
-    case InteractionMode::BOTH: {
+  switch (interaction_mode) {
+    case mobile_apis::InteractionMode::BOTH: {
       LOG4CXX_INFO(logger_, "Interaction Mode: BOTH");
       if (!CheckChoiceSetVRSynonyms(app)) {
         return;
@@ -152,7 +160,7 @@ void PerformInteractionRequest::Run() {
       SendUIPerformInteractionRequest(app);
       break;
     }
-    case InteractionMode::MANUAL_ONLY: {
+    case mobile_apis::InteractionMode::MANUAL_ONLY: {
       LOG4CXX_INFO(logger_, "Interaction Mode: MANUAL_ONLY");
       if (!CheckChoiceSetMenuNames(app)) {
         return;
@@ -163,7 +171,7 @@ void PerformInteractionRequest::Run() {
       SendUIPerformInteractionRequest(app);
       break;
     }
-    case InteractionMode::VR_ONLY: {
+    case mobile_apis::InteractionMode::VR_ONLY: {
       LOG4CXX_INFO(logger_, "Interaction Mode: VR_ONLY");
       if (!CheckChoiceSetVRSynonyms(app)) {
         return;
@@ -204,7 +212,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
-      LOG4CXX_INFO(logger_,"Received UI_PerformInteraction event");
+      LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
       if (is_keyboard_trigger_source_) {
         trigger_source_ = mobile_apis::TriggerSource::TS_KEYBOARD;
       } else {
@@ -214,12 +222,18 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
-      LOG4CXX_INFO(logger_,"Received OnAppUnregistered event");
+      LOG4CXX_INFO(logger_, "Received OnAppUnregistered event");
       ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
+    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+      LOG4CXX_INFO(logger_, "Received TTS_PerformInteraction");
+      tts_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
+          event.smart_object()[strings::params][hmi_response::code].asInt());
+      break;
+    }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -263,8 +277,8 @@ void PerformInteractionRequest::ProcessVRNotification(
             strings::choice_set);
 
       for (size_t j = 0; j < choice_set.length(); ++j) {
-        if (cmd_id
-            == choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
+        if (cmd_id ==
+            choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
           choice_id_chosen = true;
           break;
         }
@@ -276,18 +290,18 @@ void PerformInteractionRequest::ProcessVRNotification(
           smart_objects::SmartType_Map);
       c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
       SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      SendVrDeleteCommand (app);
+      SendVrDeleteCommand(app);
       app->set_perform_interaction_mode(-1);
       app->DeletePerformInteractionChoiceSetMap();
       app->set_perform_interaction_active(0);
 
       (*message_)[strings::params][strings::function_id] =
-          mobile_apis::FunctionID::PerformInteractionID;
+          static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
       smart_objects::SmartObject msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
       msg_params[strings::choice_id] = cmd_id;
       msg_params[strings::trigger_source] =
-        mobile_apis::TriggerSource::TS_VR;
+        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
       SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
 
     } else {
@@ -303,40 +317,41 @@ void PerformInteractionRequest::ProcessVRNotification(
       smart_objects::SmartObject& notification = *notification_so;
       notification = message;
       notification[strings::params][strings::function_id] =
-            mobile_apis::FunctionID::eType::OnCommandID;
+            static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
       notification[strings::msg_params][strings::trigger_source] =
-          mobile_apis::TriggerSource::TS_VR;
+          static_cast<int>(mobile_apis::TriggerSource::TS_VR);
       ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
     }
 }
 
 void PerformInteractionRequest::ProcessAppUnregisteredNotification
   (const smart_objects::SmartObject& message) {
- LOG4CXX_INFO
-  (logger_,"PerformInteractionRequest::ProcessAppUnregisteredNotification");
- const unsigned int app_id = (*message_)[strings::params]
-                                         [strings::connection_key].asUInt();
- if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
-   Application* app = ApplicationManagerImpl::instance()->application(app_id);
-   if (NULL == app) {
-     LOG4CXX_ERROR(logger_, "NULL pointer");
-     return;
-   }
-   if (app->is_perform_interaction_active()) {
-     if (mobile_apis::InteractionMode::MANUAL_ONLY
-         != app->perform_interaction_mode()) {
-       SendVrDeleteCommand (app);
-     }
-     app->set_perform_interaction_mode(-1);
-     app->DeletePerformInteractionChoiceSetMap();
-     app->set_perform_interaction_active(0);
-   }
- } else {
-   LOG4CXX_INFO(logger_,"Notification was sent from another application");
- }
+  LOG4CXX_INFO(logger_,
+               "PerformInteractionRequest::ProcessAppUnregisteredNotification");
+  const unsigned int app_id = (*message_)[strings::params]
+                                          [strings::connection_key].asUInt();
+  if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
+    Application* app = ApplicationManagerImpl::instance()->application(app_id);
+    if (NULL == app) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+    if (app->is_perform_interaction_active()) {
+      if (static_cast<int>(mobile_apis::InteractionMode::MANUAL_ONLY) !=
+          app->perform_interaction_mode()) {
+        SendVrDeleteCommand(app);
+      }
+      app->set_perform_interaction_mode(-1);
+      app->DeletePerformInteractionChoiceSetMap();
+      app->set_perform_interaction_active(0);
+    }
+  } else {
+    LOG4CXX_INFO(logger_, "Notification was sent from another application");
+  }
 }
 
-void PerformInteractionRequest::SendVrDeleteCommand (Application* const app) {
+void PerformInteractionRequest::SendVrDeleteCommand(
+    application_manager::Application* const app) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
   const PerformChoiceSetMap& choice_set_map = app
       ->performinteraction_choice_set_map();
@@ -366,39 +381,58 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       return;
     }
     if (app->is_perform_interaction_active()) {
-      if (mobile_apis::InteractionMode::MANUAL_ONLY
+      if (static_cast<int>(mobile_apis::InteractionMode::MANUAL_ONLY)
           != app->perform_interaction_mode()) {
-        SendVrDeleteCommand (app);
+        SendVrDeleteCommand(app);
       }
       app->set_perform_interaction_mode(-1);
       app->DeletePerformInteractionChoiceSetMap();
       app->set_perform_interaction_active(0);
     }
     (*message_)[strings::params][strings::function_id] =
-            mobile_apis::FunctionID::PerformInteractionID;
+            static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params = message[strings::msg_params];
-    bool result_code = false;
-    const hmi_apis::Common_Result::eType code =
-        static_cast<hmi_apis::Common_Result::eType>(
-            message[strings::params][hmi_response::code].asInt());
-    if (hmi_apis::Common_Result::SUCCESS == code) {
+    bool result = false;
+    int hmi_response_code =
+        message[strings::params][hmi_response::code].asInt();
+    if (hmi_apis::Common_Result::SUCCESS ==
+        hmi_apis::Common_Result::eType(hmi_response_code)) {
       msg_params[strings::trigger_source] = trigger_source_;
-      result_code = true;
+      result = true;
     }
-    SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-                   NULL, &(msg_params));
+
+    const char* return_info = NULL;
+     mobile_apis::Result::eType result_code =
+        static_cast<mobile_apis::Result::eType>(hmi_response_code);
+    if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+          hmi_apis::Common_Result::eType(hmi_response_code)) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string(
+            "Unsupported phoneme type sent in any item").c_str();
+      }
+    }
+
+    SendResponse(result,
+                 result_code,
+                 return_info,
+                 &(msg_params));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
-    Application* const app) {
+    application_manager::Application* const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  if (InteractionMode::VR_ONLY
-      == (*message_)[strings::msg_params][strings::interaction_mode].asInt()) {
-    // TODO(DK): We need subscribe perform interaction with on command notification
+  mobile_apis::InteractionMode::eType mode =
+      static_cast<mobile_apis::InteractionMode::eType>(
+      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
+
+  if (mobile_apis::InteractionMode::VR_ONLY == mode) {
+    // TODO(DK): We need subscribe perform interaction with on command
+    // notification
     /*CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
      smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);*/
   }
@@ -426,18 +460,21 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
 }
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
-    Application* const app) {
+    application_manager::Application* const app) {
   smart_objects::SmartObject& choice_set_id_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
-  const int mode  =
-      (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+
+  mobile_apis::InteractionMode::eType mode  =
+      static_cast<mobile_apis::InteractionMode::eType>(
+      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
 
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[hmi_request::initial_text][hmi_request::field_name] =
-        TextFieldName::INITIAL_INTERACTION_TEXT;
+        static_cast<int>(application_manager::TextFieldName::
+                         INITIAL_INTERACTION_TEXT);
     msg_params[hmi_request::initial_text][hmi_request::field_text] =
         (*message_)[strings::msg_params][hmi_request::initial_text];
   }
@@ -464,15 +501,18 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
         choice_set_id_list[i].asInt());
     if (choice_set) {
       // save perform interaction choice set
-      app->AddPerformInteractionChoiceSet(choice_set_id_list[i].asInt(), *choice_set);
+      app->AddPerformInteractionChoiceSet(choice_set_id_list[i].asInt(),
+                                          *choice_set);
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         if (mobile_apis::InteractionMode::VR_ONLY != mode) {
           size_t index = msg_params[strings::choice_set].length();
-          msg_params[strings::choice_set][index] = (*choice_set)[strings::choice_set][j];
+          msg_params[strings::choice_set][index] =
+              (*choice_set)[strings::choice_set][j];
           // vrCommands should be added via VR.AddCommand only
           msg_params[strings::choice_set][index].erase(strings::vr_commands);
         }
-        if (mobile_apis::InteractionMode::MANUAL_ONLY != mode && !is_vr_help_item) {
+        if (mobile_apis::InteractionMode::MANUAL_ONLY !=
+            mode && !is_vr_help_item) {
           smart_objects::SmartObject& vr_commands =
               (*choice_set)[strings::choice_set][j][strings::vr_commands];
           if (0 < vr_commands.length()) {
@@ -486,8 +526,8 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
       }
     }
   }
-  if((*message_)[strings::msg_params].
-        keyExists(hmi_request::interaction_layout)
+  if ((*message_)[strings::msg_params]
+                  .keyExists(hmi_request::interaction_layout)
         && mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[hmi_request::interaction_layout] =
         (*message_)[strings::msg_params][hmi_request::interaction_layout].
@@ -497,13 +537,14 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
 }
 
 void PerformInteractionRequest::CreateUIPerformInteraction(
-    const smart_objects::SmartObject& msg_params, Application* const app) {
+    const smart_objects::SmartObject& msg_params,
+    application_manager::Application* const app) {
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                      &msg_params, true);
 }
 
 void PerformInteractionRequest::SendTTSPerformInteractionRequest(
-    Application* const app) {
+    application_manager::Application* const app) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -512,7 +553,7 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::help_promt] =
         (*message_)[strings::msg_params][strings::help_promt];
 
-    DeleteParameterFromTTSChunk(msg_params[strings::help_promt]);
+    DeleteParameterFromTTSChunk(&msg_params[strings::help_promt]);
   } else {
 
     smart_objects::SmartObject& choice_list =
@@ -545,7 +586,7 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::timeout_promt] =
             (*message_)[strings::msg_params][strings::timeout_promt];
 
-    DeleteParameterFromTTSChunk(msg_params[strings::timeout_promt]);
+    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_promt]);
   } else {
     msg_params[strings::timeout_promt] = msg_params[strings::help_promt];
   }
@@ -554,14 +595,15 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
       msg_params[strings::initial_prompt] =
           (*message_)[strings::msg_params][strings::initial_prompt];
 
-      DeleteParameterFromTTSChunk(msg_params[strings::initial_prompt]);
+      DeleteParameterFromTTSChunk(&msg_params[strings::initial_prompt]);
   }
 
-  int mode =
-        (*message_)[strings::msg_params][strings::interaction_mode].asInt();
+  mobile_apis::InteractionMode::eType mode =
+      static_cast<mobile_apis::InteractionMode::eType>(
+        (*message_)[strings::msg_params][strings::interaction_mode].asInt());
 
-  if (InteractionMode::BOTH == mode ||
-      InteractionMode::MANUAL_ONLY == mode) {
+  if (mobile_apis::InteractionMode::BOTH == mode ||
+      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
     msg_params[strings::timeout] = default_timeout_/2;
   } else {
     msg_params[strings::timeout] = default_timeout_;
@@ -571,15 +613,15 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
 }
 
 void PerformInteractionRequest::DeleteParameterFromTTSChunk
-(smart_objects::SmartObject& array_tts_chunk) {
-  int length = array_tts_chunk.length();
+(smart_objects::SmartObject* array_tts_chunk) {
+  int length = array_tts_chunk->length();
   for (int i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
   }
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
-    Application* const app) {
+    application_manager::Application* const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -629,7 +671,7 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
 }
 
 bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
-    Application* const app) {
+    application_manager::Application* const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -685,7 +727,7 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 }
 
 bool PerformInteractionRequest::CheckVrHelpItemPositions(
-    Application* const app) {
+    application_manager::Application* const app) {
 
   if (!(*message_)[strings::msg_params].keyExists(strings::vr_help)) {
     LOG4CXX_INFO(logger_, ""

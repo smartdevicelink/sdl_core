@@ -89,7 +89,7 @@ void UIDeleteSubmenuResponse::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::DeleteSubMenuID;
+      static_cast<int>(mobile_apis::FunctionID::DeleteSubMenuID);
 
   SendResponseToMobile(message_);
 }

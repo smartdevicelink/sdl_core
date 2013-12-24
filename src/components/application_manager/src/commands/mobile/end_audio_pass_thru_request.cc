@@ -52,15 +52,35 @@ void EndAudioPassThruRequest::Run() {
   bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
 
   if (ended_successfully) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru,
-                     smart_objects::SmartObject(smart_objects::SmartType_Map),
-                     true, 1);
+    SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
     int session_key =
       (*message_)[strings::params][strings::connection_key].asInt();
     ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
   } else {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "No PerformAudioPassThru is now active");
+  }
+}
+
+void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_EndAudioPassThru: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
   }
 }
 

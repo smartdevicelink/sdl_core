@@ -49,7 +49,11 @@ TransportAdapterEvent::TransportAdapterEvent(
   set_error(error);
 }
 
-TransportAdapterEvent::~TransportAdapterEvent() {}
+
+TransportAdapterEvent::~TransportAdapterEvent() {
+  //TODO: is event_error_ delleted correctly?  /* delete event_error_;*/
+
+}
 
 void TransportAdapterEvent::set_event_type(int type) { event_type_ = type; }
 

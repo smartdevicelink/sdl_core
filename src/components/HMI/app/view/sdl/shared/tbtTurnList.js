@@ -54,10 +54,10 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
          */
         closeTurnList: function () {
 
-            if (!SDL.TurnByTurnView.get('activeState')) {
+            if (!SDL.TurnByTurnView.get('activeTBT')) {
                 this.set('active', false);
             }
-        }.observes('SDL.TurnByTurnView.activeState'),
+        }.observes('SDL.TurnByTurnView.activeTBT'),
 
         /**
          * Title Labes of window

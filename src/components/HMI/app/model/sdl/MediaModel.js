@@ -73,6 +73,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('globalProperties.timeoutPrompt', []);
             this.set('globalProperties.keyboardProperties', Em.Object.create());
             this.set('globalProperties.keyboardProperties.keyboardLayout', 'QWERTY');
+            this.set('globalProperties.keyboardProperties.limitedCharacterList', []);
 
             this.set('commandsList', {"top": []});
             this.set('softButtons', []);

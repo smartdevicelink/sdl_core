@@ -50,17 +50,6 @@ namespace commands {
 class PerformInteractionRequest : public CommandRequestImpl  {
 
  public:
-
-  /*
-   * @brief Typedef for InteractionMode
-   */
-  typedef enum {
-    MANUAL_ONLY = 0,
-    VR_ONLY,
-    BOTH,
-    INVALID_ENUM
-  } InteractionMode;
-
   /**
    * @brief PerformInteractionRequest class constructor
    *
@@ -128,7 +117,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendVrDeleteCommand(Application* const app);
+  void SendVrDeleteCommand(application_manager::Application* const app);
 
   /*
    * @brief Sends PerformInteraction response to mobile side
@@ -145,7 +134,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendVRAddCommandRequest(Application* const app);
+  void SendVRAddCommandRequest(application_manager::Application* const app);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -153,7 +142,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendUIPerformInteractionRequest(Application* const app);
+  void SendUIPerformInteractionRequest(
+      application_manager::Application* const app);
 
   /*
    * @brief Sends TTS PerformInteraction request to HMI
@@ -161,7 +151,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendTTSPerformInteractionRequest(Application* const app);
+  void SendTTSPerformInteractionRequest(
+      application_manager::Application* const app);
 
   /*
    * @brief Prepare request for sending to HMI
@@ -169,7 +160,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param array of structure of TTS
    *
    */
-  void DeleteParameterFromTTSChunk(smart_objects::SmartObject& array_tts_chunk);
+  void DeleteParameterFromTTSChunk(smart_objects::SmartObject* array_tts_chunk);
 
   /*
    * @brief Sends UI Show VR help request to HMI
@@ -182,7 +173,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @brief Creates and Sends Perform interaction to UI.
    */
   void CreateUIPerformInteraction(const smart_objects::SmartObject& msg_params,
-                                  Application* const app);
+                                  application_manager::Application* const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
@@ -192,7 +183,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar menu names in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetMenuNames(Application* const app);
+  bool CheckChoiceSetMenuNames(application_manager::Application* const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -202,7 +193,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar VR synonyms in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetVRSynonyms(Application* const app);
+  bool CheckChoiceSetVRSynonyms(application_manager::Application* const app);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -213,7 +204,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return TRUE if vrHelpItems positions are sequential,
    * otherwise FALSE
    */
-  bool CheckVrHelpItemPositions(Application* const app);
+  bool CheckVrHelpItemPositions(application_manager::Application* const app);
 
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;
@@ -221,6 +212,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   bool is_keyboard_trigger_source_;
   mobile_apis::TriggerSource::eType trigger_source_;
+  mobile_apis::Result::eType tts_perform_interaction_code_;
 };
 
 }  // namespace commands

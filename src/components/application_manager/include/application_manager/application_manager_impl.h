@@ -70,6 +70,7 @@
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
@@ -132,56 +133,43 @@ using namespace threads;
 struct MessageFromMobile: public utils::SharedPtr<Message> {
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageFromMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
-  explicit MessageToMobile(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageToMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
-};
+  explicit MessageToMobile(const utils::SharedPtr<Message>& message,
+                           bool final_message):
+    utils::SharedPtr<Message>(message), is_final(final_message) {}
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  // Signals if connection to mobile must be closed after sending this message
+  bool is_final;
+ };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageFromHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
   explicit MessageToHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
-  // This method is used by priority queue to decide which
-  // message should be popped out of the queue first
-  // "smaller" things go out of std::priority_queue first
-  bool operator <(const MessageToHmi& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageFromMobile> > FromMobileQueue;
+    utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageToMobile> > ToMobileQueue;
+    utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageFromHmi> > FromHmiQueue;
+    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<MessageToHmi> > ToHmiQueue;
+    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
@@ -217,15 +205,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param app_id Application id
      */
     bool UnregisterApplication(const unsigned int& app_id);
-
-    /*
-     * @brief Checks if application with app_id registered
-     *
-     * @param app_id Application id
-     *
-     * @return true if application registered false if it is not
-     */
-    bool IsApplicationRegistered(int app_id);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -398,8 +377,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     ///////////////////////////////////////////////////////
 
     void StartDevicesDiscovery();
+
+    // Put message to the queue to be sent to mobile.
+    // if |final_message| parameter is set connection to mobile will be closed
+    // after processing this message
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message = false);
     bool ManageMobileCommand(
       const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(
@@ -421,8 +404,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                                      RawMessagePtr& message);
 
     void OnMessageReceived(
-      utils::SharedPtr<application_manager::Message> message);
-    void OnErrorSending(utils::SharedPtr<application_manager::Message> message);
+      hmi_message_handler::MessageSharedPointer message);
+    void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);

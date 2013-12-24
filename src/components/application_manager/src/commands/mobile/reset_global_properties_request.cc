@@ -46,7 +46,13 @@ namespace commands {
 
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
   const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+  : CommandRequestImpl(message),
+    is_ui_send_(false),
+    is_tts_send_(false),
+    is_ui_received_(false),
+    is_tts_received_(false),
+    ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
+    tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {
 }
 
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
@@ -153,10 +159,10 @@ void ResetGlobalPropertiesRequest::Run() {
     if (is_key_board_properties) {
       smart_objects::SmartObject key_board_properties = smart_objects::
           SmartObject(smart_objects::SmartType_Map);
-      key_board_properties[strings::language] = hmi_apis::
-          Common_Language::EN_US;
-      key_board_properties[hmi_request::keyboard_layout] = hmi_apis::
-          Common_KeyboardLayout::QWERTY;
+      key_board_properties[strings::language] = static_cast<int>
+      (hmi_apis::Common_Language::EN_US);
+      key_board_properties[hmi_request::keyboard_layout] = static_cast<int>
+      (hmi_apis::Common_KeyboardLayout::QWERTY);
       key_board_properties[hmi_request::send_dynamic_entry] = false;
 
       // Look for APPLINK-4432 for details.
@@ -171,8 +177,8 @@ void ResetGlobalPropertiesRequest::Run() {
     }
 
     msg_params[strings::app_id] = app->app_id();
-    CreateHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params,
-                     true, chaining_counter);
+    SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
+                       &msg_params, true);
   }
 
   if (timeout_promt || helpt_promt) {
@@ -190,14 +196,8 @@ void ResetGlobalPropertiesRequest::Run() {
 
     msg_params[strings::app_id] = app->app_id();
 
-    // check if only tts request should be sent
-    if (1 == chaining_counter) {
-      CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                       msg_params, true, chaining_counter);
-    } else {
-      CreateHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                       msg_params, true);
-    }
+    SendHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+                       &msg_params, true);
   }
 }
 
@@ -273,6 +273,64 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
   app->reset_vr_help();
 
   return true;
+}
+
+void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_SetGlobalProperties: {
+      LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+      is_ui_received_ = true;
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+      LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      is_tts_received_ = true;
+      tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
+
+  bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+        && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+        || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+            && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+        || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+            && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+
+  mobile_apis::Result::eType result_code;
+  const char* return_info = NULL;
+
+  if (result) {
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    } else {
+      result_code = static_cast<mobile_apis::Result::eType>(
+      std::max(ui_result_, tts_result_));
+    }
+  } else {
+    result_code = static_cast<mobile_apis::Result::eType>(
+        std::max(ui_result_, tts_result_));
+  }
+
+  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                   return_info, &(message[strings::msg_params]));
+}
+
+bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
+
+  return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
 }
 
 }  // namespace commands

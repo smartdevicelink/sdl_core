@@ -93,10 +93,10 @@ void OnVRCommandNotification::Run() {
     event.raise();
   } else {
     (*message_)[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::eType::OnCommandID;
+        static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
 
     (*message_)[strings::msg_params][strings::trigger_source] =
-        mobile_apis::TriggerSource::TS_VR;
+        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
     SendNotificationToMobile(message_);
   }
 }

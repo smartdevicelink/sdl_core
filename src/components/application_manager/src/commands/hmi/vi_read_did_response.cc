@@ -30,8 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vi_read_did_response.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
+
 
 namespace application_manager {
 
@@ -47,11 +48,9 @@ VIReadDIDResponse::~VIReadDIDResponse() {
 void VIReadDIDResponse::Run() {
   LOG4CXX_INFO(logger_, "VIReadDIDResponse::Run");
 
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::ReadDIDID;
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_ReadDID);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

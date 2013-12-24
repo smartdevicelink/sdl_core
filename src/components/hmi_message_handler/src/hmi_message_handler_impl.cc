@@ -39,8 +39,8 @@ log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("HMIMessageHandler"));
 
 HMIMessageHandlerImpl* HMIMessageHandlerImpl::instance() {
-  static HMIMessageHandlerImpl instance;
-  return &instance;
+  static HMIMessageHandlerImpl instance_;
+  return &instance_;
 }
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()

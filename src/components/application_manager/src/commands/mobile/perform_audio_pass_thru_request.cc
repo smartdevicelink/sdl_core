@@ -95,8 +95,8 @@ void PerformAudioPassThruRequest::Run() {
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[hmi_request::audio_pass_display_texts]
-               [0][hmi_request::field_name] =
-                   TextFieldName::AUDIO_DISPLAY_TEXT1;
+               [0][hmi_request::field_name] = static_cast<int>
+    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT1);
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text1];
@@ -104,8 +104,8 @@ void PerformAudioPassThruRequest::Run() {
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     msg_params[hmi_request::audio_pass_display_texts]
-               [1][hmi_request::field_name] =
-                   TextFieldName::AUDIO_DISPLAY_TEXT2;
+               [1][hmi_request::field_name] = static_cast<int>
+    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT2);
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text2];
@@ -117,8 +117,8 @@ void PerformAudioPassThruRequest::Run() {
 
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru, msg_params,
-                   true, 1);
+  SendHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,
+                 &msg_params, true);
 
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
       (*message_)[str::params][str::connection_key].asInt(),
@@ -127,6 +127,43 @@ void PerformAudioPassThruRequest::Run() {
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
       (*message_)[str::msg_params][str::bits_per_sample].asInt(),
       (*message_)[str::msg_params][str::audio_type].asInt());
+}
+
+void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
+        int session_key =
+          (*message_)[strings::params][strings::connection_key].asUInt();
+        ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
+      }
+
+      const char* return_info = NULL;
+
+      if (result) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+          result_code = mobile_apis::Result::WARNINGS;
+          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+        }
+      }
+
+      SendResponse(result, result_code, return_info, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {

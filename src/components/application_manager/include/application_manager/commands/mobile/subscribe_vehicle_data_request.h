@@ -71,6 +71,8 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
+  bool IsAnythingAlreadySubscribed();
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };
 

@@ -29,6 +29,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
+#include "./audio_stream_sender_thread.h"
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
@@ -36,7 +37,6 @@
 #endif
 
 #include <string>
-#include "./audio_stream_sender_thread.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"

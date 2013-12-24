@@ -122,7 +122,7 @@ SDL.SDLMediaController = Em.Object.create( {
         if (this.currentAppId == appID) {
 
             if (SDL.States.media.sdlmedia.active
-                || SDL.SDLAppController.model.active) {
+                || SDL.SDLAppController.model) {
 
                 SDL.SDLAppController.model.set('active', false);
 
