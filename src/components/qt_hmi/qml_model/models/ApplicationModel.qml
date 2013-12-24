@@ -59,9 +59,8 @@ QtObject {
 
     property string helpPrompt
     property string timeoutPrompt
-    property KeyboardProperties keyboardProperties: KeyboardProperties { } //!
-    property ListModel vrHelpItemsDefault: VrHelpItemsDefault { } //!
     property ListModel vrHelpItems: ListModel { }
+    property ListModel vrHelpItemsDefault: VrHelpItemsDefault { } //!
     property ListModel vrHelpItemsPerformInteraction: ListModel {  } // !
     property ListModel options: ListModel { }
     property ListModel currentSubMenu: options

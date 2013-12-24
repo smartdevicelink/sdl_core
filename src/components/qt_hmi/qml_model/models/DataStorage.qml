@@ -154,20 +154,17 @@ QtObject {
                 }
                 // Check fields with mandatory = false
 
-                console.debug("11`")
                 if (application.menuIcon !== undefined) {
                     currentApplication.menuIcon.source = application.menuIcon
                 }
-                console.debug("12`", currentApplication.menuIcon.source)
                 currentApplication.vrHelpTitle = application.vrHelpTitle
                 currentApplication.vrHelpTitleDefault = application.vrHelpTitleDefault
-                console.debug("13`")
+                if (application.vrHelpTitlePerformInteraction !== undefined) {
+                    currentApplication.vrHelpTitlePerformInteraction = application.vrHelpTitlePerformInteraction
+                }
                 currentApplication.menuTitle = application.menuTitle
-                console.debug("14`")
                 currentApplication.vrHelpItems = application.vrHelpItems
                 currentApplication.vrHelpItemsPerformInteraction = application.vrHelpItemsPerformInteraction
-                console.debug("15`")
-
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
@@ -211,10 +208,16 @@ QtObject {
             softButtons: [],
             vrHelpTitle: "",
             vrHelpTitlePerformInteraction: "",
-            vrHelpTitleDefault: app.vrHelpTitleDefault,
+            vrHelpTitleDefault: "VR HELP",
             menuTitle: "",
             keyboardProperties: [],
-            vrHelpItems: app.vrHelpItems,
+            vrHelpItems: [],
+            vrHelpItemsPerformInteraction: [],
+            vrHelpItemsDefault: {
+                   text: "VrHelpItems - defaultText1",
+                   image: "",
+                   position: 1
+            },
             navigationSoftButtons: [],
             alertManeuverSoftButtons: [],
             navigationModel: {
@@ -529,31 +532,9 @@ QtObject {
         }
         console.debug("exit")
     }
-
-    //    function setVrHelp (vrHelp) {
-    //        this.vrHelp.clear()
-    //        var index
-    //        for (var i = 0; i < vrHelp.length; ++i) {
-    //            index = 0
-    //// sort by simple inserts
-    //            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
-    //                ++index
-    //            }
-    //            this.vrHelp.insert(index, {
-    //                                            "text": vrHelp[i].text,
-    //                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
-    //                                            "position": vrHelp[i].position
-    //                                        })
-    //        }
-    //    }
-
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
-
-    property InteractionModel interactionModel: InteractionModel {
-    }
-
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {
         sdlUI.onDriverDistraction(driverDistractionState);

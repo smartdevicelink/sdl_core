@@ -300,10 +300,7 @@ Rectangle {
                     "startTime": -1,
                     "endTime": -1,
                     "startTimeForProgress": -1
-                },
-                vrHelpItems: [],
-                vrHelpItemsPerformInteraction: [],
-                vrHelpTitleDefault: "VR HELP"
+                }
              });
         }
 

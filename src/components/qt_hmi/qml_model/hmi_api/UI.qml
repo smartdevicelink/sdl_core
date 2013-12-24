@@ -158,9 +158,9 @@ Item {
         dataContainer.deleteSubMenu(menuID, appID)
     }
 
-    function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
+    function performInteraction (initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
         console.debug("enter")
-        var async = dataContainer.interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        var async = interactionPopup.performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID)
         console.debug("exit")
         return async
     }
@@ -268,86 +268,48 @@ Item {
     }
 
     function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {
-        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + menuTitle + ", " + menuIcon + ", " + keyboardProperties + ", " + appID)
-
+        console.debug("enter")
         var app = dataContainer.getApplication(appID)
-        var newVRHelpTitle
-        var newMenuTitle
-        var newMenuIcon
-        var newKeyboardProperties
+        var dataToUpdate = {}
 
-        console.debug("1")
         if (vrHelpTitle !== undefined) {
-            newVRHelpTitle = vrHelpTitle
+            dataToUpdate.vrHelpTitle = vrHelpTitle
         } else {
             if ( (vrHelp !== undefined) && (vrHelp.length >= 1) ) {
                 return { __retCode: Common.Result.REJECTED, __message: "vrHelpTitle - undefined, vrHelpItem - provided" }
-            } else {
-                newVRHelpTitle = app.vrHelpTitle
             }
         }
-
-        console.debug("2")
         if (vrHelp !== undefined) {
-            console.debug("21")
             var checkSequentialPosition = vrHelp[0].position
             for (var index = 0; index < vrHelp.length; index++) {
-                console.debug("22")
                 if (vrHelp[index].position !== checkSequentialPosition) {
                     return { __retCode: Common.Result.REJECTED, __message: "Nonsequential positions of VrHelpItems" }
                 }
                 checkSequentialPosition++
             }
 
-            console.debug("23")
-            if (app.vrHelpItems.count === 0) {
+            if (app.vrHelpItems.count !== 0) {
                 app.vrHelpItems.clear()
             }
             for (var i = 0; i < vrHelp.length; ++i) {
-                console.debug("233", vrHelp[i].image.imageType, vrHelp[i].image.value)
                 app.vrHelpItems.append({
-                                   text: vrHelp[i].text,
-                                   image: vrHelp[i].image ? vrHelp[i].image : "",
-                                   position: vrHelp[i].position
-                                    })
-                ///!!!
-                console.debug("44", app.vrHelpItems.count)
-                for(var j = 0; j < app.vrHelpItems.count; ++j) {
-                    console.debug(app.vrHelpItems.get(j).text, app.vrHelpItems.get(j).image, app.vrHelpItems.get(j).position)
-                }
-                console.debug("45")
+                    text: vrHelp[i].text,
+                    image: vrHelp[i].image ? vrHelp[i].image : "",
+                    position: vrHelp[i].position
+                    })
             }
         } else {
-            console.debug("24")
             if (vrHelpTitle !== undefined) {
                 return { __retCode: Common.Result.REJECTED, __message: "vrHelpItems - undefined, vrHelpTitle - provided" }
-            } else {
-                console.debug("25")
-                // Use default VR Help Items instead of provided
             }
         }
-
-        console.debug("3")
         if (menuTitle !== undefined) {
-            newMenuTitle = menuTitle
-        } else {
-            newMenuTitle = app.MenuTitle
+            dataToUpdate.menuTitle = menuTitle
         }
-
-        console.debug("4")
         if (menuIcon !== undefined) {
-            newMenuIcon = menuIcon
-        } else {
-            newMenuIcon = app.menuIcon
+            dataToUpdate.menuIcon = menuIcon
         }
-
-        console.debug("6")
-
-        dataContainer.setApplicationProperties(appID, {
-            vrHelpTitle: newVRHelpTitle,
-            menuTitle: newMenuTitle,
-            menuIcon: newMenuIcon
-        })
+        dataContainer.setApplicationProperties(appID, dataToUpdate)
         console.debug("exit")
     }
 

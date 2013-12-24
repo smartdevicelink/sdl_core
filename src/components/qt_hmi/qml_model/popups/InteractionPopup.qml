@@ -36,11 +36,18 @@ import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../hmi_api/Async.js" as Async
 
 ContextPopup {
+    id: piPopUp
+    property ListModel choiceSet: ListModel { }
+    property int timeout
+    property int appID
+    property int interactionLayout
+    property var async
+
     Text {
         id: initialText
-        text: dataContainer.interactionModel.initialText
         anchors.top: parent.top
         anchors.topMargin: Constants.popupMargin
         anchors.left: parent.left
@@ -55,13 +62,13 @@ ContextPopup {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
-        model: dataContainer.interactionModel.choice
+        model: choiceSet
         delegate: OvalButton {
             width: parent.width
-            text: name
+            text: menuName
             icon: image
             onClicked: {
-                complete(Common.Result.SUCCESS, {"choiceID": id})
+                complete(Common.Result.SUCCESS, {"choiceID": appID})
             }
         }
     }
@@ -75,9 +82,57 @@ ContextPopup {
         }
     }
 
+    function performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
+        console.debug("enter")
+        var app = dataContainer.getApplication(appID)
+        var dataToUpdate = {}
+
+        initialText.text = initialText.fieldText
+        this.timeout = timeout
+        this.appID = appID
+
+        if (choiceSet !== undefined) {
+            this.choiceSet.clear()
+            for (var choiceIndex in choiceSet) {
+                this.choiceSet.append({
+                    choiceID: choiceSet[choiceIndex].choiceID,
+                    menuName: choiceSet[choiceIndex].menuName ? choiceSet[choiceIndex].menuName : "",
+                    image: choiceSet[choiceIndex].image ? choiceSet[choiceIndex].image : "",
+                    secondaryText: choiceSet[choiceIndex].secondaryText ? choiceSet[choiceIndex].secondaryText : "",
+                    tetriaryText: choiceSet[choiceIndex].tetriaryText ? choiceSet[choiceIndex].tetriaryText: "",
+                    secondaryImage: choiceSet[choiceIndex].secondaryImage ? choiceSet[choiceIndex].secondaryImage : ""
+                })
+
+            }
+        }/* else {
+            DBus.sendReply( { __retCode: Common.Result.INVALID_DATA, __message: "UI:PI ChoiceSet - no choices" } )
+        }*/
+        if (vrHelpTitle !== undefined) {
+            dataToUpdate.vrHelpTitlePerformInteraction = vrHelpTitle
+        }
+        if (vrHelp !== undefined) {
+            app.vrHelpItemsPerformInteraction.clear()
+            for (var ItemIndex in vrHelp) {
+                app.vrHelpItemsPerformInteraction.append({
+                    text: vrHelp[ItemIndex].text,
+                    image: vrHelp[ItemIndex].image ? vrHelp[ItemIndex].image : "",
+                    position: vrHelp[ItemIndex].position
+                })
+            }
+        }
+        if (interactionLayout !== undefined) {
+            this.interactionLayout = interactionLayout
+        }
+        dataContainer.setApplicationProperties(appID, dataToUpdate)
+        async = new Async.AsyncCall()
+        activate()
+        console.debug("exit")
+        return async
+    }
+
     function activate () {
         console.debug("enter")
-        timer.interval = dataContainer.interactionModel.timeout
+        timer.interval = timeout
         timer.start()
         show()
         console.debug("exit")
@@ -87,13 +142,13 @@ ContextPopup {
         console.debug("enter")
         switch (reason) {
             case Common.Result.SUCCESS:
-                DBus.sendReply(dataContainer.interactionModel.async, data)
+                DBus.sendReply(async, data)
                 break
             case Common.Result.ABORTED:
-                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.ABORTED })
+                DBus.sendReply(async, { __retCode: Common.Result.ABORTED })
                 break
             case Common.Result.TIMED_OUT:
-                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.TIMED_OUT })
+                DBus.sendReply(async, { __retCode: Common.Result.TIMED_OUT })
                 break
         }
         timer.stop()

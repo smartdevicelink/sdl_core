@@ -38,14 +38,7 @@ import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 
 ContextPopup {
-
     property alias title: title.text
-    property var vrHelpItemsToDisplay: {
-        "defaultItems": 0,
-        "setGlobalProperries": 1,
-        "performInteraction": 2
-    }
-
     Text {
         id: title
         anchors.top: parent.top
@@ -53,18 +46,16 @@ ContextPopup {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
         text: {
-            switch (vrHelpItemsToDisplay) {
-            case defaultItems:
-                dataContainer.currentApplication.vrHelpTitleDefault
-                break
-            case setGlobalProperties:
-                break
+            if (interactionPopup.visible) {
+                return dataContainer.currentApplication.vrHelpTitlePerformInteraction
+            } else {
+                if (dataContainer.currentApplication.vrHelpTitle) {
+                    return dataContainer.currentApplication.vrHelpTitle
+                } else {
+                    return dataContainer.currentApplication.vrHelpTitleDefault
+                }
             }
         }
-
-//            dataContainer.currentApplication.vrHelpTitle
-//              ? dataContainer.currentApplication.vrHelpTitle
-//              : dataContainer.currentApplication.vrHelpTitleDefault
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
     }
@@ -76,9 +67,17 @@ ContextPopup {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
 
-        model:  dataContainer.currentApplication.vrHelpItems
-                    ? dataContainer.currentApplication.vrHelpItems
-                    : dataContainer.currentApplication.vrHelpItemsDefault
+        model: {
+            if (interactionPopup.visible) {
+                return dataContainer.currentApplication.vrHelpItemsPerformInteraction
+            } else {
+                if (dataContainer.currentApplication.vrHelpItems.count > 0) {
+                    return dataContainer.currentApplication.vrHelpItems
+                } else {
+                    return dataContainer.currentApplication.vrHelpItemsDefault
+                }
+            }
+        }
 
         delegate:
             Row {
@@ -99,16 +98,6 @@ ContextPopup {
             }
         }
     }
-
-//    OvalButton {
-//        id: closeButton
-//        anchors.bottom: parent.bottom
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.margins: Constants.popupMargin
-//        width: Constants.ovalButtonWidth
-//        text: "Close"
-//        onClicked: complete()
-//    }
 
     function complete(reason, data) {
         hide()
