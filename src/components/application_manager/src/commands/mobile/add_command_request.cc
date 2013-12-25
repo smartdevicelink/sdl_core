@@ -335,8 +335,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
             std::max(ui_result_, vr_result_));
       }
 
-      SendResponse(result, result_code,
-                   NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
     }
   }
 }

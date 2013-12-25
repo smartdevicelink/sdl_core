@@ -63,9 +63,32 @@ class DeleteCommandRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
  private:
 
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
+
+  /*
+   * @brief Check if there some not delivered hmi responses exist
+   *
+   * @return true if all responses received
+   */
+  bool IsPendingResponseExist();
+
+  bool is_ui_send_;
+  bool is_vr_send_;
+
+  bool is_ui_received_;
+  bool is_vr_received_;
+
+  hmi_apis::Common_Result::eType ui_result_;
+  hmi_apis::Common_Result::eType vr_result_;
 };
 
 }  // namespace commands

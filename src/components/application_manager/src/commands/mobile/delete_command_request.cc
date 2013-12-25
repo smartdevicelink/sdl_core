@@ -42,7 +42,13 @@ namespace application_manager {
 namespace commands {
 
 DeleteCommandRequest::DeleteCommandRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    : CommandRequestImpl(message),
+      is_ui_send_(false),
+      is_vr_send_(false),
+      is_ui_received_(false),
+      is_vr_received_(false),
+      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      vr_result_(hmi_apis::Common_Result::INVALID_ENUM)  {
 }
 
 DeleteCommandRequest::~DeleteCommandRequest() {
@@ -87,20 +93,88 @@ void DeleteCommandRequest::Run() {
   }
 
   if ((*command).keyExists(strings::menu_params)) {
-    CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params, true,
-                     chaining_counter);
+    is_ui_send_ = true;
+
+    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
   // check vr params
   if ((*command).keyExists(strings::vr_commands)) {
-    // check if only vr
-    if (1 == chaining_counter) {
-      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params, true,
-                       chaining_counter);
-    } else {
-      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params,
-                       true);
+    is_vr_send_ = true;
+
+    SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
+  }
+}
+
+void DeleteCommandRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "DeleteCommandRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_DeleteCommand: {
+      LOG4CXX_INFO(logger_, "Received UI_DeleteCommand event");
+      is_ui_received_ = true;
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      break;
+    }
+    case hmi_apis::FunctionID::VR_DeleteCommand: {
+      LOG4CXX_INFO(logger_, "Received VR_DeleteCommand event");
+      is_vr_received_ = true;
+      vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
     }
   }
+
+  if (!IsPendingResponseExist()) {
+    Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+
+    if (NULL == application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
+    }
+
+    smart_objects::SmartObject* command = application->FindCommand(
+        (*message_)[strings::msg_params][strings::cmd_id].asInt());
+
+    if (command) {
+      if ((((*message_)[strings::msg_params].keyExists(strings::menu_params)) ||
+          ((*message_)[strings::msg_params].keyExists(strings::vr_commands))) &&
+           (hmi_apis::Common_Result::REJECTED != ui_result_)) {
+        application->RemoveCommand(
+            (*message_)[strings::msg_params][strings::cmd_id].asInt());
+      }
+
+      mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+
+      bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+                     (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
+                     ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_)) ||
+                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
+                     (hmi_apis::Common_Result::SUCCESS == vr_result_));
+
+      if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
+        result_code = static_cast<mobile_apis::Result::eType>(vr_result_);
+      } else {
+        result_code = static_cast<mobile_apis::Result::eType>(
+            std::max(ui_result_, vr_result_));
+      }
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+    }
+  }
+}
+
+bool DeleteCommandRequest::IsPendingResponseExist() {
+  return is_ui_send_ != is_ui_received_ || is_vr_send_ != is_vr_received_;
 }
 
 }  // namespace commands
