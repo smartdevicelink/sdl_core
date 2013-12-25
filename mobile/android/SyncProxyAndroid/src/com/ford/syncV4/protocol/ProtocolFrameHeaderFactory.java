@@ -134,4 +134,27 @@ public class ProtocolFrameHeaderFactory {
         msg.setMessageID(consumedFramesNumber);
         return msg;
     }
+
+    public static ProtocolFrameHeader createHeartbeat(SessionType serviceType,
+                                                      byte version) {
+        return createControlFrame(serviceType, version,
+                FrameDataControlFrameType.Heartbeat);
+    }
+
+    public static ProtocolFrameHeader createHeartbeatACK(
+            SessionType serviceType, byte version) {
+        return createControlFrame(serviceType, version,
+                FrameDataControlFrameType.HeartbeatACK);
+    }
+
+    private static ProtocolFrameHeader createControlFrame(
+            SessionType serviceType, byte version,
+            FrameDataControlFrameType frameData) {
+        ProtocolFrameHeader msg = new ProtocolFrameHeader();
+        msg.setVersion(version);
+        msg.setFrameType(FrameType.Control);
+        msg.setSessionType(serviceType);
+        msg.setFrameData(frameData.value());
+        return msg;
+    }
 }
