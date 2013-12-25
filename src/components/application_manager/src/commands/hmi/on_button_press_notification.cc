@@ -35,7 +35,6 @@
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 

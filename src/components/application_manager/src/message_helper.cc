@@ -156,12 +156,12 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendTTSChunksToHMI(const Application& application_impl) {
-  if(application_impl.tts_name()) {
+  if (application_impl.tts_name()) {
     smart_objects::SmartObject* speak_command = new smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     if (!speak_command) {
         return;
-      }
+    }
     (*speak_command)[strings::params][strings::function_id] =
         hmi_apis::FunctionID::TTS_Speak;
     (*speak_command)[strings::params][strings::message_type] =
@@ -178,6 +178,7 @@ void MessageHelper::SendTTSChunksToHMI(const Application& application_impl) {
     msg_params[strings::app_id] = application_impl.app_id();
     msg_params[strings::tts_chunks] = *(application_impl.tts_name());
     (*speak_command)[strings::msg_params] = msg_params;
+
     ApplicationManagerImpl::instance()->ManageHMICommand(speak_command);
   }
 }

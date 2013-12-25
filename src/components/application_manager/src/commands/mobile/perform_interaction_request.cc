@@ -280,56 +280,55 @@ void PerformInteractionRequest::ProcessVRNotification(
   bool choice_id_chosen = false;
   LOG4CXX_INFO(logger_, "If command was choice id");
   for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-         choice_set_map.end() != it; ++it) {
-      const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-            strings::choice_set);
-
-      for (size_t j = 0; j < choice_set.length(); ++j) {
-        if (cmd_id ==
-            choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
-          choice_id_chosen = true;
-          break;
-        }
+      choice_set_map.end() != it; ++it) {
+    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
+        strings::choice_set);
+    for (size_t j = 0; j < choice_set.length(); ++j) {
+      if (cmd_id ==
+          choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
+        choice_id_chosen = true;
+        break;
       }
     }
-    if (choice_id_chosen) {
-      LOG4CXX_INFO(logger_, "Command was choice id!");
-      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      SendVrDeleteCommand(app);
-      app->set_perform_interaction_mode(-1);
-      app->DeletePerformInteractionChoiceSetMap();
-      app->set_perform_interaction_active(0);
+  }
+  if (choice_id_chosen) {
+    LOG4CXX_INFO(logger_, "Command was choice id!");
+    smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
+    SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+    SendVrDeleteCommand(app);
+    app->set_perform_interaction_mode(-1);
+    app->DeletePerformInteractionChoiceSetMap();
+    app->set_perform_interaction_active(0);
 
-      (*message_)[strings::params][strings::function_id] =
-          static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      msg_params[strings::choice_id] = cmd_id;
-      msg_params[strings::trigger_source] =
+    (*message_)[strings::params][strings::function_id] =
+        static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    msg_params[strings::choice_id] = cmd_id;
+    msg_params[strings::trigger_source] =
         static_cast<int>(mobile_apis::TriggerSource::TS_VR);
-      SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
+    SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
 
-    } else {
-      LOG4CXX_INFO(logger_, "Sending OnCommand notification");
-      smart_objects::SmartObject* notification_so =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
-      if (!notification_so) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Failed to allocate memory for perform interaction response.");
-        return;
-      }
-      smart_objects::SmartObject& notification = *notification_so;
-      notification = message;
-      notification[strings::params][strings::function_id] =
-            static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
-      notification[strings::msg_params][strings::trigger_source] =
-          static_cast<int>(mobile_apis::TriggerSource::TS_VR);
-      ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
+  } else {
+    LOG4CXX_INFO(logger_, "Sending OnCommand notification");
+    smart_objects::SmartObject* notification_so =
+        new smart_objects::SmartObject(smart_objects::SmartType_Map);
+    if (!notification_so) {
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed to allocate memory for perform interaction response.");
+      return;
     }
+    smart_objects::SmartObject& notification = *notification_so;
+    notification = message;
+    notification[strings::params][strings::function_id] =
+        static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
+    notification[strings::msg_params][strings::trigger_source] =
+        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
+    ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
+  }
 }
 
 void PerformInteractionRequest::ProcessAppUnregisteredNotification
@@ -571,12 +570,14 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     int index = 0;
-    for (int i = 0; i < choice_list.length(); ++i) {
+    for (unsigned int i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
 
       if (choice_set) {
-        for (int j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+        for (unsigned int j = 0;
+            j < (*choice_set)[strings::choice_set].length();
+            ++j) {
           smart_objects::SmartObject& vr_commands =
               (*choice_set)[strings::choice_set][j][strings::vr_commands];
           if (0 < vr_commands.length()) {
