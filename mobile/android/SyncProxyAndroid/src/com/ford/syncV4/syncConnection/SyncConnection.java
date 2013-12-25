@@ -74,8 +74,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     case TCP:
                         TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) transportConfig;
                         _transport = new TCPTransport(tcpTransportConfig, this);
-                        mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
-                        mNSDHelper.initializeNsd();
+                        if (tcpTransportConfig.getIsNSD()) {
+                            mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
+                            mNSDHelper.initializeNsd();
+                        }
                         break;
 
                     case USB:
