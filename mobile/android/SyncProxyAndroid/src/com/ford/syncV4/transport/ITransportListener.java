@@ -12,4 +12,7 @@ public interface ITransportListener {
 
 	// Called to indicate that some error occurred on the transport
 	void onTransportError(String info, Exception e);
-} // end-interface
+
+    // Called to indicate that ServerSocket object is initialized
+    void onServerSocketInit(int serverSocketPort);
+}

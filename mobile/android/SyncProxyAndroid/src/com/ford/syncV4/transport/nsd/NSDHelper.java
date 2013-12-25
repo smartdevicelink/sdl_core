@@ -26,7 +26,7 @@ public class NSDHelper {
     public static final String SERVICE_TYPE = "_ford-sdlapp._tcp.";
 
     public static final String TAG = "NSDHelper";
-    public String mServiceName = "SyncProxy";
+    public String mServiceName = "SyncProxyAndroid";
 
     NsdServiceInfo mService;
 
@@ -54,7 +54,7 @@ public class NSDHelper {
 
             @Override
             public void onServiceFound(NsdServiceInfo service) {
-                Log.d(TAG, "Service discovery success" + service);
+                Log.d(TAG, "Service discovery success: " + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
                 } else if (service.getServiceName().equals(mServiceName)) {
@@ -66,7 +66,7 @@ public class NSDHelper {
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(TAG, "service lost" + service);
+                Log.e(TAG, "service lost: " + service);
                 if (mService == service) {
                     mService = null;
                 }
@@ -92,16 +92,17 @@ public class NSDHelper {
     }
 
     public void initializeResolveListener() {
+
         mResolveListener = new NsdManager.ResolveListener() {
 
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.e(TAG, "Resolve failed" + errorCode);
+                Log.e(TAG, "Resolve failed code: " + errorCode);
             }
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
+                Log.d(TAG, "Resolve Succeeded. " + serviceInfo);
 
                 if (serviceInfo.getServiceName().equals(mServiceName)) {
                     Log.d(TAG, "Same IP.");

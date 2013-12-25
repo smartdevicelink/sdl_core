@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -58,6 +59,11 @@ public class TCPTransport extends SyncTransport {
     private Socket mSocket = null;
 
     /**
+     * Instance of the server socket
+     */
+    private ServerSocket mServerSocket = null;
+
+    /**
      * Instance of the input stream. Used to read data from ApplinkCore
      */
     private InputStream mInputStream = null;
@@ -82,19 +88,19 @@ public class TCPTransport extends SyncTransport {
      * Constructs TCP transport component instance
      *
      * @param tcpTransportConfig Instance of the TCP transport configuration
-     * @param transportListener Listener that will be notified on different TCP transport activities
+     * @param transportListener  Listener that will be notified on different TCP transport activities
      */
     public TCPTransport(TCPTransportConfig tcpTransportConfig, ITransportListener transportListener) {
         super(transportListener);
         this.mConfig = tcpTransportConfig;
-        logInfo("TRACE: " + mConfig.getIsNSD());
     }
 
     /**
      * Performs actual work of sending array of bytes over the transport
+     *
      * @param msgBytes Bytes to send
-     * @param offset Offset in the bytes array to send data from
-     * @param length Number of bytes to send
+     * @param offset   Offset in the bytes array to send data from
+     * @param length   Number of bytes to send
      * @return True if data was sent successfully, False otherwise
      */
     @Override
@@ -105,7 +111,7 @@ public class TCPTransport extends SyncTransport {
 
         boolean bResult = false;
 
-        if(currentState == TCPTransportState.CONNECTED) {
+        if (currentState == TCPTransportState.CONNECTED) {
             synchronized (this) {
                 if (mOutputStream != null) {
                     logInfo("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
@@ -132,6 +138,7 @@ public class TCPTransport extends SyncTransport {
     /**
      * Tries to open connection to ApplinkCore.
      * Actual try will be performed only if no actual connection is available
+     *
      * @throws SyncException
      */
     @Override
@@ -139,22 +146,20 @@ public class TCPTransport extends SyncTransport {
         TCPTransportState currentState = getCurrentState();
         logInfo(String.format("TCPTransport: openConnection requested. Current state is: %s", currentState.name()));
 
-        if(currentState == TCPTransportState.IDLE) {
-            synchronized (this) {
-                setCurrentState(TCPTransportState.CONNECTING);
-                logInfo("TCPTransport: openConnection request accepted. Starting transport thread");
-                try {
-                    mThread = new TCPTransportThread();
-                    mThread.setName(TCPTransportThread.class.getSimpleName());
-                    mThread.setDaemon(true);
-                    mThread.start();
+        if (currentState == TCPTransportState.IDLE) {
+            setCurrentState(TCPTransportState.CONNECTING);
+            logInfo("TCPTransport: openConnection request accepted. Starting transport thread");
+            try {
+                mThread = new TCPTransportThread();
+                mThread.setName(TCPTransportThread.class.getSimpleName());
+                mThread.setDaemon(true);
+                mThread.start();
 
-                    // Initialize the SiphonServer
-                    SiphonServer.init();
-                } catch (Exception e) {
-                    logError("TCPTransport: Exception during transport thread starting", e);
-                    throw new SyncException(e);
-                }
+                // Initialize the SiphonServer
+                SiphonServer.init();
+            } catch (Exception e) {
+                logError("TCPTransport: Exception during transport thread starting", e);
+                throw new SyncException(e);
             }
         } else {
             logInfo("TCPTransport: openConnection request rejected. Another connection is not finished");
@@ -171,11 +176,9 @@ public class TCPTransport extends SyncTransport {
         TCPTransportState currentState = getCurrentState();
         logInfo(String.format("TCPTransport: disconnect requested from client. Current state is: %s", currentState.name()));
 
-        if(currentState == TCPTransportState.CONNECTED) {
+        if (currentState == TCPTransportState.CONNECTED || currentState == TCPTransportState.CONNECTING) {
             logInfo("TCPTransport: disconnect request accepted.");
-            synchronized (this) {
-                disconnect(null, null);
-            }
+            disconnect(null, null);
         } else {
             logInfo("TCPTransport: disconnect request rejected. Transport is not connected");
         }
@@ -189,12 +192,12 @@ public class TCPTransport extends SyncTransport {
     /**
      * Performs actual work related to disconnecting from ApplinkCore.
      *
-     * @param message Message that describes disconnect reason
+     * @param message   Message that describes disconnect reason
      * @param exception Some of the possible exceptions that was the reason of disconnecting
      */
-    private synchronized void disconnect(String message, Exception exception) {
+    private void disconnect(String message, Exception exception) {
 
-        if(getCurrentState() == TCPTransportState.DISCONNECTING) {
+        if (getCurrentState() == TCPTransportState.DISCONNECTING) {
             logInfo("TCPTransport: disconnecting already in progress");
             return;
         }
@@ -207,15 +210,20 @@ public class TCPTransport extends SyncTransport {
         }
 
         try {
-            if(mThread != null) {
+            if (mThread != null) {
                 mThread.halt();
                 mThread.interrupt();
             }
 
-            if(mSocket != null){
+            if (mSocket != null) {
                 mSocket.close();
             }
             mSocket = null;
+
+            if (mServerSocket != null) {
+                mServerSocket.close();
+            }
+            mServerSocket = null;
         } catch (IOException e) {
             logInfo("TCPTransport.disconnect: Exception during disconnect: " + e.getMessage());
         }
@@ -238,7 +246,6 @@ public class TCPTransport extends SyncTransport {
      * Overridden abstract method which returns specific type of this transport.
      *
      * @return Constant value - TransportType.TCP.
-     *
      * @see TransportType
      */
     public TransportType getTransportType() {
@@ -247,6 +254,7 @@ public class TCPTransport extends SyncTransport {
 
     /**
      * Internal method for logging information messages
+     *
      * @param message Message to log
      */
     protected void logInfo(String message) {
@@ -255,6 +263,7 @@ public class TCPTransport extends SyncTransport {
 
     /**
      * Internal method for logging error messages
+     *
      * @param message Message to log
      */
     protected void logError(String message) {
@@ -263,6 +272,7 @@ public class TCPTransport extends SyncTransport {
 
     /**
      * Internal method for logging warning messages
+     *
      * @param message Message to log
      */
     protected void logWarning(String message) {
@@ -271,7 +281,8 @@ public class TCPTransport extends SyncTransport {
 
     /**
      * Internal method for logging error message together with information about exception that was the reason of it
-     * @param message Message to log
+     *
+     * @param message   Message to log
      * @param throwable Exception, that was the main reason for logged error message
      */
     protected void logError(String message, Throwable throwable) {
@@ -303,37 +314,54 @@ public class TCPTransport extends SyncTransport {
          */
         private boolean connect() {
             boolean bConnected = false;
+            if (!isHalted) {
+                try {
 
-            synchronized (TCPTransport.this) {
-                if (!isHalted) {
-                    try {
+                    if ((null != mSocket) && (!mSocket.isClosed())) {
+                        logInfo("TCPTransport.connect: Socket is not closed. Trying to close it");
+                        mSocket.close();
+                    }
 
-                        if ((null != mSocket) && (!mSocket.isClosed())) {
-                            logInfo("TCPTransport.connect: Socket is not closed. Trying to close it");
-                            mSocket.close();
+                    if ((null != mServerSocket) && (!mServerSocket.isClosed())) {
+                        logInfo("TCPTransport.connect: ServerSocket is not closed. Trying to close it");
+                        mServerSocket.close();
+                    }
+
+                    logInfo(String.format("TCPTransport.connect: Socket is closed. Trying to connect to %s", mConfig));
+
+                    if (mConfig.getIsNSD()) {
+                        // Since discovery will happen via Nsd, we don't need to care which port is used.
+                        // Just grab an available one and advertise it via Nsd.
+                        if (mServerSocket == null) {
+                            mServerSocket = new ServerSocket(0);
+
+                            handleOnServerSocketInit(mServerSocket.getLocalPort());
                         }
-
-                        logInfo(String.format("TCPTransport.connect: Socket is closed. Trying to connect to %s", mConfig));
+                        logInfo("Waiting for accept ...");
+                        mSocket = mServerSocket.accept();
+                        logInfo("Socket accepted");
+                    } else {
                         mSocket = new Socket();
                         mSocket.connect(new InetSocketAddress(mConfig.getIPAddress(), mConfig.getPort()));
-                        mOutputStream = mSocket.getOutputStream();
-                        mInputStream =  new BufferedInputStream(mSocket.getInputStream());
-
-                    } catch (IOException e) {
-                        logInfo("TCPTransport.connect: Exception during connect stage: " + e.getMessage());
                     }
 
-                    bConnected = (null != mSocket) && mSocket.isConnected();
+                    mOutputStream = mSocket.getOutputStream();
+                    mInputStream = new BufferedInputStream(mSocket.getInputStream());
 
-                    if(bConnected){
-                        logInfo("TCPTransport.connect: Socket connected");
-                    }else{
-                        logInfo("TCPTransport.connect: Socket not connected");
-                    }
+                } catch (IOException e) {
+                    logInfo("TCPTransport.connect: Exception during connect stage: " + e.getMessage());
                 }
 
-                return bConnected;
+                bConnected = (null != mSocket) && mSocket.isConnected();
+
+                if (bConnected) {
+                    logInfo("TCPTransport.connect: Socket connected");
+                } else {
+                    logInfo("TCPTransport.connect: Socket not connected");
+                }
             }
+
+            return bConnected;
         }
 
         /**
@@ -343,9 +371,9 @@ public class TCPTransport extends SyncTransport {
         public void run() {
             logInfo("TCPTransport.run: transport thread created. Starting connect stage");
 
-            while(!isHalted) {
+            while (!isHalted) {
                 setCurrentState(TCPTransportState.CONNECTING);
-                if(!connect()){
+                if (!connect()) {
                     if (isHalted) {
                         logInfo("TCPTransport.run: Connection failed, but thread already halted");
                     } else {
@@ -355,8 +383,8 @@ public class TCPTransport extends SyncTransport {
                     break;
                 }
 
+                setCurrentState(TCPTransportState.CONNECTED);
                 synchronized (TCPTransport.this) {
-                    setCurrentState(TCPTransportState.CONNECTED);
                     handleTransportConnected();
                 }
 
@@ -402,7 +430,7 @@ public class TCPTransport extends SyncTransport {
          * Internal handling of Tcp disconnection
          */
         private void internalHandleTCPDisconnect() {
-            if(isHalted){
+            if (isHalted) {
                 logInfo("TCPTransport.run: TCP disconnect received, but thread already halted");
             } else {
                 logInfo("TCPTransport.run: TCP disconnect received");
@@ -414,7 +442,7 @@ public class TCPTransport extends SyncTransport {
          * Internal handling of reading data from input stream
          */
         private void internalHandleStreamReadError() {
-            if(isHalted){
+            if (isHalted) {
                 logInfo("TCPTransport.run: Exception during reading data, but thread already halted");
             } else {
                 logInfo("TCPTransport.run: Exception during reading data");
@@ -435,6 +463,7 @@ public class TCPTransport extends SyncTransport {
 
     /**
      * Sets current TCP transport state
+     *
      * @param currentState New state
      */
     private synchronized void setCurrentState(TCPTransportState currentState) {

@@ -298,6 +298,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     case Const.Transport.KEY_TCP:
                         config = new TCPTransportConfig(tcpPort, ipAddress);
                         ((TCPTransportConfig)config).setIsNSD(mIsNSD);
+                        ((TCPTransportConfig)config).setApplicationContext(this);
                         appID = APPID_TCP;
                         break;
 
