@@ -219,6 +219,7 @@ TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread)
   : timer_thread_(timer_thread),
     timeout_seconds_(0),
     stop_flag_(false) {
+  DCHECK(timer_thread_);
 }
 
 template <class T>
@@ -230,14 +231,21 @@ template <class T>
 void TimerThread<T>::TimerDelegate::threadMain() {
   using sync_primitives::ConditionalVariable;
   sync_primitives::AutoLock auto_lock(state_lock_);
-  if (!stop_flag_) {
+  const time_t end_time = time(NULL) + timeout_seconds_;
+  int wait_seconds_left = int(difftime(end_time, time(NULL)));
+  while (!stop_flag_) {
+    // Sleep
     ConditionalVariable::WaitStatus wait_status =
-        termination_condition_.WaitFor(auto_lock, timeout_seconds_ * 1000);
-
-    if (ConditionalVariable::kTimeout == wait_status &&
-        false == stop_flag_ && timer_thread_) {
-      timer_thread_->onTimeOut();
+        termination_condition_.WaitFor(auto_lock, wait_seconds_left * 1000);
+    wait_seconds_left = int(difftime(end_time, time(NULL)));
+    // Quit sleeping or continue sleeping in case of spurious wake up
+    if (ConditionalVariable::kTimeout == wait_status ||
+        wait_seconds_left <= 0) {
+      break;
     }
+  }
+  if (!stop_flag_) {
+    timer_thread_->onTimeOut();
   }
   stop_flag_ = false;
 }
