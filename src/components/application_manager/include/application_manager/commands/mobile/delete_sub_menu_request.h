@@ -84,6 +84,13 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    */
   void DeleteSubMenuUICommands(Application* const app);
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };
 
