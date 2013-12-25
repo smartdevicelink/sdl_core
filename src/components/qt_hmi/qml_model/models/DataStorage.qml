@@ -157,9 +157,7 @@ QtObject {
                 }
                 currentApplication.vrHelpTitle = application.vrHelpTitle
                 currentApplication.vrHelpTitleDefault = application.vrHelpTitleDefault
-                if (application.vrHelpTitlePerformInteraction !== undefined) {
-                    currentApplication.vrHelpTitlePerformInteraction = application.vrHelpTitlePerformInteraction
-                }
+                currentApplication.vrHelpTitlePerformInteraction = application.vrHelpTitlePerformInteraction
                 currentApplication.menuTitle = application.menuTitle
                 currentApplication.vrHelpItems = application.vrHelpItems
                 currentApplication.vrHelpItemsPerformInteraction = application.vrHelpItemsPerformInteraction
