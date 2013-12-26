@@ -1,3 +1,6 @@
+[CW52]
+* Fix SetAppIcon request before putFile response
+
 [CW51]
 + Add ability to SPT to Slider request without sliderFooter
 * Fix parsing OnAudioPassThru notifications.
