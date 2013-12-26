@@ -138,6 +138,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	
 	private static boolean waitingForResponse = false;
     private ProxyServiceEvent mServiceDestroyEvent;
+
+    private boolean isAwaitingPutFileResponse;
 	
 	public void onCreate() {
 		super.onCreate();
@@ -433,25 +435,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		}
     }
 
-    private void setAppIcon() {
-        try {
-            PutFile putFile = new PutFile();
-            putFile.setFileType(FileType.GRAPHIC_PNG);
-            putFile.setSyncFileName(ICON_SYNC_FILENAME);
-            putFile.setCorrelationID(nextCorrID());
-            putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-            _msgAdapter.logMessage(putFile, true);
-            getProxyInstance().sendRPCRequest(putFile);
+    private void setInitAppIcon() {
+        PutFile putFile = new PutFile();
+        putFile.setFileType(FileType.GRAPHIC_PNG);
+        putFile.setSyncFileName(ICON_SYNC_FILENAME);
+        putFile.setCorrelationID(nextCorrID());
+        putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+        _msgAdapter.logMessage(putFile, true);
 
-            if (getAutoSetAppIconFlag()) {
-                SetAppIcon setAppIcon = new SetAppIcon();
-                setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-                setAppIcon.setCorrelationID(nextCorrID());
-                _msgAdapter.logMessage(setAppIcon, true);
-                getProxyInstance().sendRPCRequest(setAppIcon);
-            }
+        try {
+            isAwaitingPutFileResponse = true;
+            getProxyInstance().sendRPCRequest(putFile);
         } catch (SyncException e) {
-            Log.e(TAG, "Error setting app icon", e);
+            Log.e(TAG, "Error init AppIcon -> PutFile request", e);
+            isAwaitingPutFileResponse = false;
         }
     }
 
@@ -587,7 +584,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
             if (!isModuleTesting()) {
-                setAppIcon();
+                setInitAppIcon();
             }
         }
 
@@ -995,7 +992,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
+
+        if (isAwaitingPutFileResponse && getAutoSetAppIconFlag()) {
+            SetAppIcon setAppIcon = new SetAppIcon();
+            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+            setAppIcon.setCorrelationID(nextCorrID());
+            _msgAdapter.logMessage(setAppIcon, true);
+            try {
+                getProxyInstance().sendRPCRequest(setAppIcon);
+            } catch (SyncException e) {
+                Log.e(TAG, "Set InitAppIcon", e);
+            }
+            isAwaitingPutFileResponse = false;
+        }
+
 		if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};

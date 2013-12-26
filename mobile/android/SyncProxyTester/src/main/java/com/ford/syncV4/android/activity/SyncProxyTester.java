@@ -687,12 +687,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         // startSyncProxyService();
         final ProxyService instance = ProxyService.getInstance();
         if (instance == null) {
-            Intent startIntent = new Intent(SyncProxyTester._activity, ProxyService.class);
+            Intent startIntent = new Intent(SyncProxyTester.this, ProxyService.class);
             startService(startIntent);
             // bindService(startIntent, this, Context.BIND_AUTO_CREATE);
         } else {
             // need to get the instance and add myself as a listener
-            instance.setCurrentActivity(SyncProxyTester._activity);
+            instance.setCurrentActivity(SyncProxyTester.this);
 
             final SyncProxyALM proxyInstance = ProxyService.getProxyInstance();
             if (proxyInstance.getIsConnected()) {
