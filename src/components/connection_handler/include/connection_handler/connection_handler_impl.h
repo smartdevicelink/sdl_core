@@ -42,8 +42,6 @@
 #include <list>
 #include <string>
 
-#include "utils/logger.h"
-#include "utils/macro.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
 #include "connection_handler/connection_handler_observer.h"
@@ -51,6 +49,9 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/stl_utils.h"
 
 /**
  * \namespace connection_handler
@@ -222,8 +223,20 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
     virtual void StartTransportManager();
 
+    /*
+     * Close all associated sessions and close the connection associated with the key
+     */
     virtual void CloseConnection(unsigned int key);
 
+    /*
+     * Close all associated sessions and close the connection pointed by handle
+     */
+    void CloseConnection(ConnectionHandle connection_handle);
+
+    /*
+     * Keep connection associated with the key from being closed by heartbeat monitor
+     */
+    void KeepConnectionAlive(unsigned int connection_key);
   private:
     /**
      * \brief Default class constructor
@@ -275,6 +288,10 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of connections
      */
     ConnectionList connection_list_;
+    /*
+     * \brief Cleans connection list on destruction
+     */
+    utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
     /**
      *\brief For logging.

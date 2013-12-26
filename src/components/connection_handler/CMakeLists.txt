@@ -9,6 +9,7 @@ set (SOURCES
     ./src/connection_handler_impl.cc
     ./src/connection.cc
     ./src/device.cc
+    ./src/heartbeat_monitor.cc
 )
 
 add_library("connectionHandler" ${SOURCES})

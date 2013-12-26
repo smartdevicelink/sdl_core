@@ -35,6 +35,7 @@
 
 #include <memory.h>
 
+#include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "utils/macro.h"
@@ -173,6 +174,10 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
 void ProtocolHandlerImpl::OnTMMessageReceived(
   const RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
+  connection_handler::ConnectionHandlerImpl* connection_handler =
+      connection_handler::ConnectionHandlerImpl::instance();
+  // Connection handler should be accessed from TM thread only
+  connection_handler->KeepConnectionAlive(message->connection_key());
 
   if (message.valid()) {
     LOG4CXX_INFO_EXT(logger_,

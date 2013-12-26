@@ -42,12 +42,15 @@
 
 #include "utils/logger.h"
 #include "connection_handler/device.h"
+#include "connection_handler/heartbeat_monitor.h"
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
+
+class ConnectionHandlerImpl;
 
 /**
  * \brief Type for ConnectionHandle
@@ -74,7 +77,8 @@ class Connection {
    * \brief Class constructor
    */
   Connection(ConnectionHandle connection_handle,
-             DeviceHandle connection_device_handle);
+             DeviceHandle connection_device_handle,
+             ConnectionHandlerImpl* connection_handler);
 
   /**
    * \brief Destructor
@@ -85,7 +89,7 @@ class Connection {
    * \brief Returns device handle
    * \return DeviceHandle
    */
-  ConnectionHandle connection_handle();
+  ConnectionHandle connection_handle() const;
 
   /**
    * \brief Returns connection device handle
@@ -119,7 +123,18 @@ class Connection {
    */
   void GetSessionList(SessionList & session_list);
 
+  /*
+   * \brief Close this connection and all associated sessions
+   */
+  void Close();
+
+  /*
+   * \brief Prevent this connection from being closed by heartbeat timeout
+   */
+  void KeepAlive();
+
  private:
+  ConnectionHandlerImpl* connection_handler_;
   /**
    * \brief Current connection handle.
    */
@@ -140,6 +155,11 @@ class Connection {
    */
   SessionList session_list_;
 
+  /*
+   * \brief monitor that closes connection if there is no traffic over it
+   */
+  HeartBeatMonitor heartbeat_monitor_;
+
   /**
    * \brief For logging.
    */
@@ -150,12 +170,12 @@ class Connection {
  * \brief Type for Connections map
  * Key is ConnectionHandle which is uniq
  */
-typedef std::map<int, Connection> ConnectionList;
+typedef std::map<int, Connection*> ConnectionList;
 
 /**
  * \brief Type for Connections map iterator
  */
-typedef std::map<int, Connection>::iterator ConnectionListIterator;
+typedef ConnectionList::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 
