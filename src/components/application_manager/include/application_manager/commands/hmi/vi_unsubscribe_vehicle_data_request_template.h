@@ -30,25 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/vi_get_my_key_request.h"
+#ifndef HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+
+#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
 
-VIGetMyKeyRequest::VIGetMyKeyRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+/**
+ * @brief VIUnsubscriveVehicleDataRequestTemplate command class
+ *
+ * Template class for sending 1 unsubscribe thin request
+ **/
+template<event_engine::Event::EventID eventID>
+class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
+ public:
+  /**
+   * @brief VIUnsubscriveVehicleDataRequestTemplate class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VIUnsubscribeVehicleDataRequestTemplate(
+      const MessageSharedPtr& message)
+      : RequestToHMI(message) {
+  }
 
-VIGetMyKeyRequest::~VIGetMyKeyRequest() {
-}
+  /**
+   * @brief Execute command with sending DBus thin request to HMI
+   **/
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VIUnsubscriveVehicleDataRequestTemplate::Run");
+    SendRequest();
+  }
 
-void VIGetMyKeyRequest::Run() {
-  LOG4CXX_INFO(logger_, "VIGetMyKeyRequest::Run");
-  SendRequest();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataRequestTemplate<eventID>);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
-
+#endif  // HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_

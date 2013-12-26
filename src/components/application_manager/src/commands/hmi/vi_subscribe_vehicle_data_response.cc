@@ -34,7 +34,6 @@
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
-
 namespace commands {
 
 VISubscribeVehicleDataResponse::VISubscribeVehicleDataResponse(
@@ -47,16 +46,12 @@ VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {
 
 void VISubscribeVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "VISubscribeVehicleDataResponse::Run");
-
-#ifdef WEB_HMI //todo: ykazakov - temp solution to make merge
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData
       );
   event.set_smart_object(*message_);
   event.raise();
-#endif
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

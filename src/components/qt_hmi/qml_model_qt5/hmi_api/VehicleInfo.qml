@@ -221,4 +221,312 @@ Item {
         console.debug("Exit")
         return {didResult: didResult}
     }
+
+    function subscribeGps(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onGpsChanged.disconnect(model.sendGpsChange)
+        model.onGpsChanged.connect(model.sendGpsChange)
+        console.debug("exit")
+    }
+    function unsubscribeGps(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onGpsChanged.disconnect(model.sendGpsChange)
+        console.debug("exit")
+    }
+
+    function subscribeSpeed(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSpeedChanged.disconnect(model.sendSpeedChange)
+        model.onSpeedChanged.connect(model.sendSpeedChange)
+        console.debug("exit")
+    }
+    function unsubscribeSpeed(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSpeedChanged.disconnect(model.sendSpeedChange)
+        console.debug("exit")
+    }
+
+    function subscribeRpm(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onRpmChanged.disconnect(model.sendRpmChange)
+        model.onRpmChanged.connect(model.sendRpmChange)
+        console.debug("exit")
+    }
+    function unsubscribeRpm(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onRpmChanged.disconnect(model.sendRpmChange)
+        console.debug("exit")
+    }
+
+    function subscribeFuelLevel(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevelChanged.disconnect(model.sendFuelLevelChange)
+        model.onFuelLevelChanged.connect(model.sendFuelLevelChange)
+        console.debug("exit")
+    }
+    function unsubscribeFuelLevel(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevelChanged.disconnect(model.sendFuelLevelChange)
+        console.debug("exit")
+    }
+
+    function subscribeFuelLevel_State(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevel_StateChanged.disconnect(model.sendFuelLevel_StateChange)
+        model.onFuelLevel_StateChanged.connect(model.sendFuelLevel_StateChange)
+        console.debug("exit")
+    }
+    function unsubscribeFuelLevel_State(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevel_StateChanged.disconnect(model.sendFuelLevel_StateChange)
+        console.debug("exit")
+    }
+
+    function subscribeInstantFuelConsumption(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onInstantFuelConsumptionChanged.disconnect(model.sendInstantFuelConsumptionChange)
+        model.onInstantFuelConsumptionChanged.connect(model.sendInstantFuelConsumptionChange)
+        console.debug("exit")
+    }
+    function unsubscribeInstantFuelConsumption(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onInstantFuelConsumptionChanged.disconnect(model.sendInstantFuelConsumptionChange)
+        console.debug("exit")
+    }
+
+    function subscribeExternalTemperature(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onExternalTemperatureChanged.disconnect(model.sendExternalTemperatureChange)
+        model.onExternalTemperatureChanged.connect(model.sendExternalTemperatureChange)
+        console.debug("exit")
+    }
+    function unsubscribeExternalTemperature(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onExternalTemperatureChanged.disconnect(model.sendExternalTemperatureChange)
+        console.debug("exit")
+    }
+
+    function subscribePrndl(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onPrndlChanged.disconnect(model.sendPrndlChange)
+        model.onPrndlChanged.connect(model.sendPrndlChange)
+        console.debug("exit")
+    }
+    function unsubscribePrndl(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onPrndlChanged.disconnect(model.sendPrndlChange)
+        console.debug("exit")
+    }
+
+    function subscribeVin(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onVinChanged.disconnect(model.sendVinChange)
+        model.onVinChanged.connect(model.sendVinChange)
+        console.debug("exit")
+    }
+    function unsubscribeVin(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onVinChanged.disconnect(model.sendVinChange)
+        console.debug("exit")
+    }
+
+    function subscribeTirePressure(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onTirePressureChanged.disconnect(model.sendTirePressureChange)
+        model.onTirePressureChanged.connect(model.sendTirePressureChange)
+        console.debug("exit")
+    }
+    function unsubscribeTirePressure(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onTirePressureChanged.disconnect(model.sendTirePressureChange)
+        console.debug("exit")
+    }
+
+    function subscribeOdometer(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onOdometerChanged.disconnect(model.sendOdometerChange)
+        model.onOdometerChanged.connect(model.sendOdometerChange)
+        console.debug("exit")
+    }
+    function unsubscribeOdometer(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onOdometerChanged.disconnect(model.sendOdometerChange)
+        console.debug("exit")
+    }
+
+    function subscribeBeltStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBeltStatusChanged.disconnect(model.sendBeltStatusChange)
+        model.onBeltStatusChanged.connect(model.sendBeltStatusChange)
+        console.debug("exit")
+    }
+    function unsubscribeBeltStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBeltStatusChanged.disconnect(model.sendBeltStatusChange)
+        console.debug("exit")
+    }
+
+    function subscribeBodyInformation(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBodyInformationChanged.disconnect(model.sendBodyInformationChange)
+        model.onBodyInformationChanged.connect(model.sendBodyInformationChange)
+        console.debug("exit")
+    }
+    function unsubscribeBodyInformation(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBodyInformationChanged.disconnect(model.sendBodyInformationChange)
+        console.debug("exit")
+    }
+
+    function subscribeDeviceStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDeviceStatusChanged.disconnect(model.sendDeviceStatusChange)
+        model.onDeviceStatusChanged.connect(model.sendDeviceStatusChange)
+        console.debug("exit")
+    }
+    function unsubscribeDeviceStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDeviceStatusChanged.disconnect(model.sendDeviceStatusChange)
+        console.debug("exit")
+    }
+
+    function subscribeDriverBraking(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDriverBrakingChanged.disconnect(model.sendDriverBrakingChange)
+        model.onDriverBrakingChanged.connect(model.sendDriverBrakingChange)
+        console.debug("exit")
+    }
+    function unsubscribeDriverBraking(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDriverBrakingChanged.disconnect(model.sendDriverBrakingChange)
+        console.debug("exit")
+    }
+
+    function subscribeWiperStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onWiperStatusChanged.disconnect(model.sendWiperStatusChange)
+        model.onWiperStatusChanged.connect(model.sendWiperStatusChange)
+        console.debug("exit")
+    }
+    function unsubscribeWiperStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onWiperStatusChanged.disconnect(model.sendWiperStatusChange)
+        console.debug("exit")
+    }
+
+    function subscribeHeadLampStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onHeadLampStatusChanged.disconnect(model.sendHeadLampStatusChange)
+        model.onHeadLampStatusChanged.connect(model.sendHeadLampStatusChange)
+        console.debug("exit")
+    }
+    function unsubscribeHeadLampStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onHeadLampStatusChanged.disconnect(model.sendHeadLampStatusChange)
+        console.debug("exit")
+    }
+
+    function subscribeEngineTorque(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEngineTorqueChanged.disconnect(model.sendEngineTorqueChange)
+        model.onEngineTorqueChanged.connect(model.sendEngineTorqueChange)
+        console.debug("exit")
+    }
+    function unsubscribeEngineTorque(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEngineTorqueChanged.disconnect(model.sendEngineTorqueChange)
+        console.debug("exit")
+    }
+
+    function subscribeAccPedalPosition(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAccPedalPositionChanged.disconnect(model.sendAccPedalPositionChange)
+        model.onAccPedalPositionChanged.connect(model.sendAccPedalPositionChange)
+        console.debug("exit")
+    }
+    function unsubscribeAccPedalPosition(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAccPedalPositionChanged.disconnect(model.sendAccPedalPositionChange)
+        console.debug("exit")
+    }
+
+    function subscribeSteeringWheelAngle(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSteeringWheelAngleChanged.disconnect(model.sendSteeringWheelAngleChange)
+        model.onSteeringWheelAngleChanged.connect(model.sendSteeringWheelAngleChange)
+        console.debug("exit")
+    }
+    function unsubscribeSteeringWheelAngle(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSteeringWheelAngleChanged.disconnect(model.sendSteeringWheelAngleChange)
+        console.debug("exit")
+    }
+
+    function subscribeECallInfo(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onECallInfoChanged.disconnect(model.sendECallInfoChange)
+        model.onECallInfoChanged.connect(model.sendECallInfoChange)
+        console.debug("exit")
+    }
+    function unsubscribeECallInfo(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onECallInfoChanged.disconnect(model.sendECallInfoChange)
+        console.debug("exit")
+    }
+
+    function subscribeAirbagStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAirbagStatusChanged.disconnect(model.sendAirbagStatusChange)
+        model.onAirbagStatusChanged.connect(model.sendAirbagStatusChange)
+        console.debug("exit")
+    }
+    function unsubscribeAirbagStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAirbagStatusChanged.disconnect(model.sendAirbagStatusChange)
+        console.debug("exit")
+    }
 }

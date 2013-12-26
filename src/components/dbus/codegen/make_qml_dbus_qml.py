@@ -53,6 +53,7 @@ class Impl(FordXmlParser):
         name = request.get('name')
         name = name[:1].lower() + name[1:]
         out.write("  function " + name + "(params) {\n")
+        out.write("""    console.debug("{0}Proxy::{1}")\n""".format(ifacename, name))
         out.write("    try {\n")
         out.write("      if(\"{0}\" in sdl{1})\n".format(name, ifacename))
         out.write("        return sdl{0}.{1}(" .format(ifacename, name))
@@ -90,6 +91,8 @@ class Impl(FordXmlParser):
             if i <> len(params) - 1:
                 out.write(', ')
         out.write(")\n")
+        name = notification.get('name')
+        out.write("""  on{1}: console.debug("emitted {0}:{1}")\n""".format(ifacename, name))
 
 
     def write_qml(self, iface, out):

@@ -37,7 +37,6 @@
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
-
 namespace commands {
 
 SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
@@ -54,5 +53,4 @@ void SubscribeVehicleDataResponse::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

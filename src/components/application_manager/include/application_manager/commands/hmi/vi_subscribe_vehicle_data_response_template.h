@@ -30,43 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_
+#ifndef HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
+#define HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
-
 /**
- * @brief VIGetWiperStatusRequest command class
+ * @brief VISubscriveVehicleDataResponseTemplate command class
  **/
-class VIGetWiperStatusRequest : public RequestToHMI {
+template<event_engine::Event::EventID eventID>
+class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
-   * @brief VIGetWiperStatusRequest class constructor
+   * @brief VISubscriveVehicleDataResponseTemplate class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetWiperStatusRequest(const MessageSharedPtr& message);
-
-  /**
-   * @brief VIGetWiperStatusRequest class destructor
-   **/
-  virtual ~VIGetWiperStatusRequest();
+  explicit VISubscribeVehicleDataResponseTemplate(
+      const MessageSharedPtr& message)
+      : ResponseFromHMI(message) {
+  }
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
-
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VISubscribeVehicleDataResponse::Run");
+    event_engine::Event event(eventID);
+    event.set_smart_object(*message_);
+    event.raise();
+  }
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetWiperStatusRequest);
+  DISALLOW_COPY_AND_ASSIGN(VISubscribeVehicleDataResponseTemplate<eventID>);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_
+#endif  // HMI_VI_SUBSCRIBE_VEHICLE_DATA_RESPONSE_TEMPLATE_H_

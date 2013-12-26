@@ -30,43 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_BELT_STATUS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_BELT_STATUS_REQUEST_H_
+#ifndef HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
 
+#include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
 
 /**
- * @brief VIGetBeltStatusRequest command class
+ * @brief VIGetVehicleDataRequestTemplate command class
+ *
+ * Template class for sending 1 subscribe thin request
  **/
-class VIGetBeltStatusRequest : public RequestToHMI {
+template<event_engine::Event::EventID eventID>
+class VIGetVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
-   * @brief VIGetBeltStatusRequest class constructor
+   * @brief VIGetVehicleDataRequestTemplate class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetBeltStatusRequest(const MessageSharedPtr& message);
+  explicit VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message)
+      : RequestToHMI(message) {
+  }
 
   /**
-   * @brief VIGetBeltStatusRequest class destructor
+   * @brief Execute command with sending DBus thin request to HMI
    **/
-  virtual ~VIGetBeltStatusRequest();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VIGetVehicleDataRequestTemplate::Run");
+    SendRequest();
+  }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetBeltStatusRequest);
+  DISALLOW_COPY_AND_ASSIGN(VIGetVehicleDataRequestTemplate<eventID>);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_BELT_STATUS_REQUEST_H_
+#endif  // HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_

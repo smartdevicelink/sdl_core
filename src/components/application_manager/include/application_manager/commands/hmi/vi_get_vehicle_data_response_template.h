@@ -30,43 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
+#ifndef HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
+#define HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
 
+#include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
 
 /**
- * @brief VIGetRpmResponse command class
+ * @brief VIGetVehicleDataResponseTemplate command class
  **/
-class VIGetRpmResponse : public ResponseFromHMI {
+template<event_engine::Event::EventID eventID>
+class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
-   * @brief VIGetRpmResponse class constructor
+   * @brief VIGetVehicleDataResponseTemplate class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetRpmResponse(const MessageSharedPtr& message);
-
-  /**
-   * @brief VIGetRpmResponse class destructor
-   **/
-  virtual ~VIGetRpmResponse();
+  explicit VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message)
+      : ResponseFromHMI(message) {
+  }
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VIGetVehicleDataResponseTemplate::Run");
+    event_engine::Event event(eventID);
+    event.set_smart_object(*message_);
+    event.raise();
+  }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetRpmResponse);
+  DISALLOW_COPY_AND_ASSIGN(VIGetVehicleDataResponseTemplate<eventID>);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
+#endif  // HMI_VI_GETBSCRIBE_VEHICLE_DATA_REQUEST_RESPONSE_H_
