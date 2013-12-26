@@ -228,7 +228,7 @@ QtObject {
     function sendClusterModeStatusChange(){
         sdlVehicleInfo.onClusterModeStatus(vehicleInfo.clusterModeStatus)
     }
-    function sendmyKeyChange(){
+    function sendMyKeyChange(){
         sdlVehicleInfo.onMyKey(vehicleInfo.myKey)
     }
 }

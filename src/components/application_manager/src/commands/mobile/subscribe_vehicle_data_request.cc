@@ -229,7 +229,8 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       } else if (status
           != static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
-      } LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status <<
+      }
+      LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status <<
           ", so response status become " << status);
     } else {
       any_arg_success = true;

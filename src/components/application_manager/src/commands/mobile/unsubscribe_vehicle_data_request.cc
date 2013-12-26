@@ -32,6 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_request.h"
+#include "application_manager/include/application_manager/commands/command_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -84,8 +85,9 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_UnsubscribeClusterModeStatus, strings::cluster_mode_status},
     { hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey, strings::my_key},
   };
-#endif // #ifdef QT_HMI
 }
+#endif // #ifdef QT_HMI
+
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
