@@ -184,7 +184,10 @@ QtObject {
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
             icon: app.icon,
-            menuIcon: "",
+            menuIcon: {
+                value: "",
+                imageType: 1
+            },
             deviceName: app.deviceName,
             appId: app.appId,
             hmiDisplayLanguageDesired: app.hmiDisplayLanguageDesired,
@@ -348,10 +351,7 @@ QtObject {
 
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
-
     property ListModel vrCommands: ListModel {}
-
-//    property ListModel vrHelp: ListModel {}
 
     function reset () {
         console.log("dataContainer reset enter");

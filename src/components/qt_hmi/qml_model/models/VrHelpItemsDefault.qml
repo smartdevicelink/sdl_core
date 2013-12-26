@@ -34,29 +34,33 @@
 import QtQuick 2.0
 
 ListModel {
-    ListElement {
-        text: "Default VR Help Text1"
-        moreParameters:[ ListElement {
-                value: ""
-                imageType: 1
-            } ]
-        position: 1
-    }
-    ListElement {
-        text: "Default VR Help Text2"
-        image: ListElement {
-            value: ""
-            imageType: 1
-        }
-        position: 2
-    }
-    ListElement {
-        text: "Default VR Help Text3"
-        image: ListElement{
-            value: ""
-            imageType: 1
-        }
-        position: 3
+    id: vrHelpItemsDefault
+
+    Component.onCompleted: {
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text1",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 1
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text2",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 2
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text3",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 3
+        });
     }
 }
 

@@ -37,6 +37,7 @@ import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 import "../hmi_api/Async.js" as Async
+import "../models/Internal.js" as Internal
 
 ContextPopup {
     id: piPopUp
@@ -94,31 +95,26 @@ ContextPopup {
         this.appID = appID
 
         this.choiceSet.clear()
-        if (choiceSet !== undefined) {            
-            for (var choiceIndex in choiceSet) {
-                this.choiceSet.append({
-                    choiceID: choiceSet[choiceIndex].choiceID,
-                    menuName: choiceSet[choiceIndex].menuName ? choiceSet[choiceIndex].menuName : "",
-                    image: choiceSet[choiceIndex].image ? choiceSet[choiceIndex].image : "",
-                    secondaryText: choiceSet[choiceIndex].secondaryText ? choiceSet[choiceIndex].secondaryText : "",
-                    tetriaryText: choiceSet[choiceIndex].tetriaryText ? choiceSet[choiceIndex].tetriaryText: "",
-                    secondaryImage: choiceSet[choiceIndex].secondaryImage ? choiceSet[choiceIndex].secondaryImage : ""
-                })
-            }
+        if (choiceSet !== undefined) {
+            choiceSet.forEach( function(arrayElement) {
+                                    piPopUp.choiceSet.append({
+                                        choiceID: arrayElement.choiceID,
+                                        menuName: arrayElement.menuName ? arrayElement.menuName : "",
+                                        image: arrayElement.image ? arrayElement.image : "",
+                                        secondaryText: arrayElement.secondaryText ? arrayElement.secondaryText : "",
+                                        tertiaryText: arrayElement.tertiaryText ? arrayElement.tertiaryText: "",
+                                        secondaryImage: arrayElement.secondaryImage ? arrayElement.secondaryImage : ""
+                                    })
+            })
         }
         if (vrHelpTitle !== undefined) {
             dataToUpdate.vrHelpTitlePerformInteraction = vrHelpTitle
         }
 
         app.vrHelpItemsPerformInteraction.clear()
+
         if (vrHelp !== undefined) {
-            for (var ItemIndex in vrHelp) {
-                app.vrHelpItemsPerformInteraction.append({
-                    text: vrHelp[ItemIndex].text,
-                    image: vrHelp[ItemIndex].image ? vrHelp[ItemIndex].image : "",
-                    position: vrHelp[ItemIndex].position
-                })
-            }
+            vrHelp.forEach( Internal.appendVrHelpItem, app.vrHelpItemsPerformInteraction )
         }
         if (interactionLayout !== undefined) {
             this.interactionLayout = interactionLayout

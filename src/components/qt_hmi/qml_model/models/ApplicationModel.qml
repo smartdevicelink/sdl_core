@@ -46,7 +46,7 @@ QtObject {
     property int appType
     property int hmiUITextAlignment
     property string vrHelpTitle
-    property string vrHelpTitleDefault
+    property string vrHelpTitleDefault: "VR HELP"
     property string vrHelpTitlePerformInteraction
     property string menuTitle
     property Icon menuIcon: Icon { }

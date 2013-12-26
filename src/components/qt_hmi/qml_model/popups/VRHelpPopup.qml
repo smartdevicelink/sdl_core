@@ -48,13 +48,12 @@ ContextPopup {
         text: {
             if (interactionPopup.performInteractionIsActiveNow) {
                 return dataContainer.currentApplication.vrHelpTitlePerformInteraction
+            } else if (dataContainer.currentApplication.vrHelpTitle) {
+                return dataContainer.currentApplication.vrHelpTitle
             } else {
-                if (dataContainer.currentApplication.vrHelpTitle) {
-                    return dataContainer.currentApplication.vrHelpTitle
-                } else {
-                    return dataContainer.currentApplication.vrHelpTitleDefault
-                }
+                return dataContainer.currentApplication.vrHelpTitleDefault
             }
+
         }
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
@@ -70,12 +69,10 @@ ContextPopup {
         model: {
             if (interactionPopup.performInteractionIsActiveNow) {
                 return dataContainer.currentApplication.vrHelpItemsPerformInteraction
+            } else if (dataContainer.currentApplication.vrHelpItems.count > 0) {
+                return dataContainer.currentApplication.vrHelpItems
             } else {
-                if (dataContainer.currentApplication.vrHelpItems.count > 0) {
-                    return dataContainer.currentApplication.vrHelpItems
-                } else {
-                    return dataContainer.currentApplication.vrHelpItemsDefault
-                }
+                return dataContainer.currentApplication.vrHelpItemsDefault
             }
         }
 

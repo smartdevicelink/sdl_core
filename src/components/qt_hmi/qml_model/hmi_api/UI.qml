@@ -274,11 +274,10 @@ Item {
 
         if (vrHelpTitle !== undefined) {
             dataToUpdate.vrHelpTitle = vrHelpTitle
-        } else {
-            if ( (vrHelp !== undefined) && (vrHelp.length >= 1) ) {
-                return { __retCode: Common.Result.REJECTED, __message: "vrHelpTitle - undefined, vrHelpItem - provided" }
-            }
+        } else if ( (vrHelp !== undefined) && (vrHelp.length >= 1) ) {
+            return { __retCode: Common.Result.REJECTED, __message: "vrHelpTitle - undefined, vrHelpItem - provided" }
         }
+
         if (vrHelp !== undefined) {
             var checkSequentialPosition = vrHelp[0].position
             for (var index = 0; index < vrHelp.length; index++) {
@@ -291,13 +290,7 @@ Item {
             if (app.vrHelpItems.count !== 0) {
                 app.vrHelpItems.clear()
             }
-            for (var i = 0; i < vrHelp.length; ++i) {
-                app.vrHelpItems.append({
-                    text: vrHelp[i].text,
-                    image: vrHelp[i].image ? vrHelp[i].image : "",
-                    position: vrHelp[i].position
-                    })
-            }
+            vrHelp.forEach( Internal.appendVrHelpItem, app.vrHelpItems )
         } else {
             if (vrHelpTitle !== undefined) {
                 return { __retCode: Common.Result.REJECTED, __message: "vrHelpItems - undefined, vrHelpTitle - provided" }
