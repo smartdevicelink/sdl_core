@@ -7,5 +7,5 @@ package com.ford.syncV4.android.manager;
  * Time: 6:00 PM
  */
 public interface IBluetoothDeviceManager {
-
+    void onBluetoothDeviceRestoreConnection();
 }
