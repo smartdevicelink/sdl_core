@@ -36,6 +36,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
 import "./hmi_api" as HmiApi
@@ -102,7 +103,38 @@ Rectangle {
             height: parent.height * 0.90
             width: parent.width
             anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalCenter                       
+
+            Video {
+                id: player
+                anchors.fill: parent
+                visible: {
+                    var naviString = new RegExp("SDLNavi\.qml")
+                    return naviString.test(contentLoader.source);
+                }
+
+                NamedPipeNotifier {
+                    id: notifier
+                    // we need absolute path here
+                    // because relative paths differ for Video and NamedPipeNotifier
+                    // we use url.toString() to obtain absolute path
+                    // and we use substring() to remove "file://" prefix
+                    property url pipe: "/tmp/video_stream_pipe"
+                    name: pipe.toString().substring(7)
+                    onReadyRead: {
+                        player.source = pipe.toString().substring(7)
+                        player.play()
+                    }
+                }
+
+                Component.onCompleted: {
+                    notifier.start()
+                }
+                onStopped: {
+                    notifier.start()
+
+                }
+            }
 
             Loader {
                 id: contentLoader
