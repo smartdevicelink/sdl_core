@@ -13,6 +13,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private static final String TAG = HeartbeatMonitor.class.getSimpleName();
     private int interval;
     private IHeartbeatMonitorDelegate delegate;
+    private boolean ackReceived;
     private Thread heartbeatThread;
     private Looper heartbeatThreadLooper;
     private Handler heartbeatThreadHandler;
@@ -20,15 +21,29 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
         @Override
         public void run() {
             Log.d(TAG, "run()");
-            if (delegate != null) {
-                delegate.sendHeartbeat(HeartbeatMonitor.this);
+
+            if (ackReceived) {
+                Log.d(TAG,
+                        "ACK has been received, sending and scheduling heartbeat");
+                if (delegate != null) {
+                    delegate.sendHeartbeat(HeartbeatMonitor.this);
+                } else {
+                    Log.w(TAG,
+                            "Delegate is not set, scheduling heartbeat anyway");
+                }
+                ackReceived = false;
             } else {
-                Log.w(TAG, "Delegate is not set, scheduling heartbeat anyway");
+                Log.d(TAG, "ACK has not been received");
+                if (delegate != null) {
+                    delegate.heartbeatTimedOut(HeartbeatMonitor.this);
+                }
             }
 
             if (heartbeatThreadHandler != null) {
                 if (!Thread.interrupted()) {
-                    heartbeatThreadHandler.postDelayed(this, interval);
+                    if (!heartbeatThreadHandler.postDelayed(this, interval)) {
+                        Log.e(TAG, "Couldn't reschedule run()");
+                    }
                 } else {
                     Log.i(TAG,
                             "The thread is interrupted; not scheduling heartbeat");
@@ -52,6 +67,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
                     heartbeatThreadHandler = new Handler();
                     Log.d(TAG, "scheduling run()");
+                    ackReceived = true;
                     if (!heartbeatThreadHandler.postDelayed(
                             heartbeatTimeoutRunnable, interval)) {
                         Log.e(TAG, "Couldn't schedule run()");
@@ -119,11 +135,18 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void notifyTransportActivity() {
-
+        if (heartbeatThreadHandler != null) {
+            heartbeatThreadHandler.removeCallbacks(heartbeatTimeoutRunnable);
+            if (!heartbeatThreadHandler.postDelayed(heartbeatTimeoutRunnable,
+                    interval)) {
+                Log.e(TAG, "Couldn't reschedule run()");
+            }
+        }
     }
 
     @Override
     public void heartbeatACKReceived() {
-
+        ackReceived = true;
+        notifyTransportActivity();
     }
 }
