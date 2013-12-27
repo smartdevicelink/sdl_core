@@ -8,4 +8,5 @@ package com.ford.syncV4.android.manager;
  */
 public interface IBluetoothDeviceManager {
     void onBluetoothDeviceRestoreConnection();
+    void onBluetoothDeviceTurningOff();
 }

@@ -46,6 +46,7 @@ import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.BluetoothDeviceManager;
 import com.ford.syncV4.android.manager.IBluetoothDeviceManager;
 import com.ford.syncV4.android.module.GenericRequest;
@@ -312,7 +313,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
      */
-    private Handler mExitTimeOutHandler;
+    private Handler mStopProxyServiceTimeOutHandler;
+    /**
+     * Handler object to monitor stop proxy procedure for the Bluetooth conenction.
+     *
+     */
+    private Handler mBluetoothStopProxyServiceTimeOutHandler;
     /**
      * progress dialog of the Exit Application
      */
@@ -389,6 +395,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         Log.d(LOG_TAG, "onCreate");
 
         _activity = this;
+
+        AppPreferencesManager.setAppContext(this);
 
         if (mBluetoothDeviceManager == null) {
             mBluetoothDeviceManager = new BluetoothDeviceManager();
@@ -498,6 +506,55 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onBluetoothDeviceRestoreConnection() {
         Log.i(LOG_TAG, "Bluetooth connection restored");
+        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+            return;
+        }
+        if (ProxyService.getInstance() == null) {
+            startSyncProxy();
+        }
+    }
+
+    @Override
+    public void onBluetoothDeviceTurningOff() {
+        Log.i(LOG_TAG, "Bluetooth turning off");
+        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+            return;
+        }
+
+        if (mBluetoothStopProxyServiceTimeOutHandler == null) {
+            mBluetoothStopProxyServiceTimeOutHandler = new Handler();
+        } else {
+            mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
+                    mBluetoothStopServicePostDelayedCallback);
+        }
+        mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
+                mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
+
+        if (ProxyService.getInstance() != null) {
+            ProxyService.getInstance().destroyService(new ProxyServiceEvent() {
+                @Override
+                public void onDisposeComplete() {
+                    Log.d(LOG_TAG, "Service disposed successfully");
+
+                    if (mBluetoothStopProxyServiceTimeOutHandler != null) {
+                        mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
+                                mBluetoothStopServicePostDelayedCallback);
+                    }
+                    stopService(new Intent(SyncProxyTester.this, ProxyService.class));
+                }
+
+                @Override
+                public void onDisposeError() {
+                    Log.e(LOG_TAG, "Service disposed error");
+
+                    if (mBluetoothStopProxyServiceTimeOutHandler != null) {
+                        mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
+                                mBluetoothStopServicePostDelayedCallback);
+                    }
+                    stopService(new Intent(SyncProxyTester.this, ProxyService.class));
+                }
+            });
+        }
     }
 
     private void loadMessageSelectCount() {
@@ -943,7 +1000,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 //PoliciesTest.runPoliciesTest();
                 break;
             case MNU_EXIT:
-                stopProxyService();
+                stopProxyServiceOnExit();
                 break;
             case MNU_TOGGLE_CONSOLE:
                 if (_scroller.getVisibility() == ScrollView.VISIBLE) {
@@ -4319,6 +4376,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
+     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
+     */
+    private Runnable mBluetoothStopServicePostDelayedCallback = new Runnable() {
+        @Override
+        public void run() {
+            Log.w(LOG_TAG, "Bluetooth Stop Service timer callback");
+            mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(mBluetoothStopServicePostDelayedCallback);
+            stopService(new Intent(SyncProxyTester.this, ProxyService.class));
+        }
+    };
+
+    /**
      * Exit Application section
      */
 
@@ -4335,23 +4404,23 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Stops the proxy service.
      */
-    private void stopProxyService() {
+    private void stopProxyServiceOnExit() {
         getExitDialog().show();
 
         saveMessageSelectCount();
 
-        if (mExitTimeOutHandler == null) {
-            mExitTimeOutHandler = new Handler();
+        if (mStopProxyServiceTimeOutHandler == null) {
+            mStopProxyServiceTimeOutHandler = new Handler();
         } else {
-            mExitTimeOutHandler.removeCallbacks(mExitCallback);
+            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
         }
-        mExitTimeOutHandler.postDelayed(mExitCallback, EXIT_TIMEOUT);
+        mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
         ProxyService.getInstance().destroyService(new ProxyServiceEvent() {
             @Override
             public void onDisposeComplete() {
-                if (mExitTimeOutHandler != null) {
-                    mExitTimeOutHandler.removeCallbacks(mExitCallback);
+                if (mStopProxyServiceTimeOutHandler != null) {
+                    mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
                 }
                 runInUIThread(new Runnable() {
                     @Override
@@ -4382,10 +4451,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
      */
-    private Runnable mExitCallback = new Runnable() {
+    private Runnable mExitPostDelayedCallback = new Runnable() {
         @Override
         public void run() {
             Log.w(LOG_TAG, "Exit App timer callback");
+            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
             getExitDialog().dismiss();
             exitApp();
             android.os.Process.killProcess(android.os.Process.myPid());

@@ -9,4 +9,5 @@ package com.ford.syncV4.android.receivers;
 public interface IBluetoothReceiver {
     void onBluetoothOn();
     void onBluetoothOff();
+    void onBluetoothTurningOff();
 }

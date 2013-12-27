@@ -50,4 +50,13 @@ public class BluetoothDeviceManager implements IBluetoothReceiver {
     public void onBluetoothOff() {
         mIsBluetoothEnabled = false;
     }
+
+    @Override
+    public void onBluetoothTurningOff() {
+        if (mIsBluetoothEnabled) {
+            if (iBluetoothDeviceManagerCallback != null) {
+                iBluetoothDeviceManagerCallback.onBluetoothDeviceTurningOff();
+            }
+        }
+    }
 }
