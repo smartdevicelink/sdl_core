@@ -37,7 +37,7 @@ import "../controls"
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 
-ContextPopup {
+PopUp {
     property alias title: title.text
     Text {
         id: title

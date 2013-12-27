@@ -197,6 +197,13 @@ Rectangle {
 
         WarningInfo { id: warningInfo }
 
+        VRHelpPopup {
+            id: vrHelpPopup
+            popUpName: "UI.VrHelp"
+            anchors.centerIn: parent
+            visible: false
+        }
+
         InteractionPopup {
             id: interactionPopup
             popUpName: "UI.PerformInteraction"
@@ -223,13 +230,6 @@ Rectangle {
             popUpName: "UI.Alert"
             objectName: "AlertWindow"
             anchors.fill: parent
-            visible: false
-        }
-
-        VRHelpPopup {
-            id: vrHelpPopup
-            popUpName: "UI.VrHelp"
-            anchors.centerIn: parent
             visible: false
         }
     }
