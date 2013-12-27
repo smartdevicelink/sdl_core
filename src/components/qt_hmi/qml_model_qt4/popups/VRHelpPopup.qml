@@ -37,7 +37,7 @@ import "../controls"
 import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 
-ContextPopup {
+PopUp {
     Text {
         id: title
         anchors.top: parent.top
