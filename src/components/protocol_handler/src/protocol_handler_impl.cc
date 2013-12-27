@@ -570,7 +570,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 
   bool success = true;
   int sessionhash_code = session_observer_->OnSessionEndedCallback(
-      connection_id, currentsession_id, hash_code, packet.service_type());
+      connection_id, currentsession_id, hash_code,
+      ServiceTypeFromByte(packet.service_type()));
 
   if (-1 != sessionhash_code) {
     if (2 == packet.version()) {
@@ -602,7 +603,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Version 2 " << (packet.version() == PROTOCOL_VERSION_2));
 
   int session_id = session_observer_->OnSessionStartedCallback(
-      connection_id, packet.service_type());
+      connection_id, ServiceTypeFromByte(packet.service_type()));
   if (-1 != session_id) {
     SendStartSessionAck(
         connection_id, session_id, packet.version(),

@@ -272,7 +272,7 @@ void ConnectionHandlerImpl::RemoveConnection(
 
 unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
   transport_manager::ConnectionUID connection_handle,
-  unsigned char service_type) {
+  protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
   int new_session_id = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -293,14 +293,12 @@ unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
       int first_session_key = KeyFromPair(connection_handle,
                                           (it->second)->GetFirstSessionID());
       int session_key = KeyFromPair(connection_handle, new_session_id);
-      protocol_handler::ServiceType type =
-          protocol_handler::ServiceTypeFromByte(service_type);
 
       bool success = connection_handler_observer_->OnSessionStartedCallback(
                        (it->second)->connection_device_handle(),
                        session_key,
                        first_session_key,
-                       type);
+                       service_type);
       if (!success) {
         if (is_first_in_connection) {
           (it->second)->RemoveSession(new_session_id);
@@ -315,7 +313,7 @@ unsigned int ConnectionHandlerImpl::OnSessionStartedCallback(
 unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
   unsigned int connection_handle, unsigned char sessionId,
   unsigned int hashCode,
-  unsigned char service_type) {
+  protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
   int result = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -323,9 +321,7 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
     int firstSessionID = (it->second)->GetFirstSessionID();
-    protocol_handler::ServiceType type =
-        protocol_handler::ServiceTypeFromByte(service_type);
-    if (protocol_handler::kRpc == type) {
+    if (protocol_handler::kRpc == service_type) {
       result = (it->second)->RemoveSession(sessionId);
       if (0 > result) {
         LOG4CXX_ERROR(logger_, "Not possible to remove session!");
@@ -340,7 +336,7 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
       int sessionKey = KeyFromPair(connection_handle, sessionId);
       connection_handler_observer_->OnSessionEndedCallback(sessionKey,
           firstSessionID,
-          type);
+          service_type);
       result = sessionKey;
     }
   }

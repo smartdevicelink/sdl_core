@@ -140,7 +140,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual unsigned int OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char service_type);
+      protocol_handler::ServiceType service_type);
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -154,7 +154,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual unsigned int OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
       unsigned char session_id, unsigned int hashCode,
-      unsigned char service_type);
+      protocol_handler::ServiceType service_type);
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
