@@ -160,7 +160,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       const char* return_info = NULL;
 
       if (result) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+            static_cast<mobile_apis::Result::eType>(result_code)) {
           result_code = mobile_apis::Result::WARNINGS;
           return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
         }
