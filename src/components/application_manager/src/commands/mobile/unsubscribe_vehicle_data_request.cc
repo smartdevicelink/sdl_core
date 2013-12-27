@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_request.h"
-#include "application_manager/include/application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
