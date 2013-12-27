@@ -22,50 +22,51 @@ import static org.mockito.Mockito.verify;
 public class HeartbeatMonitorTest extends InstrumentationTestCase {
     private static final int MAX_TIMER_DRIFT = 20;
     private static final int HEARTBEAT_TEST_INTERVAL = 30;
+    private IHeartbeatMonitorDelegate delegateMock;
+    private HeartbeatMonitor heartbeatMonitor;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         TestCommon.setupMocking(this);
+
+        delegateMock = Mockito.mock(IHeartbeatMonitorDelegate.class);
+        heartbeatMonitor = new HeartbeatMonitor();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        delegateMock = null;
+        heartbeatMonitor = null;
+
+        super.tearDown();
     }
 
     public void testDelegateShouldBeSet() {
-        IHeartbeatMonitorDelegate delegateMock =
-                Mockito.mock(IHeartbeatMonitorDelegate.class);
-
-        HeartbeatMonitor hm = new HeartbeatMonitor();
-        hm.setDelegate(delegateMock);
-        assertThat(hm.getDelegate(), is(delegateMock));
+        heartbeatMonitor.setDelegate(delegateMock);
+        assertThat(heartbeatMonitor.getDelegate(), is(delegateMock));
     }
 
     public void testStartedMonitorShouldAskToSendHeartbeatAfterTimeout()
             throws InterruptedException {
-        final IHeartbeatMonitorDelegate delegateMock =
-                Mockito.mock(IHeartbeatMonitorDelegate.class);
+        heartbeatMonitor.setDelegate(delegateMock);
 
-        final HeartbeatMonitor hm = new HeartbeatMonitor();
-        hm.setDelegate(delegateMock);
-
-        hm.setInterval(HEARTBEAT_TEST_INTERVAL);
-        hm.start();
+        heartbeatMonitor.setInterval(HEARTBEAT_TEST_INTERVAL);
+        heartbeatMonitor.start();
 
         verify(delegateMock, timeout(HEARTBEAT_TEST_INTERVAL + MAX_TIMER_DRIFT))
-                .sendHeartbeat(hm);
-        hm.stop();
+                .sendHeartbeat(heartbeatMonitor);
+        heartbeatMonitor.stop();
     }
 
     public void testStartedAndStoppedMonitorShouldNotSendHeartbeats()
             throws InterruptedException {
-        final IHeartbeatMonitorDelegate delegateMock =
-                Mockito.mock(IHeartbeatMonitorDelegate.class);
+        heartbeatMonitor.setDelegate(delegateMock);
 
-        final HeartbeatMonitor hm = new HeartbeatMonitor();
-        hm.setDelegate(delegateMock);
-
-        hm.setInterval(HEARTBEAT_TEST_INTERVAL);
-        hm.start();
+        heartbeatMonitor.setInterval(HEARTBEAT_TEST_INTERVAL);
+        heartbeatMonitor.start();
         Thread.sleep(5);
-        hm.stop();
+        heartbeatMonitor.stop();
 
         // this does not work:
 //        verify(delegateMock, timeout(HEARTBEAT_TEST_INTERVAL * 3 +
@@ -79,15 +80,11 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
 
     public void testStartedAndStoppedImmediatelyMonitorShouldNotSendHeartbeats()
             throws InterruptedException {
-        final IHeartbeatMonitorDelegate delegateMock =
-                Mockito.mock(IHeartbeatMonitorDelegate.class);
+        heartbeatMonitor.setDelegate(delegateMock);
 
-        final HeartbeatMonitor hm = new HeartbeatMonitor();
-        hm.setDelegate(delegateMock);
-
-        hm.setInterval(HEARTBEAT_TEST_INTERVAL);
-        hm.start();
-        hm.stop();
+        heartbeatMonitor.setInterval(HEARTBEAT_TEST_INTERVAL);
+        heartbeatMonitor.start();
+        heartbeatMonitor.stop();
 
         Thread.sleep(HEARTBEAT_TEST_INTERVAL * 2 + MAX_TIMER_DRIFT);
         verify(delegateMock, never()).sendHeartbeat(
@@ -96,20 +93,16 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
 
     public void testStartedMonitorShouldSendHeartbeatsRepeatedly()
             throws InterruptedException {
-        final IHeartbeatMonitorDelegate delegateMock =
-                Mockito.mock(IHeartbeatMonitorDelegate.class);
+        heartbeatMonitor.setDelegate(delegateMock);
 
-        final HeartbeatMonitor hm = new HeartbeatMonitor();
-        hm.setDelegate(delegateMock);
-
-        hm.setInterval(HEARTBEAT_TEST_INTERVAL);
-        hm.start();
+        heartbeatMonitor.setInterval(HEARTBEAT_TEST_INTERVAL);
+        heartbeatMonitor.start();
 
         final int numberOfInvocations = 3;
         verify(delegateMock,
                 timeout((HEARTBEAT_TEST_INTERVAL * numberOfInvocations) +
                         MAX_TIMER_DRIFT).times(
-                        numberOfInvocations)).sendHeartbeat(hm);
-        hm.stop();
+                        numberOfInvocations)).sendHeartbeat(heartbeatMonitor);
+        heartbeatMonitor.stop();
     }
 }
