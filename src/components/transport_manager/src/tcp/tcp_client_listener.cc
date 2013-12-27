@@ -45,7 +45,7 @@
 #include <sys/socket.h>
 #ifdef __linux__
 #  include <linux/tcp.h>
-#elif  // __linux__
+#else // __linux__
 #  include <netinet/in.h>
 #  include <netinet/tcp.h>
 #endif  // __linux__
