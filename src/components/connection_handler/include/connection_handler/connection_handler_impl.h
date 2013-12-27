@@ -231,7 +231,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /*
      * Close all associated sessions and close the connection pointed by handle
      */
-    void CloseConnection(ConnectionHandle connection_handle);
+    virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
     /*
      * Keep connection associated with the key from being closed by heartbeat monitor

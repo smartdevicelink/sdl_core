@@ -50,7 +50,7 @@
  */
 namespace connection_handler {
 
-class ConnectionHandlerImpl;
+class ConnectionHandler;
 
 /**
  * \brief Type for ConnectionHandle
@@ -78,7 +78,8 @@ class Connection {
    */
   Connection(ConnectionHandle connection_handle,
              DeviceHandle connection_device_handle,
-             ConnectionHandlerImpl* connection_handler);
+             ConnectionHandler* connection_handler,
+             int32_t heartbeat_timeout);
 
   /**
    * \brief Destructor
@@ -134,7 +135,7 @@ class Connection {
   void KeepAlive();
 
  private:
-  ConnectionHandlerImpl* connection_handler_;
+  ConnectionHandler* connection_handler_;
   /**
    * \brief Current connection handle.
    */

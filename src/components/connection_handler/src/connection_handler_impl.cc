@@ -39,6 +39,13 @@
 
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
+#include "config_profile/profile.h"
+
+namespace {
+int32_t HeartBeatTimeout() {
+  return profile::Profile::instance()->heart_beat_timeout();
+}
+}
 
 /**
  * \namespace connection_handler
@@ -184,7 +191,8 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   connection_list_.insert(
       ConnectionList::value_type(
           connection_id,
-          new Connection(connection_id, device_info.device_handle(), this)));
+          new Connection(connection_id, device_info.device_handle(),
+                         this, HeartBeatTimeout())));
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(

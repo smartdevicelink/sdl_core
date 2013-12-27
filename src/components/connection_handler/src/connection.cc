@@ -36,7 +36,7 @@
 #include <algorithm>
 
 #include "connection_handler/connection.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
 
 /**
@@ -50,12 +50,13 @@ log4cxx::LoggerPtr Connection::logger_ = log4cxx::LoggerPtr(
 
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,
-                       ConnectionHandlerImpl* connection_handler)
+                       ConnectionHandler* connection_handler,
+                       int32_t heartbeat_timeout)
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle),
       session_id_counter_(1),
-      heartbeat_monitor_(2*5, this) {
+      heartbeat_monitor_(heartbeat_timeout, this) {
   DCHECK(connection_handler_);
 }
 

@@ -40,8 +40,10 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-
-
+namespace {
+const char* kMainSection = "MAIN";
+const uint32_t kDefaultHeartBeatTimeout = 5;
+}
 
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Profile"));
@@ -71,7 +73,8 @@ Profile::Profile()
   , put_file_in_none_(5)
   , delete_file_in_none_(5)
   , list_files_in_none_(5)
-  , app_info_storage_("app_info.dat") {
+  , app_info_storage_("app_info.dat")
+  , heart_beat_timeout_(kDefaultHeartBeatTimeout) {
   UpdateValues();
 }
 
@@ -207,6 +210,10 @@ const unsigned int& Profile::list_files_in_none() const {
 
 const std::string& Profile::app_info_storage() const {
   return app_info_storage_;
+}
+
+const int32_t Profile::heart_beat_timeout() const {
+  return heart_beat_timeout_;
 }
 
 void Profile::UpdateValues() {
@@ -498,6 +505,10 @@ void Profile::UpdateValues() {
                  "Set Application information storage to "
                  << app_info_storage_);
   }
+
+
+  (void)ReadIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout,
+                     kMainSection, "HeartBeatTimeout");
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
@@ -536,4 +547,30 @@ bool Profile::ReadValue(std::string* value,
 
   return ret;
 }
+
+bool Profile::ReadStringValue(std::string* value,
+                              const char* default_value,
+                              const char* const pSection,
+                              const char* const pKey) const {
+  if (!ReadValue(value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  }
+  return true;
+}
+
+bool Profile::ReadIntValue(int32_t* value,
+                           int32_t  default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    *value = atoi(string_value.c_str());
+    return true;
+  }
+}
+
 }  //  namespace profile

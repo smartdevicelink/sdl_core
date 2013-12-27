@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 #include "utils/macro.h"
 
 namespace profile {
@@ -217,6 +218,11 @@ class Profile {
      */
     const std::string& app_info_storage() const;
 
+    /*
+     * @brief Heartbeat timeout before closing connection
+     */
+    const int32_t heart_beat_timeout() const;
+
     // Members section
 
   protected:
@@ -268,6 +274,39 @@ class Profile {
                    const char* const pSection,
                    const char* const pKey) const;
 
+
+    /**
+     * @brief Reads a string value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
+     */
+    bool ReadStringValue(std::string* value,
+                         const char* default_value,
+                         const char* const pSection,
+                         const char* const pKey) const;
+
+    /**
+     * @brief Reads an int value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
+     */
+    bool ReadIntValue(int32_t* value,
+                      int32_t  default_value,
+                      const char* const pSection,
+                      const char* const pKey) const;
+
     // Members section
     bool                            launch_hmi_;
     std::string                     config_file_name_;
@@ -298,6 +337,7 @@ class Profile {
     unsigned int                    delete_file_in_none_;
     unsigned int                    list_files_in_none_;
     std::string                     app_info_storage_;
+    int32_t                         heart_beat_timeout_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

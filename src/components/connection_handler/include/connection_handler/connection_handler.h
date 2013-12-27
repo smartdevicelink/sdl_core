@@ -73,6 +73,12 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+  /*
+   * Close all associated sessions and close the connection pointed by handle
+   */
+  virtual void CloseConnection(ConnectionHandle connection_handle) = 0;
+
+
  protected:
   /**
    * \brief Destructor
