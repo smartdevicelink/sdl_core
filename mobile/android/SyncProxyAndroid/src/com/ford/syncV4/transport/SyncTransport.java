@@ -103,6 +103,10 @@ public abstract class SyncTransport {
 		_transportListener.onTransportError(message, ex);
 	}
 
+    protected void handleOnServerSocketInit(int serverSocketPort) {
+        _transportListener.onServerSocketInit(serverSocketPort);
+    }
+
 	public abstract void openConnection() throws SyncException;
 	public abstract void disconnect();
 
