@@ -43,27 +43,19 @@
 #include <sys/types.h>
 
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-
+#ifdef __linux__
+#  include <linux/tcp.h>
+#elif  // __linux__
+#  include <netinet/in.h>
+#  include <netinet/tcp.h>
+#endif  // __linux__
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-
-#ifndef TCP_KEEPIDLE
-#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
-#define TCP_KEEPINTVL  5  /* Interval between keepalives */
-#define TCP_KEEPCNT  6  /* Number of keepalives before death */
-#endif
-
 namespace transport_manager {
 namespace transport_adapter {
-
-#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
-#define TCP_KEEPINTVL  5  /* Interval between keepalives */
-#define TCP_KEEPCNT  6  /* Number of keepalives before death */
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port)
@@ -134,6 +126,10 @@ void TcpClientListener::Thread() {
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+#ifdef __linux__
+    int user_timeout = 3000;  // milliseconds
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout, sizeof(user_timeout));
+#endif  // __linux__
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);
