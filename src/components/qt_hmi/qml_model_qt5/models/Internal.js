@@ -63,6 +63,14 @@ var MediaClockRunningMode = {
     MCR_STOPPED: 1
 }
 
+function appendVrHelpItem (arrayElement, index, array) {
+    this.append({
+        text: arrayElement.text,
+        image: arrayElement.image ? arrayElement.image : "",
+        position: arrayElement.position
+        })
+}
+
 function checkBit(value, bitPosition) {
     return (value & (1 << bitPosition))
 }
