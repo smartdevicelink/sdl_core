@@ -1,6 +1,6 @@
 /**
- * @file InteractionModel.qml
- * @brief Interaction model.
+ * @file VrHelpItemsDefault.qml
+ * @brief Default voice recognition help items.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,28 +31,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 import QtQuick 2.0
-import "../hmi_api/Async.js" as Async
 
-QtObject {
-    property string initialText
-    property ListModel choice: ListModel {
-    }
-    property int timeout
-    property var async
+ListModel {
+    id: vrHelpItemsDefault
 
-    function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
-        console.debug("enter")
-        this.initialText = initialText.fieldText
-        choice.clear()
-        for (var i = 0; i < choiceSet.length; ++i) {
-            choice.append({"id": choiceSet[i].choiceID, "name": choiceSet[i].menuName ? choiceSet[i].menuName : "choiceID = " + choiceSet[i].choiceID, image: choiceSet[i].image})
-        }
-        this.timeout = timeout
-        interactionPopup.activate()
-        async = new Async.AsyncCall()
-        console.debug("exit")
-        return async
+    Component.onCompleted: {
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text1",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 1
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text2",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 2
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text3",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 3
+        });
     }
 }
+

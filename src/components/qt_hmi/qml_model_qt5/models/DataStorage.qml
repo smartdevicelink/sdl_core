@@ -38,7 +38,6 @@ import "Internal.js" as Internal
 import "Constants.js" as Constants
 
 QtObject {
-
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
     property SliderModel uiSlider: SliderModel { }
@@ -105,7 +104,6 @@ QtObject {
                 }
                 if (application.navigationModel.distanceToManeuver !== undefined) {
                     currentApplication.navigationModel.distanceToManeuver = application.navigationModel.distanceToManeuver
-                    console.debug(currentApplication.navigationModel.distanceToManeuver)
                 }
                 if (application.navigationModel.distanceToManeuverScale !== undefined) {
                     currentApplication.navigationModel.distanceToManeuverScale = application.navigationModel.distanceToManeuverScale
@@ -115,7 +113,6 @@ QtObject {
                 }
                 if (application.navigationModel.appID !== undefined) {
                     currentApplication.navigationModel.appID = application.navigationModel.appID
-                    console.debug(currentApplication.navigationModel.appID)
                 }
                 if (application.hmiUIText.mainField1 !== undefined) {
                     currentApplication.hmiUIText.mainField1 = application.hmiUIText.mainField1
@@ -147,8 +144,23 @@ QtObject {
                 if (application.timeoutPrompt !== undefined) {
                     currentApplication.timeoutPrompt = application.timeoutPrompt
                 }
+                if (application.mediaClock.startTime !== undefined) {
+                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
+                }
+                if (application.mediaClock.endTime !== undefined) {
+                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
+                }
                 // Check fields with mandatory = false
 
+                if (application.menuIcon !== undefined) {
+                    currentApplication.menuIcon.source = application.menuIcon
+                }
+                currentApplication.vrHelpTitle = application.vrHelpTitle
+                currentApplication.vrHelpTitleDefault = application.vrHelpTitleDefault
+                currentApplication.vrHelpTitlePerformInteraction = application.vrHelpTitlePerformInteraction
+                currentApplication.menuTitle = application.menuTitle
+                currentApplication.vrHelpItems = application.vrHelpItems
+                currentApplication.vrHelpItemsPerformInteraction = application.vrHelpItemsPerformInteraction
                 currentApplication.deviceName = application.deviceName
                 currentApplication.isMediaApplication = application.isMediaApplication
                 currentApplication.turnList = application.turnList
@@ -156,12 +168,6 @@ QtObject {
                 currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
                 currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
                 currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
-                if (application.mediaClock.startTime !== undefined) {
-                    currentApplication.mediaClock.startTime = application.mediaClock.startTime
-                }
-                if (application.mediaClock.endTime !== undefined) {
-                    currentApplication.mediaClock.endTime = application.mediaClock.endTime
-                }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -178,6 +184,10 @@ QtObject {
             appName: app.appName,
             ngnMediaScreenAppName: app.ngnMediaScreenAppName,
             icon: app.icon,
+            menuIcon: {
+                value: "",
+                imageType: 1
+            },
             deviceName: app.deviceName,
             appId: app.appId,
             hmiDisplayLanguageDesired: app.hmiDisplayLanguageDesired,
@@ -195,6 +205,18 @@ QtObject {
             mediaClock: app.mediaClock,
             languageTTSVR: Common.Language.EN_US,
             softButtons: [],
+            vrHelpTitle: "",
+            vrHelpTitlePerformInteraction: "",
+            vrHelpTitleDefault: "VR HELP",
+            menuTitle: "",
+            keyboardProperties: [],
+            vrHelpItems: [],
+            vrHelpItemsPerformInteraction: [],
+            vrHelpItemsDefault: {
+                   text: "VrHelpItems - defaultText1",
+                   image: "",
+                   position: 1
+            },
             navigationSoftButtons: [],
             alertManeuverSoftButtons: [],
             navigationModel: {
@@ -231,8 +253,10 @@ QtObject {
 
     function setApplicationProperties(appId, props) {
         console.log("Enter setApplicationProperties function");
+
         var app = getApplication(appId)
         for (var p in props) {
+            console.debug(p)
             if (props[p] !== undefined) {
                 app[p] = props[p]
             }
@@ -327,10 +351,7 @@ QtObject {
 
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
-
     property ListModel vrCommands: ListModel {}
-
-    property ListModel vrHelp: ListModel {}
 
     function reset () {
         console.log("dataContainer reset enter");
@@ -507,31 +528,9 @@ QtObject {
         }
         console.debug("exit")
     }
-
-    function setVrHelp (vrHelp) {
-        this.vrHelp.clear()
-        var index
-        for (var i = 0; i < vrHelp.length; ++i) {
-            index = 0
-// sort by simple inserts
-            while ((index < this.vrHelp.count) && (this.vrHelp.get(index).position < vrHelp[i].position)) {
-                ++index
-            }
-            this.vrHelp.insert(index, {
-                                            "text": vrHelp[i].text,
-                                            "icon": vrHelp[i].image ? vrHelp[i].image : {},
-                                            "position": vrHelp[i].position
-                                        })
-        }
-    }
-
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
-
-    property InteractionModel interactionModel: InteractionModel {
-    }
-
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {
         sdlUI.onDriverDistraction(driverDistractionState);

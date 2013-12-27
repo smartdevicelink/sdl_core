@@ -183,6 +183,30 @@ Item {
         return { steeringWheelAngle: dataContainer.vehicleInfoModel.steeringWheelAngle }
     }
 
+    function getECallInfo(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { eCallInfo: dataContainer.vehicleInfoModel.eCallInfo }
+    }
+
+    function getAirbagStatus(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { airbagStatus: dataContainer.vehicleInfoModel.airbagStatus }
+    }
+
+    function getEmergencyEvent(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { emergencyEvent: dataContainer.vehicleInfoModel.emergencyEvent }
+    }
+
+    function getClusterModeStatus(appID) {
+        console.debug("enter")
+        console.debug("exit")
+        return { clusterModeStatus: dataContainer.vehicleInfoModel.clusterModeStatus }
+    }
+
     function getMyKey(appID) {
         console.debug("enter")
         console.debug("exit")
@@ -220,5 +244,506 @@ Item {
         }
         console.debug("Exit")
         return {didResult: didResult}
+    }
+
+    function subscribeGps(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onGpsChanged.disconnect(model.sendGpsChange)
+        model.onGpsChanged.connect(model.sendGpsChange)
+        console.debug("exit")
+        return {gps:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_GPS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS} }
+    }
+    function unsubscribeGps(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onGpsChanged.disconnect(model.sendGpsChange)
+        console.debug("exit")
+        return {gps:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_GPS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS} }
+
+    }
+
+    function subscribeSpeed(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSpeedChanged.disconnect(model.sendSpeedChange)
+        model.onSpeedChanged.connect(model.sendSpeedChange)
+        console.debug("exit")
+        return { speed:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_SPEED,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeSpeed(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSpeedChanged.disconnect(model.sendSpeedChange)
+        console.debug("exit")
+        return { speed:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_SPEED,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeRpm(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onRpmChanged.disconnect(model.sendRpmChange)
+        model.onRpmChanged.connect(model.sendRpmChange)
+        console.debug("exit")
+        return { rpm:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_RPM,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeRpm(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onRpmChanged.disconnect(model.sendRpmChange)
+        console.debug("exit")
+        return { rpm:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_RPM,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeFuelLevel(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevelChanged.disconnect(model.sendFuelLevelChange)
+        model.onFuelLevelChanged.connect(model.sendFuelLevelChange)
+        console.debug("exit")
+        return { fuelLevel:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELLEVEL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeFuelLevel(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevelChanged.disconnect(model.sendFuelLevelChange)
+        console.debug("exit")
+        return { fuelLevel:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELLEVEL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeFuelLevel_State(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevel_StateChanged.disconnect(model.sendFuelLevel_StateChange)
+        model.onFuelLevel_StateChanged.connect(model.sendFuelLevel_StateChange)
+        console.debug("exit")
+        return { fuelLevel_State:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeFuelLevel_State(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onFuelLevel_StateChanged.disconnect(model.sendFuelLevel_StateChange)
+        console.debug("exit")
+        return { fuelLevel_State:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeInstantFuelConsumption(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onInstantFuelConsumptionChanged.disconnect(model.sendInstantFuelConsumptionChange)
+        model.onInstantFuelConsumptionChanged.connect(model.sendInstantFuelConsumptionChange)
+        console.debug("exit")
+        return { instantFuelConsumption:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELCONSUMPTION,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeInstantFuelConsumption(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onInstantFuelConsumptionChanged.disconnect(model.sendInstantFuelConsumptionChange)
+        console.debug("exit")
+        return { instantFuelConsumption:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_FUELCONSUMPTION,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeExternalTemperature(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onExternalTemperatureChanged.disconnect(model.sendExternalTemperatureChange)
+        model.onExternalTemperatureChanged.connect(model.sendExternalTemperatureChange)
+        console.debug("exit")
+        return { externalTemperature:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_EXTERNTEMP,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeExternalTemperature(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onExternalTemperatureChanged.disconnect(model.sendExternalTemperatureChange)
+        console.debug("exit")
+        return { externalTemperature:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_EXTERNTEMP,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribePrndl(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onPrndlChanged.disconnect(model.sendPrndlChange)
+        model.onPrndlChanged.connect(model.sendPrndlChange)
+        console.debug("exit")
+        return { prndl:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_PRNDL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribePrndl(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onPrndlChanged.disconnect(model.sendPrndlChange)
+        console.debug("exit")
+        return { prndl:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_PRNDL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeVin(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onVinChanged.disconnect(model.sendVinChange)
+        model.onVinChanged.connect(model.sendVinChange)
+        console.debug("exit")
+        return { vin:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_VIN,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeVin(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onVinChanged.disconnect(model.sendVinChange)
+        console.debug("exit")
+        return { vin:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_VIN,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeTirePressure(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onTirePressureChanged.disconnect(model.sendTirePressureChange)
+        model.onTirePressureChanged.connect(model.sendTirePressureChange)
+        console.debug("exit")
+        return { tirePressure:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_TIREPRESSURE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeTirePressure(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onTirePressureChanged.disconnect(model.sendTirePressureChange)
+        console.debug("exit")
+        return { tirePressure:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_TIREPRESSURE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeOdometer(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onOdometerChanged.disconnect(model.sendOdometerChange)
+        model.onOdometerChanged.connect(model.sendOdometerChange)
+        console.debug("exit")
+        return { odometer:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ODOMETER,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeOdometer(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onOdometerChanged.disconnect(model.sendOdometerChange)
+        console.debug("exit")
+        return { odometer:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ODOMETER,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeBeltStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBeltStatusChanged.disconnect(model.sendBeltStatusChange)
+        model.onBeltStatusChanged.connect(model.sendBeltStatusChange)
+        console.debug("exit")
+        return { beltStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BELTSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeBeltStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBeltStatusChanged.disconnect(model.sendBeltStatusChange)
+        console.debug("exit")
+        return { beltStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BELTSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeBodyInformation(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBodyInformationChanged.disconnect(model.sendBodyInformationChange)
+        model.onBodyInformationChanged.connect(model.sendBodyInformationChange)
+        console.debug("exit")
+        return { bodyInformation:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BODYINFO,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeBodyInformation(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onBodyInformationChanged.disconnect(model.sendBodyInformationChange)
+        console.debug("exit")
+        return { bodyInformation:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BODYINFO,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeDeviceStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDeviceStatusChanged.disconnect(model.sendDeviceStatusChange)
+        model.onDeviceStatusChanged.connect(model.sendDeviceStatusChange)
+        console.debug("exit")
+        return { deviceStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_DEVICESTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeDeviceStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDeviceStatusChanged.disconnect(model.sendDeviceStatusChange)
+        console.debug("exit")
+        return { deviceStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_DEVICESTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeDriverBraking(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDriverBrakingChanged.disconnect(model.sendDriverBrakingChange)
+        model.onDriverBrakingChanged.connect(model.sendDriverBrakingChange)
+        console.debug("exit")
+        return { driverBraking:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BRAKING,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeDriverBraking(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onDriverBrakingChanged.disconnect(model.sendDriverBrakingChange)
+        console.debug("exit")
+        return { driverBraking:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_BRAKING,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeWiperStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onWiperStatusChanged.disconnect(model.sendWiperStatusChange)
+        model.onWiperStatusChanged.connect(model.sendWiperStatusChange)
+        console.debug("exit")
+        return { wiperStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_WIPERSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeWiperStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onWiperStatusChanged.disconnect(model.sendWiperStatusChange)
+        console.debug("exit")
+        return { wiperStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_WIPERSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeHeadLampStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onHeadLampStatusChanged.disconnect(model.sendHeadLampStatusChange)
+        model.onHeadLampStatusChanged.connect(model.sendHeadLampStatusChange)
+        console.debug("exit")
+        return { headLampStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeHeadLampStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onHeadLampStatusChanged.disconnect(model.sendHeadLampStatusChange)
+        console.debug("exit")
+        return { headLampStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeEngineTorque(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEngineTorqueChanged.disconnect(model.sendEngineTorqueChange)
+        model.onEngineTorqueChanged.connect(model.sendEngineTorqueChange)
+        console.debug("exit")
+        return { engineTorque:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ENGINETORQUE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeEngineTorque(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEngineTorqueChanged.disconnect(model.sendEngineTorqueChange)
+        console.debug("exit")
+        return { engineTorque:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ENGINETORQUE,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeAccPedalPosition(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAccPedalPositionChanged.disconnect(model.sendAccPedalPositionChange)
+        model.onAccPedalPositionChanged.connect(model.sendAccPedalPositionChange)
+        console.debug("exit")
+        return { accPedalPosition:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ACCPEDAL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeAccPedalPosition(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAccPedalPositionChanged.disconnect(model.sendAccPedalPositionChange)
+        console.debug("exit")
+        return { accPedalPosition:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ACCPEDAL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeSteeringWheelAngle(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSteeringWheelAngleChanged.disconnect(model.sendSteeringWheelAngleChange)
+        model.onSteeringWheelAngleChanged.connect(model.sendSteeringWheelAngleChange)
+        console.debug("exit")
+        return { steeringWheelAngle:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_STEERINGWHEEL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeSteeringWheelAngle(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onSteeringWheelAngleChanged.disconnect(model.sendSteeringWheelAngleChange)
+        console.debug("exit")
+        return { steeringWheelAngle:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_STEERINGWHEEL,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeECallInfo(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onECallInfoChanged.disconnect(model.sendECallInfoChange)
+        model.onECallInfoChanged.connect(model.sendECallInfoChange)
+        console.debug("exit")
+        return { eCallInfo:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ECALLINFO,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeECallInfo(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onECallInfoChanged.disconnect(model.sendECallInfoChange)
+        console.debug("exit")
+        return { eCallInfo:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_ECALLINFO,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeAirbagStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAirbagStatusChanged.disconnect(model.sendAirbagStatusChange)
+        model.onAirbagStatusChanged.connect(model.sendAirbagStatusChange)
+        console.debug("exit")
+        return { airbagStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_AIRBAGSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeAirbagStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onAirbagStatusChanged.disconnect(model.sendAirbagStatusChange)
+        console.debug("exit")
+        return { airbagStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_AIRBAGSTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeEmergencyEvent(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEmergencyEventChanged.disconnect(model.sendEmergencyEventChange)
+        model.onEmergencyEventChanged.connect(model.sendEmergencyEventChange)
+        console.debug("exit")
+        return { emergencyEvent:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_EMERGENCYEVENT,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeEmergencyEvent(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onEmergencyEventChanged.disconnect(model.sendEmergencyEventChange)
+        console.debug("exit")
+        return { emergencyEvent:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_EMERGENCYEVENT,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeClusterModeStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onClusterModeStatusChanged.disconnect(model.sendClusterModeStatusChange)
+        model.onClusterModeStatusChanged.connect(model.sendClusterModeStatusChange)
+        console.debug("exit")
+        return { clusterModeStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeClusterModeStatus(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onClusterModeStatusChanged.disconnect(model.sendClusterModeStatusChange)
+        console.debug("exit")
+        return { clusterModeStatus:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+
+    function subscribeMyKey(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onMyKeyChanged.disconnect(model.sendMyKeyChange)
+        model.onMyKeyChanged.connect(model.sendMyKeyChange)
+        console.debug("exit")
+        return { myKey:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_MYKEY,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
+    }
+    function unsubscribeMyKey(appID) {
+        console.debug("enter")
+        var model = dataContainer.vehicleInfoModel;
+        model.onMyKeyChanged.disconnect(model.sendMyKeyChange)
+        console.debug("exit")
+        return { myKey:
+            { dataType: Common.VehicleDataType.VEHICLEDATA_MYKEY,
+              resultCode: Common.VehicleDataResultCode.VDRC_SUCCESS } }
     }
 }

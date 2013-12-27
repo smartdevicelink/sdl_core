@@ -37,7 +37,7 @@ import "../hmi_api/Common.js" as Common
 
 QtObject {
     id: vehicleInfo
-    property real speed: 80.1        
+    property real speed: 80.1
     property int rpm: 5000
     property real fuelLevel: 0.2
     property int fuelLevel_State: Common.ComponentVolumeStatus.CVS_LOW
@@ -52,9 +52,6 @@ QtObject {
     property int odometer: 2
     property int prndl: Common.PRNDL.FIFTH
 
-    property var myKey: {
-        "e911Override": Common.VehicleDataStatus.VDS_NO_DATA_EXISTS
-    }
     property var headLampStatus: {
         "lowBeamsOn": false,
         "highBeamsOn": false,
@@ -128,26 +125,110 @@ QtObject {
         'data1': 'ECU 1 Test Data',
         'data2': 'ECU 2 Test Data'
     }
+    property var eCallInfo: {
+        "eCallNotificationStatus" : Common.VehicleDataNotificationStatus.VDNS_NORMAL,
+        "auxECallNotificationStatus" : Common.VehicleDataNotificationStatus.VDNS_ACTIVE,
+        "eCallConfirmationStatus" : Common.ECallConfirmationStatus.ECCS_NORMAL
+    }
+    property var airbagStatus: {
+        "driverAirbagDeployed" : Common.VehicleDataEventStatus.VDES_NO_EVENT,
+        "driverSideAirbagDeployed" : Common.VehicleDataEventStatus.VDES_NO,
+        "driverCurtainAirbagDeployed" : Common.VehicleDataEventStatus.VDES_YES,
+        "passengerAirbagDeployed" : Common.VehicleDataEventStatus.VDES_NOT_SUPPORTED,
+        "passengerCurtainAirbagDeployed" : Common.VehicleDataEventStatus.VDES_FAULT,
+        "driverKneeAirbagDeployed" : Common.VehicleDataEventStatus.VDES_NO,
+        "passengerSideAirbagDeployed" : Common.VehicleDataEventStatus.VDES_YES,
+        "passengerKneeAirbagDeployed" : Common.VehicleDataEventStatus.VDES_NOT_SUPPORTED
+    }
+    property var emergencyEvent: {
+        "emergencyEventType" : Common.EmergencyEventType.EET_NO_EVENT,
+        "fuelCutoffStatus" : Common.EmergencyEventType.EET_FRONTAL,
+        "rolloverEvent" : Common.EmergencyEventType.EET_SIDE,
+        "maximumChangeVelocity" : Common.EmergencyEventType.EET_REAR,
+        "multipleEvents" : Common.EmergencyEventType.EET_ROLLOVER
+    }
+    property var clusterModeStatus: {
+        "powerModeActive" : true,
+        "powerModeQualificationStatus" : Common.PowerModeQualificationStatus.POWER_MODE_UNDEFINED,
+        "carModeStatus" : Common.CarModeStatus.CMS_NORMAL,
+        "powerModeStatus" : Common.PowerModeStatus.KEY_OUT
+    }
+    property var myKey: {
+        "e911Override": Common.VehicleDataStatus.VDS_NO_DATA_EXISTS
+    }
 
-    onSpeedChanged: { sdlVehicleInfo.onSpeed(vehicleInfo.speed) }
-    onRpmChanged: { sdlVehicleInfo.onRpm(vehicleInfo.rpm) }
-    onFuelLevelChanged: { sdlVehicleInfo.onFuelLevel(vehicleInfo.fuelLevel) }
-    onFuelLevel_StateChanged:  { sdlVehicleInfo.onFuelLevelState(vehicleInfo.fuelLevel_State) }
-    onInstantFuelConsumptionChanged: { sdlVehicleInfo.onInstantFuelConsumption(vehicleInfo.instantFuelConsumption) }
-    onDriverBrakingChanged: { sdlVehicleInfo.onDriverBraking(vehicleInfo.driverBraking) }
-    onWiperStatusChanged: { sdlVehicleInfo.onWiperStatus(vehicleInfo.wiperStatus) }
-    onEngineTorqueChanged: { sdlVehicleInfo.onEngineTorque(vehicleInfo.engineTorque) }
-    onAccPedalPositionChanged: { sdlVehicleInfo.onAccPedalPosition(vehicleInfo.accPedalPosition) }
-    onSteeringWheelAngleChanged: { sdlVehicleInfo.onSteeringWheelAngle(vehicleInfo.steeringWheelAngle) }
-    onExternalTemperatureChanged: { sdlVehicleInfo.onExternalTemperature(vehicleInfo.externalTemperature) }
-    onVinChanged: { sdlVehicleInfo.onVin(vehicleInfo.vin) }
-    onOdometerChanged: { sdlVehicleInfo.onOdometer(vehicleInfo.odometer) }
-    onPrndlChanged: { if (dataContainer.vehicleInfoModel.prndl !== -1) {sdlVehicleInfo.onPrndl(vehicleInfo.prndl)} }
-    onMyKeyChanged: { sdlVehicleInfo.onMyKey(vehicleInfo.myKey) }
-    onHeadLampStatusChanged: { sdlVehicleInfo.onHeadLampStatus(vehicleInfo.headLampStatus) }
-    onDeviceStatusChanged: { sdlVehicleInfo.onDeviceStatus(vehicleInfo.deviceStatus) }
-    onBodyInformationChanged: { sdlVehicleInfo.onBodyInformation(vehicleInfo.bodyInformation) }
-    onBeltStatusChanged: { sdlVehicleInfo.onBeltStatus(vehicleInfo.beltStatus) }
-    onTirePressureChanged: { sdlVehicleInfo.onTirePressure(vehicleInfo.tirePressure) }
-    onGpsChanged: { sdlVehicleInfo.onGpsData(vehicleInfo.gps) }
+
+    function sendGpsChange(){
+        sdlVehicleInfo.onGps(vehicleInfo.gps)
+    }
+    function sendSpeedChange(){
+        sdlVehicleInfo.onSpeed(vehicleInfo.speed)
+    }
+    function sendRpmChange(){
+        sdlVehicleInfo.onRpm(vehicleInfo.rpm)
+    }
+    function sendFuelLevelChange(){
+        sdlVehicleInfo.onFuelLevel(vehicleInfo.fuelLevel)
+    }
+    function sendFuelLevel_StateChange(){
+        sdlVehicleInfo.onFuelLevel_State(vehicleInfo.fuelLevel_State)
+    }
+    function sendInstantFuelConsumptionChange(){
+        sdlVehicleInfo.onInstantFuelConsumption(vehicleInfo.instantFuelConsumption)
+    }
+    function sendExternalTemperatureChange(){
+        sdlVehicleInfo.onExternalTemperature(vehicleInfo.externalTemperature)
+    }
+    function sendPrndlChange() {
+        if (dataContainer.vehicleInfoModel.prndl !== -1)
+        {sdlVehicleInfo.onPrndl(vehicleInfo.prndl)}
+    }
+    function sendTirePressureChange(){
+        sdlVehicleInfo.onTirePressure(vehicleInfo.tirePressure)
+    }
+    function sendOdometerChange(){
+        sdlVehicleInfo.onOdometer(vehicleInfo.odometer)
+    }
+    function sendBeltStatusChange(){
+        sdlVehicleInfo.onBeltStatus(vehicleInfo.beltStatus)
+    }
+    function sendBodyInformationChange(){
+        sdlVehicleInfo.onBodyInformation(vehicleInfo.bodyInformation)
+    }
+    function sendDeviceStatusChange(){
+        sdlVehicleInfo.onDeviceStatus(vehicleInfo.deviceStatus)
+    }
+    function sendDriverBrakingChange(){
+        sdlVehicleInfo.onDriverBraking(vehicleInfo.driverBraking)
+    }
+    function sendWiperStatusChange(){
+        sdlVehicleInfo.onWiperStatus(vehicleInfo.wiperStatus)
+    }
+    function sendHeadLampStatusChange(){
+        sdlVehicleInfo.onHeadLampStatus(vehicleInfo.headLampStatus)
+    }
+    function sendEngineTorqueChange(){
+        sdlVehicleInfo.onEngineTorque(vehicleInfo.engineTorque)
+    }
+    function sendAccPedalPositionChange(){
+        sdlVehicleInfo.onAccPedalPosition(vehicleInfo.accPedalPosition)
+    }
+    function sendSteeringWheelAngleChange(){
+        sdlVehicleInfo.onSteeringWheelAngle(vehicleInfo.steeringWheelAngle)
+    }
+    function sendECallInfoChange(){
+        sdlVehicleInfo.onECallInfo(vehicleInfo.eCallInfo)
+    }
+    function sendAirbagStatusChange(){
+        sdlVehicleInfo.onAirbagStatus(vehicleInfo.airbagStatus)
+    }
+    function sendEmergencyEventChange(){
+        sdlVehicleInfo.onEmergencyEvent(vehicleInfo.emergencyEvent)
+    }
+    function sendClusterModeStatusChange(){
+        sdlVehicleInfo.onClusterModeStatus(vehicleInfo.clusterModeStatus)
+    }
+    function sendMyKeyChange(){
+        sdlVehicleInfo.onMyKey(vehicleInfo.myKey)
+    }
 }

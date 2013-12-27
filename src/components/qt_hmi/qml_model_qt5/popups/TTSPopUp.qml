@@ -64,6 +64,8 @@ PopUp {
     function activate(message) {
         console.debug("Activate TTS popup:", message);
         dataContainer.activeTTS = true;
+        sdlTTS.started();
+        console.debug("TTS started");
         text.text = message;
         show();
         timer.restart();
@@ -73,6 +75,8 @@ PopUp {
     function deactivate() {
         console.debug("Deactivate TTS popup");
         dataContainer.activeTTS = false;
+        sdlTTS.stopped();
+        console.debug("TTS stopped");
         text.text = '';
         timer.stop();
         hide();

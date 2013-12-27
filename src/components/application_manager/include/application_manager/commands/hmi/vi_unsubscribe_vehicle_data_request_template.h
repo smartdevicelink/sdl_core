@@ -30,43 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
+#ifndef HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
+#define HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
 
 /**
- * @brief VIGetRpmResponse command class
+ * @brief VIUnsubscriveVehicleDataRequestTemplate command class
+ *
+ * Template class for sending 1 unsubscribe thin request
  **/
-class VIGetRpmResponse : public ResponseFromHMI {
+template<event_engine::Event::EventID eventID>
+class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
-   * @brief VIGetRpmResponse class constructor
+   * @brief VIUnsubscriveVehicleDataRequestTemplate class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetRpmResponse(const MessageSharedPtr& message);
+  explicit VIUnsubscribeVehicleDataRequestTemplate(
+      const MessageSharedPtr& message)
+      : RequestToHMI(message) {
+  }
 
   /**
-   * @brief VIGetRpmResponse class destructor
+   * @brief Execute command with sending DBus thin request to HMI
    **/
-  virtual ~VIGetRpmResponse();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  virtual void Run() {
+    LOG4CXX_INFO(logger_, "VIUnsubscriveVehicleDataRequestTemplate::Run");
+    SendRequest();
+  }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetRpmResponse);
+  DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataRequestTemplate<eventID>);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_RPM_RESPONSE_H_
+#endif  // HMI_VI_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_TEMPLATE_H_

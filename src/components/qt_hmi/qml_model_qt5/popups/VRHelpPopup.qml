@@ -38,53 +38,63 @@ import "../models/Constants.js" as Constants
 import "../hmi_api/Common.js" as Common
 
 ContextPopup {
+    property alias title: title.text
     Text {
         id: title
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
-        text: "VR HELP" // default title
+        text: {
+            if (interactionPopup.performInteractionIsActiveNow) {
+                return dataContainer.currentApplication.vrHelpTitlePerformInteraction
+            } else if (dataContainer.currentApplication.vrHelpTitle) {
+                return dataContainer.currentApplication.vrHelpTitle
+            } else {
+                return dataContainer.currentApplication.vrHelpTitleDefault
+            }
+
+        }
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
     }
 
     ScrollableListView {
         anchors.top: title.bottom
-        anchors.bottom: closeButton.top
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
 
-        model: dataContainer.vrHelp
+        model: {
+            if (interactionPopup.performInteractionIsActiveNow) {
+                return dataContainer.currentApplication.vrHelpItemsPerformInteraction
+            } else if (dataContainer.currentApplication.vrHelpItems.count > 0) {
+                return dataContainer.currentApplication.vrHelpItems
+            } else {
+                return dataContainer.currentApplication.vrHelpItemsDefault
+            }
+        }
 
-        delegate: Row {
+        delegate:
+            Row {
             spacing: Constants.iconItemListSpacing
             Icon {
-                source: model.icon
+                source: model.image
+                anchors.verticalCenter: parent.verticalCenter
                 width: Constants.iconItemListSize
                 height: Constants.iconItemListSize
             }
 
             Text {
+                id: text
+                anchors.verticalCenter: parent.verticalCenter
                 text: model.text
                 color: Constants.primaryColor
                 font.pixelSize: Constants.fontSize
             }
         }
     }
-
-    OvalButton {
-        id: closeButton
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: Constants.popupMargin
-        width: Constants.ovalButtonWidth
-        text: "Close"
-        onClicked: complete()
-    }
-
-    property alias title: title.text
 
     function complete(reason, data) {
         hide()

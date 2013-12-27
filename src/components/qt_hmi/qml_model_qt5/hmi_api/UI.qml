@@ -158,9 +158,9 @@ Item {
         dataContainer.deleteSubMenu(menuID, appID)
     }
 
-    function performInteraction (initialText, choiceSet, vrHelp, timeout, appID) {
+    function performInteraction (initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
         console.debug("enter")
-        var async = dataContainer.interactionModel.performInteraction(initialText, choiceSet, vrHelp, timeout, appID)
+        var async = interactionPopup.performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID)
         console.debug("exit")
         return async
     }
@@ -268,21 +268,41 @@ Item {
     }
 
     function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {
-        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + menuTitle + ", " + menuIcon + ", " + keyboardProperties + ", " + appID)
-        if (vrHelpTitle) {
-            vrHelpPopup.title = vrHelpTitle
-        }
-        dataContainer.setVrHelp(vrHelp)
-        console.debug("exit")
-    }
+        console.debug("enter")
+        var app = dataContainer.getApplication(appID)
+        var dataToUpdate = {}
 
-    function showVrHelp (vrHelpTitle, vrHelp, appID) {
-        console.debug("enter: " + vrHelpTitle + ", " + vrHelp + ", " + appID)
-        if (vrHelpTitle) {
-            vrHelpPopup.title = vrHelpTitle
+        if (vrHelpTitle !== undefined) {
+            dataToUpdate.vrHelpTitle = vrHelpTitle
+        } else if ( (vrHelp !== undefined) && (vrHelp.length >= 1) ) {
+            return { __retCode: Common.Result.REJECTED, __message: "vrHelpTitle - undefined, vrHelpItem - provided" }
         }
-        dataContainer.setVrHelp(vrHelp)
-        vrHelpPopup.show()
+
+        if (vrHelp !== undefined) {
+            var checkSequentialPosition = vrHelp[0].position
+            for (var index = 0; index < vrHelp.length; index++) {
+                if (vrHelp[index].position !== checkSequentialPosition) {
+                    return { __retCode: Common.Result.REJECTED, __message: "Nonsequential positions of VrHelpItems" }
+                }
+                checkSequentialPosition++
+            }
+
+            if (app.vrHelpItems.count !== 0) {
+                app.vrHelpItems.clear()
+            }
+            vrHelp.forEach( Internal.appendVrHelpItem, app.vrHelpItems )
+        } else {
+            if (vrHelpTitle !== undefined) {
+                return { __retCode: Common.Result.REJECTED, __message: "vrHelpItems - undefined, vrHelpTitle - provided" }
+            }
+        }
+        if (menuTitle !== undefined) {
+            dataToUpdate.menuTitle = menuTitle
+        }
+        if (menuIcon !== undefined) {
+            dataToUpdate.menuIcon = menuIcon
+        }
+        dataContainer.setApplicationProperties(appID, dataToUpdate)
         console.debug("exit")
     }
 

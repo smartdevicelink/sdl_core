@@ -1,4 +1,6 @@
 /**
+ * @file VrHelpItemsDefault.qml
+ * @brief Default voice recognition help items.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -29,44 +31,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+import QtQuick 2.0
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_
+ListModel {
+    id: vrHelpItemsDefault
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+    Component.onCompleted: {
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text1",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 1
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text2",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 2
+        });
+        vrHelpItemsDefault.append({
+            text: "Default VR Help Text3",
+            image: {
+              value: "",
+              imageType: 1
+            },
+            position: 3
+        });
+    }
+}
 
-namespace application_manager {
-
-namespace commands {
-
-/**
- * @brief VIGetWiperStatusRequest command class
- **/
-class VIGetWiperStatusRequest : public RequestToHMI {
- public:
-  /**
-   * @brief VIGetWiperStatusRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit VIGetWiperStatusRequest(const MessageSharedPtr& message);
-
-  /**
-   * @brief VIGetWiperStatusRequest class destructor
-   **/
-  virtual ~VIGetWiperStatusRequest();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(VIGetWiperStatusRequest);
-};
-
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_GET_WIPER_STATUS_REQUEST_H_

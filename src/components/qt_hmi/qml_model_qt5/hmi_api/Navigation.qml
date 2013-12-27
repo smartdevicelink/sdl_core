@@ -49,7 +49,7 @@ Item {
         var app = dataContainer.getApplication(appID)
         var dataToUpdate = {}
 
-        navigationTexts.forEach(fillTexts, dataToUpdate) // Check
+        navigationTexts.forEach(fillTexts, dataToUpdate)
         if (turnIcon !== undefined) { dataToUpdate.turnIcon = turnIcon }
         if (nextTurnIcon !== undefined) { dataToUpdate.nextTurnIcon = nextTurnIcon }
         if (distanceToManeuver !== undefined) {

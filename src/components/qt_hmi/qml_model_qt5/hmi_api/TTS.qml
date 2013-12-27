@@ -48,7 +48,6 @@ Item {
             console.log('speak send abort');
             throw Common.Result.ABORTED;
         }
-
         var message = ttsChunks.map(function(str) { return str.text }).join('\n');
         ttsPopUp.activate(message);
         ttsPopUp.async = new Async.AsyncCall();

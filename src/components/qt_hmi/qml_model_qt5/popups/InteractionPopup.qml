@@ -36,11 +36,20 @@ import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../hmi_api/Async.js" as Async
+import "../models/Internal.js" as Internal
 
 ContextPopup {
+    id: piPopUp
+    property ListModel choiceSet: ListModel { }
+    property int timeout
+    property int appID
+    property int interactionLayout
+    property var async
+    property bool performInteractionIsActiveNow
+
     Text {
         id: initialText
-        text: dataContainer.interactionModel.initialText
         anchors.top: parent.top
         anchors.topMargin: Constants.popupMargin
         anchors.left: parent.left
@@ -55,13 +64,13 @@ ContextPopup {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
-        model: dataContainer.interactionModel.choice
+        model: choiceSet
         delegate: OvalButton {
             width: parent.width
-            text: name
+            text: menuName
             icon: image
             onClicked: {
-                complete(Common.Result.SUCCESS, {"choiceID": id})
+                complete(Common.Result.SUCCESS, {"choiceID": appID})
             }
         }
     }
@@ -75,9 +84,53 @@ ContextPopup {
         }
     }
 
+    function performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
+        console.debug("enter")
+        var app = dataContainer.getApplication(appID)
+        var dataToUpdate = {}
+
+        performInteractionIsActiveNow = true
+        initialText.text = initialText.fieldText
+        this.timeout = timeout
+        this.appID = appID
+
+        this.choiceSet.clear()
+        if (choiceSet !== undefined) {
+            choiceSet.forEach( function(arrayElement) {
+                                    piPopUp.choiceSet.append({
+                                        choiceID: arrayElement.choiceID,
+                                        menuName: arrayElement.menuName ? arrayElement.menuName : "",
+                                        image: arrayElement.image ? arrayElement.image : "",
+                                        secondaryText: arrayElement.secondaryText ? arrayElement.secondaryText : "",
+                                        tertiaryText: arrayElement.tertiaryText ? arrayElement.tertiaryText: "",
+                                        secondaryImage: arrayElement.secondaryImage ? arrayElement.secondaryImage : ""
+                                    })
+            })
+        }
+        if (vrHelpTitle !== undefined) {
+            dataToUpdate.vrHelpTitlePerformInteraction = vrHelpTitle
+        }
+
+        app.vrHelpItemsPerformInteraction.clear()
+
+        if (vrHelp !== undefined) {
+            vrHelp.forEach( Internal.appendVrHelpItem, app.vrHelpItemsPerformInteraction )
+        }
+        if (interactionLayout !== undefined) {
+            this.interactionLayout = interactionLayout
+        }
+        dataContainer.setApplicationProperties(appID, dataToUpdate)
+        async = new Async.AsyncCall()
+        if (piPopUp.choiceSet.count !== 0) {
+            activate()
+        }
+        console.debug("exit")
+        return async
+    }
+
     function activate () {
         console.debug("enter")
-        timer.interval = dataContainer.interactionModel.timeout
+        timer.interval = timeout
         timer.start()
         show()
         console.debug("exit")
@@ -87,17 +140,18 @@ ContextPopup {
         console.debug("enter")
         switch (reason) {
             case Common.Result.SUCCESS:
-                DBus.sendReply(dataContainer.interactionModel.async, data)
+                DBus.sendReply(async, data)
                 break
             case Common.Result.ABORTED:
-                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.ABORTED })
+                DBus.sendReply(async, { __retCode: Common.Result.ABORTED })
                 break
             case Common.Result.TIMED_OUT:
-                DBus.sendReply(dataContainer.interactionModel.async, { __retCode: Common.Result.TIMED_OUT })
+                DBus.sendReply(async, { __retCode: Common.Result.TIMED_OUT })
                 break
         }
         timer.stop()
         hide()
+        performInteractionIsActiveNow = false
         console.debug("exit")
     }
 }

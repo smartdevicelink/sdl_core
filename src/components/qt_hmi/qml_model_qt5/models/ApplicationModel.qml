@@ -39,12 +39,17 @@ QtObject {
     property int appId
     property string appName
     property string ngnMediaScreenAppName
-    property Icon appIcon: Icon { }
+    property Icon appIcon: Icon { }    
     property string deviceName
     property int hmiDisplayLanguageDesired
     property bool isMediaApplication
     property int appType
     property int hmiUITextAlignment
+    property string vrHelpTitle
+    property string vrHelpTitleDefault: "VR HELP"
+    property string vrHelpTitlePerformInteraction
+    property string menuTitle
+    property Icon menuIcon: Icon { }
 
     // media player
     property string playPauseState
@@ -54,8 +59,10 @@ QtObject {
 
     property string helpPrompt
     property string timeoutPrompt
+    property ListModel vrHelpItems: ListModel { }
+    property ListModel vrHelpItemsDefault: VrHelpItemsDefault { }
+    property ListModel vrHelpItemsPerformInteraction: ListModel {  }
     property ListModel options: ListModel { }
-
     property ListModel currentSubMenu: options
     property ListModel turnList
     property ListModel softButtons

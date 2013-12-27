@@ -73,16 +73,17 @@ PopUp {
                 model: prndlList
 
                 onCurrentIndexChanged: {
-                    console.debug("index change")
+                    console.debug("PRNDL:", currentIndex)
                     dataContainer.vehicleInfoModel.prndl = model.get(currentIndex).id
                 }
 
+                textRole: "name"
                 ListModel {
                     id: prndlList
                     Component.onCompleted: {
-                        append({name: "<NO DATA (prndl)>"})
+                        append({ id: -1, name: "<NO DATA (prndl)>" })
                         for (var name in Common.PRNDL) {
-                            append({name: name});
+                            append({ id: Common.PRNDL[name], name: name });
                         }
                     }
                 }

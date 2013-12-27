@@ -73,8 +73,10 @@ Rectangle {
                 console.debug("Clicked VR button");
                 if (!dataContainer.activeVR) {
                     vrPopUp.activate();
+                    vrHelpPopup.show();
                 } else {
                     vrPopUp.complete();
+                    vrHelpPopup.hide()
                 }
             }
         }
