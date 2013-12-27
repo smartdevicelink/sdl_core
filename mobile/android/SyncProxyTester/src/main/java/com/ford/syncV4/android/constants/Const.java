@@ -45,6 +45,7 @@ public class Const {
 		public static final String TCP = "WiFi";
 		public static final String BLUETOOTH = "Bluetooth";
 		public static final String USB = "USB";
+		public static final int KEY_UNKNOWN = -1;
 		public static final int KEY_TCP = 1;
 		public static final int KEY_BLUETOOTH = 2;
 		public static final int KEY_USB = 3;
