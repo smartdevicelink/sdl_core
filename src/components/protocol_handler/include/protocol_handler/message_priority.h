@@ -22,6 +22,7 @@ class MessagePriority {
   MessagePriority(const MessagePriority& that): value_(that.value_) {}
 
   // Ordering value which is used by queues to order messages
+  // Higher value means higher prioirty
   size_t OrderingValue() { return value_; }
  private:
   // Constructor is private to prevent creation
