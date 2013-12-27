@@ -95,8 +95,8 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
 }
 
-const VehicleData MessageHelper::vehicle_data_ =
-{ {strings::gps, VehicleDataType::GPS},
+const VehicleData MessageHelper::vehicle_data_ = {
+  {strings::gps, VehicleDataType::GPS},
   {strings::speed, VehicleDataType::SPEED },
   {strings::rpm, VehicleDataType::RPM},
   {strings::fuel_level, VehicleDataType::FUELLEVEL},
@@ -110,14 +110,14 @@ const VehicleData MessageHelper::vehicle_data_ =
   {strings::belt_status, VehicleDataType::BELTSTATUS},
   {strings::body_information, VehicleDataType::BODYINFO},
   {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   {strings::e_call_info, VehicleDataType::ECALLINFO},
   {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
   {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
   {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
   {strings::my_key, VehicleDataType::MYKEY},
-  {strings::driver_braking, VehicleDataType::BRAKING},
-  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
-  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},
@@ -149,8 +149,8 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::audio_streaming_state] =
     application_impl.audio_streaming_state();
 
-  message[strings::msg_params][strings::system_context] = application_impl
-      .system_context();
+  message[strings::msg_params][strings::system_context] =
+      static_cast<int>(application_impl.system_context());
 
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
@@ -1269,7 +1269,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 }
 
 // TODO(AK): change printf to logger
-bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
+bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   static unsigned int tab = 0;
   std::string tab_buffer;
 
@@ -1287,7 +1287,7 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
         ++tab;
 
         printf("\n%s%d: ", tab_buffer.c_str(), i);
-        if (!PrintSmartObject(object[i])) {
+        if (!PrintSmartObject(object.getElement(i))) {
           printf("\n");
           return false;
         }
@@ -1302,7 +1302,7 @@ bool MessageHelper::PrintSmartObject(smart_objects::SmartObject& object) {
         ++tab;
 
         printf("\n%s%s: ", tab_buffer.c_str(), (*key).c_str());
-        if (!PrintSmartObject(object[*key])) {
+        if (!PrintSmartObject(object[(*key).c_str()])) {
           printf("\n");
           return false;
         }

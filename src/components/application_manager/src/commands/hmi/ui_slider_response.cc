@@ -30,8 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_slider_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -48,17 +47,9 @@ UISliderResponse::~UISliderResponse() {
 void UISliderResponse::Run() {
   LOG4CXX_INFO(logger_, "UISliderResponse::Run");
 
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SliderID;
-
-  if ((*message_)[strings::params][hmi_response::code] ==
-      hmi_apis::Common_Result::ABORTED) {
-    (*message_)[strings::msg_params][strings::slider_position] =
-        (*message_)[strings::params][strings::data][strings::slider_position];
-    (*message_)[strings::params].erase(strings::data);
-  }
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::UI_Slider);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

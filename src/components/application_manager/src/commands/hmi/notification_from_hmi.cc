@@ -77,8 +77,10 @@ void NotificationFromHMI::CreateHMIRequest(
       ->GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-  request[strings::params][strings::message_type] = MessageType::kRequest;
-  request[strings::params][strings::function_id] = function_id;
+  request[strings::params][strings::message_type] =
+      static_cast<int>(application_manager::MessageType::kRequest);
+  request[strings::params][strings::function_id] =
+      static_cast<int>(function_id);
   request[strings::params][strings::correlation_id] = hmi_correlation_id_;
   request[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;

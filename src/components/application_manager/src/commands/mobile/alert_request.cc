@@ -153,16 +153,30 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_) {
+      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_ && result) {
         result_code = ui_alert_result_;
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const char* return_info = NULL;
+
+      if (result) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+          result_code = mobile_apis::Result::WARNINGS;
+          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+        }
+      }
+
+      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                  return_info, &(message[strings::msg_params]));
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       is_tts_speak_received_ = true;
+
+      tts_speak_result_code_ = static_cast<mobile_apis::Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+
       break;
     }
     default: {

@@ -30,16 +30,19 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdlib.h>
+#include "config_profile/profile.h"
+
 #include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "config_profile/ini_file.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-#include <stdlib.h>
-#include <stdlib.h>
+
+
+
 log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Profile"));
 
@@ -135,6 +138,7 @@ const std::string& Profile::vr_help_title() const {
 const uint16_t& Profile::server_port() const {
   return server_port_;
 }
+
 
 const uint16_t& Profile::navi_server_port() const {
   return navi_server_port_;

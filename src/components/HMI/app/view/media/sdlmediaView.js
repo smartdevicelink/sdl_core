@@ -76,7 +76,7 @@ SDL.sdlView = Em.ContainerView
 
                 refreshItems: function() {
 
-                    if (SDL.SDLAppController.model.appID == SDL.SDLMediaController.currentAppId) {
+                    if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID == SDL.SDLMediaController.currentAppId) {
                         this.addItems(SDL.SDLAppController.model.softButtons,
                             SDL.SDLAppController.model.appID);
                     }

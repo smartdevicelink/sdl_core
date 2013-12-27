@@ -62,7 +62,7 @@ void OnSyncPDataNotification::Run() {
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-        mobile_apis::Result::FILE_NOT_FOUND;
+        static_cast<int>(mobile_apis::Result::FILE_NOT_FOUND);
 
     LOG4CXX_ERROR(logger_, "File not found");
     SendResponse(false);

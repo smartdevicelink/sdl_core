@@ -50,7 +50,7 @@ void OnVIVehicleDataNotification::Run() {
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnVehicleDataID;
+      static_cast<int>(mobile_apis::FunctionID::eType::OnVehicleDataID);
 
   SendNotificationToMobile(message_);
 }

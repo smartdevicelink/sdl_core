@@ -92,23 +92,27 @@ void SpeakRequest::ProcessTTSSpeakResponse(
     return;
   }
 
-  bool result_code = false;
-  const hmi_apis::Common_Result::eType code =
-    static_cast<hmi_apis::Common_Result::eType>(
+  bool result = false;
+  mobile_apis::Result::eType result_code =
+    static_cast<mobile_apis::Result::eType>(
       message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    result_code = true;
+  if (hmi_apis::Common_Result::SUCCESS == result_code) {
+    result = true;
   }
   (*message_)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::SpeakID;
 
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == code) {
-    const mobile_apis::Result::eType return_code =
-        mobile_apis::Result::WARNINGS;
+  const char* return_info = NULL;
+
+  if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      }
   }
 
-  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(code),
-               "UNSUPPORTED_RESOURCE", &(message[strings::msg_params]));
+  SendResponse(result_code, static_cast<mobile_apis::Result::eType>(result_code),
+               return_info, &(message[strings::msg_params]));
 }
 
 }  // namespace commands

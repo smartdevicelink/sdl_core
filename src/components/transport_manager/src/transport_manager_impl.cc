@@ -312,7 +312,7 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
   // Clear messages for this connection
   // Note that MessageQueue typedef is assumed to be std::list,
   // or there is a problem here. One more point versus typedefs-everywhere
-  auto e = message_queue_.begin();
+  MessageQueue::iterator e = message_queue_.begin();
   while (e != message_queue_.end()) {
     if ((*e)->connection_key() == cid) {
       RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
@@ -643,7 +643,7 @@ void TransportManagerImpl::RemoveConnection(int id) {
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const ConnectionUID& id) {
-  for (auto it = connections_.begin(); it != connections_.end(); ++it) {
+  for (std::vector<ConnectionInternal>::iterator  it = connections_.begin(); it != connections_.end(); ++it) {
     if (it->id == id) {
       return &*it;
     }
@@ -653,7 +653,7 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
-  for (auto it = connections_.begin(); it != connections_.end(); ++it) {
+  for (std::vector<ConnectionInternal>::iterator it = connections_.begin(); it != connections_.end(); ++it) {
     if (it->device == device && it->application == application) {
       return &*it;
     }

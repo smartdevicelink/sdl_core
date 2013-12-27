@@ -1,0 +1,289 @@
+#!/usr/bin/env bash
+
+set -e
+
+function print_usage {
+	echo
+	echo "Usage: Lint [FILE=file|ALL] BUILD_PATH=path [-v] [w0|w1|w2|w3|w4] [MISRA=ON|MISRA=OFF]"
+	echo 
+	echo "\"FILE=file|ALL\" Sets the scope of linting"
+	echo -e '\t' "FILE sets the scope to single \"file\""
+	echo -e '\t' "ALL sets the scope to all project modules"
+	echo -e '\t' "If none is set then localy changes files will be linted"
+	echo 
+	echo "\"BUILD_PATH=path\" is the only mandatory parameter which sets"
+	echo -e '\t' "the path to the build product directory"  
+	echo
+	echo "\"-v\" Turns verbose mode on (off by default)"
+	echo
+	echo "\"w0|w1|w2|w3|w4\" sets the Warning level"
+	echo -e '\t' "w0 - No messages (except for fatal errors)"
+	echo -e '\t' "w1 - Error messages only -- no Warnings or"
+	echo -e '\t' "Informationals."
+	echo -e '\t' "w2 - Error and Warning messages only"
+	echo -e '\t' "w3 - Error, Warning and Informational messages (this"
+	echo -e '\t' "is the default)"
+	echo -e '\t' "w4 - All messages."
+	echo
+	echo "\"MISRA=ON|MISRA=OFF\" Turns custom MISRA configuration ON"
+	echo -e '\t' "and OFF respectively (OFF by defaul)"
+	echo
+	echo
+}
+
+
+echo
+echo "=========== Lint SMART DEVICE LINK project ==========="
+echo
+ 
+########################################################################
+##### Process input arguments ##########################################
+########################################################################
+
+MISRA_ENABLED=false
+WARNING_LEVEL=w3
+SCOPE=LOCAL_CHANGES
+BUILD_PATH=""
+VERBOSE=false
+
+if [ $# == 0 ] || [ ${1} == '-h' ] || [ ${1} == '--help' ]; then
+	print_usage
+	exit 0
+fi
+
+while test $# -gt 0; do
+        case "$1" in
+        MISRA=ON)
+			MISRA_ENABLED=true
+			shift
+			;;	
+		MISRA=OFF)
+			MISRA_ENABLED=false
+			shift
+			;;
+		w0|w1|w2|w3|w4)
+			WARNING_LEVEL=$1
+			shift
+			;;	
+		ALL)
+			if [ "$SCOPE" != "LOCAL_CHANGES" ]; then
+				echo "Wrong input. It is not allowed to use FILE and ALL at the same time"
+				print_usage
+				exit 1;
+			fi
+			SCOPE=ALL
+			shift
+			;;	
+		-v|--verbose)
+			VERBOSE=true
+			shift
+			;;
+		*)
+			LHS=$(echo $1 | awk 'BEGIN { FS = "=" } ; { print $1 }')
+			RHS=$(echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
+			
+			if [ ${LHS} == 'FILE' ]; then
+				if [ "$SCOPE" != "LOCAL_CHANGES" ]; then
+					echo "Wrong input. It is not allowed to use FILE and ALL at the same time"
+					print_usage
+					exit 1;
+				fi
+				
+				if [ "${RHS}" == "" ]; then
+					echo "Wrong input. Provide valid FILE value"
+					print_usage
+					exit 1;
+				fi
+				SCOPE=$LHS
+				FILE_PATH=$RHS
+			elif [ ${LHS} == 'BUILD_PATH' ]; then
+				if [ "${RHS}" == "" ]; then
+					echo "Wrong input. Provide valid BUILD_PATH value"
+					print_usage
+					exit 1;
+				fi
+				BUILD_PATH=$RHS
+			else 
+				echo "Wrong input"
+				print_usage
+				exit 1;
+			fi
+			shift
+			;;
+        esac
+done
+
+if [ "${BUILD_PATH}" == "" ]; then
+	echo "Mandatory parameter BUILD_PATH is missing"
+	print_usage
+	exit 1;
+fi
+
+
+if [ "$SCOPE" == "LOCAL_CHANGES" ]; then
+	echo -e '\t' "Lining scope is limitted to localy changed files"
+elif [ "$SCOPE" == "FILE" ]; then
+	echo -e '\t' "Lining scope is limitted to file " $FILE_PATH
+elif [ "$SCOPE" == "ALL" ]; then
+	
+#	echo "You a going to Lint the whole project. It takes a lot of time."
+#	echo -n "Are you sure? [Y/n] "
+
+#	read item
+#	case "$item" in
+#		y|Y)
+#			;;
+#		n|N)
+#			exit 0
+#			;;
+#		*) 
+#			exit 0
+#			;;
+#	esac
+
+	echo -e '\t' "Lining scope is set to all project files"
+fi
+
+if $MISRA_ENABLED; then
+	echo -e '\t' "MISRA is enabled"
+else
+	echo -e '\t' "MISRA is disabled"
+fi
+
+case "$WARNING_LEVEL" in
+	w0) 
+		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- No messages (except for fatal errors)"
+		;;
+	w1)  
+		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error messages only -- no Warnings or Informationals."
+		;;
+	w2)  
+		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error and Warning messages only"
+		;;
+	w3) 
+		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error, Warning and Informational messages (this is the default)"
+		;;
+	w4) 
+		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- All messages."
+		;;
+esac
+
+if $VERBOSE; then 
+	echo -e '\t' "Verbose mode is on"
+fi
+
+########################################################################
+##### Configuring ######################################################
+########################################################################
+
+# +e900 Turns on Successful completion, 'Integer' messages produced, which is not by defaulf available in level w0-w3
+# -e830 Turns off Info 831: Reference cited in prior message
+# -e830 Turns off Info 830: Location cited in prior message
+SUPPRESS="-e830 -e831 +e900"
+
+OTHER_PARAMS="-dOS_POSIX"
+MISRA_CONFIGURATION=""
+SOURCE_CODE_PATH="./src/components/ ./src/appMain/"
+EXLUDE_FROM_SOURCE_CODE_PATH="./src/components/qt_hmi/ ./src/components/dbus/ ./src/components/transport_manager/src/usb/qnx"
+
+echo
+echo Configuring ...
+echo =====================================
+echo
+
+rm -Rf ./tools/FlexeLint/tmp
+rm -Rf ./tools/FlexeLint/results
+mkdir ./tools/FlexeLint/tmp
+mkdir ./tools/FlexeLint/results
+
+if $MISRA_ENABLED; then
+	MISRA_CONFIGURATION="au-misra-cpp.lnt"
+fi
+
+if [ "$SCOPE" == "ALL" ]; then
+  EXLUDE_FROM_SOURCE_CODE_PATH=$(echo $EXLUDE_FROM_SOURCE_CODE_PATH | awk '{gsub(/ /,"\\|")}; 1')
+  find $SOURCE_CODE_PATH \( -name "*.cc" -o -name "*.cpp" \) | awk '{print "../../../" $0}' | grep -v "./src/components/qt_hmi/" | grep -v $EXLUDE_FROM_SOURCE_CODE_PATH > ./tools/FlexeLint/tmp/sdl-modules.lnt
+elif [ "$SCOPE" == "FILE" ]; then
+  echo "$FILE_PATH" | awk '{print "../../../" $0}' > ./tools/FlexeLint/tmp/sdl-modules.lnt
+elif [ "$SCOPE" == "LOCAL_CHANGES" ]; then
+  (git diff --name-only HEAD ; git ls-files --other --exclude-standard) | grep '.cc\|.cpp' | grep 'src/components\|src/appMain' | awk '{print "../../../" $0}' > ./tools/FlexeLint/tmp/sdl-modules.lnt
+fi # if [ $CHECKSCOPE == "ALL" ]
+
+(cd tools/FlexeLint/config && make -f co-gcc.mak > /dev/null)
+
+find ./src/ -type d -name "*include*" | awk '{print "--i../../." $0}'  > ./tools/FlexeLint/tmp/sdl-include-path.lnt
+
+echo "--i\"/usr/include/gstreamer-1.0\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/include/glib-2.0\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/lib/i386-linux-gnu/glib-2.0/include\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/lib/x86_64-linux-gnu/glib-2.0/include\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/include/dbus-1.0\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/include/dbus-1.0\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/lib/i386-linux-gnu/dbus-1.0/include\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+echo "--i\"/usr/lib/x86_64-linux-gnu/dbus-1.0/include\"" >> ./tools/FlexeLint/config/gcc-include-path.lnt
+
+########################################################################
+##### Linting ##########################################################
+########################################################################
+FLINT_BINARY="Flint"
+
+echo
+echo Linting ...
+echo =====================================
+echo
+
+cd ./tools/FlexeLint/bin
+
+if $VERBOSE; then 
+	./${FLINT_BINARY} -$WARNING_LEVEL $SUPPRESS -zero -u --i../../../$BUILD_PATH/src/components/ $OTHER_PARAMS $WORDSIZE ../config/smartdevicelink.lnt | tee ../results/raw_flexelint_report.txt
+else
+	./${FLINT_BINARY} -$WARNING_LEVEL $SUPPRESS -zero -u --i../../../$BUILD_PATH/src/components/ -os ../results/raw_flexelint_report.txt $OTHER_PARAMS $WORDSIZE ../config/smartdevicelink.lnt
+fi
+
+
+########################################################################
+##### Preparing detailed report ########################################
+########################################################################
+if [ "$SCOPE" != "LOCAL_CHANGES" ]; then
+
+	mkdir ../results/developers
+
+	echo
+	echo Preparing detailed report. Be patient
+	echo =====================================
+	echo
+
+	./make_detailed_report
+else
+	echo
+	echo "Detailed report for each developer won't be generated since"
+	echo "only local changes are present in report"
+	echo =====================================
+	echo
+fi
+
+########################################################################
+##### Cleaning-up ######################################################
+########################################################################
+
+function clean-up {
+	echo
+	echo Cleaning-up ...
+	echo =====================================
+	echo
+
+	rm -R ../tmp
+	cd ../config
+	make -f co-gcc.mak clean > /dev/null
+	
+}
+
+clean-up
+
+
+
+
+
+
+
+

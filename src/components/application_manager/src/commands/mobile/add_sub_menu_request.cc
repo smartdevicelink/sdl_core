@@ -86,7 +86,29 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, msg_params, true, 1);
+  SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
+}
+
+void AddSubMenuRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "AddSubMenuRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_AddSubMenu: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands

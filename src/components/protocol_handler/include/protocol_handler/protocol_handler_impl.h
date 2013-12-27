@@ -39,6 +39,7 @@
 #include <map>
 #include <set>
 #include "utils/logger.h"
+#include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
@@ -79,29 +80,24 @@ namespace impl {
 struct RawFordMessageFromMobile: public RawMessagePtr {
   explicit RawFordMessageFromMobile(const RawMessagePtr& message)
       : RawMessagePtr(message) {}
-  // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
-  bool operator < (const RawFordMessageFromMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct RawFordMessageToMobile: public RawMessagePtr {
-  explicit RawFordMessageToMobile(const RawMessagePtr& message)
-      : RawMessagePtr(message) {}
-  // This operator is used by priority queue to sort messages based
-  // on their priority, "smaller" messages come out from priority queue first
-  bool operator < (const RawFordMessageToMobile& that) const {
-    return (*this)->HasHigherPriorityThan(*that);
-  }
+  explicit RawFordMessageToMobile(const RawMessagePtr& message, bool final_message)
+      : RawMessagePtr(message), is_final(final_message) {}
+  // PrioritizedQueue requres this method to decide which priority to assign
+  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  // Signals wether connection to mobile must be closed after processing this message
+  bool is_final;
 };
 
 // Short type names for proiritized message queues
 typedef threads::MessageLoopThread<
-               std::priority_queue<RawFordMessageFromMobile> > FromMobileQueue;
+               utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
-               std::priority_queue<RawFordMessageToMobile> > ToMobileQueue;
-
+               utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
 }
 
 /**
@@ -124,7 +120,7 @@ class ProtocolHandlerImpl
      * message exchange.
      */
     explicit ProtocolHandlerImpl(
-      transport_manager::TransportManager* transport_manager);
+      transport_manager::TransportManager* transport_manager_param);
 
     /**
      * \brief Destructor
@@ -156,7 +152,8 @@ class ProtocolHandlerImpl
      * \brief Method for sending message to Mobile Application.
      * \param message Message with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const RawMessagePtr& message);
+    void SendMessageToMobileApp(const RawMessagePtr& message,
+                                bool final_message) OVERRIDE;
 
     /**
      * \brief Sends number of processed frames in case of binary nav streaming

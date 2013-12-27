@@ -102,7 +102,7 @@ void SliderRequest::Run() {
     msg_params[strings::timeout] = default_timeout_;
   }
 
-  CreateHMIRequest(hmi_apis::FunctionID::UI_Slider, msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::UI_Slider, &msg_params, true);
 }
 
 void SliderRequest::on_event(const event_engine::Event& event) {
@@ -115,6 +115,27 @@ void SliderRequest::on_event(const event_engine::Event& event) {
       ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
           correlation_id(),
           default_timeout());
+      break;
+    }
+    case hmi_apis::FunctionID::UI_Slider: {
+      LOG4CXX_INFO(logger_, "Received UI_Slider event");
+
+      mobile_apis::Result::eType code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      if ((mobile_apis::Result::SUCCESS == code) ||
+          (mobile_apis::Result::ABORTED == code)) {
+        SendResponse(true,
+                     mobile_apis::Result::eType(code),
+                     0,
+                     &(message[strings::msg_params]));
+      } else {
+        SendResponse(false,
+                     mobile_apis::Result::eType(code),
+                     0,
+                     &(message[strings::msg_params]));
+      }
       break;
     }
     default: {

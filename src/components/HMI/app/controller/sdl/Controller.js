@@ -39,15 +39,29 @@ SDL.SDLController = Em.Object
          */
         sysContext: function() {
 
-            if (SDL.VRPopUp.VRActive) { return 'VRSESSION'; }
-            if (SDL.AlertPopUp.active) { return 'ALERT'; }
-            if (SDL.TBTClientStateView.active || SDL.VehicleInfo.active
-                || SDL.DriverDistraction.active || SDL.ExitApp.active
-                || SDL.SliderView.active || SDL.InteractionChoicesView.active
-                || SDL.ScrollableMessage.active || SDL.VRHelpListView.active) { return 'HMI_OBSCURED'; }
-            if (SDL.OptionsView.active) { return 'MENU'; }
+            if (SDL.VRPopUp.VRActive) {
+                return 'VRSESSION';
+            }
+            if (SDL.AlertPopUp.active) {
+                return 'ALERT';
+            }
+            if (SDL.TBTClientStateView.active
+                || SDL.VehicleInfo.active
+                || SDL.DriverDistraction.active
+                || SDL.ExitApp.active
+                || SDL.SliderView.active
+                || SDL.InteractionChoicesView.active
+                || SDL.ScrollableMessage.active
+                || SDL.VRHelpListView.active) {
+
+                return 'HMI_OBSCURED';
+            }
+            if (SDL.OptionsView.active) {
+                return 'MENU';
+            }
             if (SDL.States.info.nonMedia.active
                 || SDL.States.media.sdlmedia.active) {
+
                 return 'MAIN';
             } else {
                 return 'MENU';
@@ -150,7 +164,9 @@ SDL.SDLController = Em.Object
                         SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
                     }
                 } else {
-                    SDL.VRHelpListView.deactivate();
+                    if (SDL.VRHelpListView.active) {
+                        SDL.VRHelpListView.deactivate();
+                    }
                 }
             }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
@@ -300,8 +316,7 @@ SDL.SDLController = Em.Object
             }
             if (SDL.AudioPassThruPopUp.active) {
                 SDL.AudioPassThruPopUp.deactivate();
-                this
-                    .performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
+                this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
             if (SDL.InteractionChoicesView.active) {
                 SDL.InteractionChoicesView.deactivate("ABORTED");

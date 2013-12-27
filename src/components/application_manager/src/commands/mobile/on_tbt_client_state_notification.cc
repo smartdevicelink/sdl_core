@@ -52,7 +52,7 @@ void OnTBTClientStateNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTBTClientStateNotification::Run");
 
   (*message_)[strings::params][strings::message_type] =
-      MessageType::kNotification;
+      static_cast<int>(application_manager::MessageType::kNotification);
 
   const std::vector<Application*>& applications =
       ApplicationManagerImpl::instance()->applications_with_navi();

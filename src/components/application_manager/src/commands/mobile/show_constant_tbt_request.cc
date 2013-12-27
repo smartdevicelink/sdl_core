@@ -113,7 +113,7 @@ void ShowConstantTBTRequest::Run() {
     // erase useless parametr
     msg_params.erase(strings::navigation_text_1);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT1;
+        static_cast<int>(application_manager::TextFieldName::NAVI_TEXT1);
     msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::navigation_text_1];
   }
@@ -122,7 +122,7 @@ void ShowConstantTBTRequest::Run() {
     // erase useless param
     msg_params.erase(strings::navigation_text_2);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-        TextFieldName::NAVI_TEXT2;
+        static_cast<int>(application_manager::TextFieldName::NAVI_TEXT2);
     msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::navigation_text_2];
   }
@@ -131,7 +131,7 @@ void ShowConstantTBTRequest::Run() {
     // erase useless param
     msg_params.erase(strings::eta);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-        TextFieldName::ETA;
+        static_cast<int>(application_manager::TextFieldName::ETA);
     msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::eta];
   }
@@ -140,7 +140,7 @@ void ShowConstantTBTRequest::Run() {
     // erase useless param
     msg_params.erase(strings::total_distance);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-        TextFieldName::TOTAL_DISTANCE;
+        static_cast<int>(application_manager::TextFieldName::TOTAL_DISTANCE);
     msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::total_distance];
   }
@@ -149,7 +149,7 @@ void ShowConstantTBTRequest::Run() {
       // erase useless param
       msg_params.erase(strings::time_to_destination);
       msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-          hmi_apis::Common_TextFieldName::timeToDestination;
+          static_cast<int>(hmi_apis::Common_TextFieldName::timeToDestination);
       msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
           (*message_)[strings::msg_params][strings::time_to_destination];
   }

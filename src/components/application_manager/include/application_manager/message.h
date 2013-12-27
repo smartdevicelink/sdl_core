@@ -95,9 +95,7 @@ class Message {
   void set_protocol_version(ProtocolVersion version);
   void set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
 
-  // Tells whether |this| message has higher priority
-  // (and must be processed earlier) than |that|
-  bool HasHigherPriorityThan(const Message& that) const;
+  protocol_handler::MessagePriority Priority() const { return priority_; }
 
  private:
   int function_id_;  // @remark protocol V2.

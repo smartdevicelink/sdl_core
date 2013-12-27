@@ -30,30 +30,56 @@
 
 cmake_minimum_required(VERSION 2.8.9)
 
-set(CMAKE_AUTOMOC ON)
+set(target HWButtons)
+set(destination com/ford/sdl/hmi/hw_buttons)
+set(install_destination bin/hmi/plugins/${destination})
+set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
+set(CMAKE_AUTOMOC ON)
 set(SOURCES
   attributed_mouse_event.cc
   hmi_hwbuttons.cc
   masked_container.cc
 )
 
-set(target HWButtons)
-
 add_library(${target} SHARED ${SOURCES})
 
-qt5_use_modules(${target} Core Qml Quick)
+if (${qt_version} MATCHES "4.8.5")
+  qt4_use_modules(${target} Core Gui Declarative)
+  set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/)
+  set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/${destination})
+elseif (${qt_version} MATCHES "5.1.0")
+  qt5_use_modules(${target} Core Qml Quick)
+  set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/)
+  set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/${destination})
+endif ()
 
-set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model)
-set(destination ${model_dir}/com/ford/sdl/hmi/hw_buttons)
+add_custom_target(copy_library_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+file(COPY qmldir DESTINATION ${copy_destination})
 
 install(TARGETS ${target}
-  DESTINATION ${destination}
+  DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
-install(FILES qmldir DESTINATION ${destination})
+install(FILES qmldir DESTINATION ${install_destination})
 
-add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND ${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.hw_buttons 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_custom_target(qmltypes_${target} ALL
+    COMMAND ${qmlplugindump_binary} -nonrelocatable com.ford.sdl.hmi.hw_buttons 1.0 ${model_dir} > ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes 2>/dev/null
+    DEPENDS copy_library_${target}
+  )
+  add_custom_target(copy_qmltypes_${target} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes
+    ${copy_destination}
+    DEPENDS qmltypes_${target}
+  )
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes DESTINATION ${install_destination})
+endif ()

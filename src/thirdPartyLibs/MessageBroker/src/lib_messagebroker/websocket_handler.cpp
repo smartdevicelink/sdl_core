@@ -157,7 +157,7 @@ namespace NsMessageBroker
    }
 
    int CWebSocketHandler::prepareWebSocketDataHeader(unsigned char* Buffer,
-                                                     unsigned long b_size)
+                                                     unsigned long long b_size)
    {
       unsigned int headerLength = 2;
       unsigned char payload;

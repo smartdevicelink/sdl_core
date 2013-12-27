@@ -64,6 +64,13 @@
         android:visibility="visible" >
     </EditText>
 
+    <CheckBox
+        android:id="@+id/use_footer_in_slider_checkbox"
+        android:checked="true"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Use Slider Footer"/>
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

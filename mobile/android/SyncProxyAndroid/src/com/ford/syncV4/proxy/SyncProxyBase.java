@@ -592,7 +592,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		// Use the telephonyManager to get and log phone info
 		if (telephonyManager != null) {
-			// Following is not quite thread-safe (because m_traceLogger could test null twice),
+			// Following is not quite thread-safe (because m_traceLogger could notifyOnAppInterfaceUnregistered null twice),
 			// so we need to fix this, but vulnerability (i.e. two instances of listener) is
 			// likely harmless.
 			if (_traceDeviceInterrogator == null) {
@@ -795,7 +795,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		// Use the telephonyManager to get and log phone info
 		if (telephonyManager != null) {
-			// Following is not quite thread-safe (because m_traceLogger could test null twice),
+			// Following is not quite thread-safe (because m_traceLogger could notifyOnAppInterfaceUnregistered null twice),
 			// so we need to fix this, but vulnerability (i.e. two instances of listener) is
 			// likely harmless.
 			if (_traceDeviceInterrogator == null) {
@@ -2610,21 +2610,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
                         }
+                        notifyOnAppInterfaceUnregistered(msg);
                     }
                 } else {
-					if (_callbackToUIThread) {
-						// Run in UI thread
-						_mainUIHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								((IProxyListener)_proxyListener).onOnAppInterfaceUnregistered(msg);
-							}
-						});
-					} else {
-						((IProxyListener)_proxyListener).onOnAppInterfaceUnregistered(msg);
-					}
-
-					notifyProxyClosed("OnAppInterfaceUnregistered", null);
+					notifyOnAppInterfaceUnregistered(msg);
 				}
 			} else {
 				if (_syncMsgVersion != null) {
@@ -2638,6 +2627,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SYNC_LIB_TRACE_KEY);
 	}
+
+    private void notifyOnAppInterfaceUnregistered(final OnAppInterfaceUnregistered msg) {
+        notifyProxyClosed("OnAppInterfaceUnregistered", null);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    ((IProxyListener)_proxyListener).onOnAppInterfaceUnregistered(msg);
+                }
+            });
+        } else {
+            ((IProxyListener)_proxyListener).onOnAppInterfaceUnregistered(msg);
+        }
+    }
 
     private void onUnregisterAppInterfaceResponse(Hashtable hash) {
         // UnregisterAppInterface

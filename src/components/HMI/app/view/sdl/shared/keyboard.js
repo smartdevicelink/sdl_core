@@ -215,11 +215,16 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
             if (!SDL.SDLAppController.model.globalProperties.keyboardProperties) {
                 return;
             }
-            var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList;
+            var list = SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList ? SDL.SDLAppController.model.globalProperties.keyboardProperties.limitedCharacterList : [];
 
-            if (SDL.SDLAppController.model && list){
+            for (var i = 0; i < list.length; i++) {
+                list[i] = list[i].toLowerCase();
+            }
+
+            if (SDL.SDLAppController.model && list.length){
 
                 for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
+
                     if (list.indexOf(this.buttonsAreaQWERTY._childViews[i].text) < 0) {
                         this.buttonsAreaQWERTY._childViews[i].set('disabled', true);
                         this.buttonsAreaQWERTZ._childViews[i].set('disabled', true);
@@ -230,7 +235,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
                         this.buttonsAreaAZERTY._childViews[i].set('disabled', false);
                     }
                 }
-            } else if (SDL.SDLAppController.model && !list) {
+            } else if (SDL.SDLAppController.model && !list.length) {
                 for (var i = 0; i < this.buttonsAreaQWERTY._childViews.length; i++) {
                     this.buttonsAreaQWERTY._childViews[i].set('disabled', false);
                 }

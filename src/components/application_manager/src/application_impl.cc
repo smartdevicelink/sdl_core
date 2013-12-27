@@ -211,12 +211,12 @@ void ApplicationImpl::set_audio_streaming_state(
   audio_streaming_state_ = state;
 }
 
-bool ApplicationImpl::set_app_icon_path(const std::string& file_name) {
+bool ApplicationImpl::set_app_icon_path(const std::string& path) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
       app_files_.end() != it;
       ++it) {
-    if (0 == it->file_name.compare(file_name)) {
-      app_icon_path_ = file_name;
+    if (0 == it->file_name.compare(path.substr(path.find_last_of("/")+1))) {
+      app_icon_path_ = path;
       return true;
     }
   }

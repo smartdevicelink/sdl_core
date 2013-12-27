@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <stdint.h>
 
 namespace file_system {
 /**

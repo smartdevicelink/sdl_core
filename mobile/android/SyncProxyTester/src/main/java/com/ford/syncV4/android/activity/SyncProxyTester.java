@@ -2,6 +2,7 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,8 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
@@ -45,6 +48,7 @@ import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.android.service.ProxyServiceEvent;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
@@ -150,8 +154,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener {
@@ -294,6 +296,24 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     static final int REQUEST_LIST_SOFTBUTTONS = 43;
     // Request id for ChoiceListActivity
     static final int REQUEST_LIST_CHOICES = 45;
+    /**
+     * Time out in milliseconds for exit from application. If application is not correctly
+     * destroyed within specified timeout - then we force destroy procedure
+     */
+    private static final int EXIT_TIMEOUT = 3000;
+    /**
+     * Handler object to monitor exit procedure. If exit procedure fails, then this object will
+     * manage application to destroy
+     */
+    private Handler mExitTimeOutHandler;
+    /**
+     * progress dialog of the Exit Application
+     */
+    private ProgressDialog mExitProgressDialog;
+    /**
+     * UI Handler to perform actions in UI Thread
+     */
+    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -313,6 +333,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public static int getNewChoiceId() {
         return autoIncChoiceId++;
+    }
+
+    public void runInUIThread(Runnable runnable) {
+        mUIHandler.post(runnable);
     }
 
     /**
@@ -878,7 +902,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 //PoliciesTest.runPoliciesTest();
                 break;
             case MNU_EXIT:
-                exitApp();
+                stopProxyService();
                 break;
             case MNU_TOGGLE_CONSOLE:
                 if (_scroller.getVisibility() == ScrollView.VISIBLE) {
@@ -965,23 +989,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
                 Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
                 Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
-    }
-
-    /**
-     * Closes the activity and stops the proxy service.
-     */
-    private void exitApp() {
-        stopService(new Intent(this, ProxyService.class));
-        finish();
-        saveMessageSelectCount();
-        // the delay should be long enough, so that UnregisterAppInterface and
-        // EndSession messages are sent
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                android.os.Process.killProcess(android.os.Process.myPid());
-            }
-        }, 2000);
     }
 
     private String getAssetsContents(String filename, String defaultString) {
@@ -3084,6 +3091,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 }
                             });
 
+                            /**
+                             * Process a possibility to exclude Footer from Slider request
+                             */
+                            final boolean[] isUseFooterInSlider = {true};
+                            final CheckBox useFooterInSliderCheckBox = (CheckBox) layout.findViewById(R.id.use_footer_in_slider_checkbox);
+                            isUseFooterInSlider[0] = useFooterInSliderCheckBox.isChecked();
+                            useFooterInSliderCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                                    isUseFooterInSlider[0] = b;
+                                    chkDynamicFooter.setEnabled(b);
+                                    txtSliderFooter.setEnabled(b);
+                                }
+                            });
+
                             builder = new AlertDialog.Builder(mContext);
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -3095,15 +3117,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
                                         msg.setSliderHeader(txtSliderHeader.getText().toString());
 
-                                        Vector<String> footerelements = null;
-                                        String footer = txtSliderFooter.getText().toString();
-                                        if (chkDynamicFooter.isChecked()) {
-                                            footerelements = new Vector<String>(Arrays.asList(footer.split(JOIN_STRING)));
-                                        } else {
-                                            footerelements = new Vector<String>();
-                                            footerelements.add(footer);
+                                        /**
+                                         * Do not set Footer
+                                         */
+                                        if (isUseFooterInSlider[0]) {
+                                            Vector<String> footerElements;
+                                            String footer = txtSliderFooter.getText().toString();
+                                            if (chkDynamicFooter.isChecked()) {
+                                                footerElements = new Vector<String>(Arrays.asList(footer.split(JOIN_STRING)));
+                                            } else {
+                                                footerElements = new Vector<String>();
+                                                footerElements.add(footer);
+                                            }
+                                            msg.setSliderFooter(footerElements);
                                         }
-                                        msg.setSliderFooter(footerelements);
 
                                         msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                         msg.setCorrelationID(autoIncCorrId++);
@@ -4249,5 +4276,78 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onKeyboardInputReceived(OnKeyboardInput event) {
 
     }
-}
 
+    /**
+     * Exit Application section
+     */
+
+    /**
+     * Exit from Activity
+     */
+    private void exitApp() {
+        Log.i(logTag, "Exit App");
+        isFirstActivityRun = true;
+        stopService(new Intent(this, ProxyService.class));
+        super.finish();
+    }
+
+    /**
+     * Stops the proxy service.
+     */
+    private void stopProxyService() {
+        getExitDialog().show();
+
+        saveMessageSelectCount();
+
+        if (mExitTimeOutHandler == null) {
+            mExitTimeOutHandler = new Handler();
+        } else {
+            mExitTimeOutHandler.removeCallbacks(mExitCallback);
+        }
+        mExitTimeOutHandler.postDelayed(mExitCallback, EXIT_TIMEOUT);
+
+        ProxyService.getInstance().destroyService(new ProxyServiceEvent() {
+            @Override
+            public void onDisposeComplete() {
+                if (mExitTimeOutHandler != null) {
+                    mExitTimeOutHandler.removeCallbacks(mExitCallback);
+                }
+                runInUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getExitDialog().dismiss();
+                        exitApp();
+                    }
+                });
+            }
+
+            @Override
+            public void onDisposeError() {
+                // TODO: process error in future releases
+            }
+        });
+    }
+
+    private ProgressDialog getExitDialog() {
+        if (mExitProgressDialog == null) {
+            mExitProgressDialog = new ProgressDialog(this);
+            mExitProgressDialog.setTitle(R.string.exit_dialog_title);
+            mExitProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mExitProgressDialog.setIndeterminate(true);
+        }
+        return mExitProgressDialog;
+    }
+
+    /**
+     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
+     */
+    private Runnable mExitCallback = new Runnable() {
+        @Override
+        public void run() {
+            Log.w(logTag, "Exit App timer callback");
+            getExitDialog().dismiss();
+            exitApp();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+    };
+}

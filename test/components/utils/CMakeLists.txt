@@ -15,7 +15,8 @@ set(LIBRARIES
 )
 
 set (SOURCES
-  ./src/file_system_tests.cc
+# ./src/file_system_tests.cc
+  ./src/prioritized_queue_tests.cc
 )
 
 create_test("test_Utils" "${SOURCES}" "${LIBRARIES}")
