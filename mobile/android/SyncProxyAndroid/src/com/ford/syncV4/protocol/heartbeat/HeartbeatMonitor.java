@@ -65,33 +65,36 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void start() {
-        // FIXME: don't start 2+ threads
         synchronized (LOCK) {
-            heartbeatThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!Thread.interrupted()) {
-                        Looper.prepare();
-                        heartbeatThreadLooper = Looper.myLooper();
+            if (heartbeatThread == null) {
+                heartbeatThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!Thread.interrupted()) {
+                            Looper.prepare();
+                            heartbeatThreadLooper = Looper.myLooper();
 
-                        heartbeatThreadHandler = new Handler();
-                        Log.d(TAG, "scheduling run()");
-                        ackReceived = true;
-                        if (!heartbeatThreadHandler.postDelayed(
-                                heartbeatTimeoutRunnable, interval)) {
-                            Log.e(TAG, "Couldn't schedule run()");
+                            heartbeatThreadHandler = new Handler();
+                            Log.d(TAG, "scheduling run()");
+                            ackReceived = true;
+                            if (!heartbeatThreadHandler.postDelayed(
+                                    heartbeatTimeoutRunnable, interval)) {
+                                Log.e(TAG, "Couldn't schedule run()");
+                            }
+
+                            Log.d(TAG, "Starting looper");
+                            Looper.loop();
+                            Log.d(TAG, "Looper stopped, exiting thread");
+                        } else {
+                            Log.i(TAG,
+                                    "HeartbeatThread is run, but already interrupted");
                         }
-
-                        Log.d(TAG, "Starting looper");
-                        Looper.loop();
-                        Log.d(TAG, "Looper stopped, exiting thread");
-                    } else {
-                        Log.i(TAG,
-                                "HeartbeatThread is run, but already interrupted");
                     }
-                }
-            }, "HeartbeatThread");
-            heartbeatThread.start();
+                }, "HeartbeatThread");
+                heartbeatThread.start();
+            } else {
+                Log.d(TAG, "HeartbeatThread is already started; doing nothing");
+            }
         }
     }
 
