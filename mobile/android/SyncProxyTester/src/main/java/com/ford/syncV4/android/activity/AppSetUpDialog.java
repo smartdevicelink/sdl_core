@@ -78,7 +78,8 @@ public class AppSetUpDialog extends DialogFragment {
 
         ipAddressLayout.setVisibility(View.GONE);
         portLayout.setVisibility(View.GONE);
-        nsdUseLayout.setVisibility(View.GONE);
+        // TODO: Use in next releases
+        //nsdUseLayout.setVisibility(View.GONE);
 
         transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -86,7 +87,9 @@ public class AppSetUpDialog extends DialogFragment {
                 boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
                 ipAddressLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
                 portLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
-                nsdUseLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
+
+                // TODO: Use in next releases
+                //nsdUseLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
             }
         });
 
