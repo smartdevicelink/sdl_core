@@ -60,7 +60,7 @@ class SessionObserver {
      * has to be started.
      * \return int Id (number) of new session if successful otherwise -1.
      */
-    virtual unsigned int OnSessionStartedCallback(
+    virtual int OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
       unsigned char service_type) = 0;
 

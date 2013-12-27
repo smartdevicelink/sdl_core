@@ -48,7 +48,7 @@
 #include "config_profile/profile.h"
 
 
-uint64_t file_system::AvailableSpace() {
+uint64_t file_system::GetAvailableDiskSpace() {
   char currentAppPath[FILENAME_MAX];
   memset(reinterpret_cast<void*>(currentAppPath), 0, FILENAME_MAX);
   getcwd(currentAppPath, FILENAME_MAX - 1);
@@ -59,7 +59,7 @@ uint64_t file_system::AvailableSpace() {
   return fsInfo.f_bsize * fsInfo.f_bfree;
 }
 
-unsigned int SizeDirectory(const std::string& path) {
+unsigned int file_system::DirectorySize(const std::string& path) {
   unsigned int size = 0;
   int return_code = 0;
   DIR* directory = NULL;
@@ -84,7 +84,7 @@ unsigned int SizeDirectory(const std::string& path) {
       }
       std::string full_element_path = path + "/" + result->d_name;
       if (file_system::IsDirectory(full_element_path)) {
-        size += SizeDirectory(full_element_path);
+        size += DirectorySize(full_element_path);
       } else {
         memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
         stat(full_element_path.c_str(), &file_info);
@@ -99,27 +99,23 @@ unsigned int SizeDirectory(const std::string& path) {
   return size;
 }
 
-unsigned int file_system::AvailableSpaceApp(const std::string& name) {
-  unsigned int available_space_app = profile::Profile::instance()
-                                     ->space_available();
-  std::string full_path;
-  unsigned int size_of_directory = 0;
-  unsigned int available_space = 0;
-  if (DirectoryExists(name)) {
-    full_path = FullPath(name);
-    size_of_directory = SizeDirectory(full_path);
-    if (available_space_app < size_of_directory) {
+unsigned int file_system::GetAvailableSpaceForApp(const std::string& app_name) {
+  const unsigned int app_quota = profile::Profile::instance()->app_dir_quota();
+  if (DirectoryExists(app_name)) {
+    std::string full_path = FullPath(app_name);
+    unsigned int size_of_directory = DirectorySize(full_path);
+    if (app_quota < size_of_directory) {
       return 0;
     }
-    available_space_app -= size_of_directory;
-    available_space = AvailableSpace();
-    if (available_space_app > available_space) {
-      return available_space;
+    unsigned int current_app_quota = app_quota - size_of_directory;
+    unsigned int available_disk_space = GetAvailableDiskSpace();
+    if (current_app_quota > available_disk_space) {
+      return available_disk_space;
     } else {
-      return available_space_app;
+      return current_app_quota;
     }
   } else {
-    return available_space_app;
+    return app_quota;
   }
 }
 
@@ -207,7 +203,6 @@ void file_system::Close(std::ofstream* file_stream) {
 std::string file_system::FullPath(const std::string& file) {
   // FILENAME_MAX defined stdio_lim.h was replaced with less value
   // since it seems, that is caused overflow in some cases
-  // TODO(AO): Will be checked during release testing
 
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];

@@ -257,17 +257,24 @@ bool LifeCycle::InitMessageSystem() {
 
 void LifeCycle::StopComponents(int params) {
   utils::ResetSubscribeToTerminateSignal();
-  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  instance()->app_manager_->~ApplicationManagerImpl();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
   instance()->protocol_handler_->RemoveProtocolObserver(
     instance()->app_manager_);
 
+  instance()->transport_manager_->Stop();
+
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
+#ifdef MEDIA_MANAGER
+  instance()->media_manager_->SetProtocolHandler(NULL);
+  instance()->media_manager_->~MediaManagerImpl();
+#endif
+
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  instance()->app_manager_->~ApplicationManagerImpl();
+
   LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
   instance()->policy_manager_->~PolicyManager();
-
-  instance()->transport_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef QT_HMI
@@ -303,12 +310,6 @@ void LifeCycle::StopComponents(int params) {
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete instance()->protocol_handler_;
-
-  LOG4CXX_INFO(logger_, "Destroying Media Manager");
-#ifdef MEDIA_MANAGER
-  instance()->media_manager_->SetProtocolHandler(NULL);
-  instance()->media_manager_->~MediaManagerImpl();
-#endif
 
   LOG4CXX_INFO(logger_, "Destroying TM");
   delete instance()->transport_manager_;

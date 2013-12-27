@@ -42,8 +42,8 @@ log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(unsigned int app_id)
-    : app_id_(app_id),
+ApplicationImpl::ApplicationImpl(unsigned int application_id)
+    : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
       allowed_support_navigation_(false),
@@ -155,8 +155,8 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
 
-void ApplicationImpl::set_version(const Version& version) {
-  version_ = version;
+void ApplicationImpl::set_version(const Version& ver) {
+  version_ = ver;
 }
 
 void ApplicationImpl::set_name(const std::string& name) {
@@ -261,17 +261,17 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   return false;
 }
 
-bool ApplicationImpl::SubscribeToButton(unsigned int btn_name) {
+bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.insert(btn_name);
   return (subscribed_buttons_.size() == old_size + 1);
 }
 
-bool ApplicationImpl::IsSubscribedToButton(unsigned int btn_name) {
-  std::set<unsigned int>::iterator it = subscribed_buttons_.find(btn_name);
+bool ApplicationImpl::IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) {
+  std::set<mobile_apis::ButtonName::eType>::iterator it = subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
 }
-bool ApplicationImpl::UnsubscribeFromButton(unsigned int btn_name) {
+bool ApplicationImpl::UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.erase(btn_name);
   return (subscribed_buttons_.size() == old_size - 1);

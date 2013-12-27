@@ -377,7 +377,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
      */
     GetVehicleTypeResponse: function(vehicleType, id) {
 
-        Em.Logger.log("FFW.VehicleInfo.GetVehicleType");
+        Em.Logger.log("FFW.VehicleInfo.GetVehicleTypeResponse");
 
         var JSONMessage = {
             "jsonrpc": "2.0",

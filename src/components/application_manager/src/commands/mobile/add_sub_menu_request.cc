@@ -101,6 +101,20 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
+      Application* application =
+             ApplicationManagerImpl::instance()->application(connection_key());
+
+      if (NULL == application) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        return;
+      }
+
+      if (result) {
+        application->AddSubMenu((*message_)[strings::msg_params]
+                                   [strings::menu_id].asInt(),
+                        (*message_)[strings::msg_params]);
+       }
+
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

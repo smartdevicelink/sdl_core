@@ -91,8 +91,7 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
 
   Application* app = ApplicationManagerImpl::instance()->application(
-      CommandRequestImpl::connection_key()
-  );
+      CommandRequestImpl::connection_key());
 
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -120,11 +119,11 @@ void SubscribeVehicleDataRequest::Run() {
       if (is_key_enabled) {
         ++items_to_subscribe;
         msg_params[key_name] = is_key_enabled;
-      }
 
-      VehicleDataType key_type = it->second;
-      if (app->SubscribeToIVI(static_cast<unsigned int>(key_type))) {
-        ++subscribed_items;
+        VehicleDataType key_type = it->second;
+        if (app->SubscribeToIVI(static_cast<unsigned int>(key_type))) {
+          ++subscribed_items;
+        }
       }
     }
   }
@@ -174,8 +173,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 #ifdef WEB_HMI
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt()
-          );
+          message[strings::params][hmi_response::code].asInt());
 
   bool result =
       hmi_result == hmi_apis::Common_Result::SUCCESS;
@@ -184,14 +182,14 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       hmi_result == hmi_apis::Common_Result::SUCCESS
       ? mobile_apis::Result::SUCCESS
       : static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt()
-          );
+          message[strings::params][hmi_response::code].asInt());
 
   const char* return_info = NULL;
   if (result) {
     if (IsAnythingAlreadySubscribed()) {
       result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      return_info =
+          std::string("Unsupported phoneme type sent in a prompt").c_str();
     }
   }
 
@@ -261,8 +259,9 @@ bool SubscribeVehicleDataRequest::IsAnythingAlreadySubscribed() {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
 
       if ((*message_)[strings::msg_params][it->first]
-          [strings::result_code].asInt() ==
-          hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED) {
+                                           [strings::result_code].asInt() ==
+          hmi_apis::Common_VehicleDataResultCode::
+          VDRC_DATA_ALREADY_SUBSCRIBED) {
         return true;
       }
     }

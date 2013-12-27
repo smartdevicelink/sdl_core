@@ -50,8 +50,8 @@ log4cxx::LoggerPtr RequestWatchdog::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
 
 Watchdog* RequestWatchdog::instance() {
-  static RequestWatchdog instance;
-  return &instance;
+  static RequestWatchdog instnc;
+  return &instnc;
 }
 
 RequestWatchdog::RequestWatchdog()
@@ -297,9 +297,9 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   int cycleDuration;
   TimevalStruct cycleStartTime;
 
-  RequestWatchdog* instance = static_cast<RequestWatchdog*>(
+  RequestWatchdog* instnc = static_cast<RequestWatchdog*>(
                                 RequestWatchdog::instance());
-  if (!instance) {
+  if (!instnc) {
     LOG4CXX_INFO(logger_, "Cannot get instance of RequestWatchdog.");
     return;
   }
@@ -310,20 +310,20 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     cycleStartTime = date_time::DateTime::getCurrentTime();
 
     {
-      AutoLock auto_lock(instance->requestsLock_);
+      AutoLock auto_lock(instnc->requestsLock_);
 
-      it = instance->requests_.begin();
+      it = instnc->requests_.begin();
 
-      while (it != instance->requests_.end()) {
+      while (it != instnc->requests_.end()) {
         if (it->first->delayed_delete_) {
-          if (instance->requests_.begin() == it) {
+          if (instnc->requests_.begin() == it) {
             delete it->first;
-            instance->requests_.erase(it);
-            it = instance->requests_.begin();
+            instnc->requests_.erase(it);
+            it = instnc->requests_.begin();
           } else {
             it_temp = --it;
             delete(++it)->first;
-            instance->requests_.erase(it);
+            instnc->requests_.erase(it);
             it = ++it_temp;
           }
           continue;
@@ -350,7 +350,7 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
 
           {
             AutoUnlock auto_unlock(auto_lock);
-            instance->notifySubscribers(*(it->first));
+            instnc->notifySubscribers(*(it->first));
           }
 
         }

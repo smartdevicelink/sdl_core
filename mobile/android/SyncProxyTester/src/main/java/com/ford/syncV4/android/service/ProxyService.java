@@ -128,8 +128,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	private static SyncProxyALM _syncProxy;
 	private static logAdapter _msgAdapter;
 	private ModuleTest _testerMain;
-	private BluetoothAdapter mBtAdapter;
-	private MediaPlayer embeddedAudioPlayer;
+    private MediaPlayer embeddedAudioPlayer;
 	private Boolean playingAudio = false;
 	protected SyncReceiver mediaButtonReceiver;
 	
@@ -138,7 +137,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	
 	private static boolean waitingForResponse = false;
     private ProxyServiceEvent mServiceDestroyEvent;
-	
+
+    private int awaitingPutFileResponseCorrelationID;
+
 	public void onCreate() {
 		super.onCreate();
 		
@@ -225,7 +226,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
 		if (transportType == Const.Transport.KEY_BLUETOOTH) {
 			Log.d(TAG, "ProxyService. onStartCommand(). Transport = Bluetooth.");
-			mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+            BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBtAdapter != null) {
 				if (mBtAdapter.isEnabled()) {
 					startProxy();
@@ -281,6 +282,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 				int tcpPort = settings.getInt(
 						Const.Transport.PREFS_KEY_TRANSPORT_PORT,
 						Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
+                boolean mIsNSD = settings.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false);
 
                 SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
                 syncMsgVersion.setMajorVersion(2);
@@ -296,6 +298,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
                     case Const.Transport.KEY_TCP:
                         config = new TCPTransportConfig(tcpPort, ipAddress);
+                        ((TCPTransportConfig)config).setIsNSD(mIsNSD);
+                        ((TCPTransportConfig)config).setApplicationContext(this);
                         appID = APPID_TCP;
                         break;
 
@@ -433,25 +437,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		}
     }
 
-    private void setAppIcon() {
-        try {
-            PutFile putFile = new PutFile();
-            putFile.setFileType(FileType.GRAPHIC_PNG);
-            putFile.setSyncFileName(ICON_SYNC_FILENAME);
-            putFile.setCorrelationID(nextCorrID());
-            putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-            _msgAdapter.logMessage(putFile, true);
-            getProxyInstance().sendRPCRequest(putFile);
+    private void setInitAppIcon() {
+        PutFile putFile = new PutFile();
+        putFile.setFileType(FileType.GRAPHIC_PNG);
+        putFile.setSyncFileName(ICON_SYNC_FILENAME);
+        putFile.setCorrelationID(nextCorrID());
+        putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+        _msgAdapter.logMessage(putFile, true);
 
-            if (getAutoSetAppIconFlag()) {
-                SetAppIcon setAppIcon = new SetAppIcon();
-                setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-                setAppIcon.setCorrelationID(nextCorrID());
-                _msgAdapter.logMessage(setAppIcon, true);
-                getProxyInstance().sendRPCRequest(setAppIcon);
-            }
+        try {
+            awaitingPutFileResponseCorrelationID = putFile.getCorrelationID();
+            getProxyInstance().sendRPCRequest(putFile);
         } catch (SyncException e) {
-            Log.e(TAG, "Error setting app icon", e);
+            Log.e(TAG, "Error init AppIcon -> PutFile request", e);
+            awaitingPutFileResponseCorrelationID = 0;
         }
     }
 
@@ -587,7 +586,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
             if (!isModuleTesting()) {
-                setAppIcon();
+                setInitAppIcon();
             }
         }
 
@@ -995,7 +994,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
-		
+
+        if (response.getCorrelationID() == awaitingPutFileResponseCorrelationID &&
+                getAutoSetAppIconFlag()) {
+            SetAppIcon setAppIcon = new SetAppIcon();
+            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+            setAppIcon.setCorrelationID(nextCorrID());
+            _msgAdapter.logMessage(setAppIcon, true);
+            try {
+                getProxyInstance().sendRPCRequest(setAppIcon);
+            } catch (SyncException e) {
+                Log.e(TAG, "Set InitAppIcon", e);
+            }
+            awaitingPutFileResponseCorrelationID = 0;
+        }
+
 		if (isModuleTesting()) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};

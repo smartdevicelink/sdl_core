@@ -1,3 +1,7 @@
+[CW52]
+* Fix SetAppIcon request before putFile response
+* Fix after turn off/on bluetooth, TM can't discover SmartDeviceLink service.
+
 [CW51]
 + Add ability to SPT to Slider request without sliderFooter
 * Fix parsing OnAudioPassThru notifications.

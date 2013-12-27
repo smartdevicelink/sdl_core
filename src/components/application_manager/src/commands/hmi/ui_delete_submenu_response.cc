@@ -30,10 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_delete_submenu_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -51,47 +48,9 @@ UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {
 void UIDeleteSubmenuResponse::Run() {
   LOG4CXX_INFO(logger_, "UIDeleteSubmenuResponse::Run");
 
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-      ->GetMessageChain(correlation_id);
-
-  if (NULL == msg_chain) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  smart_objects::SmartObject data = msg_chain->data();
-
-  /* store received response code for to check it
-   * in corresponding Mobile response
-   */
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-
-  msg_chain->set_ui_response_result(code);
-
-  const int connection_key = msg_chain->connection_key();
-
-  Application* app = ApplicationManagerImpl::instance()->application(
-      connection_key);
-
-  if (NULL == app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    app->RemoveSubMenu(data[strings::msg_params][strings::menu_id].asInt());
-  }
-
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::DeleteSubMenuID);
-
-  SendResponseToMobile(message_);
+  event_engine::Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

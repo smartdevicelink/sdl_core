@@ -18,6 +18,7 @@ import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
@@ -28,6 +29,7 @@ import java.io.PipedOutputStream;
 
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener {
 
+    private NSDHelper mNSDHelper;
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
@@ -70,13 +72,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                         break;
 
                     case TCP:
-                        _transport = new TCPTransport(
-                                (TCPTransportConfig) transportConfig, this);
+                        TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) transportConfig;
+                        _transport = new TCPTransport(tcpTransportConfig, this);
+                        if (tcpTransportConfig.getIsNSD()) {
+                            mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
+                            mNSDHelper.initializeNsd();
+                        }
                         break;
 
                     case USB:
-                        _transport = new USBTransport(
-                                (USBTransportConfig) transportConfig, this);
+                        _transport = new USBTransport((USBTransportConfig) transportConfig, this);
                         break;
                 }
             }
@@ -115,11 +120,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
             } // end-if
         }
-
         synchronized (TRANSPORT_REFERENCE_LOCK) {
+
             stopH264();
 
             if (!keepConnection) {
+
+                if (mNSDHelper != null) {
+                    mNSDHelper.stopDiscovery();
+                    mNSDHelper.tearDown();
+                }
+
                 if (_transport != null) {
                     _transport.disconnect();
                 }
@@ -216,6 +227,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onTransportError(String info, Exception e) {
         // Pass directly to connection listener
         _connectionListener.onTransportError(info, e);
+    }
+
+    @Override
+    public void onServerSocketInit(int serverSocketPort) {
+        Log.d("SyncConnection", "ServerSocket init: " + serverSocketPort);
+        mNSDHelper.registerService(serverSocketPort);
+        mNSDHelper.discoverServices();
     }
 
     @Override

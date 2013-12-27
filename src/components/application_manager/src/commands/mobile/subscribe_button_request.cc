@@ -64,13 +64,13 @@ void SubscribeButtonRequest::Run() {
   const unsigned int btn_id = ((*message_)[str::msg_params][str::button_name]
       .asUInt());
 
-  if (app->IsSubscribedToButton(btn_id)) {
+  if (app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
-  app->SubscribeToButton(btn_id);
+  app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

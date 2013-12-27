@@ -4,7 +4,7 @@ kkolodiy 	KonstantinKolodiy
 aaleshin 	AnatoliyLeshin
 dchmerev 	DmitryChmerev
 nkhlopkov 	nkhlopkov 		NikolayKhlopkov
-pkvramchaninov 	PavelKramchaninov	meskalito
+pkramchaninov 	PavelKramchaninov	meskalito
 dklimenko 	DmitryKlimenko
 akandul	 	KandulAlexander
 aoleynik 	AndreyOleynik

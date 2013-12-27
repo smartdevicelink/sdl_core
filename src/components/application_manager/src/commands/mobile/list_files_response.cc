@@ -66,7 +66,7 @@ void ListFilesResponse::Run() {
     return;
   }
   (*message_)[strings::msg_params][strings::space_available] =
-        static_cast<int>(file_system::AvailableSpaceApp(application->name()));
+        static_cast<int>(file_system::GetAvailableSpaceForApp(application->name()));
   if (file_system::DirectoryExists(application->name())) {
     const std::string full_directory_path = file_system::FullPath(
         application->name());

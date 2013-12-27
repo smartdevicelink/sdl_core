@@ -311,6 +311,8 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         OnFindApplications: function() {
 
+            Em.Logger.log("FFW.BasicCommunication.OnFindApplications");
+
             var JSONMessage = {
                 "jsonrpc": "2.0",
                 "method": "BasicCommunication.OnFindApplications"
@@ -331,6 +333,8 @@ FFW.BasicCommunication = FFW.RPCObserver
          * Request for list of avaliable devices
          */
         getDeviceList: function() {
+
+            Em.Logger.log("FFW.BasicCommunication.GetDeviceList");
 
             this.getDeviceListRequestID = this.client.generateID();
 
@@ -433,8 +437,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         MixingAudioSupported: function(attenuatedSupported) {
 
-            Em.Logger
-                .log("FFW.BasicCommunication.MixingAudioSupportedResponse");
+            Em.Logger.log("FFW.BasicCommunication.MixingAudioSupportedResponse");
 
             // send request
 
@@ -507,7 +510,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         OnDeviceChosen: function(deviceName, appID) {
 
-            Em.Logger.log("FFW.UI.OnDeviceChosen");
+            Em.Logger.log("FFW.BasicCommunication.OnDeviceChosen");
 
             // send repsonse
             var JSONMessage = {

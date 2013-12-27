@@ -220,10 +220,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
-    bool RemoveAppDataFromHMI(Application* application);
-    bool LoadAppDataToHMI(Application* application);
-    bool ActivateApplication(Application* application);
-    void DeactivateApplication(Application* application);
+    bool RemoveAppDataFromHMI(Application* app);
+    bool LoadAppDataToHMI(Application* app);
+    bool ActivateApplication(Application* applic);
+    void DeactivateApplication(Application* app);
     void ConnectToDevice(unsigned int id);
     void OnHMIStartedCooperation();
 
@@ -474,6 +474,20 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void Unmute();
 
+    /*
+     * @brief Save binary data to specified directory
+     *
+     * @param application name
+     * @param binary file name
+     * @param binary data
+     * @param path for saving data
+     *
+     * @return SUCCESS if file was saved, other code otherwise
+     */
+    mobile_apis::Result::eType SaveBinary(
+                                const std::string& app_name,
+                                const std::vector<unsigned char>& binary_data,
+                                const std::string& save_path);
 
   private:
     ApplicationManagerImpl();
@@ -493,7 +507,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * \return bool Indicates whether message is allowed for application
      */
     bool CheckPolicies(smart_objects::SmartObject* message,
-                       Application* application);
+                       Application* app);
 
     /**
      * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority

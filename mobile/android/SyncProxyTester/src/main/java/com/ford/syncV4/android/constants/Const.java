@@ -23,8 +23,7 @@ public class Const {
 	// Default values
 	public static final boolean PREFS_DEFAULT_ISMEDIAAPP = true;
     public static final boolean PREFS_DEFAULT_ISNAVIAPP = true;
-    public static final int PREFS_DEFAULT_NAVI_VIDEOSOURCE =
-            KEY_VIDEOSOURCE_MP4;
+    public static final int PREFS_DEFAULT_NAVI_VIDEOSOURCE = KEY_VIDEOSOURCE_MP4;
 	public static final String PREFS_DEFAULT_APPNAME = FlavorConst.PREFS_DEFAULT_APPNAME;
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
@@ -41,10 +40,12 @@ public class Const {
 		public static final String PREFS_KEY_TRANSPORT_TYPE = "TransportType";
 		public static final String PREFS_KEY_TRANSPORT_PORT = "TCPPort";
 		public static final String PREFS_KEY_TRANSPORT_IP = "IPAddress";
+		public static final String PREFS_KEY_IS_NSD = "IsNSD";
 
 		public static final String TCP = "WiFi";
 		public static final String BLUETOOTH = "Bluetooth";
 		public static final String USB = "USB";
+		public static final int KEY_UNKNOWN = -1;
 		public static final int KEY_TCP = 1;
 		public static final int KEY_BLUETOOTH = 2;
 		public static final int KEY_USB = 3;

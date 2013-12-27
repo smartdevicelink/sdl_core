@@ -34,9 +34,7 @@
 #include <string>
 #include <fstream>
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application.h"
 #include "application_manager/mobile_command_factory.h"
-#include "application_manager/hmi_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_chaining.h"
@@ -316,44 +314,44 @@ Application* ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
-bool ApplicationManagerImpl::RemoveAppDataFromHMI(Application* application) {
+bool ApplicationManagerImpl::RemoveAppDataFromHMI(Application* app) {
   return true;
 }
 
-bool ApplicationManagerImpl::LoadAppDataToHMI(Application* application) {
+bool ApplicationManagerImpl::LoadAppDataToHMI(Application* app) {
   return true;
 }
 
-bool ApplicationManagerImpl::ActivateApplication(Application* application) {
-  if (!application) {
+bool ApplicationManagerImpl::ActivateApplication(Application* applic) {
+  if (!applic) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
     return false;
   }
 
-  bool is_new_app_media = application->is_media_application();
+  bool is_new_app_media = applic->is_media_application();
 
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
     Application* app = *it;
-    if (app->app_id() == application->app_id()) {
+    if (app->app_id() == applic->app_id()) {
       if (app->IsFullscreen()) {
         LOG4CXX_WARN(logger_, "Application is already active.");
         return false;
       }
       if (mobile_api::HMILevel::eType::HMI_LIMITED !=
-          application->hmi_level()) {
-        if (application->has_been_activated()) {
-          MessageHelper::SendAppDataToHMI(application);
+          applic->hmi_level()) {
+        if (applic->has_been_activated()) {
+          MessageHelper::SendAppDataToHMI(applic);
         } else {
-          MessageHelper::SendChangeRegistrationRequestToHMI(application);
+          MessageHelper::SendChangeRegistrationRequestToHMI(applic);
         }
       }
-      if (!application->MakeFullscreen()) {
+      if (!applic->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*application);
+      MessageHelper::SendHMIStatusNotification(*applic);
     } else {
       if (is_new_app_media) {
         if (app->IsAudible()) {
@@ -369,9 +367,9 @@ bool ApplicationManagerImpl::ActivateApplication(Application* application) {
   return true;
 }
 
-void ApplicationManagerImpl::DeactivateApplication(Application* application) {
-  MessageHelper::SendDeleteCommandRequestToHMI(application);
-  MessageHelper::ResetGlobalproperties(application);
+void ApplicationManagerImpl::DeactivateApplication(Application* app) {
+  MessageHelper::SendDeleteCommandRequestToHMI(app);
+  MessageHelper::ResetGlobalproperties(app);
 }
 
 void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
@@ -387,7 +385,6 @@ void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
-
 
   if (true == profile::Profile::instance()->launch_hmi()) {
     utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
@@ -1125,7 +1122,7 @@ void ApplicationManagerImpl::CreatePoliciesManager(PoliciesManager* managaer) {
 }
 
 bool ApplicationManagerImpl::CheckPolicies(smart_objects::SmartObject* message,
-    Application* application) {
+    Application* app) {
   return true;
 }
 
@@ -1673,6 +1670,25 @@ void ApplicationManagerImpl::SaveApplications() const {
   }
 
   file.close();
+}
+
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
+                            const std::string& app_name,
+                            const std::vector<unsigned char>& binary_data,
+                            const std::string& save_path) {
+
+  if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
+    return mobile_apis::Result::OUT_OF_MEMORY;
+  }
+
+  LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
+
+  if (!file_system::Write(file_system::FullPath(save_path),binary_data)) {
+    return mobile_apis::Result::GENERIC_ERROR;
+  }
+
+  LOG4CXX_INFO(logger_, "Successfully write data to file");
+  return mobile_apis::Result::SUCCESS;
 }
 
 }  // namespace application_manager

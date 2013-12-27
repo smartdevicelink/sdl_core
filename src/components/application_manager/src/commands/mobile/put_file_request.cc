@@ -52,7 +52,7 @@ void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
   Application* application = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+      connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -61,23 +61,13 @@ void PutFileRequest::Run() {
   }
 
   if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
-      profile::Profile::instance()->put_file_in_none() <= application->put_file_in_none_count()) {
+      profile::Profile::instance()->put_file_in_none() <=
+      application->put_file_in_none_count()) {
       // If application is in the HMI_NONE level the quantity of allowed
       // PutFile request is limited by the configuration profile
-      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
+      LOG4CXX_ERROR(logger_,
+                    "Too many requests from the app with HMILevel HMI_NONE ");
       SendResponse(false, mobile_apis::Result::REJECTED);
-  }
-
-  unsigned int free_space = file_system::AvailableSpaceApp(application->name());
-
-  const std::string& sync_file_name =
-      (*message_)[strings::msg_params][strings::sync_file_name].asString();
-
-  bool is_persistent_file = false;
-
-  if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
-    is_persistent_file =
-        (*message_)[strings::msg_params][strings::persistent_file].asBool();
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
@@ -86,28 +76,42 @@ void PutFileRequest::Run() {
     return;
   }
 
+  const std::string& sync_file_name =
+      (*message_)[strings::msg_params][strings::sync_file_name].asString();
+
   const std::vector<unsigned char> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
-  LOG4CXX_ERROR(logger_, "######## size " << file_data.size());
 
-  if (free_space > file_data.size()) {
-    std::string relative_file_path = file_system::CreateDirectory(
-        application->name());
-    relative_file_path += "/";
-    relative_file_path += sync_file_name;
+  std::string relative_file_path =
+      file_system::CreateDirectory(application->name());
+  relative_file_path += "/";
+  relative_file_path += sync_file_name;
 
-    if (file_system::Write(file_system::FullPath(relative_file_path),
-                           file_data)) {
+  mobile_apis::Result::eType save_result =
+      ApplicationManagerImpl::instance()->SaveBinary(
+          application->name(),
+          file_data,
+          relative_file_path);
+
+  switch (save_result) {
+    case mobile_apis::Result::SUCCESS: {
+      bool is_persistent_file = false;
+
+      if ((*message_)[strings::msg_params].
+          keyExists(strings::persistent_file)) {
+
+        is_persistent_file =
+            (*message_)[strings::msg_params][strings::persistent_file].asBool();
+      }
+
       application->AddFile(sync_file_name, is_persistent_file);
-
       application->increment_put_file_in_none_count();
-      SendResponse(true, mobile_apis::Result::SUCCESS);
-    } else {
-      LOG4CXX_ERROR(logger_, "Unable to save file");
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      SendResponse(true, save_result);
+      break;
     }
-  } else {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    default:
+      SendResponse(false, save_result);
+      break;
   }
 }
 

@@ -59,7 +59,7 @@
  */
 namespace connection_handler {
 /**
- * \class ConnectionHandlerImpl
+ * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
@@ -138,7 +138,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param connection_handle Connection identifier whithin which session has to be started.
      * \return int Id (number) of new session if successful otherwise -1.
      */
-    virtual unsigned int OnSessionStartedCallback(
+    virtual int OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
       unsigned char service_type);
 
@@ -208,7 +208,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param transportManager Pointer to TransportManager object.
      **/
     virtual void set_transport_manager(
-      transport_manager::TransportManager* transportManager);
+      transport_manager::TransportManager* transport_mngr);
 
     /**
      * \brief Method which should start devices discoveryng

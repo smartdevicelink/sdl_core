@@ -276,7 +276,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      */
     buttonEvent: function(id, type) {
 
-        Em.Logger.log("FFW.Buttons.buttonEvent " + type);
+        Em.Logger.log("FFW.Buttons.OnButtonEvent " + type);
 
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -298,7 +298,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      */
     buttonPressedCustom: function(name, type, softButtonID) {
 
-        // Em.Logger.log("FFW.Buttons.buttonPressedCustom " + type);
+        Em.Logger.log("FFW.Buttons.OnButtonPress " + type);
 
         var JSONMessage = {
             "jsonrpc": "2.0",
@@ -320,7 +320,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      */
     buttonEventCustom: function(name, type, softButtonID) {
 
-        // Em.Logger.log("FFW.Buttons.buttonEventCustom " + type);
+        Em.Logger.log("FFW.Buttons.OnButtonEvent " + type);
 
         var JSONMessage = {
             "jsonrpc": "2.0",
