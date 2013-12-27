@@ -45,7 +45,7 @@ namespace commands {
 const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME =
     "policy_sync_data.dat";
 const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME =
-    "policies/";
+    "policies";
 
 SyncPDataRequest::SyncPDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -57,47 +57,44 @@ SyncPDataRequest::~SyncPDataRequest() {
 void SyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SyncPDataRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  Application* application = ApplicationManagerImpl::instance()->application(
+      connection_key());
 
-  if (NULL == app) {
+  if (NULL == application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  unsigned int free_space = file_system::AvailableSpaceApp(app->name());
-
-  const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
-
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    LOG4CXX_ERROR(logger_, "Mandatory param are missed!");
+    LOG4CXX_ERROR(logger_, "Binary data is missed!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  const std::vector<unsigned char> char_vector_pdata =
+  const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
+
+  const std::vector<unsigned char> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
-  if (free_space > char_vector_pdata.size()) {
-    std::string relative_file_path = file_system::CreateDirectory(
-        TEMPORARY_HARDCODED_FOLDERNAME);
+  std::string relative_file_path = file_system::CreateDirectory(
+      TEMPORARY_HARDCODED_FOLDERNAME);
+  relative_file_path += "/";
+  relative_file_path += sync_file_name;
 
-    relative_file_path += sync_file_name;
+  mobile_apis::Result::eType save_result =
+      ApplicationManagerImpl::instance()->SaveBinary(
+          application->name(),
+          file_data,
+          relative_file_path);
 
-    LOG4CXX_INFO(logger_, "relative_file_path = " << relative_file_path);
-
-    if (file_system::Write(file_system::FullPath(relative_file_path),
-                           char_vector_pdata)) {
-      LOG4CXX_INFO(logger_, "Successfully write data to file");
-      SendResponse(true, mobile_apis::Result::SUCCESS);
-    } else {
-      LOG4CXX_ERROR(logger_, "Failed wrire to file");
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    }
-  } else {
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  switch(save_result) {
+    case mobile_apis::Result::SUCCESS:
+      SendResponse(true, save_result);
+      break;
+    default:
+      SendResponse(false, save_result);
+      break;
   }
 }
 

@@ -474,6 +474,20 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void Unmute();
 
+    /*
+     * @brief Save binary data to specified directory
+     *
+     * @param application name
+     * @param binary file name
+     * @param binary data
+     * @param path for saving data
+     *
+     * @return SUCCESS if file was saved, other code otherwise
+     */
+    mobile_apis::Result::eType SaveBinary(
+                                const std::string& app_name,
+                                const std::vector<unsigned char>& binary_data,
+                                const std::string& save_path);
 
   private:
     ApplicationManagerImpl();

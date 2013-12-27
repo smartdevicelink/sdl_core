@@ -62,7 +62,7 @@ Profile::Profile()
   , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
-  , space_available_(104857600)
+  , app_dir_quota_(104857600)
   , app_hmi_level_none_time_scale_max_requests_(100)
   , app_hmi_level_none_requests_time_scale_(10)
   , app_time_scale_max_requests_(100)
@@ -152,8 +152,8 @@ bool Profile::is_mixing_audio_supported() const {
   return is_mixing_audio_supported_;
 }
 
-const unsigned int& Profile::space_available() const {
-  return space_available_;
+const unsigned int& Profile::app_dir_quota() const {
+  return app_dir_quota_;
 }
 
 bool Profile::is_redecoding_enabled() const {
@@ -383,11 +383,11 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MAIN", "SpaceAvailable", value))
       && ('\0' != *value)) {
-    space_available_ = atoi(value);
-    if (space_available_ <= 0) {
-      space_available_ = 104857600;
+    app_dir_quota_ = atoi(value);
+    if (app_dir_quota_ <= 0) {
+      app_dir_quota_ = 104857600;
     }
-    LOG4CXX_INFO(logger_, "Set Space Available " << space_available_);
+    LOG4CXX_INFO(logger_, "Set App Directory Quota " << app_dir_quota_);
   }
 
   help_promt_.clear();
@@ -482,7 +482,7 @@ void Profile::UpdateValues() {
                            "MAIN", "PendingRequestsAmount", value))
       && ('\0' != *value)) {
     pending_requests_amount_ = atoi(value);
-    if (space_available_ <= 0) {
+    if (app_dir_quota_ <= 0) {
       pending_requests_amount_ = 1000;
     }
     LOG4CXX_INFO(logger_, "Set system pending requests amount " <<

@@ -45,14 +45,21 @@ namespace file_system {
  *
  * @return free disc space.
  */
-uint64_t AvailableSpace();
+uint64_t GetAvailableDiskSpace();
+
+/*
+ * @brief Get size of current directory
+ *
+ * @param path to directory
+ */
+unsigned int DirectorySize(const std::string& path);
 
 /**
  * @brief Get available app space
  * @param name of app
  * @return free app space.
  */
-unsigned int AvailableSpaceApp(const std::string& name);
+unsigned int GetAvailableSpaceForApp(const std::string& name);
 
 /**
  * @brief Creates directory

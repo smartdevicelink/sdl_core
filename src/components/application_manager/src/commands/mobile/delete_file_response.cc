@@ -58,7 +58,7 @@ void DeleteFileResponse::Run() {
     return;
   }
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::AvailableSpaceApp(app->name()));
+      static_cast<int>(file_system::GetAvailableSpaceForApp(app->name()));
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

@@ -146,9 +146,9 @@ class Profile {
     const std::string& vr_help_title() const;
 
     /**
-      * @brief Returns space for app
+      * @brief Returns application directory quota size
       */
-    const unsigned int& space_available() const;
+    const unsigned int& app_dir_quota() const;
 
     /**
       * @brief Returns the video server type
@@ -285,7 +285,7 @@ class Profile {
     unsigned int                    max_cmd_id_;
     unsigned int                    default_timeout_;
     std::string                     vr_help_title_;
-    unsigned int                    space_available_;
+    unsigned int                    app_dir_quota_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
     unsigned int                    app_hmi_level_none_time_scale_max_requests_;

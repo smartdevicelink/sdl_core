@@ -1672,4 +1672,23 @@ void ApplicationManagerImpl::SaveApplications() const {
   file.close();
 }
 
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
+                            const std::string& app_name,
+                            const std::vector<unsigned char>& binary_data,
+                            const std::string& save_path) {
+
+  if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
+    return mobile_apis::Result::OUT_OF_MEMORY;
+  }
+
+  LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
+
+  if (!file_system::Write(file_system::FullPath(save_path),binary_data)) {
+    return mobile_apis::Result::GENERIC_ERROR;
+  }
+
+  LOG4CXX_INFO(logger_, "Successfully write data to file");
+  return mobile_apis::Result::SUCCESS;
+}
+
 }  // namespace application_manager
