@@ -70,8 +70,6 @@ DnssdServiceBrowser::DnssdServiceBrowser(TransportAdapterController* controller)
       avahi_threaded_poll_(0),
       avahi_client_(0),
       service_records_(),
-      scan_requests_(0),
-      services_to_be_resolved_(0),
       mutex_(),
       initialised_(false) {
   pthread_mutex_init(&mutex_, 0);
@@ -154,7 +152,8 @@ void DnssdServiceBrowser::ServiceResolved(
   if (service_record_it != service_records_.end()) {
     *service_record_it = service_record;
   }
-  ServiceResolveFinished();
+  DeviceVector device_vector = PrepareDeviceVector();
+  controller_->SearchDeviceDone(device_vector);
   pthread_mutex_unlock(&mutex_);
 }
 
@@ -168,22 +167,7 @@ void DnssdServiceBrowser::ServiceResolveFailed(
   if (service_record_it != service_records_.end()) {
     service_records_.erase(service_record_it);
   }
-  ServiceResolveFinished();
   pthread_mutex_unlock(&mutex_);
-}
-
-void DnssdServiceBrowser::ServiceResolveFinished() {
-  if (0 == --services_to_be_resolved_) {
-    DeviceVector device_vector = PrepareDeviceVector();
-    for (int i = 0; i < scan_requests_; ++i) {
-      OnSearchDone(device_vector);
-    }
-    scan_requests_ = 0;
-  }
-}
-
-void DnssdServiceBrowser::OnSearchDone(const DeviceVector& device_vector) {
-  controller_->SearchDeviceDone(device_vector);
 }
 
 void AvahiServiceResolverCallback(AvahiServiceResolver* avahi_service_resolver,
@@ -270,15 +254,7 @@ TransportAdapter::Error DnssdServiceBrowser::Init() {
 }
 
 TransportAdapter::Error DnssdServiceBrowser::Scan() {
-  pthread_mutex_lock(&mutex_);
-  if (0 == services_to_be_resolved_) {
-    DeviceVector device_vector = PrepareDeviceVector();
-    OnSearchDone(device_vector);
-  } else {
-    ++scan_requests_;
-  }
-  pthread_mutex_unlock(&mutex_);
-  return TransportAdapter::OK;
+  return TransportAdapter::NOT_SUPPORTED;
 }
 
 void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
@@ -295,7 +271,6 @@ void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
   if (service_records_.end()
       == std::find(service_records_.begin(), service_records_.end(), record)) {
     service_records_.push_back(record);
-    ++services_to_be_resolved_;
     AvahiServiceResolver* avahi_service_resolver = avahi_service_resolver_new(
         avahi_client_, interface, protocol, name, type, domain,
         AVAHI_PROTO_INET, static_cast<AvahiLookupFlags>(0),
@@ -327,6 +302,7 @@ DeviceVector DnssdServiceBrowser::PrepareDeviceVector() const {
   for (ServiceRecords::const_iterator it = service_records_.begin();
       it != service_records_.end(); ++it) {
     const DnssdServiceRecord& service_record = *it;
+    if (service_record.host_name.empty()) continue;
     if (devices[service_record.addr] == 0) {
       devices[service_record.addr] = new TcpDevice(service_record.addr,
                                                    service_record.host_name);
