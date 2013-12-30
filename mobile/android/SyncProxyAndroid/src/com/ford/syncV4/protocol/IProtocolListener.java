@@ -17,9 +17,10 @@ public interface IProtocolListener {
 	// Called to indicate that a protocol session has ended (from either side)
 	void onProtocolSessionEnded(SessionType sessionType, byte sessionID, String correlationID /*, String info, Exception ex*/);
 
-	// Called to indicate that expected receipt of a protocol heartbeat from SYNC is
-	// past due (by indicated amount).
-	void onProtocolHeartbeatPastDue(int heartbeatInterval_ms, int pastDue_ms);
+    /**
+     * Called when a protocol heartbeat ACK message has been received from SYNC.
+     */
+    void onProtocolHeartbeatACK();
 
 	// Called to indicate that a protocol error was detected in received data.
 	void onProtocolError(String info, Exception e);

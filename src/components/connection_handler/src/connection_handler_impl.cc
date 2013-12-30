@@ -39,12 +39,27 @@
 
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
+#include "config_profile/profile.h"
+
+namespace {
+int32_t HeartBeatTimeout() {
+  return profile::Profile::instance()->heart_beat_timeout();
+}
+}
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace connection_handler {
+
+ConnectionHandle HandleFromConnectionUID(transport_manager::ConnectionUID uid) {
+  return ConnectionHandle(uid);
+}
+
+transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle) {
+  return transport_manager::ConnectionUID(handle);
+}
 
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ConnectionHandler"));
@@ -56,7 +71,8 @@ ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
-    transport_manager_(NULL) {
+    transport_manager_(NULL),
+    connection_list_deleter_(&connection_list_){
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
@@ -87,7 +103,7 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
       for (ConnectionListIterator it = connection_list_.begin();
            it != connection_list_.end(); ++it) {
         if (device_for_remove_handle
-            == (*it).second.connection_device_handle()) {
+            == (*it).second->connection_device_handle()) {
           RemoveConnection((*it).first);
         }
       }
@@ -173,9 +189,10 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   }
   LOG4CXX_INFO(logger_, "Add Connection:" << connection_id << " to the list.");
   connection_list_.insert(
-    ConnectionList::value_type(
-      connection_id,
-      Connection(connection_id, device_info.device_handle())));
+      ConnectionList::value_type(
+          connection_id,
+          new Connection(connection_id, device_info.device_handle(),
+                         this, HeartBeatTimeout())));
 }
 
 void ConnectionHandlerImpl::OnConnectionFailed(
@@ -197,7 +214,7 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      unsigned int first_session_id = (itr->second).GetFirstSessionID();
+      unsigned int first_session_id = (itr->second)->GetFirstSessionID();
       if (0 < first_session_id) {
         first_session_id = KeyFromPair(connection_id, first_session_id);
         // In case both parameters of OnSessionEndedCallback are the same
@@ -207,6 +224,7 @@ void ConnectionHandlerImpl::OnConnectionClosed(
             first_session_id);
       }
     }
+    delete itr->second;
     connection_list_.erase(itr);
   }
 }
@@ -245,7 +263,7 @@ void ConnectionHandlerImpl::RemoveConnection(
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      int first_session_id = (itr->second).GetFirstSessionID();
+      int first_session_id = (itr->second)->GetFirstSessionID();
       if (0 < first_session_id) {
         first_session_id = KeyFromPair(connection_handle, first_session_id);
         // In case both parameters of OnSessionEndedCallback are the same
@@ -255,24 +273,25 @@ void ConnectionHandlerImpl::RemoveConnection(
             first_session_id);
       }
     }
+    delete itr->second;
     connection_list_.erase(itr);
   }
 }
 
  int ConnectionHandlerImpl::OnSessionStartedCallback(
   transport_manager::ConnectionUID connection_handle,
-  unsigned char service_type) {
+  protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
   int new_session_id = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
-    new_session_id = (it->second).GetFirstSessionID();
+    new_session_id = (it->second)->GetFirstSessionID();
     bool is_first_in_connection = false;
     if (-1 == new_session_id) {
       is_first_in_connection = true;
-      new_session_id = (it->second).AddNewSession();
+      new_session_id = (it->second)->AddNewSession();
       if (0 > new_session_id) {
         LOG4CXX_ERROR(logger_, "Not possible to start session!");
         return -1;
@@ -280,19 +299,17 @@ void ConnectionHandlerImpl::RemoveConnection(
     }
     if (connection_handler_observer_) {
       int first_session_key = KeyFromPair(connection_handle,
-                                          (it->second).GetFirstSessionID());
+                                          (it->second)->GetFirstSessionID());
       int session_key = KeyFromPair(connection_handle, new_session_id);
-      protocol_handler::ServiceType type =
-          protocol_handler::ServiceTypeFromByte(service_type);
 
       bool success = connection_handler_observer_->OnSessionStartedCallback(
-                       (it->second).connection_device_handle(),
+                       (it->second)->connection_device_handle(),
                        session_key,
                        first_session_key,
-                       type);
+                       service_type);
       if (!success) {
         if (is_first_in_connection) {
-          (it->second).RemoveSession(new_session_id);
+          (it->second)->RemoveSession(new_session_id);
         }
         new_session_id = -1;
       }
@@ -304,18 +321,16 @@ void ConnectionHandlerImpl::RemoveConnection(
 unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
   unsigned int connection_handle, unsigned char sessionId,
   unsigned int hashCode,
-  unsigned char service_type) {
+  protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
   int result = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
-    int firstSessionID = (it->second).GetFirstSessionID();
-    protocol_handler::ServiceType type =
-        protocol_handler::ServiceTypeFromByte(service_type);
-    if (protocol_handler::kRpc == type) {
-      result = (it->second).RemoveSession(sessionId);
+    int firstSessionID = (it->second)->GetFirstSessionID();
+    if (protocol_handler::kRpc == service_type) {
+      result = (it->second)->RemoveSession(sessionId);
       if (0 > result) {
         LOG4CXX_ERROR(logger_, "Not possible to remove session!");
         return result;
@@ -329,7 +344,7 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
       int sessionKey = KeyFromPair(connection_handle, sessionId);
       connection_handler_observer_->OnSessionEndedCallback(sessionKey,
           firstSessionID,
-          type);
+          service_type);
       result = sessionKey;
     }
   }
@@ -374,7 +389,7 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
-    Connection connection = it->second;
+    Connection& connection = *it->second;
     if (device_id) {
       *device_id = connection.connection_device_handle();
     }
@@ -428,8 +443,8 @@ int ConnectionHandlerImpl::GetDataOnDeviceID(
       applications_list->clear();
       for (ConnectionListIterator itr = connection_list_.begin();
            itr != connection_list_.end(); ++itr) {
-        if (device_handle == (*itr).second.connection_device_handle()) {
-          applications_list->push_back((*itr).second.GetFirstSessionID());
+        if (device_handle == (*itr).second->connection_device_handle()) {
+          applications_list->push_back((*itr).second->GetFirstSessionID());
         }
       }
     }
@@ -491,17 +506,32 @@ void ConnectionHandlerImpl::StartTransportManager() {
 }
 
 void ConnectionHandlerImpl::CloseConnection(unsigned int key) {
+  unsigned int connection_handle = 0;
+  unsigned char session_id = 0;
+  PairFromKey(key, &connection_handle, &session_id);
+  CloseConnection(connection_handle);
+}
+
+void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection");
   if (!transport_manager_) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
+  transport_manager::ConnectionUID connection_uid =
+      ConnectionUIDFromHandle(connection_handle);
+  transport_manager_->Disconnect(connection_uid);
+}
 
+void ConnectionHandlerImpl::KeepConnectionAlive(unsigned int connection_key) {
   unsigned int connection_handle = 0;
   unsigned char session_id = 0;
-  PairFromKey(key, &connection_handle, &session_id);
+  PairFromKey(connection_key, &connection_handle, &session_id);
 
-  transport_manager_->Disconnect(connection_handle);
+  ConnectionListIterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    it->second->KeepAlive();
+  }
 }
 
 }/* namespace connection_handler */

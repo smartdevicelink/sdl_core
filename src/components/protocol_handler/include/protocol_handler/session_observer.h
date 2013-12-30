@@ -62,7 +62,7 @@ class SessionObserver {
      */
     virtual int OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char service_type) = 0;
+      ServiceType service_type) = 0;
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -77,7 +77,7 @@ class SessionObserver {
       transport_manager::ConnectionUID connection_handle,
       unsigned char sessionId,
       unsigned int hashCode,
-      unsigned char service_type) = 0;
+      ServiceType service_type) = 0;
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)

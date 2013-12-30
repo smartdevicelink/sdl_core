@@ -34,8 +34,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                   int pastDue_ms) {
+            public void onProtocolHeartbeatACK() {
             }
 
             @Override
@@ -103,8 +102,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                   int pastDue_ms) {
+            public void onProtocolHeartbeatACK() {
             }
 
             @Override

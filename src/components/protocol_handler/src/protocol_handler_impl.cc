@@ -35,6 +35,7 @@
 
 #include <memory.h>
 
+#include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "utils/macro.h"
@@ -156,6 +157,16 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
+                                           unsigned char session_id,
+                                           unsigned int message_id) {
+  ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF,
+                        FRAME_TYPE_CONTROL, SERVICE_TYPE_RPC,
+                        FRAME_DATA_HEART_BEAT_ACK, session_id,
+                        0, message_id);
+  return SendFrame(connection_id, packet);
+}
+
 void ProtocolHandlerImpl::SendMessageToMobileApp(
   const RawMessagePtr& message, bool final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -173,6 +184,10 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(
 void ProtocolHandlerImpl::OnTMMessageReceived(
   const RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
+  connection_handler::ConnectionHandlerImpl* connection_handler =
+      connection_handler::ConnectionHandlerImpl::instance();
+  // Connection handler should be accessed from TM thread only
+  connection_handler->KeepConnectionAlive(message->connection_key());
 
   if (message.valid()) {
     LOG4CXX_INFO_EXT(logger_,
@@ -387,7 +402,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
       LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
 
       LOG4CXX_TRACE_EXIT(logger_);
-      return HandleControlMessage(connection_id, packet);
+      return HandleControlMessage(connection_id, *packet);
     }
     case FRAME_TYPE_SINGLE: {
       LOG4CXX_INFO(
@@ -519,9 +534,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
   ConnectionID connection_id,
-  const ProtocolPacket* packet) {
-  LOG4CXX_TRACE_ENTER(logger_);
-
+  const ProtocolPacket& packet) {
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 
@@ -529,70 +542,86 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     return RESULT_FAIL;
   }
 
-  if (packet->frame_data() == FRAME_DATA_END_SESSION) {
-    LOG4CXX_INFO(logger_, "handleControlMessage() - FRAME_DATA_END_SESSION");
+  switch (packet.frame_data()) {
+    case FRAME_DATA_END_SESSION:
+      return HandleControlMessageEndSession(connection_id, packet);
+    case FRAME_DATA_START_SESSION:
+      return HandleControlMessageStartSession(connection_id, packet);
+    case FRAME_DATA_HEART_BEAT:
+      return HandleControlMessageHeartBeat(connection_id, packet);
+    default:
+      LOG4CXX_WARN(logger_, "Control message of type "
+                            <<int(packet.frame_data())<<" ignored");
+      return RESULT_OK;
+  }
+}
 
-    unsigned char currentsession_id = packet->session_id();
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
+  ConnectionID connection_id ,
+  const ProtocolPacket& packet) {
+  LOG4CXX_INFO(logger_, "ProtocolHandlerImpl::HandleControlMessageEndSession()");
 
-    unsigned int hash_code = 0;
-    if (packet->version() == 2) {
-      hash_code = packet->message_id();
-    }
+  unsigned char currentsession_id = packet.session_id();
 
-    bool success = true;
-    int sessionhash_code = session_observer_->OnSessionEndedCallback(
-                             connection_id,
-                             currentsession_id,
-                             hash_code,
-                             packet->service_type());
+  unsigned int hash_code = 0;
+  if (packet.version() == 2) {
+    hash_code = packet.message_id();
+  }
 
-    if (-1 != sessionhash_code) {
-      if (2 == packet->version()) {
-        if (packet->message_id() != sessionhash_code) {
-          success = false;
-        }
+  bool success = true;
+  int sessionhash_code = session_observer_->OnSessionEndedCallback(
+      connection_id, currentsession_id, hash_code,
+      ServiceTypeFromByte(packet.service_type()));
+
+  if (-1 != sessionhash_code) {
+    if (2 == packet.version()) {
+      if (packet.message_id() != sessionhash_code) {
+        success = false;
       }
-    } else {
-      success = false;
     }
-
-    if (success) {
-      message_counters_.erase(currentsession_id);
-    } else {
-      LOG4CXX_INFO_EXT(
-        logger_,
-        "Refused to end session " << packet -> service_type() << " type.");
-      SendEndSessionNAck(connection_id, currentsession_id,
-                         packet->service_type());
-    }
+  } else {
+    success = false;
   }
 
-  if (packet->frame_data() == FRAME_DATA_START_SESSION) {
-    LOG4CXX_INFO(logger_,
-                 "handleControlMessage() - FRAME_DATA_START_SESSION");
+  if (success) {
+    message_counters_.erase(currentsession_id);
+  } else {
     LOG4CXX_INFO_EXT(
-      logger_, "Version 2 " << (packet -> version() == PROTOCOL_VERSION_2));
-
-    int session_id = session_observer_->OnSessionStartedCallback(
-                       connection_id,
-                       packet->service_type());
-    if (-1 != session_id) {
-      SendStartSessionAck(
-        connection_id, session_id, packet->version(),
-        session_observer_->KeyFromPair(
-          connection_id, session_id),
-        packet->service_type());
-    } else {
-      LOG4CXX_INFO_EXT(
         logger_,
-        "Refused to create session " << packet -> service_type() << " type.");
-      SendStartSessionNAck(connection_id,
-                           packet->service_type());
-    }
+        "Refused to end session " << packet.service_type() << " type.");
+    SendEndSessionNAck(connection_id, currentsession_id,
+                       packet.service_type());
   }
-
-  LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
+  ConnectionID connection_id ,
+  const ProtocolPacket& packet) {
+  LOG4CXX_INFO(logger_, "ProtocolHandlerImpl::HandleControlMessageStartSession");
+  LOG4CXX_INFO_EXT(logger_,
+                   "Version 2 " << (packet.version() == PROTOCOL_VERSION_2));
+
+  int session_id = session_observer_->OnSessionStartedCallback(
+      connection_id, ServiceTypeFromByte(packet.service_type()));
+  if (-1 != session_id) {
+    SendStartSessionAck(
+        connection_id, session_id, packet.version(),
+        session_observer_->KeyFromPair(connection_id, session_id),
+        packet.service_type());
+  } else {
+    LOG4CXX_INFO_EXT(
+        logger_,
+        "Refused to create session " << packet.service_type() << " type.");
+    SendStartSessionNAck(connection_id, packet.service_type());
+  }
+  return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
+  ConnectionID connection_id,
+  const ProtocolPacket& packet) {
+  return SendHeartBeatAck(connection_id, packet.session_id(), packet.message_id());
 }
 
 void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile& message) {

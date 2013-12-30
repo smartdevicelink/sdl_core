@@ -108,9 +108,14 @@ const unsigned char SERVICE_TYPE_NAVI = 0x0B;
 const unsigned char SERVICE_TYPE_BULK = 0x0F;
 
 /**
- *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for hear beat.
+ *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
  */
-const unsigned char FRAME_DATA_HEART_BEAT = 0x00;   // Unused
+const unsigned char FRAME_DATA_HEART_BEAT = 0x00;
+
+/**
+ *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat ack.
+ */
+const unsigned char FRAME_DATA_HEART_BEAT_ACK = 0xFF;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Start session frame

@@ -59,6 +59,7 @@ public abstract class AbstractProtocol {
     // session has ended.
     public abstract void EndProtocolSession(SessionType sessionType, byte sessionID);
 
+    // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
     // sent to SYNC.
     public abstract void SetHeartbeatSendInterval(int heartbeatSendInterval_ms);
@@ -165,4 +166,7 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolAppUnregistered();
     }
 
+    protected void handleProtocolHeartbeatACK() {
+        _protocolListener.onProtocolHeartbeatACK();
+    }
 } // end-class

@@ -17,6 +17,7 @@ public class FrameDataControlFrameType extends ByteEnumer {
 	public final static FrameDataControlFrameType StartSessionNACK = new FrameDataControlFrameType((byte)0x03, "StartSessionNACK");
 	public final static FrameDataControlFrameType EndSession = new FrameDataControlFrameType((byte)0x04, "EndSession");
     public final static FrameDataControlFrameType MobileNaviACK = new FrameDataControlFrameType((byte)0x06, "MobileNaviACK");
+    public final static FrameDataControlFrameType HeartbeatACK = new FrameDataControlFrameType((byte)0xFF, "HeartbeatACK");
 
 	static {
 		theList.addElement(Heartbeat);
