@@ -1,3 +1,6 @@
+[CW1]
++ SyncProxyAndroid SDK: Add heartbeat support. WARNING: you'll need to use a compatible SDL core version, otherwise the connection will reset periodically when nothing happens.
+
 [CW51]
 + Add ability to SPT to Slider request without sliderFooter
 * Fix parsing OnAudioPassThru notifications.
