@@ -32,6 +32,7 @@
 #include "utils/conditional_variable.h"
 
 #include <errno.h>
+#include <time.h>
 
 #include "utils/lock.h"
 #include "utils/logger.h"
