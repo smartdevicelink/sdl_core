@@ -90,13 +90,11 @@ class DnssdServiceBrowser : public DeviceScanner {
 
   void OnClientConnected();
   void OnClientFailure();
-  void OnSearchDone(const DeviceVector& device_vector);
 
   DeviceVector PrepareDeviceVector() const;
 
   void ServiceResolved(const DnssdServiceRecord& service_record);
   void ServiceResolveFailed(const DnssdServiceRecord& service_record);
-  void ServiceResolveFinished();
 
   friend void AvahiClientCallback(AvahiClient *avahi_client,
                                   AvahiClientState avahi_client_state,
@@ -123,8 +121,6 @@ class DnssdServiceBrowser : public DeviceScanner {
   typedef std::vector<DnssdServiceRecord> ServiceRecords;
   ServiceRecords service_records_;
 
-  int scan_requests_;
-  int services_to_be_resolved_;
   pthread_mutex_t mutex_;
 
   bool initialised_;
