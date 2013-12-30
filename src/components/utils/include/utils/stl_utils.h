@@ -29,61 +29,53 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-
-#include <queue>
-#include <map>
-#include <iostream>
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
 
 #include "utils/macro.h"
 
 namespace utils {
 
 /*
- * Template queue class that gives out messages respecting their priority
- * Message class must have size_t PriorityOrder() method implemented
+ * Utility class that automatically deletes STL collection of
+ * freestore objects
  */
-template < typename M >
-class PrioritizedQueue {
+template<class T>
+class StlCollectionDeleter {
  public:
-  typedef M value_type;
-  // std::map guarantees it's contents is sorted by key
-  typedef std::map<size_t, std::queue<value_type> > QueuesMap;
-  PrioritizedQueue()
-    : total_size_(0) {
+  typedef T Collection;
+  StlCollectionDeleter(T* collection): collection_(collection) {
+    DCHECK(collection_);
   }
-  // All api mimics usual std queue interface
-  void push(const value_type& message) {
-    size_t message_priority = message.PriorityOrder();
-    queues_[message_priority].push(message);
-    ++total_size_;
-  }
-  size_t size() const {
-    return total_size_;
-  }
-  bool empty() const {
-    return queues_.empty();
-  }
-  value_type front() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    return queues_.rbegin()->second.front();
-  }
-  void pop() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    typename QueuesMap::iterator last = --queues_.end();
-    last->second.pop();
-    --total_size_;
-    if (last->second.empty()) {
-      queues_.erase(last);
+  ~StlCollectionDeleter() {
+    for (typename Collection::iterator i = collection_->begin(),
+                                       end = collection_->end();
+                                       i != end; ++i) {
+      delete *i;
     }
   }
  private:
-  QueuesMap queues_;
-  size_t total_size_;
+  Collection* collection_;
 };
 
-}
+template<class T>
+class StlMapDeleter {
+ public:
+  typedef T Collection;
+  StlMapDeleter(T* collection): collection_(collection) {
+    DCHECK(collection_);
+  }
+  ~StlMapDeleter() {
+    for (typename Collection::iterator i = collection_->begin(),
+                                       end = collection_->end();
+                                       i != end; ++i) {
+      delete i->second;
+    }
+  }
+ private:
+  Collection* collection_;
+};
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
+} // namespace utils
+
+#endif /* SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_ */

@@ -3,7 +3,8 @@ package com.ford.syncV4.protocol;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
-import com.ford.syncV4.protocol.enums.FrameData;
+
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.util.BitConverter;
@@ -61,8 +62,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                       int pastDue_ms) {
+                public void onProtocolHeartbeatACK() {
                 }
 
                 @Override
@@ -409,8 +409,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                   int pastDue_ms) {
+            public void onProtocolHeartbeatACK() {
             }
 
             @Override
@@ -436,7 +435,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testEndSessionACKFrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
-        frameHeader.setFrameData(FrameData.EndSessionACK.getValue());
+        frameHeader.setFrameData(FrameDataControlFrameType.EndSessionACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
         frameHeader.setSessionType(SessionType.RPC);
@@ -444,13 +443,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol((mock(IProtocolListener.class))){
             @Override
             protected void handleProtocolSessionEnded(SessionType sessionType, byte sessionID, String correlationID) {
-                assertEquals("", SESSION_ID, sessionID);
+                assertEquals( SESSION_ID, sessionID);
                 assertEquals(SessionType.RPC, sessionType);
                 return;
             }
         }.new MessageFrameAssembler();
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
         assertTrue("Should not get here", false);
-
     }
 }

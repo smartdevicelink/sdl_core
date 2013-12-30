@@ -5,9 +5,12 @@ import android.util.Log;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
+import com.ford.syncV4.protocol.ProtocolFrameHeader;
+import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
@@ -27,7 +30,13 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener {
+import static com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor.IHeartbeatMonitorDelegate;
+
+public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
+        IHeartbeatMonitorDelegate {
+    private static final String TAG = "SyncConnection";
+
+    private boolean _isHeartbeatTimedout = false;
 
     private NSDHelper mNSDHelper;
     SyncTransport _transport = null;
@@ -37,6 +46,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     // Thread safety locks
     Object TRANSPORT_REFERENCE_LOCK = new Object();
     Object PROTOCOL_REFERENCE_LOCK = new Object();
+    IHeartbeatMonitor _heartbeatMonitor;
 
     /**
      * Constructor.
@@ -102,6 +112,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         return _protocol;
     }
 
+    public IHeartbeatMonitor getHeartbeatMonitor() {
+        return _heartbeatMonitor;
+    }
+
+    public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
+        this._heartbeatMonitor = heartbeatMonitor;
+        _heartbeatMonitor.setDelegate(this);
+    }
+
     public void stopTransportReading() {
         if (_transport != null) {
             _transport.stopReading();
@@ -109,10 +128,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void closeConnection(byte rpcSessionID, boolean keepConnection) {
+        closeConnection(rpcSessionID, keepConnection, true);
+    }
+
+    public void closeConnection(byte rpcSessionID, boolean keepConnection,
+                         boolean sendFinishMessages) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
-                if (_transport != null && _transport.getIsConnected()) {
+                if (sendFinishMessages && (_transport != null) &&
+                        _transport.getIsConnected()) {
                     _protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
                 }
                 if (!keepConnection) {
@@ -120,6 +145,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
             } // end-if
         }
+
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.stop();
+            _heartbeatMonitor = null;
+        }
+
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
             stopH264();
@@ -158,7 +189,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mPacketizer.start();
             return os;
         } catch (Exception e) {
-            Log.e("SyncConnection", "Unable to start H.264 streaming:" + e.toString());
+            Log.e(TAG, "Unable to start H.264 streaming:" + e.toString());
         }
         return null;
     }
@@ -210,6 +241,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onTransportConnected() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.start();
+        }
+
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 _protocol.StartProtocolSession(SessionType.RPC);
@@ -219,14 +254,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onTransportDisconnected(String info) {
-        // Pass directly to connection listener
-        _connectionListener.onTransportDisconnected(info);
+        if (!_isHeartbeatTimedout) {
+            // Pass directly to connection listener
+            _connectionListener.onTransportDisconnected(info);
+        }
+        _isHeartbeatTimedout = false;
     }
 
     @Override
     public void onTransportError(String info, Exception e) {
-        // Pass directly to connection listener
-        _connectionListener.onTransportError(info, e);
+        if (!_isHeartbeatTimedout) {
+            // Pass directly to connection listener
+            _connectionListener.onTransportError(info, e);
+        }
+        _isHeartbeatTimedout = false;
     }
 
     @Override
@@ -243,12 +284,21 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
                 _transport.sendBytes(msgBytes, offset, length);
+
+                if (_heartbeatMonitor != null) {
+                    _heartbeatMonitor.notifyTransportActivity();
+                }
             }
         }
     }
 
     @Override
     public void onProtocolMessageReceived(ProtocolMessage msg) {
+        // only data messages get here
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.notifyTransportActivity();
+        }
+
         _connectionListener.onProtocolMessageReceived(msg);
     }
 
@@ -265,9 +315,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                           int pastDue_ms) {
-        // Not implemented on SYNC
+    public void onProtocolHeartbeatACK() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.heartbeatACKReceived();
+        }
     }
 
     @Override
@@ -277,7 +328,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolAppUnregistered() {
-        Log.d("SyncConnection", "onProtocolAppUnregistered");
+        Log.d(TAG, "onProtocolAppUnregistered");
         _transport.stopReading();
     }
 
@@ -301,5 +352,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (pm != null) {
             sendMessage(pm);
         }
+    }
+
+    @Override
+    public void sendHeartbeat(IHeartbeatMonitor monitor) {
+        Log.d(TAG, "Asked to send heartbeat");
+        final ProtocolFrameHeader heartbeat =
+                ProtocolFrameHeaderFactory.createHeartbeat(SessionType.RPC,
+                        (byte) 2);
+        final byte[] bytes = heartbeat.assembleHeaderBytes();
+        onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+    }
+
+    @Override
+    public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
+        Log.d(TAG, "Heartbeat timeout; closing connection");
+        _isHeartbeatTimedout = true;
+        closeConnection((byte) 0, false, false);
+        _connectionListener.onHeartbeatTimedOut();
     }
 }

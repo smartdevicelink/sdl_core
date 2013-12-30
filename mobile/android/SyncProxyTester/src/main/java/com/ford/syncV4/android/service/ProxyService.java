@@ -128,8 +128,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 	private static SyncProxyALM _syncProxy;
 	private static logAdapter _msgAdapter;
 	private ModuleTest _testerMain;
-	private BluetoothAdapter mBtAdapter;
-	private MediaPlayer embeddedAudioPlayer;
+    private MediaPlayer embeddedAudioPlayer;
 	private Boolean playingAudio = false;
 	protected SyncReceiver mediaButtonReceiver;
 	
@@ -227,7 +226,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
 		if (transportType == Const.Transport.KEY_BLUETOOTH) {
 			Log.d(TAG, "ProxyService. onStartCommand(). Transport = Bluetooth.");
-			mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+            BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBtAdapter != null) {
 				if (mBtAdapter.isEnabled()) {
 					startProxy();
@@ -754,6 +753,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                     (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                 reset();
+            }
+
+            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) &&
+                    (_msgAdapter != null)) {
+                _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e,
+                        true);
             }
         }
 	}

@@ -7,6 +7,8 @@ public interface ISyncConnectionListener {
 	public void onTransportDisconnected(String info);
 	
 	public void onTransportError(String info, Exception e);
+
+    public void onHeartbeatTimedOut();
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	

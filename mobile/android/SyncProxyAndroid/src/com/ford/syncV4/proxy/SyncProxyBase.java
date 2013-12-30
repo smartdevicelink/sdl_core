@@ -19,6 +19,7 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -167,8 +168,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	// Protected Correlation IDs
 	private final int 	REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
 						UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
-						HEARTBEAT_CORRELATION_ID = 65531,
 						POLICIES_CORRELATION_ID = 65535;
+	final int HEARTBEAT_CORRELATION_ID = 65531; // TODO: remove
 
 	// Synchronization Objects
 	static final Object CONNECTION_REFERENCE_LOCK = new Object(),
@@ -183,11 +184,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private static final int PROXY_RECONNECT_DELAY = 5000;
 
-	// Heartbeat members
-	private ProxyHeartBeat _proxyHeartBeat = null;
-	private boolean _heartBeatEnabled = false;
-	private long _interfaceIdleTimeLimit = 3000; // 3 seconds
-	private long _heartbeatResponsePastDueTimeLimit = 2000; // 2 seconds
+    /**
+     * Interval between heartbeat messages, in milliseconds.
+     * NOTE: this value is not specified in the protocol, and thus must be
+     * negotiated with the Sync.
+     */
+    static final int HEARTBEAT_INTERVAL = 5000;
 
 	// RPC Session ID
 	byte _rpcSessionID = 0;
@@ -307,12 +309,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			}
 		}
 
-		@Override
-		public void onProtocolMessageReceived(ProtocolMessage msg) {
-			if (_proxyHeartBeat != null && _heartBeatEnabled) {
-				_proxyHeartBeat.recordMostRecentIncomingProtocolInterfaceActivity();
-			} // end-if
+        @Override
+        public void onHeartbeatTimedOut() {
+            final String msg = "Heartbeat timeout";
+            DebugTool.logInfo(msg);
+            notifyProxyClosed(msg, new SyncException(msg,
+                    SyncExceptionCause.HEARTBEAT_PAST_DUE));
+        }
 
+        @Override
+		public void onProtocolMessageReceived(ProtocolMessage msg) {
 			try {if (msg.getData().length > 0) queueIncomingMessage(msg);}
 			catch (Exception e) {}
 			try {if (msg.getBulkData().length > 0) queueIncomingMessage(msg);}
@@ -356,166 +362,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
 
-	private class ProxyHeartBeat {
-
-		private final String THREAD_NAME = "SyncHeartbeat";
-		private final long POLLING_INTERVAL = 1000; // 1 second
-
-		private boolean _isHalted = false;
-
-		private Thread _heartbeatThread = null;
-		private boolean _heartbeatActive = false;
-		private int _pendingRequestCount = 0;
-		private long _interfaceMostRecentActivityTimestamp_ms = 0;
-		private long _mostRecentHeartbeatSentTimestamp_ms = 0;
-		private boolean _heartbeatRequestInProgress = false;
-
-		public ProxyHeartBeat() {
-			// Set initial value of heart beat members
-			_heartbeatRequestInProgress = false;
-			_heartbeatActive = false;
-			_interfaceMostRecentActivityTimestamp_ms = 0;
-			_mostRecentHeartbeatSentTimestamp_ms = 0;
-			_pendingRequestCount = 0;
-
-			_heartbeatThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						while (!_isHalted) {
-							heartbeatProcessing();
-						}
-					} catch (InterruptedException e) {
-						SyncTrace.logProxyEvent("Heartbeat thread interupted.", SYNC_LIB_TRACE_KEY);
-					}
-				}
-			});
-			_heartbeatThread.setName(THREAD_NAME);
-			_heartbeatThread.setDaemon(true);
-			_heartbeatActive = true;
-		}
-
-		// Method to start the heart beat
-		public void startHeartBeat() {
-			_heartbeatThread.start();
-		}
-
-		// Set heart beat active
-		public void setHeartBeatActive(boolean isActive) {
-			_heartbeatActive = isActive;
-		}
-
-		// Manage most-recent activity timestamp for pseudo-heartbeat
-		// TODO Remove on next release if proven unnecessary
-		@Deprecated
-		private	synchronized void changePendingRequestCount(boolean incrementCount) {
-			if (incrementCount) {
-				_pendingRequestCount++;
-			} else {
-				_pendingRequestCount--;
-			}
-		}
-
-		private synchronized void recordMostRecentHeartbeatSentTimestamp() {
-			_mostRecentHeartbeatSentTimestamp_ms = System.currentTimeMillis();
-		}
-
-		private synchronized void recordMostRecentIncomingProtocolInterfaceActivity() {
-			_interfaceMostRecentActivityTimestamp_ms = System.currentTimeMillis();
-			if (_heartbeatRequestInProgress) {
-				cancelHeartbeatRequest();
-			}
-		}
-
-		private synchronized boolean heartbeatRequired() {
-			long idleTime = System.currentTimeMillis() - _interfaceMostRecentActivityTimestamp_ms;
-
-			return (idleTime >= _interfaceIdleTimeLimit);
-		}
-
-		private synchronized boolean heartbeatResponsePastDue() {
-			long heartbeatElapsedTime = System.currentTimeMillis() - _mostRecentHeartbeatSentTimestamp_ms;
-
-			return (heartbeatElapsedTime >= _heartbeatResponsePastDueTimeLimit);
-		}
-
-		private void cancelHeartbeatRequest() {
-			_heartbeatRequestInProgress = false;
-		}
-
-		private void issueHeartbeatRequest() {
-			SetGlobalProperties req = new SetGlobalProperties();
-			req.setCorrelationID(HEARTBEAT_CORRELATION_ID);
-
-			try {
-				sendRPCRequestPrivate(req);
-				_heartbeatRequestInProgress = true;
-			} catch (Exception ex) {
-				// If sending the heartbeat request fails, cancel the heartbeat monitoring
-				DebugTool.logError("Failure issuing heartbeat request: " + ex.toString(), ex);
-				halt();
-				_heartBeatEnabled = false;
-			} // end-catch
-		} // end-method
-
-		public void receivedHeartBeatResponse() {
-			_heartbeatRequestInProgress = false;
-		}
-
-		private void heartbeatProcessing() throws InterruptedException {
-			// This function polls to manage an RPC-level heartbeat to more quickly detect
-			// a lost connection to SYNC.
-
-			Thread.sleep(POLLING_INTERVAL);
-
-			if (_heartbeatRequestInProgress) {
-				if (heartbeatResponsePastDue()) {
-					DebugTool.logError("HEARTBEAT PAST DUE (i.e. not received within " +  _heartbeatResponsePastDueTimeLimit + "ms)");
-					if (_advancedLifecycleManagementEnabled) {
-						// Heartbeat past due and connection lost, interface no longer valid
-						_appInterfaceRegisterd = false;
-						synchronized(APP_INTERFACE_REGISTERED_LOCK) {
-							APP_INTERFACE_REGISTERED_LOCK.notify();
-						}
-
-						// Cycle the proxy with HEARTBEAT_PAST_DUE as the disconnect reason
-						cycleProxy(SyncDisconnectedReason.HEARTBEAT_PAST_DUE);
-					} else {
-						notifyProxyClosed("HeartbeatPastDue", new SyncException("Heartbeat past due.", SyncExceptionCause.HEARTBEAT_PAST_DUE));
-					}
-					return;
-				} // end-if
-			} else {
-				// There's not a heartbeat request in-flight at the moment ...
-				//
-				// If heartbeat is deactivated (for whatever reason), then just
-				// iterate loop.
-				if (!_heartbeatActive) {
-					return; // Do not need to request a heartbeat
-				} // end-if
-
-				//if (heartbeatRequired()) && m_pendingRequestCount == 0) {
-				if (heartbeatRequired()) {
-					issueHeartbeatRequest();
-				} // end-if
-			} // end-if
-		} // end-method
-
-		private void halt() {
-			_isHalted = true;
-
-			if (_heartbeatThread != null) {
-				try	{
-					_heartbeatThread.interrupt();
-				} catch (Exception ex) {
-					DebugTool.logError("Failure interrupting heartbeat thread: " + ex.toString(), ex);
-				}
-				_heartbeatThread = null;
-			} // end-if
-		}
-	}
-
-	/**
+    /**
 	 * Constructor.
 	 *
 	 * @param listener Type of listener for this proxy base.
@@ -1163,10 +1010,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_haveReceivedFirstFocusLevel = false;
 		_haveReceivedFirstFocusLevelFull = false;
 		_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
-
-		//TODO: Set Heart Beat Active!
-		//_proxyHeartBeat = new ProxyHeartBeat();
-		//_heartBeatEnabled = true;
     }
 
     // Function to initialize new proxy connection
@@ -1177,6 +1020,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		synchronized(CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
                 _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+                final HeartbeatMonitor heartbeatMonitor =
+                        new HeartbeatMonitor();
+                heartbeatMonitor.setInterval(HEARTBEAT_INTERVAL);
+                _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
             }
 			WiProProtocol protocol = (WiProProtocol)_syncConnection.getWiProProtocol();
 			protocol.setVersion(_wiproVersion);
@@ -1259,11 +1106,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			synchronized(CONNECTION_REFERENCE_LOCK) {
                 closeSyncConnection(keepConnection);
             }
-
-			// Clean up Heartbeat Thread
-			if (_proxyHeartBeat != null) {
-				_proxyHeartBeat.halt();
-			}
 		} catch (SyncException e) {
 			throw e;
 		} finally {
@@ -1584,7 +1426,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 	// Private sendPRCRequest method. All RPCRequests are funneled through this method after
 		// error checking.
-	private void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
+    // FIXME: return to private?
+    void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
 		try {
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 
@@ -1603,15 +1446,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
 			throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
 		}
-
-		// Record most recent heart beat activity
-		if (_proxyHeartBeat != null && _heartBeatEnabled) {
-			if (request.getCorrelationID() != null && request.getCorrelationID() == HEARTBEAT_CORRELATION_ID) {
-				_proxyHeartBeat.recordMostRecentHeartbeatSentTimestamp();
-			}
-
-			_proxyHeartBeat.changePendingRequestCount(true);
-		} // end-if
 	}
 
     private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
@@ -1634,10 +1468,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		if (messageType.equals(Names.response)) {
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCResponse(rpcMsg), SYNC_LIB_TRACE_KEY);
-
-			if (_proxyHeartBeat != null && _heartBeatEnabled) {
-				_proxyHeartBeat.changePendingRequestCount(false);
-			} // end-if
 
 			// Check to ensure response is not from an internal message (reserved correlation ID)
 			if (isCorrelationIDProtected((new RPCResponse(hash)).getCorrelationID())) {
@@ -1995,27 +1825,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					_proxyListener.onPerformInteractionResponse((PerformInteractionResponse)msg);
 				}
 			} else if (functionName.equals(Names.SetGlobalProperties)) {
-				// SetGlobalPropertiesResponse (can also be Heartbeat)
-
 				final SetGlobalPropertiesResponse msg = new SetGlobalPropertiesResponse(hash);
-
-				if (msg.getCorrelationID() != null && HEARTBEAT_CORRELATION_ID == msg.getCorrelationID()) {
-					if (_proxyHeartBeat != null) {
-						_proxyHeartBeat.receivedHeartBeatResponse();
-					}
-				} else {
-					if (_callbackToUIThread) {
-						// Run in UI thread
-						_mainUIHandler.post(new Runnable() {
+				if (_callbackToUIThread) {
+					// Run in UI thread
+					_mainUIHandler.post(new Runnable() {
 							@Override
 							public void run() {
-								_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
-							}
+							_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
+						}
 						});
-					} else {
-						_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
-					}
-				} // end-if
+				} else {
+					_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
+				}
 			} else if (functionName.equals(Names.ResetGlobalProperties)) {
 				// ResetGlobalProperties
 
@@ -2328,35 +2149,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					} else {
 						_proxyListener.onOnHMIStatus((OnHMIStatus)msg);
 					}
-				}
-
-				// Take action dependent on first non-NONE HMI Message
-				if (_haveReceivedFirstNonNoneHMILevel) {
-					if (_proxyHeartBeat != null && _heartBeatEnabled) {
-						if (msg.getHmiLevel() == HMILevel.HMI_NONE) {
-							_proxyHeartBeat.setHeartBeatActive(false);
-						} else {
-							// This will usually be a redundant set of the boolean, but
-							// should be harmless.
-							_proxyHeartBeat.setHeartBeatActive(true);
-						} // end-if
-					} // end-if
-				} else {
-					if (msg.getHmiLevel() == HMILevel.HMI_NONE) {
-						if (_proxyHeartBeat != null && _heartBeatEnabled) {
-							// This particular case will, I think, ALWAYS be redundant
-							// (and will only happen once per life of proxy instance), but
-							// setting to false will ALWAYS be correct logic anyway.
-							_proxyHeartBeat.setHeartBeatActive(false);
-						} // end-if
-					} else {
-						// This is the first non-None HMI Level
-						_haveReceivedFirstNonNoneHMILevel = true;
-
-						if (_proxyHeartBeat != null && _heartBeatEnabled) {
-							_proxyHeartBeat.startHeartBeat();
-						} // end-if
-					} // end-if
 				}
 			} else if (functionName.equals(Names.OnCommand)) {
 				// OnCommand

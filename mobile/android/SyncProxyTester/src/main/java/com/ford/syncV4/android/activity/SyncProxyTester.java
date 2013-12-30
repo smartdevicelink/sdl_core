@@ -400,30 +400,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         AppPreferencesManager.setAppContext(this);
 
-        if (mBluetoothDeviceManager == null) {
-            mBluetoothDeviceManager = new BluetoothDeviceManager();
-        }
-        mBluetoothDeviceManager.setBluetoothDeviceManagerCallback(this);
-        mBluetoothDeviceManager.initState();
-
-        IntentFilter intentFilter = new IntentFilter();
-
-        // provide access to the connection states with a remote device.
-        //intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        //intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-        intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-
-        if (mSyncReceiver == null) {
-            mSyncReceiver = new SyncReceiver();
-            mSyncReceiver.setBluetoothReceiverCallback(mBluetoothDeviceManager);
-        }
-        registerReceiver(mSyncReceiver, intentFilter);
-
-        //_msgAdapter.logMessage("SyncProxyTester activity was started.", Log.DEBUG);
-
         setContentView(R.layout.main);
         _scroller = (ScrollView) findViewById(R.id.scrollConsole);
 
@@ -507,8 +483,36 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onSetUpDialogResult() {
+        setUpReceiver();
         showProtocolPropertiesInTitle();
         startSyncProxy();
+    }
+
+    private void setUpReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+
+        // provide access to the connection states with a remote device.
+        //intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        //intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+        intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+
+        if (mSyncReceiver == null) {
+            mSyncReceiver = new SyncReceiver();
+
+            if (AppPreferencesManager.getTransportType() == Const.Transport.KEY_BLUETOOTH) {
+                intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+                if (mBluetoothDeviceManager == null) {
+                    mBluetoothDeviceManager = new BluetoothDeviceManager();
+                }
+                mBluetoothDeviceManager.setBluetoothDeviceManagerCallback(this);
+                mBluetoothDeviceManager.initState();
+                mSyncReceiver.setBluetoothReceiverCallback(mBluetoothDeviceManager);
+            }
+
+        }
+        registerReceiver(mSyncReceiver, intentFilter);
     }
 
     @Override

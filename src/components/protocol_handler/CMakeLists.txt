@@ -6,6 +6,7 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/applink_protocol.cc
     ./src/rpc_type.cc
     ./src/raw_message.cc
     ./src/protocol_handler_impl.cc

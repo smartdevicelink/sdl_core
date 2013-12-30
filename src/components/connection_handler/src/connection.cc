@@ -36,6 +36,8 @@
 #include <algorithm>
 
 #include "connection_handler/connection.h"
+#include "connection_handler/connection_handler.h"
+#include "utils/macro.h"
 
 /**
  * \namespace connection_handler
@@ -47,10 +49,15 @@ log4cxx::LoggerPtr Connection::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("ConnectionHandler"));
 
 Connection::Connection(ConnectionHandle connection_handle,
-                       DeviceHandle connection_device_handle)
-    : connection_handle_(connection_handle),
+                       DeviceHandle connection_device_handle,
+                       ConnectionHandler* connection_handler,
+                       int32_t heartbeat_timeout)
+    : connection_handler_(connection_handler),
+      connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle),
-      session_id_counter_(1) {
+      session_id_counter_(1),
+      heartbeat_monitor_(heartbeat_timeout, this) {
+  DCHECK(connection_handler_);
 }
 
 Connection::~Connection() {
@@ -58,6 +65,9 @@ Connection::~Connection() {
 
 int Connection::AddNewSession() {
   int result = -1;
+  if (session_list_.empty()) {
+    heartbeat_monitor_.BeginMonitoring();
+  }
   if (255 > session_id_counter_) {
     session_list_.push_back(session_id_counter_);
     result = session_id_counter_++;
@@ -87,7 +97,7 @@ int Connection::GetFirstSessionID() {
   return result;
 }
 
-ConnectionHandle Connection::connection_handle() {
+ConnectionHandle Connection::connection_handle() const {
   return connection_handle_;
 }
 
@@ -98,4 +108,13 @@ DeviceHandle Connection::connection_device_handle() {
 void Connection::GetSessionList(SessionList& session_list) {
   session_list = session_list_;
 }
+
+void Connection::Close() {
+  connection_handler_->CloseConnection(connection_handle_);
+}
+
+void Connection::KeepAlive() {
+  heartbeat_monitor_.KeepAlive();
+}
+
 }/* namespace connection_handler */

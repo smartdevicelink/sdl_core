@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,61 +28,48 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-
-#include <queue>
+#include <stdint.h>
 #include <map>
-#include <iostream>
 
+#include "utils/timer_thread.h"
+#include "utils/threads/thread_validator.h"
 #include "utils/macro.h"
 
-namespace utils {
+namespace connection_handler {
+
+class Connection;
 
 /*
- * Template queue class that gives out messages respecting their priority
- * Message class must have size_t PriorityOrder() method implemented
+ * Starts timer and when it elapses closes associated connection
  */
-template < typename M >
-class PrioritizedQueue {
+class HeartBeatMonitor: public threads::SingleThreadSimpleValidator {
  public:
-  typedef M value_type;
-  // std::map guarantees it's contents is sorted by key
-  typedef std::map<size_t, std::queue<value_type> > QueuesMap;
-  PrioritizedQueue()
-    : total_size_(0) {
-  }
-  // All api mimics usual std queue interface
-  void push(const value_type& message) {
-    size_t message_priority = message.PriorityOrder();
-    queues_[message_priority].push(message);
-    ++total_size_;
-  }
-  size_t size() const {
-    return total_size_;
-  }
-  bool empty() const {
-    return queues_.empty();
-  }
-  value_type front() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    return queues_.rbegin()->second.front();
-  }
-  void pop() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    typename QueuesMap::iterator last = --queues_.end();
-    last->second.pop();
-    --total_size_;
-    if (last->second.empty()) {
-      queues_.erase(last);
-    }
-  }
+  HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
+                   Connection* connection);
+  ~HeartBeatMonitor();
+  /*
+   * \brief Starts connection monitoring.
+   * Should be called when first session was opened.
+   */
+  void BeginMonitoring();
+  /*
+   * Resets keepalive timer preventing connection from being killed
+   */
+  void KeepAlive();
  private:
-  QueuesMap queues_;
-  size_t total_size_;
+  void TimeOut();
+ private:
+  // \brief Heartbeat timeout, should be read from profile
+  const int32_t heartbeat_timeout_seconds_;
+  // \brief Connection that must be closed when timeout elapsed
+  Connection* connection_;
+  timer::TimerThread<HeartBeatMonitor> timer_;
+  DISALLOW_COPY_AND_ASSIGN(HeartBeatMonitor);
 };
 
-}
+} // namespace connection_handler
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
+#endif // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_

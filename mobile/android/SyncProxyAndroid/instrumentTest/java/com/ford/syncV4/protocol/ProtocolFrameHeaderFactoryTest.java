@@ -6,19 +6,26 @@ import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * Created by Andrew Batutin on 8/20/13.
  */
 public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
-
-    public ProtocolFrameHeaderFactoryTest() {
-    }
+    static final byte SESSION_TYPE_RPC = 0x07;
+    static final byte PROTOCOL_VERSION = 0x02;
+    static final byte FRAME_HEARTBEAT = 0x00;
+    static final byte FRAME_HEARTBEAT_ACK = (byte) 0xFF;
 
     public void testMobileNavStartSessionFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createMobileNavStartSession(48, (byte) 48, (byte) 2);
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createMobileNavStartSession(48,
+                        (byte) 48, (byte) 2);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
-        assertEquals(header.getFrameData(), FrameDataControlFrameType.StartSession.getValue());
+        assertEquals(header.getFrameData(),
+                FrameDataControlFrameType.StartSession.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);
@@ -27,22 +34,29 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
     }
 
     public void testSessionStartACKFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.RPC, (byte) 48, 48, (byte) 2);
-        byte[] data =  header.assembleHeaderBytes();
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createStartSessionACK(
+                        SessionType.RPC, (byte) 48, 48, (byte) 2);
+        byte[] data = header.assembleHeaderBytes();
         assertNotNull("data should not be null", data);
     }
 
     public void testSessionStartNACKFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionNACK(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
-        byte[] data =  header.assembleHeaderBytes();
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createStartSessionNACK(
+                        SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        byte[] data = header.assembleHeaderBytes();
         assertNotNull("data should not be null", data);
     }
 
     public void testMobileNavStartSessionACKFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createStartSessionACK(
+                        SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
-        assertEquals(header.getFrameData(), FrameDataControlFrameType.StartSessionACK.getValue());
+        assertEquals(header.getFrameData(),
+                FrameDataControlFrameType.StartSessionACK.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);
@@ -51,10 +65,13 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
     }
 
     public void testMobileNavEndSessionFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2, 0);
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createEndSession(
+                        SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2, 0);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
-        assertEquals(header.getFrameData(), FrameDataControlFrameType.EndSession.getValue());
+        assertEquals(header.getFrameData(),
+                FrameDataControlFrameType.EndSession.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);
@@ -63,7 +80,9 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
     }
 
     public void testMobileNavDataSessionFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(SessionType.Mobile_Nav, (byte) 48, 10, 48, (byte) 2);
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createSingleSendData(
+                        SessionType.Mobile_Nav, (byte) 48, 10, 48, (byte) 2);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Single);
         assertEquals(header.getFrameData(), 0x00);
@@ -75,14 +94,77 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
     }
 
     public void testMobileNavAckFrameCreation() throws Exception {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createMobileNaviAck(SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createMobileNaviAck(
+                        SessionType.Mobile_Nav, (byte) 48, 48, (byte) 2);
         assertEquals(header.getSessionType(), SessionType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
-        assertEquals(header.getFrameData(), FrameDataControlFrameType.MobileNaviACK.getValue());
+        assertEquals(header.getFrameData(),
+                FrameDataControlFrameType.MobileNaviACK.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
+    }
+
+    public void testCreatedHeartbeatShouldHaveCorrectBytes() {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createHeartbeat(
+                SessionType.valueOf(SESSION_TYPE_RPC), PROTOCOL_VERSION);
+
+        final byte[] correct =
+                new byte[]{ 0x20, SESSION_TYPE_RPC, FRAME_HEARTBEAT, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        assertThat("Wrong binary header", header.assembleHeaderBytes(),
+                is(correct));
+    }
+
+    public void testCreatedHeartbeatShouldHaveCorrectHeaderValues() {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createHeartbeat(
+                SessionType.valueOf(SESSION_TYPE_RPC), PROTOCOL_VERSION);
+
+        assertThat("Wrong version", header.getVersion(), is(PROTOCOL_VERSION));
+        assertThat("Wrong compression flag", header.isCompressed(), is(false));
+        assertThat("Wrong frame type", header.getFrameType(),
+                is(FrameType.Control));
+        assertThat("Wrong session type", header.getSessionType(),
+                is(SessionType.RPC));
+        assertThat("Wrong frame data", header.getFrameData(),
+                is(FrameDataControlFrameType.Heartbeat.value()));
+        assertThat("Wrong session id", header.getSessionID(), is((byte) 0));
+        assertThat("Wrong data size", header.getDataSize(), is(0));
+        assertThat("Wrong message id", header.getMessageID(), is(0));
+    }
+
+    public void testCreatedHeartbeatACKShouldHaveCorrectBytes() {
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createHeartbeatACK(
+                        SessionType.valueOf(SESSION_TYPE_RPC),
+                        PROTOCOL_VERSION);
+
+        final byte[] correct =
+                new byte[]{ 0x20, SESSION_TYPE_RPC, FRAME_HEARTBEAT_ACK, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        assertThat("Wrong binary header", header.assembleHeaderBytes(),
+                is(correct));
+    }
+
+    public void testCreatedHeartbeatACKShouldHaveCorrectHeaderValues() {
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createHeartbeatACK(
+                        SessionType.valueOf(SESSION_TYPE_RPC),
+                        PROTOCOL_VERSION);
+
+        assertThat("Wrong version", header.getVersion(), is(PROTOCOL_VERSION));
+        assertThat("Wrong compression flag", header.isCompressed(), is(false));
+        assertThat("Wrong frame type", header.getFrameType(),
+                is(FrameType.Control));
+        assertThat("Wrong session type", header.getSessionType(),
+                is(SessionType.RPC));
+        assertThat("Wrong frame data", header.getFrameData(),
+                is(FrameDataControlFrameType.HeartbeatACK.value()));
+        assertThat("Wrong session id", header.getSessionID(), is((byte) 0));
+        assertThat("Wrong data size", header.getDataSize(), is(0));
+        assertThat("Wrong message id", header.getMessageID(), is(0));
     }
 }

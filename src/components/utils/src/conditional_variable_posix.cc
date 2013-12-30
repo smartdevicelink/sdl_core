@@ -116,6 +116,9 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     case 0: {
       wait_status = kNoTimeout;
     } break;
+    case EINTR: {
+      wait_status = kNoTimeout;
+    } break;
     case ETIMEDOUT: {
       wait_status = kTimeout;
     } break;

@@ -1,6 +1,5 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.protocol.enums.FrameData;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
@@ -114,20 +113,6 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-    public static ProtocolFrameHeader createMultiSendDataRest(SessionType serviceType, byte sessionID,
-                                                              int dataLength, int messageID, byte version) {
-        ProtocolFrameHeader msg = new ProtocolFrameHeader();
-        msg.setVersion(version);
-        msg.setFrameType(FrameType.Consecutive);
-        msg.setSessionType(serviceType);
-        msg.setFrameData(FrameData.ConsecutiveFrame.value());
-        msg.setSessionID(sessionID);
-        msg.setDataSize(dataLength);
-        msg.setMessageID(messageID);
-
-        return msg;
-    }
-
     public static BinaryFrameHeader createBinaryFrameHeader(byte rpcType, int functionID, int corrID, int jsonSize) {
         BinaryFrameHeader msg = new BinaryFrameHeader();
         msg.setRPCType(rpcType);
@@ -147,6 +132,29 @@ public class ProtocolFrameHeaderFactory {
         msg.setSessionID(sessionID);
         msg.setFrameData(FrameDataControlFrameType.MobileNaviACK.value());
         msg.setMessageID(consumedFramesNumber);
+        return msg;
+    }
+
+    public static ProtocolFrameHeader createHeartbeat(SessionType serviceType,
+                                                      byte version) {
+        return createControlFrame(serviceType, version,
+                FrameDataControlFrameType.Heartbeat);
+    }
+
+    public static ProtocolFrameHeader createHeartbeatACK(
+            SessionType serviceType, byte version) {
+        return createControlFrame(serviceType, version,
+                FrameDataControlFrameType.HeartbeatACK);
+    }
+
+    private static ProtocolFrameHeader createControlFrame(
+            SessionType serviceType, byte version,
+            FrameDataControlFrameType frameData) {
+        ProtocolFrameHeader msg = new ProtocolFrameHeader();
+        msg.setVersion(version);
+        msg.setFrameType(FrameType.Control);
+        msg.setSessionType(serviceType);
+        msg.setFrameData(frameData.value());
         return msg;
     }
 }

@@ -29,61 +29,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "connection_handler/heartbeat_monitor.h"
+#include "connection_handler/connection.h"
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+namespace connection_handler {
 
-#include <queue>
-#include <map>
-#include <iostream>
-
-#include "utils/macro.h"
-
-namespace utils {
-
-/*
- * Template queue class that gives out messages respecting their priority
- * Message class must have size_t PriorityOrder() method implemented
- */
-template < typename M >
-class PrioritizedQueue {
- public:
-  typedef M value_type;
-  // std::map guarantees it's contents is sorted by key
-  typedef std::map<size_t, std::queue<value_type> > QueuesMap;
-  PrioritizedQueue()
-    : total_size_(0) {
-  }
-  // All api mimics usual std queue interface
-  void push(const value_type& message) {
-    size_t message_priority = message.PriorityOrder();
-    queues_[message_priority].push(message);
-    ++total_size_;
-  }
-  size_t size() const {
-    return total_size_;
-  }
-  bool empty() const {
-    return queues_.empty();
-  }
-  value_type front() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    return queues_.rbegin()->second.front();
-  }
-  void pop() {
-    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
-    typename QueuesMap::iterator last = --queues_.end();
-    last->second.pop();
-    --total_size_;
-    if (last->second.empty()) {
-      queues_.erase(last);
-    }
-  }
- private:
-  QueuesMap queues_;
-  size_t total_size_;
-};
-
+HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
+                                   Connection* connection)
+    : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
+      connection_(connection),
+      timer_(this, &HeartBeatMonitor::TimeOut) {
 }
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
+HeartBeatMonitor::~HeartBeatMonitor() {
+  AssertRunningOnCreationThread();
+}
+
+void HeartBeatMonitor::BeginMonitoring() {
+  AssertRunningOnCreationThread();
+  timer_.start(heartbeat_timeout_seconds_);
+}
+
+void HeartBeatMonitor::TimeOut() {
+  connection_->Close();
+}
+
+void HeartBeatMonitor::KeepAlive() {
+  AssertRunningOnCreationThread();
+  timer_.stop();
+  timer_.start(heartbeat_timeout_seconds_);
+}
+
+
+} // namespace connection_handler

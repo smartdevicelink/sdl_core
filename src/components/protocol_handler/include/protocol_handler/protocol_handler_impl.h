@@ -206,6 +206,13 @@ class ProtocolHandlerImpl
       unsigned char service_type = SERVICE_TYPE_RPC);
 
   private:
+    /*
+     * Prepare and send heartbeat acknowledge message
+     */
+    RESULT_CODE SendHeartBeatAck(ConnectionID connection_id,
+                          unsigned char session_id,
+                          unsigned int message_id);
+
     /**
      * @brief Notifies about recieving message from TM.
      *
@@ -333,7 +340,19 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleControlMessage(
       ConnectionID connection_id ,
-      const ProtocolPacket* packet);
+      const ProtocolPacket& packet);
+
+    RESULT_CODE HandleControlMessageEndSession(
+      ConnectionID connection_id ,
+      const ProtocolPacket& packet);
+
+    RESULT_CODE HandleControlMessageStartSession(
+      ConnectionID connection_id ,
+      const ProtocolPacket& packet);
+
+    RESULT_CODE HandleControlMessageHeartBeat(
+      ConnectionID connection_id ,
+      const ProtocolPacket& packet);
 
     /**
      * \brief Sends Mobile Navi Ack message

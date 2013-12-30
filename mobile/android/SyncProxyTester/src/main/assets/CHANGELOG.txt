@@ -1,3 +1,6 @@
+[CW1]
++ SyncProxyAndroid SDK: Add heartbeat support. WARNING: you'll need to use a compatible SDL core version, otherwise the connection will reset periodically when nothing happens.
+
 [CW52]
 * Fix SetAppIcon request before putFile response
 * Fix after turn off/on bluetooth, TM can't discover SmartDeviceLink service.
