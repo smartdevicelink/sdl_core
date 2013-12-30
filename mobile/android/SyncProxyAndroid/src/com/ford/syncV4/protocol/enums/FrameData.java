@@ -1,8 +1,8 @@
 package com.ford.syncV4.protocol.enums;
 
-import java.util.Vector;
-
 import com.ford.syncV4.util.ByteEnumer;
+
+import java.util.Vector;
 
 public class FrameData extends ByteEnumer {
 
@@ -16,6 +16,7 @@ public class FrameData extends ByteEnumer {
 	public final static FrameData StartSessionACK = new FrameData((byte)0x02, "StartSessionACK");
 	public final static FrameData StartSessionNACK = new FrameData((byte)0x03, "StartSessionNACK");
 	public final static FrameData EndSession = new FrameData((byte)0x04, "EndSession");
+    public final static FrameData EndSessionACK = new FrameData((byte)0x05, "EndSessionACK");
 	
 	public final static FrameData SingleFrame = new FrameData((byte)0x00, "SingleFrame");
 	public final static FrameData FirstFrame = new FrameData((byte)0x00, "FirstFrame");
@@ -26,7 +27,8 @@ public class FrameData extends ByteEnumer {
 		theList.addElement(StartSession);
 		theList.addElement(StartSessionACK);
 		theList.addElement(StartSessionNACK);
-		theList.addElement(EndSession);	
+		theList.addElement(EndSession);
+        theList.addElement(EndSessionACK);
 	}
 	
 	public static FrameData valueOf(String passedButton) {
@@ -34,6 +36,8 @@ public class FrameData extends ByteEnumer {
 	}
 	
 	public static FrameData[] values() {
-		return (FrameData[]) theList.toArray();
+        FrameData[] result = new FrameData[theList.size()];
+		theList.toArray(result);
+        return result;
 	}
 }

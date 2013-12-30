@@ -32,6 +32,11 @@ public class SyncConnectionUSBTest extends TestCase {
             @Override
             public void onTransportError(String info, Exception e) {
             }
+
+            @Override
+            public void onServerSocketInit(int serverSocketPort) {
+
+            }
         };
 
         final SyncTransport fakeTransport =
