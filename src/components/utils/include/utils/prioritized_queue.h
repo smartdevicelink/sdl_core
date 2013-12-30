@@ -34,7 +34,8 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 
 #include <queue>
-#include <vector>
+#include <map>
+#include <iostream>
 
 #include "utils/macro.h"
 
@@ -48,15 +49,14 @@ template < typename M >
 class PrioritizedQueue {
  public:
   typedef M value_type;
-  typedef std::vector< std::queue<value_type> > QueuesList;
+  // std::map guarantees it's contents is sorted by key
+  typedef std::map<size_t, std::queue<value_type> > QueuesMap;
   PrioritizedQueue()
     : total_size_(0) {
   }
   // All api mimics usual std queue interface
   void push(const value_type& message) {
     size_t message_priority = message.PriorityOrder();
-    if (message_priority >= queues_.size())
-      queues_.resize(message_priority + 1);
     queues_[message_priority].push(message);
     ++total_size_;
   }
@@ -67,18 +67,20 @@ class PrioritizedQueue {
     return queues_.empty();
   }
   value_type front() {
-    DCHECK(!queues_.empty() && !queues_.back().empty());
-    return queues_.back().front();
+    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
+    return queues_.rbegin()->second.front();
   }
   void pop() {
-    DCHECK(!queues_.empty() && !queues_.back().empty());
-    queues_.back().pop();
+    DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
+    typename QueuesMap::iterator last = --queues_.end();
+    last->second.pop();
     --total_size_;
-    while (!queues_.empty() && queues_.back().empty())
-      queues_.pop_back();
+    if (last->second.empty()) {
+      queues_.erase(last);
+    }
   }
  private:
-  QueuesList queues_;
+  QueuesMap queues_;
   size_t total_size_;
 };
 
