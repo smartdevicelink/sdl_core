@@ -19,6 +19,7 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -183,8 +184,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private static final int PROXY_RECONNECT_DELAY = 5000;
 
-	// Heartbeat members
-	private ProxyHeartBeat _proxyHeartBeat = null;
+    /**
+     * Interval between heartbeat messages, in milliseconds.
+     * NOTE: this value is not specified in the protocol, and thus must be
+     * negotiated with the Sync.
+     */
+    static final int HEARTBEAT_INTERVAL = 5000;
 
 	// RPC Session ID
 	byte _rpcSessionID = 0;
@@ -304,12 +309,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			}
 		}
 
-		@Override
-		public void onProtocolMessageReceived(ProtocolMessage msg) {
-			if (_proxyHeartBeat != null) {
-				_proxyHeartBeat.recordMostRecentIncomingProtocolInterfaceActivity();
-			} // end-if
+        @Override
+        public void onHeartbeatTimedOut() {
+            final String msg = "Heartbeat timeout";
+            DebugTool.logInfo(msg);
+            notifyProxyClosed(msg, new SyncException(msg,
+                    SyncExceptionCause.HEARTBEAT_PAST_DUE));
+        }
 
+        @Override
+		public void onProtocolMessageReceived(ProtocolMessage msg) {
 			try {if (msg.getData().length > 0) queueIncomingMessage(msg);}
 			catch (Exception e) {}
 			try {if (msg.getBulkData().length > 0) queueIncomingMessage(msg);}
@@ -1001,10 +1010,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_haveReceivedFirstFocusLevel = false;
 		_haveReceivedFirstFocusLevelFull = false;
 		_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
-
-		//TODO: Set Heart Beat Active!
-		//_proxyHeartBeat = new ProxyHeartBeat();
-		//_heartBeatEnabled = true;
     }
 
     // Function to initialize new proxy connection
@@ -1015,6 +1020,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		synchronized(CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
                 _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+                final HeartbeatMonitor heartbeatMonitor =
+                        new HeartbeatMonitor();
+                heartbeatMonitor.setInterval(HEARTBEAT_INTERVAL);
+                _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
             }
 			WiProProtocol protocol = (WiProProtocol)_syncConnection.getWiProProtocol();
 			protocol.setVersion(_wiproVersion);
@@ -1097,11 +1106,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			synchronized(CONNECTION_REFERENCE_LOCK) {
                 closeSyncConnection(keepConnection);
             }
-
-			// Clean up Heartbeat Thread
-			if (_proxyHeartBeat != null) {
-				_proxyHeartBeat.halt();
-			}
 		} catch (SyncException e) {
 			throw e;
 		} finally {
@@ -1442,15 +1446,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
 			throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
 		}
-
-		// Record most recent heart beat activity
-		if (_proxyHeartBeat != null) {
-			if (request.getCorrelationID() != null && request.getCorrelationID() == HEARTBEAT_CORRELATION_ID) {
-				_proxyHeartBeat.recordMostRecentHeartbeatSentTimestamp();
-			}
-
-			_proxyHeartBeat.changePendingRequestCount(true);
-		} // end-if
 	}
 
     private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
@@ -1473,10 +1468,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 		if (messageType.equals(Names.response)) {
 			SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCResponse(rpcMsg), SYNC_LIB_TRACE_KEY);
-
-			if (_proxyHeartBeat != null) {
-				_proxyHeartBeat.changePendingRequestCount(false);
-			} // end-if
 
 			// Check to ensure response is not from an internal message (reserved correlation ID)
 			if (isCorrelationIDProtected((new RPCResponse(hash)).getCorrelationID())) {
@@ -1834,27 +1825,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					_proxyListener.onPerformInteractionResponse((PerformInteractionResponse)msg);
 				}
 			} else if (functionName.equals(Names.SetGlobalProperties)) {
-				// SetGlobalPropertiesResponse (can also be Heartbeat)
-
 				final SetGlobalPropertiesResponse msg = new SetGlobalPropertiesResponse(hash);
-
-				if (msg.getCorrelationID() != null && HEARTBEAT_CORRELATION_ID == msg.getCorrelationID()) {
-					if (_proxyHeartBeat != null) {
-						_proxyHeartBeat.receivedHeartBeatResponse();
-					}
-				} else {
-					if (_callbackToUIThread) {
-						// Run in UI thread
-						_mainUIHandler.post(new Runnable() {
+				if (_callbackToUIThread) {
+					// Run in UI thread
+					_mainUIHandler.post(new Runnable() {
 							@Override
 							public void run() {
-								_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
-							}
+							_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
+						}
 						});
-					} else {
-						_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
-					}
-				} // end-if
+				} else {
+					_proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse)msg);
+				}
 			} else if (functionName.equals(Names.ResetGlobalProperties)) {
 				// ResetGlobalProperties
 
@@ -2167,36 +2149,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					} else {
 						_proxyListener.onOnHMIStatus((OnHMIStatus)msg);
 					}
-				}
-
-                // FIXME: the below is likely unnecessary
-				// Take action dependent on first non-NONE HMI Message
-				if (_haveReceivedFirstNonNoneHMILevel) {
-					if (_proxyHeartBeat != null) {
-						if (msg.getHmiLevel() == HMILevel.HMI_NONE) {
-							_proxyHeartBeat.setHeartBeatActive(false);
-						} else {
-							// This will usually be a redundant set of the boolean, but
-							// should be harmless.
-							_proxyHeartBeat.setHeartBeatActive(true);
-						} // end-if
-					} // end-if
-				} else {
-					if (msg.getHmiLevel() == HMILevel.HMI_NONE) {
-						if (_proxyHeartBeat != null) {
-							// This particular case will, I think, ALWAYS be redundant
-							// (and will only happen once per life of proxy instance), but
-							// setting to false will ALWAYS be correct logic anyway.
-							_proxyHeartBeat.setHeartBeatActive(false);
-						} // end-if
-					} else {
-						// This is the first non-None HMI Level
-						_haveReceivedFirstNonNoneHMILevel = true;
-
-						if (_proxyHeartBeat != null) {
-							_proxyHeartBeat.startHeartBeat();
-						} // end-if
-					} // end-if
 				}
 			} else if (functionName.equals(Names.OnCommand)) {
 				// OnCommand

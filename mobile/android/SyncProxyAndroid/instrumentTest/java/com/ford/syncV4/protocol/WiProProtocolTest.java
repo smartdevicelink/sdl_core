@@ -60,8 +60,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                       int pastDue_ms) {
+                public void onProtocolHeartbeatACK() {
                 }
 
                 @Override
@@ -408,8 +407,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolHeartbeatPastDue(int heartbeatInterval_ms,
-                                                   int pastDue_ms) {
+            public void onProtocolHeartbeatACK() {
             }
 
             @Override

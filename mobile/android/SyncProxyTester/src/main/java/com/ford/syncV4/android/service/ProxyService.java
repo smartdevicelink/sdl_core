@@ -755,6 +755,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                 reset();
             }
+
+            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) &&
+                    (_msgAdapter != null)) {
+                _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e,
+                        true);
+            }
         }
 	}
 
