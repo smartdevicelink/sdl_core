@@ -3,6 +3,7 @@ package com.ford.syncV4.protocol;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
+import com.ford.syncV4.protocol.enums.FrameData;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.util.BitConverter;
@@ -431,5 +432,25 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         protocol.hashID = 0xCDEF1234;
         protocol._version = 2;
         protocol.EndProtocolSession(SessionType.RPC, (byte) 0x01);
+    }
+
+    public void testEndSessionACKFrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameData.EndSessionACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setSessionType(SessionType.RPC);
+        frameHeader.setDataSize(0);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol((mock(IProtocolListener.class))){
+            @Override
+            protected void handleProtocolSessionEnded(SessionType sessionType, byte sessionID, String correlationID) {
+                assertEquals("", SESSION_ID, sessionID);
+                assertEquals(SessionType.RPC, sessionType);
+                return;
+            }
+        }.new MessageFrameAssembler();
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+        assertTrue("Should not get here", false);
+
     }
 }

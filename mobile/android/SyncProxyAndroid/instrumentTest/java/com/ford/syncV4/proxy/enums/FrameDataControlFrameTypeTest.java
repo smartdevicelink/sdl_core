@@ -3,13 +3,14 @@ package com.ford.syncV4.proxy.enums;
 import android.test.AndroidTestCase;
 
 import com.ford.syncV4.protocol.enums.FrameData;
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 
 import java.util.Arrays;
 
 /**
  * Created by Andrew Batutin on 12/30/13.
  */
-public class FrameDataTest extends AndroidTestCase {
+public class FrameDataControlFrameTypeTest extends AndroidTestCase {
 
     public void testFrameDataEndSession() throws Exception {
         assertNotNull("enum should have EndSession value", FrameData.EndSession);
@@ -28,6 +29,6 @@ public class FrameDataTest extends AndroidTestCase {
     }
 
     public void testFrameDataValuesHasEndSessionACKValue() throws Exception {
-       assertTrue("FrameData list should have EndSessionACK value", Arrays.asList(FrameData.values()).contains(FrameData.EndSessionACK));
+        assertTrue("FrameData list should have EndSessionACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSession));
     }
 }

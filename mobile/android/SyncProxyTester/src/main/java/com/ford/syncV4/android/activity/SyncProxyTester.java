@@ -133,7 +133,6 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
@@ -4160,7 +4159,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             _msgAdapter.logMessage("Should stop mobile nav session", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
             closeMobileNaviOutputStream();
-
         }
     }
 
