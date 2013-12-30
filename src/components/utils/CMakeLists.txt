@@ -24,5 +24,5 @@ if (BUILD_BACKTRACE_SUPPORT)
 endif()
 
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
+target_link_libraries ("Utils" log4cxx apr-1 aprutil-1 rt)
 
