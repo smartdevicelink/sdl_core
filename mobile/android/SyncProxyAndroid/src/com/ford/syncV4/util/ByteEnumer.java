@@ -49,4 +49,10 @@ public abstract class ByteEnumer {
 		}
 		return null;
 	}
+
+    @Override
+    public String toString() {
+        final String clazz = this.getClass().getSimpleName();
+        return String.format("%s{value=%x, name='%s'}", clazz, value, name);
+    }
 }
