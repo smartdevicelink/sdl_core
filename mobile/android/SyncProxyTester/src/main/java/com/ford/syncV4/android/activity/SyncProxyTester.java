@@ -4293,6 +4293,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     };
 
     public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID){
-        
+        // TODO - need to handle end session logic
     }
 }
