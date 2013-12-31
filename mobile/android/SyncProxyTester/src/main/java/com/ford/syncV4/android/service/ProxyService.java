@@ -25,6 +25,7 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -1388,18 +1389,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onMobileNavAckReceived(int frameReceivedNumber) {
         final int fNumber = frameReceivedNumber;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "Mobile Ack Received = "+ frameReceivedNumber;
+        String response = "Mobile Ack Received = " + frameReceivedNumber;
         if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
         else Log.i(TAG, "" + response);
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null){
+        if (mainActivity != null) {
             mainActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+                @Override
+                public void run() {
                     mainActivity.onMobileNavAckReceived(fNumber);
                 }
-        });
+            });
         }
     }
 
@@ -1462,6 +1463,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         _syncProxy.resetLanguagesDesired(msg.getLanguage(),
                 msg.getHmiDisplayLanguage());
+    }
+
+    @Override
+    public void onProtocolSessionEnded(final SessionType sessionType, final Byte version, final String correlationID) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "EndSession Ack received; Session Type " + sessionType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
+        else Log.i(TAG, "" + response);
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null){
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.onProtocolSessionEnded(sessionType, version, correlationID);
+                }
+            });
+        }
     }
 
     @Override

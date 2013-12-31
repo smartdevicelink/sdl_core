@@ -56,6 +56,7 @@ import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceEvent;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -4290,4 +4291,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             android.os.Process.killProcess(android.os.Process.myPid());
         }
     };
+
+    public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID){
+        
+    }
 }

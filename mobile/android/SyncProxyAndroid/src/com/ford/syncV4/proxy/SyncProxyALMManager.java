@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.proxy.interfaces.ISyncALMLifeCycleListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAddSubMenuResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAlertResponseListener;
@@ -2616,6 +2617,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+
+        }
+
+        @Override
+        public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID) {
 
         }
     }
