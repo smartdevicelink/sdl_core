@@ -33,18 +33,18 @@ public interface IHeartbeatMonitor {
     public void setInterval(int interval);
 
     /**
-     * Returns the delegate.
+     * Returns the listener.
      *
-     * @return the delegate
+     * @return the listener
      */
-    public IHeartbeatMonitorDelegate getDelegate();
+    public IHeartbeatMonitorListener getListener();
 
     /**
-     * Sets the heartbeat's delegate.
+     * Sets the heartbeat's listener.
      *
-     * @param delegate the new delegate
+     * @param listener the new listener
      */
-    public void setDelegate(IHeartbeatMonitorDelegate delegate);
+    public void setListener(IHeartbeatMonitorListener listener);
 
     /**
      * Notifies the monitor about sent/received messages.
@@ -55,23 +55,4 @@ public interface IHeartbeatMonitor {
      * Notifies the monitor about a received heartbeat ACK message.
      */
     public void heartbeatACKReceived();
-
-    /**
-     * Delegate that actually knows how to work with the outside world.
-     */
-    public static interface IHeartbeatMonitorDelegate {
-        /**
-         * The delegate should create and send a hearbeat message.
-         *
-         * @param monitor the caller
-         */
-        public void sendHeartbeat(IHeartbeatMonitor monitor);
-
-        /**
-         * Notifies the delegate that the heartbeat timed out.
-         *
-         * @param monitor the caller
-         */
-        public void heartbeatTimedOut(IHeartbeatMonitor monitor);
-    }
 }

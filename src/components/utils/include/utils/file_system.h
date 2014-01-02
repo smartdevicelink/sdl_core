@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
 
 #include <string.h>
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <iostream>
-#include <stdint.h>
 
 namespace file_system {
 /**
@@ -115,12 +115,10 @@ std::ofstream* Open(const std::string& file_name,
   * @param file_stream file stream to be written to
   * @param data data to be written to file
   * @param data_size size of data to be written to file
-  * @return returns pointer to opened stream in case of success;
-  * otherwise returns NULL
   */
-std::ofstream* Write(std::ofstream* file_stream,
-                     const unsigned char* data,
-                     unsigned int data_size);
+void Write(std::ofstream* const file_stream,
+           const unsigned char* data,
+           unsigned int data_size);
 
 /**
   * @brief Closes file stream

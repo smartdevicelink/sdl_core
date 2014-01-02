@@ -204,7 +204,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param app_id Application id
      */
-    bool UnregisterApplication(const unsigned int& app_id);
+    void UnregisterApplication(const unsigned int& app_id);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
