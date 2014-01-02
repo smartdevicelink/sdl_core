@@ -108,6 +108,10 @@ namespace NsMessageBroker
        unsigned long length = parseWebSocketDataLength(recBuffer, size);
        position = 2;
 
+       if (length > size) {
+          break;
+       }
+
        switch(payload) {
           case 126:
              {

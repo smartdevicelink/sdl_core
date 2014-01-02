@@ -1,0 +1,20 @@
+
+Count   Type    Number  Text
+
+4       Error   309     ___
+3       Warning 429     Custodial pointer '___' (___) has not been freed or returned
+1       Warning 451     Header file '___' repeatedly included but does not have a standard include guard
+68      Warning 506     Constant value Boolean
+1       Warning 514     Unusual use of a Boolean expression
+50      Warning 534     Ignoring return value of function '___' (compare with ___)
+10      Warning 537     Repeated include file '___'
+9       Warning 578     Declaration of symbol '___' hides symbol '___' (___)
+2       Warning 613     Possible use of null pointer '___' in ___argument to operator '___'___
+44      Warning 641     Converting enum '___' to '___'
+47      Warning 665     Unparenthesized parameter ___ in macro '___' is passed an expression
+1       Warning 686     Option '___' is suspicious because of '___'___
+1       Warning 1536    Exposing low access member '___'
+2       Warning 1540    Pointer member '___' (___) neither freed nor zeroed by destructor
+37      Warning 1551    Function may throw exception '___' in destructor '___'
+6       Warning 1579    Pointer member '___' (___) might have been freed by a separate function but no '-sem(___,cleanup)' was seen
+1       Note    900     Successful completion, ___ messages produced
