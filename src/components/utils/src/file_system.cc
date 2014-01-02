@@ -68,7 +68,9 @@ unsigned int file_system::DirectorySize(const std::string& path) {
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(path.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(path.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
@@ -183,15 +185,14 @@ std::ofstream* file_system::Open(const std::string& file_name,
   return NULL;
 }
 
-std::ofstream* file_system::Write(std::ofstream* file_stream,
-                                  const unsigned char* data,
-                                  unsigned int data_size) {
+void file_system::Write(std::ofstream* const file_stream,
+                        const unsigned char* data,
+                        unsigned int data_size) {
   if (file_stream) {
     for (size_t i = 0; i < data_size; ++i) {
       (*file_stream) << data[i];
     }
   }
-  return file_stream;
 }
 
 void file_system::Close(std::ofstream* file_stream) {
@@ -229,7 +230,9 @@ void remove_directory_content(const std::string& directory_name) {
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
@@ -293,7 +296,9 @@ std::vector<std::string> file_system::ListFiles(
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;

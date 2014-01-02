@@ -947,8 +947,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       smart_objects::SmartObject* response =
         MessageHelper::CreateNegativeResponse(
             connection_key,
-            function_id,
-            correlation_id, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+            static_cast<int>(function_id),
+            correlation_id,
+            static_cast<int>(mobile_apis::Result::APPLICATION_NOT_REGISTERED));
 
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
@@ -1002,8 +1003,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         smart_objects::SmartObject* response =
           MessageHelper::CreateNegativeResponse(
               connection_key,
-              function_id,
-              correlation_id, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+              static_cast<int>(function_id),
+              correlation_id,
+              static_cast<int>(mobile_apis::Result::TOO_MANY_PENDING_REQUESTS));
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return false;
@@ -1484,7 +1486,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   }
 }
 
-bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
+void ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1493,7 +1495,7 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   std::map<int, Application*>::iterator it = applications_.find(app_id);
   if (applications_.end() == it) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
-    return false;
+    return;
   }
 
   MessageHelper::RemoveAppDataFromHMI(it->second);
@@ -1505,7 +1507,7 @@ bool ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
   request_ctrl_.terminateAppRequests(app_id);
   delete app_to_remove;
 
-  return true;
+  return;
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
@@ -1603,9 +1605,6 @@ void ApplicationManagerImpl::SaveApplications() const {
 
   std::string app_data;
   for (; it != it_end; ++it) {
-    size_t msg_size = 1024;
-    char message[msg_size];
-
     if (0 == connection_handler_) {
       LOG4CXX_ERROR(logger_,
                     "Unable to get necessary parameters during saving "
@@ -1638,19 +1637,28 @@ void ApplicationManagerImpl::SaveApplications() const {
 
     const Application* app = it->second;
 
-    snprintf(
-      message,
-      msg_size,
-      "%s:%d;"
-      "%s:%d;"
-      "%s:%d;"
-      "%s:%s;",
-      strings::app_id, app->mobile_app_id()->asInt(),
-      strings::connection_key, it->first,
-      strings::hmi_level, static_cast<int>(app->hmi_level()),
-      "mac_address", mac_adddress.c_str());
+    int print_result = 0;
+    size_t msg_size = 256;
 
-    app_data = message;
+    do {
+      char message[msg_size];
+
+      print_result = snprintf(
+        message,
+        msg_size,
+        "%s:%d;"
+        "%s:%d;"
+        "%s:%d;"
+        "%s:%s;",
+        strings::app_id, app->mobile_app_id()->asInt(),
+        strings::connection_key, it->first,
+        strings::hmi_level, static_cast<int>(app->hmi_level()),
+        "mac_address", mac_adddress.c_str());
+
+      msg_size += msg_size;
+      app_data = message;
+
+    } while (print_result >= msg_size);
   }  // end of app.list
 
   const std::string& storage =
@@ -1683,7 +1691,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
 
   LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
 
-  if (!file_system::Write(file_system::FullPath(save_path),binary_data)) {
+  if (!file_system::Write(file_system::FullPath(save_path), binary_data)) {
     return mobile_apis::Result::GENERIC_ERROR;
   }
 
