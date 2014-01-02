@@ -157,12 +157,14 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
         verify(listenerMock, timeout(INTERVAL + MAX_TIMER_DRIFT)).sendHeartbeat(
                 heartbeatMonitor);
 
-
         IHeartbeatMonitorListener listenerMock2 =
                 Mockito.mock(IHeartbeatMonitorListener.class);
         heartbeatMonitor.setListener(listenerMock2);
 
-        final int ACK_DELAY = 40;
+        verify(listenerMock2, never()).heartbeatTimedOut(
+                Matchers.<IHeartbeatMonitor>any());
+
+        final int ACK_DELAY = 10;
         Thread.sleep(ACK_DELAY);
         heartbeatMonitor.heartbeatACKReceived();
 
@@ -170,6 +172,9 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
                 timeout(INTERVAL + MAX_TIMER_DRIFT)).sendHeartbeat(
                 heartbeatMonitor);
 
+        // NOTE: I had to decrease the ACK_DELAY from 40 ms. because sometimes
+        // the test had failed here. Probably due to imprecision of scheduling,
+        // heartbeatTimedOut() was called before heartbeatACKReceived().
         verify(listenerMock2, never()).heartbeatTimedOut(
                 Matchers.<IHeartbeatMonitor>any());
         verify(listenerMock2,
