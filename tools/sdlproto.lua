@@ -3,11 +3,12 @@
 
 -- create sdlproto protocol and its fields
 p_sdlproto = Proto("sdlproto", "Ford's Smart Device Link Protocol")
-local f_command = ProtoField.uint16("sdlproto.command", "Command", base.HEX)
-local f_data = ProtoField.string("sdlproto.data", "Data", FT_STRING)
+local f_version = ProtoField.uint8("sdlproto.version", "Protocol Version", base.HEX)
+local f_compressionflag = ProtoField.bool("sdlproto.compression_flag", "Compression Flag")
+--local f_data = ProtoField.string("sdlproto.data", "Data", FT_STRING)
 
 --local f_debug = ProtoField.uint8("sdlproto.debug", "Debug")
-p_sdlproto.fields = {f_command}
+p_sdlproto.fields = {f_version, f_compressionflag}
 
 -- sdlproto dissector function
 function p_sdlproto.dissector(buf, pkt, root)
@@ -19,7 +20,11 @@ function p_sdlproto.dissector(buf, pkt, root)
   -- create subtree for sdlproto
   subtree = root:add(p_sdlproto, buf(0))
   -- add protocol fields to subtree
-  subtree:add(f_command, buf(0,2)):append_text(" [Command text]")
+  local l_byte0 = buf:range(0, 1)
+  local l_version = l_byte0:bitfield(0, 4)
+  subtree:add(f_version, l_version):append_text(" (Only version 2 is supported)")
+  local l_compressionflag = l_byte0:bitfield(4, 1)
+  subtree:add(f_compressionflag, l_compressionflag)
 
   -- description of payload
   subtree:append_text(", Command details here or in the tree below")
