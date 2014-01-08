@@ -201,7 +201,8 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 }
 
-bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetHelpPromt(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -227,7 +228,8 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -253,7 +255,8 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -264,7 +267,8 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetVrHelpItems(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

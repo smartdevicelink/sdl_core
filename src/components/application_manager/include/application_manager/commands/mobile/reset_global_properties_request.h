@@ -93,7 +93,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetHelpPromt(Application* const app);
+  bool ResetHelpPromt(application_manager::Application* const app);
 
   /*
    * @brief  Sets default value of the TIMEOUTPROMT global property
@@ -103,7 +103,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetTimeoutPromt(Application* const app);
+  bool ResetTimeoutPromt(application_manager::Application* const app);
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property
@@ -113,7 +113,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitle(Application* const app);
+  bool ResetVrHelpTitle(application_manager::Application* const app);
 
   /*
    * @brief Sets default value of the VRHELPITEMS global property
@@ -123,7 +123,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpItems(Application* const app);
+  bool ResetVrHelpItems(application_manager::Application* const app);
 
   /*
    * @brief Check if there some not delivered hmi responses exist
