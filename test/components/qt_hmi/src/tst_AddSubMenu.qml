@@ -1,6 +1,6 @@
 /**
- * @file tst_ScrollableMessage.qml
- * @brief Test Case for ScrollableMessageView.
+ * @file tst_AddSubMenu.qml
+ * @brief Test Case for OptionsView.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -93,14 +93,14 @@ Item {
          * Test Cases
          */
 
-        //Create AddSubMenu and check data
+        //Positive case and in boundary conditions
         function test_01_addSubMenu() {
             console.debug("enter")
             var initData = {
-                menuID: 100,
+                menuID: 1000,
                 menuParams: {
-                    position: 100,
-                    menuName: "Submenu1"
+                    position: 500,
+                    menuName: "SubMenu positive"
                 },
                 appID: 1
             }
@@ -117,8 +117,32 @@ Item {
             console.debug("exit")
         }
 
+        // Only mandatory - without Position
+        function test_02_addSubMenu_WithoutPosition() {
+            console.debug("enter")
+            var initData = {
+                menuID: 1001,
+                menuParams: {
+                    menuName: "SubMenu mandatory only"
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.get(0).id, initData.menuID, "SubMenu id")
+            //How to verify if value was not set?
+            //compare(app.options.get(0).position, initData.menuParams.position, "SubMenu position")
+            compare(app.options.get(0).name, initData.menuParams.menuName, "SubMenu name")
+
+            destroyView()
+            console.debug("exit")
+        }
+
         //Create AddSubMenu and check data
-        function test_02_1000_SubMenu() {
+        function test_03_1000_SubMenu() {
             console.debug("enter")
             var initData = {
                 appID: 1,
@@ -138,7 +162,6 @@ Item {
             }
 
             createMessageView(initData.appID)
-
             for (var i = 0; i < initData.subMenus.length; i++) {
                 sdlUIProxy.addSubMenu(initData.subMenus[i])
             }
@@ -151,6 +174,152 @@ Item {
                 compare(app.options.get(i).position, initData.subMenus[i].menuParams.position, "SubMenu position")
                 compare(app.options.get(i).name, initData.subMenus[i].menuParams.menuName, "SubMenu name")
             }
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        //Create AddSubMenu and check data
+        function test_04_addSubMenu_UpperBound() {
+            console.debug("enter")
+            var initData = {
+                menuID: 2000000000,
+                menuParams: {
+                    position: 1000,
+                    menuName: "00012å/678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHI=JKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012å/678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHI=JKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012å/678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHI=JKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012å/678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHI=JKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012å/678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHI=JKL+MNO|PQR~STU{}WXY[]Z,01234567890aAaaaaaaaaaaaaaa"
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.get(0).id, initData.menuID, "SubMenu id")
+            compare(app.options.get(0).position, initData.menuParams.position, "SubMenu position")
+            compare(app.options.get(0).name.length, 500, "SubMenu name")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        //Create AddSubMenu and check data
+        function test_05_addSubMenu_LowerBound() {
+            console.debug("enter")
+            var initData = {
+                menuID: 0,
+                menuParams: {
+                    position: 0,
+                    menuName: "0"
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.get(0).id, initData.menuID, "SubMenu id")
+            compare(app.options.get(0).position, initData.menuParams.position, "SubMenu position")
+            compare(app.options.get(0).name.length, 1, "SubMenu name")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        // With fake parameter
+        function test_06_addSubMenu_With_Fake_Parameter() {
+            console.debug("enter")
+            var initData = {
+                menuID: 1001,
+                menuParams: {
+                    menuName: "SubMenu fake param",
+                    position: 1,
+                    fakeParam: "fakeParam"
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.get(0).id, initData.menuID, "SubMenu id")
+            compare(app.options.get(0).position, initData.menuParams.position, "SubMenu position")
+            compare(app.options.get(0).name, initData.menuParams.menuName, "SubMenu name")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        // With fake parameter
+        function test_07_addSubMenu_menuIDOutLowerBound() {
+            console.debug("enter")
+            var initData = {
+                menuID: -1,
+                menuParams: {
+                    menuName: "100",
+                    position: 1,
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.count, 0, "SubMenus count")
+
+            compare(app.options.get(1), !undefined, "SubMenu duplicated")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        // With fake parameter
+        function test_08_addSubMenu_menuIDOutUpperBound() {
+            console.debug("enter")
+            var initData = {
+                menuID: 2000000001,
+                menuParams: {
+                    menuName: "100",
+                    position: 1,
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.count, 0, "SubMenus count")
+
+            compare(app.options.get(1), !undefined, "SubMenu duplicated")
+
+            destroyView()
+            console.debug("exit")
+        }
+
+        // With fake parameter
+        function test_09_addSubMenu_duplicatedSubMenus() {
+            console.debug("enter")
+            var initData = {
+                menuID: 2000000001,
+                menuParams: {
+                    menuName: "100",
+                    position: 1,
+                },
+                appID: 1
+            }
+
+            createMessageView(initData.appID)
+            sdlUIProxy.addSubMenu(initData)
+            sdlUIProxy.addSubMenu(initData)
+            var app = dataContainer.getApplication(initData.appID)
+
+            compare(app.options.count, 1, "SubMenus count")
+
+            compare(app.options.get(1), undefined, "SubMenu duplicated")
 
             destroyView()
             console.debug("exit")

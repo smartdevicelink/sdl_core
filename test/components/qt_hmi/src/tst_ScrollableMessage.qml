@@ -38,7 +38,7 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "../../../../src/components/qt_hmi/qml_model_qt5/controls"
 import "../../../../src/components/qt_hmi/qml_model_qt5/views"
 import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api" as HmiApi
