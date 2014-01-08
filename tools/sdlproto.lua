@@ -20,9 +20,7 @@ local f_serviceType = ProtoField.uint8(p_protoname..".service_type", "Service Ty
 })
 -- TODO add Frame Info depending on Frame Type
 local f_sessionID = ProtoField.uint8(p_protoname..".session_id", "Session ID", base.HEX)
---local f_data = ProtoField.string("sdlproto.data", "Data", FT_STRING)
 
---local f_debug = ProtoField.uint8("sdlproto.debug", "Debug")
 p_sdlproto.fields = {
     f_version, f_compressionFlag, f_frameType, f_serviceType, f_sessionID
 }
@@ -45,14 +43,6 @@ function p_sdlproto.dissector(buf, pkt, root)
 
   subtree:add(f_serviceType, buf(1, 1))
   subtree:add(f_sessionID, buf(3, 1))
-
-  -- description of payload
-  subtree:append_text(", Command details here or in the tree below")
-  -- add debug info if debug field is not nil
-  if f_debug then
-    -- write debug values
-    subtree:add(f_debug, buf:len())
-  end
 end
 
 -- Initialization routine
@@ -62,7 +52,4 @@ end
 -- register a chained dissector for certain port
 local tcp_port = 12345
 local tcp_dissector_table = DissectorTable.get("tcp.port")
---dissector = tcp_dissector_table:get_dissector(tcp_port)
-  -- you can call dissector from function p_sdlproto.dissector above
-  -- so that the previous dissector gets called
 tcp_dissector_table:add(tcp_port, p_sdlproto)
