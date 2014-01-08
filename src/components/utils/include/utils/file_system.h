@@ -52,14 +52,14 @@ uint64_t GetAvailableDiskSpace();
  *
  * @param path to directory
  */
-unsigned int DirectorySize(const std::string& path);
+uint32_t DirectorySize(const std::string& path);
 
 /**
  * @brief Get available app space
  * @param name of app
  * @return free app space.
  */
-unsigned int GetAvailableSpaceForApp(const std::string& name);
+uint32_t GetAvailableSpaceForApp(const std::string& name);
 
 /**
  * @brief Creates directory
@@ -98,7 +98,7 @@ bool FileExists(const std::string& name);
   * @return returns true if the operation is successfully.
   */
 bool Write(const std::string& file_name,
-           const std::vector<unsigned char>& data,
+           const std::vector<uint8_t>& data,
            std::ios_base::openmode mode = std::ios_base::out);
 
 /**
@@ -117,8 +117,8 @@ std::ofstream* Open(const std::string& file_name,
   * @param data_size size of data to be written to file
   */
 void Write(std::ofstream* const file_stream,
-           const unsigned char* data,
-           unsigned int data_size);
+           const uint8_t* data,
+           uint32_t data_size);
 
 /**
   * @brief Closes file stream
@@ -159,7 +159,7 @@ bool RemoveDirectory(const std::string& directory_name,
   * @param how Read/write attribute.
   * @return returns true if file has the given mode.
   */
-bool IsAccessible(const std::string& name, int how);
+bool IsAccessible(const std::string& name, int32_t how);
 
 /**
   * @brief Lists all files in given directory
@@ -177,7 +177,7 @@ std::vector<std::string> ListFiles(const std::string& directory_name);
   * @return returns true if the operation is successfully.
   */
 bool ReadBinaryFile(const std::string& name,
-                    std::vector<unsigned char>& result);
+                    std::vector<uint8_t>& result);
 
 bool ReadFile(const std::string& name, std::string& result);
 

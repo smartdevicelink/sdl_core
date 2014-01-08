@@ -67,7 +67,7 @@ class EventDispatcher
    * @param observer    The observer to subscribe for event
    */
   void add_observer(const Event::EventID& event_id,
-                    int hmi_correlation_id,
+                    int32_t hmi_correlation_id,
                     EventObserver* const observer);
 
   /*
@@ -104,7 +104,7 @@ class EventDispatcher
 
   // Data types section
   typedef std::list<EventObserver*>                   ObserverList;
-  typedef std::map<int, ObserverList>                 ObserversMap;
+  typedef std::map<int32_t, ObserverList>                 ObserversMap;
   typedef std::map<Event::EventID, ObserversMap>      EventObserverMap;
 
   // Members section

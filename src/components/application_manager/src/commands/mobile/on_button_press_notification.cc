@@ -53,8 +53,8 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
 
-  const unsigned int btn_id =
-      static_cast<unsigned int>(
+  const uint32_t btn_id =
+      static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
   const std::vector<Application*>& subscribedApps =
@@ -70,7 +70,7 @@ void OnButtonPressNotification::Run() {
 
     if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
         || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-            && static_cast<unsigned int>(mobile_apis::ButtonName::OK) !=
+            && static_cast<uint32_t>(mobile_apis::ButtonName::OK) !=
                 btn_id)) {
       SendButtonPress(subscribed_app);
     } else {
@@ -96,7 +96,7 @@ void OnButtonPressNotification::SendButtonPress(const Application* app) {
   (*on_btn_press)[strings::params][strings::connection_key] = app->app_id();
 
   (*on_btn_press)[strings::params][strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::eType::OnButtonPressID);
+      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonPressID);
 
   (*on_btn_press)[strings::msg_params][strings::button_name] =
       (*message_)[strings::msg_params][hmi_response::button_name];

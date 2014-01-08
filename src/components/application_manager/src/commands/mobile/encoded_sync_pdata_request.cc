@@ -84,7 +84,7 @@ void EncodedSyncPDataRequest::Run() {
 
   LOG4CXX_INFO(logger_, "string_pdata = " << string_pdata);
 
-  const std::vector<unsigned char> file_data(string_pdata.begin(),
+  const std::vector<uint8_t> file_data(string_pdata.begin(),
                                              string_pdata.end());
 
   std::string relative_file_path = file_system::CreateDirectory(

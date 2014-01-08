@@ -66,14 +66,14 @@ void ListFilesResponse::Run() {
     return;
   }
   (*message_)[strings::msg_params][strings::space_available] =
-        static_cast<int>(file_system::GetAvailableSpaceForApp(application->name()));
+        static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
   if (file_system::DirectoryExists(application->name())) {
     const std::string full_directory_path = file_system::FullPath(
         application->name());
     std::vector < std::string > list_files = file_system::ListFiles(
         full_directory_path);
     if (!list_files.empty()) {
-      int i = 0;
+      int32_t i = 0;
       for (std::vector<std::string>::iterator it = list_files.begin();
           list_files.end() != it; ++it) {
         (*message_)[strings::msg_params][strings::filenames][i] = *it;

@@ -50,13 +50,13 @@ namespace utils {
 class Backtrace {
  public:
   // Inspect stack up to 128 calls back
-  static const int kDefaultDepth = 128;
-  static const int kSkipTop = 0;
+  static const int32_t kDefaultDepth = 128;
+  static const int32_t kSkipTop = 0;
   /* Capture backtrace and store. Limit captured stack length to
    * count symbols and remove first skip_top elements from it
    * (to avoid polluting stack trace with debugging function names)
    */
-  Backtrace(int count = kDefaultDepth, int skip_top = kSkipTop);
+  Backtrace(int32_t count = kDefaultDepth, int32_t skip_top = kSkipTop);
   ~Backtrace();
 
   // Captured symbols in order from topmost stack frame to last captured

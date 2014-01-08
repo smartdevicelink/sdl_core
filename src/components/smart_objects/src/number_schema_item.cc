@@ -33,11 +33,11 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-template<> SmartType TNumberSchemaItem<int>::getSmartType() {
+template<> SmartType TNumberSchemaItem<int32_t>::getSmartType() {
   return SmartType_Integer;
 }
 
-template<> SmartType TNumberSchemaItem<unsigned int>::getSmartType() {
+template<> SmartType TNumberSchemaItem<uint32_t>::getSmartType() {
   return SmartType_Integer;
 }
 

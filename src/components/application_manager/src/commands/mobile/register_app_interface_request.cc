@@ -124,7 +124,7 @@ void RegisterAppInterfaceRequest::Run() {
       app->set_app_types(msg_params[strings::app_hmi_type]);
 
       // check if app is NAVI
-      const int is_navi_type = mobile_apis::AppHMIType::NAVIGATION;
+      const int32_t is_navi_type = mobile_apis::AppHMIType::NAVIGATION;
       const smart_objects::SmartObject& app_type =
           msg_params.getElement(strings::app_hmi_type);
 
@@ -457,7 +457,7 @@ bool RegisterAppInterfaceRequest::IsApplicationRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
-  int mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
 
   const std::set<Application*>& applications =
       ApplicationManagerImpl::instance()->applications();

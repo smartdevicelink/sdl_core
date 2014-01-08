@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_INI_FILE_H_
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_INI_FILE_H_
 
+#include <stdint.h>
+
 namespace profile {
 
 #define INI_FILE_VER  1000
@@ -89,7 +91,7 @@ extern "C" {
  * @return NULL if file or desired entry not found, otherwise pointer to fname
  */
 extern char* ini_write_inst(const char *fname,
-                            unsigned char flag);
+                            uint8_t flag);
 
 /*
  * @brief Read a certain item of the specified chapter of a ini-file
@@ -110,7 +112,7 @@ extern char ini_write_value(const char *fname,
                             const char *chapter,
                             const char *item,
                             const char *value,
-                            unsigned char flag);
+                            uint8_t flag);
 
 /*
  * @brief Parse the given line for the item and returns the value if

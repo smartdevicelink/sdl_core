@@ -45,14 +45,14 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValue
 
       Json::Value::Members members = value.getMemberNames();
 
-      for (int i = 0; i < members.size(); i++) {
+      for (int32_t i = 0; i < members.size(); i++) {
         jsonValueToObj(value[members[i]], obj[members[i]]);
       }
     } else if (value.type() == Json::arrayValue) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
           NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 
-      for (int i = 0; i < value.size(); i++) {
+      for (int32_t i = 0; i < value.size(); i++) {
         jsonValueToObj(value[i], obj[i]);
       }
     } else if (value.type() == Json::intValue
@@ -78,7 +78,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJson
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == obj.getType()) {
       item = Json::arrayValue;
 
-      for (int i = 0; i < obj.length(); i++) {
+      for (int32_t i = 0; i < obj.length(); i++) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(i), value);

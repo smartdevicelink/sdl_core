@@ -62,7 +62,7 @@ void OnSyncPDataNotification::Run() {
   if (!file_system::FileExists(fileName)) {
     (*message_)[strings::msg_params][strings::success] = false;
     (*message_)[strings::msg_params][strings::result_code] =
-        static_cast<int>(mobile_apis::Result::FILE_NOT_FOUND);
+        static_cast<int32_t>(mobile_apis::Result::FILE_NOT_FOUND);
 
     LOG4CXX_ERROR(logger_, "File not found");
     SendResponse(false);
@@ -90,7 +90,7 @@ void OnSyncPDataNotification::SendPData() {
   const std::string fileName =
       (*message_)[strings::params][hmi_notification::file_name].asString();
 
-  std::vector<unsigned char> pData;
+  std::vector<uint8_t> pData;
   file_system::ReadBinaryFile(fileName, pData);
   const std::string string_pdata = std::string(pData.begin(), pData.end());
   (*message_)[strings::params][strings::data] = string_pdata;

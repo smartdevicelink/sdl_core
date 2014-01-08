@@ -122,7 +122,7 @@ void CommandRequestImpl::SendHMIRequest(
     return;
   }
 
-  const unsigned int hmi_correlation_id =
+  const uint32_t hmi_correlation_id =
        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   if (use_events) {
     subscribe_on_event(function_id, hmi_correlation_id);
@@ -150,7 +150,7 @@ void CommandRequestImpl::SendHMIRequest(
 void CommandRequestImpl::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params, bool require_chaining,
-    unsigned int chaining_counter) {
+    uint32_t chaining_counter) {
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
@@ -159,13 +159,13 @@ void CommandRequestImpl::CreateHMIRequest(
     return;
   }
 
-  const unsigned int correlation_id =
+  const uint32_t correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
-  const unsigned int connection_key =
+  const uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asUInt();
 
   // get hmi correlation id for chaining further request from this object
-  const unsigned int hmi_correlation_id_ = ApplicationManagerImpl::instance()
+  const uint32_t hmi_correlation_id_ = ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
@@ -215,7 +215,7 @@ void CommandRequestImpl::CreateHMINotification(
   NsSmartDeviceLink::NsSmartObjects::SmartObject& notify = *result;
 
   notify[strings::params][strings::message_type] =
-      static_cast<int>(application_manager::MessageType::kNotification);
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;

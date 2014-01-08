@@ -53,7 +53,7 @@ void EndAudioPassThruRequest::Run() {
 
   if (ended_successfully) {
     SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
-    int session_key =
+    int32_t session_key =
       (*message_)[strings::params][strings::connection_key].asInt();
     ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
   } else {

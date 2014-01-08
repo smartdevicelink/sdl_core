@@ -28,7 +28,7 @@ ServiceType ServiceTypeFromByte(uint8_t byte) {
   ServiceType type = ServiceType(byte);
   bool valid_type = IsValid(type);
   if (!valid_type) {
-    LOG4CXX_INFO(g_logger, "Invalid service type: "<<int(byte))
+    LOG4CXX_INFO(g_logger, "Invalid service type: "<<int32_t(byte))
   }
   return valid_type ? type : kInvalidServiceType;
 }

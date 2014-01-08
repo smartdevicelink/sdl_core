@@ -162,26 +162,26 @@ bool SmartObject::operator==(const SmartObject& Other) const {
 // =============================================================
 // INTEGER TYPE SUPPORT
 // =============================================================
-SmartObject::SmartObject(int InitialValue)
+SmartObject::SmartObject(int32_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
 }
 
-int SmartObject::asInt() const {
+int32_t SmartObject::asInt() const {
   return convert_int();
 }
 
-SmartObject& SmartObject::operator=(int NewValue) {
+SmartObject& SmartObject::operator=(int32_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(int Value) const {
-  int comp = convert_int();
+bool SmartObject::operator==(int32_t Value) const {
+  int32_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
   } else {
@@ -189,13 +189,13 @@ bool SmartObject::operator==(int Value) const {
   }
 }
 
-void SmartObject::set_value_integer(int NewValue) {
+void SmartObject::set_value_integer(int32_t NewValue) {
   set_new_type(SmartType_Integer);
   m_data.int_value = NewValue;
 }
 
-int SmartObject::convert_int() const {
-  int retval;
+int32_t SmartObject::convert_int() const {
+  int32_t retval;
 
   switch (m_type) {
     case SmartType_String:
@@ -208,7 +208,7 @@ int SmartObject::convert_int() const {
       retval = m_data.int_value;
       break;
     case SmartType_Double:
-      retval = static_cast<unsigned int>(m_data.double_value);
+      retval = static_cast<uint32_t>(m_data.double_value);
       break;
     default: {
 /*
@@ -221,32 +221,32 @@ int SmartObject::convert_int() const {
     }
   }
 
-  return static_cast<int>(retval);
+  return static_cast<int32_t>(retval);
 }
 
 // =============================================================
-// unsigned int TYPE SUPPORT
+// uint32_t TYPE SUPPORT
 // =============================================================
-SmartObject::SmartObject(unsigned int InitialValue)
+SmartObject::SmartObject(uint32_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_unsigned_int(InitialValue);
 }
 
-unsigned int SmartObject::asUInt() const {
+uint32_t SmartObject::asUInt() const {
   return convert_unsigned_int();
 }
 
-SmartObject& SmartObject::operator=(unsigned int NewValue) {
+SmartObject& SmartObject::operator=(uint32_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_unsigned_int(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(unsigned int Value) const {
-  int comp = convert_unsigned_int();
+bool SmartObject::operator==(uint32_t Value) const {
+  int32_t comp = convert_unsigned_int();
   if (comp == invalid_int_value) {
     return false;
   } else {
@@ -254,13 +254,13 @@ bool SmartObject::operator==(unsigned int Value) const {
   }
 }
 
-void SmartObject::set_value_unsigned_int(unsigned int NewValue) {
+void SmartObject::set_value_unsigned_int(uint32_t NewValue) {
   set_new_type(SmartType_Integer);
   m_data.int_value = NewValue;
 }
 
-unsigned int SmartObject::convert_unsigned_int() const {
-  unsigned int retval;
+uint32_t SmartObject::convert_unsigned_int() const {
+  uint32_t retval;
 
   switch (m_type) {
     case SmartType_String:
@@ -272,7 +272,7 @@ unsigned int SmartObject::convert_unsigned_int() const {
       retval = m_data.int_value;
       break;
     case SmartType_Double:
-      retval = static_cast<unsigned int>(m_data.double_value);
+      retval = static_cast<uint32_t>(m_data.double_value);
       break;
     default: {
 /*
@@ -647,15 +647,15 @@ SmartBinary SmartObject::convert_binary(void) const {
 // ARRAY INTERFACE SUPPORT
 // =============================================================
 
-SmartObject& SmartObject::operator[](int Index) {
+SmartObject& SmartObject::operator[](int32_t Index) {
   return handle_array_access(Index);
 }
 
-const SmartObject& SmartObject::operator[](int Index) const {
+const SmartObject& SmartObject::operator[](int32_t Index) const {
   return getElement(Index);
 }
 
-inline SmartObject& SmartObject::handle_array_access(int Index) {
+inline SmartObject& SmartObject::handle_array_access(int32_t Index) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }
@@ -666,7 +666,7 @@ inline SmartObject& SmartObject::handle_array_access(int Index) {
     m_data.array_value = new SmartArray();
   }
 
-  int sz = m_data.array_value->size();
+  int32_t sz = m_data.array_value->size();
   if (Index == -1) {
     Index = sz;
   }
@@ -912,7 +912,7 @@ std::string SmartObject::convert_double_to_string(const double& Value) {
   return s;
 }
 
-unsigned int SmartObject::convert_string_to_unsigned_int(
+uint32_t SmartObject::convert_string_to_unsigned_int(
     const std::string* Value) {
   if (0 == Value->size()) {
 /*
@@ -925,7 +925,7 @@ unsigned int SmartObject::convert_string_to_unsigned_int(
 
   char* ptr;
   errno = 0;
-  unsigned int result = strtol(Value->c_str(), &ptr, 10);
+  uint32_t result = strtol(Value->c_str(), &ptr, 10);
   if (errno || (ptr != (Value->c_str() + Value->length()))) {
 /*
 #if !defined UNIT_TESTS

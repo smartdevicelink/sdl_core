@@ -84,7 +84,7 @@ class EventObserver
    * If param is omitted, it means subscription for HMI notification
    */
   void subscribe_on_event(
-      const Event::EventID& event_id, int hmi_correlation_id = 0);
+      const Event::EventID& event_id, int32_t hmi_correlation_id = 0);
 
   /*
    * @brief Unsubscribes the observer from specific event

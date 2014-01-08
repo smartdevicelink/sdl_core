@@ -63,8 +63,8 @@ Connection::Connection(ConnectionHandle connection_handle,
 Connection::~Connection() {
 }
 
-int Connection::AddNewSession() {
-  int result = -1;
+int32_t Connection::AddNewSession() {
+  int32_t result = -1;
   if (session_list_.empty()) {
     heartbeat_monitor_.BeginMonitoring();
   }
@@ -75,8 +75,8 @@ int Connection::AddNewSession() {
   return result;
 }
 
-int Connection::RemoveSession(unsigned char session) {
-  int result = -1;
+int32_t Connection::RemoveSession(uint8_t session) {
+  int32_t result = -1;
   SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
                                      session);
   if (session_list_.end() == it) {
@@ -88,8 +88,8 @@ int Connection::RemoveSession(unsigned char session) {
   return result;
 }
 
-int Connection::GetFirstSessionID() {
-  int result = -1;
+int32_t Connection::GetFirstSessionID() {
+  int32_t result = -1;
   SessionListIterator it = session_list_.begin();
   if (session_list_.end() != it) {
     result = *it;

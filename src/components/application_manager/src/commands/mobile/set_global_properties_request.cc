@@ -63,7 +63,7 @@ void SetGlobalPropertiesRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  unsigned int app_id =
+  uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
 
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
@@ -158,7 +158,7 @@ void SetGlobalPropertiesRequest::Run() {
     const CommandsMap& cmdMap = app->commands_map();
     CommandsMap::const_iterator command_it = cmdMap.begin();
 
-    int index = 0;
+    int32_t index = 0;
     smart_objects::SmartObject vr_help_items;
     for (; cmdMap.end() != command_it; ++command_it) {
       if (false == (*command_it->second).keyExists(strings::vr_commands)) {
@@ -232,7 +232,7 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
       .getElement(strings::vr_help);
 
   //vr help item start position must be 1
-  const unsigned int vr_help_item_start_position = 1;
+  const uint32_t vr_help_item_start_position = 1;
 
   if (vr_help_item_start_position !=
       vr_help.getElement(0).getElement(strings::position).asUInt()) {

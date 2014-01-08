@@ -53,7 +53,7 @@ class MediaAdapterImpl : public MediaAdapter {
   protected:
     MediaAdapterImpl();
     std::set<MediaListenerPtr> media_listeners_;
-    int current_application_;
+    int32_t current_application_;
 
   private:
     static log4cxx::LoggerPtr logger_;

@@ -81,22 +81,22 @@ class CommandRequestImpl : public CommandImpl,
    *
    * @return Request default timeout
    */
-  inline unsigned int default_timeout() const;
+  inline uint32_t default_timeout() const;
 
   /*
    * @brief Retrieves request ID
    */
-  inline int function_id() const;
+  inline int32_t function_id() const;
 
   /*
    * @brief Retrieves correlation ID
    */
-  inline int correlation_id() const;
+  inline int32_t correlation_id() const;
 
   /*
    * @brief Retrieves connection key
    */
-  inline int connection_key() const;
+  inline int32_t connection_key() const;
 
   /*
    * @brief Creates Mobile response
@@ -125,7 +125,7 @@ class CommandRequestImpl : public CommandImpl,
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const NsSmart::SmartObject& msg_params,
                         bool require_chaining = false,
-                        unsigned int chaining_counter = 0);
+                        uint32_t chaining_counter = 0);
 
   /*
    * @brief Sends HMI request
@@ -150,25 +150,25 @@ class CommandRequestImpl : public CommandImpl,
 
  protected:
   MessageChaining* msg_chaining_;
-  unsigned int  default_timeout_;
+  uint32_t  default_timeout_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
 
-unsigned int CommandRequestImpl::default_timeout() const {
+uint32_t CommandRequestImpl::default_timeout() const {
   return default_timeout_;
 }
 
-int CommandRequestImpl::function_id() const {
+int32_t CommandRequestImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
 }
 
-int CommandRequestImpl::correlation_id() const {
+int32_t CommandRequestImpl::correlation_id() const {
   return (*message_)[strings::params][strings::correlation_id].asInt();
 }
 
-int CommandRequestImpl::connection_key() const {
+int32_t CommandRequestImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asInt();
 }
 

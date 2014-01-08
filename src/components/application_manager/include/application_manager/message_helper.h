@@ -167,7 +167,7 @@ class MessageHelper {
      *
      **/
     static void SendOnAppInterfaceUnregisteredNotificationToMobile(
-      int connection_key,
+      int32_t connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
     /*
@@ -180,8 +180,8 @@ class MessageHelper {
 
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,
-      mobile_apis::Result::eType result, unsigned int correlation_id,
-      unsigned int connection_key);
+      mobile_apis::Result::eType result, uint32_t correlation_id,
+      uint32_t connection_key);
 
     /*
      * @brief Prepare GetDeviceListResponse
@@ -194,10 +194,10 @@ class MessageHelper {
       const connection_handler::DeviceList& devices);
 
     static smart_objects::SmartObject* CreateModuleInfoSO(
-      unsigned int function_id);
+      uint32_t function_id);
 
     static smart_objects::SmartObject* CreateSetAppIcon(
-      const std::string& path_to_icon, unsigned int app_id);
+      const std::string& path_to_icon, uint32_t app_id);
 
     static void SendAppDataToHMI(const Application* app);
     static void SendGlobalPropertiesToHMI(const Application* app);
@@ -209,8 +209,8 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(const Application* app);
     static void SendChangeRegistrationRequestToHMI(const Application* app);
     static void SendAddVRCommandToHMI(
-      unsigned int cmd_id, const smart_objects::SmartObject& vr_commands,
-      unsigned int app_id);
+      uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
+      uint32_t app_id);
     static void SendAddSubMenuRequestToHMI(const Application* app);
     static void RemoveAppDataFromHMI(Application* const app);
     static void SendOnAppUnregNotificationToHMI(Application* const app);
@@ -218,7 +218,7 @@ class MessageHelper {
     static void SendDeleteSubMenuRequestToHMI(Application* const app);
     static void ResetGlobalproperties(Application* const app);
 
-    static void SendActivateAppToHMI(unsigned int const app_id);
+    static void SendActivateAppToHMI(uint32_t const app_id);
 
 
     /*
@@ -228,7 +228,7 @@ class MessageHelper {
      * @param connection_key  Application connection key
      *
      */
-    static void SendNaviStartStream(const std::string& url, int connection_key);
+    static void SendNaviStartStream(const std::string& url, int32_t connection_key);
 
     /*
      * @brief Sends notification to HMI to stop video streaming
@@ -236,11 +236,11 @@ class MessageHelper {
      * @param connection_key  Application connection key
      *
      */
-    static void SendNaviStopStream(int connection_key);
+    static void SendNaviStopStream(int32_t connection_key);
 
     static smart_objects::SmartObject* CreateNegativeResponse(
-      unsigned int connection_key, int function_id, unsigned int correlation_id,
-      int result_code);
+      uint32_t connection_key, int32_t function_id, uint32_t correlation_id,
+      int32_t result_code);
 
     /*
      * @brief Verify image and add image file full path
@@ -284,10 +284,10 @@ class MessageHelper {
 
   private:
     static smart_objects::SmartObject* CreateChangeRegistration(
-      int function_id, int language, unsigned int app_id);
+      int32_t function_id, int32_t language, uint32_t app_id);
     static smart_objects::SmartObject* CreateGeneralVrCommand();
-    static void SendRemoveCommandToHMI(int function_id, int command_id,
-                                       unsigned int app_id);
+    static void SendRemoveCommandToHMI(int32_t function_id, int32_t command_id,
+                                       uint32_t app_id);
     MessageHelper();
 
     static const VehicleData vehicle_data_;

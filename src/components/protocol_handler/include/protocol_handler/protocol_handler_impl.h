@@ -65,7 +65,7 @@ class MessagesToMobileAppHandler;
 
 using transport_manager::TransportManagerListenerEmpty;
 
-typedef std::multimap<int, RawMessagePtr> MessagesOverNaviMap;
+typedef std::multimap<int32_t, RawMessagePtr> MessagesOverNaviMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
 typedef transport_manager::ConnectionUID ConnectionID;
 
@@ -161,7 +161,7 @@ class ProtocolHandlerImpl
      * \param number_of_frames Number of frames processed by
      * streaming server and displayed to user.
      */
-    void SendFramesNumber(int connection_key, int number_of_frames);
+    void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
 
   protected:
     /**
@@ -173,8 +173,8 @@ class ProtocolHandlerImpl
      */
     void SendEndSessionNAck(
       ConnectionID connection_id ,
-      unsigned int session_id,
-      unsigned char service_type = SERVICE_TYPE_RPC);
+      uint32_t session_id,
+      uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
      * \brief Sends acknowledgement of starting session to mobile application
@@ -190,10 +190,10 @@ class ProtocolHandlerImpl
      */
     void SendStartSessionAck(
       ConnectionID connection_id,
-      unsigned char session_id,
-      unsigned char protocol_version,
-      unsigned int hash_code = 0,
-      unsigned char service_type = SERVICE_TYPE_RPC);
+      uint8_t session_id,
+      uint8_t protocol_version,
+      uint32_t hash_code = 0,
+      uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
      * \brief Sends fail of starting session to mobile application.
@@ -203,15 +203,15 @@ class ProtocolHandlerImpl
      */
     void SendStartSessionNAck(
       ConnectionID connection_id,
-      unsigned char service_type = SERVICE_TYPE_RPC);
+      uint8_t service_type = SERVICE_TYPE_RPC);
 
   private:
     /*
      * Prepare and send heartbeat acknowledge message
      */
     RESULT_CODE SendHeartBeatAck(ConnectionID connection_id,
-                          unsigned char session_id,
-                          unsigned int message_id);
+                          uint8_t session_id,
+                          uint32_t message_id);
 
     /**
      * @brief Notifies about recieving message from TM.
@@ -267,11 +267,11 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE SendSingleFrameMessage(
       ConnectionID connection_id,
-      const unsigned char session_id,
-      unsigned int protocol_version,
-      const unsigned char service_type,
-      const unsigned int data_size,
-      const unsigned char* data,
+      const uint8_t session_id,
+      uint32_t protocol_version,
+      const uint8_t service_type,
+      const uint32_t data_size,
+      const uint8_t* data,
       const bool compress);
 
     /**
@@ -289,13 +289,13 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE SendMultiFrameMessage(
       ConnectionID connection_id,
-      const unsigned char session_id,
-      unsigned int protocol_version,
-      const unsigned char service_type,
-      const unsigned int data_size,
-      const unsigned char* data,
+      const uint8_t session_id,
+      uint32_t protocol_version,
+      const uint8_t service_type,
+      const uint32_t data_size,
+      const uint8_t* data,
       const bool compress,
-      const unsigned int max_data_size);
+      const uint32_t max_data_size);
 
     /**
      * \brief Sends message already containing protocol header.
@@ -359,7 +359,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE SendMobileNaviAck(
       ConnectionID connection_id ,
-      int connection_key);
+      int32_t connection_key);
 
     // threads::MessageLoopThread<*>::Handler implementations
     // CALLED ON raw_ford_messages_from_mobile_ thread!
@@ -392,7 +392,7 @@ class ProtocolHandlerImpl
     /**
      *\brief Map of frames for messages received in multiple frames.
      */
-    std::map<int, ProtocolPacket*> incomplete_multi_frame_messages_;
+    std::map<int32_t, ProtocolPacket*> incomplete_multi_frame_messages_;
 
     /**
      * \brief Map of messages (frames) recieved over mobile nave session
@@ -404,12 +404,12 @@ class ProtocolHandlerImpl
      * \brief Untill specified otherwise, amount of message recievied
      * over streaming session to send Ack
      */
-    const unsigned int kPeriodForNaviAck;
+    const uint32_t kPeriodForNaviAck;
 
     /**
      *\brief Counter of messages sent in each session.
      */
-    std::map<unsigned char, unsigned int> message_counters_;
+    std::map<uint8_t, uint32_t> message_counters_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
     impl::FromMobileQueue raw_ford_messages_from_mobile_;

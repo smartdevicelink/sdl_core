@@ -95,9 +95,9 @@ void CArraySchemaItem::unapplySchema(SmartObject& Object) {
 void CArraySchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
                                            SmartObject& result_object) {
   if (SmartType_Array == pattern_object.getType()) {
-    int array_len = pattern_object.length();
+    int32_t array_len = pattern_object.length();
     if (array_len > 0) {
-      for (int i = 0; i < array_len; i++) {
+      for (int32_t i = 0; i < array_len; i++) {
         mElementSchemaItem->BuildObjectBySchema(pattern_object.getElement(i),
                                                 result_object[i]);
       }

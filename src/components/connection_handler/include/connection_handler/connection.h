@@ -55,17 +55,17 @@ class ConnectionHandler;
 /**
  * \brief Type for ConnectionHandle
  */
-typedef int ConnectionHandle;
+typedef int32_t ConnectionHandle;
 
 /**
  * \brief Type for Sessions vector
  */
-typedef std::vector<unsigned char> SessionList;
+typedef std::vector<uint8_t> SessionList;
 
 /**
  * \brief Type for Sessions vector iterator
  */
-typedef std::vector<unsigned char>::iterator SessionListIterator;
+typedef std::vector<uint8_t>::iterator SessionListIterator;
 
 /**
  * \class Connection
@@ -102,20 +102,20 @@ class Connection {
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int AddNewSession();
+  int32_t AddNewSession();
 
   /**
    * \brief Removes session from connection
    * \param aSession session ID
    * \return sessionID or -1 in case of issues
    */
-  int RemoveSession(unsigned char session);
+  int32_t RemoveSession(uint8_t session);
 
   /**
    * \brief Returns ID of first session from connection
    * \return first sessionID or -1 in case of issues
    */
-  int GetFirstSessionID();
+  int32_t GetFirstSessionID();
 
   /**
    * \brief Returns list of sessions which have been opened in
@@ -149,7 +149,7 @@ class Connection {
   /**
    * \brief Counter to generate session id's.
    */
-  unsigned char session_id_counter_;
+  uint8_t session_id_counter_;
 
   /**
    * \brief Counter to generate session id's.
@@ -171,7 +171,7 @@ class Connection {
  * \brief Type for Connections map
  * Key is ConnectionHandle which is uniq
  */
-typedef std::map<int, Connection*> ConnectionList;
+typedef std::map<int32_t, Connection*> ConnectionList;
 
 /**
  * \brief Type for Connections map iterator

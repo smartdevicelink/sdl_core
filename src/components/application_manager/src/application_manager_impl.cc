@@ -54,8 +54,8 @@ namespace application_manager {
 
 log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ApplicationManager"));
-unsigned int ApplicationManagerImpl::message_chain_current_id_ = 0;
-const unsigned int ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
+uint32_t ApplicationManagerImpl::message_chain_current_id_ = 0;
+const uint32_t ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -137,8 +137,8 @@ ApplicationManagerImpl* ApplicationManagerImpl::instance() {
   return &instance;
 }
 
-Application* ApplicationManagerImpl::application(int app_id) {
-  std::map<int, Application*>::iterator it = applications_.find(app_id);
+Application* ApplicationManagerImpl::application(int32_t app_id) {
+  std::map<int32_t, Application*>::iterator it = applications_.find(app_id);
   if (applications_.end() != it) {
     return it->second;
   } else {
@@ -159,7 +159,7 @@ Application* ApplicationManagerImpl::active_application() const {
 }
 
 std::vector<Application*> ApplicationManagerImpl::applications_by_button(
-  unsigned int button) {
+  uint32_t button) {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it; ++it) {
@@ -172,7 +172,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_button(
 }
 
 std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
-  unsigned int vehicle_info) {
+  uint32_t vehicle_info) {
   std::vector<Application*> result;
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
@@ -200,7 +200,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
   smart_objects::SmartObject& message = *request_for_registration;
-  unsigned int connection_key =
+  uint32_t connection_key =
     message[strings::params][strings::connection_key].asInt();
 
   if (false == is_all_apps_allowed_) {
@@ -217,9 +217,9 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   // app_id is SDL "internal" ID
   // original app_id can be gotten via ApplicationImpl::mobile_app_id()
-  unsigned int app_id = 0;
-  std::list<int> sessions_list;
-  unsigned int device_id = 0;
+  uint32_t app_id = 0;
+  std::list<int32_t> sessions_list;
+  uint32_t device_id = 0;
 
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
@@ -267,7 +267,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
       .asInt()));
 
   Version version;
-  int min_version =
+  int32_t min_version =
     message[strings::msg_params][strings::sync_msg_version]
     [strings::minor_version].asInt();
 
@@ -284,7 +284,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   }*/
   version.min_supported_api_version = static_cast<APIVersion>(min_version);
 
-  int max_version =
+  int32_t max_version =
     message[strings::msg_params][strings::sync_msg_version]
     [strings::major_version].asInt();
 
@@ -304,7 +304,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  applications_.insert(std::pair<int, Application*>(app_id, application));
+  applications_.insert(std::pair<int32_t, Application*>(app_id, application));
   application_list_.insert(application);
 
   // TODO(PV): add asking user to allow application
@@ -372,7 +372,7 @@ void ApplicationManagerImpl::DeactivateApplication(Application* app) {
   MessageHelper::ResetGlobalproperties(app);
 }
 
-void ApplicationManagerImpl::ConnectToDevice(unsigned int id) {
+void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {
   // TODO(VS): Call function from ConnectionHandler
   if (!connection_handler_) {
     LOG4CXX_WARN(logger_, "Connection handler is not set.");
@@ -422,7 +422,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   }
 }
 
-unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
+uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   if (message_chain_current_id_ < message_chain_max_id_) {
     message_chain_current_id_++;
   } else {
@@ -433,8 +433,8 @@ unsigned int ApplicationManagerImpl::GetNextHMICorrelationID() {
 }
 
 MessageChaining* ApplicationManagerImpl::AddMessageChain(
-  const unsigned int& connection_key, const unsigned int& correlation_id,
-  const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
+  const uint32_t& connection_key, const uint32_t& correlation_id,
+  const uint32_t& hmi_correlation_id, MessageChaining* msg_chaining,
   const smart_objects::SmartObject* data) {
   LOG4CXX_INFO(
     logger_,
@@ -502,8 +502,8 @@ MessageChaining* ApplicationManagerImpl::AddMessageChain(
 }
 
 bool ApplicationManagerImpl::DecreaseMessageChain(
-  const unsigned int& hmi_correlation_id,
-  unsigned int& mobile_correlation_id) {
+  const uint32_t& hmi_correlation_id,
+  uint32_t& mobile_correlation_id) {
   LOG4CXX_INFO(
     logger_,
     "ApplicationManagerImpl::DecreaseMessageChain id " << hmi_correlation_id);
@@ -547,7 +547,7 @@ bool ApplicationManagerImpl::DecreaseMessageChain(
 }
 
 bool ApplicationManagerImpl::RemoveMobileRequestFromMessageChain(
-  unsigned int mobile_correlation_id, unsigned int connection_key) {
+  uint32_t mobile_correlation_id, uint32_t connection_key) {
   LOG4CXX_INFO(
     logger_,
     "ApplicationManagerImpl::RemoveMobileRequestFromMessageChain id "
@@ -570,7 +570,7 @@ bool ApplicationManagerImpl::RemoveMobileRequestFromMessageChain(
 }
 
 MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  const unsigned int& hmi_correlation_id) const {
+  const uint32_t& hmi_correlation_id) const {
   LOG4CXX_INFO(
     logger_,
     "ApplicationManagerImpl::GetMessageChain id " << hmi_correlation_id);
@@ -621,9 +621,9 @@ void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
   is_all_apps_allowed_ = allowed;
 }
 
-void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
-    int correlation_id, int max_duration, int sampling_rate,
-    int bits_per_sample, int audio_type) {
+void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
+    int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
+    int32_t bits_per_sample, int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
 #ifdef MEDIA_MANAGER
   if (NULL != media_manager_) {
@@ -636,8 +636,8 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int session_key,
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
-  unsigned int session_key,
-  std::vector<unsigned char> binaryData) {
+  uint32_t session_key,
+  std::vector<uint8_t> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   {
@@ -664,7 +664,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
     application_manager::MessageType::kNotification;
 
   (*on_audio_pass)[strings::params][strings::connection_key] =
-    static_cast<int>(session_key);
+    static_cast<int32_t>(session_key);
   (*on_audio_pass)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnAudioPassThruID;
 
@@ -683,7 +683,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   command->CleanUp();
 }
 
-void ApplicationManagerImpl::StopAudioPassThru(int application_key) {
+void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef MEDIA_MANAGER
 if (NULL != media_manager_) {
@@ -697,7 +697,7 @@ std::string ApplicationManagerImpl::GetDeviceName(
   DCHECK(connection_handler_ != 0);
 
   std::string device_name = "";
-  std::list<unsigned int> applications_list;
+  std::list<uint32_t> applications_list;
   connection_handler::ConnectionHandlerImpl* con_handler_impl =
     static_cast<connection_handler::ConnectionHandlerImpl*>(
         connection_handler_);
@@ -782,8 +782,8 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 bool ApplicationManagerImpl::OnSessionStartedCallback(
-  connection_handler::DeviceHandle device_handle, int session_key,
-  int first_session_key, protocol_handler::ServiceType type) {
+  connection_handler::DeviceHandle device_handle, int32_t session_key,
+  int32_t first_session_key, protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
 
   if (protocol_handler::kMovileNav == type) {
@@ -810,8 +810,8 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
   return true;
 }
 
-void ApplicationManagerImpl::OnSessionEndedCallback(int session_key,
-    int first_session_key,
+void ApplicationManagerImpl::OnSessionEndedCallback(int32_t session_key,
+    int32_t first_session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
@@ -927,13 +927,13 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asInt());
 
-  unsigned int correlation_id =
+  uint32_t correlation_id =
     (*message)[strings::params][strings::correlation_id].asUInt();
 
-  unsigned int connection_key =
+  uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();
 
-  unsigned int protocol_type =
+  uint32_t protocol_type =
     (*message)[strings::params][strings::protocol_type].asUInt();
 
   Application* app = NULL;
@@ -947,9 +947,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       smart_objects::SmartObject* response =
         MessageHelper::CreateNegativeResponse(
             connection_key,
-            static_cast<int>(function_id),
+            static_cast<int32_t>(function_id),
             correlation_id,
-            static_cast<int>(mobile_apis::Result::APPLICATION_NOT_REGISTERED));
+            static_cast<int32_t>(mobile_apis::Result::APPLICATION_NOT_REGISTERED));
 
       ApplicationManagerImpl::instance()->SendMessageToMobile(response);
       return false;
@@ -967,8 +967,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       LOG4CXX_WARN(
         logger_,
         "Request blocked by policies. " << "FunctionID: "
-        << static_cast<int>(function_id) << " Application HMI status: "
-        << static_cast<int>(app->hmi_level()));
+        << static_cast<int32_t>(function_id) << " Application HMI status: "
+        << static_cast<int32_t>(app->hmi_level()));
 
       smart_objects::SmartObject* response =
         MessageHelper::CreateBlockedByPoliciesResponse(function_id,
@@ -1003,9 +1003,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         smart_objects::SmartObject* response =
           MessageHelper::CreateNegativeResponse(
               connection_key,
-              static_cast<int>(function_id),
+              static_cast<int32_t>(function_id),
               correlation_id,
-              static_cast<int>(mobile_apis::Result::TOO_MANY_PENDING_REQUESTS));
+              static_cast<int32_t>(mobile_apis::Result::TOO_MANY_PENDING_REQUESTS));
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return false;
@@ -1144,7 +1144,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
     case ProtocolVersion::kV2: {
       if (message.function_id() == 0 || message.type() == kUnknownType) {
         LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
-        int conversation_result =
+        int32_t conversation_result =
           formatters::CFormatterJsonSDLRPCv1::fromString <
           NsSmartDeviceLinkRPC::V1::FunctionID::eType,
           NsSmartDeviceLinkRPC::V1::messageType::eType > (
@@ -1192,7 +1192,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       break;
     }
     case ProtocolVersion::kHMI: {
-      int result = formatters::FormatterJsonRpc::FromString <
+      int32_t result = formatters::FormatterJsonRpc::FromString <
                    hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
                      message.json_message(), output);
       LOG4CXX_INFO(
@@ -1435,20 +1435,20 @@ void ApplicationManagerImpl::removeNotification(const CommandSharedPtr& ptr) {
   }
 }
 
-void ApplicationManagerImpl::updateRequestTimeout(unsigned int connection_key,
-    unsigned int mobile_correlation_id,
-    unsigned int new_timeout_value) {
+void ApplicationManagerImpl::updateRequestTimeout(uint32_t connection_key,
+    uint32_t mobile_correlation_id,
+    uint32_t new_timeout_value) {
   request_ctrl_.updateRequestTimeout(connection_key, mobile_correlation_id,
                                      new_timeout_value);
 }
 
-const unsigned int ApplicationManagerImpl::application_id
-(const int correlation_id) {
+const uint32_t ApplicationManagerImpl::application_id
+(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
-  std::map<const int, const unsigned int>::iterator it =
+  std::map<const int32_t, const uint32_t>::iterator it =
     appID_list_.find(correlation_id);
   if (appID_list_.end() != it) {
-    const unsigned int app_id = it->second;
+    const uint32_t app_id = it->second;
     appID_list_.erase(it);
     return app_id;
   } else {
@@ -1456,9 +1456,9 @@ const unsigned int ApplicationManagerImpl::application_id
   }
 }
 
-void ApplicationManagerImpl::set_application_id(const int correlation_id,
-    const unsigned int app_id) {
-  appID_list_.insert(std::pair<const int, const unsigned int>
+void ApplicationManagerImpl::set_application_id(const int32_t correlation_id,
+    const uint32_t app_id) {
+  appID_list_.insert(std::pair<const int32_t, const uint32_t>
                      (correlation_id, app_id));
 }
 
@@ -1486,13 +1486,13 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   }
 }
 
-void ApplicationManagerImpl::UnregisterApplication(const unsigned int& app_id) {
+void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  std::map<int, Application*>::iterator it = applications_.find(app_id);
+  std::map<int32_t, Application*>::iterator it = applications_.find(app_id);
   if (applications_.end() == it) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
@@ -1600,8 +1600,8 @@ void ApplicationManagerImpl::Unmute() {
 void ApplicationManagerImpl::SaveApplications() const {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveApplications()");
 
-  std::map<int, Application*>::const_iterator it = applications_.begin();
-  std::map<int, Application*>::const_iterator it_end = applications_.end();
+  std::map<int32_t, Application*>::const_iterator it = applications_.begin();
+  std::map<int32_t, Application*>::const_iterator it_end = applications_.end();
 
   std::string app_data;
   for (; it != it_end; ++it) {
@@ -1616,7 +1616,7 @@ void ApplicationManagerImpl::SaveApplications() const {
       static_cast<connection_handler::ConnectionHandlerImpl*>(
         connection_handler_);
 
-    unsigned int device_id = 0;
+    uint32_t device_id = 0;
     std::string mac_adddress;
     if (-1 != conn_handler->GetDataOnSessionKey(
           it->first,
@@ -1637,7 +1637,7 @@ void ApplicationManagerImpl::SaveApplications() const {
 
     const Application* app = it->second;
 
-    int print_result = 0;
+    int32_t print_result = 0;
     size_t msg_size = 256;
 
     do {
@@ -1652,7 +1652,7 @@ void ApplicationManagerImpl::SaveApplications() const {
         "%s:%s;",
         strings::app_id, app->mobile_app_id()->asInt(),
         strings::connection_key, it->first,
-        strings::hmi_level, static_cast<int>(app->hmi_level()),
+        strings::hmi_level, static_cast<int32_t>(app->hmi_level()),
         "mac_address", mac_adddress.c_str());
 
       msg_size += msg_size;
@@ -1670,7 +1670,7 @@ void ApplicationManagerImpl::SaveApplications() const {
   if (file.is_open()) {
     file_system::Write(
       &file,
-      reinterpret_cast<const unsigned char*>(app_data.c_str()),
+      reinterpret_cast<const uint8_t*>(app_data.c_str()),
       app_data.size());
   } else {
     LOG4CXX_ERROR(logger_,
@@ -1682,7 +1682,7 @@ void ApplicationManagerImpl::SaveApplications() const {
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
                             const std::string& app_name,
-                            const std::vector<unsigned char>& binary_data,
+                            const std::vector<uint8_t>& binary_data,
                             const std::string& save_path) {
 
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {

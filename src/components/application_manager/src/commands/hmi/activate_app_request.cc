@@ -46,8 +46,8 @@ ActivateAppRequest::~ActivateAppRequest() {
 
 void ActivateAppRequest::Run() {
   LOG4CXX_INFO(logger_, "ActivateAppRequest::Run");
-  int correlation_id = RequestToHMI::correlation_id();
-  unsigned int app_id = RequestToHMI::application_id();
+  int32_t correlation_id = RequestToHMI::correlation_id();
+  uint32_t app_id = RequestToHMI::application_id();
   ApplicationManagerImpl::instance()->set_application_id(correlation_id, app_id);
   SendRequest();
 }

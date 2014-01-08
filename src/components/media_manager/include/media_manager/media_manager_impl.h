@@ -50,19 +50,19 @@ class MediaManagerImpl : public MediaManager,
     virtual ~MediaManagerImpl();
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
-    virtual void PlayA2DPSource(int application_key);
-    virtual void StopA2DPSource(int application_key);
-    virtual void StartMicrophoneRecording(int application_key,
+    virtual void PlayA2DPSource(int32_t application_key);
+    virtual void StopA2DPSource(int32_t application_key);
+    virtual void StartMicrophoneRecording(int32_t application_key,
                                           const std::string& outputFileName,
-                                          int duration);
-    virtual void StopMicrophoneRecording(int application_key);
-    virtual void StartVideoStreaming(int application_key);
-    virtual void StopVideoStreaming(int application_key);
+                                          int32_t duration);
+    virtual void StopMicrophoneRecording(int32_t application_key);
+    virtual void StartVideoStreaming(int32_t application_key);
+    virtual void StopVideoStreaming(int32_t application_key);
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
     virtual void OnMobileMessageSent(
       const protocol_handler::RawMessagePtr& message);
-    virtual void FramesProcessed(int application_key, int frame_number);
+    virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
   protected:
     MediaManagerImpl();

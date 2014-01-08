@@ -87,7 +87,7 @@ class TimerThread {
      *
      * @param timeout_seconds Timeout in seconds to be set
      */
-    virtual void start(unsigned int timeout_seconds);
+    virtual void start(uint32_t timeout_seconds);
 
     /*
      * @brief Stops timer execution
@@ -134,13 +134,13 @@ class TimerThread {
          *
          * @param timeout_seconds New timeout to be set
          */
-        virtual void setTimeOut(unsigned int timeout_seconds);
+        virtual void setTimeOut(uint32_t timeout_seconds);
 
       protected:
 
       private:
         const TimerThread*                               timer_thread_;
-        unsigned int                                     timeout_seconds_;
+        uint32_t                                     timeout_seconds_;
         sync_primitives::Lock                            state_lock_;
         sync_primitives::ConditionalVariable             termination_condition_;
         volatile bool                                    stop_flag_;
@@ -185,7 +185,7 @@ TimerThread<T>::~TimerThread() {
 }
 
 template <class T>
-void TimerThread<T>::start(unsigned int timeout_seconds) {
+void TimerThread<T>::start(uint32_t timeout_seconds) {
   if (is_running_) {
     stop();
   }
@@ -232,12 +232,12 @@ void TimerThread<T>::TimerDelegate::threadMain() {
   using sync_primitives::ConditionalVariable;
   sync_primitives::AutoLock auto_lock(state_lock_);
   const time_t end_time = time(NULL) + timeout_seconds_;
-  int wait_seconds_left = int(difftime(end_time, time(NULL)));
+  int32_t wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
   while (!stop_flag_) {
     // Sleep
     ConditionalVariable::WaitStatus wait_status =
         termination_condition_.WaitFor(auto_lock, wait_seconds_left * 1000);
-    wait_seconds_left = int(difftime(end_time, time(NULL)));
+    wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status ||
         wait_seconds_left <= 0) {
@@ -261,7 +261,7 @@ bool TimerThread<T>::TimerDelegate::exitThreadMain() {
 }
 
 template <class T>
-void TimerThread<T>::TimerDelegate::setTimeOut(unsigned int timeout_seconds) {
+void TimerThread<T>::TimerDelegate::setTimeOut(uint32_t timeout_seconds) {
   timeout_seconds_ = timeout_seconds;
 }
 

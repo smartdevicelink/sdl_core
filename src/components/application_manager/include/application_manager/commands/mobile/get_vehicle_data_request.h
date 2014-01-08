@@ -70,7 +70,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-  void SendRequestsToHmi(const int app_id);
+  void SendRequestsToHmi(const int32_t app_id);
 
   struct HmiRequest {
     hmi_apis::Common_Result::eType status;

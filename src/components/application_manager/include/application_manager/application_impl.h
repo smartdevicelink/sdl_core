@@ -55,7 +55,7 @@ struct AppFile {
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
-  explicit ApplicationImpl(unsigned int application_id);
+  explicit ApplicationImpl(uint32_t application_id);
   ~ApplicationImpl();
 
   /**
@@ -75,13 +75,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool has_been_activated() const;
 
   const Version& version() const;
-  inline unsigned int app_id() const;
+  inline uint32_t app_id() const;
   const std::string& name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
-  const unsigned int put_file_in_none_count() const;
-  const unsigned int delete_file_in_none_count() const;
-  const unsigned int list_files_in_none_count() const;
+  const uint32_t put_file_in_none_count() const;
+  const uint32_t delete_file_in_none_count() const;
+  const uint32_t list_files_in_none_count() const;
   const mobile_api::SystemContext::eType& system_context() const;
   inline const mobile_api::AudioStreamingState::eType&
   audio_streaming_state() const;
@@ -110,9 +110,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool SubscribeToIVI(unsigned int vehicle_info_type_);
-  bool IsSubscribedToIVI(unsigned int vehicle_info_type_);
-  bool UnsubscribeFromIVI(unsigned int vehicle_info_type_);
+  bool SubscribeToIVI(uint32_t vehicle_info_type_);
+  bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
+  bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
 
  protected:
   void CleanupFiles();
@@ -121,7 +121,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   smart_objects::SmartObject* active_message_;
 
   Version version_;
-  unsigned int app_id_;
+  uint32_t app_id_;
   std::string app_name_;
   bool is_media_;
   bool allowed_support_navigation_;
@@ -129,9 +129,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool has_been_activated_;
 
   mobile_api::HMILevel::eType hmi_level_;
-  unsigned int put_file_in_none_count_;
-  unsigned int delete_file_in_none_count_;
-  unsigned int list_files_in_none_count_;
+  uint32_t put_file_in_none_count_;
+  uint32_t delete_file_in_none_count_;
+  uint32_t list_files_in_none_count_;
   mobile_api::SystemContext::eType system_context_;
   mobile_api::AudioStreamingState::eType audio_streaming_state_;
   std::string app_icon_path_;
@@ -139,11 +139,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   std::vector<AppFile> app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::set<unsigned int> subscribed_vehicle_info_;
+  std::set<uint32_t> subscribed_vehicle_info_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 
-unsigned int ApplicationImpl::app_id() const {
+uint32_t ApplicationImpl::app_id() const {
   return app_id_;
 }
 

@@ -90,7 +90,7 @@ void SetIconRequest::Run() {
 
   // TODO(VS): research why is image_type hardcoded
   msg_params[strings::sync_file_name][strings::image_type] =
-      static_cast<int> (SetIconRequest::ImageType::DYNAMIC);
+      static_cast<int32_t> (SetIconRequest::ImageType::DYNAMIC);
 
   // for further use in on_event function
   (*message_)[strings::msg_params][strings::sync_file_name] =

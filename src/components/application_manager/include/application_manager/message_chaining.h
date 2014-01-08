@@ -57,7 +57,7 @@ class MessageChaining {
    * @param connection_key of connection for Mobile side
    * @param correlation_id Correlation id for response for Mobile side
    */
-  MessageChaining(unsigned int connection_key, unsigned int correlation_id);
+  MessageChaining(uint32_t connection_key, uint32_t correlation_id);
   /**
    * @brief MessageChaining class destructor
    */
@@ -76,14 +76,14 @@ class MessageChaining {
    *
    * @return correlation_id
    */
-  const unsigned int correlation_id() const;
+  const uint32_t correlation_id() const;
 
   /**
    * @brief Retrieves connection key
    *
    * @return connection_key
    */
-  const unsigned int connection_key() const;
+  const uint32_t connection_key() const;
 
   /**
    * @brief Increments counter that represent
@@ -104,14 +104,14 @@ class MessageChaining {
    *
    * @return counter
    */
-  int counter() const;
+  int32_t counter() const;
 
   /**
    * @brief Sets counter
    *
    * @param counter Param indicates how many responses expected
    */
-  void set_counter(const unsigned int& counter);
+  void set_counter(const uint32_t& counter);
 
   /**
    * @brief Sets SmartObject data
@@ -164,10 +164,10 @@ class MessageChaining {
   const hmi_apis::Common_Result::eType& tts_response_result() const;
 
  private:
-  unsigned int correlation_id_;
-  unsigned int connection_key_;
+  uint32_t correlation_id_;
+  uint32_t connection_key_;
   bool success_;
-  int counter_;  // amount of pending HMI responses
+  int32_t counter_;  // amount of pending HMI responses
   smart_objects::SmartObject data_;   // temporal data
   hmi_apis::Common_Result::eType vr_response_result_;
   hmi_apis::Common_Result::eType ui_response_result_;

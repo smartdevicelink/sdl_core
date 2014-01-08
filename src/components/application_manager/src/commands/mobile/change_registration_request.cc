@@ -84,10 +84,10 @@ void ChangeRegistrationRequest::Run() {
     tts_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
 
-  const int hmi_language =
+  const int32_t hmi_language =
       (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
-  const int language =
+  const int32_t language =
       (*message_)[strings::msg_params][strings::language].asInt();
 
   if (false ==
@@ -203,7 +203,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           (*message_)[strings::msg_params][strings::language].asInt()));
     }
 
-    int greates_result_code = std::max(std::max(ui_result_, vr_result_),
+    int32_t greates_result_code = std::max(std::max(ui_result_, vr_result_),
                                        tts_result_);
 
     (*message_)[strings::params][strings::function_id] =
@@ -216,7 +216,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
-    const int& hmi_display_lang) {
+    const int32_t& hmi_display_lang) {
 
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
@@ -240,7 +240,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
-    const int& hmi_display_lang) {
+    const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* vr_languages =
@@ -263,7 +263,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 }
 
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
-    const int& hmi_display_lang) {
+    const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
   const smart_objects::SmartObject* tts_languages =

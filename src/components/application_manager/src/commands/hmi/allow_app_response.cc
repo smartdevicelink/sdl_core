@@ -46,7 +46,7 @@ AllowAppResponse::~AllowAppResponse() {
 void AllowAppResponse::Run() {
   LOG4CXX_INFO(logger_, "AllowAppResponse::Run");
 
-  unsigned int connection_key =
+  uint32_t connection_key =
     (*message_)[strings::params][strings::connection_key].asInt();
 
   Application* app = ApplicationManagerImpl::instance()->

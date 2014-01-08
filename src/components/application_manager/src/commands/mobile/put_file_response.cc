@@ -49,7 +49,7 @@ PutFileResponse::~PutFileResponse() {
 
 void PutFileResponse::Run() {
   LOG4CXX_INFO(logger_, "PutFileResponse::Run");
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
@@ -59,7 +59,7 @@ void PutFileResponse::Run() {
   }
 
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int>(file_system::GetAvailableSpaceForApp(app->name()));
+      static_cast<int32_t>(file_system::GetAvailableSpaceForApp(app->name()));
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

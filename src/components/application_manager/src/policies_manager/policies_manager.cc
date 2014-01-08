@@ -160,7 +160,7 @@ bool PoliciesManager::Init() {
       }
 
       const Json::Value levels = items[item.asString()][kHmiLevelsKey];
-      for (unsigned int j = 0; j < levels.size(); ++j) {
+      for (uint32_t j = 0; j < levels.size(); ++j) {
         hmi_levels.push_back(kHmiLevels[levels[j].asString()]);
       }
 

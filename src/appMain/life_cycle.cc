@@ -255,7 +255,7 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // QT_HMI
 
-void LifeCycle::StopComponents(int params) {
+void LifeCycle::StopComponents(int32_t params) {
   utils::ResetSubscribeToTerminateSignal();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);

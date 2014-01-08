@@ -44,7 +44,7 @@
 namespace request_watchdog {
 using namespace sync_primitives;
 
-const int RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
+const int32_t RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
@@ -132,8 +132,8 @@ void RequestWatchdog::addRequest(RequestInfo* requestInfo) {
   }
 }
 
-void RequestWatchdog::removeRequest(int connection_key,
-                                    int correlation_id) {
+void RequestWatchdog::removeRequest(int32_t connection_key,
+                                    int32_t correlation_id) {
   LOG4CXX_TRACE_ENTER(logger_);
   {
     AutoLock auto_lock(requestsLock_);
@@ -159,9 +159,9 @@ void RequestWatchdog::removeRequest(int connection_key,
   }
 }
 
-void RequestWatchdog::updateRequestTimeout(int connection_key,
-                                           int correlation_id,
-                                           int new_timeout_value) {
+void RequestWatchdog::updateRequestTimeout(int32_t connection_key,
+                                           int32_t correlation_id,
+                                           int32_t new_timeout_value) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   {
@@ -190,9 +190,9 @@ void RequestWatchdog::updateRequestTimeout(int connection_key,
 }
 
 bool RequestWatchdog::checkTimeScaleMaxRequest(
-                              const int& connection_key,
-                              const unsigned int& app_time_scale,
-                              const unsigned int& max_request_per_time_scale) {
+                              const int32_t& connection_key,
+                              const uint32_t& app_time_scale,
+                              const uint32_t& max_request_per_time_scale) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   bool result = true;
@@ -203,7 +203,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     TimeScale scale(start, end, connection_key);
-    int count = 0;
+    int32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 
@@ -219,10 +219,10 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
 }
 
 bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
-                              const int& hmi_level,
-                              const int& connection_key,
-                              const unsigned int& app_time_scale,
-                              const unsigned int& max_request_per_time_scale) {
+                              const int32_t& hmi_level,
+                              const int32_t& connection_key,
+                              const uint32_t& app_time_scale,
+                              const uint32_t& max_request_per_time_scale) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   bool result = true;
@@ -233,7 +233,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     HMILevelTimeScale scale(start, end, connection_key, hmi_level);
-    int count = 0;
+    int32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 
@@ -263,7 +263,7 @@ void RequestWatchdog::removeAllRequests() {
   queueDispatcherThread.stop();
 }
 
-int RequestWatchdog::getRegesteredRequestsNumber() {
+int32_t RequestWatchdog::getRegesteredRequestsNumber() {
   LOG4CXX_TRACE_ENTER(logger_);
   {
     AutoLock auto_lock(requestsLock_);
@@ -293,8 +293,8 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   std::map<RequestInfo*, TimevalStruct>::iterator it;
   std::map<RequestInfo*, TimevalStruct>::iterator it_temp;
 
-  int cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
-  int cycleDuration;
+  int32_t cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
+  int32_t cycleDuration;
   TimevalStruct cycleStartTime;
 
   RequestWatchdog* instnc = static_cast<RequestWatchdog*>(

@@ -28,7 +28,7 @@ class MessagePriority {
   // Constructor is private to prevent creation
   // of random priorities in the code please use static constructor if you
   // need priority value
-  explicit MessagePriority(int value): value_(value) {}
+  explicit MessagePriority(int32_t value): value_(value) {}
   size_t value_;
 };
 

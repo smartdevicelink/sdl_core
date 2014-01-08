@@ -80,7 +80,7 @@ void EventDispatcher::raise_event(const Event& event) {
 }
 
 void EventDispatcher::add_observer(const Event::EventID& event_id,
-                                   int hmi_correlation_id,
+                                   int32_t hmi_correlation_id,
                                    EventObserver* const observer) {
   AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);

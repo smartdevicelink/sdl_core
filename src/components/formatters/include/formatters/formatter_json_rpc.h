@@ -57,48 +57,48 @@ class FormatterJsonRpc: public CFormatterJsonBase {
     /**
      * @brief No errors occured during the parsing of the input JSON string.
      */
-    static const int kSuccess = 0;
+    static const int32_t kSuccess = 0;
 
     /**
      * @brief Input JSON string cannot be parsed.
      */
-    static const int kParsingError = 1;
+    static const int32_t kParsingError = 1;
 
     /**
      * @brief Input JSON string has invalid format.
      */
-    static const int kInvalidFormat = 2;
+    static const int32_t kInvalidFormat = 2;
 
     /**
      * @brief Method in input JSON string is not
      *        specified or specified incorrectly.
      */
-    static const int kMethodNotSpecified = 4;
+    static const int32_t kMethodNotSpecified = 4;
 
     /**
      * @brief Method is unknown.
      */
-    static const int kUnknownMethod = 8;
+    static const int32_t kUnknownMethod = 8;
 
     /**
      * @brief Message type is unknown.
      */
-    static const int kUnknownMessageType = 16;
+    static const int32_t kUnknownMessageType = 16;
 
     /**
      * @brief Id of request or response is invalid.
      */
-    static const int kInvalidId = 32;
+    static const int32_t kInvalidId = 32;
 
     /**
      * @brief Response code is not available.
      */
-    static const int kResponseCodeNotAvailable = 64;
+    static const int32_t kResponseCodeNotAvailable = 64;
 
     /**
      * @brief Message for error response is not available.
      */
-    static const int kErrorResponseMessageNotAvailable = 128;
+    static const int32_t kErrorResponseMessageNotAvailable = 128;
 
     /**
      * @brief Creates a JSON string from a SmartObject.
@@ -124,7 +124,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      *         during the parsing of the input string. 0 if no errors occured.
      */
     template <typename FunctionId, typename MessageType>
-    static int FromString(const std::string& str,
+    static int32_t FromString(const std::string& str,
                           NsSmartObjects::SmartObject& out);
 
   private:
@@ -222,7 +222,7 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      *         during the parsing of the function id. 0 if no errors occured.
      */
     template <typename FunctionId>
-    static int ParseFunctionId(const Json::Value& method_value,
+    static int32_t ParseFunctionId(const Json::Value& method_value,
                                NsSmartObjects::SmartObject& out);
 
     /**
@@ -271,9 +271,9 @@ class FormatterJsonRpc: public CFormatterJsonBase {
 };
 
 template <typename FunctionId, typename MessageType>
-int FormatterJsonRpc::FromString(const std::string& str,
+int32_t FormatterJsonRpc::FromString(const std::string& str,
                                  NsSmartObjects::SmartObject& out) {
-  int result = kSuccess;
+  int32_t result = kSuccess;
   try {
   Json::Value root;
   Json::Reader reader;
@@ -468,9 +468,9 @@ int FormatterJsonRpc::FromString(const std::string& str,
 }
 
 template <typename FunctionId>
-int FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
+int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
                                       NsSmartObjects::SmartObject& out) {
-  int result = kSuccess;
+  int32_t result = kSuccess;
 
   if (false == method_value.isString()) {
     result |= kInvalidFormat | kUnknownMethod;

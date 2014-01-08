@@ -252,7 +252,7 @@ bool AddCommandRequest::CheckCommandParentId(const Application* app) {
     return false;
   }
 
-  const int parent_id =
+  const int32_t parent_id =
       (*message_)[strings::msg_params][strings::menu_params]
                                        [hmi_request::parent_id].asInt();
   smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);

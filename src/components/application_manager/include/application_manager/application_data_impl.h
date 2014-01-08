@@ -99,33 +99,33 @@ class DynamicApplicationDataImpl : public virtual Application {
     /*
      * @brief Adds a command to the in application menu
      */
-    void AddCommand(unsigned int cmd_id,
+    void AddCommand(uint32_t cmd_id,
                     const smart_objects::SmartObject& command);
 
     /*
      * @brief Deletes all commands from the application menu with the specified command id
      */
-    void RemoveCommand(unsigned int cmd_id);
+    void RemoveCommand(uint32_t cmd_id);
 
     /*
      * @brief Finds command with the specified command id
      */
-    smart_objects::SmartObject* FindCommand(unsigned int cmd_id);
+    smart_objects::SmartObject* FindCommand(uint32_t cmd_id);
 
     /*
      * @brief Adds a menu to the application
      */
-    void AddSubMenu(unsigned int menu_id, const smart_objects::SmartObject& menu);
+    void AddSubMenu(uint32_t menu_id, const smart_objects::SmartObject& menu);
 
     /*
      * @brief Deletes menu from the application menu
      */
-    void RemoveSubMenu(unsigned int menu_id);
+    void RemoveSubMenu(uint32_t menu_id);
 
     /*
      * @brief Finds menu with the specified id
      */
-    smart_objects::SmartObject* FindSubMenu(unsigned int menu_id) const;
+    smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const;
 
     /*
      * @brief Returns true if sub menu with such name already exist
@@ -138,7 +138,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @param choice_set_id Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represent choice set
      */
-    void AddChoiceSet(unsigned int choice_set_id,
+    void AddChoiceSet(uint32_t choice_set_id,
                       const smart_objects::SmartObject& choice_set);
 
     /*
@@ -146,14 +146,14 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    void RemoveChoiceSet(unsigned int choice_set_id);
+    void RemoveChoiceSet(uint32_t choice_set_id);
 
     /*
      * @brief Finds choice set with the specified choice_set_id id
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    smart_objects::SmartObject* FindChoiceSet(unsigned int choice_set_id);
+    smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id);
 
     /*
      * @brief Adds perform interaction choice set to the application
@@ -162,7 +162,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @param choice_set SmartObject that represents choice set
      */
     void AddPerformInteractionChoiceSet(
-      unsigned int choice_set_id, const smart_objects::SmartObject& choice_set);
+      uint32_t choice_set_id, const smart_objects::SmartObject& choice_set);
 
     /*
      * @brief Deletes entirely perform interaction choice set map
@@ -186,7 +186,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @return SmartObject that represents choice set
      */
     smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      unsigned int choice_set_id) const;
+      uint32_t choice_set_id) const;
 
     /*
      * @brief Retrieve application commands
@@ -208,14 +208,14 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @param active Current state of the perform interaction
      */
-    void set_perform_interaction_active(unsigned int active);
+    void set_perform_interaction_active(uint32_t active);
 
     /*
      * @brief Retrieves perform interaction state
      *
      * @return TRUE if perform interaction active, otherwise FALSE
      */
-    inline unsigned int is_perform_interaction_active() const;
+    inline uint32_t is_perform_interaction_active() const;
 
     /*
      * @brief Sets the choice that was selected in
@@ -223,7 +223,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @param choice Choice that was selected
      */
-    void set_perform_interaction_ui_corrid(unsigned int corr_id);
+    void set_perform_interaction_ui_corrid(uint32_t corr_id);
 
     /*
      * @brief Retrieve the choice that was selected in
@@ -231,20 +231,20 @@ class DynamicApplicationDataImpl : public virtual Application {
      *
      * @return Choice that was selected in response to PerformInteraction
      */
-    inline unsigned int perform_interaction_ui_corrid() const;
+    inline uint32_t perform_interaction_ui_corrid() const;
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH
      *
      * @param mode Mode that was selected (MENU; VR; BOTH)
      */
-    void set_perform_interaction_mode(int mode);
+    void set_perform_interaction_mode(int32_t mode);
 
     /*
      * @brief Retrieve the mode that was PerformInteraction sent in
      *
      * @return mode of PerformInteraction
      */
-    inline int perform_interaction_mode() const;
+    inline int32_t perform_interaction_mode() const;
 
     /*
      * @brief Sets reset global properties state
@@ -273,9 +273,9 @@ class DynamicApplicationDataImpl : public virtual Application {
     SubMenuMap sub_menu_;
     ChoiceSetMap choice_set_map_;
     PerformChoiceSetMap performinteraction_choice_set_map_;
-    int perform_interaction_mode_;
-    unsigned int is_perform_interaction_active_;
-    unsigned int perform_interaction_ui_corrid_;
+    int32_t perform_interaction_mode_;
+    uint32_t is_perform_interaction_active_;
+    uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
   private:
     DISALLOW_COPY_AND_ASSIGN(DynamicApplicationDataImpl);
@@ -293,11 +293,11 @@ const ChoiceSetMap& DynamicApplicationDataImpl::choice_set_map() const {
   return choice_set_map_;
 }
 
-unsigned int DynamicApplicationDataImpl::is_perform_interaction_active() const {
+uint32_t DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
 }
 
-unsigned int DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
+uint32_t DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
   return perform_interaction_ui_corrid_;
 }
 
@@ -310,7 +310,7 @@ DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
   return performinteraction_choice_set_map_;
 }
 
-inline int DynamicApplicationDataImpl::perform_interaction_mode() const {
+inline int32_t DynamicApplicationDataImpl::perform_interaction_mode() const {
   return perform_interaction_mode_;
 }
 

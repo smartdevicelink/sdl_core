@@ -48,7 +48,7 @@ Lock::Lock()
       : lock_taken_(false)
 #endif // NDEBUG
 {
-  int status = pthread_mutex_init(&mutex_, NULL);
+  int32_t status = pthread_mutex_init(&mutex_, NULL);
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to initialize mutex");
   }
@@ -60,14 +60,14 @@ Lock::~Lock() {
     LOG4CXX_ERROR(g_logger, "Destroying non-released mutex");
   }
 #endif
-  int status = pthread_mutex_destroy(&mutex_);
+  int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to destroy mutex");
   }
 }
 
 void Lock::Ackquire() {
-  int status = pthread_mutex_lock(&mutex_);
+  int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to acquire mutex");
   }
@@ -76,7 +76,7 @@ void Lock::Ackquire() {
 
 void Lock::Release() {
   AssertTakenAndMarkFree();
-  int status = pthread_mutex_unlock(&mutex_);
+  int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
     LOG4CXX_ERROR(g_logger, "Failed to unlock mutex");
   }

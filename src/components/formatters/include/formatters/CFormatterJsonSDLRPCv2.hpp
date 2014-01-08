@@ -110,7 +110,7 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
   static bool fromString(const std::string &str,
                          NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
                          FunctionId functionId, MessageType messageType,
-                         int correlationId);
+                         int32_t correlationId);
 
   /**
    * @brief Converts to string the smart object against the given schema
@@ -157,7 +157,7 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 template<typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
     const std::string& str, NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
-    FunctionId functionId, MessageType messageType, int correlationId) {
+    FunctionId functionId, MessageType messageType, int32_t correlationId) {
 
   bool result = fromString(str, out, functionId, messageType);
   namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;

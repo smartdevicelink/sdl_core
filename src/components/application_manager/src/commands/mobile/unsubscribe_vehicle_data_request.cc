@@ -63,9 +63,9 @@ void UnsubscribeVehicleDataRequest::Run() {
   }
 
   // counter for items to subscribe
-  int items_to_unsubscribe = 0;
+  int32_t items_to_unsubscribe = 0;
   // counter for subscribed items by application
-  int unsubscribed_items = 0;
+  int32_t unsubscribed_items = 0;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
@@ -84,7 +84,7 @@ void UnsubscribeVehicleDataRequest::Run() {
         msg_params[key_name] = is_key_enabled;
 
         VehicleDataType key_type = it->second;
-        if (app->UnsubscribeFromIVI(static_cast<unsigned int>(key_type))) {
+        if (app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
           ++unsubscribed_items;
         }
       }

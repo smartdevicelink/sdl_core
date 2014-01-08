@@ -76,21 +76,21 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
    *
    * @return true if language supported by UI, otherwise false
    */
-  bool IsLanguageSupportedByUI(const int& hmi_display_lang);
+  bool IsLanguageSupportedByUI(const int32_t& hmi_display_lang);
 
   /*
    * @brief Search for requested language in HMI VR supported languages
    *
    * @return true if language supported by VR, otherwise false
    */
-  bool IsLanguageSupportedByVR(const int& hmi_display_lang);
+  bool IsLanguageSupportedByVR(const int32_t& hmi_display_lang);
 
   /*
    * @brief Search for requested language in HMI TTS supported languages
    *
    * @return true if language supported by TTS, otherwise false
    */
-  bool IsLanguageSupportedByTTS(const int& hmi_display_lang);
+  bool IsLanguageSupportedByTTS(const int32_t& hmi_display_lang);
 
   /*
    * @brief Check if there some not delivered hmi responses exist
