@@ -4,15 +4,15 @@
 -- create sdlproto protocol and its fields
 local p_protoname = "sdlproto"
 p_sdlproto = Proto(p_protoname, "Ford's Smart Device Link Protocol")
-local f_version = ProtoField.uint8(p_protoname..".version", "Protocol Version", base.DEC)
-local f_compressionFlag = ProtoField.bool(p_protoname..".compression_flag", "Compression Flag")
+local f_version = ProtoField.uint8(p_protoname..".version", "Protocol Version", base.DEC, nil, 0xF0)
+local f_compressionFlag = ProtoField.bool(p_protoname..".compression_flag", "Compression Flag", 8, nil, 0x08)
 local f_frameType = ProtoField.uint8(p_protoname..".frame_type", "Frame Type", base.HEX, {
     [0x00] = "Control Frame",
     [0x01] = "Single Frame",
     [0x02] = "First Frame",
     [0x03] = "Consecutive Frame"
     -- TODO check the values not in the list
-})
+}, 0x07)
 local f_serviceType = ProtoField.uint8(p_protoname..".service_type", "Service Type", base.HEX, {
     [0x07] = "Remote Procedure Call [RPC Service]",
     [0x0F] = "Bulk Data [Hybrid Service]"
@@ -38,17 +38,10 @@ function p_sdlproto.dissector(buf, pkt, root)
   subtree = root:add(p_sdlproto, buf(0))
 
   -- add protocol fields to subtree
-  local l_byte0 = buf:range(0, 1)
-
-  local l_version = l_byte0:bitfield(0, 4)
-  subtree:add(f_version, l_version):append_text(" (Only version 2 is supported)")
-
-  local l_compressionFlag = l_byte0:bitfield(4, 1)
-  subtree:add(f_compressionFlag, l_compressionFlag)
-
-  local l_frameType = l_byte0:bitfield(5, 3)
-  subtree:add(f_frameType, l_frameType)
-  -- TODO the three protocol fields above are not displayed correctly in the Packet Bytes window
+  local l_byte0 = buf(0, 1)
+  subtree:add(f_version, l_byte0):append_text(" (Only version 2 is supported)")
+  subtree:add(f_compressionFlag, l_byte0)
+  subtree:add(f_frameType, l_byte0)
 
   subtree:add(f_serviceType, buf(1, 1))
   subtree:add(f_sessionID, buf(3, 1))
