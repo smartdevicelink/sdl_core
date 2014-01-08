@@ -3,11 +3,15 @@ package com.ford.syncV4.protocol;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.util.BitConverter;
 
 import junit.framework.Assert;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -429,5 +433,24 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         protocol.hashID = 0xCDEF1234;
         protocol._version = 2;
         protocol.EndProtocolSession(SessionType.RPC, (byte) 0x01);
+    }
+
+    public void testEndSessionACKFrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.EndSessionACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setSessionType(SessionType.RPC);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol(mock).new MessageFrameAssembler();
+        ArgumentCaptor<SessionType> sessionTypeCaptor = ArgumentCaptor.forClass(SessionType.class);
+        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+        Mockito.verify(mock).onProtocolSessionEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        assertEquals(SessionType.RPC, sessionTypeCaptor.getValue());
+        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
+        assertEquals("", correlationIdCaptor.getValue());
     }
 }

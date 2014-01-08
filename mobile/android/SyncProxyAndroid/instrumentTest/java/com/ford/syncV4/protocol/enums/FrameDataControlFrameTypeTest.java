@@ -2,6 +2,8 @@ package com.ford.syncV4.protocol.enums;
 
 import junit.framework.TestCase;
 
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,5 +63,25 @@ public class FrameDataControlFrameTypeTest extends TestCase {
     public void testValueOfHeartbeatACKShouldReturnObject() {
         assertThat(FrameDataControlFrameType.valueOf("HeartbeatACK"),
                 is(FrameDataControlFrameType.HeartbeatACK));
+    }
+
+    public void testFrameDataEndSession() throws Exception {
+        assertNotNull("enum should have EndSession value", FrameDataControlFrameType.EndSession);
+    }
+
+    public void testFrameDataEndSessionACK() throws Exception {
+        assertNotNull("enum should have EndSession value", FrameDataControlFrameType.EndSessionACK);
+    }
+
+    public void testEndSessionACKValueIs0x005() throws Exception {
+        assertEquals("EndSessionACK should have 0x005 value", (byte) 0x05, FrameDataControlFrameType.EndSessionACK.getValue());
+    }
+
+    public void testGetValueReturnsEndSessionACK() throws Exception {
+        assertEquals("value of EndSessionACK string should be FrameData.EndSessionACK", FrameDataControlFrameType.EndSessionACK, FrameDataControlFrameType.valueOf("EndSessionACK"));
+    }
+
+    public void testFrameDataValuesHasEndSessionACKValue() throws Exception {
+        assertTrue("FrameData list should have EndSessionACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSessionACK));
     }
 }
