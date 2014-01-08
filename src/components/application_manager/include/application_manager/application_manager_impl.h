@@ -40,7 +40,6 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
@@ -234,59 +233,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     uint32_t GetNextHMICorrelationID();
 
-    /*
-     * @brief Add to the chain amount of requests sent to hmi
-     * from mobile request, to ensure that all response were received
-     * before sending response to mobile.
-     *
-     * @param connection_key Connection key of application stored in
-     * MessageChaining object
-     *
-     * @param correlation_id Correlation of Mobile request stored in
-     * MessageChaining object
-     *
-     *
-     * @param hmi_correlation_id Param is map index and it is equeal to hmi
-     * correlation id. Returned from GetNextHMICorrelationID.
-     *
-     * If param is grate then 0, stored  MessageChaining counter incremented,
-     * otherwise new Message chain created.
-     *
-     * @param data Temporary SmartObject from mobile request.
-     * Sometimes request data is needed in mobile response.
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    MessageChaining* AddMessageChain(
-      const uint32_t& connection_key, const uint32_t& correlation_id,
-      const uint32_t& hmi_correlation_id, MessageChaining* msg_chaining,
-      const smart_objects::SmartObject* data = NULL);
-
-    /*
-     * @brief Decrease chain after response from hmi was received
-     *
-     * @param hmi_correlation_id Unique HMI correlation id from response
-     * @param mobile_correlation_id Unique correlation id for Mobile response
-     * returned in this parameter
-     *
-     * @return true if there is no other pending responses
-     */
-    bool DecreaseMessageChain(const uint32_t& hmi_correlation_id,
-                              uint32_t& mobile_correlation_id);
-
-    /*
-     * @brief Retrieve MessageChaining object from chain for corresponding
-     * HMI correlation ID
-     *
-     * @param hmi_correlation_id HMI correlation id from HMI response
-     *
-     * @return MessageChaining on success, otherwise NULL
-     */
-    MessageChaining* GetMessageChain(
-      const uint32_t& hmi_correlation_id) const;
-
-    /*
-     * @brief Starts audio passthru process
+    /* @brief Starts audio passthru process
      *
      * @return true on success, false if passthru is already in process
      */
@@ -577,7 +524,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     std::map<const int32_t, const uint32_t> appID_list_;
 
-    MessageChain message_chaining_;
     bool audio_pass_thru_active_;
     sync_primitives::Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
@@ -602,8 +548,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
     static log4cxx::LoggerPtr logger_;
-    static uint32_t message_chain_current_id_;
-    static const uint32_t message_chain_max_id_;
+
+    static uint32_t corelation_id_;
+    static const uint32_t max_corelation_id_;
 
     // The reason of HU shutdown
     mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;

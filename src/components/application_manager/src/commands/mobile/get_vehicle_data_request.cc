@@ -84,12 +84,36 @@ void GetVehicleDataRequest::Run() {
     }
   }
   if (msg_params.length() > min_length_msg_params) {
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                         msg_params, true, 1);
+    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   &msg_params, true);
   return;
   }
   SendResponse(false, mobile_apis::Result::INVALID_DATA);
 }
+
+void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      bool result = mobile_apis::Result::SUCCESS == result_code  ||
+          hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code;
+
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
+}
+
 #endif // #ifdef WEB_HMI
 #ifdef QT_HMI
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)

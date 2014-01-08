@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/reset_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"

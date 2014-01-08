@@ -37,7 +37,6 @@
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mobile_message_handler.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -54,8 +53,9 @@ namespace application_manager {
 
 log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ApplicationManager"));
-uint32_t ApplicationManagerImpl::message_chain_current_id_ = 0;
-const uint32_t ApplicationManagerImpl::message_chain_max_id_ = UINT_MAX;
+
+uint32_t ApplicationManagerImpl::corelation_id_ = 0;
+const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -123,7 +123,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     LOG4CXX_ERROR(logger_,
                   "An error occured during unregistering applications.");
   }
-  message_chaining_.clear();
 
 #ifdef MEDIA_MANAGER
   if (media_manager_) {
@@ -423,170 +422,13 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
-  if (message_chain_current_id_ < message_chain_max_id_) {
-    message_chain_current_id_++;
+  if (corelation_id_ < max_corelation_id_) {
+    corelation_id_++;
   } else {
-    message_chain_current_id_ = 0;
+    corelation_id_ = 0;
   }
 
-  return message_chain_current_id_;
-}
-
-MessageChaining* ApplicationManagerImpl::AddMessageChain(
-  const uint32_t& connection_key, const uint32_t& correlation_id,
-  const uint32_t& hmi_correlation_id, MessageChaining* msg_chaining,
-  const smart_objects::SmartObject* data) {
-  LOG4CXX_INFO(
-    logger_,
-    "ApplicationManagerImpl::AddMessageChain id " << hmi_correlation_id);
-
-  if (NULL == msg_chaining) {
-    MessageChaining* chain = new MessageChaining(connection_key,
-        correlation_id);
-
-    if (chain) {
-      if (data) {
-        chain->set_data(*data);
-      }
-
-      MessageChain::iterator it = message_chaining_.find(connection_key);
-      if (message_chaining_.end() == it) {
-        // Create new HMI request
-        HMIRequest hmi_request;
-        hmi_request[hmi_correlation_id] = MessageChainPtr(chain);
-
-        // create new Mobile request
-        MobileRequest mob_request;
-        mob_request[correlation_id] = hmi_request;
-
-        // add new application
-        message_chaining_[connection_key] = mob_request;
-      } else {
-        // check if mobile correlation ID exist
-        MobileRequest::iterator mob_request = it->second.find(correlation_id);
-        if (it->second.end() == mob_request) {
-          // Create new HMI request
-          HMIRequest hmi_request;
-          hmi_request[hmi_correlation_id] = MessageChainPtr(chain);
-
-          // create new Mobile request
-          it->second[correlation_id] = hmi_request;
-        } else {
-          // Add new HMI request
-          mob_request->second[hmi_correlation_id] = MessageChainPtr(chain);
-        }
-      }
-
-      return chain;
-    } else {
-      LOG4CXX_ERROR(logger_, "Null pointer message received.");
-      return NULL;
-    }
-  } else {
-    MessageChain::iterator it = message_chaining_.find(connection_key);
-    if (message_chaining_.end() != it) {
-      MobileRequest::iterator i = it->second.find(correlation_id);
-      if (it->second.end() != i) {
-        HMIRequest::iterator j = i->second.begin();
-        for (; i->second.end() != j; ++j) {
-          if ((*j->second) == *msg_chaining) {
-            // copy existing MessageChaining
-            i->second[hmi_correlation_id] = j->second;
-            return &(*j->second);
-          }
-        }
-      }
-    }
-    return NULL;
-  }
-}
-
-bool ApplicationManagerImpl::DecreaseMessageChain(
-  const uint32_t& hmi_correlation_id,
-  uint32_t& mobile_correlation_id) {
-  LOG4CXX_INFO(
-    logger_,
-    "ApplicationManagerImpl::DecreaseMessageChain id " << hmi_correlation_id);
-
-  bool result = false;
-
-  MessageChain::iterator i = message_chaining_.begin();
-  for (; message_chaining_.end() != i; ++i) {
-    MobileRequest::iterator j = i->second.begin();
-    for (; i->second.end() != j; ++j) {
-      HMIRequest::iterator it = j->second.find(hmi_correlation_id);
-
-      if (j->second.end() != it) {
-        (*it->second).DecrementCounter();
-        LOG4CXX_INFO(
-          logger_,
-          "ApplicationManagerImpl::DecreaseMessageChain "
-          "mobile request id " << (*it->second).correlation_id()
-          << " is waiting for " << (*it->second).counter()
-          << " responses");
-
-        if (0 == (*it->second).counter()) {
-          mobile_correlation_id = (*it->second).correlation_id();
-
-          LOG4CXX_INFO(
-            logger_,
-            "HMI response id  " << hmi_correlation_id
-            << " is the final for mobile request id  "
-            << mobile_correlation_id);
-
-          j->second.clear();
-          i->second.erase(j);
-
-          result = true;
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-bool ApplicationManagerImpl::RemoveMobileRequestFromMessageChain(
-  uint32_t mobile_correlation_id, uint32_t connection_key) {
-  LOG4CXX_INFO(
-    logger_,
-    "ApplicationManagerImpl::RemoveMobileRequestFromMessageChain id "
-    << mobile_correlation_id);
-
-  bool result = false;
-
-  MessageChain::iterator connection_chain = message_chaining_.find(
-        connection_key);
-  if (connection_chain != message_chaining_.end()) {
-    MobileRequest::iterator request = connection_chain->second.find(
-                                        mobile_correlation_id);
-    if (request != connection_chain->second.end()) {
-      connection_chain->second.erase(request);
-      result = true;
-    }
-  }
-
-  return result;
-}
-
-MessageChaining* ApplicationManagerImpl::GetMessageChain(
-  const uint32_t& hmi_correlation_id) const {
-  LOG4CXX_INFO(
-    logger_,
-    "ApplicationManagerImpl::GetMessageChain id " << hmi_correlation_id);
-
-  MessageChain::const_iterator i = message_chaining_.begin();
-  for (; message_chaining_.end() != i; ++i) {
-    MobileRequest::const_iterator j = i->second.begin();
-    for (; i->second.end() != j; ++j) {
-      HMIRequest::const_iterator it = j->second.find(hmi_correlation_id);
-
-      if (j->second.end() != it) {
-        return &(*it->second);
-      }
-    }
-  }
-  return NULL;
+  return corelation_id_;
 }
 
 bool ApplicationManagerImpl::begin_audio_pass_thru() {

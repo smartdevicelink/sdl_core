@@ -182,7 +182,8 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int32_t app_id) {
     }
     // app_id
     msg_params[strings::app_id] = app_id;
-    CreateHMIRequest(hmi_apis::FunctionID::TTS_Speak, msg_params, false);
+
+    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params);
   }
 }
 

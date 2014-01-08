@@ -65,10 +65,11 @@ class GetVehicleDataRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
-#ifdef QT_HMI
+
  protected:
   virtual void on_event(const event_engine::Event& event);
 
+#ifdef QT_HMI
  private:
   void SendRequestsToHmi(const int32_t app_id);
 

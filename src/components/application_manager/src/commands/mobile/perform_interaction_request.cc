@@ -459,8 +459,7 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
             smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
             (*choice_set)[strings::choice_set][j][strings::vr_commands];
-        CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params,
-                         false);
+        SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
       }
     }
   }
