@@ -38,15 +38,15 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
-import "../../../../src/components/qt_hmi/qml_model/controls"
-import "../../../../src/components/qt_hmi/qml_model/views"
-import "../../../../src/components/qt_hmi/qml_model/hmi_api" as HmiApi
-import "../../../../src/components/qt_hmi/qml_model/models"
-import "../../../../src/components/qt_hmi/qml_model/popups"
-import "../../../../src/components/qt_hmi/qml_model/hmi_api/Common.js" as Common
-import "../../../../src/components/qt_hmi/qml_model/models/Constants.js" as Constants
-import "../../../../src/components/qt_hmi/qml_model/models/Internal.js" as Internal
+//import com.ford.sdl.hmi.log4cxx 1.0
+import "../../../../src/components/qt_hmi/qml_model_qt5/controls"
+import "../../../../src/components/qt_hmi/qml_model_qt5/views"
+import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api" as HmiApi
+import "../../../../src/components/qt_hmi/qml_model_qt5/models"
+import "../../../../src/components/qt_hmi/qml_model_qt5/popups"
+import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api/Common.js" as Common
+import "../../../../src/components/qt_hmi/qml_model_qt5/models/Constants.js" as Constants
+import "../../../../src/components/qt_hmi/qml_model_qt5/models/Internal.js" as Internal
 
 Item {
     width : mainWindowLoader.width
@@ -78,7 +78,7 @@ Item {
         //initialization for each test
         function createMessageView(appID) {
             mainWindowLoader.source = ""
-            mainWindowLoader.source = "../../../../src/components/qt_hmi/qml_model/MainWindow.qml"
+            mainWindowLoader.source = "../../../../src/components/qt_hmi/qml_model_qt5/MainWindow.qml"
             var mainWindowObject = mainWindowLoader.item
             if(!mainWindowObject)
                 qtest_fail("mainWindowObject is undefined");

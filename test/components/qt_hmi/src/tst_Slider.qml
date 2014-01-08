@@ -38,20 +38,20 @@ import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
 import com.ford.sdl.hmi.hw_buttons 1.0
 import com.ford.sdl.hmi.log4cxx 1.0
-import "./../../../../src/components/qt_hmi/qml_model/controls"
-import "./../../../../src/components/qt_hmi/qml_model/views"
-import "./../../../../src/components/qt_hmi/qml_model/hmi_api" as HmiApi
-import "./../../../../src/components/qt_hmi/qml_model/models"
-import "./../../../../src/components/qt_hmi/qml_model/popups"
-import "./../../../../src/components/qt_hmi/qml_model/hmi_api/Common.js" as Common
-import "./../../../../src/components/qt_hmi/qml_model/models/Constants.js" as Constants
-import "./../../../../src/components/qt_hmi/qml_model/models/Internal.js" as Internal
+import "../../../../src/components/qt_hmi/qml_model_qt5/controls"
+import "../../../../src/components/qt_hmi/qml_model_qt5/views"
+import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api" as HmiApi
+import "../../../../src/components/qt_hmi/qml_model_qt5/models"
+import "../../../../src/components/qt_hmi/qml_model_qt5/popups"
+import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api/Common.js" as Common
+import "../../../../src/components/qt_hmi/qml_model_qt5/models/Constants.js" as Constants
+import "../../../../src/components/qt_hmi/qml_model_qt5/models/Internal.js" as Internal
 
 Item {
     TestCase {
         name: "Slider"
         when: windowShown
-        property var mainWindowComponent : Qt.createComponent("./../../../../src/components/qt_hmi/qml_model/MainWindow.qml")
+        property var mainWindowComponent : Qt.createComponent("./../../../../src/components/qt_hmi/qml_model_qt5/MainWindow.qml")
         property var mainObject
         property var sldUI
         property var dataContainer
