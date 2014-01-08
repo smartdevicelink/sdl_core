@@ -2,13 +2,30 @@
 -- source: https://delog.wordpress.com/2010/09/27/create-a-wireshark-dissector-in-lua/
 
 -- create sdlproto protocol and its fields
-p_sdlproto = Proto("sdlproto", "Ford's Smart Device Link Protocol")
-local f_version = ProtoField.uint8("sdlproto.version", "Protocol Version", base.HEX)
-local f_compressionflag = ProtoField.bool("sdlproto.compression_flag", "Compression Flag")
+local p_protoname = "sdlproto"
+p_sdlproto = Proto(p_protoname, "Ford's Smart Device Link Protocol")
+local f_version = ProtoField.uint8(p_protoname..".version", "Protocol Version", base.DEC)
+local f_compressionFlag = ProtoField.bool(p_protoname..".compression_flag", "Compression Flag")
+local f_frameType = ProtoField.uint8(p_protoname..".frame_type", "Frame Type", base.HEX, {
+    [0x00] = "Control Frame",
+    [0x01] = "Single Frame",
+    [0x02] = "First Frame",
+    [0x03] = "Consecutive Frame"
+    -- TODO check the values not in the list
+})
+local f_serviceType = ProtoField.uint8(p_protoname..".service_type", "Service Type", base.HEX, {
+    [0x07] = "Remote Procedure Call [RPC Service]",
+    [0x0F] = "Bulk Data [Hybrid Service]"
+    -- TODO check the values not in the list
+})
+-- TODO add Frame Info depending on Frame Type
+local f_sessionID = ProtoField.uint8(p_protoname..".session_id", "Session ID", base.HEX)
 --local f_data = ProtoField.string("sdlproto.data", "Data", FT_STRING)
 
 --local f_debug = ProtoField.uint8("sdlproto.debug", "Debug")
-p_sdlproto.fields = {f_version, f_compressionflag}
+p_sdlproto.fields = {
+    f_version, f_compressionFlag, f_frameType, f_serviceType, f_sessionID
+}
 
 -- sdlproto dissector function
 function p_sdlproto.dissector(buf, pkt, root)
@@ -19,12 +36,22 @@ function p_sdlproto.dissector(buf, pkt, root)
 
   -- create subtree for sdlproto
   subtree = root:add(p_sdlproto, buf(0))
+
   -- add protocol fields to subtree
   local l_byte0 = buf:range(0, 1)
+
   local l_version = l_byte0:bitfield(0, 4)
   subtree:add(f_version, l_version):append_text(" (Only version 2 is supported)")
-  local l_compressionflag = l_byte0:bitfield(4, 1)
-  subtree:add(f_compressionflag, l_compressionflag)
+
+  local l_compressionFlag = l_byte0:bitfield(4, 1)
+  subtree:add(f_compressionFlag, l_compressionFlag)
+
+  local l_frameType = l_byte0:bitfield(5, 3)
+  subtree:add(f_frameType, l_frameType)
+  -- TODO the three protocol fields above are not displayed correctly in the Packet Bytes window
+
+  subtree:add(f_serviceType, buf(1, 1))
+  subtree:add(f_sessionID, buf(3, 1))
 
   -- description of payload
   subtree:append_text(", Command details here or in the tree below")
