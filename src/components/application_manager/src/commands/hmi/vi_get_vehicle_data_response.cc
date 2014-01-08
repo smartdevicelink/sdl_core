@@ -56,7 +56,7 @@ void VIGetVehicleDataResponse::Run() {
     return;
   }
 
-  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetDTCs);
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
 
   smart_objects::SmartObject& result = *result_so;
 
@@ -78,7 +78,7 @@ void VIGetVehicleDataResponse::Run() {
           (*message_)[strings::params][strings::protocol_version];
     }
 
-    event.set_smart_object(result_so);
+    event.set_smart_object(*result_so);
   } else {
     event.set_smart_object(*message_);
   }
