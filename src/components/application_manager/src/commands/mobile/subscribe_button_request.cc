@@ -52,7 +52,7 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {
 void SubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -61,7 +61,7 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id = ((*message_)[str::msg_params][str::button_name]
+  const uint32_t btn_id = ((*message_)[str::msg_params][str::button_name]
       .asUInt());
 
   if (app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {

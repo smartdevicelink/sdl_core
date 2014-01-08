@@ -34,7 +34,7 @@
 #include "utils/macro.h"
 
 namespace {
-bool BinaryDataPredicate(unsigned char i, unsigned char j) {
+bool BinaryDataPredicate(uint8_t i, uint8_t j) {
   return (i == j);
 }
 }
@@ -108,15 +108,15 @@ Message::~Message() {
   }
 }
 
-int Message::function_id() const {
+int32_t Message::function_id() const {
   return function_id_;
 }
 
-int Message::correlation_id() const {
+int32_t Message::correlation_id() const {
   return correlation_id_;
 }
 
-int Message::connection_key() const {
+int32_t Message::connection_key() const {
   return connection_key_;
 }
 
@@ -140,15 +140,15 @@ bool Message::has_binary_data() const {
   return (binary_data_ != NULL);
 }
 
-void Message::set_function_id(int id) {
+void Message::set_function_id(int32_t id) {
   function_id_ = id;
 }
 
-void Message::set_correlation_id(int id) {
+void Message::set_correlation_id(int32_t id) {
   correlation_id_ = id;
 }
 
-void Message::set_connection_key(int key) {
+void Message::set_connection_key(int32_t key) {
   connection_key_ = key;
 }
 

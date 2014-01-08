@@ -62,11 +62,18 @@ namespace NsMessageBroker
 
    bool TcpServer::Recv(int fd)
    {
+      DBG_MSG(("TcpServer::Recv(int fd)\n"));
       ssize_t nb = -1;
-      char buf[RECV_BUFFER_LENGTH] = {'\0'};
 
-      nb = recv(fd, buf, MAX_RECV_DATA, 0);
+      std::string* pReceivingBuffer = getBufferFor(fd);
+      //char buf[RECV_BUFFER_LENGTH] = {'\0'};
+      char* buf = (char*)calloc(RECV_BUFFER_LENGTH + pReceivingBuffer->size(),sizeof(char));
+      DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n", pReceivingBuffer->size(),pReceivingBuffer->c_str()));
+      memcpy(buf, pReceivingBuffer->c_str(), pReceivingBuffer->size());
+      nb = recv(fd, buf+ pReceivingBuffer->size(), MAX_RECV_DATA , 0);
       DBG_MSG(("Recieved %d from %d\n", nb, fd));
+      nb += pReceivingBuffer->size();
+      DBG_MSG(("Recieved with buffer %d from %d\n", nb, fd));
 
       if (nb > 0)
       {
@@ -95,10 +102,10 @@ namespace NsMessageBroker
 
            mWebSocketHandler.parseWebSocketData(data, (unsigned int&)nb);
          }
-         std::string msg = std::string(data, nb);
-         DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
-         std::string* pReceivingBuffer = getBufferFor(fd);
-         *pReceivingBuffer += msg;
+
+         *pReceivingBuffer = std::string(data,nb);
+         free(buf);
+          DBG_MSG(("pReceivingBuffer before onMessageReceived:%d : %s", pReceivingBuffer->size(), pReceivingBuffer->c_str()));
          // we need to check websocket clients here
          if (!checkWebSocketHandShake(fd, pReceivingBuffer))
          {//JSON MESSAGE received. Send data in CMessageBroker.

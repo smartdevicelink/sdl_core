@@ -87,7 +87,7 @@ bool Execute(std::string file, const char * const * argv) {
       return false;
     }
     case 0: {  // Child process
-      int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+      int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
       if (0 > fd_dev0) {
         LOG4CXX_WARN(logger, "Open dev0 failed!");
         return false;
@@ -141,7 +141,7 @@ if (!file_str.is_open()) {
 }
 
 file_str.seekg(0, std::ios::end);
-int length = file_str.tellg();
+int32_t length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
   std::string hmi_link;
@@ -191,7 +191,7 @@ bool InitHmi() {
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-int main(int argc, char** argv) {
+int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization

@@ -211,7 +211,7 @@ bool TEnumSchemaItem<EnumType>::setDefaultValue(SmartObject& Object) {
   EnumType value;
 
   if (true == mDefaultValue.getValue(value)) {
-    Object = static_cast<int>(value);
+    Object = static_cast<int32_t>(value);
     result = true;
   }
 
@@ -231,7 +231,7 @@ void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
         elementsStringRepresentation.begin();
         i != elementsStringRepresentation.end(); ++i) {
       if (i->second == stringValue) {
-        Object = static_cast<int>(i->first);
+        Object = static_cast<int32_t>(i->first);
         break;
       }
     }
@@ -243,7 +243,7 @@ void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
 template<typename EnumType>
 void TEnumSchemaItem<EnumType>::unapplySchema(SmartObject& Object) {
   if (SmartType_Integer == Object.getType()) {
-    int integerValue = Object.asInt();
+    int32_t integerValue = Object.asInt();
     const std::map<EnumType, std::string> elementsStringRepresentation =
         getEnumElementsStringRepresentation();
     typename std::map<EnumType, std::string>::const_iterator i =

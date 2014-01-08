@@ -36,6 +36,7 @@
 #ifndef SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_H_
 #define SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_WATCHDOG_H_
 
+#include <stdint.h>
 #include "request_watchdog/watchdog_subscriber.h"
 #include "request_watchdog/request_info.h"
 
@@ -72,8 +73,8 @@ class Watchdog {
      * @brief connection_key    Application connection key
      * @brief correlation_id    Mobile request correlation ID
      */
-    virtual void removeRequest(int connection_key,
-                               int correlation_id) = 0;
+    virtual void removeRequest(int32_t connection_key,
+                               int32_t correlation_id) = 0;
 
     /*
      * @brief Update request watchdog timeout
@@ -82,9 +83,9 @@ class Watchdog {
      * @brief correlation_id    Mobile request correlation ID
      * @brief new_timeout_value New value of request watchdog timeout
      */
-    virtual void updateRequestTimeout(int connection_key,
-                                      int correlation_id,
-                                      int new_timeout_value) = 0;
+    virtual void updateRequestTimeout(int32_t connection_key,
+                                      int32_t correlation_id,
+                                      int32_t new_timeout_value) = 0;
 
     /*
      * @brief Check if amount of requests during time scale for application
@@ -98,9 +99,9 @@ class Watchdog {
      * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
      */
     virtual bool checkTimeScaleMaxRequest(
-                            const int& connection_key,
-                            const unsigned int& app_time_scale,
-                            const unsigned int& max_request_per_time_scale) = 0;
+                            const int32_t& connection_key,
+                            const uint32_t& app_time_scale,
+                            const uint32_t& max_request_per_time_scale) = 0;
 
     /*
      * @brief Check if amount of requests during time scale for application in
@@ -115,17 +116,17 @@ class Watchdog {
      * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
      */
     virtual bool checkHMILevelTimeScaleMaxRequest(
-                            const int& hmi_level,
-                            const int& connection_key,
-                            const unsigned int& app_time_scale,
-                            const unsigned int& max_request_per_time_scale) = 0;
+                            const int32_t& hmi_level,
+                            const int32_t& connection_key,
+                            const uint32_t& app_time_scale,
+                            const uint32_t& max_request_per_time_scale) = 0;
 
     /*
      * @brief Removes all requests
      */
     virtual void removeAllRequests() = 0;
 
-    virtual int getRegesteredRequestsNumber() = 0;
+    virtual int32_t getRegesteredRequestsNumber() = 0;
 };
 
 }  //  namespace request_watchdog

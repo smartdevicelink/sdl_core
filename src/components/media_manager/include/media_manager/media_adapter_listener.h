@@ -33,20 +33,22 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_
 
+#include <stdint.h>
+
 namespace media_manager {
 
-typedef int DataForListener;
+typedef int32_t DataForListener;
 
 class MediaAdapterListener {
   public:
     virtual void OnDataReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data) = 0;
     virtual void OnErrorReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data) = 0;
-    virtual void OnActivityStarted(int application_key) = 0;
-    virtual void OnActivityEnded(int application_key) = 0;
+    virtual void OnActivityStarted(int32_t application_key) = 0;
+    virtual void OnActivityEnded(int32_t application_key) = 0;
 };
 }  //  namespace media_manager
 

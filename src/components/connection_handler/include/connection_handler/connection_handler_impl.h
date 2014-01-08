@@ -136,9 +136,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session has to be started.
-     * \return int Id (number) of new session if successful otherwise -1.
+     * \return int32_t Id (number) of new session if successful otherwise -1.
      */
-    virtual int OnSessionStartedCallback(
+    virtual int32_t OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
       protocol_handler::ServiceType service_type);
 
@@ -149,11 +149,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return int -1 if operation fails session key otherwise
+     * \return int32_t -1 if operation fails session key otherwise
      */
-    virtual unsigned int OnSessionEndedCallback(
+    virtual uint32_t OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char session_id, unsigned int hashCode,
+      uint8_t session_id, uint32_t hashCode,
       protocol_handler::ServiceType service_type);
 
     /**
@@ -162,11 +162,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * whithin which session exists and session number.
      * \param  connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session
-     * \return int Unique key for session
+     * \return int32_t Unique key for session
      */
-    virtual unsigned int KeyFromPair(
+    virtual uint32_t KeyFromPair(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char session_id);
+      uint8_t session_id);
 
     /**
      * \brief Returns connection identifier and session number from given session key
@@ -174,9 +174,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param connection_handle Returned: Connection identifier whithin which session exists
      * \param sessionId Returned: Number of session
      */
-    virtual void PairFromKey(unsigned int key,
+    virtual void PairFromKey(uint32_t key,
                              transport_manager::ConnectionUID* connection_handle,
-                             unsigned char* session_id);
+                             uint8_t* session_id);
 
     /**
      * \brief information about given Connection Key.
@@ -184,11 +184,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param app_id Returned: ApplicationID
      * \param sessions_list Returned: List of session keys
      * \param device_id Returned: DeviceID
-     * \return int -1 in case of error or 0 in case of success
+     * \return int32_t -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnSessionKey(unsigned int key, unsigned int* app_id = 0,
-                                    std::list<int>* sessions_list = NULL,
-                                    unsigned int* device_id = 0);
+    virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id = 0,
+                                    std::list<int32_t>* sessions_list = NULL,
+                                    uint32_t* device_id = 0);
 
     /**
      * \brief information about given Connection Key.
@@ -196,11 +196,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param app_id Returned: ApplicationID
      * \param sessions_list Returned: List of session keys
      * \param device_id Returned: DeviceID
-     * \return int -1 in case of error or 0 in case of success
+     * \return int32_t -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
+    virtual int32_t GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
                                   std::string* device_name = NULL,
-                                  std::list<unsigned int>* applications_list = NULL,
+                                  std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
     /**
@@ -226,7 +226,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /*
      * Close all associated sessions and close the connection associated with the key
      */
-    virtual void CloseConnection(unsigned int key);
+    virtual void CloseConnection(uint32_t key);
 
     /*
      * Close all associated sessions and close the connection pointed by handle
@@ -236,7 +236,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /*
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
-    void KeepConnectionAlive(unsigned int connection_key);
+    void KeepConnectionAlive(uint32_t connection_key);
   private:
     /**
      * \brief Default class constructor

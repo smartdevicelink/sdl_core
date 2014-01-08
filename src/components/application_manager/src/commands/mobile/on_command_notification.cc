@@ -58,7 +58,7 @@ void OnCommandNotification::Run() {
     return;
   }
 
-  const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
+  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
       .asUInt();
 
   if (!app->FindCommand(cmd_id)) {

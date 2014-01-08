@@ -62,7 +62,7 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const unsigned int btn_id = (*message_)[str::msg_params][str::button_name]
+  const uint32_t btn_id = (*message_)[str::msg_params][str::button_name]
       .asUInt();
 
   if (!app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {

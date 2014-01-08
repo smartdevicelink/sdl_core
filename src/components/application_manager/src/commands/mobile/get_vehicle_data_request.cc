@@ -56,7 +56,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
@@ -76,7 +76,7 @@ void GetVehicleDataRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
             smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
-  const int min_length_msg_params = 1;
+  const int32_t min_length_msg_params = 1;
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first)
         && true == (*message_)[str::msg_params][it->first].asBool()) {
@@ -102,7 +102,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
-  int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
@@ -161,11 +161,11 @@ namespace {
   };
 }
 
-void GetVehicleDataRequest::SendRequestsToHmi(const int app_id) {
+void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app_id;
 
-  for (int i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
+  for (int32_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
     if (true == (*message_)[str::msg_params].keyExists(sr.str)
         && true == (*message_)[str::msg_params][sr.str].asBool()) {

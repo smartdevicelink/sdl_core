@@ -34,12 +34,13 @@
 */
 
 #include <sys/time.h>
+#include <stdint.h>
 #include "utils/date_time.h"
 
 namespace date_time {
 
-int const DateTime::MILLISECONDS_IN_SECOND;
-int const DateTime::MICROSECONDS_IN_MILLISECONDS;
+int32_t const DateTime::MILLISECONDS_IN_SECOND;
+int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;
 
 struct timeval DateTime::getCurrentTime() {
   struct timeval currentTime;
@@ -50,7 +51,7 @@ struct timeval DateTime::getCurrentTime() {
   return currentTime;
 }
 
-int DateTime::calculateTimeSpan(struct timeval sinceTime) {
+int32_t DateTime::calculateTimeSpan(struct timeval sinceTime) {
   struct timeval currentTime, timeDifference;
   struct timezone timeZone;
 

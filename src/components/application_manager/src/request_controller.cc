@@ -71,19 +71,19 @@ RequestController::TResult RequestController::addRequest(
     const commands::CommandRequestImpl* request_impl =
       static_cast<commands::CommandRequestImpl*>(request.get());
 
-    const unsigned int& app_hmi_level_none_time_scale =
+    const uint32_t& app_hmi_level_none_time_scale =
         profile::Profile::instance()->app_hmi_level_none_time_scale();
 
-    const unsigned int& app_hmi_level_none_max_request_per_time_scale =
+    const uint32_t& app_hmi_level_none_max_request_per_time_scale =
      profile::Profile::instance()->app_hmi_level_none_time_scale_max_requests();
 
-    const unsigned int& app_time_scale =
+    const uint32_t& app_time_scale =
         profile::Profile::instance()->app_time_scale();
 
-    const unsigned int& max_request_per_time_scale =
+    const uint32_t& max_request_per_time_scale =
         profile::Profile::instance()->app_time_scale_max_requests();
 
-    const unsigned int& pending_requests_amount =
+    const uint32_t& pending_requests_amount =
         profile::Profile::instance()->pending_requests_amount();
 
     const mobile_apis::HMILevel::eType hmi_level =
@@ -125,7 +125,7 @@ RequestController::TResult RequestController::addRequest(
 }
 
 void RequestController::terminateRequest(
-    const unsigned int& mobile_correlation_id) {
+    const uint32_t& mobile_correlation_id) {
   LOG4CXX_INFO(logger_, "RequestController::terminateRequest()");
 
   {
@@ -145,7 +145,7 @@ void RequestController::terminateRequest(
 }
 
 void RequestController::terminateAppRequests(
-    const unsigned int& app_id) {
+    const uint32_t& app_id) {
   LOG4CXX_INFO(logger_, "RequestController::terminateAppRequests()");
 
   {
@@ -164,9 +164,9 @@ void RequestController::terminateAppRequests(
 }
 
 void RequestController::updateRequestTimeout(
-    const unsigned int& connection_key,
-    const unsigned int& mobile_correlation_id,
-    const unsigned int& new_timeout) {
+    const uint32_t& connection_key,
+    const uint32_t& mobile_correlation_id,
+    const uint32_t& new_timeout) {
   LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
 
   watchdog_->updateRequestTimeout(connection_key,

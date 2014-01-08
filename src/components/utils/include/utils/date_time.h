@@ -44,11 +44,11 @@ namespace date_time {
 
 class DateTime {
   public:
-    static const int MILLISECONDS_IN_SECOND = 1000;
-    static const int MICROSECONDS_IN_MILLISECONDS = 1000;
+    static const int32_t MILLISECONDS_IN_SECOND = 1000;
+    static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
 
     static TimevalStruct getCurrentTime();
-    static int calculateTimeSpan(TimevalStruct sinceTime);
+    static int32_t calculateTimeSpan(TimevalStruct sinceTime);
 };
 
 }  // namespace date_time

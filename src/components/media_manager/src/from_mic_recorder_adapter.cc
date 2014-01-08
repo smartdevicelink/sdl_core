@@ -53,7 +53,7 @@ FromMicRecorderAdapter::~FromMicRecorderAdapter() {
   StopActivity(current_application_);
 }
 
-void FromMicRecorderAdapter::StartActivity(int application_key) {
+void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::StartActivity "
                << application_key);
   if (application_key == current_application_) {
@@ -74,7 +74,7 @@ void FromMicRecorderAdapter::StartActivity(int application_key) {
   }
 }
 
-void FromMicRecorderAdapter::StopActivity(int application_key) {
+void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::StopActivity "
                << application_key);
   if (application_key != current_application_) {
@@ -91,7 +91,7 @@ void FromMicRecorderAdapter::StopActivity(int application_key) {
   current_application_ = 0;
 }
 
-bool FromMicRecorderAdapter::is_app_performing_activity(int application_key) {
+bool FromMicRecorderAdapter::is_app_performing_activity(int32_t application_key) {
   return (application_key == current_application_);
 }
 
@@ -99,7 +99,7 @@ void FromMicRecorderAdapter::set_output_file(const std::string& output_file) {
   output_file_ = output_file;
 }
 
-void FromMicRecorderAdapter::set_duration(int duration) {
+void FromMicRecorderAdapter::set_duration(int32_t duration) {
   duration_ = duration;
 }
 

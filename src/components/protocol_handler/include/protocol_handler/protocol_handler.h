@@ -81,7 +81,7 @@ class ProtocolHandler {
      * \param number_of_frames Number of frames processed by
      * streaming server and displayed to user.
      */
-    virtual void SendFramesNumber(int connection_key, int number_of_frames) = 0;
+    virtual void SendFramesNumber(int32_t connection_key, int32_t number_of_frames) = 0;
 
   protected:
     /**

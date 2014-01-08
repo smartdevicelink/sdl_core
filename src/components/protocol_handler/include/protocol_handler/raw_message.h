@@ -62,9 +62,9 @@ class RawMessage {
      * \param data Message string
      * \param dataSize Message size
      */
-    RawMessage(int connectionKey, unsigned int protocolVersion,
-               unsigned char* data_param, unsigned int dataSize,
-               unsigned char type = ServiceType::kRpc);
+    RawMessage(int32_t connectionKey, uint32_t protocolVersion,
+               uint8_t* data_param, uint32_t dataSize,
+               uint8_t type = ServiceType::kRpc);
 
     /**
      * \brief Destructor
@@ -74,24 +74,24 @@ class RawMessage {
     /**
      * \brief Getter for connection identifier
      */
-    int connection_key() const;
+    int32_t connection_key() const;
 
-    void set_connection_key(unsigned int);
+    void set_connection_key(uint32_t);
 
     /**
      * \brief Getter for message string
      */
-    unsigned char* data() const;
+    uint8_t* data() const;
 
     /**
      * \brief Getter for message size
      */
-    unsigned int data_size() const;
+    uint32_t data_size() const;
 
     /**
      * \brief Getter for protocol version
      */
-    unsigned int protocol_version() const;
+    uint32_t protocol_version() const;
 
     /**
      * \brief Getter for service type
@@ -114,23 +114,23 @@ class RawMessage {
      * \brief Connection Identifier
      * Obtained from \saCconnection_handler
      */
-    int connection_key_;
+    int32_t connection_key_;
 
     /**
      * \brief Message string
      */
-    unsigned char* data_;
+    uint8_t* data_;
 
     /**
      * \brief Size of message
      */
-    unsigned int data_size_;
+    uint32_t data_size_;
 
     /**
      * \brief Version of SmartDeviceLink protocol (currently 1,2)
      * used for tranferring message.
      */
-    unsigned int protocol_version_;
+    uint32_t protocol_version_;
 
     /**
      * \brief Type of service message belongs to

@@ -81,8 +81,8 @@ class ConnectionHandlerObserver {
      * \param firstSessionKey Session key of first session in this connection.
      */
     virtual bool OnSessionStartedCallback(
-        connection_handler::DeviceHandle device_handle, int session_key,
-        int first_session_key,
+        connection_handler::DeviceHandle device_handle, int32_t session_key,
+        int32_t first_session_key,
         protocol_handler::ServiceType type =
             protocol_handler::kRpc) = 0;
 
@@ -93,8 +93,8 @@ class ConnectionHandlerObserver {
      * \param firstSessionKey Session key of first session in this connection
      */
     virtual void OnSessionEndedCallback(
-      int session_key,
-      int first_session_key,
+      int32_t session_key,
+      int32_t first_session_key,
       protocol_handler::ServiceType type =
           protocol_handler::kRpc) = 0;
 

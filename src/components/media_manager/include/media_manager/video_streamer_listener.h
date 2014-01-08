@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
 
+#include <stdint.h>
 #include "media_manager/media_adapter_listener.h"
 #include "utils/macro.h"
 #include "utils/logger.h"
@@ -43,15 +44,15 @@ class VideoStreamerListener : public MediaAdapterListener {
     VideoStreamerListener();
     ~VideoStreamerListener();
     virtual void OnDataReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data);
     virtual void OnErrorReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data);
-    virtual void OnActivityStarted(int application_key);
-    virtual void OnActivityEnded(int application_key);
+    virtual void OnActivityStarted(int32_t application_key);
+    virtual void OnActivityEnded(int32_t application_key);
   private:
-    int current_application_;
+    int32_t current_application_;
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(VideoStreamerListener);
 };

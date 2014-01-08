@@ -58,9 +58,9 @@ class SessionObserver {
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session
      * has to be started.
-     * \return int Id (number) of new session if successful otherwise -1.
+     * \return int32_t Id (number) of new session if successful otherwise -1.
      */
-    virtual int OnSessionStartedCallback(
+    virtual int32_t OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
       ServiceType service_type) = 0;
 
@@ -71,12 +71,12 @@ class SessionObserver {
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return unsigned int 0 if operation fails session key otherwise
+     * \return uint32_t 0 if operation fails session key otherwise
      */
-    virtual unsigned int OnSessionEndedCallback(
+    virtual uint32_t OnSessionEndedCallback(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char sessionId,
-      unsigned int hashCode,
+      uint8_t sessionId,
+      uint32_t hashCode,
       ServiceType service_type) = 0;
 
     /**
@@ -85,11 +85,11 @@ class SessionObserver {
      * whithin which session exists and session number.
      * \param  connection_handle Connection identifier whithin which session exists
      * \param sessionId Identifier of the session
-     * \return unsigned int Unique key for session
+     * \return uint32_t Unique key for session
      */
-    virtual unsigned int KeyFromPair(
+    virtual uint32_t KeyFromPair(
       transport_manager::ConnectionUID connection_handle,
-      unsigned char sessionId) = 0;
+      uint8_t sessionId) = 0;
 
     /**
      * \brief Returns connection identifier and session number from given
@@ -100,9 +100,9 @@ class SessionObserver {
      * \param sessionId Returned: Number of session
      */
     virtual void PairFromKey(
-      unsigned int key,
+      uint32_t key,
       transport_manager::ConnectionUID* connection_handle,
-      unsigned char* sessionId) = 0;
+      uint8_t* sessionId) = 0;
 
     /**
      * \brief information about given Connection Key.
@@ -110,12 +110,12 @@ class SessionObserver {
      * \param app_id Returned: ApplicationID
      * \param sessions_list Returned: List of session keys
      * \param device_id Returned: DeviceID
-     * \return int -1 in case of error or 0 in case of success
+     * \return int32_t -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnSessionKey(unsigned int key,
-                                    unsigned int* app_id,
-                                    std::list<int>* sessions_list,
-                                    unsigned int* device_id) = 0;
+    virtual int32_t GetDataOnSessionKey(uint32_t key,
+                                    uint32_t* app_id,
+                                    std::list<int32_t>* sessions_list,
+                                    uint32_t* device_id) = 0;
 
     /**
      * \brief information about given Connection Key.
@@ -123,12 +123,12 @@ class SessionObserver {
      * \param app_id Returned: ApplicationID
      * \param sessions_list Returned: List of session keys
      * \param device_id Returned: DeviceID
-     * \return int -1 in case of error or 0 in case of success
+     * \return int32_t -1 in case of error or 0 in case of success
      */
-    virtual int GetDataOnDeviceID(
-      unsigned int device_handle,
+    virtual int32_t GetDataOnDeviceID(
+      uint32_t device_handle,
       std::string* device_name,
-      std::list<unsigned int>* applications_list,
+      std::list<uint32_t>* applications_list,
       std::string* mac_address) = 0;
 
   protected:

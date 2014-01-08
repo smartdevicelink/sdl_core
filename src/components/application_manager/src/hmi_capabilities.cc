@@ -274,7 +274,7 @@ bool HMICapabilities::is_hmi_capabilities_initialized() const {
   return result;
 }
 
-bool HMICapabilities::VerifyImageType(int image_type) const {
+bool HMICapabilities::VerifyImageType(int32_t image_type) const {
   if (!display_capabilities_) {
     return false;
   }
@@ -282,7 +282,7 @@ bool HMICapabilities::VerifyImageType(int image_type) const {
   if (display_capabilities_->keyExists(hmi_response::image_capabilities)) {
     const smart_objects::SmartObject& image_caps = display_capabilities_
         ->getElement(hmi_response::image_capabilities);
-    for (int i = 0; i < image_caps.length(); ++i) {
+    for (int32_t i = 0; i < image_caps.length(); ++i) {
       if (image_caps.getElement(i).asInt() == image_type) {
         return true;
       }
@@ -514,7 +514,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      Json::Value languages = ui.get("languages", "");
      smart_objects::SmartObject ui_languages =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < languages.size(); i++){
+     for (int32_t i = 0; i < languages.size(); i++){
        ui_languages[i] =
            languages_enum_values.find(languages[i].asString())->second;
      }
@@ -530,7 +530,7 @@ bool HMICapabilities::load_capabilities_from_file() {
          smart_objects::SmartObject(smart_objects::SmartType_Array);
 
      Json::Value text_fields = display_capabilities.get("textFields", "");
-     for (int i = 0; i < text_fields.size(); i++) {
+     for (int32_t i = 0; i < text_fields.size(); i++) {
 
        // there is an issue with enum to string, therefore used string
        display_capabilities_so["textFields"][i]["name"] =
@@ -541,7 +541,7 @@ bool HMICapabilities::load_capabilities_from_file() {
               smart_objects::SmartObject(smart_objects::SmartType_Array);
      Json::Value media_clock_format =
          display_capabilities.get("mediaClockFormats", "");
-     for (int i = 0; i < media_clock_format.size(); i++) {
+     for (int32_t i = 0; i < media_clock_format.size(); i++) {
        display_capabilities_so["mediaClockFormats"][i] =
            media_clock_enum_name.find(media_clock_format[i].asString())->second;
      }
@@ -552,7 +552,7 @@ bool HMICapabilities::load_capabilities_from_file() {
          display_capabilities.get("imageCapabilities", "");
      display_capabilities_so["imageCapabilities"] =
               smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < image_capabilities.size(); i++) {
+     for (int32_t i = 0; i < image_capabilities.size(); i++) {
        display_capabilities_so["imageCapabilities"][i] =
            image_type_enum.find(image_capabilities[i].asString())->second;
      }
@@ -561,7 +561,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      Json::Value audio_capabilities = ui.get("audioPassThruCapabilities", "");
      smart_objects::SmartObject audio_capabilities_so =
               smart_objects::SmartObject(smart_objects::SmartType_Array);
-     int i = 0;
+     int32_t i = 0;
      audio_capabilities_so[i] =
                    smart_objects::SmartObject(smart_objects::SmartType_Map);
      audio_capabilities_so[i]["samplingRate"] =
@@ -577,7 +577,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
      smart_objects::SmartObject hmi_zone_capabilities_so =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     int index = 0;
+     int32_t index = 0;
      hmi_zone_capabilities_so[index] =
          hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())->second;
      set_hmi_zone_capabilities(hmi_zone_capabilities_so);
@@ -603,7 +603,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      languages = vr.get("languages", "");
      smart_objects::SmartObject vr_languages =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < languages.size(); i++){
+     for (int32_t i = 0; i < languages.size(); i++){
        vr_languages[i] =
            languages_enum_values.find(languages[i].asString())->second;
      }
@@ -612,7 +612,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      Json::Value capabilities = vr.get("capabilities", "");
      smart_objects::SmartObject vr_capabilities =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < capabilities.size(); i++){
+     for (int32_t i = 0; i < capabilities.size(); i++){
        vr_capabilities[i] =
            vr_enum_capabilities.find(capabilities[i].asString())->second;
      }
@@ -627,7 +627,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      languages = tts.get("languages", "");
      smart_objects::SmartObject tts_languages =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < languages.size(); i++){
+     for (int32_t i = 0; i < languages.size(); i++){
        tts_languages[i] =
            languages_enum_values.find(languages[i].asString())->second;
      }
@@ -641,7 +641,7 @@ bool HMICapabilities::load_capabilities_from_file() {
      Json::Value bt_capabilities = buttons.get("capabilities", "");
      smart_objects::SmartObject buttons_capabilities =
          smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int i = 0; i < bt_capabilities.size(); i++){
+     for (int32_t i = 0; i < bt_capabilities.size(); i++){
        smart_objects::SmartObject button =
                 smart_objects::SmartObject(smart_objects::SmartType_Map);
        button["name"] =

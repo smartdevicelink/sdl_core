@@ -50,7 +50,7 @@ VideoStreamToFileAdapter::~VideoStreamToFileAdapter() {
 }
 
 void VideoStreamToFileAdapter::SendData(
-  int application_key,
+  int32_t application_key,
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::SendData"
                << application_key);
@@ -58,7 +58,7 @@ void VideoStreamToFileAdapter::SendData(
       file_stream_) {
     file_system::Write(file_stream_, message->data(), message->data_size());
 
-    static int messsages_for_session = 0;
+    static int32_t messsages_for_session = 0;
     ++messsages_for_session;
 
     LOG4CXX_INFO(logger, "Handling map streaming message. This is "
@@ -75,7 +75,7 @@ void VideoStreamToFileAdapter::SendData(
   }
 }
 
-void VideoStreamToFileAdapter::StartActivity(int application_key) {
+void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::StartActivity "
                << application_key);
   if (application_key == current_application_) {
@@ -96,7 +96,7 @@ void VideoStreamToFileAdapter::StartActivity(int application_key) {
   }
 }
 
-void VideoStreamToFileAdapter::StopActivity(int application_key) {
+void VideoStreamToFileAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::StopActivity "
                << application_key);
   if (application_key != current_application_) {
@@ -115,7 +115,7 @@ void VideoStreamToFileAdapter::StopActivity(int application_key) {
   current_application_ = 0;
 }
 
-bool VideoStreamToFileAdapter::is_app_performing_activity(int application_key) {
+bool VideoStreamToFileAdapter::is_app_performing_activity(int32_t application_key) {
   return (application_key == current_application_ && file_stream_);
 }
 

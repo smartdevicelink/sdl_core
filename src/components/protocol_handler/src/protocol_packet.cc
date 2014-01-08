@@ -46,13 +46,13 @@ ProtocolPacket::ProtocolPacket()
       packet_id_(0) {
 }
 
-ProtocolPacket::ProtocolPacket(unsigned char version, bool compress,
-                               unsigned char frameType,
-                               unsigned char serviceType,
-                               unsigned char frameData, unsigned char sessionID,
-                               unsigned int dataSize, unsigned int messageID,
-                               const unsigned char* data,
-                               unsigned int packet_id)
+ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
+                               uint8_t frameType,
+                               uint8_t serviceType,
+                               uint8_t frameData, uint8_t sessionID,
+                               uint32_t dataSize, uint32_t messageID,
+                               const uint8_t* data,
+                               uint32_t packet_id)
     : packet_(0),
       total_packet_size_(0),
       data_offset_(0),
@@ -69,28 +69,28 @@ ProtocolPacket::~ProtocolPacket() {
 }
 
 // Serialization
-RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
+RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
                                             bool compress,
-                                            unsigned char frameType,
-                                            unsigned char serviceType,
-                                            unsigned char frameData,
-                                            unsigned char sessionID,
-                                            unsigned int dataSize,
-                                            unsigned int messageID,
-                                            const unsigned char* data) {
+                                            uint8_t frameType,
+                                            uint8_t serviceType,
+                                            uint8_t frameData,
+                                            uint8_t sessionID,
+                                            uint32_t dataSize,
+                                            uint32_t messageID,
+                                            const uint8_t* data) {
   if (packet_) {
     delete[] packet_;
     packet_ = 0;
     total_packet_size_ = 0;
   }
 
-  unsigned char offset = 0;
-  unsigned char compressF = 0x0;
-  packet_ = new unsigned char[MAXIMUM_FRAME_DATA_SIZE];
+  uint8_t offset = 0;
+  uint8_t compressF = 0x0;
+  packet_ = new uint8_t[MAXIMUM_FRAME_DATA_SIZE];
   if (compress) {
     compressF = 0x1;
   }
-  unsigned char firstByte = ((version << 4) & 0xF0) | ((compressF << 3) & 0x08)
+  uint8_t firstByte = ((version << 4) & 0xF0) | ((compressF << 3) & 0x08)
       | (frameType & 0x07);
 
   packet_[offset++] = firstByte;
@@ -127,20 +127,20 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
   return RESULT_OK;
 }
 
-unsigned char * ProtocolPacket::packet() const {
+uint8_t * ProtocolPacket::packet() const {
   return packet_;
 }
 
-unsigned int ProtocolPacket::packet_size() const {
+uint32_t ProtocolPacket::packet_size() const {
   return total_packet_size_;
 }
 
-unsigned int ProtocolPacket::packet_id() const {
+uint32_t ProtocolPacket::packet_id() const {
   return packet_id_;
 }
 
-RESULT_CODE ProtocolPacket::appendData(unsigned char* chunkData,
-                                       unsigned int chunkDataSize) {
+RESULT_CODE ProtocolPacket::appendData(uint8_t* chunkData,
+                                       uint32_t chunkDataSize) {
   if (data_offset_ + chunkDataSize <= packet_data_.totalDataBytes) {
     memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
     data_offset_ += chunkDataSize;
@@ -151,10 +151,10 @@ RESULT_CODE ProtocolPacket::appendData(unsigned char* chunkData,
 // End of Serialization
 
 // Deserialization
-RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
-                                              unsigned int messageSize) {
-  unsigned char offset = 0;
-  unsigned char firstByte = message[offset];
+RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
+                                              uint32_t messageSize) {
+  uint8_t offset = 0;
+  uint8_t firstByte = message[offset];
   offset++;
 
   packet_header_.version = firstByte >> 4u;
@@ -186,7 +186,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
   }
 
 
-  unsigned int dataPayloadSize = 0;
+  uint32_t dataPayloadSize = 0;
   if (offset < messageSize) {
     dataPayloadSize = messageSize - offset;
   }
@@ -195,9 +195,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
     return RESULT_FAIL;
   }
 
-  unsigned char * data = 0;
+  uint8_t * data = 0;
   if (dataPayloadSize) {
-    data = new unsigned char[messageSize - offset];
+    data = new uint8_t[messageSize - offset];
     if (data) {
       memcpy(data, message + offset, dataPayloadSize);
     } else {
@@ -210,7 +210,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char* message,
   return RESULT_OK;
 }
 
-unsigned char ProtocolPacket::version() const {
+uint8_t ProtocolPacket::version() const {
   return packet_header_.version;
 }
 
@@ -218,46 +218,46 @@ bool ProtocolPacket::is_compress() const {
   return packet_header_.compress;
 }
 
-unsigned char ProtocolPacket::frame_type() const {
+uint8_t ProtocolPacket::frame_type() const {
   return packet_header_.frameType;
 }
 
-unsigned char ProtocolPacket::service_type() const {
+uint8_t ProtocolPacket::service_type() const {
   return packet_header_.serviceType;
 }
 
-unsigned char ProtocolPacket::frame_data() const {
+uint8_t ProtocolPacket::frame_data() const {
   return packet_header_.frameData;
 }
 
-unsigned char ProtocolPacket::session_id() const {
+uint8_t ProtocolPacket::session_id() const {
   return packet_header_.sessionId;
 }
 
-unsigned int ProtocolPacket::data_size() const {
+uint32_t ProtocolPacket::data_size() const {
   return packet_header_.dataSize;
 }
 
-unsigned int ProtocolPacket::message_id() const {
+uint32_t ProtocolPacket::message_id() const {
   return packet_header_.messageId;
 }
 
-unsigned char* ProtocolPacket::data() const {
+uint8_t* ProtocolPacket::data() const {
   return packet_data_.data;
 }
 
-void ProtocolPacket::set_total_data_bytes(unsigned int dataBytes) {
+void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
   if (dataBytes) {
     if (packet_data_.data) {
       delete[] packet_data_.data;
       packet_data_.data = 0;
     }
-    packet_data_.data = new unsigned char[dataBytes];
+    packet_data_.data = new uint8_t[dataBytes];
     packet_data_.totalDataBytes = dataBytes;
   }
 }
 
-unsigned int ProtocolPacket::total_data_bytes() const {
+uint32_t ProtocolPacket::total_data_bytes() const {
   return packet_data_.totalDataBytes;
 }
 // End of Deserialization

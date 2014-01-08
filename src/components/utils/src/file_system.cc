@@ -59,16 +59,18 @@ uint64_t file_system::GetAvailableDiskSpace() {
   return fsInfo.f_bsize * fsInfo.f_bfree;
 }
 
-unsigned int file_system::DirectorySize(const std::string& path) {
-  unsigned int size = 0;
-  int return_code = 0;
+uint32_t file_system::DirectorySize(const std::string& path) {
+  uint32_t size = 0;
+  int32_t return_code = 0;
   DIR* directory = NULL;
 
 #ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(path.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(path.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
@@ -99,16 +101,16 @@ unsigned int file_system::DirectorySize(const std::string& path) {
   return size;
 }
 
-unsigned int file_system::GetAvailableSpaceForApp(const std::string& app_name) {
-  const unsigned int app_quota = profile::Profile::instance()->app_dir_quota();
+uint32_t file_system::GetAvailableSpaceForApp(const std::string& app_name) {
+  const uint32_t app_quota = profile::Profile::instance()->app_dir_quota();
   if (DirectoryExists(app_name)) {
     std::string full_path = FullPath(app_name);
-    unsigned int size_of_directory = DirectorySize(full_path);
+    uint32_t size_of_directory = DirectorySize(full_path);
     if (app_quota < size_of_directory) {
       return 0;
     }
-    unsigned int current_app_quota = app_quota - size_of_directory;
-    unsigned int available_disk_space = GetAvailableDiskSpace();
+    uint32_t current_app_quota = app_quota - size_of_directory;
+    uint32_t available_disk_space = GetAvailableDiskSpace();
     if (current_app_quota > available_disk_space) {
       return available_disk_space;
     } else {
@@ -160,11 +162,11 @@ bool file_system::FileExists(const std::string& name) {
 }
 
 bool file_system::Write(
-  const std::string& file_name, const std::vector<unsigned char>& data,
+  const std::string& file_name, const std::vector<uint8_t>& data,
   std::ios_base::openmode mode) {
   std::ofstream file(file_name.c_str(), std::ios_base::binary | mode);
   if (file.is_open()) {
-    for (int i = 0; i < data.size(); ++i) {
+    for (int32_t i = 0; i < data.size(); ++i) {
       file << data[i];
     }
     file.close();
@@ -183,15 +185,14 @@ std::ofstream* file_system::Open(const std::string& file_name,
   return NULL;
 }
 
-std::ofstream* file_system::Write(std::ofstream* file_stream,
-                                  const unsigned char* data,
-                                  unsigned int data_size) {
+void file_system::Write(std::ofstream* const file_stream,
+                        const uint8_t* data,
+                        uint32_t data_size) {
   if (file_stream) {
     for (size_t i = 0; i < data_size; ++i) {
       (*file_stream) << data[i];
     }
   }
-  return file_stream;
 }
 
 void file_system::Close(std::ofstream* file_stream) {
@@ -223,13 +224,15 @@ bool file_system::DeleteFile(const std::string& name) {
 }
 
 void remove_directory_content(const std::string& directory_name) {
-  int return_code = 0;
+  int32_t return_code = 0;
   DIR* directory = NULL;
 #ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
@@ -276,7 +279,7 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
   return false;
 }
 
-bool file_system::IsAccessible(const std::string& name, int how) {
+bool file_system::IsAccessible(const std::string& name, int32_t how) {
   return !access(name.c_str(), how);
 }
 
@@ -287,13 +290,15 @@ std::vector<std::string> file_system::ListFiles(
     return listFiles;
   }
 
-  int return_code = 0;
+  int32_t return_code = 0;
   DIR* directory = NULL;
 #ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
 #else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) + pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
@@ -322,7 +327,7 @@ std::vector<std::string> file_system::ListFiles(
 }
 
 bool file_system::ReadBinaryFile(const std::string& name,
-                                 std::vector<unsigned char>& result) {
+                                 std::vector<uint8_t>& result) {
   if (!FileExists(name) || !IsAccessible(name, R_OK)) {
     return false;
   }

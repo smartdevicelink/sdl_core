@@ -47,18 +47,18 @@ class FromMicRecorderListener : public MediaAdapterListener {
       const std::string& file_name);
     ~FromMicRecorderListener();
     virtual void OnDataReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data);
     virtual void OnErrorReceived(
-      int application_key,
+      int32_t application_key,
       const DataForListener& data);
-    virtual void OnActivityStarted(int application_key);
-    virtual void OnActivityEnded(int application_key);
+    virtual void OnActivityStarted(int32_t application_key);
+    virtual void OnActivityEnded(int32_t application_key);
 
   private:
     threads::Thread* reader_;
     std::string file_name_;
-    int current_application_;
+    int32_t current_application_;
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
 };

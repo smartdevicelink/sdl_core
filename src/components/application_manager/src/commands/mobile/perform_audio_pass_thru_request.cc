@@ -66,7 +66,7 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
@@ -95,7 +95,7 @@ void PerformAudioPassThruRequest::Run() {
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[hmi_request::audio_pass_display_texts]
-               [0][hmi_request::field_name] = static_cast<int>
+               [0][hmi_request::field_name] = static_cast<int32_t>
     (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT1);
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_text] =
@@ -104,7 +104,7 @@ void PerformAudioPassThruRequest::Run() {
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     msg_params[hmi_request::audio_pass_display_texts]
-               [1][hmi_request::field_name] = static_cast<int>
+               [1][hmi_request::field_name] = static_cast<int32_t>
     (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT2);
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_text] =
@@ -142,7 +142,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
-        int session_key =
+        int32_t session_key =
           (*message_)[strings::params][strings::connection_key].asUInt();
         ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
       }
@@ -166,7 +166,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
+void PerformAudioPassThruRequest::SendSpeakRequest(const int32_t app_id) {
   // crate HMI TTS speak request
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -174,7 +174,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest(const int app_id) {
 
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
-    for (int i = 0;
+    for (int32_t i = 0;
         i < (*message_)[str::msg_params][str::initial_prompt].length();
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =

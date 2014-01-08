@@ -78,7 +78,7 @@ class HMICapabilities {
    * @param image_type recieved type of image from Enum.
    * @return Bool true if supported
    */
-  bool VerifyImageType(int image_type) const;
+  bool VerifyImageType(int32_t image_type) const;
 
   /**
    * @brief Checks if all HMI capabilities received

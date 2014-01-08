@@ -48,16 +48,16 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   public:
     A2DPSourcePlayerAdapter();
     ~A2DPSourcePlayerAdapter();
-    void SendData(int application_key,
+    void SendData(int32_t application_key,
                   const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int application_key);
-    void StopActivity(int application_key);
-    bool is_app_performing_activity(int application_key);
+    void StartActivity(int32_t application_key);
+    void StopActivity(int32_t application_key);
+    bool is_app_performing_activity(int32_t application_key);
 
   private:
     class A2DPSourcePlayerThread;
 
-    std::map<int, threads::Thread*> sources_;
+    std::map<int32_t, threads::Thread*> sources_;
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };

@@ -61,7 +61,7 @@ bool ScrollabelMessageRequest::Init() {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   } else {
-    const int def_value = 30000;
+    const int32_t def_value = 30000;
     default_timeout_ = def_value;
   }
 
@@ -99,7 +99,7 @@ void ScrollabelMessageRequest::Run() {
       smart_objects::SmartType_Map);
 
   msg_params[hmi_request::message_text][hmi_request::field_name] =
-     static_cast<int>(application_manager::TextFieldName::SCROLLABLE_MSG_BODY);
+     static_cast<int32_t>(application_manager::TextFieldName::SCROLLABLE_MSG_BODY);
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();

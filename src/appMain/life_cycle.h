@@ -70,7 +70,7 @@ class LifeCycle {
     * @return true if success otherwise false.
     */
     bool InitMessageSystem();
-    static void StopComponents(int params);
+    static void StopComponents(int32_t params);
 
   private:
     LifeCycle();

@@ -37,6 +37,7 @@
 #else
 #error Please implement conditional variable for your OS
 #endif
+#include <stdint.h>
 
 #include "utils/macro.h"
 
@@ -80,7 +81,7 @@ class ConditionalVariable {
 
   // Wait forever or up to milliseconds time limit
   void Wait(AutoLock& auto_lock);
-  WaitStatus WaitFor(AutoLock& auto_lock, int milliseconds );
+  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds );
  private:
   impl::PlatformConditionalVariable cond_var_;
 

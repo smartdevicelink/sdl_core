@@ -61,7 +61,7 @@ void OnTTSLanguageChangeNotification::Run() {
       hmi_capabilities.active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::OnLanguageChangeID);
+      static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
   const std::set<Application*>& applications =
       ApplicationManagerImpl::instance()->applications();

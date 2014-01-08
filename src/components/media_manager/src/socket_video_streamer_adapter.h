@@ -45,11 +45,11 @@ class SocketVideoStreamerAdapter : public MediaAdapterImpl {
   public:
     SocketVideoStreamerAdapter();
     virtual ~SocketVideoStreamerAdapter();
-    virtual void SendData(int application_key,
+    virtual void SendData(int32_t application_key,
                           const protocol_handler::RawMessagePtr& message);
-    virtual void StartActivity(int application_key);
-    virtual void StopActivity(int application_key);
-    virtual bool is_app_performing_activity(int application_key);
+    virtual void StartActivity(int32_t application_key);
+    virtual void StopActivity(int32_t application_key);
+    virtual bool is_app_performing_activity(int32_t application_key);
 
   private:
     class VideoStreamer : public threads::ThreadDelegate {
@@ -98,7 +98,7 @@ class SocketVideoStreamerAdapter : public MediaAdapterImpl {
 
       private:
         SocketVideoStreamerAdapter* const server_;
-        int socket_fd_;
+        int32_t socket_fd_;
         bool is_first_loop_;
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
@@ -106,9 +106,9 @@ class SocketVideoStreamerAdapter : public MediaAdapterImpl {
         DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
     };
 
-    int port_;
+    int32_t port_;
     std::string ip_;
-    int socket_;
+    int32_t socket_;
     bool is_ready_;
     VideoStreamer* delegate_;
     threads::Thread* thread_;

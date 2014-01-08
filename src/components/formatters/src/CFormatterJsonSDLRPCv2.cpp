@@ -47,7 +47,7 @@ bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
     Json::Value root(Json::objectValue);
 
     smart_objects_ns::SmartObject formattedObj(obj);
-    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int) to strings
+    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int32_t) to strings
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), root);
 

@@ -112,11 +112,11 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
 
  public:
 
-  static const int kSuccess;
-  static const int kParsingError;
-  static const int kFunctionIdNotFound;
-  static const int kMessageTypeNotFound;
-  static const int kCorrelationIdNotFound;
+  static const int32_t kSuccess;
+  static const int32_t kParsingError;
+  static const int32_t kFunctionIdNotFound;
+  static const int32_t kMessageTypeNotFound;
+  static const int32_t kCorrelationIdNotFound;
 
   typedef NsSmartDeviceLink::NsJSONHandler::Formatters::meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
 
@@ -139,7 +139,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @return true if success, otherwise - false
    */
   template<typename FunctionId, typename MessageType>
-  static int fromString(const std::string &str,
+  static int32_t fromString(const std::string &str,
                         NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
 
   /**
@@ -160,10 +160,10 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
 // ----------------------------------------------------------------------------
 
 template<typename FunctionId, typename MessageType>
-int Formatters::CFormatterJsonSDLRPCv1::fromString(
+int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
-  int result = kSuccess;
+  int32_t result = kSuccess;
 
   try {
     Json::Value root;

@@ -35,6 +35,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #if  defined(__QNX__) || defined(__QNXNTO__)
 #include <atomic.h>
@@ -187,13 +188,13 @@ class SharedPtr {
     /**
      * @brief Pointer to reference counter.
      **/
-    unsigned int* mReferenceCounter;
+    uint32_t* mReferenceCounter;
 };
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
   : mObject(NULL),
-    mReferenceCounter(new unsigned int(1)) {
+    mReferenceCounter(new uint32_t(1)) {
   DCHECK(Object != NULL);
   mObject = Object;
 }
@@ -296,7 +297,7 @@ template<typename ObjectType> void
 utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
   dropReference();
   mObject = other;
-  mReferenceCounter = new unsigned int(1);
+  mReferenceCounter = new uint32_t(1);
 }
 
 template<typename ObjectType>

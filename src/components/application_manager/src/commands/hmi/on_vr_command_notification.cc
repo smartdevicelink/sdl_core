@@ -55,9 +55,9 @@ void OnVRCommandNotification::Run() {
 
   Application* active_app = ApplicationManagerImpl::instance()
       ->active_application();
-  const unsigned int cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
+  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
       .asUInt();
-  unsigned int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
   if (NULL == active_app && cmd_id > max_cmd_id + 1) {
     MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
     return;
@@ -76,7 +76,7 @@ void OnVRCommandNotification::Run() {
   if (cmd_id == max_cmd_id + 1) {
     return;
   }
-  const unsigned int app_id = (*message_)[strings::msg_params][strings::app_id]
+  const uint32_t app_id = (*message_)[strings::msg_params][strings::app_id]
       .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
   if (NULL == app) {
@@ -93,10 +93,10 @@ void OnVRCommandNotification::Run() {
     event.raise();
   } else {
     (*message_)[strings::params][strings::function_id] =
-        static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
+        static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
 
     (*message_)[strings::msg_params][strings::trigger_source] =
-        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
+        static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
     SendNotificationToMobile(message_);
   }
 }

@@ -52,7 +52,7 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 

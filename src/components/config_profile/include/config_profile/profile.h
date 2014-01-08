@@ -119,12 +119,12 @@ class Profile {
     /**
      * @brief Maximum command id available for mobile app
      */
-    const unsigned int& max_cmd_id() const;
+    const uint32_t& max_cmd_id() const;
 
     /**
      * @brief Default timeout for waiting for response to mobile app
      */
-    const unsigned int& default_timeout() const;
+    const uint32_t& default_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -149,7 +149,7 @@ class Profile {
     /**
       * @brief Returns application directory quota size
       */
-    const unsigned int& app_dir_quota() const;
+    const uint32_t& app_dir_quota() const;
 
     /**
       * @brief Returns the video server type
@@ -165,7 +165,7 @@ class Profile {
      * @brief Returns time scale for max amount of requests for application
      * in hmi level none.
      */
-    const unsigned int& app_hmi_level_none_time_scale() const;
+    const uint32_t& app_hmi_level_none_time_scale() const;
 
     /**
       * @brief Returns path to testing file to which redirects video stream
@@ -177,41 +177,41 @@ class Profile {
      * application in hmi level none
      *
      */
-    const unsigned int& app_hmi_level_none_time_scale_max_requests() const;
+    const uint32_t& app_hmi_level_none_time_scale_max_requests() const;
 
     /**
      * @brief Returns application time scale for max amount of requests per it.
      */
-    const unsigned int& app_time_scale() const;
+    const uint32_t& app_time_scale() const;
 
     /**
      * @brief Returns allowable max amount of requests per application
      * time scale
      */
-    const unsigned int& app_time_scale_max_requests() const;
+    const uint32_t& app_time_scale_max_requests() const;
 
     /**
      * @brief Returns allowable amount of the system pending requests
      */
-    const unsigned int& pending_requests_amount() const;
+    const uint32_t& pending_requests_amount() const;
 
     /**
      * @brief Returns Max allowed number of PutFile requests for one
      * application in NONE
      */
-    const unsigned int& put_file_in_none() const;
+    const uint32_t& put_file_in_none() const;
 
     /**
      * @brief Returns Max allowed number of DeleteFile requests for one
      * application in NONE
      */
-    const unsigned int& delete_file_in_none() const;
+    const uint32_t& delete_file_in_none() const;
 
     /**
      * @brief Returns Max allowed number of ListFiles requests for one
      * application in NONE
      */
-    const unsigned int& list_files_in_none() const;
+    const uint32_t& list_files_in_none() const;
 
     /*
      * @brief Returns file name for storing applications data
@@ -292,7 +292,7 @@ class Profile {
                          const char* const pKey) const;
 
     /**
-     * @brief Reads an int value from the profile
+     * @brief Reads an int32_t value from the profile
      *
      * @param value         Result value
      * @param default_value Value to use key wasn't found
@@ -321,21 +321,21 @@ class Profile {
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
     bool                            is_redecoding_enabled_;
-    unsigned int                    max_cmd_id_;
-    unsigned int                    default_timeout_;
+    uint32_t                    max_cmd_id_;
+    uint32_t                    default_timeout_;
     std::string                     vr_help_title_;
-    unsigned int                    app_dir_quota_;
+    uint32_t                    app_dir_quota_;
     std::string                     consumer_type_;
     std::string                     named_pipe_path_;
-    unsigned int                    app_hmi_level_none_time_scale_max_requests_;
-    unsigned int                    app_hmi_level_none_requests_time_scale_;
+    uint32_t                    app_hmi_level_none_time_scale_max_requests_;
+    uint32_t                    app_hmi_level_none_requests_time_scale_;
     std::string                     video_stream_file_;
-    unsigned int                    app_time_scale_max_requests_;
-    unsigned int                    app_requests_time_scale_;
-    unsigned int                    pending_requests_amount_;
-    unsigned int                    put_file_in_none_;
-    unsigned int                    delete_file_in_none_;
-    unsigned int                    list_files_in_none_;
+    uint32_t                    app_time_scale_max_requests_;
+    uint32_t                    app_requests_time_scale_;
+    uint32_t                    pending_requests_amount_;
+    uint32_t                    put_file_in_none_;
+    uint32_t                    delete_file_in_none_;
+    uint32_t                    list_files_in_none_;
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
 

@@ -129,10 +129,10 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  unsigned int correlation_id =
+  uint32_t correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  int mode =
+  int32_t mode =
       (*message_)[strings::msg_params][strings::interaction_mode].asInt();
 
   app->set_perform_interaction_mode(mode);
@@ -267,14 +267,14 @@ void PerformInteractionRequest::onTimeOut() {
 void PerformInteractionRequest::ProcessVRNotification(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRNotification");
-  const unsigned int app_id = message[strings::msg_params][strings::app_id]
+  const uint32_t app_id = message[strings::msg_params][strings::app_id]
                                 .asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
-  int cmd_id = message[strings::msg_params][strings::cmd_id].asInt();
+  int32_t cmd_id = message[strings::msg_params][strings::cmd_id].asInt();
   const PerformChoiceSetMap& choice_set_map = app
       ->performinteraction_choice_set_map();
   bool choice_id_chosen = false;
@@ -303,12 +303,12 @@ void PerformInteractionRequest::ProcessVRNotification(
     app->set_perform_interaction_active(0);
 
     (*message_)[strings::params][strings::function_id] =
-        static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
+        static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params[strings::choice_id] = cmd_id;
     msg_params[strings::trigger_source] =
-        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
+        static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
     SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
 
   } else {
@@ -324,9 +324,9 @@ void PerformInteractionRequest::ProcessVRNotification(
     smart_objects::SmartObject& notification = *notification_so;
     notification = message;
     notification[strings::params][strings::function_id] =
-        static_cast<int>(mobile_apis::FunctionID::eType::OnCommandID);
+        static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
     notification[strings::msg_params][strings::trigger_source] =
-        static_cast<int>(mobile_apis::TriggerSource::TS_VR);
+        static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
     ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
   }
 }
@@ -335,7 +335,7 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
   (const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessAppUnregisteredNotification");
-  const unsigned int app_id = (*message_)[strings::params]
+  const uint32_t app_id = (*message_)[strings::params]
                                           [strings::connection_key].asUInt();
   if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
     Application* app = ApplicationManagerImpl::instance()->application(app_id);
@@ -344,7 +344,7 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
       return;
     }
     if (app->is_perform_interaction_active()) {
-      if (static_cast<int>(mobile_apis::InteractionMode::MANUAL_ONLY) !=
+      if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY) !=
           app->perform_interaction_mode()) {
         SendVrDeleteCommand(app);
       }
@@ -388,7 +388,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       return;
     }
     if (app->is_perform_interaction_active()) {
-      if (static_cast<int>(mobile_apis::InteractionMode::MANUAL_ONLY)
+      if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY)
           != app->perform_interaction_mode()) {
         SendVrDeleteCommand(app);
       }
@@ -397,12 +397,12 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       app->set_perform_interaction_active(0);
     }
     (*message_)[strings::params][strings::function_id] =
-            static_cast<int>(mobile_apis::FunctionID::PerformInteractionID);
+            static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params = message[strings::msg_params];
     bool result = false;
-    int hmi_response_code =
+    int32_t hmi_response_code =
         message[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS ==
         hmi_apis::Common_Result::eType(hmi_response_code)) {
@@ -480,7 +480,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
 
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[hmi_request::initial_text][hmi_request::field_name] =
-        static_cast<int>(application_manager::TextFieldName::
+        static_cast<int32_t>(application_manager::TextFieldName::
                          INITIAL_INTERACTION_TEXT);
     msg_params[hmi_request::initial_text][hmi_request::field_text] =
         (*message_)[strings::msg_params][hmi_request::initial_text];
@@ -502,7 +502,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
     msg_params[strings::choice_set] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
   }
-  int index_array_of_vr_help = 0;
+  int32_t index_array_of_vr_help = 0;
   for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
     smart_objects::SmartObject* choice_set = app->FindChoiceSet(
         choice_set_id_list[i].asInt());
@@ -569,13 +569,13 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::help_promt] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-    int index = 0;
-    for (unsigned int i = 0; i < choice_list.length(); ++i) {
+    int32_t index = 0;
+    for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
 
       if (choice_set) {
-        for (unsigned int j = 0;
+        for (uint32_t j = 0;
             j < (*choice_set)[strings::choice_set].length();
             ++j) {
           smart_objects::SmartObject& vr_commands =
@@ -623,8 +623,8 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
 
 void PerformInteractionRequest::DeleteParameterFromTTSChunk
 (smart_objects::SmartObject* array_tts_chunk) {
-  int length = array_tts_chunk->length();
-  for (int i = 0; i < length; ++i) {
+  int32_t length = array_tts_chunk->length();
+  for (int32_t i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
   }
 }
@@ -747,7 +747,7 @@ bool PerformInteractionRequest::CheckVrHelpItemPositions(
   smart_objects::SmartObject& vr_help =
       (*message_)[strings::msg_params][strings::vr_help];
 
-  int position = 1;
+  int32_t position = 1;
   for (size_t i = 0; i < vr_help.length(); ++i) {
     if (position != vr_help[i][strings::position].asInt()) {
       LOG4CXX_ERROR(logger_, "Non-sequential vrHelp item position");

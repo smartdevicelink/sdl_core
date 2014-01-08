@@ -99,7 +99,7 @@ void UpdateTurnListRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
-  for (unsigned int i = 0; i < msg_params[strings::turn_list].length(); ++i) {
+  for (uint32_t i = 0; i < msg_params[strings::turn_list].length(); ++i) {
     if (msg_params[strings::turn_list][i].keyExists(hmi_request::navi_text)) {
       std::string navigation_text =
           msg_params[strings::turn_list][i][hmi_request::navi_text].asString();
@@ -152,11 +152,11 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
     return false;
   }
 
-  int length = (*message_)[strings::msg_params][strings::turn_list].length();
+  int32_t length = (*message_)[strings::msg_params][strings::turn_list].length();
   if (0 == length) {
     return false;
   }
-  for (int i = 0; i < length; ++i) {
+  for (int32_t i = 0; i < length; ++i) {
     if (!((*message_)[strings::msg_params][strings::turn_list][i].
         keyExists(hmi_request::navi_text)) &&
         !((*message_)[strings::msg_params][strings::turn_list][i].

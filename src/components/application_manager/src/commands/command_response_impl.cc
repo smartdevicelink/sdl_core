@@ -86,15 +86,15 @@ void CommandResponseImpl::SendResponse(
 
 bool CommandResponseImpl::IsPendingResponseExist() {
   bool result = true;
-  const unsigned int correlation_id =
+  const uint32_t correlation_id =
       (*message_)[strings::params][strings::correlation_id].asUInt();
 
-  unsigned int mobile_correlation_id = 0;
+  uint32_t mobile_correlation_id = 0;
 
   MessageChaining* msg_chain = ApplicationManagerImpl::instance()
       ->GetMessageChain(correlation_id);
 
-  int connection_key = 0;
+  int32_t connection_key = 0;
   if (msg_chain) {
     connection_key = msg_chain->connection_key();
 

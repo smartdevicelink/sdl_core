@@ -49,7 +49,7 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef int ErrorCode;
+typedef int32_t ErrorCode;
 
 enum APIVersion {
   kUnknownAPI = -1,
@@ -95,22 +95,22 @@ class InitialApplicationData {
 /*
  * @brief Typedef for supported commands in application menu
  */
-typedef std::map<unsigned int, smart_objects::SmartObject*> CommandsMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> CommandsMap;
 
 /*
  * @brief Typedef for supported sub menu in application menu
  */
-typedef std::map<unsigned int, smart_objects::SmartObject*> SubMenuMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> SubMenuMap;
 
 /*
  * @brief Typedef for interaction choice set
  */
-typedef std::map<unsigned int, smart_objects::SmartObject*> ChoiceSetMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> ChoiceSetMap;
 
 /*
  * @brief Typedef for perform interaction choice set
  */
-typedef std::map<unsigned int, smart_objects::SmartObject*> PerformChoiceSetMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoiceSetMap;
 
 class DynamicApplicationData {
   public:
@@ -142,36 +142,36 @@ class DynamicApplicationData {
     /*
      * @brief Adds a command to the in application menu
      */
-    virtual void AddCommand(unsigned int cmd_id,
+    virtual void AddCommand(uint32_t cmd_id,
                             const smart_objects::SmartObject& command) = 0;
 
     /*
      * @brief Deletes all commands from the application
      * menu with the specified command id
      */
-    virtual void RemoveCommand(unsigned int cmd_id) = 0;
+    virtual void RemoveCommand(uint32_t cmd_id) = 0;
 
     /*
      * @brief Finds command with the specified command id
      */
-    virtual smart_objects::SmartObject* FindCommand(unsigned int cmd_id) = 0;
+    virtual smart_objects::SmartObject* FindCommand(uint32_t cmd_id) = 0;
 
     /*
      * @brief Adds a menu to the application
      */
-    virtual void AddSubMenu(unsigned int menu_id,
+    virtual void AddSubMenu(uint32_t menu_id,
                             const smart_objects::SmartObject& menu) = 0;
 
     /*
      * @brief Deletes menu from the application menu
      */
-    virtual void RemoveSubMenu(unsigned int menu_id) = 0;
+    virtual void RemoveSubMenu(uint32_t menu_id) = 0;
 
     /*
      * @brief Finds menu with the specified id
      */
     virtual smart_objects::SmartObject* FindSubMenu(
-      unsigned int menu_id) const = 0;
+      uint32_t menu_id) const = 0;
 
     /*
      * @brief Returns true if sub menu with such name already exist
@@ -184,7 +184,7 @@ class DynamicApplicationData {
      * @param choice_set_id Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represent choice set
      */
-    virtual void AddChoiceSet(unsigned int choice_set_id,
+    virtual void AddChoiceSet(uint32_t choice_set_id,
                               const smart_objects::SmartObject& choice_set) = 0;
 
     /*
@@ -192,7 +192,7 @@ class DynamicApplicationData {
      *
      * @param choice_set_id Unique ID of the interaction choice set
      */
-    virtual void RemoveChoiceSet(unsigned int choice_set_id) = 0;
+    virtual void RemoveChoiceSet(uint32_t choice_set_id) = 0;
 
     /*
      * @brief Finds choice set with the specified choice_set_id id
@@ -200,7 +200,7 @@ class DynamicApplicationData {
      * @param choice_set_id Unique ID of the interaction choice set
      */
     virtual smart_objects::SmartObject* FindChoiceSet(
-      unsigned int choice_set_id) = 0;
+      uint32_t choice_set_id) = 0;
 
     /*
      * @brief Adds perform interaction choice set to the application
@@ -209,7 +209,7 @@ class DynamicApplicationData {
      * @param choice_set SmartObject that represents choice set
      */
     virtual void AddPerformInteractionChoiceSet(
-      unsigned int choice_set_id,
+      uint32_t choice_set_id,
       const smart_objects::SmartObject& choice_set) = 0;
 
     /*
@@ -235,7 +235,7 @@ class DynamicApplicationData {
      * @return SmartObject that represents choice set
      */
     virtual smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      unsigned int choice_set_id) const = 0;
+      uint32_t choice_set_id) const = 0;
 
     /*
      * @brief Retrieve application commands
@@ -257,14 +257,14 @@ class DynamicApplicationData {
      *
      * @param active Current state of the perform interaction
      */
-    virtual void set_perform_interaction_active(unsigned int active) = 0;
+    virtual void set_perform_interaction_active(uint32_t active) = 0;
 
     /*
      * @brief Retrieves perform interaction state
      *
      * @return TRUE if perform interaction active, otherwise FALSE
      */
-    virtual unsigned int is_perform_interaction_active() const = 0;
+    virtual uint32_t is_perform_interaction_active() const = 0;
 
     /*
      * @brief Sets the choice that was selected in
@@ -272,7 +272,7 @@ class DynamicApplicationData {
      *
      * @param choice Choice that was selected
      */
-    virtual void set_perform_interaction_ui_corrid(unsigned int choice) = 0;
+    virtual void set_perform_interaction_ui_corrid(uint32_t choice) = 0;
 
     /*
      * @brief Retrieve the choice that was selected in
@@ -280,21 +280,21 @@ class DynamicApplicationData {
      *
      * @return Choice that was selected in response to PerformInteraction
      */
-    virtual unsigned int perform_interaction_ui_corrid() const = 0;
+    virtual uint32_t perform_interaction_ui_corrid() const = 0;
 
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH
      *
      * @param mode Mode that was selected (MENU; VR; BOTH)
      */
-    virtual void set_perform_interaction_mode(int mode) = 0;
+    virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
     /*
      * @brief Retrieve the mode that was PerformInteraction sent in
      *
      * @return mode of PerformInteraction
      */
-    virtual int perform_interaction_mode() const = 0;
+    virtual int32_t perform_interaction_mode() const = 0;
 
     /*
      * @brief Sets reset global properties state
@@ -335,13 +335,13 @@ class Application : public virtual InitialApplicationData,
   virtual bool has_been_activated() const = 0;
 
     virtual const Version& version() const = 0;
-    virtual unsigned int app_id() const = 0;
+    virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
-    virtual const unsigned int put_file_in_none_count() const = 0;
-    virtual const unsigned int delete_file_in_none_count() const = 0;
-    virtual const unsigned int list_files_in_none_count() const = 0;
+    virtual const uint32_t put_file_in_none_count() const = 0;
+    virtual const uint32_t delete_file_in_none_count() const = 0;
+    virtual const uint32_t list_files_in_none_count() const = 0;
     virtual const mobile_api::SystemContext::eType& system_context() const = 0;
     virtual const mobile_api::AudioStreamingState::eType&
     audio_streaming_state() const = 0;
@@ -370,9 +370,9 @@ class Application : public virtual InitialApplicationData,
     virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;
     virtual bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) = 0;
 
-    virtual bool SubscribeToIVI(unsigned int vehicle_info_type_) = 0;
-    virtual bool IsSubscribedToIVI(unsigned int vehicle_info_type_) = 0;
-    virtual bool UnsubscribeFromIVI(unsigned int vehicle_info_type_) = 0;
+    virtual bool SubscribeToIVI(uint32_t vehicle_info_type_) = 0;
+    virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
+    virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 };
 
 }  // namespace application_manager

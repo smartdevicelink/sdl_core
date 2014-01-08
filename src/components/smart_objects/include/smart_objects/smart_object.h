@@ -109,13 +109,13 @@ typedef std::map<std::string, SmartObject> SmartMap;
 /**
  * @brief SmartBinary type
  **/
-typedef std::vector<unsigned char> SmartBinary;
+typedef std::vector<uint8_t> SmartBinary;
 
 /**
  * @brief Main SmartObject class
  *
  * This class act as Variant type from other languages and can be used as primitive type
- * like bool, int, char, double, string and as complex type like array and map.
+ * like bool, int32_t, char, double, string and as complex type like array and map.
  **/
 class SmartObject {
  public:
@@ -136,7 +136,7 @@ class SmartObject {
   /**
    * @brief Constructor for creating object of given primitive type.
    *
-   * Only primitive types (bool, int, char, double, string) are supported.
+   * Only primitive types (bool, int32_t, char, double, string) are supported.
    *
    * @param type Type of the created object.
    **/
@@ -165,30 +165,30 @@ class SmartObject {
   bool operator==(const SmartObject& Other) const;
 
   /**
-   * @name Support of type: int
+   * @name Support of type: int32_t
    * @{
    */
   /**
-   * @brief Constructor for creating object of type: int
+   * @brief Constructor for creating object of type: int32_t
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(int InitialValue);
+  explicit SmartObject(int32_t InitialValue);
 
   /**
-   * @brief Returns current object converted to int
+   * @brief Returns current object converted to int32_t
    *
-   * @return int
+   * @return int32_t
    **/
-  int asInt() const;
+  int32_t asInt() const;
 
   /**
-   * @brief Assignment operator for type: int
+   * @brief Assignment operator for type: int32_t
    *
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(int NewValue);
+  SmartObject& operator=(int32_t NewValue);
 
   /**
    * @brief Comparison operator for comparing object with integer value
@@ -196,38 +196,38 @@ class SmartObject {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(int Value) const;
+  bool operator==(int32_t Value) const;
 
-  // Support of type: unsigned int
+  // Support of type: uint32_t
   /**
-   * @brief Constructor for creating object of type: int
+   * @brief Constructor for creating object of type: int32_t
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(unsigned int InitialValue);
+  explicit SmartObject(uint32_t InitialValue);
 
   /**
-   * @brief Returns current object converted to unsigned int int
+   * @brief Returns current object converted to uint32_t int32_t
    *
    * @return double
    **/
-  unsigned int asUInt() const;
+  uint32_t asUInt() const;
 
   /**
-   * @brief Assignment operator for type: int
+   * @brief Assignment operator for type: int32_t
    *
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(unsigned int NewValue);
+  SmartObject& operator=(uint32_t NewValue);
 
   /**
-   * @brief Comparison operator for comparing object with unsigned int value
+   * @brief Comparison operator for comparing object with uint32_t value
    *
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(unsigned int Value) const;
+  bool operator==(uint32_t Value) const;
 
   /** @} */
 
@@ -467,8 +467,8 @@ class SmartObject {
    * @param  Index index of element to return
    * @return SmartObject&
    **/
-  SmartObject& operator[](int Index);
-  const SmartObject& operator[](int Index) const;
+  SmartObject& operator[](int32_t Index);
+  const SmartObject& operator[](int32_t Index) const;
 
   /**
    * @brief Get array element.
@@ -617,7 +617,7 @@ class SmartObject {
  protected:
   static std::string OperatorToTransform(const SmartMap::value_type &pair) ;
   /**
-   * @name Support of type: int (internal)
+   * @name Support of type: int32_t (internal)
    * @{
    */
   /**
@@ -628,7 +628,7 @@ class SmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_integer(int NewValue);
+  inline void set_value_integer(int32_t NewValue);
 
   /**
    * @brief Sets new integer value to the object.
@@ -638,21 +638,21 @@ class SmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_unsigned_int(unsigned int NewValue);
+  inline void set_value_unsigned_int(uint32_t NewValue);
 
   /**
-   * @brief Converts object to int type
+   * @brief Converts object to int32_t type
    *
-   * @return int Converted value or invalid_int_value if conversion not possible
+   * @return int32_t Converted value or invalid_int_value if conversion not possible
    **/
-  inline int convert_int() const;
+  inline int32_t convert_int() const;
 
   /**
-   * @brief Converts object to int type
+   * @brief Converts object to int32_t type
    *
-   * @return int Converted value or invalid_int_value if conversion not possible
+   * @return int32_t Converted value or invalid_int_value if conversion not possible
    **/
-  inline unsigned int convert_unsigned_int() const;
+  inline uint32_t convert_unsigned_int() const;
   /** @} */
 
   /**
@@ -672,7 +672,7 @@ class SmartObject {
   /**
    * @brief Converts object to char type
    *
-   * @return int Converted value or invalid_char_value if conversion not possible
+   * @return int32_t Converted value or invalid_char_value if conversion not possible
    **/
   inline char convert_char() const;
   /** @} */
@@ -694,7 +694,7 @@ class SmartObject {
   /**
    * @brief Converts object to double type
    *
-   * @return int Converted value or invalid_double_value if conversion not possible
+   * @return int32_t Converted value or invalid_double_value if conversion not possible
    **/
   inline double convert_double() const;
   /** @} */
@@ -716,7 +716,7 @@ class SmartObject {
   /**
    * @brief Converts object to bool type
    *
-   * @return int Converted value or invalid_bool_value if conversion not possible
+   * @return int32_t Converted value or invalid_bool_value if conversion not possible
    **/
   inline bool convert_bool() const;
   /** @} */
@@ -748,7 +748,7 @@ class SmartObject {
   /**
    * @brief Converts object to string type
    *
-   * @return int Converted value or invalid_string_value if conversion not possible
+   * @return int32_t Converted value or invalid_string_value if conversion not possible
    **/
   inline std::string convert_string() const;
   /** @} */
@@ -770,7 +770,7 @@ class SmartObject {
   /**
    * @brief Converts object to binary type
    *
-   * @return int Converted value or invalid_binary_value if conversion not possible
+   * @return int32_t Converted value or invalid_binary_value if conversion not possible
    **/
   inline SmartBinary convert_binary() const;
   /** @} */
@@ -785,7 +785,7 @@ class SmartObject {
    * @param Index Index of element to retrieve
    * @return SmartObject&
    **/
-  SmartObject& handle_array_access(int Index);
+  SmartObject& handle_array_access(int32_t Index);
   /** @} */
 
   /**
@@ -814,12 +814,12 @@ class SmartObject {
   static double convert_string_to_double(const std::string* Value);
 
   /**
-   * @brief Converts string to unsigned int
+   * @brief Converts string to uint32_t
    *
    * @param Value Pointer to string to convert
-   * @return unsigned int int
+   * @return uint32_t int32_t
    **/
-  static unsigned int convert_string_to_unsigned_int(const std::string* Value);
+  static uint32_t convert_string_to_unsigned_int(const std::string* Value);
 
   /**
    * @brief Converts double value to string
@@ -868,8 +868,8 @@ class SmartObject {
     double double_value;
     bool bool_value;
     char char_value;
-    int int_value;
-    // unsigned int unsigned_int_value;
+    int32_t int_value;
+    // uint32_t unsigned_int_value;
     std::string* str_value;
     SmartArray* array_value;
     SmartMap* map_value;
@@ -893,10 +893,10 @@ class SmartObject {
 static const bool invalid_bool_value = false;
 
 /**
- * @brief Value that is used as invalid value for int type
+ * @brief Value that is used as invalid value for int32_t type
  **/
-static const int invalid_int_value = -1;
-static const int invalid_unsigned_int_value = 0;
+static const int32_t invalid_int_value = -1;
+static const int32_t invalid_unsigned_int_value = 0;
 
 /**
  * @brief Value that is used as invalid value for char type

@@ -58,7 +58,7 @@ PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {
 }
 
 void PipeVideoStreamerAdapter::SendData(
-  int application_key,
+  int32_t application_key,
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::SendData");
 
@@ -85,7 +85,7 @@ void PipeVideoStreamerAdapter::SendData(
   LOG4CXX_INFO(logger, "The data was successfully written to a pipe "
                << named_pipe_path_);
 
-  static int messsages_for_session = 0;
+  static int32_t messsages_for_session = 0;
   ++messsages_for_session;
 
   LOG4CXX_INFO(logger, "Handling map streaming message. This is "
@@ -97,7 +97,7 @@ void PipeVideoStreamerAdapter::SendData(
   }
 }
 
-void PipeVideoStreamerAdapter::StartActivity(int application_key) {
+void PipeVideoStreamerAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::StartActivity");
 
   if (application_key == current_application_) {
@@ -131,7 +131,7 @@ void PipeVideoStreamerAdapter::StartActivity(int application_key) {
   LOG4CXX_TRACE(logger, "Pipe was opened for writing " << named_pipe_path_);
 }
 
-void PipeVideoStreamerAdapter::StopActivity(int application_key) {
+void PipeVideoStreamerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::StopActivity");
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Not performing activity for " << application_key);
@@ -147,7 +147,7 @@ void PipeVideoStreamerAdapter::StopActivity(int application_key) {
 }
 
 bool PipeVideoStreamerAdapter::is_app_performing_activity(
-  int application_key) {
+  int32_t application_key) {
   return (application_key == current_application_);
 }
 

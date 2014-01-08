@@ -47,7 +47,7 @@ EventObserver::~EventObserver() {
 }
 
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
-                                       int hmi_correlation_id) {
+                                       int32_t hmi_correlation_id) {
   EventDispatcher::instance()->add_observer(event_id, hmi_correlation_id, this);
 }
 

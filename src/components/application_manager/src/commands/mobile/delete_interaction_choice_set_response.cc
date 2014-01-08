@@ -61,7 +61,7 @@ void DeleteInteractionChoiceSetResponse::Run() {
     }
   }
 
-  const int code =
+  const int32_t code =
       (*message_)[strings::msg_params][strings::result_code].asInt();
 
   if (hmi_apis::Common_Result::SUCCESS == code) {

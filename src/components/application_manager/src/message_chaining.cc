@@ -34,8 +34,8 @@
 
 namespace application_manager {
 
-MessageChaining::MessageChaining(unsigned int connection_key,
-                                 unsigned int correlation_id)
+MessageChaining::MessageChaining(uint32_t connection_key,
+                                 uint32_t correlation_id)
     : correlation_id_(correlation_id),
       connection_key_(connection_key),
       success_(true),
@@ -54,11 +54,11 @@ bool MessageChaining::operator==(const MessageChaining& other) const {
       && (connection_key_ == other.connection_key_));
 }
 
-const unsigned int MessageChaining::correlation_id() const {
+const uint32_t MessageChaining::correlation_id() const {
   return correlation_id_;
 }
 
-const unsigned int MessageChaining::connection_key() const {
+const uint32_t MessageChaining::connection_key() const {
   return connection_key_;
 }
 
@@ -70,11 +70,11 @@ void MessageChaining::DecrementCounter() {
   --counter_;
 }
 
-int MessageChaining::counter() const {
+int32_t MessageChaining::counter() const {
   return counter_;
 }
 
-void MessageChaining::set_counter(const unsigned int& counter) {
+void MessageChaining::set_counter(const uint32_t& counter) {
   counter_ = counter;
 }
 

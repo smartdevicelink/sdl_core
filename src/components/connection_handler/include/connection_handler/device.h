@@ -51,8 +51,8 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef unsigned int DeviceHandle;
-typedef std::vector<int> AppList;
+typedef uint32_t DeviceHandle;
+typedef std::vector<int32_t> AppList;
 
 /**
  * \class Device
@@ -110,13 +110,13 @@ class Device {
 /**
  * \brief Type for Devices map
  */
-typedef std::map<int, Device> DeviceList;
+typedef std::map<int32_t, Device> DeviceList;
 
 /**
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<int, Device>::iterator DeviceListIterator;
+typedef std::map<int32_t, Device>::iterator DeviceListIterator;
 
 }/* namespace connection_handler */
 

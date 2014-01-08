@@ -52,19 +52,19 @@ class RequestToHMI : public CommandImpl {
   /*
    * @brief Retrieves correlation ID
    */
-  inline int correlation_id() const;
+  inline int32_t correlation_id() const;
 
   /*
    * @brief Retrieves application ID
    */
-  inline unsigned int application_id() const;
+  inline uint32_t application_id() const;
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
 };
-int RequestToHMI::correlation_id() const {
+int32_t RequestToHMI::correlation_id() const {
   return (*message_)[strings::params][strings::correlation_id].asInt();
 }
-unsigned int RequestToHMI::application_id() const {
+uint32_t RequestToHMI::application_id() const {
   return (*message_)[strings::msg_params][strings::app_id].asUInt();
 }
 

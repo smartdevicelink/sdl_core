@@ -82,7 +82,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
   }
 
-  const int choice_set_id = (*message_)[strings::msg_params]
+  const int32_t choice_set_id = (*message_)[strings::msg_params]
       [strings::interaction_choice_set_id].asInt();
 
   if (app->FindChoiceSet(choice_set_id)) {

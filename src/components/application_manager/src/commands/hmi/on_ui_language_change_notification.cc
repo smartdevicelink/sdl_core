@@ -64,7 +64,7 @@ void OnUILanguageChangeNotification::Run() {
       hmi_capabilities.active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::OnLanguageChangeID);
+      static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
   const std::set<Application*>& applications =
       ApplicationManagerImpl::instance()->applications();

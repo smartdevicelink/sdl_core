@@ -69,12 +69,12 @@ class ResponseFromHMI : public CommandImpl {
   /*
    * @brief Retrieves correlation ID
    */
-  inline int correlation_id() const;
+  inline int32_t correlation_id() const;
  private:
   DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);
 };
 
-int ResponseFromHMI::correlation_id() const {
+int32_t ResponseFromHMI::correlation_id() const {
   return (*message_)[strings::params][strings::correlation_id].asInt();
 }
 

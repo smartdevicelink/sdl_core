@@ -330,11 +330,11 @@ void DynamicApplicationDataImpl::set_tbt_show_command(
 }
 
 void DynamicApplicationDataImpl::AddCommand(
-  unsigned int cmd_id, const smart_objects::SmartObject& command) {
+  uint32_t cmd_id, const smart_objects::SmartObject& command) {
   commands_[cmd_id] = new smart_objects::SmartObject(command);
 }
 
-void DynamicApplicationDataImpl::RemoveCommand(unsigned int cmd_id) {
+void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
   CommandsMap::iterator it = commands_.find(cmd_id);
 
   if (commands_.end() != it) {
@@ -344,7 +344,7 @@ void DynamicApplicationDataImpl::RemoveCommand(unsigned int cmd_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
-    unsigned int cmd_id) {
+    uint32_t cmd_id) {
   CommandsMap::const_iterator it = commands_.find(cmd_id);
   if (it != commands_.end()) {
     return it->second;
@@ -355,11 +355,11 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
 
 // TODO(VS): Create common functions for processing collections
 void DynamicApplicationDataImpl::AddSubMenu(
-  unsigned int menu_id, const smart_objects::SmartObject& menu) {
+  uint32_t menu_id, const smart_objects::SmartObject& menu) {
   sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
 }
 
-void DynamicApplicationDataImpl::RemoveSubMenu(unsigned int menu_id) {
+void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
   SubMenuMap::iterator it = sub_menu_.find(menu_id);
 
   if (sub_menu_.end() != it) {
@@ -369,7 +369,7 @@ void DynamicApplicationDataImpl::RemoveSubMenu(unsigned int menu_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
-    unsigned int menu_id) const {
+    uint32_t menu_id) const {
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
     return it->second;
@@ -392,11 +392,11 @@ bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
 }
 
 void DynamicApplicationDataImpl::AddChoiceSet(
-  unsigned int choice_set_id, const smart_objects::SmartObject& choice_set) {
+  uint32_t choice_set_id, const smart_objects::SmartObject& choice_set) {
   choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
 }
 
-void DynamicApplicationDataImpl::RemoveChoiceSet(unsigned int choice_set_id) {
+void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
   ChoiceSetMap::iterator it = choice_set_map_.find(choice_set_id);
 
   if (choice_set_map_.end() != it) {
@@ -406,7 +406,7 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(unsigned int choice_set_id) {
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
-    unsigned int choice_set_id) {
+    uint32_t choice_set_id) {
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
     return it->second;
@@ -416,7 +416,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
-  unsigned int choice_set_id, const smart_objects::SmartObject& vr_commands) {
+  uint32_t choice_set_id, const smart_objects::SmartObject& vr_commands) {
   performinteraction_choice_set_map_[choice_set_id] =
       new smart_objects::SmartObject(vr_commands);
 }
@@ -431,7 +431,7 @@ void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSetMap() {
 
 smart_objects::SmartObject*
 DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
-  unsigned int choice_set_id) const {
+  uint32_t choice_set_id) const {
   PerformChoiceSetMap::const_iterator it = performinteraction_choice_set_map_
       .find(choice_set_id);
 
@@ -443,12 +443,12 @@ DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_active(
-    unsigned int active) {
+    uint32_t active) {
   is_perform_interaction_active_ = active;
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_ui_corrid(
-    unsigned int corr_id) {
+    uint32_t corr_id) {
   perform_interaction_ui_corrid_ = corr_id;
 }
 
@@ -457,7 +457,7 @@ void DynamicApplicationDataImpl::set_reset_global_properties_active(
   is_reset_global_properties_active_ = active;
 }
 
-void DynamicApplicationDataImpl::set_perform_interaction_mode(int mode) {
+void DynamicApplicationDataImpl::set_perform_interaction_mode(int32_t mode) {
   perform_interaction_mode_ = mode;
 }
 

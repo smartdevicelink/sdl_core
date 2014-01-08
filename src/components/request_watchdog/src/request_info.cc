@@ -37,9 +37,9 @@
 
 namespace request_watchdog {
 
-RequestInfo::RequestInfo(const int& function_id, const int& connection_id,
-                         const int& correlation_id, const int& custom_timeout,
-                         const int& app_hmi_level)
+RequestInfo::RequestInfo(const int32_t& function_id, const int32_t& connection_id,
+                         const int32_t& correlation_id, const int32_t& custom_timeout,
+                         const int32_t& app_hmi_level)
   : functionID_(function_id),
     connectionID_(connection_id),
     correlationID_(correlation_id),

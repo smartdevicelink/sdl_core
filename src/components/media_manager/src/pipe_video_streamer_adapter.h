@@ -41,14 +41,14 @@ class PipeVideoStreamerAdapter : public MediaAdapterImpl {
   public:
     PipeVideoStreamerAdapter();
     ~PipeVideoStreamerAdapter();
-    virtual void SendData(int application_key,
+    virtual void SendData(int32_t application_key,
                           const protocol_handler::RawMessagePtr& message);
-    virtual void StartActivity(int application_key);
-    virtual void StopActivity(int application_key);
-    virtual bool is_app_performing_activity(int application_key);
+    virtual void StartActivity(int32_t application_key);
+    virtual void StopActivity(int32_t application_key);
+    virtual bool is_app_performing_activity(int32_t application_key);
 
   private:
-    int pipe_fd_;
+    int32_t pipe_fd_;
     std::string named_pipe_path_;
     DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
 };
