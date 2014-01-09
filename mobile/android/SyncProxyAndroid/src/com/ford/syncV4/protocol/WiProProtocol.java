@@ -370,25 +370,11 @@ public class WiProProtocol extends AbstractProtocol {
             } else if (header.getFrameData() == FrameDataControlFrameType.StartSessionNACK.getValue()) {
                 handleProtocolError("Got StartSessionNACK for protocol sessionID=" + header.getSessionID(), null);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndSession.getValue()) {
-                //if (hashID == BitConverter.intFromByteArray(data, 0))
-                if (_version == 2) {
-                    if (hashID == header.getMessageID()) {
-                        handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                    }
-                } else {
-                    handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                }
+                handleEndSessionFrame(header);
             }else if (header.getSessionType().getValue() ==  SessionType.Mobile_Nav.getValue()  && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()){
                 handleMobileNavAckReceived(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndSessionACK.getValue()) {
-                //if (hashID == BitConverter.intFromByteArray(data, 0))
-                if (_version == 2) {
-                    if (hashID == header.getMessageID()) {
-                        handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                    }
-                } else {
-                    handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                }
+                handleEndSessionFrame(header);
             }
 		} // end-method
 
@@ -438,5 +424,15 @@ public class WiProProtocol extends AbstractProtocol {
                             .getFunctionID(Names.UnregisterAppInterface));
         }
 	} // end-class
+
+    private void handleEndSessionFrame(ProtocolFrameHeader header) {
+        if (_version == 2) {
+            if (hashID == header.getMessageID()) {
+                handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+            }
+        } else {
+            handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+        }
+    }
 } // end-class
 

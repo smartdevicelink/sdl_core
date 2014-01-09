@@ -34,10 +34,6 @@ import java.io.PipedOutputStream;
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
     private static final String TAG = "SyncConnection";
-
-    private boolean _isHeartbeatTimedout = false;
-
-    private NSDHelper mNSDHelper;
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
@@ -46,6 +42,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     Object TRANSPORT_REFERENCE_LOCK = new Object();
     Object PROTOCOL_REFERENCE_LOCK = new Object();
     IHeartbeatMonitor _heartbeatMonitor;
+    private boolean _isHeartbeatTimedout = false;
+    private NSDHelper mNSDHelper;
 
     /**
      * Constructor.
@@ -120,7 +118,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _heartbeatMonitor.setListener(this);
     }
 
-    public void stopTransportReading() {
+    private void stopTransportReading() {
         if (_transport != null) {
             _transport.stopReading();
         }
@@ -131,7 +129,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void closeConnection(byte rpcSessionID, boolean keepConnection,
-                         boolean sendFinishMessages) {
+                                boolean sendFinishMessages) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage

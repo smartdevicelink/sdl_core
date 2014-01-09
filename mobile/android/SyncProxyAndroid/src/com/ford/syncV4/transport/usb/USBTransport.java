@@ -28,7 +28,7 @@ import java.io.OutputStream;
 
 /**
  * Class that implements USB transport.
- *
+ * <p/>
  * A note about USB Accessory protocol. If the device is already in the USB
  * accessory mode, any side (computer or Android) can open connection even if
  * the other side is not connected. Conversely, if one side simply disconnects,
@@ -38,7 +38,7 @@ import java.io.OutputStream;
 public class USBTransport extends SyncTransport {
     /**
      * Broadcast action: sent when a USB accessory is attached.
-     *
+     * <p/>
      * UsbManager.EXTRA_ACCESSORY extra contains UsbAccessory object that has
      * been attached.
      */
@@ -133,7 +133,7 @@ public class USBTransport extends SyncTransport {
     private USBTransportConfig mConfig = null;
     /**
      * Current state of transport.
-     *
+     * <p/>
      * Use setter and getter to access it.
      */
     private State mState = State.IDLE;
@@ -155,6 +155,11 @@ public class USBTransport extends SyncTransport {
      * Data output stream to write data to USB accessory.
      */
     private OutputStream mOutputStream = null;
+
+    public void setReaderThread(Thread mReaderThread) {
+        this.mReaderThread = mReaderThread;
+    }
+
     /**
      * Thread that connects and reads data from USB accessory.
      *
@@ -175,6 +180,10 @@ public class USBTransport extends SyncTransport {
         this.mConfig = usbTransportConfig;
     }
 
+    public Thread getReaderThread() {
+        return mReaderThread;
+    }
+
     /**
      * Returns the current state of transport.
      *
@@ -189,7 +198,7 @@ public class USBTransport extends SyncTransport {
      *
      * @param state New state
      */
-    private void setState(State state) {
+    protected void setState(State state) {
         logD("Changing state " + this.mState + " to " + state);
         this.mState = state;
     }
@@ -300,7 +309,7 @@ public class USBTransport extends SyncTransport {
     @Override
     public void stopReading() {
         DebugTool.logInfo("USBTransport: stop reading requested, doing nothing");
-        // TODO - put back stopUSBReading(); @see <a href="https://adc.luxoft.com/jira/browse/APPLINK-3450">APPLINK-3450</a>
+        stopUSBReading();
     }
 
     private void stopUSBReading() {
@@ -327,8 +336,6 @@ public class USBTransport extends SyncTransport {
         if (mReaderThread != null) {
             logI("Interrupting USB reader");
             mReaderThread.interrupt();
-            // don't join() now
-            mReaderThread = null;
         } else {
             logD("USB reader is null");
         }
@@ -466,7 +473,7 @@ public class USBTransport extends SyncTransport {
 
     /**
      * Attempts to connect to the specified accessory.
-     *
+     * <p/>
      * If the permission is already granted, opens the accessory. Otherwise,
      * requests permission to use it.
      *
@@ -512,7 +519,7 @@ public class USBTransport extends SyncTransport {
 
     /**
      * Opens a connection to the accessory.
-     *
+     * <p/>
      * When this function is called, the permission to use it must have already
      * been granted.
      *
@@ -526,11 +533,7 @@ public class USBTransport extends SyncTransport {
                     logI("Opening accessory " + accessory);
                     mAccessory = accessory;
 
-                    mReaderThread = new Thread(new USBTransportReader());
-                    mReaderThread.setDaemon(true);
-                    mReaderThread
-                            .setName(USBTransportReader.class.getSimpleName());
-                    mReaderThread.start();
+                    startReaderThread();
 
                     // Initialize the SiphonServer
                     SiphonServer.init();
@@ -542,6 +545,14 @@ public class USBTransport extends SyncTransport {
                 logW("openAccessory() called from state " + state +
                         "; doing nothing");
         }
+    }
+
+    private void startReaderThread() {
+        mReaderThread = new Thread(new USBTransportReader());
+        mReaderThread.setDaemon(true);
+        mReaderThread
+                .setName(USBTransportReader.class.getSimpleName());
+        mReaderThread.start();
     }
 
     /**
@@ -609,7 +620,7 @@ public class USBTransport extends SyncTransport {
     /**
      * Possible states of the USB transport.
      */
-    private enum State {
+    protected enum State {
         /**
          * Transport initialized; no connections.
          */
@@ -629,7 +640,7 @@ public class USBTransport extends SyncTransport {
 
     /**
      * Internal task that connects to and reads data from a USB accessory.
-     *
+     * <p/>
      * Since the class has to have access to the parent class' variables,
      * synchronization must be taken in consideration! For now, all access
      * to variables of USBTransport must be surrounded with
