@@ -31,10 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/pending.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -108,22 +109,16 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
                      const hmi_apis::Common_Result::eType vr,
                      const hmi_apis::Common_Result::eType tts);
 
-  DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
-
-  bool is_ui_send_;
-  bool is_vr_send_;
-  bool is_tts_send_;
-
-  bool is_ui_received_;
-  bool is_vr_received_;
-  bool is_tts_received_;
+  Pending pending_requests_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
   hmi_apis::Common_Result::eType tts_result_;
+
+  DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CHANGE_REGISTRATION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
