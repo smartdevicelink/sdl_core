@@ -55,7 +55,6 @@ LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
-LIBXML2_DEV="libxml2-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
 APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
@@ -65,11 +64,13 @@ CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 QT5_RUNFILE_DST="/tmp/qt5"
 INSTALL_ALL=false
 QT_HMI=false
-AVAHI_CLIENT_LIBRARY="libavahi-client-dev "
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
 MSCGEN="mscgen"
 BLUEZ_TOOLS="bluez-tools"
+GSTREAMER="gstreamer1.0*"
+USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
@@ -109,7 +110,7 @@ while test $# -gt 0; do
 done
 
 function apt-install() {
-    if [ -z "$1" ]
+    if [ -z "$1" ];
     then
         echo "warning: apt-install() function called without parameters"
         return 1;
@@ -143,10 +144,46 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade
 fi
 
-if [ $INSTALL_ALL == "false" -a $QT_HMI == "false" ]; then
-echo "Installing CMake build system"
-apt-install ${CMAKE_BUILD_SYSTEM}
+#INSTALL_CMAKE becomes "true" if no cmake  at all or lower version "2.8.9" is present
+INSTALL_CMAKE=false
+
+if dpkg -s cmake | grep installed > /dev/null; then		
+	echo "Checking for installed cmake"
+	CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
+	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
+	case ${CMAKE_COMPARE_RESULT} in
+	"equal"|"1 > 2");;
+	"2 > 1") echo "Removing CMake build system"
+	    sudo apt-get remove -y cmake cmake-data
+	    INSTALL_CMAKE=true
+	    ;;
+	esac
+else 
+	INSTALL_CMAKE=true
+fi
 echo $OK
+
+if ${INSTALL_CMAKE}; then
+	echo "Installing Subversion"
+	apt-install ${SUBVERSION}
+	echo $OK
+
+	echo "Checking out CMake packages, please be patient"
+	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+	echo $OK
+
+	echo "Installing gdebi"
+	apt-install ${GDEBI}
+	echo $OK
+
+	echo "Installing CMake build system"
+	if [ ${ARCH} == "i386" ]; then
+	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+	elif [ ${ARCH} == "x64" ]; then
+	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+	fi
+	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
 
 echo "Installing gstreamer..."
@@ -202,39 +239,11 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 fi
 
 if $QT_HMI || $INSTALL_ALL; then
+
 	echo "Installing Subversion"
 	apt-install ${SUBVERSION}
 	echo $OK
-
-	echo "Checking out CMake packages, please be patient"
-	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
-	echo $OK
-
-	echo "Installing gdebi"
-	apt-install ${GDEBI}
-	echo $OK
-
-	if dpkg -s cmake | grep installed > /dev/null; then		
-		echo "Checking for installed cmake"
-		CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
-		CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
-		case ${CMAKE_COMPARE_RESULT} in
-		"equal"|"1 > 2");;
-		"2 > 1") echo "Removing CMake build system"
-		   sudo apt-get remove -y cmake cmake-data
-		   echo "Installing CMake build system"
-		   if [ ${ARCH} == "i386" ]; then
-		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-		   elif [ ${ARCH} == "x64" ]; then
-		         CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
-		   fi
-		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-		   sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
-		   ;;
-		esac
-	fi
-	echo $OK
-
+	
 	if [ ${ARCH} = "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"

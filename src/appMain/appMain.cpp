@@ -75,6 +75,17 @@ const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
 
+#ifdef __QNX__
+bool Execute(std::string command, const char * const *) {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("appMain"));
+  if (system(command.c_str()) == -1) {
+    LOG4CXX_INFO(logger, "Can't start HMI!");
+    return false;
+  }
+  return true;
+}
+#else
 bool Execute(std::string file, const char * const * argv) {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
@@ -116,6 +127,7 @@ bool Execute(std::string file, const char * const * argv) {
     }
   }
 }
+#endif
 
 #ifdef WEB_HMI
 /**
@@ -144,8 +156,8 @@ file_str.seekg(0, std::ios::end);
 int32_t length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
-  std::string hmi_link;
-  std::getline(file_str, hmi_link);
+std::string hmi_link;
+std::getline(file_str, hmi_link);
 
 
 LOG4CXX_INFO(logger,

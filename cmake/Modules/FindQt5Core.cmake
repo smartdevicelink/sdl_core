@@ -1,5 +1,5 @@
 execute_process(
-  COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh file Qt5CoreConfig.cmake
+  COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version} Qt5CoreConfig.cmake
   OUTPUT_VARIABLE config_file
 )
 

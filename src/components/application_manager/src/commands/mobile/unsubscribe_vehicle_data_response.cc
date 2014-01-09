@@ -36,7 +36,6 @@
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
-
 namespace commands {
 
 UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
@@ -66,5 +65,4 @@ void UnsubscribeVehicleDataResponse::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

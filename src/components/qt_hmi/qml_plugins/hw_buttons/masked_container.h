@@ -36,33 +36,54 @@
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_
 
 #include <vector>
+#include <QtCore/QString>
 
-#include <QQuickItem>
-#include <QString>
+#include "qt_version.h"
+
+#if QT_4
+#  include <QtDeclarative/QDeclarativeItem>
+typedef QDeclarativeItem Item;
+typedef QGraphicsSceneMouseEvent MouseEvent;
+#elif QT_5
+#  include <QtQuick/QQuickItem>
+typedef QQuickItem Item;
+typedef QMouseEvent MouseEvent;
+#endif
 
 #include "attributed_mouse_event.h"
 
-class MaskedContainer : public QQuickItem
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(MaskedContainer)
-    
-public:
-    MaskedContainer(QQuickItem *parent = 0);
-    ~MaskedContainer();
-signals:
-    void pressed(AttributedMouseEvent *attr);
-    void released(AttributedMouseEvent *attr);
-protected:
-    virtual void componentComplete();
-    // virtual bool childMouseEventFilter(QQuickItem *item, QEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseReleaseEvent(QMouseEvent *event);
-private:
-    std::vector<QQuickItem*> images;
-    int *mask;
+class MaskedContainer : public Item {
+  Q_OBJECT
+  Q_DISABLE_COPY(MaskedContainer)
+
+ public:
+  explicit MaskedContainer(Item *parent = 0);
+  ~MaskedContainer();
+
+ signals:
+  void pressed(AttributedMouseEvent *attr);
+  void released(AttributedMouseEvent *attr);
+
+ protected:
+  virtual void componentComplete();
+  virtual void mousePressEvent(MouseEvent *event);
+  virtual void mouseReleaseEvent(MouseEvent *event);
+
+ private:
+  std::vector<Item*> images_;
+  int *mask_;
+
+#if QT_4
+  int indexOfMask(qreal x, qreal y) const {
+    return static_cast<int>(y * width() + x);
+  }
+#elif QT_5
+  int indexOfMask(int x, int y) const {
+    return y * static_cast<int>(width()) + x;
+  }
+#endif  // QT_VERSION
 };
 
 QML_DECLARE_TYPE(MaskedContainer)
 
-#endif // MASKED_CONTAINER_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_MASKED_CONTAINER_H_

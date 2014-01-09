@@ -35,25 +35,40 @@
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_LOG4CXX_LOG4CXX_PLUGIN_H_
 
-#include <QQmlExtensionPlugin>
-#include <QQuickItem>
+#include <qglobal.h>
 
-class Logger : public QQuickItem
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(Logger)
+#define QT_4 ((QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(5, 0, 0)))
 
-public:
-    explicit Logger(QQuickItem *parent = 0) : QQuickItem(parent) {}
+#define QT_5 ((QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)) && \
+  (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)))
+
+#if QT_4
+#  include <QtDeclarative/qdeclarative.h>
+#  include <QtDeclarative/QDeclarativeExtensionPlugin>
+typedef QDeclarativeExtensionPlugin ExtensionPlugin;
+#elif QT_5
+#  include <QtQml/qqml.h>
+#  include <QtQml/QQmlExtensionPlugin>
+typedef QQmlExtensionPlugin ExtensionPlugin;
+#endif  // QT_VERSION
+
+class Logger : public QObject {
+  Q_OBJECT
+  Q_DISABLE_COPY(Logger)
+
+ public:
+  explicit Logger(QObject *parent = 0) : QObject(parent) {}
 };
 
-class Log4cxxPlugin : public QQmlExtensionPlugin
-{
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
-    
-public:
-    void registerTypes(const char *uri);
+class Log4cxxPlugin : public ExtensionPlugin {
+  Q_OBJECT
+#if QT_5
+  Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+#endif  // QT_5
+
+ public:
+  void registerTypes(const char *uri);
 };
 
 QML_DECLARE_TYPE(Logger)
