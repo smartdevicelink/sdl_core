@@ -310,6 +310,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
                                        String correlationID) {
         _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
+        if ( _transport != null ){
+            _transport.stopReading();
+        }
     }
 
     @Override
@@ -327,7 +330,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolAppUnregistered() {
         Log.d(TAG, "onProtocolAppUnregistered");
-        _transport.stopReading();
     }
 
     @Override

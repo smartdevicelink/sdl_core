@@ -198,7 +198,7 @@ public class USBTransport extends SyncTransport {
      *
      * @param state New state
      */
-    protected void setState(State state) {
+    public void setState(State state) {
         logD("Changing state " + this.mState + " to " + state);
         this.mState = state;
     }
@@ -620,7 +620,7 @@ public class USBTransport extends SyncTransport {
     /**
      * Possible states of the USB transport.
      */
-    protected enum State {
+    public enum State {
         /**
          * Transport initialized; no connections.
          */

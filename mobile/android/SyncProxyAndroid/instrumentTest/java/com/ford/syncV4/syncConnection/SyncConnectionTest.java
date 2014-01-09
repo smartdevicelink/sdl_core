@@ -111,6 +111,5 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
         connection.closeMobileNavSession(SESSION_ID);
-
     }
 }
