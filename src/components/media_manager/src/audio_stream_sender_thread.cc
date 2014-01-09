@@ -29,12 +29,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-#include "./audio_stream_sender_thread.h"
+
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
 #include <unistd.h>
 #endif
+
 
 #include <string>
 #include "application_manager/application_manager_impl.h"
@@ -44,6 +45,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 
+#include "./audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
 
