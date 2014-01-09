@@ -100,11 +100,19 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-
-      bool result = mobile_apis::Result::SUCCESS == result_code  ||
-          hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code;
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      bool result = false;
+      if (mobile_apis::Result::SUCCESS == result_code ||
+          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code
+                    && message[strings::msg_params].length() > 1)) {
+        result = true;
+      }
+      const char *info = NULL;
+      std::string error_message;
+      if (true == message[strings::params].keyExists(strings::error_msg)) {
+        error_message = message[strings::params][strings::error_msg].asString();
+        info = error_message.c_str();
+      }
+      SendResponse(result, result_code, info, &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -261,7 +269,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse( any_arg_success, status, NULL, &response_params);
+    const char *info = NULL;
+    std::string error_message;
+    if (true == message[strings::params].keyExists(strings::error_msg)) {
+      error_message = message[strings::params][strings::error_msg].asString();
+      info = error_message.c_str();
+    }
+    SendResponse( any_arg_success, status, info, &response_params);
   }
 }
 #endif // #ifdef QT_HMI

@@ -31,12 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/change_registration_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include <algorithm>
 
 namespace application_manager {
 
@@ -45,12 +45,6 @@ namespace commands {
 ChangeRegistrationRequest::ChangeRegistrationRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message),
-      is_ui_send_(false),
-      is_vr_send_(false),
-      is_tts_send_(false),
-      is_ui_received_(false),
-      is_vr_received_(false),
-      is_tts_received_(false),
       ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
       tts_result_(hmi_apis::Common_Result::INVALID_ENUM),
       vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -99,6 +93,10 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
+  pending_requests_.Add(hmi_apis::FunctionID::UI_ChangeRegistration);
+  pending_requests_.Add(hmi_apis::FunctionID::VR_ChangeRegistration);
+  pending_requests_.Add(hmi_apis::FunctionID::TTS_ChangeRegistration);
+
   // UI processing
   smart_objects::SmartObject ui_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -108,8 +106,6 @@ void ChangeRegistrationRequest::Run() {
 
   SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
                  &ui_params, true);
-
-  is_ui_send_ = true;
 
   // VR processing
   smart_objects::SmartObject vr_params =
@@ -123,8 +119,6 @@ void ChangeRegistrationRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
                  &vr_params, true);
 
-  is_vr_send_ = true;
-
   // TTS processing
   smart_objects::SmartObject tts_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -136,8 +130,6 @@ void ChangeRegistrationRequest::Run() {
 
   SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
                  &tts_params, true);
-
-  is_tts_send_ = true;
 }
 
 bool ChangeRegistrationRequest::WasAnySuccess(
@@ -155,35 +147,37 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
-  switch (event.id()) {
+  hmi_apis::FunctionID::eType event_id = event.id();
+
+  switch (event_id) {
     case hmi_apis::FunctionID::UI_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received UI_ChangeRegistration event");
-      is_ui_received_ = true;
+      pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received VR_ChangeRegistration event");
-      is_vr_received_ = true;
+      pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received TTS_ChangeRegistration event");
-      is_tts_received_ = true;
+      pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event_id);
       return;
     }
   }
 
-  if (!IsPendingResponseExist()) {
+  if (pending_requests_.IsFinal(event_id)) {
     Application* application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
@@ -212,6 +206,10 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     SendResponse(WasAnySuccess(ui_result_, vr_result_, tts_result_),
                  static_cast<mobile_apis::Result::eType>(greates_result_code),
                  NULL, &(message[strings::msg_params]));
+  } else {
+    LOG4CXX_INFO(logger_,
+                "There are some pending responses from HMI."
+                "ChangeRegistrationRequest still waiting.");
   }
 }
 
@@ -283,15 +281,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
 
   LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
   return false;
-}
-
-bool ChangeRegistrationRequest::IsPendingResponseExist() {
-
-  return
-      is_ui_send_ != is_ui_received_ ||
-      is_vr_send_ != is_vr_received_ ||
-      is_tts_send_ != is_tts_received_
-      ;
 }
 
 }  // namespace commands
