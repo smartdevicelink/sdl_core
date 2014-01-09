@@ -106,7 +106,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
                     && message[strings::msg_params].length() > 1)) {
         result = true;
       }
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const char *info = NULL;
+      std::string error_message;
+      if (true == message[strings::params].keyExists(strings::error_msg)) {
+        error_message = message[strings::params][strings::error_msg].asString();
+        info = error_message.c_str();
+      }
+      SendResponse(result, result_code, info, &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -263,7 +269,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse( any_arg_success, status, NULL, &response_params);
+    const char *info = NULL;
+    std::string error_message;
+    if (true == message[strings::params].keyExists(strings::error_msg)) {
+      error_message = message[strings::params][strings::error_msg].asString();
+      info = error_message.c_str();
+    }
+    SendResponse( any_arg_success, status, info, &response_params);
   }
 }
 #endif // #ifdef QT_HMI
