@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 2.8.0)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -121,6 +121,7 @@ if(NOT PYTHONINTERP_FOUND)
 endif(NOT PYTHONINTERP_FOUND)
 
 if (${HMI2})
+    cmake_minimum_required(VERSION 2.8.9)
     if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
         set(qt_version "4.8.5")
     else ()
