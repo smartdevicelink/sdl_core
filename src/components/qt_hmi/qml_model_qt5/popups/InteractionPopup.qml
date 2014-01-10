@@ -138,6 +138,8 @@ ContextPopup {
 
     function complete (reason, data) {
         console.debug("enter")
+        timer.stop()
+        hide()
         switch (reason) {
             case Common.Result.SUCCESS:
                 DBus.sendReply(async, data)
@@ -149,8 +151,6 @@ ContextPopup {
                 DBus.sendReply(async, { __retCode: Common.Result.TIMED_OUT })
                 break
         }
-        timer.stop()
-        hide()
         performInteractionIsActiveNow = false
         console.debug("exit")
     }

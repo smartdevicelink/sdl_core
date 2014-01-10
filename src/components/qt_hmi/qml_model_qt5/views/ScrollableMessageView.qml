@@ -1,5 +1,5 @@
 /**
- * @file ScrollableMessageView.qml
+ * @file ScrollableMessage.qml
  * @brief Scrollable Message View .
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -35,47 +35,29 @@
 import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
+import "../hmi_api/Async.js" as Async
 import "../models/Constants.js" as Constants
 import "../models"
 import "../popups"
 
 GeneralView {
     applicationContext: true
-    id: scrollableMessageView
-
-    function complete(abort){
-        console.debug("enter")
+    id: scrollableMessage
+    onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false
-
-        dataContainer.popups--
-        dataContainer.applicationContext = dataContainer.applicationSavedContext
-
-        if(abort) {
-            console.debug("send error")
-            DBus.sendError(dataContainer.scrollableMessageModel.async, Common.Result.ABORTED)
-        } else {
-            console.debug("send ok")
-            DBus.sendReply(dataContainer.scrollableMessageModel.async, {})
-        }
-
-        contentLoader.back()
-        console.debug("exit")
+        DBus.sendReply(dataContainer.scrollableMessageModel.async, { __retCode: dataContainer.scrollableMessageModel.result })
     }
-
-
-    Connections {
-        target: contentLoader
-        onStatusChanged: {
-            if (status == Component.Ready) {
-                console.debug("enter")
-                console.debug("timeout in timer", timer.interval)
-                dataContainer.popups++
-                dataContainer.applicationSavedContext = dataContainer.applicationContext
-                dataContainer.scrollableMessageModel.running = true
-                timer.start()
-                console.debug("exit")
-            }
+    Component.onCompleted: {
+        dataContainer.scrollableMessageModel.running = true
+        timer.start()
+    }
+    Timer {
+        id: timer
+        interval: dataContainer.scrollableMessageModel.timeout
+        onTriggered: {
+            dataContainer.scrollableMessageModel.result = Common.Result.TIMED_OUT
+            contentLoader.back()
         }
     }
 
@@ -83,53 +65,34 @@ GeneralView {
         anchors.fill: parent
         color: Constants.secondaryColor
 
-        Timer {
-            id: timer
-            interval: dataContainer.scrollableMessageModel.timeout
-            onTriggered: {
-                complete(false)
-            }
-        }
-
         Item {
-            // top 1/6 of screen
+            // top 1/5 of screen
             id: top
             anchors.top: parent.top
             anchors.left: parent.left
             width: parent.width
-            height: dataContainer.scrollableMessageModel.softButtons.count > 0 ? parent.height * 1/6 : 1
-
-            OvalButton {
-                //this button is used only to get item size for PagedFlickable
-                id: fakeButton
-                text: "defaultBtnSize"//remove this line when default size for btn will be introduced
-                visible:false
-            }
+            height: dataContainer.scrollableMessageModel.softButtons.count > 0 ? parent.height * 1/5 : 1
 
             PagedFlickable {
                 id: flickRow
                 width: top.width
-                spacing: (width - fakeButton.width * 4) / 3
-                snapTo: fakeButton.width + spacing
-                elementWidth: fakeButton.width
-
-
-                ListView {
-                    id: softButtons
-                    width: model.count * fakeButton.width + (model.count - 1) * flickRow.spacing
-                    height: fakeButton.height
-                    spacing: flickRow.spacing
-
-                    orientation: ListView.Horizontal
-                    interactive: false
-                    model: dataContainer.scrollableMessageModel.softButtons
-
-                    delegate: SoftButton {
-                        appId: dataContainer.currentApplication.appId
-                        button: model
-                        onKeepContext: { timer.restart() }
-                        onDefaultAction: { scrollableMessageView.complete(true) }
-                    }
+                spacing: (width - elementWidth * 4) / 3
+                snapTo: Constants.ovalButtonWidth + spacing
+                elementWidth: Constants.ovalButtonWidth
+                Repeater {
+                    model: dataContainer.scrollableMessageModel.softButtons ?
+                               dataContainer.scrollableMessageModel.softButtons.count :
+                               0
+                    delegate:
+                        SoftButton {
+                            appId: dataContainer.scrollableMessageModel.appId
+                            button: dataContainer.scrollableMessageModel.softButtons.get(index)
+                            onKeepContext: { timer.restart() }
+                            onDefaultAction: {
+                                dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
+                                contentLoader.back()
+                            }
+                        }
                 }
             }
         }
@@ -140,6 +103,7 @@ GeneralView {
             anchors.left: parent.left
             anchors.bottom: bottom.top
             width: parent.width
+            clip: true
 
             Flickable {
                 id:flickable
@@ -149,7 +113,6 @@ GeneralView {
                 contentHeight: longMessageText.height
                 clip: true
 
-
                 Text {
                     id: longMessageText
                     wrapMode: Text.Wrap
@@ -157,7 +120,6 @@ GeneralView {
                     text: dataContainer.scrollableMessageModel.longMessageText
                     color: Constants.scrollableMessageTextColor
                     font.pixelSize: Constants.fontSize
-
                 }
             }
             Rectangle {
@@ -169,24 +131,20 @@ GeneralView {
                 visible: !(flickable.visibleArea.heightRatio > 1)
                 color: Constants.scrollableMessageScrollBarColor
             }
-
         }
-
         Item {
-            // 1/4 bottom screen
+            // 1/5 bottom screen
             id: bottom
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             width: parent.width
-            height: 1/4 * parent.height
-
-            BackButton {
-                id:backButton
+            height: 1/5 * parent.height
+            OvalButton {
                 anchors.centerIn: parent
+                text: "Close"
                 onClicked: {
-                    console.debug("enter")
-                    complete(true)
-                    console.debug("exit")
+                    dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
+                    contentLoader.back()
                 }
             }
         }

@@ -106,18 +106,7 @@ GeneralView {
                         anchors.leftMargin: Constants.margin
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
-                            if (Internal.checkBit(dataContainer.currentApplication.appType, Common.AppHMIType.NAVIGATION)) {
-                                if (dataContainer.currentApplication.isMediaApplication) {
-                                    contentLoader.go("./views/SDLNavi.qml", dataContainer.currentApplication.appId)
-                                }
-                                else {
-                                    contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
-                                }
-                            } else if (dataContainer.currentApplication.isMediaApplication) {
-                                contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
-                            } else {
-                                contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
-                            }
+                            Internal.chooseAppStartScreen()
                         }
                     }
                 }

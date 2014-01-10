@@ -65,17 +65,10 @@ Item {
             pressedColor: Constants.primaryColorPressed
             font.pixelSize: Constants.fontSize
 
-            onClicked: {
-                parent.clicked()
-            }
-
-            Component.onCompleted: {
-                console.debug("enter")
-                pressed.connect(menuText.press)
-                released.connect(menuText.release)
-                canceled.connect(menuText.release)
-                console.debug("exit")
-            }
+            onClicked: parent.clicked()
+            onPressed: menuLogo.press()
+            onReleased: menuLogo.release()
+            onCanceled: menuLogo.release()
         }
 
         ClickableText {
@@ -86,17 +79,10 @@ Item {
             pressedColor: Constants.primaryColorPressed
             font.pixelSize: Constants.fontSize
 
-            onClicked: {
-                parent.clicked()
-            }
-
-            Component.onCompleted: {
-                console.debug("enter")
-                pressed.connect(menuLogo.press)
-                released.connect(menuLogo.release)
-                canceled.connect(menuLogo.release)
-                console.debug("exit")
-            }
+            onClicked: parent.clicked()
+            onPressed: menuText.press()
+            onReleased: menuText.release()
+            onCanceled: menuText.release()
         }
 
         onClicked: {

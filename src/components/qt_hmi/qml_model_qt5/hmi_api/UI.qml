@@ -357,23 +357,31 @@ Item {
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
-        console.debug("scrollableMessage ", messageText, timeout, softButtons, appID)
+        console.debug("enter ", messageText, timeout, softButtons, appID)
+        // TODO{ALeshin}: Also check HMILevel, when it will be available. It should be FULL otherwise - REJECTED
+        if (contentLoader.item.systemContext !== Common.SystemContext.SYSCTXT_MAIN) {
+            return { __retCode: Common.Result.REJECTED, __message: "System Context isn't MAIN" }
+        }
         if(dataContainer.scrollableMessageModel.running){
-            //send error response if long message already running
-            console.debug("scrollableMessage throw")
-            throw Common.Result.ABORTED
+            //send error response if scrollable message already running
+            return { __retCode: Common.Result.ABORTED, __message: "ScrollableMessage already running" }
         }
 
         dataContainer.scrollableMessageModel.longMessageText = messageText.fieldText
+        if (timeout === 0) {
+            return { __retCode: Common.Result.SUCCESS, __message: "Timeout = 0" }
+        } else {
+            dataContainer.scrollableMessageModel.timeout = timeout
+        }
+
         dataContainer.scrollableMessageModel.softButtons.clear();
         if (softButtons !== undefined) {
             softButtons.forEach(fillSoftButtons, dataContainer.scrollableMessageModel.softButtons);
         }
-        dataContainer.scrollableMessageModel.timeout = timeout
         dataContainer.scrollableMessageModel.appId = appID
         dataContainer.scrollableMessageModel.async = new Async.AsyncCall()
         contentLoader.go("./views/ScrollableMessageView.qml")
-        console.debug("scrollableMessage exit")
+        console.debug("exit")
         return dataContainer.scrollableMessageModel.async
     }
 

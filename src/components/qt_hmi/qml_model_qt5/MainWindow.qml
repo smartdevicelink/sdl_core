@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -164,7 +164,8 @@ Rectangle {
                             if (appId) {
                                 dataContainer.setCurrentApplication(appId)
                             }
-                            currentLocation = path
+                            item.leaveScreen()
+                            currentLocation = path                            
                             source = path
                         }
                     }
@@ -173,6 +174,7 @@ Rectangle {
 
                 function back() {
                     if (viewTransitionStack.length) {
+                        item.leaveScreen()
                         source = viewTransitionStack.pop().uri
                     }
                     currentLocation = ""

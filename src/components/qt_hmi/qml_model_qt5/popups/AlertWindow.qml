@@ -36,6 +36,7 @@ import QtQuick 2.0
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
+import "../models/Internal.js" as Internal
 
 Rectangle {
     id: alertWindow
@@ -119,11 +120,7 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            if (dataContainer.currentApplication.isMediaApplication) {
-                                contentLoader.go("views/SDLPlayerView.qml", appId);
-                            } else {
-                                contentLoader.go("views/SDLNonMediaView.qml", appId);
-                            }
+                            Internal.chooseAppStartScreen()
                         }
                     }
                     SoftButton {
@@ -141,11 +138,7 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            if (dataContainer.currentApplication.isMediaApplication) {
-                                contentLoader.go("views/SDLPlayerView.qml", appId);
-                            } else {
-                                contentLoader.go("views/SDLNonMediaView.qml", appId);
-                            }
+                            Internal.chooseAppStartScreen()
                         }
                     }
                 }
@@ -168,11 +161,7 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            if (dataContainer.currentApplication.isMediaApplication) {
-                                contentLoader.go("views/SDLPlayerView.qml", appId);
-                            } else {
-                                contentLoader.go("views/SDLNonMediaView.qml", appId);
-                            }
+                            Internal.chooseAppStartScreen()
                         }
                     }
                     SoftButton {
@@ -190,11 +179,7 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            if (dataContainer.currentApplication.isMediaApplication) {
-                                contentLoader.go("views/SDLPlayerView.qml", appId);
-                            } else {
-                                contentLoader.go("views/SDLNonMediaView.qml", appId);
-                            }
+                            Internal.chooseAppStartScreen()
                         }
                     }
                 }

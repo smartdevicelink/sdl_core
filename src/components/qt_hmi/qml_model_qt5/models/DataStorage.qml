@@ -36,12 +36,14 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 import "Internal.js" as Internal
 import "Constants.js" as Constants
+import "../views"
 
 QtObject {
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
     property ApplicationModel currentApplication: ApplicationModel { }
     property SliderModel uiSlider: SliderModel { }
     property PerformAudioPassThruModel uiAudioPassThru: PerformAudioPassThruModel { }
+    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
 
     function getApplication(appId) {
         console.log("dataContainer getApplication enter");
@@ -167,7 +169,9 @@ QtObject {
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
                 currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
                 currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
-                currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
+                if (application.startTimeForProgress !== undefined) {
+                    currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
+                }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -529,7 +533,6 @@ QtObject {
         console.debug("exit")
     }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
-    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {

@@ -30,6 +30,8 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
 
+.import "../hmi_api/Common.js" as Common
+
 var MenuItemType = {
     MI_NODE: 0,
     MI_SUBMENU: 1,
@@ -61,6 +63,16 @@ var MediaClockUpdateMode = {
 var MediaClockRunningMode = {
     MCR_RUNNING: 0,
     MCR_STOPPED: 1
+}
+
+function chooseAppStartScreen() {
+    if (checkBit(dataContainer.currentApplication.appType, Common.AppHMIType.NAVIGATION)) {
+        contentLoader.go("./views/SDLNavi.qml", dataContainer.currentApplication.appId)
+    } else if (dataContainer.currentApplication.isMediaApplication) {
+        contentLoader.go("./views/SDLPlayerView.qml", dataContainer.currentApplication.appId)
+    } else {
+        contentLoader.go("./views/SDLNonMediaView.qml", dataContainer.currentApplication.appId)
+    }
 }
 
 function appendVrHelpItem (arrayElement, index, array) {
