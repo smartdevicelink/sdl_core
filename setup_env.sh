@@ -252,7 +252,7 @@ if $QT_HMI || $INSTALL_ALL; then
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
 	echo "Checking whether Qt5 with QML support is installed"
-	qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+	qmlscene_binary=`./FindQt.sh binary qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
 	  echo "Found Qt5 in "`dirname $qmlscene_binary`
 	  NEED_QT5_INSTALL=false
@@ -273,6 +273,7 @@ if $QT_HMI || $INSTALL_ALL; then
 		echo "Installing Qt5 libraries"
 		chmod +x ${QT5_RUNFILE_BIN}
 		sudo ${QT5_RUNFILE_BIN}
+		sudo updatedb
 		echo $OK
 	fi
 	
