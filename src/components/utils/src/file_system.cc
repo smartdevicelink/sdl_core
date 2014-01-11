@@ -44,9 +44,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
-
 #include "config_profile/profile.h"
-
 
 uint64_t file_system::GetAvailableDiskSpace() {
   char currentAppPath[FILENAME_MAX];
@@ -175,13 +173,19 @@ bool file_system::Write(
   return false;
 }
 
+
+
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
-  std::ofstream* file = new std::ofstream(file_name.c_str(),
-                                          std::ios_base::binary | mode);
+
+
+  std::ofstream* file = new std::ofstream();
+  file->open( file_name.c_str(),std::ios_base::binary | mode);
   if (file->is_open()) {
+
     return file;
   }
+
   return NULL;
 }
 

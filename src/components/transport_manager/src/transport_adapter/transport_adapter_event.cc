@@ -51,7 +51,6 @@ TransportAdapterEvent::TransportAdapterEvent(
 
 
 TransportAdapterEvent::~TransportAdapterEvent() {
-  //TODO: is event_error_ delleted correctly?  /* delete event_error_;*/
 
 }
 
