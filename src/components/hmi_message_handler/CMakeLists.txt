@@ -16,20 +16,17 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/
 )
 
-set (DBUS_SOURCE)
 IF (${QT_HMI})
-set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
-ENDIF (${QT_HMI})
-set (SOURCES
-./src/hmi_message_handler_impl.cc
-./src/messagebroker_adapter.cc
-./src/hmi_message_adapter.cc
-${DBUS_SOURCE}
-)
-
-IF (${QT_HMI})
+    set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
     set (DBUS_ADAPTER DBus)
 ENDIF (${QT_HMI})
+
+set (SOURCES
+    ./src/hmi_message_handler_impl.cc
+    ./src/messagebroker_adapter.cc
+    ./src/hmi_message_adapter.cc
+    ${DBUS_SOURCE}
+)
 
 set (LIBRARIES
     log4cxx

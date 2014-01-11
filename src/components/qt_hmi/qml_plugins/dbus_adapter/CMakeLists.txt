@@ -30,8 +30,6 @@
 
 cmake_minimum_required(VERSION 2.8.9)
 
-set(CMAKE_AUTOMOC ON)
-
 set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
@@ -41,7 +39,7 @@ set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/QT_HMI_API.xml)
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.cc ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h
-  COMMAND python ${codegen} --infile ${api_xml} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  COMMAND python ${codegen} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS ${api_xml} ${codegen} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.cc
@@ -50,8 +48,12 @@ add_custom_command(
     ${api_xml} ..."
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/src/components)
+set(target DbusAdapter)
+set(destination com/ford/sdl/hmi/dbus_adapter)
+set(install_destination bin/hmi/plugins/${destination})
+set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
+set(CMAKE_AUTOMOC ON)
 set(SOURCES
   dbus_plugin.cc
   ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.cc
@@ -59,30 +61,56 @@ set(SOURCES
   hmi_proxy.cc
   stream_qvariant.cc
   moc_qml_dbus.cpp
-  dbus_controller.cpp
+  dbus_controller.cc
 )
-
-qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
-
-set(target DbusAdapter)
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_BINARY_DIR}/src/components
+)
 
 add_library(${target} SHARED ${SOURCES})
 
-qt5_use_modules(${target} Core DBus Qml Quick)
+if (${qt_version} MATCHES "4.8.5")
+   qt4_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
+   qt4_use_modules(${target} Core DBus Declarative)
+   set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/)
+   set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/${destination})
+elseif (${qt_version} MATCHES "5.1.0")
+  qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
+  qt5_use_modules(${target} Core DBus Qml)
+  set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/)
+  set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/${destination})
+endif ()
 
-set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model)
-set(destination ${model_dir}/com/ford/sdl/hmi/dbus_adapter)
+target_link_libraries(${target} apr-1 aprutil-1 log4cxx)
 
-target_link_libraries(${target} log4cxx)
+add_custom_target(copy_library_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+file(COPY qmldir DESTINATION ${copy_destination})
 
 install(TARGETS ${target}
-  DESTINATION ${destination}
+  DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
-install(FILES qmldir DESTINATION ${destination})
+install(FILES qmldir DESTINATION ${install_destination})
 
-add_custom_command(TARGET ${target} POST_BUILD COMMAND make install)
-add_custom_command(TARGET ${target} POST_BUILD COMMAND
-	${qmlplugindump_binary} -notrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${destination}/plugins.qmltypes 2>/dev/null || true)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_custom_target(qmltypes_${target} ALL
+    COMMAND ${qmlplugindump_binary} -nonrelocatable com.ford.sdl.hmi.dbus_adapter 1.0 ${model_dir} > ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes 2>/dev/null || true
+    DEPENDS copy_library_${target}
+  )
+  add_custom_target(copy_qmltypes_${target} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes
+      ${copy_destination}
+    DEPENDS qmltypes_${target}
+  )
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/plugins.qmltypes DESTINATION ${install_destination})
+endif ()

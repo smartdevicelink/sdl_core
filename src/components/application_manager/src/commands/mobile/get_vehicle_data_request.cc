@@ -47,7 +47,7 @@ namespace str = strings;
 
 #ifdef WEB_HMI
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-: CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {
@@ -189,6 +189,10 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
     { hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
     { hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle, str::steering_wheel_angle},
+    { hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
+    { hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
+    { hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
+    { hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus, str::cluster_mode_status},
     { hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
   };
 }

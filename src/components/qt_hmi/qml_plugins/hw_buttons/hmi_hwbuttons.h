@@ -32,19 +32,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_HMI_PLUGIN_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_HMI_PLUGIN_H_
+#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_HMI_HWBUTTONS_H_
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_HMI_HWBUTTONS_H_
 
-#include <QQmlExtensionPlugin>
+#include "qt_version.h"
 
-class HmiHWButtons : public QQmlExtensionPlugin
-{
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
-    
-public:
-    void registerTypes(const char *uri);
+#if QT_4
+#  include <QtDeclarative/QDeclarativeExtensionPlugin>
+typedef QDeclarativeExtensionPlugin ExtensionPlugin;
+#elif QT_5
+#  include <QtQml/QQmlExtensionPlugin>
+typedef QQmlExtensionPlugin ExtensionPlugin;
+#endif  // QT_VERSION
+
+class HmiHWButtons : public ExtensionPlugin {
+  Q_OBJECT
+#if QT_5
+  Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+#endif  // QT_5
+
+ public:
+  void registerTypes(const char *uri);
 };
 
-#endif // HMI_PLUGIN_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_HMI_HWBUTTONS_H_
 

@@ -36,3 +36,6 @@ add_subdirectory(./hw_buttons)
 
 # --- Log4cxx plugin
 add_subdirectory(./log4cxx)
+
+# --- NamedPipeNotifier plugin
+add_subdirectory(./named_pipe_notifier)

@@ -34,25 +34,31 @@
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_ATTRIBUTED_MOUSE_EVENT_H_
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_ATTRIBUTED_MOUSE_EVENT_H_
 
-#include <QObject>
-#include <qqml.h>
-#include <QQuickItem>
+#include "qt_version.h"
 
-class AttributedMouseEvent : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QQuickItem* item READ item)
-public:
-    AttributedMouseEvent(QQuickItem *item)
-        : item_(item) { }
+#include <QtCore/QObject>
+#if QT_4
+#  include <QtDeclarative/QDeclarativeItem>
+typedef QDeclarativeItem Item;
+#elif QT_5
+#  include <QtQuick/QQuickItem>
+typedef QQuickItem Item;
+#endif  // QT_VERSION
 
-    QQuickItem *item() const;
-private:
-    QQuickItem *item_;
-private:
-    Q_DISABLE_COPY(AttributedMouseEvent)
+class AttributedMouseEvent : public QObject {
+  Q_OBJECT
+  Q_PROPERTY(Item* item READ item)
+
+ public:
+  explicit AttributedMouseEvent(Item *item) : item_(item) {}
+
+  Item *item() const;
+
+ private:
+  Item *item_;
+  Q_DISABLE_COPY(AttributedMouseEvent)
 };
 
 QML_DECLARE_TYPE(AttributedMouseEvent)
 
-#endif // ATTRIBUTEDMOUSEEVENT_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_HW_BUTTONS_ATTRIBUTED_MOUSE_EVENT_H_

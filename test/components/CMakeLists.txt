@@ -1,5 +1,5 @@
 # --- RequestWatchdog
-#add_subdirectory(./request_watchdog)
+add_subdirectory(./request_watchdog)
 
 # --- TransportManager
 #add_subdirectory(./transport_manager)
@@ -11,10 +11,14 @@
 #add_subdirectory(./smart_objects)
 
 # --- AppMgr
+<<<<<<< HEAD
 add_subdirectory(./application_manager)
+=======
+ add_subdirectory(./application_manager)
+>>>>>>> 82329753b45fc633628550ff98db97fd014a218f
 
 # --- ProtocolHandler
-#add_subdirectory(./protocol_handler)
+add_subdirectory(./protocol_handler)
 
 # --- ProtocolHandler
 #add_subdirectory(./connection_handler)

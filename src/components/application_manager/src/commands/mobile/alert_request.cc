@@ -58,7 +58,7 @@ AlertRequest::~AlertRequest() {
 bool AlertRequest::Init() {
 
   /* Timeout in milliseconds.
-     If omitted a standard value of 5000 milliseconds is used.*/
+     If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::duration].asUInt();
@@ -76,12 +76,6 @@ void AlertRequest::Run() {
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
-
-  if (ApplicationManagerImpl::instance()->vr_session_started()) {
-    LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");

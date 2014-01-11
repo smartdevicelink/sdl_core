@@ -110,14 +110,14 @@ const VehicleData MessageHelper::vehicle_data_ = {
   {strings::belt_status, VehicleDataType::BELTSTATUS},
   {strings::body_information, VehicleDataType::BODYINFO},
   {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   {strings::e_call_info, VehicleDataType::ECALLINFO},
   {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
   {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
   {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
   {strings::my_key, VehicleDataType::MYKEY},
-  {strings::driver_braking, VehicleDataType::BRAKING},
-  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
-  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},

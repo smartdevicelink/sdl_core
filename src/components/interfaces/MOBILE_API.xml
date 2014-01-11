@@ -121,6 +121,8 @@
       <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
     </element>
     <element name="SAVED" />
+    <element name="INVALID_CERT"/> 
+    <element name="EXPIRED_CERT"/>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -1796,6 +1798,18 @@
     <element name="GRAPHIC_PNG" />
     <element name="AUDIO_WAVE" />
     <element name="AUDIO_MP3" />
+    <element name="AUDIO_AAC" />
+    <element name="BINARY" />
+    <element name="JSON" />
+  </enum>
+
+  <enum name="RequestType">
+    <description>Enumeration listing possible asynchronous requests.</description>
+    <element name="HTTP" />   
+    <element name="FILE_RESUME" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
+    <element name="AUTH_ACK" />       
   </enum>
 
   <enum name="AppHMIType">
@@ -1856,6 +1870,7 @@
     <element name="ListFilesID" value="34" hexvalue="22" />
     <element name="SetAppIconID" value="35" hexvalue="23" />
     <element name="SetDisplayLayoutID" value="36" hexvalue="24" />
+    <element name="SystemRequestID" value="37" hexvalue="25" />
 
 <!--
 	Base Notifications
@@ -1874,7 +1889,8 @@
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
     <element name="OnLanguageChangeID" value="32778" hexvalue="800A" />
     <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
-    <element name="OnTouchEventID" value="32780" hexvalue="800C" />  
+    <element name="OnTouchEventID" value="32780" hexvalue="800C" /> 
+    <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -4125,6 +4141,32 @@
 
   </function>
 
+  <function name="SystemRequest" functionID="SystemRequestID" messagetype="request" scope="partner">
+     <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+     <param name="requestType" type="RequestType" mandatory="true">
+        <description>The type of system request.</description>
+     </param>
+  </function>
+
+  <function name="SystemRequest" functionID="SystemRequestID" messagetype="response" scope="partner">
+     <param name="success" type="Boolean" platform="documentation">
+        <description> true, if successful; false, if failed </description>
+     </param>
+     <param name="resultCode" type="Result" platform="documentation">
+        <description>See Result</description>
+        <element name="SUCCESS"/>
+        <element name="INVALID_DATA"/>
+        <element name="OUT_OF_MEMORY"/>
+        <element name="TOO_MANY_PENDING_REQUESTS"/>
+        <element name="APPLICATION_NOT_REGISTERED"/>
+        <element name="GENERIC_ERROR"/>
+        <element name="REJECTED"/> 
+        <element name="INVALID_CERT"/> 
+        <element name="EXPIRED_CERT"/> 
+     </param>
+  </function> 
+
+
   <!-- Notifications -->
 
   <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification">
@@ -4323,7 +4365,27 @@
 	<param name="event" type="TouchEvent" mandatory="true" minsize="1" maxsize="10" array="true">
 	   <description>List of all individual touches involved in this event.</description>
 	</param>
-   </function>	
+   </function>
+
+  <function name="OnSystemRequest" functionID="OnSystemRequestID" messagetype="notification" scope="partner">
+      <description> An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
+      </description>
+	<param name="requestType" type="RequestType" mandatory="true">
+           <description>The type of system request.</description>
+	</param>
+	<param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+           <description>Optional array of URL(s) for HTTP requests.</description>
+        </param>
+        <param name="fileType" type="FileType" mandatory="false">
+           <description>Optional file type (meant for HTTP file requests).</description>
+        </param>
+        <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+           <description>Optional offset in bytes for resuming partial data chunks</description>
+        </param>
+        <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+           <description>Optional length in bytes for resuming partial data chunks</description>
+        </param>    
+  </function>	
   
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->

@@ -1,0 +1,9 @@
+*.o
+*.pri
+*.so
+.DS_Store
+*.user
+Common.js
+
+Makefile
+moc_*.cpp
