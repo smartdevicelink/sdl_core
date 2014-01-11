@@ -127,9 +127,9 @@
 namespace application_manager {
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+    const MessageSharedPtr& message) {printf("\n\n\n blabla befor command \n\n\n");
   CommandSharedPtr command;
-
+printf("\n\n\n blabla after command \n\n\n");
   switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type]
@@ -169,9 +169,9 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::AddCommandID: {
       if ((*message)[strings::params][strings::message_type]
-          == MessageType::kResponse) {
+          == MessageType::kResponse) {printf("\n\n\n blabla res \n\n\n");
         command.reset(new commands::AddCommandResponse(message));
-      } else {
+      } else {printf("\n\n\n blabla req \n\n\n");
         command.reset(new commands::AddCommandRequest(message));
       }
       break;

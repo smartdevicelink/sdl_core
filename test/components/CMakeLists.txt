@@ -2,25 +2,25 @@
 #add_subdirectory(./request_watchdog)
 
 # --- TransportManager
-add_subdirectory(./transport_manager)
+#add_subdirectory(./transport_manager)
 
 # --- JSONHandler
-add_subdirectory(./json_handler)
+#add_subdirectory(./json_handler)
 
 # --- SmartObjects
-add_subdirectory(./smart_objects)
+#add_subdirectory(./smart_objects)
 
 # --- AppMgr
-# add_subdirectory(./application_manager)
+add_subdirectory(./application_manager)
 
 # --- ProtocolHandler
 #add_subdirectory(./protocol_handler)
 
 # --- ProtocolHandler
-add_subdirectory(./connection_handler)
+#add_subdirectory(./connection_handler)
 
 # --- Utils
-add_subdirectory(./utils)
+#add_subdirectory(./utils)
 
 # --- Mobile Message Handler
 # add_subdirectory(./mobile_message_handler)
@@ -29,7 +29,7 @@ add_subdirectory(./utils)
 #add_subdirectory(./media_manager)
 
 # --- policies (Policy Manager)
-add_subdirectory(./policies)
+#add_subdirectory(./policies)
 
 # --- DBus
 IF (${QT_HMI})

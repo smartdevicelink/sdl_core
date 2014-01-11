@@ -756,8 +756,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 #ifdef DEBUG
   MessageHelper::PrintSmartObject(*message);
 #endif
-
-  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
+printf("\n\n\n blabla befor log \n\n\n");
+  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");printf("\n\n\n blabla befor command \n\n\n");
   CommandSharedPtr command = MobileCommandFactory::CreateCommand(message);
 
   if (!command) {
