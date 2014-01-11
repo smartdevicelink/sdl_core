@@ -58,6 +58,17 @@ class ConnectionHandler;
 typedef int32_t ConnectionHandle;
 
 /**
+ * \brief Type for Connections map
+ * Key is ConnectionHandle which is uniq
+ */
+typedef std::map<int32_t, Connection*> ConnectionList;
+
+/**
+ * \brief Type for Connections map iterator
+ */
+typedef ConnectionList::iterator ConnectionListIterator;
+
+/**
  * \brief Type for Sessions vector
  */
 typedef std::vector<uint8_t> SessionList;
@@ -66,6 +77,26 @@ typedef std::vector<uint8_t> SessionList;
  * \brief Type for Sessions vector iterator
  */
 typedef std::vector<uint8_t>::iterator SessionListIterator;
+
+/**
+ * \brief Type for Session Services
+ */
+typedef std::vector<uint8_t> ServiceList;
+
+/**
+ * \brief Type for Services iterator
+ */
+typedef std::vector<uint8_t>::iterator ServiceListIterator;
+
+/**
+ * \brief Type for Services iterator
+ */
+typedef std::map<uint8_t, ServiceList> SessionMap;
+
+/**
+ * \brief Type for Services iterator
+ */
+typedef std::map<uint8_t, ServiceList>::iterator SessionMapIterator;
 
 /**
  * \class Connection
@@ -112,10 +143,17 @@ class Connection {
   int32_t RemoveSession(uint8_t session);
 
   /**
-   * \brief Returns ID of first session from connection
-   * \return first sessionID or -1 in case of issues
+   * \brief Adds service to session
+   * \return TRUE on success, otherwise FALSE
    */
-  int32_t GetFirstSessionID();
+  bool AddNewService(uint8_t session, uint8_t service);
+
+  /**
+   * \brief Removes service from session
+   * \param aSession session ID
+   * \return TRUE on success, otherwise FALSE
+   */
+  bool RemoveService(uint8_t session, uint8_t service);
 
   /**
    * \brief Returns list of sessions which have been opened in
@@ -156,6 +194,11 @@ class Connection {
    */
   SessionList session_list_;
 
+  /**
+   * \brief session/services map
+   */
+  SessionMap  session_map_;
+
   /*
    * \brief monitor that closes connection if there is no traffic over it
    */
@@ -166,17 +209,6 @@ class Connection {
    */
   static log4cxx::LoggerPtr logger_;
 };
-
-/**
- * \brief Type for Connections map
- * Key is ConnectionHandle which is uniq
- */
-typedef std::map<int32_t, Connection*> ConnectionList;
-
-/**
- * \brief Type for Connections map iterator
- */
-typedef ConnectionList::iterator ConnectionListIterator;
 
 }/* namespace connection_handler */
 
