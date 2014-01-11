@@ -221,7 +221,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
-    bool ActivateApplication(Application* applic);
+    bool ActivateApplication(Application* app);
     void DeactivateApplication(Application* app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
