@@ -1,3 +1,6 @@
+[CW3]
++ SyncProxyAndroid SDK: Heartbeat is sent every 5 seconds unconditionally.
+
 [CW2]
 + SyncProxyAndroid SDK: Add EndSessionACK handling logic.
 
