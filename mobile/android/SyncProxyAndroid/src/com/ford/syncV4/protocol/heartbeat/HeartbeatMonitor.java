@@ -167,7 +167,6 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
         synchronized (LOCK) {
             Log.d(TAG, "ACK received");
             ackReceived = true;
-            notifyTransportActivity();
         }
     }
 }
