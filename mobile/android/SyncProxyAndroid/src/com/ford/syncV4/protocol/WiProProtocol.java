@@ -64,8 +64,9 @@ public class WiProProtocol extends AbstractProtocol {
         sendFrameToTransport(header);
     } // end-method
 
-    public void StartProtocolSession(SessionType sessionType, int messageID) {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, messageID, _version);
+    public void StartProtocolSession(SessionType sessionType, byte sessionID) {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0, _version);
+        header.setSessionID(sessionID);
         sendFrameToTransport(header);
     } // end-method
 
