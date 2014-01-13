@@ -55,7 +55,7 @@ void OnButtonPressNotification::Run() {
   event.set_smart_object(*message_);
   event.raise();
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnButtonPressID;
+      static_cast<int>(mobile_apis::FunctionID::eType::OnButtonPressID);
   SendNotificationToMobile(message_);
 }
 

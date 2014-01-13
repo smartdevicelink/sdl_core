@@ -317,7 +317,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
     temp_ptr = strrchr(temp_str, ']');
-    if (temp_ptr == '\0') {
+    if (*temp_ptr == '\0') {
       return INI_NOTHING;
     } else {
       *temp_ptr = '\0';
