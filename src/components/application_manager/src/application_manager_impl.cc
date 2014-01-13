@@ -623,9 +623,9 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-bool ApplicationManagerImpl::OnSessionStartedCallback(
+bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
-  int32_t first_session_key, protocol_handler::ServiceType type) {
+  protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
 
   if (protocol_handler::kMovileNav == type) {
@@ -652,17 +652,16 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
   return true;
 }
 
-void ApplicationManagerImpl::OnSessionEndedCallback(int32_t session_key,
-    int32_t first_session_key,
+void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
     "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << first_session_key << " type " << type);
+    << " type " << type);
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(first_session_key);
+      UnregisterApplication(session_key);
       break;
     }
     case protocol_handler::kMovileNav: {

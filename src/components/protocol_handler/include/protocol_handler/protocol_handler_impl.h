@@ -164,17 +164,6 @@ class ProtocolHandlerImpl
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
 
   protected:
-    /**
-     * \brief Sends fail of ending session to mobile application.
-     * \param connection_handle Identifier of connection whithin which
-     * session exists
-     * \param session_id ID of session ment to be ended
-     * \param service_type Type of session: RPC or BULK Data. RPC by default.
-     */
-    void SendEndSessionNAck(
-      ConnectionID connection_id ,
-      uint32_t session_id,
-      uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
      * \brief Sends acknowledgement of starting session to mobile application
@@ -203,6 +192,37 @@ class ProtocolHandlerImpl
      */
     void SendStartSessionNAck(
       ConnectionID connection_id,
+      uint8_t service_type = SERVICE_TYPE_RPC);
+
+    /**
+     * \brief Sends acknowledgement of end session/service to mobile application
+     * with session number and hash code for second version of protocol.
+     * \param connection_handle Identifier of connection whithin which session
+     * was started
+     * \param session_id ID of session to be sent to mobile applicatin.
+     * \param protocol_version Version of protocol used for communication
+     * \param hash_code For second version of protocol: identifier of session
+     * to be sent to
+     * mobile app for using when ending session.
+     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     */
+    void SendEndSessionAck(
+      ConnectionID connection_id ,
+      uint8_t session_id,
+      uint8_t protocol_version,
+      uint32_t hash_code = 0,
+      uint8_t service_type = SERVICE_TYPE_RPC);
+
+    /**
+     * \brief Sends fail of ending session to mobile application.
+     * \param connection_handle Identifier of connection whithin which
+     * session exists
+     * \param session_id ID of session ment to be ended
+     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     */
+    void SendEndSessionNAck(
+      ConnectionID connection_id ,
+      uint32_t session_id,
       uint8_t service_type = SERVICE_TYPE_RPC);
 
   private:
