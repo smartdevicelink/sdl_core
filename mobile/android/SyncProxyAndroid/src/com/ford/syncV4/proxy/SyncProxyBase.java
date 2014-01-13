@@ -1005,15 +1005,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     }
                 }
             }
-
             // Clean up SYNC Connection
             synchronized (CONNECTION_REFERENCE_LOCK) {
+                stopAllServices();
                 closeSyncConnection(keepConnection);
             }
         } catch (SyncException e) {
             throw e;
         } finally {
             SyncTrace.logProxyEvent("SyncProxy cleaned.", SYNC_LIB_TRACE_KEY);
+        }
+    }
+
+    private void stopAllServices() {
+        if (servicePool.size() > 0) {
+            stopMobileNaviSession();
         }
     }
 
@@ -2544,6 +2550,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void startMobileNavSession(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
+        servicePool.add(sessionID);
         _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2560,6 +2567,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviSession() {
         Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
+        servicePool.remove(servicePool.indexOf(_mobileNavSessionID));
         getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
     }
 
