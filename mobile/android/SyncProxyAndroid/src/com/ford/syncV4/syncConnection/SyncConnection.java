@@ -217,10 +217,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startMobileNavSession() {
+    public void startMobileNavSession(byte sessionID) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(SessionType.Mobile_Nav);
+                _protocol.StartProtocolSession(SessionType.Mobile_Nav, sessionID);
             }
         }
     }

@@ -1,12 +1,15 @@
 package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TransportType;
 
 import junit.framework.TestCase;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by u on 2013-09-30.
@@ -68,10 +71,9 @@ public class SyncConnectionUSBTest extends TestCase {
                 };
 
         final SyncConnection connection =
-                new SyncConnection(null, new BTTransportConfig());
+                new SyncConnection(mock(ISyncConnectionListener.class), new BTTransportConfig());
         connection._transport = fakeTransport;
-        connection.onProtocolAppUnregistered();
-
+        connection.onProtocolSessionEnded(SessionType.Mobile_Nav, (byte) 0, "");
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }
 }
