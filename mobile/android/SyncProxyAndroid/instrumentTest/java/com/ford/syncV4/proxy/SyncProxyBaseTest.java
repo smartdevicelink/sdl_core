@@ -46,8 +46,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
-    
-
     private SyncProxyBase getSyncProxyBase() throws SyncException {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
