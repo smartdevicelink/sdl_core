@@ -35,23 +35,30 @@
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
 
-#include <QQuickItem>
-
+#include "qt_version.h"
 #include "qml_dbus.h"
 
-class HmiProxy : public QQuickItem
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(HmiProxy)
-    
-public:
-    explicit HmiProxy(QQuickItem *parent = 0);
-    static ApiAdaptors api_adaptors_;
-protected:
-    virtual void componentComplete();
+#if QT_4
+#  include <QtDeclarative/QDeclarativeItem>
+typedef QDeclarativeItem Item;
+#elif QT_5
+#  include <QtQuick/QQuickItem>
+typedef QQuickItem Item;
+#endif  // QT_VERSION
+
+class HmiProxy : public Item {
+  Q_OBJECT
+  Q_DISABLE_COPY(HmiProxy)
+
+ public:
+  explicit HmiProxy(Item *parent = 0);
+  static ApiAdaptors api_adaptors_;
+
+ protected:
+  virtual void componentComplete();
 };
 
 QML_DECLARE_TYPE(HmiProxy)
 
-#endif // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_HMI_PROXY_H_
 

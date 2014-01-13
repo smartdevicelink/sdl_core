@@ -84,36 +84,6 @@ void CommandResponseImpl::SendResponse(
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_, final_message);
 }
 
-bool CommandResponseImpl::IsPendingResponseExist() {
-  bool result = true;
-  const uint32_t correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
-  uint32_t mobile_correlation_id = 0;
-
-  MessageChaining* msg_chain = ApplicationManagerImpl::instance()
-      ->GetMessageChain(correlation_id);
-
-  int32_t connection_key = 0;
-  if (msg_chain) {
-    connection_key = msg_chain->connection_key();
-
-    if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-        correlation_id, mobile_correlation_id)) {
-      result = false;
-      // change correlation id to mobile
-      (*message_)[strings::params][strings::correlation_id] =
-          mobile_correlation_id;
-
-      (*message_)[strings::params][strings::connection_key] = connection_key;
-    }
-  } else {
-    LOG4CXX_INFO(logger_, "Request doesn't require response.");
-  }
-
-  return result;
-}
-
 }  // namespace commands
 
 }  // namespace application_manager

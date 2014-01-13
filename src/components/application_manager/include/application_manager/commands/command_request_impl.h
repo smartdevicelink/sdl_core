@@ -81,22 +81,22 @@ class CommandRequestImpl : public CommandImpl,
    *
    * @return Request default timeout
    */
-  inline uint32_t default_timeout() const;
+  inline unsigned int default_timeout() const;
 
   /*
    * @brief Retrieves request ID
    */
-  inline int32_t function_id() const;
+  inline int function_id() const;
 
   /*
    * @brief Retrieves correlation ID
    */
-  inline int32_t correlation_id() const;
+  inline int correlation_id() const;
 
   /*
    * @brief Retrieves connection key
    */
-  inline int32_t connection_key() const;
+  inline int connection_key() const;
 
   /*
    * @brief Creates Mobile response
@@ -110,22 +110,6 @@ class CommandRequestImpl : public CommandImpl,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
                     const NsSmart::SmartObject* response_params = NULL) const;
-
-  /*
-   * @brief Creates HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   * @param require_chaining Indicate if response from HMI is required
-   * before sending response to Mobile
-   * @param chaining counter Indicate amount of HMI responses should arrived
-   * before sending response to Mobile
-   *
-   */
-  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                        const NsSmart::SmartObject& msg_params,
-                        bool require_chaining = false,
-                        uint32_t chaining_counter = 0);
 
   /*
    * @brief Sends HMI request
@@ -150,25 +134,25 @@ class CommandRequestImpl : public CommandImpl,
 
  protected:
   MessageChaining* msg_chaining_;
-  uint32_t  default_timeout_;
+  unsigned int  default_timeout_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
 
-uint32_t CommandRequestImpl::default_timeout() const {
+unsigned int CommandRequestImpl::default_timeout() const {
   return default_timeout_;
 }
 
-int32_t CommandRequestImpl::function_id() const {
+int CommandRequestImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
 }
 
-int32_t CommandRequestImpl::correlation_id() const {
+int CommandRequestImpl::correlation_id() const {
   return (*message_)[strings::params][strings::correlation_id].asInt();
 }
 
-int32_t CommandRequestImpl::connection_key() const {
+int CommandRequestImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asInt();
 }
 

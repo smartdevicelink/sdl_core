@@ -35,30 +35,41 @@
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
 #define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
 
-#include <QQuickItem>
-#include <QDBusInterface>
-
 #include "qml_dbus.h"
+#include "qt_version.h"
 
-class SdlProxy: public QQuickItem
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(SdlProxy)
+#include <QtDBus/QDBusInterface>
+#if QT_4
+# include <QtDeclarative/QDeclarativeItem>
+typedef QDeclarativeItem Item;
+#elif QT_5
+#  include <QtQuick/QQuickItem>
+typedef QQuickItem Item;
+#endif  // QT_VERSION
 
-public:
-    explicit SdlProxy(QQuickItem* parent = 0);
-private:
-    QDBusInterface *sdlBasicCommunicationInterface;
-signals:
-    void appRegistered(QVariant application);
-    void appUnregistered(int appId);
-    void playTone();
-    void showNotification(QVariant text, QVariant icon, int timeout);
-private slots:
-    void OnAppRegistered(Common_HMIApplication);
-    void OnShowNotification(Common_TextFieldStruct text, OptionalArgument<Common_Image> image, int timeout);
+class SdlProxy: public Item {
+  Q_OBJECT
+  Q_DISABLE_COPY(SdlProxy)
+
+ public:
+  explicit SdlProxy(Item* parent = 0);
+
+ private:
+  QDBusInterface *sdlBasicCommunicationInterface;
+
+ signals:
+  void appRegistered(QVariant application);
+  void appUnregistered(int appId);
+  void playTone();
+  void showNotification(QVariant text, QVariant icon, int timeout);
+
+ private slots:
+  void OnAppRegistered(Common_HMIApplication);
+  void OnShowNotification(Common_TextFieldStruct text,
+                          OptionalArgument<Common_Image> image,
+                          int timeout);
 };
 
 QML_DECLARE_TYPE(SdlProxy)
 
-#endif // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_

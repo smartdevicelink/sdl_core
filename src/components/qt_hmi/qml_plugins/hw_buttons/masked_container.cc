@@ -34,31 +34,38 @@
 
 #include "masked_container.h"
 
-#include <QImage>
-#include <QEvent>
+#if QT_4
+#  include <QtCore/QPointF>
+#  include <QtGui/QGraphicsSceneMouseEvent>
+#  define IMAGE "QDeclarativeImage"
+#elif QT_5
+#  include <QtGui/QImage>
+#  include <QtCore/QEvent>
+#  define IMAGE "QQuickImage"
+#endif  // QT_VERSION
 
-MaskedContainer::MaskedContainer(QQuickItem *parent):
-    QQuickItem(parent),
-    mask(NULL)
-{
-    setAcceptedMouseButtons(Qt::LeftButton);
+MaskedContainer::MaskedContainer(Item *parent)
+    : Item(parent),
+      mask_(NULL) {
+  setAcceptedMouseButtons(Qt::LeftButton);
 }
 
 void MaskedContainer::componentComplete() {
-    QQuickItem::componentComplete();
+    Item::componentComplete();
 
-    for (QObjectList::ConstIterator it = children().begin(); it != children().end(); ++it) {
-        QQuickItem *item = qobject_cast<QQuickItem*>(*it);
-        if (item && item->inherits("QQuickImage") && item->opacity() > 0 && item->isVisible()) {
-            images.push_back(item);
+    for (QObjectList::ConstIterator it = children().begin();
+         it != children().end(); ++it) {
+        Item *item = qobject_cast<Item*>(*it);
+        if (item && item->inherits(IMAGE) && item->isVisible()) {
+            images_.push_back(item);
         }
     }
 
     int height = this->height();
     int width  =this->width();
 
-    for (int i = 0; i < images.size(); ++i) {
-        QQuickItem *item = images[i];
+    for (int i = 0; i < images_.size(); ++i) {
+        Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();
         int itemX = item->x();
@@ -72,11 +79,11 @@ void MaskedContainer::componentComplete() {
     setHeight(height);
     setWidth(width);
 
-    mask = new int[height * width];
-    std::fill(mask, mask + height * width, -1);
+    mask_ = new int[height * width];
+    std::fill(mask_, mask_ + height * width, -1);
 
-    for (int i = 0; i < images.size(); ++i) {
-        QQuickItem *item = images[i];
+    for (int i = 0; i < images_.size(); ++i) {
+        Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();
         int itemX = item->x();
@@ -88,51 +95,61 @@ void MaskedContainer::componentComplete() {
         for (int x = 0; x < itemWidth; ++x) {
             for (int y = 0; y < itemHeight; ++y) {
                 if (qAlpha(bits[y * itemWidth + x]) > 128) {
-                    mask[(itemY + y) * width + (x + itemX)] = i;
+                    mask_[(itemY + y) * width + (x + itemX)] = i;
                 }
             }
         }
     }
 }
 
-void MaskedContainer::mousePressEvent(QMouseEvent *mouse) {
+void MaskedContainer::mousePressEvent(MouseEvent *mouse) {
+#if QT_4
+  qreal x = mouse->pos().x();
+  qreal y = mouse->pos().y();
+#elif QT_5
+  int x = mouse->x();
+  int y = mouse->y();
+#endif  // QT_VERSION
 
-    if (width() * mouse->y() + mouse->x() > width() * height())
-    {
-        mouse->ignore();
-        return;
+  if (width() * y + x > width() * height()) {
+    mouse->ignore();
+  } else {
+    int idx = mask_[indexOfMask(x, y)];
+    if (idx >= 0) {
+      AttributedMouseEvent ev(images_[idx]);
+      emit pressed(&ev);
+      grabMouse();
+      mouse->accept();
     } else {
-        int idx = mask[mouse->y() * static_cast<int>(width()) +
-                mouse->x()];
-        if (idx >= 0) {
-            AttributedMouseEvent ev(images[idx]);
-            emit pressed(&ev);
-            grabMouse();
-            mouse->accept();
-        } else {
-            mouse->ignore();
-        }
+      mouse->ignore();
     }
+  }
 }
 
-void MaskedContainer::mouseReleaseEvent(QMouseEvent *mouse) {
-    if (width() * mouse->y() + mouse->x() > width() * height()) {
-        return;
+void MaskedContainer::mouseReleaseEvent(MouseEvent *mouse) {
+#if QT_4
+  qreal x = mouse->pos().x();
+  qreal y = mouse->pos().y();
+#elif QT_5
+  int x = mouse->x();
+  int y = mouse->y();
+#endif  // QT_VERSION
+
+  if (width() * y + x > width() * height()) {
+    return;
+  } else {
+    int idx = mask_[indexOfMask(x, y)];
+    if (idx >= 0) {
+      AttributedMouseEvent ev(images_[idx]);
+      emit released(&ev);
     } else {
-        int idx = mask[mouse->y() * static_cast<int>(width()) +
-                mouse->x()];
-        if (idx >= 0) {
-            AttributedMouseEvent ev(images[idx]);
-            emit released(&ev);
-        } else {
-            emit released(NULL);
-        }
+      emit released(NULL);
     }
-    ungrabMouse();
+  }
+  ungrabMouse();
 }
 
-MaskedContainer::~MaskedContainer()
-{
-    delete[] mask;
+MaskedContainer::~MaskedContainer() {
+  delete[] mask_;
 }
 

@@ -100,7 +100,7 @@ void FromMicToFileRecorderThread::threadMain() {
   GstElement* alsasrc, *panorama, *wavenc, *filesink;
   GstBus* bus;
 
-  gchar* device = "hw:0,0";
+  const gchar* device = "hw:0,0";
   gchar* outfile = NULL;
   gint duration = -1;
   GOptionContext* context = NULL;

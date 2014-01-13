@@ -33,9 +33,6 @@
 
 #include "application_manager/commands/mobile/reset_global_properties_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 

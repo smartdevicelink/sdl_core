@@ -35,14 +35,12 @@
 #include "hmi_proxy.h"
 #include <QtDBus/QDBusConnection>
 
-HmiProxy::HmiProxy(QQuickItem *parent):
-    QQuickItem(parent) {
-}
+ApiAdaptors HmiProxy::api_adaptors_;
+
+HmiProxy::HmiProxy(Item *parent)
+    : Item(parent) {}
 
 void HmiProxy::componentComplete() {
-    QQuickItem::componentComplete();
-
-    api_adaptors_.SetApi(this);
+  Item::componentComplete();
+  api_adaptors_.SetApi(this);
 }
-
-ApiAdaptors HmiProxy::api_adaptors_;

@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/unsubscribe_button_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
 
 namespace application_manager {
 

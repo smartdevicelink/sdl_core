@@ -86,6 +86,13 @@ void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
   CloseCurrent();
 
   file_stream_ = file_system::Open(file_name_);
+  if (file_stream_ == NULL){
+      LOG4CXX_WARN(logger, "Cant open File stream! "<<file_name_);
+    }
+  else{
+      LOG4CXX_INFO(logger, "file_stream_ opened :"
+                   << file_stream_);
+    }
 
   current_application_ = application_key;
 

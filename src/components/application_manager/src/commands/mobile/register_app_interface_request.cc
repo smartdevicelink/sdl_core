@@ -278,7 +278,7 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
     // name check
     const std::string &cur_name = (*it)->name();
-    if (app_name == cur_name) {
+    if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -320,8 +320,9 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       std::vector<smart_objects::SmartObject>::const_iterator it_tts_End =
           new_tts->end();
 
-      for (; it_tts != it_tts_End; ++it) {
-        if (cur_name == (*it_tts)[strings::text].asString()) {
+      for (; it_tts != it_tts_End; ++it_tts) {
+        std::string text = (*it_tts)[strings::text].asString();
+        if (!strcasecmp(cur_name.c_str(), text.c_str())){
           LOG4CXX_ERROR(logger_,
                         "Some TTS parameters names are known already.");
           return mobile_apis::Result::DUPLICATE_NAME;
@@ -356,8 +357,9 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       std::vector<smart_objects::SmartObject>::const_iterator it_vr_End =
           new_vr->end();
 
-      for (; it_vr != it_vr_End; ++it) {
-        if (cur_name == it_vr->asString()) {
+      for (; it_vr != it_vr_End; ++it_vr) {
+        std::string vr_synonym = it_vr->asString();
+        if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
           LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
           return mobile_apis::Result::DUPLICATE_NAME;
         }

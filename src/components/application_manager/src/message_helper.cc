@@ -110,14 +110,14 @@ const VehicleData MessageHelper::vehicle_data_ = {
   {strings::belt_status, VehicleDataType::BELTSTATUS},
   {strings::body_information, VehicleDataType::BODYINFO},
   {strings::device_status, VehicleDataType::DEVICESTATUS},
+  {strings::driver_braking, VehicleDataType::BRAKING},
+  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
+  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   {strings::e_call_info, VehicleDataType::ECALLINFO},
   {strings::airbag_status, VehicleDataType::AIRBAGSTATUS},
   {strings::emergency_event, VehicleDataType::EMERGENCYEVENT},
   {strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS},
   {strings::my_key, VehicleDataType::MYKEY},
-  {strings::driver_braking, VehicleDataType::BRAKING},
-  {strings::wiper_status, VehicleDataType::WIPERSTATUS},
-  {strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS},
   /*
    NOT DEFINED in mobile API
    {strings::gps,                      VehicleDataType::BATTVOLTAGE},
@@ -163,9 +163,9 @@ void MessageHelper::SendTTSChunksToHMI(const Application& application_impl) {
         return;
     }
     (*speak_command)[strings::params][strings::function_id] =
-        hmi_apis::FunctionID::TTS_Speak;
+        static_cast<int>(hmi_apis::FunctionID::TTS_Speak);
     (*speak_command)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
+        static_cast<int>(hmi_apis::messageType::request);
     (*speak_command)[strings::params][strings::protocol_version] =
         commands::CommandImpl::protocol_version_;
     (*speak_command)[strings::params][strings::protocol_type] =
@@ -272,8 +272,9 @@ void MessageHelper::SendRemoveVrCommandsOnUnregisterApp(Application* app) {
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
 
   if (app->vr_synonyms()) {
-    SendRemoveCommandToHMI(hmi_apis::FunctionID::VR_DeleteCommand,
-                           max_cmd_id + app->app_id(), app->app_id());
+    SendRemoveCommandToHMI(
+        static_cast<int32_t>(hmi_apis::FunctionID::VR_DeleteCommand),
+        max_cmd_id + app->app_id(), app->app_id());
   }
 }
 
@@ -834,13 +835,15 @@ void MessageHelper::SendDeleteCommandRequestToHMI(Application* const app) {
   CommandsMap::const_iterator i = commands.begin();
   for (; commands.end() != i; ++i) {
     if ((*i->second).keyExists(strings::menu_params)) {
-      SendRemoveCommandToHMI(hmi_apis::FunctionID::UI_DeleteCommand, i->first,
-                             app->app_id());
+      SendRemoveCommandToHMI(
+          static_cast<int32_t>(hmi_apis::FunctionID::UI_DeleteCommand),
+          i->first, app->app_id());
     }
 
     if ((*i->second).keyExists(strings::vr_commands)) {
-      SendRemoveCommandToHMI(hmi_apis::FunctionID::VR_DeleteCommand, i->first,
-                             app->app_id());
+      SendRemoveCommandToHMI(
+          static_cast<int32_t>(hmi_apis::FunctionID::VR_DeleteCommand),
+          i->first, app->app_id());
     }
   }
 }

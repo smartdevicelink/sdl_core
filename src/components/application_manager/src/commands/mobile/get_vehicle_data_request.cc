@@ -47,7 +47,7 @@ namespace str = strings;
 
 #ifdef WEB_HMI
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-: CommandRequestImpl(message) {
+    : CommandRequestImpl(message) {
 }
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {
@@ -84,12 +84,44 @@ void GetVehicleDataRequest::Run() {
     }
   }
   if (msg_params.length() > min_length_msg_params) {
-  CreateHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                         msg_params, true, 1);
+    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   &msg_params, true);
   return;
   }
   SendResponse(false, mobile_apis::Result::INVALID_DATA);
 }
+
+void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      bool result = false;
+      if (mobile_apis::Result::SUCCESS == result_code ||
+          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code
+                    && message[strings::msg_params].length() > 1)) {
+        result = true;
+      }
+      const char *info = NULL;
+      std::string error_message;
+      if (true == message[strings::params].keyExists(strings::error_msg)) {
+        error_message = message[strings::params][strings::error_msg].asString();
+        info = error_message.c_str();
+      }
+      SendResponse(result, result_code, info, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
+}
+
 #endif // #ifdef WEB_HMI
 #ifdef QT_HMI
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
@@ -157,6 +189,10 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
     { hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
     { hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle, str::steering_wheel_angle},
+    { hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
+    { hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
+    { hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
+    { hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus, str::cluster_mode_status},
     { hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
   };
 }
@@ -237,7 +273,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(
         logger_, "All HMI requests are complete");
-    SendResponse( any_arg_success, status, NULL, &response_params);
+    const char *info = NULL;
+    std::string error_message;
+    if (true == message[strings::params].keyExists(strings::error_msg)) {
+      error_message = message[strings::params][strings::error_msg].asString();
+      info = error_message.c_str();
+    }
+    SendResponse( any_arg_success, status, info, &response_params);
   }
 }
 #endif // #ifdef QT_HMI

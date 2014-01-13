@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"

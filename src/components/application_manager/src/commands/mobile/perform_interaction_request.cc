@@ -406,7 +406,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
         message[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS ==
         hmi_apis::Common_Result::eType(hmi_response_code)) {
-      msg_params[strings::trigger_source] = trigger_source_;
+      msg_params[strings::trigger_source] = static_cast<int>(trigger_source_);
       result = true;
     }
 
@@ -459,8 +459,7 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
             smart_objects::SmartType_Array);
         msg_params[strings::vr_commands] =
             (*choice_set)[strings::choice_set][j][strings::vr_commands];
-        CreateHMIRequest(hmi_apis::FunctionID::VR_AddCommand, msg_params,
-                         false);
+        SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
       }
     }
   }
