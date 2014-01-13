@@ -152,7 +152,9 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -263,6 +265,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Currently scheduled proxy reconnect task, if any.
      */
     private TimerTask _currentReconnectTimerTask = null;
+    private List<Byte> servicePool = new ArrayList<Byte>();
 
     /**
      * Constructor.
@@ -3418,6 +3421,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
 
         restartRPCProtocolSession();
+    }
+
+    public List<Byte> getServicePool() {
+        return servicePool;
     }
 
     // Private Class to Interface with SyncConnection
