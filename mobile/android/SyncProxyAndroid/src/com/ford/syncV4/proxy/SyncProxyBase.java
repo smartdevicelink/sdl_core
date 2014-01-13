@@ -2463,8 +2463,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolSession(byte sessionID, String correlationID) {
+    private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
         _rpcSessionID = sessionID;
+        Log.i(TAG, "RPC Session started" + correlationID);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onSessionStarted(sessionID, correlationID);
+                }
+            });
+        } else {
+            _proxyListener.onSessionStarted(sessionID, correlationID);
+        }
 
         restartRPCProtocolSession();
     }
