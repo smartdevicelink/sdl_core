@@ -157,9 +157,19 @@ class Profile {
     const std::string& video_server_type() const;
 
     /**
-      * @brief Returns the video server type
+      * @brief Returns the audio server type
       */
-    const std::string& named_pipe_path() const;
+    const std::string& audio_server_type() const;
+
+    /**
+      * @brief Returns the video pipe path
+      */
+    const std::string& named_video_pipe_path() const;
+
+     /**
+      * @brief Returns the video pipe path
+      */
+     const std::string& named_audio_pipe_path() const;
 
     /**
      * @brief Returns time scale for max amount of requests for application
@@ -325,8 +335,10 @@ class Profile {
     uint32_t                    default_timeout_;
     std::string                     vr_help_title_;
     uint32_t                    app_dir_quota_;
-    std::string                     consumer_type_;
-    std::string                     named_pipe_path_;
+    std::string                     video_consumer_type_;
+    std::string                     audio_consumer_type_;
+    std::string                     named_video_pipe_path_;
+    std::string                     named_audio_pipe_path_;
     uint32_t                    app_hmi_level_none_time_scale_max_requests_;
     uint32_t                    app_hmi_level_none_requests_time_scale_;
     std::string                     video_stream_file_;

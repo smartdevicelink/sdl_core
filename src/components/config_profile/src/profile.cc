@@ -164,11 +164,19 @@ bool Profile::is_redecoding_enabled() const {
 }
 
 const std::string&  Profile::video_server_type() const {
-  return consumer_type_;
+  return video_consumer_type_;
 }
 
-const std::string& Profile::named_pipe_path() const {
-  return named_pipe_path_;
+const std::string&  Profile::audio_server_type() const {
+  return audio_consumer_type_;
+}
+
+const std::string& Profile::named_video_pipe_path() const {
+  return named_video_pipe_path_;
+}
+
+const std::string& Profile::named_audio_pipe_path() const {
+  return named_audio_pipe_path_;
 }
 
 const uint32_t& Profile::app_hmi_level_none_time_scale() const {
@@ -298,16 +306,32 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MEDIA MANAGER", "VideoStreamConsumer", value))
       && ('\0' != *value)) {
-    consumer_type_ = value;
-    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << consumer_type_);
+    video_consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << video_consumer_type_);
   }
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "MEDIA MANAGER", "NamedPipePath", value))
+                           "MEDIA MANAGER", "AudioStreamConsumer", value))
       && ('\0' != *value)) {
-    named_pipe_path_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << named_pipe_path_);
+    audio_consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set AudioStreamConsumer to " << audio_consumer_type_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedVideoPipePath", value))
+      && ('\0' != *value)) {
+    named_video_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_video_pipe_path_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedAudioPipePath", value))
+      && ('\0' != *value)) {
+    named_audio_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_audio_pipe_path_);
   }
 
   *value = '\0';

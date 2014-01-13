@@ -30,22 +30,22 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_
 
 #include <string>
 #include "media_manager/media_adapter_impl.h"
 
 namespace media_manager {
-class PipeVideoStreamerAdapter : public PipeStreamerAdapter {
+class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
   public:
-    PipeVideoStreamerAdapter();
-    ~PipeVideoStreamerAdapter();
+    PipeAudioStreamerAdapter();
+    ~PipeAudioStreamerAdapter();
 
   private:
-   DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
+    DISALLOW_COPY_AND_ASSIGN(PipeAudioStreamerAdapter);
 };
 
 }  //  namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_

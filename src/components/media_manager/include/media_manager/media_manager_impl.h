@@ -72,6 +72,7 @@ class MediaManagerImpl : public MediaManager,
     MediaAdapterImpl* from_mic_recorder_;
     MediaListenerPtr from_mic_listener_;
     MediaAdapterImpl* video_streamer_;
+    MediaAdapterImpl* audio_streamer_;
     MediaListenerPtr video_streamer_listener_;
 
   private:

@@ -14,6 +14,7 @@ set(default_sources
     ./src/from_mic_to_file_recorder_thread.cc
     ./src/socket_video_streamer_adapter.cc
     ./src/pipe_video_streamer_adapter.cc
+    ./src/pipe_audio_streamer_adapter.cc
 )
 set(LIBRARIES
   ${GSTREAMER_gstreamer_LIBRARY}

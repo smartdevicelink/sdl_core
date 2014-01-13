@@ -176,6 +176,11 @@ void MediaManagerImpl::OnMessageReceived(
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
     }
+  } else if (message->service_type()
+          == protocol_handler::kAudio) {
+    if (audio_streamer_) {
+        audio_streamer_->SendData(message->connection_key(), message);
+    }
   }
 }
 
