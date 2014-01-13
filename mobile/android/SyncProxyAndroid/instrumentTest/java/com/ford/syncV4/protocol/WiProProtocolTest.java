@@ -453,4 +453,16 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
     }
+
+    public void testTestStartSessionWithIdSetsId() throws Exception {
+        final int id = 13;
+        WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)){
+            @Override
+            public void StartProtocolSession(SessionType sessionType, int messageID) {
+                super.StartProtocolSession(sessionType, messageID);
+                assertEquals("Message ID should be same", id, messageID);
+            }
+        };
+        protocol.StartProtocolSession(SessionType.Mobile_Nav, id);
+    }
 }
