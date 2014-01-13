@@ -769,8 +769,11 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asInt());
 
+  // Notifications from HMI have no such parameter
   uint32_t correlation_id =
-    (*message)[strings::params][strings::correlation_id].asUInt();
+      (*message)[strings::params].keyExists(strings::correlation_id)
+      ? (*message)[strings::params][strings::correlation_id].asUInt()
+      : 0;
 
   uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();
