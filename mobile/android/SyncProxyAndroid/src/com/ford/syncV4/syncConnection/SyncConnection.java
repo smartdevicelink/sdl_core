@@ -284,21 +284,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
                 _transport.sendBytes(msgBytes, offset, length);
-
-                if (_heartbeatMonitor != null) {
-                    _heartbeatMonitor.notifyTransportActivity();
-                }
             }
         }
     }
 
     @Override
     public void onProtocolMessageReceived(ProtocolMessage msg) {
-        // only data messages get here
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.notifyTransportActivity();
-        }
-
         _connectionListener.onProtocolMessageReceived(msg);
     }
 
