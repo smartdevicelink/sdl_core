@@ -456,11 +456,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testTestStartSessionWithIdSetsId() throws Exception {
         final int id = 13;
-        WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)){
+        WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)) {
             @Override
-            public void StartProtocolSession(SessionType sessionType, int messageID) {
-                super.StartProtocolSession(sessionType, messageID);
-                assertEquals("Message ID should be same", id, messageID);
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+                assertEquals("Message ID should be same", id, header.getMessageID());
             }
         };
         protocol.StartProtocolSession(SessionType.Mobile_Nav, id);
