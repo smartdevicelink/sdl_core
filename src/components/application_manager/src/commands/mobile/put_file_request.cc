@@ -135,10 +135,10 @@ void PutFileRequest::Run() {
       if (offset == 0) {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(sync_file_name, is_persistent_file,false)) {
-          LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist) ");
-          //TODO: Is it correctly to response GENERIC_ERROR if file already exist?
-          SendResponse(false,mobile_apis::Result::GENERIC_ERROR);
-          return;
+          LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
+          //TODO: Do we need to rewrite existing file or we need to send error? ( now is rewriting)
+          //SendResponse(false,mobile_apis::Result::GENERIC_ERROR);
+          //return;
         }
         application->increment_put_file_in_none_count();
       }
