@@ -49,13 +49,19 @@ namespace test {
 		}
 
 
+		void AdminAppTest::threadMain()
+		{
+			this->run();
+		}
+
+
 		void AdminAppTest::run()
 		{
 			
 			//Start init dependence appManagerImpl,HMIImpl,transport...
 			initStartData();
 			
-			sleep(60);
+			sleep(20);
 			printf("\n\n\n after init in Admin \n\n\n");
 			//////////////////////////////////////////////
 			//Test AddCommand

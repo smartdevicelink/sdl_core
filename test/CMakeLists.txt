@@ -6,7 +6,7 @@ find_package(Glib-2.0 REQUIRED)
 
 # --- components tests
 add_subdirectory(./components)
-#add_subdirectory(./thirdPartyLibs)
+add_subdirectory(./thirdPartyLibs)
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
@@ -25,17 +25,17 @@ include_directories (
   ../src/components/smart_objects/include
   ../src/components/formatters/include
   ../src/components/utils/include/
-  #../test/components/mobile_message_handler/include/
-  #../test/components/request_watchdog/include/
-  #../test/components/media_manager/include
-  #../test/components/protocol_handler/include/
-  #../test/components/utils/include
-  #../test/components/json_handler/include
-  #../test/components/smart_objects
-  #../test/components/transport_manager
-  #../test/components/
-  #../test/thirdPartyLibs/jsoncpp/include
-  #../test/components/application_manager
+  ../test/components/mobile_message_handler/include/
+  ../test/components/request_watchdog/include/
+  ../test/components/media_manager/include
+  ../test/components/protocol_handler/include/
+  ../test/components/utils/include
+  ../test/components/json_handler/include
+  ../test/components/smart_objects
+  ../test/components/transport_manager
+  ../test/components/
+  ../test/thirdPartyLibs/jsoncpp/include
+  ../test/components/application_manager
   ../test/components/application_manager/rpc/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}

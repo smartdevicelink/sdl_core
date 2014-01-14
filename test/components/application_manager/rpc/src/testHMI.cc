@@ -78,17 +78,17 @@ namespace test{
 			
 			///////////////////////////////////
 			//add to 23 december
-			/*
 			
-			test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester* mobile_handler_test;
-		    mobile_handler_test = 
-        					new test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester;
+			/*
+			//test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester* mobile_handler_test;
+		    //mobile_handler_test = 
+        	//				new test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester;
         					
-			app_manager_->set_mobile_message_handler(mobile_handler_test);
+			//app_manager_->set_mobile_message_handler(mobile_handler_test);
 			////////////////////////////////////
 			//add 25 december
-			app_manager_->set_active_vr_language(hmi_apis::Common_Language::EN_US);
-			app_manager_->set_active_ui_language(hmi_apis::Common_Language::EN_US);
+			//app_manager_->set_active_vr_language(hmi_apis::Common_Language::EN_US);
+			//app_manager_->set_active_ui_language(hmi_apis::Common_Language::EN_US);
 			/////////////////////////////////////
 			(*AppRegRequest)[S_PARAMS][strings::function_id] = mobile_apis::FunctionID::RegisterAppInterfaceID;
 			(*AppRegRequest)[S_PARAMS][strings::message_type] = mobile_apis::messageType::request;
@@ -107,7 +107,7 @@ namespace test{
 			(*AppRegRequest)[S_MSG_PARAMS][strings::hmi_display_language_desired] = hmi_apis::Common_Language::EN_US;
 			
 			
-			MessageChaining* MesChain = app_manager_->AddMessageChain(connectKey, 1, 16, NULL, &(*AppRegRequest) );
+			//MessageChaining* MesChain = app_manager_->AddMessageChain(connectKey, 1, 16, NULL, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain \n\n\n");
 			//app_manager_->AddMessageChain(connectKey,1,16,MesChain, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain  after\n\n\n");
@@ -118,7 +118,7 @@ namespace test{
 			//Application* appl = app_manager_->application(connectKey);
 			
 			////////////////////////////////////////
-			sleep(4);
+			sleep(20);
 			
 			
 			

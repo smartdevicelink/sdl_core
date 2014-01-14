@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-//#include "config_profile/profile.h"
-//#include "utils/file_system_tests.h"
-//#include "utils/prioritized_queue_tests.h"
-//#include "protocol_handler/protocol_handler_tm_test.h"
-//#include "request_watchdog/request_watchdog_test.h"
-//#include "application_manager/formatters_commands.h"
-//#include "media_manager/media_manager_impl_test.h"
+#include "config_profile/profile.h"
+#include "utils/file_system_tests.h"
+#include "utils/prioritized_queue_tests.h"
+#include "protocol_handler/protocol_handler_tm_test.h"
+#include "request_watchdog/request_watchdog_test.h"
+#include "application_manager/formatters_commands.h"
+#include "media_manager/media_manager_impl_test.h"
 //#include "SmartObjectDraftTest.h"
 //#include "SmartObjectInvalidTest.h"
 //#include "SmartObjectStressTest.h"
@@ -26,19 +26,19 @@
 #include "application_manager/smart_object_keys.h"
 #include "formatters/CSmartFactory.hpp"
 
-//using namespace test::components::request_watchdog_test;
-//using namespace test::components::utils;
-//using namespace test::components::protocol_handler_test;
+using namespace test::components::request_watchdog_test;
+using namespace test::components::utils;
+using namespace test::components::protocol_handler_test;
 //using namespace test::components::SmartObjects;
-//using namespace test::components::media_manager_test;
-//using namespace utils;
+using namespace test::components::media_manager_test;
+using namespace utils;
 
 //using namespace test::third_party_libs::json_reader_test;
 //using namespace test::components::json_handler::smart_schema_draft_test;
 //using namespace test::components::json_handler::formatters;
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+//using namespace NsSmartDeviceLink::NsSmartObjects;
+//using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 
 #ifdef __cplusplus
 extern "C" void __gcov_flush();
@@ -48,11 +48,14 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 	
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  
+
   test::app_manager_test::AdminAppTest app;
-	
-  app.run();
   
+  threads::Thread threadAdminAppTest("AdminAppTest", &app);
+
+  threadAdminAppTest.start();
+  //app.threadMain();//run();
+  sleep(60);
   int result = RUN_ALL_TESTS();
 
 #ifdef __cplusplus

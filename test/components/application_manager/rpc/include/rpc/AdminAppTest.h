@@ -40,21 +40,18 @@
 #include "rpc/GMockClassContainer.h"
 
 //Interface class what called in GTestFord
-#include "rpc/ICheckClass.h"
-
-#include "rpc/initStartData.h"
-
-#include "rpc/xmlParser.h"
-
 #include "rpc/addTest.h"
-
 #include "rpc/testHMI.h"
-
+#include "rpc/xmlParser.h"
+#include "rpc/ICheckClass.h"
+#include "rpc/initStartData.h"
 #include "rpc/HMIMessageHandlerTester.h"
 
 #include "transport_manager/error.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"				 
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+
+#include "utils/threads/thread_delegate.h"
 
 
 using namespace application_manager;
@@ -70,7 +67,7 @@ namespace test {
 		/**
 		* @brief Main class for test 
 		*/
-		class AdminAppTest
+		class AdminAppTest : public threads::ThreadDelegate
 		{
 		public:
 			
@@ -106,6 +103,10 @@ namespace test {
 			*/
 			inline void SetXmlPathToDir(const std::string& path);
 			
+			/**
+			* @brief Thread procedure.
+			*/
+			virtual void threadMain();
 
 		protected:
 
