@@ -61,17 +61,29 @@ Connection::Connection(ConnectionHandle connection_handle,
 }
 
 Connection::~Connection() {
+  session_list_.clear();
+  session_map_.clear();
 }
 
 int32_t Connection::AddNewSession() {
   int32_t result = -1;
+
   if (session_list_.empty()) {
     heartbeat_monitor_.BeginMonitoring();
   }
-  if (255 > session_id_counter_) {
+
+  const uint8_t max_connections = 255;
+  if (max_connections > session_id_counter_) {
     session_list_.push_back(session_id_counter_);
+
+    /* whenever new session created RPC and Bulk services are
+    established automatically */
+    session_map_[session_id_counter_].push_back(protocol_handler::kRpc);
+    session_map_[session_id_counter_].push_back(protocol_handler::kBulk);
+
     result = session_id_counter_++;
   }
+
   return result;
 }
 
@@ -83,17 +95,54 @@ int32_t Connection::RemoveSession(uint8_t session) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
   } else {
     session_list_.erase(it);
+    session_map_.erase(session);
     result = session;
   }
+
   return result;
 }
 
-int32_t Connection::GetFirstSessionID() {
-  int32_t result = -1;
-  SessionListIterator it = session_list_.begin();
-  if (session_list_.end() != it) {
-    result = *it;
+bool Connection::AddNewService(uint8_t session, uint8_t service) {
+  bool result = false;
+
+  SessionMapIterator session_it = session_map_.find(session);
+  if (session_it == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return result;
   }
+
+  ServiceListIterator service_it = find(session_it->second.begin(),
+                                        session_it->second.end(), service);
+  if (service_it != session_it->second.end()) {
+    LOG4CXX_ERROR(logger_, "Session " << session << " already established"
+                  " service " << service);
+  } else {
+    session_it->second.push_back(service);
+    result = true;
+  }
+
+  return result;
+}
+
+bool Connection::RemoveService(uint8_t session, uint8_t service) {
+  bool result = false;
+
+  SessionMapIterator session_it = session_map_.find(session);
+  if (session_it == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return result;
+  }
+
+  ServiceListIterator service_it = find(session_it->second.begin(),
+                                        session_it->second.end(), service);
+  if (service_it != session_it->second.end()) {
+    session_it->second.erase(service_it);
+    result = true;
+  } else {
+    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
+                  " service " << service);
+  }
+
   return result;
 }
 
