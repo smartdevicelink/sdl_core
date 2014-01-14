@@ -60,7 +60,16 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public void StartProtocolSession(SessionType sessionType) {
+        if (!sessionType.equals(SessionType.RPC)) {
+            throw new IllegalArgumentException("Only PRC session may be started with this method. Use StartProtocolSession(SessionType sessionType, byte sessionID) instead");
+        }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0x00, _version);
+        sendFrameToTransport(header);
+    } // end-method
+
+    public void StartProtocolSession(SessionType sessionType, byte sessionID) {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0, _version);
+        header.setSessionID(sessionID);
         sendFrameToTransport(header);
     } // end-method
 
@@ -370,73 +379,70 @@ public class WiProProtocol extends AbstractProtocol {
             } else if (header.getFrameData() == FrameDataControlFrameType.StartSessionNACK.getValue()) {
                 handleProtocolError("Got StartSessionNACK for protocol sessionID=" + header.getSessionID(), null);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndSession.getValue()) {
-                //if (hashID == BitConverter.intFromByteArray(data, 0))
-                if (_version == 2) {
-                    if (hashID == header.getMessageID()) {
-                        handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                    }
-                } else {
-                    handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                }
-            }else if (header.getSessionType().getValue() ==  SessionType.Mobile_Nav.getValue()  && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()){
+                handleEndSessionFrame(header);
+            } else if (header.getSessionType().getValue() == SessionType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndSessionACK.getValue()) {
-                //if (hashID == BitConverter.intFromByteArray(data, 0))
-                if (_version == 2) {
-                    if (hashID == header.getMessageID()) {
-                        handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                    }
-                } else {
-                    handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
-                }
+                handleEndSessionFrame(header);
             }
-		} // end-method
+        } // end-method
 
         private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
             _protocolListener.onMobileNavAckReceived(header.getMessageID());
         }
 
-		private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
-			ProtocolMessage message = new ProtocolMessage();
-			if (header.getSessionType() == SessionType.RPC) {
-				message.setMessageType(MessageType.RPC);
-			} else if (header.getSessionType() == SessionType.Bulk_Data) {
-				message.setMessageType(MessageType.BULK);
-			} // end-if
-			message.setSessionType(header.getSessionType());
-			message.setSessionID(header.getSessionID());
-			//If it is WiPro 2.0 it must have binary header
-			if (_version == 2) {
-				BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
-						parseBinaryHeader(data);
-				message.setVersion(_version);
-				message.setRPCType(binFrameHeader.getRPCType());
-				message.setFunctionID(binFrameHeader.getFunctionID());
-				message.setCorrID(binFrameHeader.getCorrID());
-				if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
-				if (binFrameHeader.getBulkData() != null) message.setBulkData(binFrameHeader.getBulkData());
-			} else message.setData(data);
+        private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
+            ProtocolMessage message = new ProtocolMessage();
+            if (header.getSessionType() == SessionType.RPC) {
+                message.setMessageType(MessageType.RPC);
+            } else if (header.getSessionType() == SessionType.Bulk_Data) {
+                message.setMessageType(MessageType.BULK);
+            } // end-if
+            message.setSessionType(header.getSessionType());
+            message.setSessionID(header.getSessionID());
+            //If it is WiPro 2.0 it must have binary header
+            if (_version == 2) {
+                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+                        parseBinaryHeader(data);
+                message.setVersion(_version);
+                message.setRPCType(binFrameHeader.getRPCType());
+                message.setFunctionID(binFrameHeader.getFunctionID());
+                message.setCorrID(binFrameHeader.getCorrID());
+                if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
+                if (binFrameHeader.getBulkData() != null)
+                    message.setBulkData(binFrameHeader.getBulkData());
+            } else message.setData(data);
 
-			_assemblerForMessageID.remove(header.getMessageID());
+            _assemblerForMessageID.remove(header.getMessageID());
 
             if (isAppUnregistered(message)) {
                 DebugTool.logInfo("App is unregistered");
                 handleAppUnregistered();
             }
 
-			try {
-				handleProtocolMessageReceived(message);
-			} catch (Exception ex) {
-				DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
-				handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
-			} // end-catch
-		} // end-method
+            try {
+                handleProtocolMessageReceived(message);
+            } catch (Exception ex) {
+                DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
+                handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
+            } // end-catch
+        } // end-method
 
         private boolean isAppUnregistered(ProtocolMessage message) {
             return (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) &&
                     (message.getFunctionID() == FunctionID
                             .getFunctionID(Names.UnregisterAppInterface));
         }
-	} // end-class
+    } // end-class
+
+    private void handleEndSessionFrame(ProtocolFrameHeader header) {
+        if (_version == 2) {
+            if (hashID == header.getMessageID()) {
+                handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+            }
+        } else {
+            handleProtocolSessionEnded(header.getSessionType(), header.getSessionID(), "");
+        }
+    }
 } // end-class
 

@@ -152,7 +152,9 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -263,6 +265,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Currently scheduled proxy reconnect task, if any.
      */
     private TimerTask _currentReconnectTimerTask = null;
+    private List<Byte> servicePool = new ArrayList<Byte>();
 
     /**
      * Constructor.
@@ -1002,15 +1005,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     }
                 }
             }
-
             // Clean up SYNC Connection
             synchronized (CONNECTION_REFERENCE_LOCK) {
+                stopAllServices();
                 closeSyncConnection(keepConnection);
             }
         } catch (SyncException e) {
             throw e;
         } finally {
             SyncTrace.logProxyEvent("SyncProxy cleaned.", SYNC_LIB_TRACE_KEY);
+        }
+    }
+
+    private void stopAllServices() {
+        if (servicePool.size() > 0) {
+            stopMobileNaviSession();
         }
     }
 
@@ -2463,8 +2472,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolSession(byte sessionID, String correlationID) {
+    private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
         _rpcSessionID = sessionID;
+        Log.i(TAG, "RPC Session started" + correlationID);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onSessionStarted(sessionID, correlationID);
+                }
+            });
+        } else {
+            _proxyListener.onSessionStarted(sessionID, correlationID);
+        }
 
         restartRPCProtocolSession();
     }
@@ -2529,6 +2550,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void startMobileNavSession(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
+        servicePool.add(sessionID);
         _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2545,6 +2567,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviSession() {
         Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
+        servicePool.remove(servicePool.indexOf(_mobileNavSessionID));
         getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
     }
 
@@ -3406,6 +3429,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
 
         restartRPCProtocolSession();
+    }
+
+    public List<Byte> getServicePool() {
+        return servicePool;
     }
 
     // Private Class to Interface with SyncConnection

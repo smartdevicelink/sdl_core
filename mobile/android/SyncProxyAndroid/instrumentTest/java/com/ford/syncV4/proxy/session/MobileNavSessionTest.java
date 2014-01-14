@@ -3,6 +3,9 @@ package com.ford.syncV4.proxy.session;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.protocol.WiProProtocol;
+import com.ford.syncV4.protocol.enums.SessionType;
+
+import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 
@@ -27,7 +30,9 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
     }
 
     private WiProProtocol createMockWiProProtocol(){
-        return mock(WiProProtocol.class);
+        WiProProtocol wiProProtocol = mock(WiProProtocol.class);
+        Mockito.doThrow(new IllegalArgumentException("Can't call this method")).when(wiProProtocol).StartProtocolSession(SessionType.Mobile_Nav);
+        return wiProProtocol;
     }
 
     public void testMobileNavigationSessionCreation() throws Exception {
@@ -36,7 +41,7 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
     }
 
     public void testMobileNavigationStartSession() throws Exception {
-        _sut.startSession();
+        _sut.startSession((byte)0x0A);
         assertTrue("should get here",true);
     }
 }
