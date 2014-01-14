@@ -38,8 +38,11 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "utils/logger.h"
 
 namespace file_system {
+
+
 /**
  * @brief Get available disc space.
  *
@@ -53,6 +56,15 @@ uint64_t GetAvailableDiskSpace();
  * @param path to directory
  */
 uint32_t DirectorySize(const std::string& path);
+
+/*
+ * @brief Get size of current file
+ *
+ * @param path to file
+ * @return size of file, return 0 if file not exist
+ */
+uint32_t FileSize(const std::string& path);
+
 
 /**
  * @brief Get available app space
@@ -115,8 +127,9 @@ std::ofstream* Open(const std::string& file_name,
   * @param file_stream file stream to be written to
   * @param data data to be written to file
   * @param data_size size of data to be written to file
+  * @return returns true if the operation is successfully.
   */
-void Write(std::ofstream* const file_stream,
+bool Write(std::ofstream* const file_stream,
            const uint8_t* data,
            uint32_t data_size);
 
