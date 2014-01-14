@@ -130,9 +130,9 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                         service_type, FRAME_DATA_START_SERVICE_NACK, 0x0, 0, 0);
 
   if (RESULT_OK == SendFrame(connection_id, packet)) {
-    LOG4CXX_INFO(logger_, "sendStartSessionAck() - write OK");
+    LOG4CXX_INFO(logger_, "sendStartSessionNAck() - write OK");
   } else {
-    LOG4CXX_ERROR(logger_, "sendStartSessionAck() - write FAIL");
+    LOG4CXX_ERROR(logger_, "sendStartSessionNAck() - write FAIL");
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -147,9 +147,9 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                         0x0, FRAME_DATA_END_SERVICE_NACK, session_id, 0, 0);
 
   if (RESULT_OK == SendFrame(connection_id, packet)) {
-    LOG4CXX_INFO(logger_, "sendStartSessionAck() - write OK");
+    LOG4CXX_INFO(logger_, "SendEndSessionNAck() - write OK");
   } else {
-    LOG4CXX_ERROR(logger_, "sendStartSessionAck() - write FAIL");
+    LOG4CXX_ERROR(logger_, "SendEndSessionNAck() - write FAIL");
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -169,11 +169,11 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   if (RESULT_OK == SendFrame(connection_id, packet)) {
     LOG4CXX_INFO(
         logger_,
-        "sendStartSessionAck() for connection " << connection_id
+        "SendEndSessionAck() for connection " << connection_id
             << " for service_type " << service_type << " session_id "
             << session_id);
   } else {
-    LOG4CXX_ERROR(logger_, "sendStartSessionAck() - write FAIL");
+    LOG4CXX_ERROR(logger_, "SendEndSessionAck() - write FAIL");
   }
 
   LOG4CXX_TRACE_EXIT(logger_);

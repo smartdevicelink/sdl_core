@@ -656,8 +656,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
-    "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << " type " << type);
+    "OnServiceEndedCallback " << type  << " in session " << session_key);
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
