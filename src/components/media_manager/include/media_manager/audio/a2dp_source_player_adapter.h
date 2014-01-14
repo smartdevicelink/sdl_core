@@ -30,22 +30,38 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
-#include <string>
+#include <map>
+#include "protocol_handler/raw_message.h"
 #include "media_manager/media_adapter_impl.h"
+#include "utils/logger.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
-class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
+
+class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   public:
-    PipeAudioStreamerAdapter();
-    ~PipeAudioStreamerAdapter();
+    A2DPSourcePlayerAdapter();
+    ~A2DPSourcePlayerAdapter();
+    void SendData(int32_t application_key,
+                  const protocol_handler::RawMessagePtr& message) {}
+    void StartActivity(int32_t application_key);
+    void StopActivity(int32_t application_key);
+    bool is_app_performing_activity(int32_t application_key);
 
   private:
-    DISALLOW_COPY_AND_ASSIGN(PipeAudioStreamerAdapter);
+    class A2DPSourcePlayerThread;
+
+    std::map<int32_t, threads::Thread*> sources_;
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 
-}  //  namespace media_manager
+}  // namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_PIPE_AUDIO_STREAMER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_

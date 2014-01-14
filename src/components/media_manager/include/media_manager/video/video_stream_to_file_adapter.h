@@ -30,22 +30,29 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_VIDEO_STREAM_TO_FILE_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_VIDEO_STREAM_TO_FILE_ADAPTER_H_
 
 #include <string>
+#include <fstream>
 #include "media_manager/media_adapter_impl.h"
 
 namespace media_manager {
-class PipeVideoStreamerAdapter : public PipeStreamerAdapter {
+
+class VideoStreamToFileAdapter : public MediaAdapterImpl {
   public:
-    PipeVideoStreamerAdapter();
-    ~PipeVideoStreamerAdapter();
-
+    explicit VideoStreamToFileAdapter(const std::string& file_name);
+    virtual ~VideoStreamToFileAdapter();
+    virtual void SendData(int32_t application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int32_t application_key);
+    virtual void StopActivity(int32_t application_key);
+    virtual bool is_app_performing_activity(int32_t application_key);
   private:
-   DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
+    void CloseCurrent();
+    std::string file_name_;
+    std::ofstream* file_stream_;
 };
-
 }  //  namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_PIPE_VIDEO_STREAMER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_VIDEO_STREAM_TO_FILE_ADAPTER_H_

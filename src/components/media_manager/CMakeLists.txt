@@ -9,12 +9,12 @@ set(default_includes
   ${GLIB_glib_2_INCLUDE_DIR}
 )
 set(default_sources
-    ./src/a2dp_source_player_adapter.cc
-    ./src/from_mic_recorder_adapter.cc
-    ./src/from_mic_to_file_recorder_thread.cc
-    ./src/socket_video_streamer_adapter.cc
-    ./src/pipe_video_streamer_adapter.cc
-    ./src/pipe_audio_streamer_adapter.cc
+    ./src/audio/a2dp_source_player_adapter.cc
+    ./src/audio/from_mic_recorder_adapter.cc
+    ./src/audio/from_mic_to_file_recorder_thread.cc
+    ./src/audio/pipe_audio_streamer_adapter.cc
+    ./src/video/socket_video_streamer_adapter.cc
+    ./src/video/pipe_video_streamer_adapter.cc
 )
 set(LIBRARIES
   ${GSTREAMER_gstreamer_LIBRARY}
@@ -27,7 +27,7 @@ else(DEFAULT_MEDIA_FLAG)
 set(default_includes
 )
 set(default_sources
-  ./src/video_stream_to_file_adapter.cc
+  ./src/video/video_stream_to_file_adapter.cc
 )
 set(LIBRARIES
 )
@@ -51,9 +51,9 @@ include_directories (
 
 set (SOURCES
     ./src/media_adapter_impl.cc
-    ./src/from_mic_recorder_listener.cc
-    ./src/audio_stream_sender_thread.cc
-    ./src/video_streamer_listener.cc
+    ./src/audio/from_mic_recorder_listener.cc
+    ./src/audio/audio_stream_sender_thread.cc
+    ./src/streamer_listener.cc
     ./src/media_manager_impl.cc
 )
 

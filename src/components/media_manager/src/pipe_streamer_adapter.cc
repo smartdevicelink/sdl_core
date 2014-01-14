@@ -34,7 +34,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils/logger.h"
-#include "./pipe_video_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "config_profile/profile.h"
 
 namespace media_manager {
@@ -89,7 +89,7 @@ void PipeStreamerAdapter::SendData(
   ++messsages_for_session;
 
   LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-               << messsages_for_session << "th message for " << application_key);
+              << messsages_for_session << "th message for " << application_key);
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {

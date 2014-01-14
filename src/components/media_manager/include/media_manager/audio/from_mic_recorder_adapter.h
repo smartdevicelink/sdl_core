@@ -30,11 +30,10 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
 
-#include <map>
-#include "protocol_handler/raw_message.h"
+#include <string>
 #include "media_manager/media_adapter_impl.h"
 #include "utils/logger.h"
 
@@ -44,24 +43,25 @@ class Thread;
 
 namespace media_manager {
 
-class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
+class FromMicRecorderAdapter : public MediaAdapterImpl {
   public:
-    A2DPSourcePlayerAdapter();
-    ~A2DPSourcePlayerAdapter();
+    FromMicRecorderAdapter();
+    ~FromMicRecorderAdapter();
     void SendData(int32_t application_key,
                   const protocol_handler::RawMessagePtr& message) {}
     void StartActivity(int32_t application_key);
     void StopActivity(int32_t application_key);
     bool is_app_performing_activity(int32_t application_key);
-
+    void set_output_file(const std::string& output_file);
+    void set_duration(int32_t duration);
   private:
-    class A2DPSourcePlayerThread;
-
-    std::map<int32_t, threads::Thread*> sources_;
+    threads::Thread* recorder_thread_;
+    std::string output_file_;
+    int32_t duration_;
+    const int32_t kDefaultDuration;
     static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
+    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };
-
 }  // namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_

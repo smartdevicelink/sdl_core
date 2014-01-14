@@ -34,23 +34,23 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils/logger.h"
-#include "media_manager/pipe_audio_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "config_profile/profile.h"
 
 namespace media_manager {
 
 namespace {
 log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("PipeAudioStreamerAdapter"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("PipeVideoStreamerAdapter"));
 }
 
-PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
-  LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::PipeAudioStreamerAdapter");
-  named_pipe_path_ = profile::Profile::instance()->named_audio_pipe_path();
+PipeVideoStreamerAdapter::PipeVideoStreamerAdapter() {
+  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::PipeVideoStreamerAdapter");
+  named_pipe_path_ = profile::Profile::instance()->named_video_pipe_path();
 }
 
-PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {
-  LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter");
+PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {
+  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter");
 }
 
 }  // namespace media_manager

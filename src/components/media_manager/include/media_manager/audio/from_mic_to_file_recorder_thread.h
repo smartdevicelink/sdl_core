@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 
 #include <net/if.h>
 #include <gst/gst.h>
@@ -82,7 +82,7 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
 
     class SleepThreadDelegate : public threads::ThreadDelegate {
       public:
-        SleepThreadDelegate(GstTimeout timeout);
+        explicit SleepThreadDelegate(GstTimeout timeout);
 
         void threadMain();
 
@@ -97,4 +97,4 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
 
 }  // namespace media_manager
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_AUDIO_MANAGER_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_

@@ -45,12 +45,12 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 
-#include "./audio_stream_sender_thread.h"
+#include "media_manager/audio/audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
 
 namespace media_manager {
-using namespace sync_primitives;
+using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
@@ -84,7 +84,6 @@ void AudioStreamSenderThread::threadMain() {
     if (getShouldBeStopped()) {
       break;
     }
-
   }
 }
 

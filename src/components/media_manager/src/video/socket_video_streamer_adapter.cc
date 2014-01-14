@@ -40,7 +40,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "config_profile/profile.h"
-#include "./socket_video_streamer_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
