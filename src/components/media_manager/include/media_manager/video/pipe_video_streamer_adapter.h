@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_PIPE_VIDEO_STREAMER_ADAPTER_H_
 
 #include <string>
-#include "media_manager/media_adapter_impl.h"
+#include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
 class PipeVideoStreamerAdapter : public PipeStreamerAdapter {

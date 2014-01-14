@@ -15,6 +15,8 @@ set(default_sources
     ./src/audio/pipe_audio_streamer_adapter.cc
     ./src/video/socket_video_streamer_adapter.cc
     ./src/video/pipe_video_streamer_adapter.cc
+    ./src/pipe_streamer_adapter.cc
+    ./src/socket_streamer_adapter.cc
 )
 set(LIBRARIES
   ${GSTREAMER_gstreamer_LIBRARY}
@@ -35,6 +37,8 @@ endif()
 
 include_directories (
   ./include
+  ./include/audio/
+  ./include/video/
   ../utils/include/
   ../protocol_handler/include/
   ../connection_handler/include/

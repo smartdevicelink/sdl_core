@@ -44,8 +44,13 @@
 
 namespace media_manager {
 
+namespace {
+log4cxx::LoggerPtr logger =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
+}
+
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
-  port_ = profile::Profile::instance()->video_streaming_port();
+  port_ = profile::Profile::instance()->audio_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
 }
 

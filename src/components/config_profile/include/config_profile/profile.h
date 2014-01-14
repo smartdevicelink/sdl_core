@@ -86,9 +86,14 @@ class Profile {
     const uint16_t& server_port() const;
 
     /**
-     * @brief Returns navi server port
+     * @brief Returns port for video streaming
      */
-    const uint16_t& navi_server_port() const;
+    const uint16_t& video_streaming_port() const;
+
+    /**
+      * @brief Returns port for audio streaming
+      */
+    const uint16_t& audio_streaming_port() const;
 
     /**
      * @brief Returns policies file name
@@ -322,7 +327,8 @@ class Profile {
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
-    uint16_t                        navi_server_port_;
+    uint16_t                        video_streaming_port_;
+    uint16_t                        audio_streaming_port_;
     std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_promt_;

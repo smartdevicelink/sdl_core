@@ -56,7 +56,8 @@ Profile::Profile()
   , hmi_capabilities_file_name_("hmi_capabilities.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
-  , navi_server_port_(5050)
+  , video_streaming_port_(5050)
+  , audio_streaming_port_(5080)
   , help_promt_()
   , time_out_promt_()
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -143,8 +144,12 @@ const uint16_t& Profile::server_port() const {
 }
 
 
-const uint16_t& Profile::navi_server_port() const {
-  return navi_server_port_;
+const uint16_t& Profile::video_streaming_port() const {
+  return video_streaming_port_;
+}
+
+const uint16_t& Profile::audio_streaming_port() const {
+  return audio_streaming_port_;
 }
 
 const uint64_t& Profile::thread_min_stach_size() const {
@@ -275,10 +280,18 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "HMI", "NaviServerPort", value))
+                           "HMI", "VideoStreamingPort", value))
       && ('\0' != *value)) {
-    navi_server_port_ = atoi(value);
-    LOG4CXX_INFO(logger_, "Set navi server port to " << navi_server_port_);
+    video_streaming_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set video streaming port to " << video_streaming_port_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "AudioStreamingPort", value))
+      && ('\0' != *value)) {
+    audio_streaming_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set audio streaming port to " << audio_streaming_port_);
   }
 
   *value = '\0';

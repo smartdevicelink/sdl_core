@@ -47,9 +47,11 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
 
+  protected:
+    std::string named_pipe_path_;
+
   private:
     int32_t pipe_fd_;
-    std::string named_pipe_path_;
     DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);
 };
 

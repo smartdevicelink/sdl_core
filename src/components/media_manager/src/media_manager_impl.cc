@@ -39,6 +39,7 @@
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
+#include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #else
 #include "media_manager/video/video_stream_to_file_adapter.h"
 #endif
