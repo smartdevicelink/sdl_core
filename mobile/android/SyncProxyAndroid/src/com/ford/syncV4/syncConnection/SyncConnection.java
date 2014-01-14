@@ -301,7 +301,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
                                        String correlationID) {
         _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
-        if ( _transport != null ){
+        if ( _transport != null && sessionType.equals(SessionType.RPC)){
             _transport.stopReading();
         }
     }
