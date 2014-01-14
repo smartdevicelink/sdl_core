@@ -213,6 +213,10 @@
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
 #include "application_manager/commands/hmi/navi_stop_stream_response.h"
+#include "application_manager/commands/hmi/audio_start_stream_request.h"
+#include "application_manager/commands/hmi/audio_start_stream_response.h"
+#include "application_manager/commands/hmi/audio_stop_stream_request.h"
+#include "application_manager/commands/hmi/audio_stop_stream_response.h"
 
 namespace application_manager {
 
@@ -1811,6 +1815,22 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviStopStreamResponse(message));
       } else {
         command.reset(new commands::NaviStopStreamRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_StartAudioStream: {
+      if (is_response) {
+        command.reset(new commands::AudioStartStreamResponse(message));
+      } else {
+        command.reset(new commands::AudioStartStreamRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_StopAudioStream: {
+      if (is_response) {
+        command.reset(new commands::AudioStopStreamResponse(message));
+      } else {
+        command.reset(new commands::AudioStopStreamRequest(message));
       }
       break;
     }

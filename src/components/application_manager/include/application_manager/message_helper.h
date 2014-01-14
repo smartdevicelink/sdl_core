@@ -224,6 +224,24 @@ class MessageHelper {
      */
     static void SendNaviStopStream(int32_t connection_key);
 
+    /*
+     * @brief Sends notification to HMI to start audio streaming
+     *
+     * @param url             URL for video streamng
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendAudioStartStream(const std::string& url, int32_t connection_key);
+
+    /*
+     * @brief Sends notification to HMI to stop audio streaming
+     *
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendAudioStopStream(int32_t connection_key);
+
+
     static smart_objects::SmartObject* CreateNegativeResponse(
       uint32_t connection_key, int32_t function_id, uint32_t correlation_id,
       int32_t result_code);

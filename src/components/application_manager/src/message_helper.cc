@@ -997,13 +997,10 @@ void MessageHelper::SendNaviStartStream(
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // TODO(PV) : remove connectionhandler
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
       connection_key,
       &app_id);
-
-  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
 
   /*Application* app =
       ApplicationManagerImpl::instance()->application(connection_key);
@@ -1043,13 +1040,81 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
   smart_objects::SmartObject msg_params =
     smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // TODO(PV) : remove connectionhandler
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
       connection_key,
       &app_id);
 
-  printf("\n\t\t\t App id %d for session id %d", app_id, connection_key);
+  msg_params[strings::app_id] = app_id;
+
+  (*stop_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
+}
+
+void MessageHelper::SendAudioStartStream(
+  const std::string& url, int32_t connection_key) {
+  smart_objects::SmartObject* start_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!start_stream) {
+    return;
+  }
+
+  (*start_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StartAudioStream;
+  (*start_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*start_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*start_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*start_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  uint32_t app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
+      &app_id);
+
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::url] = url;
+
+  (*start_stream)[strings::msg_params] = msg_params;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
+}
+
+void MessageHelper::SendAudioStopStream(int32_t connection_key) {
+  smart_objects::SmartObject* stop_stream =
+    new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (!stop_stream) {
+    return;
+  }
+
+  (*stop_stream)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::Navigation_StopAudioStream;
+  (*stop_stream)[strings::params][strings::message_type] =
+    hmi_apis::messageType::request;
+  (*stop_stream)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*stop_stream)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+  (*stop_stream)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  smart_objects::SmartObject msg_params =
+    smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  uint32_t app_id = 0;
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+      connection_key,
+      &app_id);
+
   msg_params[strings::app_id] = app_id;
 
   (*stop_stream)[strings::msg_params] = msg_params;

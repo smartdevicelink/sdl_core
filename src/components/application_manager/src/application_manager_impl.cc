@@ -1151,7 +1151,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     output.set_binary_data(binaryData);
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  LOG4CXX_INFO(logger_, "Successfully parsed smart object into message");
   return true;
 }
 
