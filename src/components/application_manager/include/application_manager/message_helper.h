@@ -126,14 +126,6 @@ class MessageHelper {
     static void SendHMIStatusNotification(const Application& application_impl);
 
     /**
-     * @brief Sends speak request to HMI
-     *
-     *@param application_impl application
-     *
-     **/
-    static void SendTTSChunksToHMI(const Application& application_impl);
-
-    /**
      * @brief Sends OnAppRegistered notification to HMI
      *
      *@param application_impl application with changed HMI status
@@ -146,12 +138,6 @@ class MessageHelper {
      * @brief Sendss Vr Command 'Help'
      */
     static void SendHelpVrCommand();
-
-    /**
-     * @brief Send Vr Synonyms of application name to HMI
-     * so that app can be activated via VR.
-     */
-    static void SendVrCommandsOnRegisterAppToHMI(Application* app);
 
     /**
      * @brief Removes Vr Synonyms of application name from HMI

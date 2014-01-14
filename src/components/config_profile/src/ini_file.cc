@@ -65,7 +65,9 @@ char* ini_write_inst(const char *fname, uint8_t flag) {
     if (flag & INI_FLAG_FILE_UP_CREA)
       if ((fp = fopen(fname, "w")) == 0)
         return NULL;
-
+  if (0 == fp) {
+    return NULL;
+  }
   fprintf(fp, "\n");
   fprintf(fp, "; The INI-file consists of different chapters.\n");
   fprintf(fp, "; Each chapter begins with the line containing\n");
