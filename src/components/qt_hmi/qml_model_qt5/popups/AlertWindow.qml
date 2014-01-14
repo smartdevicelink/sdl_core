@@ -120,7 +120,8 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            Internal.chooseAppStartScreen()
+                            contentLoader.go( Internal.chooseAppStartScreen(dataContainer.currentApplication.appType,
+                                                                           dataContainer.currentApplication.isMediaApplication), appId )
                         }
                     }
                     SoftButton {
@@ -138,7 +139,8 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            Internal.chooseAppStartScreen()
+                            contentLoader.go( Internal.chooseAppStartScreen(dataContainer.currentApplication.appType,
+                                                                           dataContainer.currentApplication.isMediaApplication), appId )
                         }
                     }
                 }
@@ -161,7 +163,8 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            Internal.chooseAppStartScreen()
+                            contentLoader.go( Internal.chooseAppStartScreen(dataContainer.currentApplication.appType,
+                                                                           dataContainer.currentApplication.isMediaApplication), appId )
                         }
                     }
                     SoftButton {
@@ -179,7 +182,8 @@ Rectangle {
                         onDefaultAction: { alertWindow.complete(Common.Result.SUCCESS); }
                         onStealFocus: {
                             alertWindow.complete(Common.Result.SUCCESS);
-                            Internal.chooseAppStartScreen()
+                            contentLoader.go( Internal.chooseAppStartScreen(dataContainer.currentApplication.appType,
+                                                                           dataContainer.currentApplication.isMediaApplication), appId )
                         }
                     }
                 }

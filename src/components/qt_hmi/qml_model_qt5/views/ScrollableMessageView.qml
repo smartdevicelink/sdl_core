@@ -1,6 +1,6 @@
 /**
- * @file ScrollableMessage.qml
- * @brief Scrollable Message View .
+ * @file ScrollableMessageView.qml
+ * @brief Scrollable Message View.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,7 +42,6 @@ import "../popups"
 
 GeneralView {
     applicationContext: true
-    id: scrollableMessage
     onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false

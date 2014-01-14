@@ -83,13 +83,13 @@ Item {
         console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
         var app = dataContainer.getApplication(appID);
 
+        app.softButtons.clear()
         if (softButtons) {
-            app.softButtons.clear()
             softButtons.forEach(function(x) { app.softButtons.append(x); });
         }
 
+        app.customPresets.clear()
         if (customPresets) {
-            app.customPresets.clear()
             customPresets.forEach( function(x) { app.customPresets.append( {text: x} ); } )
         }
 

@@ -36,7 +36,6 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 import "Internal.js" as Internal
 import "Constants.js" as Constants
-import "../views"
 
 QtObject {
     property string contactsFirstLetter // first letter of contact's name that need to find at contact list
@@ -46,14 +45,14 @@ QtObject {
     property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
 
     function getApplication(appId) {
-        console.log("dataContainer getApplication enter");
+        console.log("enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 console.log("Application found", applicationList.get(i));
                 return applicationList.get(i);
             }
         }
-        console.log("dataContainer getApplication exit");
+        console.log("exit");
     }
 
     onApplicationListChanged: {

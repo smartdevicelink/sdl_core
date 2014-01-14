@@ -106,7 +106,8 @@ GeneralView {
                         anchors.leftMargin: Constants.margin
                         onClicked: {
                             dataContainer.setCurrentApplication(appId)
-                            Internal.chooseAppStartScreen()
+                            contentLoader.go( Internal.chooseAppStartScreen(dataContainer.currentApplication.appType,
+                                                                           dataContainer.currentApplication.isMediaApplication), appId )
                         }
                     }
                 }
