@@ -100,7 +100,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       msg_params[strings::app_id] = app->app_id();
 
-      CreateHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, msg_params);
+      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
     }
   }
 }
@@ -130,7 +130,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
       it = commands.begin();  // Can not relay on
                               // iterators after erase was called
 
-      CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, msg_params);
+      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
     } else {
       ++it;
     }

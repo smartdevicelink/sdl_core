@@ -75,6 +75,17 @@ const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
 
+#ifdef __QNX__
+bool Execute(std::string command, const char * const *) {
+  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("appMain"));
+  if (system(command.c_str()) == -1) {
+    LOG4CXX_INFO(logger, "Can't start HMI!");
+    return false;
+  }
+  return true;
+}
+#else
 bool Execute(std::string file, const char * const * argv) {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("appMain"));
@@ -87,7 +98,7 @@ bool Execute(std::string file, const char * const * argv) {
       return false;
     }
     case 0: {  // Child process
-      int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+      int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
       if (0 > fd_dev0) {
         LOG4CXX_WARN(logger, "Open dev0 failed!");
         return false;
@@ -116,6 +127,7 @@ bool Execute(std::string file, const char * const * argv) {
     }
   }
 }
+#endif
 
 #ifdef WEB_HMI
 /**
@@ -141,11 +153,11 @@ if (!file_str.is_open()) {
 }
 
 file_str.seekg(0, std::ios::end);
-int length = file_str.tellg();
+int32_t length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
-  std::string hmi_link;
-  std::getline(file_str, hmi_link);
+std::string hmi_link;
+std::getline(file_str, hmi_link);
 
 
 LOG4CXX_INFO(logger,
@@ -191,7 +203,7 @@ bool InitHmi() {
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
-int main(int argc, char** argv) {
+int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization

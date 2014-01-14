@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/reset_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
@@ -61,7 +60,7 @@ ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
 void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
@@ -70,9 +69,9 @@ void ResetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  const unsigned int correlation_id =
+  const uint32_t correlation_id =
     (*message_)[strings::params][strings::correlation_id].asUInt();
-  const unsigned int connection_key =
+  const uint32_t connection_key =
     (*message_)[strings::params][strings::connection_key].asUInt();
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
@@ -128,7 +127,7 @@ void ResetGlobalPropertiesRequest::Run() {
 
   app->set_reset_global_properties_active(true);
 
-  unsigned int chaining_counter = 0;
+  uint32_t chaining_counter = 0;
   if (vr_help_title || vr_help_items || menu_name || menu_icon
       || is_key_board_properties) {
     ++chaining_counter;
@@ -159,9 +158,9 @@ void ResetGlobalPropertiesRequest::Run() {
     if (is_key_board_properties) {
       smart_objects::SmartObject key_board_properties = smart_objects::
           SmartObject(smart_objects::SmartType_Map);
-      key_board_properties[strings::language] = static_cast<int>
+      key_board_properties[strings::language] = static_cast<int32_t>
       (hmi_apis::Common_Language::EN_US);
-      key_board_properties[hmi_request::keyboard_layout] = static_cast<int>
+      key_board_properties[hmi_request::keyboard_layout] = static_cast<int32_t>
       (hmi_apis::Common_KeyboardLayout::QWERTY);
       key_board_properties[hmi_request::send_dynamic_entry] = false;
 
@@ -201,7 +200,8 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 }
 
-bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetHelpPromt(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -214,7 +214,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
   smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  for (unsigned int i = 0; i < help_promt.size(); ++i) {
+  for (uint32_t i = 0; i < help_promt.size(); ++i) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     helpPrompt[strings::text] = help_promt[i];
@@ -227,7 +227,8 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -240,7 +241,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
   smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  for (unsigned int i = 0; i < time_out_promt.size(); ++i) {
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
@@ -253,7 +254,8 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -264,7 +266,8 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(Application* const app) {
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetVrHelpItems(Application* const app) {
+bool ResetGlobalPropertiesRequest::ResetVrHelpItems(
+    application_manager::Application* const app) {
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

@@ -44,28 +44,13 @@ void UnregisterAppInterfaceRequest::Run() {
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
-  Application* application = app_manager->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
-
-  if (!application) {
+  if (!app_manager->application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
 
-  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  if (!notification) {
-    LOG4CXX_ERROR(logger_, "Not enough memory.");
-    return;
-  }
-
-  if (!app_manager->UnregisterApplication(connection_key())) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    LOG4CXX_ERROR(logger_, "Generic error");
-    return;
-  }
-
+  app_manager->UnregisterApplication(connection_key());
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

@@ -160,7 +160,7 @@ bool PolicyManagerImpl::StorePolicyTable() {
     return false;
   }
 
-  const std::vector<unsigned char> char_vector_pdata(
+  const std::vector<uint8_t> char_vector_pdata(
     pt_string.begin(), pt_string.end());
 
   if (false == file_system::Write(policy_config_.pt_file_name(),

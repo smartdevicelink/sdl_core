@@ -88,17 +88,17 @@ class Event {
   /*
    * @brief Retrieves smart object request ID
    */
-  inline int smart_object_function_id() const;
+  inline int32_t smart_object_function_id() const;
 
   /*
    * @brief Retrieves smart object correlation ID
    */
-  inline int smart_object_correlation_id() const;
+  inline int32_t smart_object_correlation_id() const;
 
   /*
    * @brief Retrieves smart_object response type
    */
-  inline int smart_object_type() const;
+  inline int32_t smart_object_type() const;
 
  protected:
 
@@ -125,17 +125,17 @@ const smart_objects::SmartObject& Event::smart_object() const {
   return response_so_;
 }
 
-int Event::smart_object_function_id() const {
+int32_t Event::smart_object_function_id() const {
   return response_so_.getElement(
       strings::params).getElement(strings::function_id).asInt();
 }
 
-int Event::smart_object_correlation_id() const {
+int32_t Event::smart_object_correlation_id() const {
   return response_so_.getElement(
       strings::params).getElement(strings::correlation_id).asInt();
 }
 
-int Event::smart_object_type() const {
+int32_t Event::smart_object_type() const {
   return response_so_.getElement(
         strings::params).getElement(strings::message_type).asInt();
 }

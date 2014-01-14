@@ -46,19 +46,19 @@ namespace media_manager {
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   public:
     FromMicToFileRecorderThread(const std::string& output_file,
-                                int duration);
+                                int32_t duration);
 
     void threadMain();
 
     bool exitThreadMain();
 
     void set_output_file(const std::string& output_file);
-    void set_record_duration(int duration);
+    void set_record_duration(int32_t duration);
 
   private:
     static log4cxx::LoggerPtr logger_;
 
-    int argc_;
+    int32_t argc_;
     gchar** argv_;
 
     const std::string oKey_;

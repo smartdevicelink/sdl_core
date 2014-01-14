@@ -46,18 +46,18 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
   public:
     FromMicRecorderAdapter();
     ~FromMicRecorderAdapter();
-    void SendData(int application_key,
+    void SendData(int32_t application_key,
                   const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int application_key);
-    void StopActivity(int application_key);
-    bool is_app_performing_activity(int application_key);
+    void StartActivity(int32_t application_key);
+    void StopActivity(int32_t application_key);
+    bool is_app_performing_activity(int32_t application_key);
     void set_output_file(const std::string& output_file);
-    void set_duration(int duration);
+    void set_duration(int32_t duration);
   private:
     threads::Thread* recorder_thread_;
     std::string output_file_;
-    int duration_;
-    const int kDefaultDuration;
+    int32_t duration_;
+    const int32_t kDefaultDuration;
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };

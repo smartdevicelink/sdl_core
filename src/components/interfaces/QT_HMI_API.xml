@@ -571,7 +571,7 @@
   </element>
 </enum>
 
- <enum name="PRNDL">
+<enum name="PRNDL">
   <description>The selected gear.</description>
   <element name="PARK">
     <description>Parking</description>
@@ -604,7 +604,7 @@
   </element>
   <element name="SEVENTH">
   </element>
-  <element name="EIGTH">
+  <element name="EIGHTH">
   </element>
 </enum>
 
@@ -764,6 +764,38 @@
   <element name="DATA_ALREADY_SUBSCRIBED" internal_name="VDRC_DATA_ALREADY_SUBSCRIBED"/>
   <element name="DATA_NOT_SUBSCRIBED" internal_name="VDRC_DATA_NOT_SUBSCRIBED"/>
   <element name="IGNORED" internal_name="VDRC_IGNORED"/>
+</enum>
+
+<enum name="VehicleDataType">
+  <description>Defines the data types that can be published and subscribed to.</description>
+  <element name="VEHICLEDATA_GPS">
+    <description>Notifies GPSData may be subscribed</description>
+  </element>
+  <element name="VEHICLEDATA_SPEED" />
+  <element name="VEHICLEDATA_RPM" />
+  <element name="VEHICLEDATA_FUELLEVEL" />
+  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+  <element name="VEHICLEDATA_FUELCONSUMPTION" />
+  <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_PRNDL" />
+  <element name="VEHICLEDATA_TIREPRESSURE" />
+  <element name="VEHICLEDATA_ODOMETER" />
+  <element name="VEHICLEDATA_BELTSTATUS" />
+  <element name="VEHICLEDATA_BODYINFO" />
+  <element name="VEHICLEDATA_DEVICESTATUS" />
+  <element name="VEHICLEDATA_ECALLINFO" />
+  <element name="VEHICLEDATA_AIRBAGSTATUS" />
+  <element name="VEHICLEDATA_EMERGENCYEVENT" />
+  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
+  <element name="VEHICLEDATA_MYKEY" />
+  <element name="VEHICLEDATA_BRAKING" />
+  <element name="VEHICLEDATA_WIPERSTATUS" />
+  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+  <element name="VEHICLEDATA_BATTVOLTAGE" />
+  <element name="VEHICLEDATA_ENGINETORQUE" />
+  <element name="VEHICLEDATA_ACCPEDAL" />
+  <element name="VEHICLEDATA_STEERINGWHEEL" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1001,6 +1033,16 @@
     <param name="upDownAvailable" type="Boolean" mandatory="true">
         <description>The button supports "button down" and "button up". Whenever the button is pressed, onButtonEvent(DOWN) should be invoked. Whenever the button is released, onButtonEvent(UP) should be invoked.</description>
     </param>
+</struct>
+
+<struct name="VehicleDataResult">
+  <description>Individual published data request result</description>
+  <param name="dataType" type="Common.VehicleDataType">
+    <description>Defined published data element type.</description>
+  </param>
+  <param name="resultCode" type="Common.VehicleDataResultCode">
+    <description>Published data result code.</description>
+  </param>
 </struct>
 
 <struct name="TouchCoord">
@@ -1705,7 +1747,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
-      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
     </function>
@@ -1898,6 +1940,12 @@
     <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
     </param>
   </function>
+  <function name="Started" messagetype="notification">
+    <description>Must be initiated  by TTS module to let SDL know that TTS session has started.</description>
+  </function>
+  <function name="Stopped" messagetype="notification">
+    <description>Must be initiated by TTS module to let SDL know that TTS session has stopped.</description>
+  </function>
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system start-up. Response must provide the information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
@@ -1910,6 +1958,13 @@
     <description>Sets some properties for the application initiated request.</description>
     <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
+    </param>
+    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true">
+      <description>
+      	This is the intial prompt spoken to the user at the start of an interaction.
+      	An array of text chunks of type TTSChunk. See TTSChunk.
+      	The array must have at least one item.
+      </description>
     </param>
     <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
@@ -2116,12 +2171,15 @@
     <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
-    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The list of choices to be used for the interaction with the user</description>
     </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false" >
-      <description> The suggested VR Help Items to be displayed on-screen during Perform Interaction.</description>
-      <description>If omitted on supported displays, the default system-generated help items should be used.</description>
+    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
+      <description>VR Help Title text.</description>
+      <description>If omitted on supported displays, the default HU system help title should be used.</description>
+    </param>
+    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
     </param>
     <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="true">
       <description>Timeout in milliseconds.</description>
@@ -2190,21 +2248,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="ShowVrHelp" messagetype="request">
-    <description>Request from SDL to show help about available VR commands.</description>
-    <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
-      <description>VR Help Title text.</description>
-      <description>If omitted on supported displays, the default HU system help title should be used.</description>
-    </param>
-    <param name="vrHelp" type="Common.VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>VR Help Items. If omitted on supported displays, the default HU system generated help items should be used.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that concerns this RPC.</description>
-    </param>
-  </function>
-  <function name="ShowVrHelp" messagetype="response">
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notification must be initiated by HMI on user choosing menu item.</description>
@@ -2475,9 +2518,8 @@
       <description>See TextFieldStruct. Uses:
           navigationText1
           navigationText2
-          ETA	  
-          totalDistance
-	  timeToDestination.
+          ETA
+          totalDistance.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
@@ -2611,6 +2653,7 @@
     </param>
   </function>
 
+<!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -2831,6 +2874,50 @@
     </param>
   </function>
 
+  <function name="GetECallInfo" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="GetECallInfo" messagetype="response">
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="true">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+  </function>
+
+  <function name="GetAirbagStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="GetAirbagStatus" messagetype="response">
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="true">
+      <description>The status of the air bags</description>
+    </param>
+  </function>
+
+  <function name="GetEmergencyEvent" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="GetEmergencyEvent" messagetype="response">
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="true">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+  </function>
+
+  <function name="GetClusterModeStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="GetClusterModeStatus" messagetype="response">
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="true">
+      <description>The status modes of the cluster</description>
+    </param>
+  </function>
+
   <function name="GetMyKey" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -2841,7 +2928,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
+<!--end Qt HMI version of GetVehicleData-->
 
+<!--Qt HMI version of OnVehicleData-->
   <function name="OnGpsData" messagetype="notification">
     <param name="gps" type="Common.GPSData" mandatory="true">
       <description>See GPSData</description>
@@ -2967,6 +3056,534 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
+<!--end Qt HMI version of OnVehicleData-->
+
+<!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <function name="SubscribeGps" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeGps" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="true">
+      <description>See GPSData</description>
+    </param>
+  </function>
+  <function name="UnsubscribeGps" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeGps" messagetype="response">
+    <param name="gps" type="Common.VehicleDataResult" mandatory="true">
+      <description>See GPSData</description>
+    </param>
+  </function>
+
+  <function name="SubscribeSpeed" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeSpeed" messagetype="response">
+    <param name="speed" type="Common.VehicleDataResult" mandatory="true">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+  </function>
+  <function name="UnsubscribeSpeed" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeSpeed" messagetype="response">
+    <param name="speed" type="Common.VehicleDataResult" mandatory="true">
+      <description>The vehicle speed in kilometers per hour</description>
+    </param>
+  </function>
+
+  <function name="SubscribeRpm" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeRpm" messagetype="response">
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+  </function>
+  <function name="UnsubscribeRpm" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeRpm" messagetype="response">
+    <param name="rpm" type="Common.VehicleDataResult" mandatory="true">
+      <description>The number of revolutions per minute of the engine</description>
+    </param>
+  </function>
+
+  <function name="SubscribeFuelLevel" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeFuelLevel" messagetype="response">
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+  </function>
+  <function name="UnsubscribeFuelLevel" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeFuelLevel" messagetype="response">
+    <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="true">
+      <description>The fuel level in the tank (percentage)</description>
+    </param>
+  </function>
+
+  <function name="SubscribeFuelLevel_State" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeFuelLevel_State" messagetype="response">
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
+      <description>The fuel level state</description>
+    </param>
+  </function>
+  <function name="UnsubscribeFuelLevel_State" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeFuelLevel_State" messagetype="response">
+    <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="true">
+      <description>The fuel level state</description>
+    </param>
+  </function>
+
+  <function name="SubscribeInstantFuelConsumption" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeInstantFuelConsumption" messagetype="response">
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+  </function>
+  <function name="UnsubscribeInstantFuelConsumption" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeInstantFuelConsumption" messagetype="response">
+    <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="true">
+      <description>The instantaneous fuel consumption in microlitres</description>
+    </param>
+  </function>
+
+  <function name="SubscribeExternalTemperature" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeExternalTemperature" messagetype="response">
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+  </function>
+  <function name="UnsubscribeExternalTemperature" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeExternalTemperature" messagetype="response">
+    <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="true">
+      <description>The external temperature in degrees celsius</description>
+    </param>
+  </function>
+
+  <function name="SubscribePrndl" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribePrndl" messagetype="response">
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
+      <description>See PRNDL</description>
+    </param>
+  </function>
+  <function name="UnsubscribePrndl" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribePrndl" messagetype="response">
+    <param name="prndl" type="Common.VehicleDataResult" mandatory="true">
+      <description>See PRNDL</description>
+    </param>
+  </function>
+
+  <function name="SubscribeVin" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeVin" messagetype="response">
+    <param name="vin" type="String" maxlength="17" mandatory="true">
+      <description>Vehicle identification number</description>
+    </param>
+  </function>
+  <function name="UnsubscribeVin" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeVin" messagetype="response">
+    <param name="vin" type="String" maxlength="17" mandatory="true">
+      <description>Vehicle identification number</description>
+    </param>
+  </function>
+
+  <function name="SubscribeTirePressure" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeTirePressure" messagetype="response">
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
+      <description>See TireStatus</description>
+    </param>
+  </function>
+  <function name="UnsubscribeTirePressure" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeTirePressure" messagetype="response">
+    <param name="tirePressure" type="Common.VehicleDataResult" mandatory="true">
+      <description>See TireStatus</description>
+    </param>
+  </function>
+
+  <function name="SubscribeOdometer" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeOdometer" messagetype="response">
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
+      <description>Odometer in km</description>
+    </param>
+  </function>
+  <function name="UnsubscribeOdometer" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeOdometer" messagetype="response">
+    <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
+      <description>Odometer in km</description>
+    </param>
+  </function>
+
+  <function name="SubscribeBeltStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeBeltStatus" messagetype="response">
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the seat belts</description>
+    </param>
+  </function>
+  <function name="UnsubscribeBeltStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeBeltStatus" messagetype="response">
+    <param name="beltStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the seat belts</description>
+    </param>
+  </function>
+
+  <function name="SubscribeBodyInformation" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeBodyInformation" messagetype="response">
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
+      <description>The body information including power modes</description>
+    </param>
+  </function>
+  <function name="UnsubscribeBodyInformation" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeBodyInformation" messagetype="response">
+    <param name="bodyInformation" type="Common.VehicleDataResult" mandatory="true">
+      <description>The body information including power modes</description>
+    </param>
+  </function>
+
+  <function name="SubscribeDeviceStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeDeviceStatus" messagetype="response">
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The device status including signal and battery strength</description>
+    </param>
+  </function>
+  <function name="UnsubscribeDeviceStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeDeviceStatus" messagetype="response">
+    <param name="deviceStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The device status including signal and battery strength</description>
+    </param>
+  </function>
+
+  <function name="SubscribeDriverBraking" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeDriverBraking" messagetype="response">
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the brake pedal</description>
+    </param>
+  </function>
+  <function name="UnsubscribeDriverBraking" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeDriverBraking" messagetype="response">
+    <param name="driverBraking" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the brake pedal</description>
+    </param>
+  </function>
+
+  <function name="SubscribeWiperStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeWiperStatus" messagetype="response">
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the wipers</description>
+    </param>
+  </function>
+  <function name="UnsubscribeWiperStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeWiperStatus" messagetype="response">
+    <param name="wiperStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the wipers</description>
+    </param>
+  </function>
+
+  <function name="SubscribeHeadLampStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeHeadLampStatus" messagetype="response">
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>Status of the head lamps</description>
+    </param>
+  </function>
+  <function name="UnsubscribeHeadLampStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeHeadLampStatus" messagetype="response">
+    <param name="headLampStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>Status of the head lamps</description>
+    </param>
+  </function>
+
+  <function name="SubscribeEngineTorque" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeEngineTorque" messagetype="response">
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+  </function>
+  <function name="UnsubscribeEngineTorque" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeEngineTorque" messagetype="response">
+    <param name="engineTorque" type="Common.VehicleDataResult" mandatory="true">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
+    </param>
+  </function>
+
+  <function name="SubscribeAccPedalPosition" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeAccPedalPosition" messagetype="response">
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+  </function>
+  <function name="UnsubscribeAccPedalPosition" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeAccPedalPosition" messagetype="response">
+    <param name="accPedalPosition" type="Common.VehicleDataResult" mandatory="true">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+  </function>
+
+  <function name="SubscribeSteeringWheelAngle" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeSteeringWheelAngle" messagetype="response">
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+  </function>
+  <function name="UnsubscribeSteeringWheelAngle" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeSteeringWheelAngle" messagetype="response">
+    <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="true">
+      <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+  </function>
+
+  <function name="SubscribeECallInfo" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeECallInfo" messagetype="response">
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+  </function>
+  <function name="UnsubscribeECallInfo" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeECallInfo" messagetype="response">
+    <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="true">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+  </function>
+
+  <function name="SubscribeAirbagStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeAirbagStatus" messagetype="response">
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the air bags</description>
+    </param>
+  </function>
+  <function name="UnsubscribeAirbagStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeAirbagStatus" messagetype="response">
+    <param name="airbagStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status of the air bags</description>
+    </param>
+  </function>
+
+  <function name="SubscribeEmergencyEvent" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeEmergencyEvent" messagetype="response">
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+  </function>
+  <function name="UnsubscribeEmergencyEvent" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeEmergencyEvent" messagetype="response">
+    <param name="emergencyEvent" type="Common.VehicleDataResult" mandatory="true">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+  </function>
+
+  <function name="SubscribeClusterModeStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeClusterModeStatus" messagetype="response">
+    <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status modes of the cluster</description>
+    </param>
+  </function>
+  <function name="UnsubscribeClusterModeStatus" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeClusterModeStatus" messagetype="response">
+    <param name="clusterModeStatus" type="Common.VehicleDataResult" mandatory="true">
+      <description>The status modes of the cluster</description>
+    </param>
+  </function>
+
+  <function name="SubscribeMyKey" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="SubscribeMyKey" messagetype="response">
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="true">
+      <description>Information related to the MyKey feature</description>
+    </param>
+  </function>
+  <function name="UnsubscribeMyKey" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeMyKey" messagetype="response">
+    <param name="myKey" type="Common.VehicleDataResult" mandatory="true">
+      <description>Information related to the MyKey feature</description>
+    </param>
+  </function>
+<!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
 
 </interface>
 </interfaces>

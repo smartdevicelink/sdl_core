@@ -46,11 +46,11 @@ const std::string CFormatterJsonSDLRPCv1::S_PARAMETERS("parameters");
 const std::string CFormatterJsonSDLRPCv1::S_NAME("name");
 const std::string CFormatterJsonSDLRPCv1::S_CORRELATION_ID("correlationID");
 
-const int CFormatterJsonSDLRPCv1::kSuccess = 0;
-const int CFormatterJsonSDLRPCv1::kParsingError = 1 << 0;
-const int CFormatterJsonSDLRPCv1::kFunctionIdNotFound = 1 << 1;
-const int CFormatterJsonSDLRPCv1::kMessageTypeNotFound = 1 << 2;
-const int CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
+const int32_t CFormatterJsonSDLRPCv1::kSuccess = 0;
+const int32_t CFormatterJsonSDLRPCv1::kParsingError = 1 << 0;
+const int32_t CFormatterJsonSDLRPCv1::kFunctionIdNotFound = 1 << 1;
+const int32_t CFormatterJsonSDLRPCv1::kMessageTypeNotFound = 1 << 2;
+const int32_t CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 // ----------------------------------------------------------------------------
 
 const std::string CFormatterJsonSDLRPCv1::getMessageType(
@@ -87,7 +87,7 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
     Json::Value params(Json::objectValue);
 
     smart_objects_ns::SmartObject formattedObj(obj);
-    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int) to strings
+    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int32_t) to strings
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), params);
 

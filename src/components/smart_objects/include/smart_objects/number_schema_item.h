@@ -159,12 +159,12 @@ class TNumberSchemaItem : public ISchemaItem {
 };
 
 /**
- * @brief Specialization of getSmartType for int.
+ * @brief Specialization of getSmartType for int32_t.
  *
  * @return SmartType_Integer.
  **/
 template<>
-SmartType TNumberSchemaItem<int>::getSmartType();
+SmartType TNumberSchemaItem<int32_t>::getSmartType();
 
 /**
  * @brief Specialization of getSmartType for long.
@@ -172,7 +172,7 @@ SmartType TNumberSchemaItem<int>::getSmartType();
  * @return SmartType_Integer.
  **/
 template<>
-SmartType TNumberSchemaItem<unsigned int>::getSmartType();
+SmartType TNumberSchemaItem<uint32_t>::getSmartType();
 
 /**
  * @brief Specialization of getSmartType for double.

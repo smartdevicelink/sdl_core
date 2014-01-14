@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -56,10 +56,12 @@ void VIGetVehicleDataResponse::Run() {
     return;
   }
 
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+
   smart_objects::SmartObject& result = *result_so;
 
   if ((*message_)[strings::params][strings::message_type]
-      == static_cast<int>(hmi_apis::messageType::error_response)) {
+      == static_cast<int32_t>(hmi_apis::messageType::error_response)) {
     if ((*message_)[strings::params].keyExists(strings::data)) {
       result[strings::msg_params] = (*message_)[strings::params][strings::data];
       result[strings::params][hmi_response::code] =
@@ -76,15 +78,12 @@ void VIGetVehicleDataResponse::Run() {
           (*message_)[strings::params][strings::protocol_version];
     }
 
-    result[strings::params][strings::function_id] =
-        static_cast<int>(mobile_apis::FunctionID::GetVehicleDataID);
-
-    SendResponseToMobile(result_so);
+    event.set_smart_object(*result_so);
   } else {
-    (*message_)[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::GetVehicleDataID;
-    SendResponseToMobile(message_);
+    event.set_smart_object(*message_);
   }
+
+  event.raise();
 }
 
 }  // namespace commands

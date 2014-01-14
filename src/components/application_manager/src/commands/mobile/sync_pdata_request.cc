@@ -74,7 +74,7 @@ void SyncPDataRequest::Run() {
 
   const std::string& sync_file_name = TEMPORARY_HARDCODED_FILENAME;
 
-  const std::vector<unsigned char> file_data =
+  const std::vector<uint8_t> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
   std::string relative_file_path = file_system::CreateDirectory(

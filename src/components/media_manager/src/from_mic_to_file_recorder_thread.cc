@@ -42,7 +42,7 @@ log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
-  const std::string& output_file, int duration)
+  const std::string& output_file, int32_t duration)
   : threads::ThreadDelegate(),
     argc_(5),
     oKey_("-o"),
@@ -60,7 +60,7 @@ void FromMicToFileRecorderThread::set_output_file(
   outputFileName_ = output_file;
 }
 
-void FromMicToFileRecorderThread::set_record_duration(int duration) {
+void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   std::stringstream stringStream;
@@ -100,7 +100,7 @@ void FromMicToFileRecorderThread::threadMain() {
   GstElement* alsasrc, *panorama, *wavenc, *filesink;
   GstBus* bus;
 
-  gchar* device = "hw:0,0";
+  const gchar* device = "hw:0,0";
   gchar* outfile = NULL;
   gint duration = -1;
   GOptionContext* context = NULL;
@@ -116,13 +116,13 @@ void FromMicToFileRecorderThread::threadMain() {
     },
     {
       "duration", 't', 0, G_OPTION_ARG_INT, &duration,
-      "length of time in seconds to capture", "INT"
+      "length of time in seconds to capture", "int32_t"
     },
     {NULL}
   };
 
   pthread_t wait;
-  int retcode;
+  int32_t retcode;
 
   if (!g_thread_supported()) {
     g_thread_init(NULL);
@@ -153,7 +153,7 @@ void FromMicToFileRecorderThread::threadMain() {
   // Set up error handling
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
   gst_bus_add_watch(bus,
-                    reinterpret_cast<int (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
+                    reinterpret_cast<int32_t (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
                     NULL);
   gst_object_unref(bus);
 

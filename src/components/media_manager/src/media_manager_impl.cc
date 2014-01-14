@@ -105,14 +105,14 @@ void MediaManagerImpl::Init() {
   }
 }
 
-void MediaManagerImpl::PlayA2DPSource(int application_key) {
+void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::PlayA2DPSource");
   if (a2dp_player_) {
     a2dp_player_->StartActivity(application_key);
   }
 }
 
-void MediaManagerImpl::StopA2DPSource(int application_key) {
+void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StopA2DPSource");
   if (a2dp_player_) {
     a2dp_player_->StopActivity(application_key);
@@ -120,9 +120,9 @@ void MediaManagerImpl::StopA2DPSource(int application_key) {
 }
 
 void MediaManagerImpl::StartMicrophoneRecording(
-  int application_key,
+  int32_t application_key,
   const std::string& output_file,
-  int duration) {
+  int32_t duration) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
                << output_file);
 #if defined(DEFAULT_MEDIA)
@@ -142,7 +142,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
   from_mic_listener_->OnActivityStarted(application_key);
 }
 
-void MediaManagerImpl::StopMicrophoneRecording(int application_key) {
+void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StopMicrophoneRecording");
 #if defined(DEFAULT_MEDIA)
   if (from_mic_recorder_) {
@@ -154,7 +154,7 @@ void MediaManagerImpl::StopMicrophoneRecording(int application_key) {
   }
 }
 
-void MediaManagerImpl::StartVideoStreaming(int application_key) {
+void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartVideoStreaming");
 
   if (video_streamer_) {
@@ -162,7 +162,7 @@ void MediaManagerImpl::StartVideoStreaming(int application_key) {
   }
 }
 
-void MediaManagerImpl::StopVideoStreaming(int application_key) {
+void MediaManagerImpl::StopVideoStreaming(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StopVideoStreaming");
   if (video_streamer_) {
     video_streamer_->StopActivity(application_key);
@@ -183,8 +183,8 @@ void MediaManagerImpl::OnMobileMessageSent(
   const protocol_handler::RawMessagePtr& message) {
 }
 
-void MediaManagerImpl::FramesProcessed(int application_key,
-                                       int frame_number) {
+void MediaManagerImpl::FramesProcessed(int32_t application_key,
+                                       int32_t frame_number) {
   if (protocol_handler_) {
     protocol_handler_->SendFramesNumber(application_key,
                                         frame_number);

@@ -43,7 +43,7 @@
 
 namespace application_manager {
 
-typedef std::vector<unsigned char> BinaryData;
+typedef std::vector<uint8_t> BinaryData;
 
 // Message type is a general type used by both mobile and HMI messages
 enum MessageType {
@@ -73,9 +73,9 @@ class Message {
   ~Message();
 
   //! --------------------------------------------------------------------------
-  int function_id() const;
-  int correlation_id() const;
-  int connection_key() const;
+  int32_t function_id() const;
+  int32_t correlation_id() const;
+  int32_t connection_key() const;
 
   MessageType type() const;
   ProtocolVersion protocol_version() const;
@@ -86,9 +86,9 @@ class Message {
   NsSmartDeviceLink::NsSmartObjects::SmartObject& smart_object();
 
   //! --------------------------------------------------------------------------
-  void set_function_id(int id);
-  void set_correlation_id(int id);
-  void set_connection_key(int key);
+  void set_function_id(int32_t id);
+  void set_correlation_id(int32_t id);
+  void set_connection_key(int32_t key);
   void set_message_type(MessageType type);
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
@@ -98,15 +98,15 @@ class Message {
   protocol_handler::MessagePriority Priority() const { return priority_; }
 
  private:
-  int function_id_;  // @remark protocol V2.
-  int correlation_id_;  // @remark protocol V2.
+  int32_t function_id_;  // @remark protocol V2.
+  int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;  // @remark protocol V2.
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first
   protocol_handler::MessagePriority priority_;
 
-  int connection_key_;
+  int32_t connection_key_;
   ProtocolVersion version_;
   std::string json_message_;
   NsSmartDeviceLink::NsSmartObjects::SmartObject object_;

@@ -53,7 +53,7 @@
 
 namespace profile {
 
-char* ini_write_inst(const char *fname, unsigned char flag) {
+char* ini_write_inst(const char *fname, uint8_t flag) {
   FILE             *fp = 0;
 
   if (NULL == fname)
@@ -111,7 +111,7 @@ char* ini_read_value(const char *fname,
     return NULL;
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (int i = 0; i < strlen(tag); i++) {
+  for (int32_t i = 0; i < strlen(tag); i++) {
     tag[i] = toupper(tag[i]);
   }
 
@@ -123,7 +123,7 @@ char* ini_read_value(const char *fname,
         chapter_found = true;
 
         snprintf(tag, INI_LINE_LEN, "%s", item);
-        for (int i = 0; i < strlen(tag); i++)
+        for (int32_t i = 0; i < strlen(tag); i++)
           tag[i] = toupper(tag[i]);
       }
     } else {
@@ -146,10 +146,10 @@ char* ini_read_value(const char *fname,
 
 char ini_write_value(const char *fname,
           const char *chapter, const char *item,
-          const char *value, unsigned char flag) {
+          const char *value, uint8_t flag) {
   FILE             *rd_fp, *wr_fp = 0;
   uint16_t         i, cr_count;
-  int              wr_result;
+  int32_t              wr_result;
   bool             chapter_found = false;
   bool             value_written = false;
   char             line[INI_LINE_LEN] = "";
@@ -176,7 +176,7 @@ char ini_write_value(const char *fname,
 #if USE_MKSTEMP
   {
     char             *temp_str;
-    int fd = -1;
+    int32_t fd = -1;
     temp_str = static_cast<char*>(getenv("TMPDIR"));
     if (temp_str)
       snprintf(temp_fname, PATH_MAX,
@@ -199,7 +199,7 @@ char ini_write_value(const char *fname,
 #endif   // #else #if USE_MKSTEMP
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (int i = 0; i < strlen (tag); i++)
+  for (int32_t i = 0; i < strlen (tag); i++)
     tag[i] = toupper(tag[i]);
 
   wr_result = 1; cr_count = 0;
@@ -213,7 +213,7 @@ char ini_write_value(const char *fname,
           chapter_found = true;
           // coding style
           snprintf(tag, INI_LINE_LEN, "%s", item);
-          for (int i = 0; i < strlen (tag); i++)
+          for (int32_t i = 0; i < strlen (tag); i++)
             tag[i] = toupper(tag[i]);
         }
       } else {
@@ -239,7 +239,7 @@ char ini_write_value(const char *fname,
     if (0 == strcmp(val, "\n")) {
       cr_count++;
     } else {
-      for (int i = 0; i < cr_count; i++)
+      for (int32_t i = 0; i < cr_count; i++)
         fprintf(wr_fp, "\n");
       cr_count = 0;
       wr_result = fprintf(wr_fp, "%s", line);
@@ -279,7 +279,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
   /* cut leading spaces */
   line_ptr = line;
-  for (int i = 0; i < strlen(line); i++) {
+  for (int32_t i = 0; i < strlen(line); i++) {
     if ((line[i] == ' ') ||
         (line[i] ==   9) ||  // TAB
         (line[i] ==  10) ||  // LF
@@ -302,7 +302,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
     /* cut leading stuff */
     uint16_t len = strlen(line_ptr);
-    for (int i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; i++) {
       if ((*line_ptr == ' ') ||
           (*line_ptr ==   9) ||  // TAB
           (*line_ptr ==  10) ||  // LF
@@ -324,7 +324,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
     }
 
     /* cut trailing stuff */
-    for (int i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == ' ') ||
           (temp_str[i] ==   9) ||  // TAB
           (temp_str[i] ==  10) ||  // LF
@@ -337,7 +337,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
-    for (int i = 0; i < strlen(temp_str); i++)
+    for (int32_t i = 0; i < strlen(temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0)
       return INI_RIGHT_CHAPTER;
@@ -348,7 +348,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
   if (NULL != strchr(line_ptr, '=')) {
     strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
     /* cut trailing stuff */
-    for (int i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == '=') ||
           (temp_str[i] == ' ') ||
           (temp_str[i] ==   9) ||  // TAB
@@ -362,13 +362,13 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
-    for (int i = 0; i < strlen (temp_str); i++)
+    for (int32_t i = 0; i < strlen (temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
       uint16_t len = strlen(line_ptr);
       /* cut trailing stuff */
-      for (int i = 0; i < len; i++) {
+      for (int32_t i = 0; i < len; i++) {
         if ((*line_ptr == ' ') ||
             (*line_ptr ==   9) ||  // TAB
             (*line_ptr ==  10) ||  // LF
@@ -383,7 +383,7 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
 
       if (value[0] != '\0') {
         /* cut trailing stuff */
-        for (int i = strlen(value) - 1; i > 0; i--) {
+        for (int32_t i = strlen(value) - 1; i > 0; i--) {
           if ((value[i] == ' ') ||
               (value[i] == ';') ||
               (value[i] ==   9) ||  // TAB

@@ -29,12 +29,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-#include "./audio_stream_sender_thread.h"
+
 
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
 #include <unistd.h>
 #endif
+
 
 #include <string>
 #include "application_manager/application_manager_impl.h"
@@ -44,18 +45,19 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 
+#include "./audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
 
 namespace media_manager {
 using namespace sync_primitives;
 
-const int AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("AudioPassThruThread"));
 
 AudioStreamSenderThread::AudioStreamSenderThread(
-  const std::string fileName, unsigned int session_key)
+  const std::string fileName, uint32_t session_key)
   : session_key_(session_key),
     shouldBeStoped_(false),
     fileName_(fileName) {
@@ -89,9 +91,9 @@ void AudioStreamSenderThread::threadMain() {
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  std::vector<unsigned char> binaryData;
-  std::vector<unsigned char>::iterator from;
-  std::vector<unsigned char>::iterator to;
+  std::vector<uint8_t> binaryData;
+  std::vector<uint8_t>::iterator from;
+  std::vector<uint8_t>::iterator to;
 
   usleep(kAudioPassThruTimeout * 1000000);
 
@@ -118,7 +120,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
 
     application_manager::ApplicationManagerImpl::instance()->
     SendAudioPassThroughNotification(session_key_,
-                                     std::vector<unsigned char>(from, to));
+                                     std::vector<uint8_t>(from, to));
     binaryData.clear();
   }
 }
@@ -139,7 +141,7 @@ bool AudioStreamSenderThread::exitThreadMain() {
   return true;
 }
 
-unsigned int AudioStreamSenderThread::session_key() const {
+uint32_t AudioStreamSenderThread::session_key() const {
   return session_key_;
 }
 

@@ -1,3 +1,6 @@
+[CW2]
++ SyncProxyAndroid SDK: Add EndSessionACK handling logic.
+
 [CW1]
 + SyncProxyAndroid SDK: Add heartbeat support. WARNING: you'll need to use a compatible SDL core version, otherwise the connection will reset periodically when nothing happens.
 

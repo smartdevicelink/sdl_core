@@ -61,7 +61,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  const int choise_set_id =
+  const int32_t choise_set_id =
       (*message_)[strings::msg_params]
                   [strings::interaction_choice_set_id].asInt();
 

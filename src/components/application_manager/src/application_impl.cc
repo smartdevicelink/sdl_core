@@ -42,7 +42,7 @@ log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(unsigned int application_id)
+ApplicationImpl::ApplicationImpl(uint32_t application_id)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
@@ -130,15 +130,15 @@ const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
   return hmi_level_;
 }
 
-const unsigned int ApplicationImpl::put_file_in_none_count() const {
+const uint32_t ApplicationImpl::put_file_in_none_count() const {
   return put_file_in_none_count_;
 }
 
-const unsigned int ApplicationImpl::delete_file_in_none_count() const {
+const uint32_t ApplicationImpl::delete_file_in_none_count() const {
   return delete_file_in_none_count_;
 }
 
-const unsigned int ApplicationImpl::list_files_in_none_count() const {
+const uint32_t ApplicationImpl::list_files_in_none_count() const {
   return list_files_in_none_count_;
 }
 
@@ -277,19 +277,19 @@ bool ApplicationImpl::UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_n
   return (subscribed_buttons_.size() == old_size - 1);
 }
 
-bool ApplicationImpl::SubscribeToIVI(unsigned int vehicle_info_type_) {
+bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.insert(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size + 1);
 }
 
-bool ApplicationImpl::IsSubscribedToIVI(unsigned int vehicle_info_type_) {
-  std::set<unsigned int>::iterator it = subscribed_vehicle_info_.find(
+bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type_) {
+  std::set<uint32_t>::iterator it = subscribed_vehicle_info_.find(
       vehicle_info_type_);
   return (subscribed_vehicle_info_.end() != it);
 }
 
-bool ApplicationImpl::UnsubscribeFromIVI(unsigned int vehicle_info_type_) {
+bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.erase(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size - 1);

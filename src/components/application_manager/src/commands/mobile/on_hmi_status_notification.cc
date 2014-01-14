@@ -50,7 +50,7 @@ OnHMIStatusNotification::~OnHMIStatusNotification() {
 void OnHMIStatusNotification::Run() {
   LOG4CXX_INFO(logger_, "OnHMIStatusNotification::Run");
 
-  (*message_)[strings::params][strings::message_type] = static_cast<int> (
+  (*message_)[strings::params][strings::message_type] = static_cast<int32_t> (
       application_manager::MessageType::kNotification);
   SendNotification();
 }

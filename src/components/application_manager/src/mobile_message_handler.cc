@@ -42,10 +42,10 @@
 #include <memory>
 
 namespace {
-const unsigned char kRequest = 0x0;
-const unsigned char kResponse = 0x1;
-const unsigned char kNotification = 0x2;
-const unsigned char kUnknown = 0xF;
+const uint8_t kRequest = 0x0;
+const uint8_t kResponse = 0x1;
+const uint8_t kNotification = 0x2;
+const uint8_t kUnknown = 0xF;
 }
 
 namespace application_manager {
@@ -107,7 +107,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   outgoing_message->set_function_id(payload.header.rpc_function_id);
   outgoing_message->set_message_type(
       MessageTypeFromRpcType(payload.header.rpc_type));
-  outgoing_message->set_correlation_id(int(payload.header.corellation_id));
+  outgoing_message->set_correlation_id(int32_t(payload.header.corellation_id));
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
     static_cast<application_manager::ProtocolVersion>(message
@@ -132,7 +132,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
     return NULL;
   }
 
-  unsigned char* rawMessage = new unsigned char[messageString.length() + 1];
+  uint8_t* rawMessage = new uint8_t[messageString.length() + 1];
   memcpy(rawMessage, messageString.c_str(), messageString.length() + 1);
 
   protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
@@ -149,19 +149,19 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
   }
-  const unsigned int MAX_HEADER_SIZE = 12;
+  const uint32_t MAX_HEADER_SIZE = 12;
 
-  unsigned int jsonSize = message->json_message().length();
-  unsigned int binarySize = 0;
+  uint32_t jsonSize = message->json_message().length();
+  uint32_t binarySize = 0;
   if (message->has_binary_data()) {
     binarySize = message->binary_data()->size();
   }
 
-  unsigned char* dataForSending = new unsigned char[MAX_HEADER_SIZE + jsonSize
+  uint8_t* dataForSending = new uint8_t[MAX_HEADER_SIZE + jsonSize
       + binarySize];
-  unsigned char offset = 0;
+  uint8_t offset = 0;
 
-  unsigned char rpcTypeFlag = 0;
+  uint8_t rpcTypeFlag = 0;
   switch (message->type()) {
     case application_manager::kRequest:
       rpcTypeFlag = kRequest;
@@ -177,13 +177,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
       break;
   }
 
-  unsigned int functionId = message->function_id();
+  uint32_t functionId = message->function_id();
   dataForSending[offset++] = ((rpcTypeFlag << 4) & 0xF0) | (functionId >> 24);
   dataForSending[offset++] = functionId >> 16;
   dataForSending[offset++] = functionId >> 8;
   dataForSending[offset++] = functionId;
 
-  unsigned int correlationId = message->correlation_id();
+  uint32_t correlationId = message->correlation_id();
   dataForSending[offset++] = correlationId >> 24;
   dataForSending[offset++] = correlationId >> 16;
   dataForSending[offset++] = correlationId >> 8;
@@ -197,9 +197,9 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
 
   if (message->has_binary_data()) {
-    const std::vector<unsigned char>& binaryData = *(message->binary_data());
-    unsigned char* currentPointer = dataForSending + offset + jsonSize;
-    for (unsigned int i = 0; i < binarySize; ++i) {
+    const std::vector<uint8_t>& binaryData = *(message->binary_data());
+    uint8_t* currentPointer = dataForSending + offset + jsonSize;
+    for (uint32_t i = 0; i < binarySize; ++i) {
       currentPointer[i] = binaryData[i];
     }
   }

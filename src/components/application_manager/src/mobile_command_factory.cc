@@ -119,9 +119,12 @@
 #include "application_manager/commands/mobile/update_turn_list_response.h"
 #include "application_manager/commands/mobile/sync_pdata_request.h"
 #include "application_manager/commands/mobile/sync_pdata_response.h"
+#include "application_manager/commands/mobile/system_request_request.h"
+#include "application_manager/commands/mobile/system_request_response.h"
 #include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
+#include "application_manager/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -466,6 +469,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SystemRequestID: {
+      if ((*message)[strings::params][strings::message_type]
+          == MessageType::kResponse) {
+        command.reset(new commands::SystemRequestResponse(message));
+      } else {
+        command.reset(new commands::SystemRequestRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::mobile::OnButtonEventNotification(message));
       break;
@@ -524,10 +536,14 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       command.reset(new commands::mobile::OnTouchEventNotification(message));
       break;
     }
+    case mobile_apis::FunctionID::OnSystemRequestID: {
+      command.reset(new commands::mobile::OnSystemRequestNotification(message));
+      break;
+    }
     default: {
       command.reset(new commands::GenericResponse(message));
       (*message)[strings::params][strings::function_id] =
-          static_cast<int>(mobile_apis::FunctionID::GenericResponseID);
+          static_cast<int32_t>(mobile_apis::FunctionID::GenericResponseID);
       break;
     }
   }

@@ -206,7 +206,7 @@ void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
   LOG4CXX_INFO(
     logger_,
-    "Delete Connection: " << static_cast<int>(connection_id)
+    "Delete Connection: " << static_cast<int32_t>(connection_id)
     << " from the list.");
   ConnectionListIterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
@@ -214,7 +214,7 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      unsigned int first_session_id = (itr->second)->GetFirstSessionID();
+      uint32_t first_session_id = (itr->second)->GetFirstSessionID();
       if (0 < first_session_id) {
         first_session_id = KeyFromPair(connection_id, first_session_id);
         // In case both parameters of OnSessionEndedCallback are the same
@@ -255,7 +255,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::RemoveConnection()");
   LOG4CXX_INFO(
     logger_,
-    "Delete Connection:" << static_cast<int>(connection_handle)
+    "Delete Connection:" << static_cast<int32_t>(connection_handle)
     << "from the list.");
   ConnectionListIterator itr = connection_list_.find(connection_handle);
   if (connection_list_.end() == itr) {
@@ -263,7 +263,7 @@ void ConnectionHandlerImpl::RemoveConnection(
     return;
   } else {
     if (0 != connection_handler_observer_) {
-      int first_session_id = (itr->second)->GetFirstSessionID();
+      int32_t first_session_id = (itr->second)->GetFirstSessionID();
       if (0 < first_session_id) {
         first_session_id = KeyFromPair(connection_handle, first_session_id);
         // In case both parameters of OnSessionEndedCallback are the same
@@ -278,11 +278,11 @@ void ConnectionHandlerImpl::RemoveConnection(
   }
 }
 
- int ConnectionHandlerImpl::OnSessionStartedCallback(
+ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   transport_manager::ConnectionUID connection_handle,
   protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
-  int new_session_id = -1;
+  int32_t new_session_id = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
@@ -298,9 +298,9 @@ void ConnectionHandlerImpl::RemoveConnection(
       }
     }
     if (connection_handler_observer_) {
-      int first_session_key = KeyFromPair(connection_handle,
+      int32_t first_session_key = KeyFromPair(connection_handle,
                                           (it->second)->GetFirstSessionID());
-      int session_key = KeyFromPair(connection_handle, new_session_id);
+      int32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
       bool success = connection_handler_observer_->OnSessionStartedCallback(
                        (it->second)->connection_device_handle(),
@@ -318,17 +318,17 @@ void ConnectionHandlerImpl::RemoveConnection(
   return new_session_id;
 }
 
-unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
-  unsigned int connection_handle, unsigned char sessionId,
-  unsigned int hashCode,
+uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
+  uint32_t connection_handle, uint8_t sessionId,
+  uint32_t hashCode,
   protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
-  int result = -1;
+  int32_t result = -1;
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
   } else {
-    int firstSessionID = (it->second)->GetFirstSessionID();
+    int32_t firstSessionID = (it->second)->GetFirstSessionID();
     if (protocol_handler::kRpc == service_type) {
       result = (it->second)->RemoveSession(sessionId);
       if (0 > result) {
@@ -341,7 +341,7 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
       if (0 < firstSessionID) {
         firstSessionID = KeyFromPair(connection_handle, firstSessionID);
       }
-      int sessionKey = KeyFromPair(connection_handle, sessionId);
+      int32_t sessionKey = KeyFromPair(connection_handle, sessionId);
       connection_handler_observer_->OnSessionEndedCallback(sessionKey,
           firstSessionID,
           service_type);
@@ -351,38 +351,38 @@ unsigned int ConnectionHandlerImpl::OnSessionEndedCallback(
   return result;
 }
 
-unsigned int ConnectionHandlerImpl::KeyFromPair(
+uint32_t ConnectionHandlerImpl::KeyFromPair(
   transport_manager::ConnectionUID connection_handle,
-  unsigned char sessionId) {
-  int key = connection_handle | (sessionId << 16);
+  uint8_t sessionId) {
+  int32_t key = connection_handle | (sessionId << 16);
   LOG4CXX_INFO(
     logger_,
-    "Key for ConnectionHandle:" << static_cast<int>(connection_handle)
-    << " Session:" << static_cast<int>(sessionId) << " is: "
-    << static_cast<int>(key));
+    "Key for ConnectionHandle:" << static_cast<int32_t>(connection_handle)
+    << " Session:" << static_cast<int32_t>(sessionId) << " is: "
+    << static_cast<int32_t>(key));
   return key;
 }
 
-void ConnectionHandlerImpl::PairFromKey(unsigned int key,
-                                        unsigned int* connection_handle,
-                                        unsigned char* sessionId) {
+void ConnectionHandlerImpl::PairFromKey(uint32_t key,
+                                        uint32_t* connection_handle,
+                                        uint8_t* sessionId) {
   *connection_handle = key & 0xFF00FFFF;
   *sessionId = key >> 16;
   LOG4CXX_INFO(
     logger_,
-    "ConnectionHandle:" << static_cast<int>(*connection_handle) << " Session:"
-    << static_cast<int>(*sessionId) << " for key:"
-    << static_cast<int>(key));
+    "ConnectionHandle:" << static_cast<int32_t>(*connection_handle) << " Session:"
+    << static_cast<int32_t>(*sessionId) << " for key:"
+    << static_cast<int32_t>(key));
 }
 
-int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
-    unsigned int* app_id,
-    std::list<int>* sessions_list,
-    unsigned int* device_id) {
+int32_t ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
+    uint32_t* app_id,
+    std::list<int32_t>* sessions_list,
+    uint32_t* device_id) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnSessionKey");
-  int result = -1;
+  int32_t result = -1;
   transport_manager::ConnectionUID conn_handle = 0;
-  unsigned char session_id = 0;
+  uint8_t session_id = 0;
   PairFromKey(key, &conn_handle, &session_id);
   ConnectionListIterator it = connection_list_.find(conn_handle);
 
@@ -393,14 +393,14 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
     if (device_id) {
       *device_id = connection.connection_device_handle();
     }
-    int first_session_id = connection.GetFirstSessionID();
+    int32_t first_session_id = connection.GetFirstSessionID();
     if (sessions_list) {
       sessions_list->clear();
     }
     if (0 == first_session_id) {
       LOG4CXX_INFO(
         logger_,
-        "No sessions in connection " << static_cast<int>(conn_handle) << ".");
+        "No sessions in connection " << static_cast<int32_t>(conn_handle) << ".");
       if (app_id) {
         *app_id = 0;
       }
@@ -412,8 +412,8 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
       connection.GetSessionList(session_list);
       LOG4CXX_INFO(
         logger_,
-        "Connection " << static_cast<int>(conn_handle) << "has "
-        << static_cast<int>(session_list.size()) << "sessions.");
+        "Connection " << static_cast<int32_t>(conn_handle) << "has "
+        << static_cast<int32_t>(session_list.size()) << "sessions.");
       if (sessions_list) {
         for (SessionListIterator itr = session_list.begin();
              itr != session_list.end(); ++itr) {
@@ -426,12 +426,12 @@ int ConnectionHandlerImpl::GetDataOnSessionKey(unsigned int key,
   return result;
 }
 
-int ConnectionHandlerImpl::GetDataOnDeviceID(
+int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   DeviceHandle device_handle, std::string* device_name,
-  std::list<unsigned int>* applications_list,
+  std::list<uint32_t>* applications_list,
   std::string* mac_address) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
-  int result = -1;
+  int32_t result = -1;
   DeviceListIterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Device not found!");
@@ -505,9 +505,9 @@ void ConnectionHandlerImpl::StartTransportManager() {
   transport_manager_->Visibility(true);
 }
 
-void ConnectionHandlerImpl::CloseConnection(unsigned int key) {
-  unsigned int connection_handle = 0;
-  unsigned char session_id = 0;
+void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
   CloseConnection(connection_handle);
 }
@@ -523,9 +523,9 @@ void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) 
   transport_manager_->Disconnect(connection_uid);
 }
 
-void ConnectionHandlerImpl::KeepConnectionAlive(unsigned int connection_key) {
-  unsigned int connection_handle = 0;
-  unsigned char session_id = 0;
+void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   ConnectionListIterator it = connection_list_.find(connection_handle);

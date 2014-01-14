@@ -170,6 +170,9 @@ class MyTransportListener
     }
   }
 
+  void OnTMMessageSend(const RawMessageSptr message) {
+  }
+  
  private:
   TransportManagerTest *test;
 };

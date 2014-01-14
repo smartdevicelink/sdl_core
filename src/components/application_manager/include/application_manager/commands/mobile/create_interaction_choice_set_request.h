@@ -82,7 +82,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   * return TRUE if there is coincidence of choice ID, otherwise FALSE
   */
   struct CoincidencePredicateChoiceID {
-    explicit CoincidencePredicateChoiceID(const unsigned int newItem)
+    explicit CoincidencePredicateChoiceID(const uint32_t newItem)
     :newItem_(newItem)
     {};
 
@@ -90,7 +90,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
       return obj[strings::choice_id].asInt() == newItem_;
     };
 
-    const unsigned int newItem_;
+    const uint32_t newItem_;
   };
 
   /*

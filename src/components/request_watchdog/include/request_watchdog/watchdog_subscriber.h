@@ -44,8 +44,8 @@ class WatchdogSubscriber {
  public:
   /*
    * When receiving this notification subscriber should remove expired entry
-   * itself using Watchdog::removeRequest(int connection_key,
-                               int correlation_id)
+   * itself using Watchdog::removeRequest(int32_t connection_key,
+                               int32_t correlation_id)
   */
   virtual void onTimeoutExpired(const RequestInfo& info) = 0;
 

@@ -47,18 +47,18 @@ VideoStreamerListener::~VideoStreamerListener() {
 }
 
 void VideoStreamerListener::OnDataReceived(
-  int application_key,
+  int32_t application_key,
   const DataForListener& data) {
   MediaManagerImpl::instance()->FramesProcessed(application_key, data);
 }
 
 void VideoStreamerListener::OnErrorReceived(
-  int application_key,
+  int32_t application_key,
   const DataForListener& data) {
   LOG4CXX_ERROR(logger_, "VideoStreamerListener::OnErrorReceived");
 }
 
-void VideoStreamerListener::OnActivityStarted(int application_key) {
+void VideoStreamerListener::OnActivityStarted(int32_t application_key) {
   LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityStarted");
   if (current_application_ == application_key) {
     LOG4CXX_WARN(logger_, "Already performing activity for "
@@ -68,7 +68,7 @@ void VideoStreamerListener::OnActivityStarted(int application_key) {
   current_application_ = application_key;
 }
 
-void VideoStreamerListener::OnActivityEnded(int application_key) {
+void VideoStreamerListener::OnActivityEnded(int32_t application_key) {
   LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityEnded");
   if (current_application_ != application_key) {
     LOG4CXX_WARN(logger_, "Already not performing activity for "

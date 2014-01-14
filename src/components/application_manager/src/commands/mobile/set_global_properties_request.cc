@@ -31,13 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/set_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include <algorithm>
 
 namespace application_manager {
 
@@ -63,7 +63,7 @@ void SetGlobalPropertiesRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  unsigned int app_id =
+  uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
 
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
@@ -110,10 +110,14 @@ void SetGlobalPropertiesRequest::Run() {
        is_menu_icon_present ||
        is_menu_title_present)
        ) {
+    const std::string app_type =
+        app->is_media_application() ?  "media" : "non-media";
 
+    const std::string message =
+        "There are too many parameters for "+app_type+" application.";
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
-                 "Too much parameters for media application.");
+                 message.c_str());
     return;
   }
 
@@ -158,7 +162,7 @@ void SetGlobalPropertiesRequest::Run() {
     const CommandsMap& cmdMap = app->commands_map();
     CommandsMap::const_iterator command_it = cmdMap.begin();
 
-    int index = 0;
+    int32_t index = 0;
     smart_objects::SmartObject vr_help_items;
     for (; cmdMap.end() != command_it; ++command_it) {
       if (false == (*command_it->second).keyExists(strings::vr_commands)) {
@@ -231,8 +235,8 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
   const smart_objects::SmartObject vr_help = (*message_)[strings::msg_params]
       .getElement(strings::vr_help);
 
-  //vr help item start position must be 1
-  const unsigned int vr_help_item_start_position = 1;
+  // vr help item start position must be 1
+  const uint32_t vr_help_item_start_position = 1;
 
   if (vr_help_item_start_position !=
       vr_help.getElement(0).getElement(strings::position).asUInt()) {
@@ -292,7 +296,8 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   if (result) {
     if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
       result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      return_info =
+          std::string("Unsupported phoneme type sent in a prompt").c_str();
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
       std::max(ui_result_, tts_result_));

@@ -33,7 +33,6 @@
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 #include "config_profile/profile.h"
@@ -122,7 +121,7 @@ void CommandRequestImpl::SendHMIRequest(
     return;
   }
 
-  const unsigned int hmi_correlation_id =
+  const uint32_t hmi_correlation_id =
        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   if (use_events) {
     subscribe_on_event(function_id, hmi_correlation_id);
@@ -147,60 +146,6 @@ void CommandRequestImpl::SendHMIRequest(
   }
 }
 
-void CommandRequestImpl::CreateHMIRequest(
-    const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params, bool require_chaining,
-    unsigned int chaining_counter) {
-
-  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
-
-  const unsigned int correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-  const unsigned int connection_key =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-
-  // get hmi correlation id for chaining further request from this object
-  const unsigned int hmi_correlation_id_ = ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
-
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-  request[strings::params][strings::message_type] = MessageType::kRequest;
-  request[strings::params][strings::function_id] = function_id;
-  request[strings::params][strings::correlation_id] = hmi_correlation_id_;
-  request[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
-  request[strings::params][strings::protocol_type] =
-      CommandImpl::hmi_protocol_type_;
-
-  request[strings::msg_params] = msg_params;
-
-  if (require_chaining) {
-    msg_chaining_ = ApplicationManagerImpl::instance()->AddMessageChain(
-        connection_key, correlation_id, hmi_correlation_id_, msg_chaining_,
-        &(*message_));
-
-    if (!msg_chaining_) {
-      LOG4CXX_ERROR(logger_, "Unable add request to MessageChain");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-      return;
-    }
-
-    if (0 < chaining_counter) {
-      msg_chaining_->set_counter(chaining_counter);
-    }
-  }
-
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-  }
-}
-
 //TODO(VS): Should be removed after we will shift to Event engine usage completely
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
@@ -215,7 +160,7 @@ void CommandRequestImpl::CreateHMINotification(
   NsSmartDeviceLink::NsSmartObjects::SmartObject& notify = *result;
 
   notify[strings::params][strings::message_type] =
-      static_cast<int>(application_manager::MessageType::kNotification);
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;

@@ -52,7 +52,7 @@ void OnButtonEventNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
 
   (*message_)[strings::params][strings::function_id] =
-      static_cast<int>(mobile_apis::FunctionID::OnButtonEventID);
+      static_cast<int32_t>(mobile_apis::FunctionID::OnButtonEventID);
 
   SendNotificationToMobile(message_);
 }

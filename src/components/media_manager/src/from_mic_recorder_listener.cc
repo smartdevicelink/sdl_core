@@ -54,16 +54,16 @@ FromMicRecorderListener::~FromMicRecorderListener() {
 }
 
 void FromMicRecorderListener::OnDataReceived(
-  int application_key,
+  int32_t application_key,
   const DataForListener& data) {
 }
 
 void FromMicRecorderListener::OnErrorReceived(
-  int application_key,
+  int32_t application_key,
   const DataForListener& data) {
 }
 
-void FromMicRecorderListener::OnActivityStarted(int application_key) {
+void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
   LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityStarted "
                << application_key);
   if (application_key == current_application_) {
@@ -80,7 +80,7 @@ void FromMicRecorderListener::OnActivityStarted(int application_key) {
   }
 }
 
-void FromMicRecorderListener::OnActivityEnded(int application_key) {
+void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
   LOG4CXX_INFO(logger_, "FromMicRecorderListener::OnActivityEnded "
                << application_key);
   if (application_key != current_application_) {

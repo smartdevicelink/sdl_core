@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "gmock/gmock.h"
 #include "config_profile/profile.h"
 #include "utils/file_system_tests.h"
 #include "utils/prioritized_queue_tests.h"

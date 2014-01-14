@@ -40,7 +40,6 @@
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/message.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
@@ -98,23 +97,23 @@ typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
 /**
  *@brief Map representing hmi request
  *
- *@param int hmi correlation ID
+ *@param int32_t hmi correlation ID
  *@param MessageChainPtr Mobile request temporary data
  */
-typedef std::map<unsigned int, MessageChainPtr> HMIRequest;
+typedef std::map<uint32_t, MessageChainPtr> HMIRequest;
 
 /**
  *@brief Map representing mobile request and pending HMI requests
  *
- *@param int mobile correlation ID
+ *@param int32_t mobile correlation ID
  *@param HMIRequest Sent HMI request
  */
-typedef std::map<unsigned int, HMIRequest> MobileRequest;
+typedef std::map<uint32_t, HMIRequest> MobileRequest;
 
 /**
  *@brief Map of application ID and incoming mobile requests
  */
-typedef std::map<unsigned int, MobileRequest> MessageChain;
+typedef std::map<uint32_t, MobileRequest> MessageChain;
 
 class ApplicationManagerImpl;
 
@@ -186,11 +185,11 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    Application* application(int app_id);
+    Application* application(int32_t app_id);
     inline const std::set<Application*>& applications() const;
     Application* active_application() const;
-    std::vector<Application*> applications_by_button(unsigned int button);
-    std::vector<Application*> applications_by_ivi(unsigned int vehicle_info);
+    std::vector<Application*> applications_by_button(uint32_t button);
+    std::vector<Application*> applications_by_ivi(uint32_t vehicle_info);
     std::vector<Application*> applications_with_navi();
 
     /////////////////////////////////////////////////////
@@ -204,7 +203,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param app_id Application id
      */
-    bool UnregisterApplication(const unsigned int& app_id);
+    void UnregisterApplication(const uint32_t& app_id);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -224,7 +223,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool LoadAppDataToHMI(Application* app);
     bool ActivateApplication(Application* applic);
     void DeactivateApplication(Application* app);
-    void ConnectToDevice(unsigned int id);
+    void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
 
     /*
@@ -232,61 +231,9 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @return Unique correlation ID
      */
-    unsigned int GetNextHMICorrelationID();
+    uint32_t GetNextHMICorrelationID();
 
-    /*
-     * @brief Add to the chain amount of requests sent to hmi
-     * from mobile request, to ensure that all response were received
-     * before sending response to mobile.
-     *
-     * @param connection_key Connection key of application stored in
-     * MessageChaining object
-     *
-     * @param correlation_id Correlation of Mobile request stored in
-     * MessageChaining object
-     *
-     *
-     * @param hmi_correlation_id Param is map index and it is equeal to hmi
-     * correlation id. Returned from GetNextHMICorrelationID.
-     *
-     * If param is grate then 0, stored  MessageChaining counter incremented,
-     * otherwise new Message chain created.
-     *
-     * @param data Temporary SmartObject from mobile request.
-     * Sometimes request data is needed in mobile response.
-     *
-     * @return TRUE on success, otherwise FALSE
-     */
-    MessageChaining* AddMessageChain(
-      const unsigned int& connection_key, const unsigned int& correlation_id,
-      const unsigned int& hmi_correlation_id, MessageChaining* msg_chaining,
-      const smart_objects::SmartObject* data = NULL);
-
-    /*
-     * @brief Decrease chain after response from hmi was received
-     *
-     * @param hmi_correlation_id Unique HMI correlation id from response
-     * @param mobile_correlation_id Unique correlation id for Mobile response
-     * returned in this parameter
-     *
-     * @return true if there is no other pending responses
-     */
-    bool DecreaseMessageChain(const unsigned int& hmi_correlation_id,
-                              unsigned int& mobile_correlation_id);
-
-    /*
-     * @brief Retrieve MessageChaining object from chain for corresponding
-     * HMI correlation ID
-     *
-     * @param hmi_correlation_id HMI correlation id from HMI response
-     *
-     * @return MessageChaining on success, otherwise NULL
-     */
-    MessageChaining* GetMessageChain(
-      const unsigned int& hmi_correlation_id) const;
-
-    /*
-     * @brief Starts audio passthru process
+    /* @brief Starts audio passthru process
      *
      * @return true on success, false if passthru is already in process
      */
@@ -351,19 +298,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param bits_per_sample The quality the audio is recorded.
      * @param audio_type      Type of audio data
      */
-    void StartAudioPassThruThread(int session_key, int correlation_id,
-                                  int max_duration, int sampling_rate,
-                                  int bits_per_sample, int audio_type);
+    void StartAudioPassThruThread(int32_t session_key, int32_t correlation_id,
+                                  int32_t max_duration, int32_t sampling_rate,
+                                  int32_t bits_per_sample, int32_t audio_type);
 
     /*
      * @brief Terminates audio pass thru thread
      * @param application_key Id of application for which
      * audio pass thru should be stopped
      */
-    void StopAudioPassThru(int application_key);
+    void StopAudioPassThru(int32_t application_key);
 
-    void SendAudioPassThroughNotification(unsigned int session_key,
-                                          std::vector<unsigned char> binaryData);
+    void SendAudioPassThroughNotification(uint32_t session_key,
+                                          std::vector<uint8_t> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
@@ -410,12 +357,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);
     bool OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
-                                  int session_key,
-                                  int first_session_key,
+                                  int32_t session_key,
+                                  int32_t first_session_key,
                                   protocol_handler::ServiceType type);
 
-    void OnSessionEndedCallback(int session_key,
-                                int first_session_key,
+    void OnSessionEndedCallback(int32_t session_key,
+                                int32_t first_session_key,
                                 protocol_handler::ServiceType type);
 
     /**
@@ -439,9 +386,9 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param mobile_correlation_id Correlation ID of the mobile request
      * @param new_timeout_value New timeout to be set
      */
-    void updateRequestTimeout(unsigned int connection_key,
-                              unsigned int mobile_correlation_id,
-                              unsigned int new_timeout_value);
+    void updateRequestTimeout(uint32_t connection_key,
+                              uint32_t mobile_correlation_id,
+                              uint32_t new_timeout_value);
 
     /*
      * @brief Retrieves application id associated whith correlation id
@@ -450,7 +397,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @return application id associated whith correlation id
      */
-    const unsigned int application_id(const int correlation_id);
+    const uint32_t application_id(const int32_t correlation_id);
 
     /*
      * @brief Sets application id correlation id
@@ -458,8 +405,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-    void set_application_id(const int correlation_id,
-                            const unsigned int app_id);
+    void set_application_id(const int32_t correlation_id,
+                            const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -486,7 +433,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     mobile_apis::Result::eType SaveBinary(
                                 const std::string& app_name,
-                                const std::vector<unsigned char>& binary_data,
+                                const std::vector<uint8_t>& binary_data,
                                 const std::string& save_path);
 
   private:
@@ -529,8 +476,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
-    bool RemoveMobileRequestFromMessageChain(unsigned int mobile_correlation_id,
-        unsigned int connection_key);
+    bool RemoveMobileRequestFromMessageChain(uint32_t mobile_correlation_id,
+        uint32_t connection_key);
 
     /*
      * @brief Save unregistered applications info to the file system
@@ -560,7 +507,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int, Application*> applications_;
+    std::map<int32_t, Application*> applications_;
 
     /**
      * @brief List of applications
@@ -575,9 +522,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Map of correlation id  and associated application id.
      */
-    std::map<const int, const unsigned int> appID_list_;
+    std::map<const int32_t, const uint32_t> appID_list_;
 
-    MessageChain message_chaining_;
     bool audio_pass_thru_active_;
     sync_primitives::Lock audio_pass_thru_lock_;
     bool is_distracting_driver_;
@@ -602,8 +548,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
     static log4cxx::LoggerPtr logger_;
-    static unsigned int message_chain_current_id_;
-    static const unsigned int message_chain_max_id_;
+
+    static uint32_t corelation_id_;
+    static const uint32_t max_corelation_id_;
 
     // The reason of HU shutdown
     mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;

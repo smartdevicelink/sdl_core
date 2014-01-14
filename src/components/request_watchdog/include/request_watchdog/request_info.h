@@ -36,18 +36,20 @@
 #ifndef SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
 #define SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
 
+#include <stdint.h>
+
 namespace request_watchdog {
 
 struct RequestInfo {
-  RequestInfo(const int& function_id, const int& connection_id,
-              const int& correlation_id, const int& custom_timeout,
-              const int& app_hmi_level);
+  RequestInfo(const int32_t& function_id, const int32_t& connection_id,
+              const int32_t& correlation_id, const int32_t& custom_timeout,
+              const int32_t& app_hmi_level);
 
-  int functionID_;
-  int connectionID_;
-  int correlationID_;
-  int customTimeout_;
-  int app_hmi_level_;
+  int32_t functionID_;
+  int32_t connectionID_;
+  int32_t correlationID_;
+  int32_t customTimeout_;
+  int32_t app_hmi_level_;
   bool delayed_delete_;
 
   friend bool operator==(const RequestInfo& left, const RequestInfo& right);

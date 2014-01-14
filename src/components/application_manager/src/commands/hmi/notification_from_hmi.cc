@@ -73,14 +73,14 @@ void NotificationFromHMI::CreateHMIRequest(
   }
 
   // get hmi correlation id for chaining further request from this object
-  const unsigned int hmi_correlation_id_ = ApplicationManagerImpl::instance()
+  const uint32_t hmi_correlation_id_ = ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] =
-      static_cast<int>(application_manager::MessageType::kRequest);
+      static_cast<int32_t>(application_manager::MessageType::kRequest);
   request[strings::params][strings::function_id] =
-      static_cast<int>(function_id);
+      static_cast<int32_t>(function_id);
   request[strings::params][strings::correlation_id] = hmi_correlation_id_;
   request[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;

@@ -11,6 +11,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
+import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
@@ -30,10 +31,8 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import static com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor.IHeartbeatMonitorDelegate;
-
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
-        IHeartbeatMonitorDelegate {
+        IHeartbeatMonitorListener {
     private static final String TAG = "SyncConnection";
 
     private boolean _isHeartbeatTimedout = false;
@@ -118,7 +117,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
         this._heartbeatMonitor = heartbeatMonitor;
-        _heartbeatMonitor.setDelegate(this);
+        _heartbeatMonitor.setListener(this);
     }
 
     public void stopTransportReading() {
@@ -234,7 +233,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
+                _protocol.HandleReceivedBytes(receivedBytes,
+                        receivedBytesLength);
             }
         }
     }

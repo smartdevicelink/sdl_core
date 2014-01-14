@@ -50,7 +50,7 @@ namespace sync_primitives {
 
 ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
-  int initialized  = pthread_condattr_init(&attrs);
+  int32_t initialized  = pthread_condattr_init(&attrs);
   if (initialized != 0)
     LOG4CXX_ERROR(g_logger, "Failed to initialize "
                             "conditional variable attributes");
@@ -59,7 +59,7 @@ ConditionalVariable::ConditionalVariable() {
   if (initialized != 0)
     LOG4CXX_ERROR(g_logger, "Failed to initialize "
                             "conditional variable");
-  int rv = pthread_condattr_destroy(&attrs);
+  int32_t rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
     LOG4CXX_ERROR(g_logger, "Failed to destroy "
                             "conditional variable attributes");
@@ -71,14 +71,14 @@ ConditionalVariable::~ConditionalVariable() {
 }
 
 void ConditionalVariable::NotifyOne() {
-  int signaled = pthread_cond_signal(&cond_var_);
+  int32_t signaled = pthread_cond_signal(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(g_logger, "Failed to signal conditional variable");
 
 }
 
 void ConditionalVariable::Broadcast() {
-  int signaled = pthread_cond_broadcast(&cond_var_);
+  int32_t signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
     LOG4CXX_ERROR(g_logger, "Failed to broadcast conditional variable");
 
@@ -87,7 +87,7 @@ void ConditionalVariable::Broadcast() {
 void ConditionalVariable::Wait(AutoLock& auto_lock) {
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
-  int wait_status = pthread_cond_wait(&cond_var_,
+  int32_t wait_status = pthread_cond_wait(&cond_var_,
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0)
@@ -95,7 +95,7 @@ void ConditionalVariable::Wait(AutoLock& auto_lock) {
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
-    AutoLock& auto_lock, int milliseconds){
+    AutoLock& auto_lock, int32_t milliseconds){
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
   timespec wait_interval;
@@ -108,7 +108,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
 
   Lock& lock = auto_lock.GetLock();
   lock.AssertTakenAndMarkFree();
-  int timedwait_status = pthread_cond_timedwait(&cond_var_,
+  int32_t timedwait_status = pthread_cond_timedwait(&cond_var_,
                                                 &lock.mutex_,
                                                 &wait_interval);
   lock.AssertFreeAndMarkTaken();

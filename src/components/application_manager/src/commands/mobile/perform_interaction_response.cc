@@ -33,11 +33,6 @@
 
 #include "application_manager/commands/mobile/perform_interaction_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_chaining.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -54,14 +49,6 @@ PerformInteractionResponse::~PerformInteractionResponse() {
 void PerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

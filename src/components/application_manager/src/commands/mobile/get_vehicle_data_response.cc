@@ -49,32 +49,7 @@ GetVehicleDataResponse::~GetVehicleDataResponse() {
 void GetVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataResponse::Run");
 
-#ifdef QT_HMI
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
-#endif // QT_HMI
-
-#ifdef WEB_HMI
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  if (!IsPendingResponseExist()) {
-    const int code = (*message_)[strings::params][hmi_response::code].asInt();
-    if (hmi_apis::Common_Result::SUCCESS == code ||
-        hmi_apis::Common_Result::DATA_NOT_AVAILABLE == code) {
-      SendResponse(true);
-    } else {
-      // TODO(DK): Some logic
-      SendResponse(false);
-    }
-  }
-#endif // WEB_HMI
 }
 
 }  // namespace commands

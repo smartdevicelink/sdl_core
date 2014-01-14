@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/dial_number_request.h"
-#include "application_manager/message_chaining.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 

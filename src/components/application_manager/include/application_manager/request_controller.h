@@ -101,7 +101,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param mobile_corellation_id Active mobile request correlation ID
    *
    */
-  void terminateRequest(const unsigned int& mobile_correlation_id);
+  void terminateRequest(const uint32_t& mobile_correlation_id);
 
   /*
    * @brief Removes all requests from queue for specified application
@@ -109,7 +109,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param app_id Mobile application ID
    *
    */
-  void terminateAppRequests(const unsigned int& app_id);
+  void terminateAppRequests(const uint32_t& app_id);
 
   /**
    * @ Updates request timeout
@@ -118,13 +118,13 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout to be set
    */
-  void updateRequestTimeout(const unsigned int& connection_key,
-                            const unsigned int& mobile_correlation_id,
-                            const unsigned int& new_timeout);
+  void updateRequestTimeout(const uint32_t& connection_key,
+                            const uint32_t& mobile_correlation_id,
+                            const uint32_t& new_timeout);
 
   /*
    * @brief Notify subscriber that expired entry should be removed
-   * using Watchdog::removeRequest(int connection_key, int correlation_id)
+   * using Watchdog::removeRequest(int32_t connection_key, int32_t correlation_id)
    *
    * @param RequestInfo Request related information
    */

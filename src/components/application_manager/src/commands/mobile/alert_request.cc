@@ -58,12 +58,12 @@ AlertRequest::~AlertRequest() {
 bool AlertRequest::Init() {
 
   /* Timeout in milliseconds.
-     If omitted a standard value of 5000 milliseconds is used.*/
+     If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
     default_timeout_ =
         (*message_)[strings::msg_params][strings::duration].asUInt();
   } else {
-    const int def_value = 5000;
+    const int32_t def_value = 5000;
     default_timeout_ = def_value;
   }
 
@@ -73,15 +73,9 @@ bool AlertRequest::Init() {
 void AlertRequest::Run() {
   LOG4CXX_INFO(logger_, "AlertRequest::Run");
 
-  unsigned int app_id = (*message_)[strings::params][strings::connection_key]
+  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asInt();
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
-
-  if (ApplicationManagerImpl::instance()->vr_session_started()) {
-    LOG4CXX_ERROR_EXT(logger_, "VR session is in progress. Reject alert");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
@@ -187,14 +181,14 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void AlertRequest::SendAlertRequest(int app_id) {
+void AlertRequest::SendAlertRequest(int32_t app_id) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
   msg_params[hmi_request::alert_strings] = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
 
-  int index = 0;
+  int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
          TextFieldName::ALERT_TEXT1;
@@ -234,7 +228,7 @@ void AlertRequest::SendAlertRequest(int app_id) {
   SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
-void AlertRequest::SendSpeakRequest(int app_id) {
+void AlertRequest::SendSpeakRequest(int32_t app_id) {
 
   // crate HMI speak request
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -248,7 +242,7 @@ void AlertRequest::SendSpeakRequest(int app_id) {
   SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
-void AlertRequest::SendPlayToneNotification(int app_id) {
+void AlertRequest::SendPlayToneNotification(int32_t app_id) {
   LOG4CXX_INFO(logger_, "AlertRequest::SendPlayToneNotification");
 
   // check playtone parameter

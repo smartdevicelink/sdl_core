@@ -96,8 +96,8 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
   ConnectionID connection_id ,
-  unsigned int session_id,
-  unsigned char service_type) {
+  uint32_t session_id,
+  uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
@@ -114,10 +114,10 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 
 void ProtocolHandlerImpl::SendStartSessionAck(
   ConnectionID connection_id ,
-  unsigned char session_id,
-  unsigned char protocol_version,
-  unsigned int hash_code,
-  unsigned char service_type) {
+  uint8_t session_id,
+  uint8_t protocol_version,
+  uint32_t hash_code,
+  uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
@@ -140,10 +140,10 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
   ConnectionID connection_id ,
-  unsigned char service_type) {
+  uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  unsigned char versionFlag = PROTOCOL_VERSION_1;
+  uint8_t versionFlag = PROTOCOL_VERSION_1;
 
   ProtocolPacket packet(versionFlag, COMPRESS_OFF, FRAME_TYPE_CONTROL,
                         service_type, FRAME_DATA_START_SESSION_NACK, 0x0, 0, 0);
@@ -158,8 +158,8 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
-                                           unsigned char session_id,
-                                           unsigned int message_id) {
+                                           uint8_t session_id,
+                                           uint32_t message_id) {
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF,
                         FRAME_TYPE_CONTROL, SERVICE_TYPE_RPC,
                         FRAME_DATA_HEART_BEAT_ACK, session_id,
@@ -258,7 +258,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
   }
 
   transport_manager::ConnectionUID connection_uid = 0;
-  unsigned char session_id = 0;
+  uint8_t session_id = 0;
   session_observer_->PairFromKey(connection_id,
                                  &connection_uid,
                                  &session_id);
@@ -286,12 +286,12 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(
 
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   ConnectionID connection_id ,
-  const unsigned char session_id, unsigned int protocol_version,
-  const unsigned char service_type, const unsigned int data_size,
-  const unsigned char* data, const bool compress) {
+  const uint8_t session_id, uint32_t protocol_version,
+  const uint8_t service_type, const uint32_t data_size,
+  const uint8_t* data, const bool compress) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  unsigned char versionF = PROTOCOL_VERSION_1;
+  uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
   }
@@ -306,23 +306,23 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   ConnectionID connection_id ,
-  const unsigned char session_id, unsigned int protocol_version,
-  const unsigned char service_type, const unsigned int data_size,
-  const unsigned char* data, const bool compress,
-  const unsigned int maxdata_size) {
+  const uint8_t session_id, uint32_t protocol_version,
+  const uint8_t service_type, const uint32_t data_size,
+  const uint8_t* data, const bool compress,
+  const uint32_t maxdata_size) {
   LOG4CXX_TRACE_ENTER(logger_);
   RESULT_CODE retVal = RESULT_OK;
 
   LOG4CXX_INFO_EXT(
     logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  unsigned char versionF = PROTOCOL_VERSION_1;
+  uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
   }
 
-  int numOfFrames = 0;
-  int lastdata_size = 0;
+  int32_t numOfFrames = 0;
+  int32_t lastdata_size = 0;
 
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;
@@ -337,7 +337,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     "Data size " << data_size << " of " << numOfFrames
     << " frames with last frame " << lastdata_size);
 
-  unsigned char* outDataFirstFrame = new unsigned char[FIRST_FRAME_DATA_SIZE];
+  uint8_t* outDataFirstFrame = new uint8_t[FIRST_FRAME_DATA_SIZE];
   outDataFirstFrame[0] = data_size >> 24;
   outDataFirstFrame[1] = data_size >> 16;
   outDataFirstFrame[2] = data_size >> 8;
@@ -360,9 +360,9 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
   delete[] outDataFirstFrame;
 
-  unsigned char* outDataFrame = new unsigned char[maxdata_size];
+  uint8_t* outDataFrame = new uint8_t[maxdata_size];
 
-  for (unsigned int i = 0; i < numOfFrames; i++) {
+  for (uint32_t i = 0; i < numOfFrames; i++) {
     if (i != (numOfFrames - 1)) {
       memcpy(outDataFrame, data + (maxdata_size * i), maxdata_size);
 
@@ -420,7 +420,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(
         return RESULT_FAIL;
       }
 
-      int connection_key = session_observer_->KeyFromPair(
+      int32_t connection_key = session_observer_->KeyFromPair(
                              connection_id,
                              packet->session_id());
 
@@ -465,14 +465,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
   LOG4CXX_INFO_EXT(
     logger_, "Packet " << packet << "; session_id " << packet -> session_id());
 
-  int key = session_observer_->KeyFromPair(connection_id,
+  int32_t key = session_observer_->KeyFromPair(connection_id,
             packet->session_id());
 
   if (packet->frame_type() == FRAME_TYPE_FIRST) {
     LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
 
-    // const unsigned char* data = packet -> getData();
-    unsigned int total_data_bytes = packet->data()[0] << 24;
+    // const uint8_t* data = packet -> getData();
+    uint32_t total_data_bytes = packet->data()[0] << 24;
     total_data_bytes |= packet->data()[1] << 16;
     total_data_bytes |= packet->data()[2] << 8;
     total_data_bytes |= packet->data()[3];
@@ -483,7 +483,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
   } else {
     LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - Consecutive frame");
 
-    std::map<int, ProtocolPacket*>::iterator it =
+    std::map<int32_t, ProtocolPacket*>::iterator it =
       incomplete_multi_frame_messages_.find(key);
 
     if (it == incomplete_multi_frame_messages_.end()) {
@@ -551,7 +551,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
       return HandleControlMessageHeartBeat(connection_id, packet);
     default:
       LOG4CXX_WARN(logger_, "Control message of type "
-                            <<int(packet.frame_data())<<" ignored");
+                            <<int32_t(packet.frame_data())<<" ignored");
       return RESULT_OK;
   }
 }
@@ -561,15 +561,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   const ProtocolPacket& packet) {
   LOG4CXX_INFO(logger_, "ProtocolHandlerImpl::HandleControlMessageEndSession()");
 
-  unsigned char currentsession_id = packet.session_id();
+  uint8_t currentsession_id = packet.session_id();
 
-  unsigned int hash_code = 0;
+  uint32_t hash_code = 0;
   if (packet.version() == 2) {
     hash_code = packet.message_id();
   }
 
   bool success = true;
-  int sessionhash_code = session_observer_->OnSessionEndedCallback(
+  int32_t sessionhash_code = session_observer_->OnSessionEndedCallback(
       connection_id, currentsession_id, hash_code,
       ServiceTypeFromByte(packet.service_type()));
 
@@ -602,7 +602,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   LOG4CXX_INFO_EXT(logger_,
                    "Version 2 " << (packet.version() == PROTOCOL_VERSION_2));
 
-  int session_id = session_observer_->OnSessionStartedCallback(
+  int32_t session_id = session_observer_->OnSessionStartedCallback(
       connection_id, ServiceTypeFromByte(packet.service_type()));
   if (-1 != session_id) {
     SendStartSessionAck(
@@ -658,7 +658,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
                               << " ; protocolVersion "
                               << message->protocol_version());
 
-  unsigned int maxDataSize = 0;
+  uint32_t maxDataSize = 0;
   if (PROTOCOL_VERSION_1 == message->protocol_version()) {
     maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
   } else if (PROTOCOL_VERSION_2 == message->protocol_version()) {
@@ -671,8 +671,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
         "Cannot handle message to mobile app:" << " ISessionObserver doesn't exist.");
     return;
   }
-  unsigned int connection_handle = 0;
-  unsigned char sessionID = 0;
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
   session_observer_->PairFromKey(message->connection_key(),
                                            &connection_handle, &sessionID);
 
@@ -703,8 +703,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
 }
 
 
-void ProtocolHandlerImpl::SendFramesNumber(int connection_key,
-    int number_of_frames) {
+void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
+    int32_t number_of_frames) {
   LOG4CXX_INFO(logger_, "SendFramesNumber MobileNaviAck for session "
                << connection_key);
 

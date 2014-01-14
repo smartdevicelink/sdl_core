@@ -20,7 +20,6 @@ include_directories (
 set (SOURCES
 ./src/application_manager_impl.cc
 ./src/message.cc
-./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
 ./src/message_helper.cc
@@ -135,9 +134,12 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/update_turn_list_response.cc
 ./src/commands/mobile/sync_pdata_request.cc
 ./src/commands/mobile/sync_pdata_response.cc
+./src/commands/mobile/system_request_request.cc
+./src/commands/mobile/system_request_response.cc
 ./src/commands/mobile/on_sync_pdata_notification.cc
 ./src/commands/mobile/on_keyboard_input_notification.cc
 ./src/commands/mobile/on_touch_event_notification.cc
+./src/commands/mobile/on_system_request_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES
@@ -246,10 +248,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_dtcs_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
-./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
-./src/commands/hmi/vi_subscribe_vehicle_data_response.cc
-./src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
-./src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
 ./src/commands/hmi/navi_alert_maneuver_request.cc
@@ -293,52 +291,14 @@ set (HMI_COMMANDS_SOURCES
 set (HMI_COMMANDS_SOURCES_WEBHMI
 ./src/commands/hmi/vi_get_vehicle_data_request.cc
 ./src/commands/hmi/vi_get_vehicle_data_response.cc
+./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_subscribe_vehicle_data_response.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
+./src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_QTHMI
-./src/commands/hmi/vi_get_gps_data_request.cc
-./src/commands/hmi/vi_get_gps_data_response.cc
-./src/commands/hmi/vi_get_speed_request.cc
-./src/commands/hmi/vi_get_speed_response.cc
-./src/commands/hmi/vi_get_rpm_request.cc
-./src/commands/hmi/vi_get_rpm_response.cc
-./src/commands/hmi/vi_get_fuel_level_request.cc
-./src/commands/hmi/vi_get_fuel_level_response.cc
-./src/commands/hmi/vi_get_fuel_level_state_request.cc
-./src/commands/hmi/vi_get_fuel_level_state_response.cc
-./src/commands/hmi/vi_get_instant_fuel_consumption_request.cc
-./src/commands/hmi/vi_get_instant_fuel_consumption_response.cc
-./src/commands/hmi/vi_get_external_temperature_request.cc
-./src/commands/hmi/vi_get_external_temperature_response.cc
-./src/commands/hmi/vi_get_vin_request.cc
-./src/commands/hmi/vi_get_vin_response.cc
-./src/commands/hmi/vi_get_prndl_request.cc
-./src/commands/hmi/vi_get_prndl_response.cc
-./src/commands/hmi/vi_get_tire_pressure_request.cc
-./src/commands/hmi/vi_get_tire_pressure_response.cc
-./src/commands/hmi/vi_get_odometer_request.cc
-./src/commands/hmi/vi_get_odometer_response.cc
-./src/commands/hmi/vi_get_belt_status_request.cc
-./src/commands/hmi/vi_get_belt_status_response.cc
-./src/commands/hmi/vi_get_body_information_request.cc
-./src/commands/hmi/vi_get_body_information_response.cc
-./src/commands/hmi/vi_get_device_status_request.cc
-./src/commands/hmi/vi_get_device_status_response.cc
-./src/commands/hmi/vi_get_driver_braking_request.cc
-./src/commands/hmi/vi_get_driver_braking_response.cc
-./src/commands/hmi/vi_get_wiper_status_request.cc
-./src/commands/hmi/vi_get_wiper_status_response.cc
-./src/commands/hmi/vi_get_head_lamp_status_request.cc
-./src/commands/hmi/vi_get_head_lamp_status_response.cc
-./src/commands/hmi/vi_get_engine_torque_request.cc
-./src/commands/hmi/vi_get_engine_torque_response.cc
-./src/commands/hmi/vi_get_acc_pedal_position_request.cc
-./src/commands/hmi/vi_get_acc_pedal_position_response.cc
-./src/commands/hmi/vi_get_steering_wheel_angle_request.cc
-./src/commands/hmi/vi_get_steering_wheel_angle_response.cc
-./src/commands/hmi/vi_get_my_key_request.cc
-./src/commands/hmi/vi_get_my_key_response.cc
 ./src/commands/hmi/on_vi_gps_data_notification.cc
 ./src/commands/hmi/on_vi_speed_notification.cc
 ./src/commands/hmi/on_vi_rpm_notification.cc

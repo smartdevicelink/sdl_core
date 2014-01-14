@@ -71,7 +71,7 @@ SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
   }
 }
 
-void SocketVideoStreamerAdapter::StartActivity(int application_key) {
+void SocketVideoStreamerAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::start");
 
   if (application_key == current_application_) {
@@ -86,7 +86,7 @@ void SocketVideoStreamerAdapter::StartActivity(int application_key) {
     return;
   }
 
-  int optval = 1;
+  int32_t optval = 1;
   if (-1 == setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
                        &optval, sizeof optval)) {
     LOG4CXX_ERROR_EXT(logger, "Unable to set sockopt");
@@ -127,7 +127,7 @@ void SocketVideoStreamerAdapter::StartActivity(int application_key) {
   }
 }
 
-void SocketVideoStreamerAdapter::StopActivity(int application_key) {
+void SocketVideoStreamerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::stop");
 
   if (application_key != current_application_) {
@@ -152,12 +152,12 @@ void SocketVideoStreamerAdapter::StopActivity(int application_key) {
 }
 
 bool SocketVideoStreamerAdapter::is_app_performing_activity(
-  int application_key) {
+  int32_t application_key) {
   return (application_key == current_application_);
 }
 
 void SocketVideoStreamerAdapter::SendData(
-  int application_key,
+  int32_t application_key,
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::sendData");
 
@@ -171,7 +171,7 @@ void SocketVideoStreamerAdapter::SendData(
     messages_.push(message);
   }
 
-  static int messsages_for_session = 0;
+  static int32_t messsages_for_session = 0;
   ++messsages_for_session;
 
   LOG4CXX_INFO(logger, "Handling map streaming message. This is "
@@ -266,7 +266,7 @@ bool SocketVideoStreamerAdapter::VideoStreamer::is_ready() const {
   tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 
-  int retval = 0;
+  int32_t retval = 0;
   retval = select(socket_fd_ + 1, 0, &fds, 0, &tv);
 
   if (-1 == retval) {

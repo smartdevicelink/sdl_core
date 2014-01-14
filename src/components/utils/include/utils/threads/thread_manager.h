@@ -62,7 +62,7 @@ class UnnamedThreadRegistry {
  private:
   typedef std::map<PlatformThreadHandle, std::string> IdNameMap;
   IdNameMap id_number_;
-  int last_thread_number_;
+  int32_t last_thread_number_;
   sync_primitives::Lock state_lock_;
 };
 

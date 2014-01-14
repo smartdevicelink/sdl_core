@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.0)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -120,18 +120,31 @@ if(NOT PYTHONINTERP_FOUND)
     message(ERROR "sudo apt-get install python")
 endif(NOT PYTHONINTERP_FOUND)
 
-if (${HMI2} AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-# ---Qt5 necessary libs
-    FIND_PACKAGE(Qt5Core REQUIRED)
-    FIND_PACKAGE(Qt5DBus REQUIRED)
-    FIND_PACKAGE(Qt5Qml REQUIRED)
-    FIND_PACKAGE(Qt5Quick REQUIRED)
-endif()
+if (${HMI2})
+    cmake_minimum_required(VERSION 2.8.9)
+    if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+        set(qt_version "4.8.5")
+    else ()
+        set(qt_version "5.1.0")
+    endif ()
 
-execute_process(
-  COMMAND ${CMAKE_SOURCE_DIR}/FindQt5.sh binary qmlplugindump
-  OUTPUT_VARIABLE qmlplugindump_binary
-)
+    execute_process(
+        COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
+            OUTPUT_VARIABLE qt_bin_dir
+    )
+    message(STATUS "Binary directory Qt ${qt_version} is ${qt_bin_dir}")
+    set(ENV{PATH} ${qt_bin_dir}:$ENV{PATH})
+
+    if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+        find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
+    else ()
+        find_package(Qt5Core REQUIRED)
+        find_package(Qt5DBus REQUIRED)
+        find_package(Qt5Qml REQUIRED)
+        find_package(Qt5Quick REQUIRED)
+        set(qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
+    endif ()
+endif()
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
@@ -173,15 +186,6 @@ macro(create_test NAME SOURCES LIBS)
 endmacro(create_test)
 
 # Building application
-
-# --- Type HMI
-if (${HMI2})
-    set(QT_HMI ON)
-    add_definitions(-DQT_HMI)
-else (${HMI2})
-    set(WEB_HMI ON)
-    add_definitions(-DWEB_HMI)
-ENDIF (${HMI2})
 
 # --- Type HMI
 if (${HMI2})

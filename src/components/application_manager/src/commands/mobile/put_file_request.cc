@@ -79,7 +79,7 @@ void PutFileRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  const std::vector<unsigned char> file_data =
+  const std::vector<uint8_t> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
   std::string relative_file_path =

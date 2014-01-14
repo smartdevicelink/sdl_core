@@ -33,45 +33,45 @@
  */
 
 #ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H
+#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H_
 
-#include <QDBusContext>
+#include <QtDBus/QDBusContext>
 #include "optional_argument.h"
 #include "stream_qvariant.h"
 
-enum ErrorCode
-{
-	Success = 0,
-	UnsupportedRequest,
-	UnsupportedResource,
-	Disallowed,
-	Rejected,
-	Aborted,
-	Ignored,
-	Retry,
-	InUse,
-	DataNotAvailable,
-	TimedOut,
-	InvalidData,
-	CharLimitExceeded,
-	InvalidId,
-	DuplicateName,
-	ApplicationNotRegistered,
-	WrongLanguage,
-	OutOfMemory,
-	TooManyPendingRequests,
-	NoAppsRegistered,
-	NoDevicesConnected,
-	Warnings,
-	GenericError,
-	UserDisallowed
+enum ErrorCode {
+  Success = 0,
+  UnsupportedRequest,
+  UnsupportedResource,
+  Disallowed,
+  Rejected,
+  Aborted,
+  Ignored,
+  Retry,
+  InUse,
+  DataNotAvailable,
+  TimedOut,
+  InvalidData,
+  CharLimitExceeded,
+  InvalidId,
+  DuplicateName,
+  ApplicationNotRegistered,
+  WrongLanguage,
+  OutOfMemory,
+  TooManyPendingRequests,
+  NoAppsRegistered,
+  NoDevicesConnected,
+  Warnings,
+  GenericError,
+  UserDisallowed
 };
 
 inline void RaiseDbusError(QObject* adaptor, int code) {
-    QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());
-    if (context) {
-        context->sendErrorReply(QDBusError::InternalError, QString::number(static_cast<int>(code)));
-    }
+  QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());
+  if (context) {
+    context->sendErrorReply(QDBusError::InternalError,
+                            QString::number(static_cast<int>(code)));
+  }
 }
 
 template<typename T>
@@ -104,12 +104,10 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, bool& v) {
 }
 
 inline bool isNumber(QVariant v) {
-    QVariant::Type t = v.type();
-    return (t == QVariant::Double) ||
-           (t == QVariant::Int) ||
-           (t == QVariant::UInt) ||
-           (t == QVariant::LongLong) ||
-           (t == QVariant::ULongLong);
+  QVariant::Type t = v.type();
+  return (t == QVariant::Double) || (t == QVariant::Int) ||
+         (t == QVariant::UInt)   || (t == QVariant::LongLong) ||
+         (t == QVariant::ULongLong);
 }
 
 inline bool GetArgFromMap(const QVariantMap& map, const char* name, double& v) {
@@ -152,16 +150,16 @@ inline QVariant ValueToVariant(const T& v) {
 template<typename T>
 inline QVariant ValueToVariant(const QList<T>& v) {
   QList<QVariant> list;
-  for(typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
-      list.append(ValueToVariant(*i));
+  for (typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
+    list.append(ValueToVariant(*i));
   return QVariant::fromValue(list);
 }
 
 template<typename T>
 inline void PutArgToMap(QVariantMap& map, const char* name, const QList<T>& v) {
   QList<QVariant> list;
-  for(typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
-      list.append(ValueToVariant(*i));
+  for (typename QList<T>::const_iterator i = v.begin(); i != v.end(); ++i)
+    list.append(ValueToVariant(*i));
   map.insert(name, QVariant::fromValue(list));
 }
 
@@ -172,7 +170,7 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, QList<T>& v)
   const QVariant& variant = *it;
   if (variant.type() != QVariant::List) return false;
   QList<QVariant> list = variant.toList();
-  for(QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {
+  for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {
     T t;
     bool ok = VariantToValue(*i, t);
     if (!ok) return false;
@@ -182,14 +180,15 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, QList<T>& v)
 }
 
 template<typename T>
-inline void PutArgToMap(QVariantMap& map, const char* name, const OptionalArgument<T>& v) {
-    if (v.presence)
-      map.insert(name, ValueToVariant(v.val));
+inline void PutArgToMap(QVariantMap& map, const char* name,
+                        const OptionalArgument<T>& v) {
+  if (v.presence)
+    map.insert(name, ValueToVariant(v.val));
 }
 
-
 template<typename T>
-inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgument<T>& v) {
+inline bool GetArgFromMap(const QVariantMap& map, const char* name,
+                          OptionalArgument<T>& v) {
   QVariantMap::const_iterator it = map.find(name);
   if (map.end() == it || !it->isValid()) {
     v.presence = false;
@@ -199,4 +198,4 @@ inline bool GetArgFromMap(const QVariantMap& map, const char* name, OptionalArgu
   return GetArgFromMap(map, name, v.val);
 }
 
-#endif // QML_DBUS_COMMON_H
+#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_QML_DBUS_COMMON_H_

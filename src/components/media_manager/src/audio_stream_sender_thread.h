@@ -78,7 +78,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @param correlation_id  Correlation id for response for Mobile side
      */
     AudioStreamSenderThread(const std::string fileName,
-                            unsigned int session_key);
+                            uint32_t session_key);
 
     /*
      * @brief AudioStreamSenderThread class destructor
@@ -95,7 +95,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      *
      * @return Stored session key
      */
-    unsigned int session_key() const;
+    uint32_t session_key() const;
 
     bool exitThreadMain();
 
@@ -118,13 +118,13 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     bool getShouldBeStopped();
     void setShouldBeStopped(bool should_stop);
 
-    unsigned int session_key_;
+    uint32_t session_key_;
     const std::string fileName_;
-    int offset_;
+    int32_t offset_;
     bool shouldBeStoped_;
     sync_primitives::Lock shouldBeStoped_lock_;
 
-    static const int kAudioPassThruTimeout;
+    static const int32_t kAudioPassThruTimeout;
     static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);

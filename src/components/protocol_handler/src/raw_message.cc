@@ -39,9 +39,9 @@
 
 namespace protocol_handler {
 
-RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
-                       unsigned char* data_param, unsigned int data_sz,
-                       unsigned char type)
+RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
+                       uint8_t* data_param, uint32_t data_sz,
+                       uint8_t type)
   : connection_key_(connectionKey),
     protocol_version_(protocolVersion),
     service_type_(ServiceTypeFromByte(type)),
@@ -49,8 +49,8 @@ RawMessage::RawMessage(int connectionKey, unsigned int protocolVersion,
     fully_binary_(false),
     data_size_(data_sz) {
   if (data_sz > 0) {
-    data_ = new unsigned char[data_sz];
-    for (unsigned int i = 0; i < data_sz; ++i) {
+    data_ = new uint8_t[data_sz];
+    for (uint32_t i = 0; i < data_sz; ++i) {
       data_[i] = data_param[i];
     }
   } else {
@@ -65,23 +65,23 @@ RawMessage::~RawMessage() {
   }
 }
 
-int RawMessage::connection_key() const {
+int32_t RawMessage::connection_key() const {
   return connection_key_;
 }
 
-void RawMessage::set_connection_key(unsigned int key) {
+void RawMessage::set_connection_key(uint32_t key) {
   connection_key_ = key;
 }
 
-unsigned char* RawMessage::data() const {
+uint8_t* RawMessage::data() const {
   return data_;
 }
 
-unsigned int RawMessage::data_size() const {
+uint32_t RawMessage::data_size() const {
   return data_size_;
 }
 
-unsigned int RawMessage::protocol_version() const {
+uint32_t RawMessage::protocol_version() const {
   return protocol_version_;
 }
 

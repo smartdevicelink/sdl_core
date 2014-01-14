@@ -53,7 +53,7 @@ string demangle(const char* symbol) {
   char temp[2048];
   if (1 == sscanf(symbol, "%*[^(]%*[^_]%2047[^)+]", temp)) {
     size_t size;
-    int status;
+    int32_t status;
     char* demangled = abi::__cxa_demangle(temp, NULL, &size, &status);
     if (demangled != NULL) {
       string result(demangled);
@@ -65,13 +65,13 @@ string demangle(const char* symbol) {
 }
 }
 
-Backtrace::Backtrace(int count, int skip_top)
+Backtrace::Backtrace(int32_t count, int32_t skip_top)
     : thread_id_(threads::Thread::CurrentId()) {
-  int skip = skip_top + 1; // Skip this constructor
+  int32_t skip = skip_top + 1; // Skip this constructor
   vector<void*> full_trace (count + skip);
-  int captured = backtrace(&full_trace.front(), count + skip);
-  int first_call = std::min(captured, skip);
-  int last_call = std::min(first_call + count, captured);
+  int32_t captured = backtrace(&full_trace.front(), count + skip);
+  int32_t first_call = std::min(captured, skip);
+  int32_t last_call = std::min(first_call + count, captured);
   backtrace_.assign(full_trace.begin() + first_call, full_trace.begin() + last_call);
 }
 

@@ -14,7 +14,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private final Object LOCK = new Object();
     //
     private int interval;
-    private IHeartbeatMonitorDelegate delegate;
+    private IHeartbeatMonitorListener delegate;
     private boolean ackReceived;
     private Thread heartbeatThread;
     private Looper heartbeatThreadLooper;
@@ -139,13 +139,13 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     }
 
     @Override
-    public IHeartbeatMonitorDelegate getDelegate() {
+    public IHeartbeatMonitorListener getListener() {
         return delegate;
     }
 
     @Override
-    public void setDelegate(IHeartbeatMonitorDelegate delegate) {
-        this.delegate = delegate;
+    public void setListener(IHeartbeatMonitorListener listener) {
+        this.delegate = listener;
     }
 
     @Override

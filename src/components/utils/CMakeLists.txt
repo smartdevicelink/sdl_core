@@ -24,5 +24,9 @@ if (BUILD_BACKTRACE_SUPPORT)
 endif()
 
 add_library("Utils" ${SOURCES})
-target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
 
+IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+	target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
+else()
+	target_link_libraries ("Utils" log4cxx apr-1 aprutil-1 rt)
+endif()

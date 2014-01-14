@@ -60,7 +60,7 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     // The Sample format to use
     static const pa_sample_spec sSampleFormat_;
 
-    const int BUFSIZE_;
+    const int32_t BUFSIZE_;
     pa_simple* s_in, *s_out;
     std::string device_;
     bool should_be_stopped_;
@@ -75,7 +75,7 @@ A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter() {
 }
 
 A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
-  for (std::map<int, threads::Thread*>::iterator it = sources_.begin();
+  for (std::map<int32_t, threads::Thread*>::iterator it = sources_.begin();
        sources_.end() != it;
        ++it) {
     if (NULL != it->second) {
@@ -88,13 +88,13 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
   sources_.clear();
 }
 
-void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
+void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_INFO(logger_, "Starting a2dp playing music for "
                << application_key << " application.");
   if (application_key != current_application_) {
     current_application_ = application_key;
 
-    std::map<int, threads::Thread*>::iterator it =
+    std::map<int32_t, threads::Thread*>::iterator it =
       sources_.find(application_key);
     if (sources_.end() != it) {
       if (NULL != it->second && !it->second->is_running()) {
@@ -103,7 +103,7 @@ void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
         current_application_ = 0;
       }
     } else {
-      unsigned int device_id = 0;
+      uint32_t device_id = 0;
       connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
         application_key, 0, NULL, &device_id);
       std::string mac_adddress;
@@ -121,7 +121,7 @@ void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
         mac_adddress.c_str(),
         new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress));
       if (NULL != new_activity) {
-        sources_.insert(std::pair<int, threads::Thread*>(
+        sources_.insert(std::pair<int32_t, threads::Thread*>(
                           application_key, new_activity));
 
         new_activity->start();
@@ -132,13 +132,13 @@ void A2DPSourcePlayerAdapter::StartActivity(int application_key) {
   }
 }
 
-void A2DPSourcePlayerAdapter::StopActivity(int application_key) {
+void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger_, "Stopping 2dp playing for "
                << application_key << " application.");
   if (application_key != current_application_) {
     return;
   }
-  std::map<int, threads::Thread*>::iterator it =
+  std::map<int32_t, threads::Thread*>::iterator it =
     sources_.find(application_key);
   if (sources_.end() != it) {
     LOG4CXX_DEBUG(logger_, "Source exists.");
@@ -154,7 +154,7 @@ void A2DPSourcePlayerAdapter::StopActivity(int application_key) {
   }
 }
 
-bool A2DPSourcePlayerAdapter::is_app_performing_activity(int application_key) {
+bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t application_key) {
   return (application_key == current_application_);
 }
 
@@ -200,7 +200,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
     should_be_stopped_ = false;
   }
 
-  int error;
+  int32_t error;
 
   const char* a2dpSource = device_.c_str();
 

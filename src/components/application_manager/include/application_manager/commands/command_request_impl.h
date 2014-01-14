@@ -112,22 +112,6 @@ class CommandRequestImpl : public CommandImpl,
                     const NsSmart::SmartObject* response_params = NULL) const;
 
   /*
-   * @brief Creates HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   * @param require_chaining Indicate if response from HMI is required
-   * before sending response to Mobile
-   * @param chaining counter Indicate amount of HMI responses should arrived
-   * before sending response to Mobile
-   *
-   */
-  void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                        const NsSmart::SmartObject& msg_params,
-                        bool require_chaining = false,
-                        unsigned int chaining_counter = 0);
-
-  /*
    * @brief Sends HMI request
    *
    * @param function_id HMI request ID

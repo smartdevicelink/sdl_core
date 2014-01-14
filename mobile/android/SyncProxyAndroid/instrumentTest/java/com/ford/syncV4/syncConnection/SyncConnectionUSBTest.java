@@ -35,6 +35,7 @@ public class SyncConnectionUSBTest extends TestCase {
 
             @Override
             public void onServerSocketInit(int serverSocketPort) {
+
             }
         };
 
