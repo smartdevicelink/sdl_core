@@ -75,26 +75,23 @@ class ConnectionHandlerObserver {
 
     /**
      * \brief Callback function used by connection_handler
-     * when Mobile Application initiates start of new session.
+     * when Mobile Application initiates start of new service.
      * \param deviceHandle Device identifier within which session has to be started.
      * \param sessionKey Key of started session.
-     * \param firstSessionKey Session key of first session in this connection.
+     * \param type Established service type
      */
-    virtual bool OnSessionStartedCallback(
+    virtual bool OnServiceStartedCallback(
         connection_handler::DeviceHandle device_handle, int32_t session_key,
-        int32_t first_session_key,
         protocol_handler::ServiceType type =
             protocol_handler::kRpc) = 0;
 
     /**
      * \brief Callback function used by connection_handler
-     * when Mobile Application initiates session ending.
+     * when Mobile Application initiates service ending.
      * \param sessionKey Key of session which should be ended
-     * \param firstSessionKey Session key of first session in this connection
      */
-    virtual void OnSessionEndedCallback(
+    virtual void OnServiceEndedCallback(
       int32_t session_key,
-      int32_t first_session_key,
       protocol_handler::ServiceType type =
           protocol_handler::kRpc) = 0;
 

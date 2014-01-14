@@ -76,7 +76,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Destructor
      */
-    ~ConnectionHandlerImpl();
+    virtual ~ConnectionHandlerImpl();
 
     /**
      * \brief Sets observer pointer for connection_handler.
@@ -137,10 +137,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session has to be started.
+     * \param sessionId Identifier of the session to be ended
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
+      uint8_t session_id,
       protocol_handler::ServiceType service_type);
 
     /**

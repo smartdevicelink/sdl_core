@@ -72,7 +72,7 @@ void OnTTSLanguageChangeNotification::Run() {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
-    if (app->language()
+    if (static_cast<int>(app->language())
         != (*message_)[strings::msg_params][strings::language].asInt()) {
       app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
 
