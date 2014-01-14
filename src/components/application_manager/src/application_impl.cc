@@ -236,7 +236,7 @@ bool ApplicationImpl::has_been_activated() const {
 }
 
 bool ApplicationImpl::AddFile(const std::string& file_name,
-                              bool is_persistent) {
+                              bool is_persistent, bool is_fully_obtained) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
       app_files_.end() != it;
       ++it) {
@@ -244,9 +244,23 @@ bool ApplicationImpl::AddFile(const std::string& file_name,
       return false;
     }
   }
-  AppFile app_file(file_name, is_persistent);
+  AppFile app_file(file_name, is_persistent,is_fully_obtained);
   app_files_.push_back(app_file);
   return true;
+}
+
+bool ApplicationImpl::UpdateFile(const std::string &file_name, bool is_persistent, bool is_fully_obtained)
+{
+  for (std::vector<AppFile>::iterator it = app_files_.begin();
+      app_files_.end() != it;
+      ++it) {
+    if (0 == file_name.compare(it->file_name)) {
+      it->is_persistent = is_persistent;
+      it->is_fully_obtained = is_fully_obtained;
+      return true;
+    }
+  }
+  return false;
 }
 
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {

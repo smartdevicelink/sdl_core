@@ -363,7 +363,15 @@ class Application : public virtual InitialApplicationData,
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
 
-    virtual bool AddFile(const std::string& file_name, bool is_persistent) = 0;
+    virtual bool AddFile(const std::string& file_name, bool is_persistent, bool is_fully_obtained) = 0;
+    /**
+     * @brief Updates fields of existing file
+     * @param file_name File name, that need to update
+     * @param is_persistent Bollean describes is file persistent?
+     * @param is_fully_obtained Bollean describes is file downloaded fully on need to finish downloading?
+     * @return TRUE if file exist and updated sucsesfuly, othervise return false
+     */
+    virtual bool UpdateFile(const std::string& file_name, bool is_persistent, bool is_fully_obtained) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
 
     virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;

@@ -46,7 +46,6 @@
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "policies/policy_manager.h"
 
 namespace application_manager {
@@ -1522,21 +1521,36 @@ void ApplicationManagerImpl::SaveApplications() const {
   file.close();
 }
 
-mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
-                            const std::string& app_name,
-                            const std::vector<uint8_t>& binary_data,
-                            const std::string& save_path) {
-
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
+														    const std::vector<uint8_t>& binary_data,
+                                                            const std::string& save_path,
+                                                            const uint32_t offset) {
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
+						 << binary_data.size());
+  uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
+  std::ofstream* file_stream;
+  if (offset != 0) {
+      if (file_size!=offset) {
+          LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+          return mobile_apis::Result::INVALID_DATA;
+        }
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::app);
+    }  else {
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+       // if offset == 0: rewrite file
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::out);
+    }
 
-  LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
-
-  if (!file_system::Write(file_system::FullPath(save_path), binary_data)) {
-    return mobile_apis::Result::GENERIC_ERROR;
-  }
-
+  if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
+      file_stream->close();
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+  file_stream->close();
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }

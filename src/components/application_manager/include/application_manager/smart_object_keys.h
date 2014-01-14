@@ -147,6 +147,9 @@ const char space_available[] = "spaceAvailable";
 const char image_type[] = "imageType";
 const char image[] = "image";
 const char type[] = "type";
+const char system_file[] = "systemFile";
+const char offset[] = "offset";
+const char length[] = "length";
 
 const char filenames[] = "filenames";
 

@@ -44,12 +44,14 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 
 struct AppFile {
-  AppFile(const std::string& name, bool persistent)
+  AppFile(const std::string& name, bool persistent, bool fully_obtained)
       : is_persistent(persistent),
+        is_fully_obtained(fully_obtained),
         file_name(name) {
   }
   std::string file_name;
   bool is_persistent;
+  bool is_fully_obtained;
 };
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
@@ -103,7 +105,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
 
-  bool AddFile(const std::string& file_name, bool is_persistent);
+  bool AddFile(const std::string& file_name, bool is_persistent, bool is_fully_obtained);
+  bool UpdateFile(const std::string& file_name, bool is_persistent, bool is_fully_obtained);
+
   bool DeleteFile(const std::string& file_name);
 
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
