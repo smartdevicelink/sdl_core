@@ -136,7 +136,7 @@ void PutFileRequest::Run() {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(sync_file_name, is_persistent_file,false)) {
           LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist) ");
-          //TODO: Is it coorectly to response GENERIC_ERROR if file already exist?
+          //TODO: Is it correctly to response GENERIC_ERROR if file already exist?
           SendResponse(false,mobile_apis::Result::GENERIC_ERROR);
           return;
         }
@@ -145,7 +145,7 @@ void PutFileRequest::Run() {
       if (offset + binary_data.size() == length) {
         LOG4CXX_INFO(logger_, "File is Fully downloaded");
         if (!application->UpdateFile(sync_file_name, is_persistent_file,true)) {
-          // If it is impossible to update file, appication doesn't know about existing this file
+          // If it is impossible to update file, application doesn't know about existing this file
           SendResponse(false,mobile_apis::Result::INVALID_DATA);
           return;
         }
