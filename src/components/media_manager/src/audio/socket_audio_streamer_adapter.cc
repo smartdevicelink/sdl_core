@@ -30,31 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <string.h>
 #include "config_profile/profile.h"
-#include "media_manager/video/socket_video_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
 
 namespace media_manager {
 
 namespace {
 log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketAudioStreamerAdapter"));
 }
 
-SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
-  port _ = profile::Profile::instance()->audio_streaming_port();
+
+SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
+  LOG4CXX_INFO(logger, "SocketAudioStreamerAdapter::SocketAudioStreamerAdapter");
+  port_ = profile::Profile::instance()->audio_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
 }
 
-SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
+SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {
 }
 
 }  // namespace media_manager

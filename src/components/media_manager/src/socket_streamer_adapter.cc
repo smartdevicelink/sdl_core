@@ -55,7 +55,7 @@ SocketStreamerAdapter::SocketStreamerAdapter()
     messages_(),
     delegate_(NULL),
     thread_(NULL) {
-  delegate_ = new VideoStreamer(this);
+  delegate_ = new Streamer(this);
   if (delegate_) {
     thread_ = new threads::Thread("SocketStreamerAdapter", delegate_);
   }
@@ -182,7 +182,7 @@ void SocketStreamerAdapter::SendData(
   }
 }
 
-SocketStreamerAdapter::VideoStreamer::VideoStreamer(
+SocketStreamerAdapter::Streamer::Streamer(
   SocketStreamerAdapter* const server)
   : server_(server),
     socket_fd_(0),
@@ -191,12 +191,12 @@ SocketStreamerAdapter::VideoStreamer::VideoStreamer(
     stop_flag_(false) {
 }
 
-SocketStreamerAdapter::VideoStreamer::~VideoStreamer() {
+SocketStreamerAdapter::Streamer::~Streamer() {
   stop();
 }
 
-void SocketStreamerAdapter::VideoStreamer::threadMain() {
-  LOG4CXX_INFO(logger, "VideoStreamer::threadMain");
+void SocketStreamerAdapter::Streamer::threadMain() {
+  LOG4CXX_INFO(logger, "Streamer::threadMain");
 
   while (!stop_flag_) {
     socket_fd_ = accept(server_->socket_, NULL, NULL);
@@ -225,15 +225,15 @@ void SocketStreamerAdapter::VideoStreamer::threadMain() {
   }
 }
 
-bool SocketStreamerAdapter::VideoStreamer::exitThreadMain() {
-  LOG4CXX_INFO(logger, "VideoStreamer::exitThreadMain");
+bool SocketStreamerAdapter::Streamer::exitThreadMain() {
+  LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
   stop_flag_ = true;
   stop();
   return true;
 }
 
-void SocketStreamerAdapter::VideoStreamer::stop() {
-  LOG4CXX_INFO(logger, "VideoStreamer::stop");
+void SocketStreamerAdapter::Streamer::stop() {
+  LOG4CXX_INFO(logger, "Streamer::stop");
 
   is_client_connected_ = false;
   if (!socket_fd_) {
@@ -253,8 +253,8 @@ void SocketStreamerAdapter::VideoStreamer::stop() {
   socket_fd_ = -1;
 }
 
-bool SocketStreamerAdapter::VideoStreamer::is_ready() const {
-  LOG4CXX_INFO(logger, "VideoStreamer::is_ready");
+bool SocketStreamerAdapter::Streamer::is_ready() const {
+  LOG4CXX_INFO(logger, "Streamer::is_ready");
 
   bool result = true;
   fd_set fds;
@@ -278,7 +278,7 @@ bool SocketStreamerAdapter::VideoStreamer::is_ready() const {
   return result;
 }
 
-bool SocketStreamerAdapter::VideoStreamer::send(
+bool SocketStreamerAdapter::Streamer::send(
   const protocol_handler::RawMessagePtr& msg) {
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
@@ -306,7 +306,7 @@ bool SocketStreamerAdapter::VideoStreamer::send(
     return false;
   }
 
-  LOG4CXX_INFO(logger, "VideoStreamer::sent " << (*msg).data_size());
+  LOG4CXX_INFO(logger, "Streamer::sent " << (*msg).data_size());
   return true;
 }
 

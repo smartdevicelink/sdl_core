@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_STREAMER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_STREAMER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_
 
 #include <string>
 #include "media_manager/media_adapter_impl.h"
@@ -57,19 +57,19 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     std::string ip_;
 
   private:
-    class VideoStreamer : public threads::ThreadDelegate {
+    class Streamer : public threads::ThreadDelegate {
       public:
         /*
          * Default constructor
          *
          * @param server  Server pointer
          */
-        explicit VideoStreamer(SocketStreamerAdapter* const server);
+        explicit Streamer(SocketStreamerAdapter* const server);
 
         /*
          * Destructor
          */
-        ~VideoStreamer();
+        ~Streamer();
 
         /*
          * Function called by thread on start
@@ -108,12 +108,12 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
 
-        DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
+        DISALLOW_COPY_AND_ASSIGN(Streamer);
     };
 
     int32_t socket_;
     bool is_ready_;
-    VideoStreamer* delegate_;
+    Streamer* delegate_;
     threads::Thread* thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
@@ -122,4 +122,4 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
 }  //  namespace media_manager
 
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_STREAMER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_

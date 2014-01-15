@@ -30,21 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <string.h>
 #include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
+namespace {
+log4cxx::LoggerPtr logger =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
+}
+
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
+  LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::SocketVideoStreamerAdapter");
   port_ = profile::Profile::instance()->video_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
 }

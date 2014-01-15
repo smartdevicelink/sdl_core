@@ -30,10 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include "utils/logger.h"
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #include "config_profile/profile.h"
 

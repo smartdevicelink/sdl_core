@@ -12,6 +12,7 @@ set(default_sources
     ./src/audio/a2dp_source_player_adapter.cc
     ./src/audio/from_mic_recorder_adapter.cc
     ./src/audio/from_mic_to_file_recorder_thread.cc
+    ./src/audio/socket_audio_streamer_adapter.cc
     ./src/audio/pipe_audio_streamer_adapter.cc
     ./src/video/socket_video_streamer_adapter.cc
     ./src/video/pipe_video_streamer_adapter.cc
