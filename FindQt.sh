@@ -51,7 +51,9 @@ version2int() {
 }
 
 version_match() {
-  if [[ $(version2int $1) == $(version2int $2) ]]; then
+  v1=$(version2int $1)
+  v2=$(version2int $2)
+  if [[ ( $v1 -le $v2 ) && ( $(( ($v1 / 1024) - ($v2 / 1024) )) == 0 ) ]]; then
     return 0;
   else
     return 1;
@@ -81,11 +83,12 @@ find_file() {
 }
 
 type=file
+version="0.0.0"
 while getopts :v:b option; do
   case "$option" in
     v) version=$OPTARG ;;
     b) type=binary ;;
-    *) usage exit 1 ;;
+    *) usage; exit 1; ;;
   esac
 done
 
@@ -97,38 +100,39 @@ else
 fi
 
 ## First attempt - using locate
-if [[ $(command -v locate) ]]; then
-  qmake_list=$(locate bin/qmake)
-  for qmake in $qmake_list; do
-    if [[ ! -x $qmake || -d $qmake ]]; then
-      continue
-    fi
-    # called with "qmake 1" return qmake version
-    qt_version=$(qmake_data $qmake 1)
-    # TODO(KKolodiy): add checking not full version (see function version_match)
-    if [[ -n $version && $version != $qt_version ]]; then
-      continue
-    fi
+if  ! command -v locate > /dev/null; then
+  for searchloc in $CUSTOM_QT_DIR ~ /opt /usr; do
+    qmake_list=$(locate $searchloc/*/bin/qmake)
+    for qmake in $qmake_list; do
+      if [[ ! -x $qmake || -d $qmake ]]; then
+        continue
+      fi
+      # called with "qmake 1" return qmake version
+      qt_version=$(qmake_data $qmake 1)
+      if ! version_match $version $qt_version; then
+        continue
+      fi
 
-    case $type in
-      binary)
-        qt_dir=$(dirname $qmake)
-        if find_binary $qt_dir $file_name; then
+      case $type in
+        binary)
+          qt_dir=$(dirname $qmake 2> /dev/null)
+          if find_binary $qt_dir $file_name; then
+            exit 0
+          fi
+          ;;
+        file)
+          # called with "qmake 2" return Qt installation dir
+          qt_installdir=$(qmake_data $qmake 2)
+          if find_file $qt_installdir $file_name; then
+            exit 0
+          fi
+          ;;
+        bindir)
+          echo -n $(dirname $qmake 2>/dev/null)
           exit 0
-        fi
-        ;;
-      file)
-        # called with "qmake 2" return Qt installation dir
-        qt_installdir=$(qmake_data $qmake 2)
-        if find_file $qt_installdir $file_name; then
-          exit 0
-        fi
-        ;;
-      bindir)
-        echo -n $(dirname $qmake)
-        exit 0
-        ;;
-    esac
+          ;;
+      esac
+    done
   done
 fi
 
@@ -137,10 +141,33 @@ export -f find_file
 export -f qmake_data
 export -f version_match
 export -f version2int
-if find -L $CUSTOM_QT_DIR ~ /opt /usr -name '.*' -prune \
+
+qmake=$(find -L ~ -name '.*' -prune \
         -o -name qmake -type f \
         -executable \
-        -exec /bin/bash -c "find_file \$0 $type $file_name" {} \; -quit 2>/dev/null; then
-   exit 0;
+        -exec /bin/bash -c "version_qt=\$(qmake_data {} 1);version_match $version \$version_qt" {} \; -print -quit)
+if ! [ $? ]; then
+   exit 1;
 fi
-exit 1
+
+case $type in
+  binary)
+    qt_dir=$(dirname $qmake 2>/dev/null)
+    if find_binary $qt_dir $file_name; then
+      exit 0
+    fi
+    ;;
+  file)
+    # called with "qmake 2" return Qt installation dir
+    qt_installdir=$(qmake_data $qmake 2)
+    if find_file $qt_installdir $file_name; then
+      exit 0
+    fi
+    ;;
+  bindir)
+    echo -n $(dirname $qmake 2>/dev/null)
+    exit 0
+    ;;
+esac
+
+exit 0
