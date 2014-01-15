@@ -50,7 +50,7 @@ log4cxx::LoggerPtr logger =
 }
 
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
-  port_ = profile::Profile::instance()->audio_streaming_port();
+  port _ = profile::Profile::instance()->audio_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
 }
 

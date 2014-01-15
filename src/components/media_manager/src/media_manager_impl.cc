@@ -38,6 +38,7 @@
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #else
@@ -102,9 +103,9 @@ void MediaManagerImpl::Init() {
     video_streamer_ = new PipeVideoStreamerAdapter();
   }
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
-    // video_streamer_ = new SocketAudioStreamerAdapter();
+    audio_streamer_ = new SocketAudioStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
-    video_streamer_ = new PipeAudioStreamerAdapter();
+    audio_streamer_ = new PipeAudioStreamerAdapter();
   }
 #else
   video_streamer_ = new VideoStreamToFileAdapter(
@@ -117,7 +118,7 @@ void MediaManagerImpl::Init() {
     video_streamer_->AddListener(video_streamer_listener_);
   }
 
-  if (NULL != video_streamer_) {
+  if (NULL != audio_streamer_) {
     audio_streamer_->AddListener(audio_streamer_listener_);
   }
 }
