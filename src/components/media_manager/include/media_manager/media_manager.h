@@ -46,6 +46,8 @@ class MediaManager {
     virtual void StopMicrophoneRecording(int32_t application_key) = 0;
     virtual void StartVideoStreaming(int32_t application_key) = 0;
     virtual void StopVideoStreaming(int32_t application_key) = 0;
+
+    virtual ~MediaManager(){}
 };
 }  // namespace media_manager
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_

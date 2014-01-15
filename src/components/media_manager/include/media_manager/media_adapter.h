@@ -42,6 +42,8 @@ class MediaAdapter {
     virtual void StartActivity(int32_t application_key) = 0;
     virtual void StopActivity(int32_t application_key) = 0;
     virtual bool is_app_performing_activity(int32_t application_key) = 0;
+
+    virtual ~MediaAdapter(){}
 };
 
 }  // namespace media_manager
