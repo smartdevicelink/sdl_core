@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/put_file_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 
@@ -76,11 +75,35 @@ void PutFileRequest::Run() {
     return;
   }
 
+  if (!(*message_)[strings::msg_params].keyExists(strings::sync_file_name)) {
+    LOG4CXX_ERROR(logger_, "No file name");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if (!(*message_)[strings::msg_params].keyExists(strings::file_type)) {
+    LOG4CXX_ERROR(logger_, "No file type");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
+  const std::string& file_type =
+      (*message_)[strings::msg_params][strings::file_type].asString();
 
-  const std::vector<uint8_t> file_data =
+  const std::vector<uint8_t> binary_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
+
+  uint32_t offset = 0;
+  if ((*message_)[strings::params].keyExists(strings::offset)) {
+      offset =
+            (*message_)[strings::msg_params][strings::offset].asInt();
+    }
+  uint32_t length = binary_data.size();
+  if ((*message_)[strings::params].keyExists(strings::length)) {
+      length =
+            (*message_)[strings::msg_params][strings::length].asInt();
+     }
 
   std::string relative_file_path =
       file_system::CreateDirectory(application->name());
@@ -90,22 +113,51 @@ void PutFileRequest::Run() {
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(
           application->name(),
-          file_data,
-          relative_file_path);
+          binary_data,
+          relative_file_path,
+          offset);
 
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
       bool is_persistent_file = false;
+      bool is_system_file = false;
 
       if ((*message_)[strings::msg_params].
           keyExists(strings::persistent_file)) {
-
         is_persistent_file =
             (*message_)[strings::msg_params][strings::persistent_file].asBool();
       }
-
-      application->AddFile(sync_file_name, is_persistent_file);
-      application->increment_put_file_in_none_count();
+      if ((*message_)[strings::msg_params].
+          keyExists(strings::system_file)) {
+        is_system_file =
+            (*message_)[strings::msg_params][strings::system_file].asBool();
+      }
+      if (offset == 0) {
+        LOG4CXX_INFO(logger_, "New file downloading");
+        if (!application->AddFile(sync_file_name, is_persistent_file,false)) {
+          LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
+          // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
+          if (!application->UpdateFile(sync_file_name, is_persistent_file,false)) {
+            // If it is impossible to update file, application doesn't know about existing this file
+            SendResponse(false,mobile_apis::Result::INVALID_DATA);
+            return;
+          }
+        }  else {
+          /* if file aded - increment it's count ( may be application->AddFile have to incapsulate it? )
+           *Any way now this method evals not only in "none"*/
+          application->increment_put_file_in_none_count();
+        }
+      }
+      if (offset + binary_data.size() == length) {
+        LOG4CXX_INFO(logger_, "File is Fully downloaded");
+        if (!application->UpdateFile(sync_file_name, is_persistent_file,true)) {
+          // If it is impossible to update file, application doesn't know about existing this file
+          SendResponse(false,mobile_apis::Result::INVALID_DATA);
+          return;
+        }
+      } else {
+        //TODO: Maybe need to save in AppFile information about downloading progress
+      }
       SendResponse(true, save_result);
       break;
     }

@@ -426,13 +426,15 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param binary file name
      * @param binary data
      * @param path for saving data
+     * @param offset for saving data to existing file with offset. If offset is 0 - create new file ( overrite existing )
      *
      * @return SUCCESS if file was saved, other code otherwise
      */
     mobile_apis::Result::eType SaveBinary(
                                 const std::string& app_name,
                                 const std::vector<uint8_t>& binary_data,
-                                const std::string& save_path);
+                                const std::string& save_path,
+                                const uint32_t offset = 0);
 
   private:
     ApplicationManagerImpl();

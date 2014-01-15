@@ -155,34 +155,6 @@ void MessageHelper::SendHMIStatusNotification(
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
-void MessageHelper::SendTTSChunksToHMI(const Application& application_impl) {
-  if (application_impl.tts_name()) {
-    smart_objects::SmartObject* speak_command = new smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    if (!speak_command) {
-        return;
-    }
-    (*speak_command)[strings::params][strings::function_id] =
-        static_cast<int>(hmi_apis::FunctionID::TTS_Speak);
-    (*speak_command)[strings::params][strings::message_type] =
-        static_cast<int>(hmi_apis::messageType::request);
-    (*speak_command)[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-    (*speak_command)[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-    (*speak_command)[strings::params][strings::correlation_id] =
-        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::app_id] = application_impl.app_id();
-    msg_params[strings::tts_chunks] = *(application_impl.tts_name());
-    (*speak_command)[strings::msg_params] = msg_params;
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(speak_command);
-  }
-}
-
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   const Application& application_impl) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
@@ -257,15 +229,6 @@ void MessageHelper::SendHelpVrCommand() {
   }
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
   SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
-}
-
-void MessageHelper::SendVrCommandsOnRegisterAppToHMI(Application* app) {
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-
-  if (app->vr_synonyms()) {
-    SendAddVRCommandToHMI(max_cmd_id + app->app_id(), *app->vr_synonyms(),
-                          app->app_id());
-  }
 }
 
 void MessageHelper::SendRemoveVrCommandsOnUnregisterApp(Application* app) {
