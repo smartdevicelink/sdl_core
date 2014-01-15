@@ -20,7 +20,7 @@ public class MobileNavSession {
         _protocol = protocol;
     }
 
-    public void startSession() {
-        _protocol.StartProtocolSession(SessionType.Mobile_Nav);
+    public void startSession(byte sessionID) {
+        _protocol.StartProtocolSession(SessionType.Mobile_Nav, sessionID);
     }
 }

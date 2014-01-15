@@ -332,6 +332,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
+    private byte rpcSessionID = -1;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -4118,7 +4119,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void startMobileNaviSession() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should start mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession();
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSessionID);
         }
     }
 
@@ -4294,5 +4295,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID){
         // TODO - need to handle end session logic
+    }
+
+    public void onSesionStarted(byte sessionID, String correlationID) {
+        rpcSessionID = sessionID;
     }
 }
