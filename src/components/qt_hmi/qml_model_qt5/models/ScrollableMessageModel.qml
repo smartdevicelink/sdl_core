@@ -50,5 +50,5 @@ QtObject {
     property int timeout: 0
     property var async
     property bool running: false
-
+    property int result: -1
 }
