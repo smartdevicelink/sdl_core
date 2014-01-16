@@ -291,7 +291,10 @@ fi
 
 if $QNX_TARGET || $INSTALL_ALL; then
 	echo "Checking for installed QNX SDP 6.5.0"
-	if [[ ! -x /opt/qnx650 ]]; then
+	QNXSDP_INSTALL_FOLDER="/opt/qnx650"
+	if [[ -d "${QNXSDP_INSTALL_FOLDER}" ]]; then
+		echo "QNX SDP 6.5.0 already installed"
+	else
 	    echo "Installing wget"
 		apt-install wget
 
