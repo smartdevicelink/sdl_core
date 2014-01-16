@@ -70,7 +70,7 @@ ContextPopup {
             text: menuName
             icon: image
             onClicked: {
-                complete(Common.Result.SUCCESS, {"choiceID": appID})
+                complete(Common.Result.SUCCESS, {"choiceID": model.choiceID})
             }
         }
     }
