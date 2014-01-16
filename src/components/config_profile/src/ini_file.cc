@@ -92,7 +92,6 @@ char* ini_write_inst(const char *fname, uint8_t flag) {
 char* ini_read_value(const char *fname,
           const char *chapter, const char *item, char *value) {
   FILE             *fp = 0;
-  uint16_t         i;
   bool             chapter_found = false;
   char             line[INI_LINE_LEN] = "";
   char             val[INI_LINE_LEN] = "";
@@ -184,15 +183,14 @@ char ini_write_value(const char *fname,
       snprintf(temp_fname, PATH_MAX,
                "%s/ini.XXXXXX", temp_str);
 
-      if (-1 == (fd = mkstemp(temp_str)) ||
-          NULL == (wr_fp = fdopen(fd, "w"))) {
-        if (-1 != fd) {
-          unlink(temp_fname);
-          close(fd);
-        }
-
-        return FALSE;
+    if (-1 == (fd = mkstemp(temp_str)) ||
+        NULL == (wr_fp = fdopen(fd, "w"))) {
+      if (-1 != fd) {
+        unlink(temp_fname);
+        close(fd);
       }
+      return FALSE;
+    }
   }
 #else   // #if USE_MKSTEMP
   tmpnam(temp_fname);
@@ -274,7 +272,6 @@ Ini_search_id ini_parse_line(const char *line, const char *tag, char *value) {
   const char       *line_ptr;
   char             *temp_ptr;
   char             temp_str[INI_LINE_LEN] = "";
-  uint16_t         i, len;
   *temp_str = '\0';
 
   snprintf(value, INI_LINE_LEN, "%s", line);
