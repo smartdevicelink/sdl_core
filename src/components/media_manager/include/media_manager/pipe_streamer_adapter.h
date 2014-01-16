@@ -30,37 +30,31 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
 
+#include <string>
 #include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
-
-namespace threads {
-class Thread;
-}
 
 namespace media_manager {
-
-class FromMicRecorderAdapter : public MediaAdapterImpl {
+class PipeStreamerAdapter : public MediaAdapterImpl {
   public:
-    FromMicRecorderAdapter();
-    ~FromMicRecorderAdapter();
-    void SendData(int32_t application_key,
-                  const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int32_t application_key);
-    void StopActivity(int32_t application_key);
-    bool is_app_performing_activity(int32_t application_key);
-    void set_output_file(const std::string& output_file);
-    void set_duration(int32_t duration);
-  private:
-    threads::Thread* recorder_thread_;
-    std::string output_file_;
-    int32_t duration_;
-    const int32_t kDefaultDuration;
-    static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
-};
-}  // namespace media_manager
+    PipeStreamerAdapter();
+    ~PipeStreamerAdapter();
+    virtual void SendData(int32_t application_key,
+                          const protocol_handler::RawMessagePtr& message);
+    virtual void StartActivity(int32_t application_key);
+    virtual void StopActivity(int32_t application_key);
+    virtual bool is_app_performing_activity(int32_t application_key);
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FROM_MIC_RECORDER_ADAPTER_H_
+  protected:
+    std::string named_pipe_path_;
+
+  private:
+    int32_t pipe_fd_;
+    DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);
+};
+
+}  //  namespace media_manager
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_

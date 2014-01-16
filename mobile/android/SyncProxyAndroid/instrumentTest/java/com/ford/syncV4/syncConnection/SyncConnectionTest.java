@@ -14,6 +14,9 @@ import com.ford.syncV4.util.BitConverter;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -47,21 +50,24 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     }
 
     public void testStartMobileNavSessionShouldSendAppropriateBytes() throws Exception {
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(SessionType.Mobile_Nav, 0x00, VERSION);
+        byte sessionID = 0x0A;
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(SessionType.Mobile_Nav, 0x00, VERSION);
+        header.setSessionID(sessionID);
+        final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
             public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
                                                      int length) {
                 super.onProtocolMessageBytesToSend(msgBytes, offset, length);
-                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, header.assembleHeaderBytes()));
+                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
                 assertEquals("Offset should be 0", offset, 0);
                 assertEquals("Length should be 12", length, 12);
             }
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.startMobileNavSession();
+        connection.startMobileNavSession(sessionID);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
@@ -111,6 +117,32 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
         connection.closeMobileNavSession(SESSION_ID);
+    }
+
+    public void testStopTransportIsCalledForRPCService() throws Exception {
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
+            @Override
+            public Boolean getIsConnected() {
+                _transport = mock(SyncTransport.class);
+                return super.getIsConnected();
+            }
+        };
+        connection.getIsConnected();
+        connection.onProtocolSessionEnded(SessionType.RPC, SESSION_ID, "");
+        verify(connection._transport, times(1)).stopReading();
+    }
+
+    public void testStopTransportNotCalledForNavigationService() throws Exception {
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
+            @Override
+            public Boolean getIsConnected() {
+                _transport = mock(SyncTransport.class);
+                return super.getIsConnected();
+            }
+        };
+        connection.getIsConnected();
+        connection.onProtocolSessionEnded(SessionType.Mobile_Nav, SESSION_ID, "");
+        verify(connection._transport, never()).stopReading();
 
     }
 }

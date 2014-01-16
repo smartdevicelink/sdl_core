@@ -306,6 +306,7 @@ void ConnectionHandlerImpl::RemoveConnection(
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
       return -1;
     }
+    new_session_id = sessionId;
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
     return -1;
@@ -429,8 +430,8 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
     connection.GetSessionList(session_list);
     LOG4CXX_INFO(
       logger_,
-      "Connection " << static_cast<int32_t>(conn_handle) << "has "
-      << static_cast<int32_t>(session_list.size()) << "sessions.");
+      "Connection " << static_cast<int32_t>(conn_handle) << " has "
+      << static_cast<int32_t>(session_list.size()) << " sessions.");
     if (sessions_list) {
       for (SessionListIterator itr = session_list.begin();
            itr != session_list.end(); ++itr) {

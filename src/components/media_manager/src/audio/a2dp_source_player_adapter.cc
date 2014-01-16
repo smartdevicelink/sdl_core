@@ -35,7 +35,7 @@
 #include <string.h>
 #include <utility>
 #include "utils/threads/thread.h"
-#include "media_manager/a2dp_source_player_adapter.h"
+#include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -104,8 +104,8 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
       }
     } else {
       uint32_t device_id = 0;
-      connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
-        application_key, 0, NULL, &device_id);
+      connection_handler::ConnectionHandlerImpl::instance()->
+          GetDataOnSessionKey(application_key, 0, NULL, &device_id);
       std::string mac_adddress;
       connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
         device_id,
@@ -154,7 +154,8 @@ void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
   }
 }
 
-bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t application_key) {
+bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t
+                                                         application_key) {
   return (application_key == current_application_);
 }
 
@@ -210,7 +211,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
   /* Create a new playback stream */
   if (!(s_out = pa_simple_new(NULL, "AudioManager", PA_STREAM_PLAYBACK, NULL,
-                              "playback", &sSampleFormat_, NULL, NULL, &error))) {
+                           "playback", &sSampleFormat_, NULL, NULL, &error))) {
     LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;

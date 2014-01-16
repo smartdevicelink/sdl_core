@@ -32,8 +32,8 @@
 
 #include <string>
 #include "utils/threads/thread.h"
-#include "./from_mic_to_file_recorder_thread.h"
-#include "media_manager/from_mic_recorder_adapter.h"
+#include "media_manager/audio/from_mic_to_file_recorder_thread.h"
+#include "media_manager/audio/from_mic_recorder_adapter.h"
 
 namespace media_manager {
 
@@ -91,7 +91,8 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   current_application_ = 0;
 }
 
-bool FromMicRecorderAdapter::is_app_performing_activity(int32_t application_key) {
+bool FromMicRecorderAdapter::is_app_performing_activity(int32_t
+                                                        application_key) {
   return (application_key == current_application_);
 }
 

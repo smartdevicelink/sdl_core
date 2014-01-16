@@ -30,24 +30,71 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 
+#include <net/if.h>
+#include <gst/gst.h>
 #include <string>
 
-namespace media_manager {
-class MediaManager {
-  public:
-    virtual void PlayA2DPSource(int32_t application_key) = 0;
-    virtual void StopA2DPSource(int32_t application_key) = 0;
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration) = 0;
-    virtual void StopMicrophoneRecording(int32_t application_key) = 0;
-    virtual void StartVideoStreaming(int32_t application_key) = 0;
-    virtual void StopVideoStreaming(int32_t application_key) = 0;
+#include "utils/lock.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
-    virtual ~MediaManager(){}
+namespace media_manager {
+
+class FromMicToFileRecorderThread : public threads::ThreadDelegate {
+  public:
+    FromMicToFileRecorderThread(const std::string& output_file,
+                                int32_t duration);
+
+    void threadMain();
+
+    bool exitThreadMain();
+
+    void set_output_file(const std::string& output_file);
+    void set_record_duration(int32_t duration);
+
+  private:
+    static log4cxx::LoggerPtr logger_;
+
+    int32_t argc_;
+    gchar** argv_;
+
+    const std::string oKey_;
+    const std::string tKey_;
+
+    static GMainLoop* loop;
+    threads::Thread* sleepThread_;
+    bool shouldBeStoped_;
+    sync_primitives::Lock stopFlagLock_;
+
+    std::string outputFileName_, durationString_;
+
+    typedef struct {
+      GstElement* pipeline;
+      gint duration;
+    } GstTimeout;
+
+    void initArgs();
+
+    void psleep(void* timeout);
+
+    class SleepThreadDelegate : public threads::ThreadDelegate {
+      public:
+        explicit SleepThreadDelegate(GstTimeout timeout);
+
+        void threadMain();
+
+      private:
+        GstTimeout timeout_;
+
+        DISALLOW_COPY_AND_ASSIGN(SleepThreadDelegate);
+    };
+
+    DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
 };
+
 }  // namespace media_manager
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_

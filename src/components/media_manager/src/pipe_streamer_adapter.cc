@@ -34,33 +34,33 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils/logger.h"
-#include "./pipe_video_streamer_adapter.h"
 #include "config_profile/profile.h"
+#include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
 
 namespace {
 log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("PipeVideoStreamerAdapter"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("PipeStreamerAdapter"));
 }
 
-PipeVideoStreamerAdapter::PipeVideoStreamerAdapter()
+PipeStreamerAdapter::PipeStreamerAdapter()
   : pipe_fd_(0) {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::PipeVideoStreamerAdapter");
-  named_pipe_path_ = profile::Profile::instance()->named_pipe_path();
+  LOG4CXX_INFO(logger, "PipeStreamerAdapter::PipeStreamerAdapter");
+  named_pipe_path_ = profile::Profile::instance()->named_video_pipe_path();
 }
 
-PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter");
+PipeStreamerAdapter::~PipeStreamerAdapter() {
+  LOG4CXX_INFO(logger, "PipeStreamerAdapter::~PipeStreamerAdapter");
   if (0 != current_application_) {
     StopActivity(current_application_);
   }
 }
 
-void PipeVideoStreamerAdapter::SendData(
+void PipeStreamerAdapter::SendData(
   int32_t application_key,
   const protocol_handler::RawMessagePtr& message) {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::SendData");
+  LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Wrong application " << application_key);
@@ -89,7 +89,7 @@ void PipeVideoStreamerAdapter::SendData(
   ++messsages_for_session;
 
   LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-               << messsages_for_session << "th message for " << application_key);
+              << messsages_for_session << "th message for " << application_key);
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
@@ -97,8 +97,8 @@ void PipeVideoStreamerAdapter::SendData(
   }
 }
 
-void PipeVideoStreamerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::StartActivity");
+void PipeStreamerAdapter::StartActivity(int32_t application_key) {
+  LOG4CXX_INFO(logger, "PipeStreamerAdapter::StartActivity");
 
   if (application_key == current_application_) {
     LOG4CXX_WARN(logger, "Already started activity for " << application_key);
@@ -131,8 +131,8 @@ void PipeVideoStreamerAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_TRACE(logger, "Pipe was opened for writing " << named_pipe_path_);
 }
 
-void PipeVideoStreamerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::StopActivity");
+void PipeStreamerAdapter::StopActivity(int32_t application_key) {
+  LOG4CXX_INFO(logger, "PipeStreamerAdapter::StopActivity");
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Not performing activity for " << application_key);
     return;
@@ -146,7 +146,7 @@ void PipeVideoStreamerAdapter::StopActivity(int32_t application_key) {
   }
 }
 
-bool PipeVideoStreamerAdapter::is_app_performing_activity(
+bool PipeStreamerAdapter::is_app_performing_activity(
   int32_t application_key) {
   return (application_key == current_application_);
 }

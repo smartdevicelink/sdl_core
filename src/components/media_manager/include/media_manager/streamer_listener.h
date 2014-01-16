@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_LISTENER_H_
 
 #include <stdint.h>
 #include "media_manager/media_adapter_listener.h"
@@ -39,10 +39,10 @@
 #include "utils/logger.h"
 
 namespace media_manager {
-class VideoStreamerListener : public MediaAdapterListener {
+class StreamerListener : public MediaAdapterListener {
   public:
-    VideoStreamerListener();
-    ~VideoStreamerListener();
+    StreamerListener();
+    ~StreamerListener();
     virtual void OnDataReceived(
       int32_t application_key,
       const DataForListener& data);
@@ -54,8 +54,8 @@ class VideoStreamerListener : public MediaAdapterListener {
   private:
     int32_t current_application_;
     static log4cxx::LoggerPtr logger_;
-    DISALLOW_COPY_AND_ASSIGN(VideoStreamerListener);
+    DISALLOW_COPY_AND_ASSIGN(StreamerListener);
 };
 }  //  namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_STREAMER_LISTENER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_LISTENER_H_

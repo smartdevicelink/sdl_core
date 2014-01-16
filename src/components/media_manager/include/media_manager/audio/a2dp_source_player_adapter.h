@@ -30,24 +30,38 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
-#include <string>
+#include <map>
+#include "protocol_handler/raw_message.h"
+#include "media_manager/media_adapter_impl.h"
+#include "utils/logger.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
-class MediaManager {
-  public:
-    virtual void PlayA2DPSource(int32_t application_key) = 0;
-    virtual void StopA2DPSource(int32_t application_key) = 0;
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration) = 0;
-    virtual void StopMicrophoneRecording(int32_t application_key) = 0;
-    virtual void StartVideoStreaming(int32_t application_key) = 0;
-    virtual void StopVideoStreaming(int32_t application_key) = 0;
 
-    virtual ~MediaManager(){}
+class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
+  public:
+    A2DPSourcePlayerAdapter();
+    ~A2DPSourcePlayerAdapter();
+    void SendData(int32_t application_key,
+                  const protocol_handler::RawMessagePtr& message) {}
+    void StartActivity(int32_t application_key);
+    void StopActivity(int32_t application_key);
+    bool is_app_performing_activity(int32_t application_key);
+
+  private:
+    class A2DPSourcePlayerThread;
+
+    std::map<int32_t, threads::Thread*> sources_;
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
+
 }  // namespace media_manager
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_

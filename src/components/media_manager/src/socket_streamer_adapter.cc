@@ -40,30 +40,28 @@
 #include <unistd.h>
 #include <string.h>
 #include "config_profile/profile.h"
-#include "./socket_video_streamer_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
 namespace {
 log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketStreamerAdapter"));
 }
 
-SocketVideoStreamerAdapter::SocketVideoStreamerAdapter()
-  : port_(profile::Profile::instance()->navi_server_port()),
-    ip_(profile::Profile::instance()->server_address()),
-    socket_(0),
+SocketStreamerAdapter::SocketStreamerAdapter()
+  : socket_(0),
     is_ready_(false),
     messages_(),
     delegate_(NULL),
     thread_(NULL) {
-  delegate_ = new VideoStreamer(this);
+  delegate_ = new Streamer(this);
   if (delegate_) {
-    thread_ = new threads::Thread("SocketVideoStreamerAdapter", delegate_);
+    thread_ = new threads::Thread("SocketStreamerAdapter", delegate_);
   }
 }
 
-SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
+SocketStreamerAdapter::~SocketStreamerAdapter() {
   delete thread_;
   thread_ = NULL;
   if (socket_ != -1) {
@@ -71,8 +69,8 @@ SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
   }
 }
 
-void SocketVideoStreamerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::start");
+void SocketStreamerAdapter::StartActivity(int32_t application_key) {
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::start");
 
   if (application_key == current_application_) {
     LOG4CXX_INFO(logger, "Already running for app " << application_key);
@@ -106,7 +104,7 @@ void SocketVideoStreamerAdapter::StartActivity(int32_t application_key) {
     return;
   }
 
-  LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::listen for connections");
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::listen for connections");
   if (-1 == listen(socket_, 5)) {
     LOG4CXX_ERROR_EXT(logger, "Unable to listen");
     return;
@@ -127,8 +125,8 @@ void SocketVideoStreamerAdapter::StartActivity(int32_t application_key) {
   }
 }
 
-void SocketVideoStreamerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::stop");
+void SocketStreamerAdapter::StopActivity(int32_t application_key) {
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::stop");
 
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Video isn't streaming for " << application_key);
@@ -151,15 +149,15 @@ void SocketVideoStreamerAdapter::StopActivity(int32_t application_key) {
   current_application_ = 0;
 }
 
-bool SocketVideoStreamerAdapter::is_app_performing_activity(
+bool SocketStreamerAdapter::is_app_performing_activity(
   int32_t application_key) {
   return (application_key == current_application_);
 }
 
-void SocketVideoStreamerAdapter::SendData(
+void SocketStreamerAdapter::SendData(
   int32_t application_key,
   const protocol_handler::RawMessagePtr& message) {
-  LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::sendData");
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
 
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Currently working with other app "
@@ -184,8 +182,8 @@ void SocketVideoStreamerAdapter::SendData(
   }
 }
 
-SocketVideoStreamerAdapter::VideoStreamer::VideoStreamer(
-  SocketVideoStreamerAdapter* const server)
+SocketStreamerAdapter::Streamer::Streamer(
+  SocketStreamerAdapter* const server)
   : server_(server),
     socket_fd_(0),
     is_first_loop_(true),
@@ -193,12 +191,12 @@ SocketVideoStreamerAdapter::VideoStreamer::VideoStreamer(
     stop_flag_(false) {
 }
 
-SocketVideoStreamerAdapter::VideoStreamer::~VideoStreamer() {
+SocketStreamerAdapter::Streamer::~Streamer() {
   stop();
 }
 
-void SocketVideoStreamerAdapter::VideoStreamer::threadMain() {
-  LOG4CXX_INFO(logger, "VideoStreamer::threadMain");
+void SocketStreamerAdapter::Streamer::threadMain() {
+  LOG4CXX_INFO(logger, "Streamer::threadMain");
 
   while (!stop_flag_) {
     socket_fd_ = accept(server_->socket_, NULL, NULL);
@@ -227,15 +225,15 @@ void SocketVideoStreamerAdapter::VideoStreamer::threadMain() {
   }
 }
 
-bool SocketVideoStreamerAdapter::VideoStreamer::exitThreadMain() {
-  LOG4CXX_INFO(logger, "VideoStreamer::exitThreadMain");
+bool SocketStreamerAdapter::Streamer::exitThreadMain() {
+  LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
   stop_flag_ = true;
   stop();
   return true;
 }
 
-void SocketVideoStreamerAdapter::VideoStreamer::stop() {
-  LOG4CXX_INFO(logger, "VideoStreamer::stop");
+void SocketStreamerAdapter::Streamer::stop() {
+  LOG4CXX_INFO(logger, "Streamer::stop");
 
   is_client_connected_ = false;
   if (!socket_fd_) {
@@ -255,8 +253,8 @@ void SocketVideoStreamerAdapter::VideoStreamer::stop() {
   socket_fd_ = -1;
 }
 
-bool SocketVideoStreamerAdapter::VideoStreamer::is_ready() const {
-  LOG4CXX_INFO(logger, "VideoStreamer::is_ready");
+bool SocketStreamerAdapter::Streamer::is_ready() const {
+  LOG4CXX_INFO(logger, "Streamer::is_ready");
 
   bool result = true;
   fd_set fds;
@@ -280,7 +278,7 @@ bool SocketVideoStreamerAdapter::VideoStreamer::is_ready() const {
   return result;
 }
 
-bool SocketVideoStreamerAdapter::VideoStreamer::send(
+bool SocketStreamerAdapter::Streamer::send(
   const protocol_handler::RawMessagePtr& msg) {
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
@@ -308,7 +306,7 @@ bool SocketVideoStreamerAdapter::VideoStreamer::send(
     return false;
   }
 
-  LOG4CXX_INFO(logger, "VideoStreamer::sent " << (*msg).data_size());
+  LOG4CXX_INFO(logger, "Streamer::sent " << (*msg).data_size());
   return true;
 }
 

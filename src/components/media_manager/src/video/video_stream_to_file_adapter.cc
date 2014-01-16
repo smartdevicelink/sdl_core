@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "./video_stream_to_file_adapter.h"
+#include "media_manager/video/video_stream_to_file_adapter.h"
 #include "utils/file_system.h"
 
 namespace media_manager {
@@ -86,13 +86,12 @@ void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
   CloseCurrent();
 
   file_stream_ = file_system::Open(file_name_);
-  if (file_stream_ == NULL){
-      LOG4CXX_WARN(logger, "Cant open File stream! "<<file_name_);
-    }
-  else{
+  if (file_stream_ == NULL) {
+      LOG4CXX_WARN(logger, "Can't open File stream! " << file_name_);
+  } else {
       LOG4CXX_INFO(logger, "file_stream_ opened :"
                    << file_stream_);
-    }
+  }
 
   current_application_ = application_key;
 
@@ -122,7 +121,8 @@ void VideoStreamToFileAdapter::StopActivity(int32_t application_key) {
   current_application_ = 0;
 }
 
-bool VideoStreamToFileAdapter::is_app_performing_activity(int32_t application_key) {
+bool VideoStreamToFileAdapter::is_app_performing_activity(int32_t
+                                                          application_key) {
   return (application_key == current_application_ && file_stream_);
 }
 

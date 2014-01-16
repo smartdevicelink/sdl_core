@@ -97,11 +97,13 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   memset((char*) &addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = tcp_device->in_addr();
-  addr.sin_port = port;
+  addr.sin_port = htons(port);
 
+  LOG4CXX_INFO(logger_, "Connecting " << inet_ntoa(addr.sin_addr) << ":"
+                                      << port);
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to Connect for application" << application_handle());
+    LOG4CXX_ERROR(logger_, "Failed to connect for application "
+                               << application_handle() << ", error " << errno);
     *error = new ConnectError();
     return false;
   }

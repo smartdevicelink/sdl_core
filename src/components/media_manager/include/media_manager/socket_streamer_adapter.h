@@ -30,9 +30,10 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_
 
+#include <string>
 #include "media_manager/media_adapter_impl.h"
 #include "utils/logger.h"
 #include "utils/shared_ptr.h"
@@ -41,30 +42,34 @@
 #include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
-class SocketVideoStreamerAdapter : public MediaAdapterImpl {
+class SocketStreamerAdapter : public MediaAdapterImpl {
   public:
-    SocketVideoStreamerAdapter();
-    virtual ~SocketVideoStreamerAdapter();
+    SocketStreamerAdapter();
+    virtual ~SocketStreamerAdapter();
     virtual void SendData(int32_t application_key,
                           const protocol_handler::RawMessagePtr& message);
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
 
+  protected:
+    int32_t port_;
+    std::string ip_;
+
   private:
-    class VideoStreamer : public threads::ThreadDelegate {
+    class Streamer : public threads::ThreadDelegate {
       public:
         /*
          * Default constructor
          *
          * @param server  Server pointer
          */
-        explicit VideoStreamer(SocketVideoStreamerAdapter* const server);
+        explicit Streamer(SocketStreamerAdapter* const server);
 
         /*
          * Destructor
          */
-        ~VideoStreamer();
+        ~Streamer();
 
         /*
          * Function called by thread on start
@@ -97,26 +102,24 @@ class SocketVideoStreamerAdapter : public MediaAdapterImpl {
         bool send(const protocol_handler::RawMessagePtr& msg);
 
       private:
-        SocketVideoStreamerAdapter* const server_;
+        SocketStreamerAdapter* const server_;
         int32_t socket_fd_;
         bool is_first_loop_;
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
 
-        DISALLOW_COPY_AND_ASSIGN(VideoStreamer);
+        DISALLOW_COPY_AND_ASSIGN(Streamer);
     };
 
-    int32_t port_;
-    std::string ip_;
     int32_t socket_;
     bool is_ready_;
-    VideoStreamer* delegate_;
+    Streamer* delegate_;
     threads::Thread* thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
-    DISALLOW_COPY_AND_ASSIGN(SocketVideoStreamerAdapter);
+    DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
 };
 }  //  namespace media_manager
 
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_SRC_SOCKET_VIDEO_STREAMER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_

@@ -30,51 +30,38 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "media_manager/video_streamer_listener.h"
-#include "media_manager/media_manager_impl.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_LISTENER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_LISTENER_H_
+
+#include <string>
+#include "media_manager/media_adapter_listener.h"
+
+namespace threads {
+class Thread;
+}
 
 namespace media_manager {
+class FromMicRecorderListener : public MediaAdapterListener {
+  public:
+    explicit FromMicRecorderListener(
+      const std::string& file_name);
+    ~FromMicRecorderListener();
+    virtual void OnDataReceived(
+      int32_t application_key,
+      const DataForListener& data);
+    virtual void OnErrorReceived(
+      int32_t application_key,
+      const DataForListener& data);
+    virtual void OnActivityStarted(int32_t application_key);
+    virtual void OnActivityEnded(int32_t application_key);
 
-log4cxx::LoggerPtr VideoStreamerListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("VideoStreamerListener"));
-
-VideoStreamerListener::VideoStreamerListener()
-  : current_application_(0) {
-}
-
-VideoStreamerListener::~VideoStreamerListener() {
-  OnActivityEnded(current_application_);
-}
-
-void VideoStreamerListener::OnDataReceived(
-  int32_t application_key,
-  const DataForListener& data) {
-  MediaManagerImpl::instance()->FramesProcessed(application_key, data);
-}
-
-void VideoStreamerListener::OnErrorReceived(
-  int32_t application_key,
-  const DataForListener& data) {
-  LOG4CXX_ERROR(logger_, "VideoStreamerListener::OnErrorReceived");
-}
-
-void VideoStreamerListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityStarted");
-  if (current_application_ == application_key) {
-    LOG4CXX_WARN(logger_, "Already performing activity for "
-                 << application_key);
-    return;
-  }
-  current_application_ = application_key;
-}
-
-void VideoStreamerListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "VideoStreamerListener::OnActivityEnded");
-  if (current_application_ != application_key) {
-    LOG4CXX_WARN(logger_, "Already not performing activity for "
-                 << application_key);
-    return;
-  }
-  current_application_ = 0;
-}
+  private:
+    threads::Thread* reader_;
+    std::string file_name_;
+    int32_t current_application_;
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
+};
 }  //  namespace media_manager
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_LISTENER_H_

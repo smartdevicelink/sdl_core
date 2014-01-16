@@ -30,24 +30,21 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_SOCKET_AUDIO_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_SOCKET_AUDIO_STREAMER_ADAPTER_H_
 
 #include <string>
+#include "media_manager/socket_streamer_adapter.h"
 
 namespace media_manager {
-class MediaManager {
+class SocketAudioStreamerAdapter : public SocketStreamerAdapter {
   public:
-    virtual void PlayA2DPSource(int32_t application_key) = 0;
-    virtual void StopA2DPSource(int32_t application_key) = 0;
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration) = 0;
-    virtual void StopMicrophoneRecording(int32_t application_key) = 0;
-    virtual void StartVideoStreaming(int32_t application_key) = 0;
-    virtual void StopVideoStreaming(int32_t application_key) = 0;
-
-    virtual ~MediaManager(){}
+    SocketAudioStreamerAdapter();
+    virtual ~SocketAudioStreamerAdapter();
+  private:
+    DISALLOW_COPY_AND_ASSIGN(SocketAudioStreamerAdapter);
 };
-}  // namespace media_manager
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+}  //  namespace media_manager
+
+
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_SOCKET_AUDIO_STREAMER_ADAPTER_H_

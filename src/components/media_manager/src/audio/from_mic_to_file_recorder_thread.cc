@@ -32,7 +32,7 @@
 
 #include <unistd.h>
 
-#include "./from_mic_to_file_recorder_thread.h"
+#include "media_manager/audio/from_mic_to_file_recorder_thread.h"
 
 namespace media_manager {
 
@@ -105,20 +105,18 @@ void FromMicToFileRecorderThread::threadMain() {
   gint duration = -1;
   GOptionContext* context = NULL;
   GError* err = NULL;
-  GOptionEntry entries[] = {
-    {
+  GOptionEntry entries[] = { {
       "device", 'd', 0, G_OPTION_ARG_FILENAME, &device,
       "device file (Default: hw:0,0)", "SRC"
-    },
-    {
+    }, {
       "output", 'o', 0, G_OPTION_ARG_FILENAME, &outfile,
       "save output of the stream to DEST", "DEST"
-    },
-    {
+    }, {
       "duration", 't', 0, G_OPTION_ARG_INT, &duration,
       "length of time in seconds to capture", "int32_t"
-    },
-    {NULL}
+    }, {
+        NULL
+    }
   };
 
   pthread_t wait;
@@ -153,7 +151,8 @@ void FromMicToFileRecorderThread::threadMain() {
   // Set up error handling
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
   gst_bus_add_watch(bus,
-                    reinterpret_cast<int32_t (*)(_GstBus*, _GstMessage*, void*)>(recvmsg),
+                    reinterpret_cast<int32_t (*)(_GstBus*, _GstMessage*, void*)>
+                    (recvmsg),
                     NULL);
   gst_object_unref(bus);
 
@@ -226,7 +225,8 @@ void FromMicToFileRecorderThread::threadMain() {
   loop = NULL;
 }
 
-FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout timeout)
+FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(GstTimeout
+                                                                      timeout)
   : threads::ThreadDelegate(),
     timeout_(timeout) {
 }

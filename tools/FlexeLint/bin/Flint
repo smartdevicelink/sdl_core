@@ -11,3 +11,5 @@ else
 fi
 
 ./${FLINT_BINARY} "$@"
+
+exit $?

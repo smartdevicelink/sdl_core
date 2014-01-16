@@ -54,6 +54,8 @@ public abstract class AbstractProtocol {
     // session has been established.
     public abstract void StartProtocolSession(SessionType sessionType);
 
+    public abstract void StartProtocolSession(SessionType sessionType, byte sessionID);
+
     // This method ends a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionEnded() method will be made when the protocol
     // session has ended.
