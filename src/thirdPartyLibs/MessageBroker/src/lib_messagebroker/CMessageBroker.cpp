@@ -299,7 +299,7 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
     }
     if(root["jsonrpc"]!="2.0")
       {
-        DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].c_str()));
+        DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
           return;
       }
     std::string wmes = p->m_recieverWriter.write(root);

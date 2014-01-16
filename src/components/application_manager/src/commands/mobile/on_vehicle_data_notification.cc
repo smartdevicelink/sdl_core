@@ -58,7 +58,7 @@ void OnVehicleDataNotification::Run() {
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
       const std::vector<Application*>& applications =
-          ApplicationManagerImpl::instance()->applications_by_ivi(it->second);
+          ApplicationManagerImpl::instance()->applications_by_ivi((static_cast<uint32_t>(it->second)));
 
       std::vector<Application*>::const_iterator it = applications.begin();
       for (; applications.end() != it; ++it) {

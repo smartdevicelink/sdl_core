@@ -321,45 +321,45 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(Application* app) {
   return true;
 }
 
-bool ApplicationManagerImpl::ActivateApplication(Application* applic) {
-  if (!applic) {
+bool ApplicationManagerImpl::ActivateApplication(Application* app) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
     return false;
   }
 
-  bool is_new_app_media = applic->is_media_application();
+  bool is_new_app_media = app->is_media_application();
 
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    Application* app = *it;
-    if (app->app_id() == applic->app_id()) {
-      if (app->IsFullscreen()) {
+    Application* curr_app = *it;
+    if (curr_app->app_id() == curr_app->app_id()) {
+      if (curr_app->IsFullscreen()) {
         LOG4CXX_WARN(logger_, "Application is already active.");
         return false;
       }
       if (mobile_api::HMILevel::eType::HMI_LIMITED !=
-          applic->hmi_level()) {
-        if (applic->has_been_activated()) {
-          MessageHelper::SendAppDataToHMI(applic);
+          curr_app->hmi_level()) {
+        if (curr_app->has_been_activated()) {
+          MessageHelper::SendAppDataToHMI(curr_app);
         } else {
-          MessageHelper::SendChangeRegistrationRequestToHMI(applic);
+          MessageHelper::SendChangeRegistrationRequestToHMI(curr_app);
         }
       }
-      if (!applic->MakeFullscreen()) {
+      if (!curr_app->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*applic);
+      MessageHelper::SendHMIStatusNotification(*curr_app);
     } else {
       if (is_new_app_media) {
-        if (app->IsAudible()) {
-          app->MakeNotAudible();
-          MessageHelper::SendHMIStatusNotification(*app);
+        if (curr_app->IsAudible()) {
+          curr_app->MakeNotAudible();
+          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
-      if (app->IsFullscreen()) {
-        MessageHelper::RemoveAppDataFromHMI(app);
+      if (curr_app->IsFullscreen()) {
+        MessageHelper::RemoveAppDataFromHMI(curr_app);
       }
     }
   }
@@ -623,9 +623,9 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-bool ApplicationManagerImpl::OnSessionStartedCallback(
+bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
-  int32_t first_session_key, protocol_handler::ServiceType type) {
+  protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
 
   if (protocol_handler::kMovileNav == type) {
@@ -652,17 +652,16 @@ bool ApplicationManagerImpl::OnSessionStartedCallback(
   return true;
 }
 
-void ApplicationManagerImpl::OnSessionEndedCallback(int32_t session_key,
-    int32_t first_session_key,
+void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
     "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << first_session_key << " type " << type);
+    << " type " << type);
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(first_session_key);
+      UnregisterApplication(session_key);
       break;
     }
     case protocol_handler::kMovileNav: {
@@ -769,8 +768,11 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asInt());
 
+  // Notifications from HMI have no such parameter
   uint32_t correlation_id =
-    (*message)[strings::params][strings::correlation_id].asUInt();
+      (*message)[strings::params].keyExists(strings::correlation_id)
+      ? (*message)[strings::params][strings::correlation_id].asUInt()
+      : 0;
 
   uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();

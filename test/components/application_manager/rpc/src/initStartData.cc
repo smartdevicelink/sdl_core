@@ -144,6 +144,7 @@ void initStartData()
 	//app_manager_->set_mobile_message_handler(mmh_);
 	app_manager_->set_connection_handler(connection_handler_);
 	app_manager_->set_hmi_message_handler(hmi_handler_);
+	app_manager_->set_protocol_handler(protocol_handler_);
 	//printf("\n\n\n after init app \n\n\n");			
 	
 	if (profile::Profile::instance()->server_address() ==

@@ -32,7 +32,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#include <stdint.h>
 #include <memory.h>
 #include <iostream>  // TODO(AK): cpplink error - Streams are highly discouraged.
 #include "protocol_handler/protocol_packet.h"

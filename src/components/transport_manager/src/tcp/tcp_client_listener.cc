@@ -41,29 +41,23 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
-
+#include <sys/sysctl.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-
+#ifdef __linux__
+#  include <linux/tcp.h>
+#else  // __linux__
+#  include <sys/time.h>
+#  include <netinet/in.h>
+#  include <netinet/tcp.h>
+#  include <netinet/tcp_var.h>
+#endif  // __linux__
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-
-#ifndef TCP_KEEPIDLE
-#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
-#define TCP_KEEPINTVL  5  /* Interval between keepalives */
-#define TCP_KEEPCNT  6  /* Number of keepalives before death */
-#endif
-
 namespace transport_manager {
 namespace transport_adapter {
-
-#define TCP_KEEPIDLE   4  /* Start keeplives after this period */
-#define TCP_KEEPINTVL  5  /* Interval between keepalives */
-#define TCP_KEEPCNT  6  /* Number of keepalives before death */
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port)
@@ -130,10 +124,42 @@ void TcpClientListener::Thread() {
     int keepidle = 3;  // 3 seconds to disconnection detecting
     int keepcnt = 5;
     int keepintvl = 1;
+    int user_timeout = 7000;  // milliseconds
+#ifdef __linux__
     setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
     setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout, sizeof(user_timeout));
+#elif __QNX__  // __linux__
+    // TODO (KKolodiy): Out of order!
+    const int kMidLength = 4;
+    int mib[kMidLength];
+    timeval tval;
+
+    mib[0] = CTL_NET;
+    mib[1] = AF_INET;
+    mib[2] = IPPROTO_TCP;
+    mib[3] = TCPCTL_KEEPIDLE;
+    sysctl(mib, kMidLength, NULL, NULL, &keepidle, sizeof(keepidle));
+
+    mib[0] = CTL_NET;
+    mib[1] = AF_INET;
+    mib[2] = IPPROTO_TCP;
+    mib[3] = TCPCTL_KEEPCNT;
+    sysctl(mib, kMidLength, NULL, NULL, &keepcnt, sizeof(keepcnt));
+
+    mib[0] = CTL_NET;
+    mib[1] = AF_INET;
+    mib[2] = IPPROTO_TCP;
+    mib[3] = TCPCTL_KEEPINTVL;
+    sysctl(mib, kMidLength, NULL, NULL, &keepintvl, sizeof(keepintvl));
+
+    memset(&tval, sizeof(tval), 0);
+    tval.tv_sec = keepidle;
+    setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
+    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
+#endif  // __QNX__
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);

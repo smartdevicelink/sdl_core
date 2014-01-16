@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   threads::Thread threadAdminAppTest("AdminAppTest", &app);
 
   threadAdminAppTest.start();
-  //app.threadMain();//run();
+  //app.run();
   sleep(60);
   int result = RUN_ALL_TESTS();
 

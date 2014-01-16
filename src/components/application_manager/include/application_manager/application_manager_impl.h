@@ -221,7 +221,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
-    bool ActivateApplication(Application* applic);
+    bool ActivateApplication(Application* app);
     void DeactivateApplication(Application* app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
@@ -356,13 +356,11 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);
-    bool OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
+    bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int32_t session_key,
-                                  int32_t first_session_key,
                                   protocol_handler::ServiceType type);
 
-    void OnSessionEndedCallback(int32_t session_key,
-                                int32_t first_session_key,
+    void OnServiceEndedCallback(int32_t session_key,
                                 protocol_handler::ServiceType type);
 
     /**

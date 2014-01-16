@@ -51,7 +51,7 @@ namespace test{
 			std::string mac_address_test = "255.255.255.0";
 			std::string name_test = "test_DeviceInfo";
 
-			transport_manager::ConnectionUID connection_id_test = 1;
+			transport_manager::ConnectionUID connection_id_test = 10;
 			
 			transport_manager::DeviceInfo device_info_test(device_handler_test, mac_address_test, name_test);
 
@@ -62,9 +62,34 @@ namespace test{
 			
 			connection_handler_->OnConnectionEstablished(device_info_test, connection_id_test);
 			
-			unsigned int connectKey = connection_handler_->OnSessionStartedCallback(connection_id_test,
-			 protocol_handler::kRpc);
+			unsigned int connectKey = connection_handler_->OnSessionStartedCallback(connection_id_test,0,
+				protocol_handler::kRpc);
+			
+			//////////////////////////////////////////
+			//HMICapabilities 14.1
+			//HMICapabilities& hmi_capabilities =
+			//	ApplicationManagerImpl::instance()->hmi_capabilities();
+			
+			//hmi_capabilities.
+			//app_manager_->OnHMIStartedCooperation();
+			HMICapabilities &hmi_capabilities = app_manager_->hmi_capabilities();
+			hmi_capabilities.set_is_vr_cooperating(true);
+			hmi_capabilities.set_is_tts_cooperating(true);
+			hmi_capabilities.set_is_ui_cooperating(true);
+			hmi_capabilities.set_is_navi_cooperating(true);
+			hmi_capabilities.set_is_ivi_cooperating(true);
+			
+			hmi_capabilities.set_active_ui_language(hmi_apis::Common_Language::EN_US);
+			hmi_capabilities.set_active_vr_language(hmi_apis::Common_Language::EN_US);
+			hmi_capabilities.set_active_tts_language(hmi_apis::Common_Language::EN_US);
 
+			SmartObject hmi_capa;
+			hmi_capabilities.set_ui_supported_languages(hmi_capa);
+			hmi_capabilities.set_tts_supported_languages(hmi_capa);
+			hmi_capabilities.set_vr_supported_languages(hmi_capa);
+			hmi_capabilities.set_vehicle_type(hmi_capa);
+			
+			
 			////////////////////////////////////////
 			sleep(2);
 			printf("\n\n\n Registration Application \n\n\n");
@@ -79,7 +104,7 @@ namespace test{
 			///////////////////////////////////
 			//add to 23 december
 			
-			/*
+			
 			//test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester* mobile_handler_test;
 		    //mobile_handler_test = 
         	//				new test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester;
@@ -94,26 +119,27 @@ namespace test{
 			(*AppRegRequest)[S_PARAMS][strings::message_type] = mobile_apis::messageType::request;
 			(*AppRegRequest)[S_PARAMS][strings::correlation_id] = 1;
 									
-			(*AppRegRequest)[S_MSG_PARAMS][strings::app_id] = "12345";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::is_media_application] = true;
-			(*AppRegRequest)[S_MSG_PARAMS][strings::vr_synonyms][0] = "VR SyncProxyTester";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::ngn_media_screen_app_name] = "SPT";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::tts_name][0]["text"] = "SyncProxyTester";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::tts_name][0]["type"] = "TEXT";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::app_hmi_type] = mobile_apis::AppHMIType::NAVIGATION;
-			(*AppRegRequest)[S_MSG_PARAMS][strings::cmd_id] = 321;
-			(*AppRegRequest)[S_MSG_PARAMS][strings::menu_params][strings::menu_name] = "MenuName";
-			(*AppRegRequest)[S_MSG_PARAMS][strings::language_desired] = hmi_apis::Common_Language::EN_US;
-			(*AppRegRequest)[S_MSG_PARAMS][strings::hmi_display_language_desired] = hmi_apis::Common_Language::EN_US;
+			(*AppRegRequest)[S_MSG_PARAMS][strings::available] = true;
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::app_id] = "12345";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::is_media_application] = true;
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::vr_synonyms][0] = "VR SyncProxyTester";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::ngn_media_screen_app_name] = "SPT";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::tts_name][0]["text"] = "SyncProxyTester";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::tts_name][0]["type"] = "TEXT";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::app_hmi_type] = mobile_apis::AppHMIType::NAVIGATION;
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::cmd_id] = 321;
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::menu_params][strings::menu_name] = "MenuName";
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::language_desired] = hmi_apis::Common_Language::EN_US;
+			//(*AppRegRequest)[S_MSG_PARAMS][strings::hmi_display_language_desired] = hmi_apis::Common_Language::EN_US;
 			
 			
 			//MessageChaining* MesChain = app_manager_->AddMessageChain(connectKey, 1, 16, NULL, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain \n\n\n");
 			//app_manager_->AddMessageChain(connectKey,1,16,MesChain, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain  after\n\n\n");
-			app_manager_->ManageMobileCommand(AppRegRequest);	
+			//app_manager_->ManageMobileCommand(AppRegRequest);	
 			///////////////////////////////////			
-			*/
+			
 			Application* appl = app_manager_->RegisterApplication(AppRegRequest); 
 			//Application* appl = app_manager_->application(connectKey);
 			
