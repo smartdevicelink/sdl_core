@@ -2565,9 +2565,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void stopMobileNaviSession() {
-        Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
-        servicePool.remove(servicePool.indexOf(_mobileNavSessionID));
-        getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+        int index = servicePool.indexOf(_mobileNavSessionID);
+        if (index != -1) {
+            Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
+            servicePool.remove(index);
+            getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+        }
     }
 
     // Queue internal callback message
