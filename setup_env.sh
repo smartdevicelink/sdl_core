@@ -153,7 +153,7 @@ fi
 #INSTALL_CMAKE becomes "true" if no cmake  at all or lower version "2.8.9" is present
 INSTALL_CMAKE=false
 
-if dpkg -s cmake | grep installed > /dev/null; then		
+if dpkg -s cmake | grep installed > /dev/null; then
 	echo "Checking for installed cmake"
 	CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
 	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
@@ -290,7 +290,7 @@ if $QT_HMI || $INSTALL_ALL; then
 fi
 
 if $QNX_TARGET || $INSTALL_ALL; then
-
+	echo "Checking for installed QNX SDP 6.5.0"
 	if [[ ! -x /opt/qnx650 ]]; then
 	    echo "Installing wget"
 		apt-install wget
