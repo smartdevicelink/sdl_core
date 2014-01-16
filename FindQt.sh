@@ -100,7 +100,7 @@ else
 fi
 
 ## First attempt - using locate
-if  ! command -v locate > /dev/null; then
+if command -v locate > /dev/null; then
   for searchloc in $CUSTOM_QT_DIR ~ /opt /usr; do
     qmake_list=$(locate $searchloc/*/bin/qmake)
     for qmake in $qmake_list; do
@@ -142,7 +142,7 @@ export -f qmake_data
 export -f version_match
 export -f version2int
 
-qmake=$(find -L ~ -name '.*' -prune \
+qmake=$(find -L $CUSTOM_QT_DIR ~ /opt /usr -name '.*' -prune \
         -o -name qmake -type f \
         -executable \
         -exec /bin/bash -c "version_qt=\$(qmake_data {} 1);version_match $version \$version_qt" {} \; -print -quit)

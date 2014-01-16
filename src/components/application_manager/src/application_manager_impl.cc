@@ -386,7 +386,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   if (true == profile::Profile::instance()->launch_hmi()) {
     utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
+      MessageHelper::CreateModuleInfoSO(
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
     ManageHMICommand(is_vr_ready);
 
     utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
