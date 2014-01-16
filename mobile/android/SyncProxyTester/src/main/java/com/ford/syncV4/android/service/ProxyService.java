@@ -449,7 +449,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         putFile.setSyncFileName(ICON_SYNC_FILENAME);
         putFile.setCorrelationID(nextCorrID());
         putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-        _msgAdapter.logMessage(putFile, true);
+        if (_msgAdapter != null) {
+            _msgAdapter.logMessage(putFile, true);
+        }
 
         try {
             awaitingPutFileResponseCorrelationID = putFile.getCorrelationID();
