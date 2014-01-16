@@ -147,7 +147,7 @@ sudo apt-key add ./gstreamer.key.pub
 if $UPDATE_SOURCES; then
 	echo "Apdating repository..."
 	sudo apt-get update
-	sudo apt-get upgrade
+	sudo apt-get upgrade --yes --force-yes
 fi
 
 #INSTALL_CMAKE becomes "true" if no cmake  at all or lower version "2.8.9" is present
