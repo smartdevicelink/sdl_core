@@ -61,9 +61,10 @@ APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
-QT5_RUNFILE_DST="/tmp/qt5"
+TEMP_FOLDER="/tmp"
 INSTALL_ALL=false
 QT_HMI=false
+QNX_TARGET=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
@@ -94,7 +95,8 @@ while test $# -gt 0; do
                         echo "options:"
                         echo "-h, --help                show brief help"
                         echo "-a, --all                 all mandatory and optional packages will be installed"
-                        echo "-q                        install additional packages for Qt HMI"
+                        echo "-qt                       install additional packages for Qt HMI"
+                        echo "-qnx                      install additional packages for QNX"
 			
                         exit 0
                         ;;
@@ -102,8 +104,12 @@ while test $# -gt 0; do
 			INSTALL_ALL=true
 			shift
                         ;;
-                -q)
+                -qt)
 			QT_HMI=true
+			shift
+                        ;;
+                -qnx)
+			QNX_TARGET=true
 			shift
                         ;;
         esac
@@ -262,6 +268,7 @@ if $QT_HMI || $INSTALL_ALL; then
 	fi
 	echo $OK
 
+	QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
 	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
 	if $NEED_QT5_INSTALL; then
@@ -279,6 +286,34 @@ if $QT_HMI || $INSTALL_ALL; then
 	
 	echo "Installing OpenGL development files"
 	apt-install ${OPENGL_DEV}
+	echo $OK
+fi
+
+if $QNX_TARGET || $INSTALL_ALL; then
+    echo "Installing wget"
+	apt-install wget
+
+	QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
+	QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
+	QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
+	QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
+
+	echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+	wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
+
+	if [ ${ARCH} = "x64" ]; then
+		QNXSDP_TOOL_REQS="ia32-libs"
+		echo "Installing 32-bit libraries for 64-bit OS"
+		apt-install ${QNXSDP_TOOL_REQS}
+	fi
+
+	echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+	chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
+	sudo ${QNXSDP_TOOL_RUNFILE_BIN}
+
+	echo "Installing SSH server"
+	SSH_SERVER="openssh-server ssh"
+	apt-install ${SSH_SERVER}
 	echo $OK
 fi
 
@@ -300,4 +335,3 @@ if $INSTALL_ALL; then
 	echo $OK
 fi
 echo "Environment configuration successfully done!"
-
