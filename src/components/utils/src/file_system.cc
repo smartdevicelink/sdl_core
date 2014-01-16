@@ -56,7 +56,7 @@ uint64_t file_system::GetAvailableDiskSpace() {
   memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
   if( statvfs(currentAppPath, &fsInfo) == 0) {
     return fsInfo.f_bsize * fsInfo.f_bfree;
-  } else{
+  } else {
     return 0;
   }
 }
