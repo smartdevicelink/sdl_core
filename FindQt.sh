@@ -53,6 +53,7 @@ version2int() {
 version_match() {
   v1=$(version2int $1)
   v2=$(version2int $2)
+  # It's bash way to say "if ((version1 < version2) and (major1 == major2))
   if [[ ( $v1 -le $v2 ) && ( $(( ($v1 / 1024) - ($v2 / 1024) )) == 0 ) ]]; then
     return 0;
   else
