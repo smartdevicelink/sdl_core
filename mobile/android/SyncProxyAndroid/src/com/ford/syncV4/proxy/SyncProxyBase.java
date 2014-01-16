@@ -2467,7 +2467,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void passErrorToProxyListener(final String info, final Exception e) {
-
         OnError message = new OnError(info, e);
         queueInternalMessage(message);
     }

@@ -449,8 +449,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         putFile.setSyncFileName(ICON_SYNC_FILENAME);
         putFile.setCorrelationID(nextCorrID());
         putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-        if (_msgAdapter != null) {
+        try {
             _msgAdapter.logMessage(putFile, true);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "NullPointerException ", e);
         }
 
         try {
@@ -806,6 +808,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (_msgAdapter != null) {
             _msgAdapter.logMessage("******onProxyError******", Log.ERROR);
             _msgAdapter.logMessage("ERROR: " + info, Log.ERROR, e);
+            _msgAdapter.logMessage(info, true);
         } else {
             Log.e(TAG, "******onProxyError******");
             Log.e(TAG, "ERROR: " + info, e);
