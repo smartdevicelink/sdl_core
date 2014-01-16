@@ -290,30 +290,33 @@ if $QT_HMI || $INSTALL_ALL; then
 fi
 
 if $QNX_TARGET || $INSTALL_ALL; then
-    echo "Installing wget"
-	apt-install wget
 
-	QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
-	QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
-	QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
-	QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
+	if [[ ! -x /opt/qnx650 ]]; then
+	    echo "Installing wget"
+		apt-install wget
 
-	echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-	wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
+		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
+		QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
+		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
+		QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
 
-	if [ ${ARCH} = "x64" ]; then
-		QNXSDP_TOOL_REQS="ia32-libs"
-		echo "Installing 32-bit libraries for 64-bit OS"
-		apt-install ${QNXSDP_TOOL_REQS}
+		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+		wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
+
+		if [ ${ARCH} = "x64" ]; then
+			QNXSDP_TOOL_REQS="ia32-libs"
+			echo "Installing 32-bit libraries for 64-bit OS"
+			apt-install ${QNXSDP_TOOL_REQS}
+		fi
+
+		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
+		sudo ${QNXSDP_TOOL_RUNFILE_BIN}
+
+		echo "Installing SSH server"
+		SSH_SERVER="openssh-server ssh"
+		apt-install ${SSH_SERVER}
 	fi
-
-	echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-	chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
-	sudo ${QNXSDP_TOOL_RUNFILE_BIN}
-
-	echo "Installing SSH server"
-	SSH_SERVER="openssh-server ssh"
-	apt-install ${SSH_SERVER}
 	echo $OK
 fi
 
