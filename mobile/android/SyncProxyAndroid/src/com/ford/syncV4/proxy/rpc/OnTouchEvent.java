@@ -40,7 +40,7 @@ public class OnTouchEvent extends RPCNotification {
         return null;
     }
     
-    public void setEvent(Vector<OnTouchEvent> event) {
+    public void setEvent(Vector<TouchType> event) {
         if (event != null) {
             parameters.put(Names.event, event);
         } else {
@@ -48,14 +48,14 @@ public class OnTouchEvent extends RPCNotification {
         }
     }
     
-    public Vector<OnTouchEvent> getEvent() {
+    public Vector<TouchType> getEvent() {
         Object objList = parameters.get(Names.event);
         if (objList instanceof Vector<?>) {
             Vector<?> list = (Vector<?>)objList;
             if (list != null && list.size() > 0) {
                 Object obj = list.get(0);
-                if (obj instanceof OnTouchEvent) {
-                    return (Vector<OnTouchEvent>)list;
+                if (obj instanceof TouchType) {
+                    return (Vector<TouchType>)list;
                 }
             }
         }
