@@ -68,14 +68,10 @@ GeneralView {
                         anchors.fill: parent
                         enabled: model.icon.value !== undefined
 
-                        Component.onCompleted: {
-                            console.debug("enter")
-                            pressed.connect(text.press)
-                            released.connect(text.release)
-                            canceled.connect(text.release)
-                            clicked.connect(text.click)
-                            console.debug("exit")
-                        }
+                        onPressed: text.press()
+                        onReleased: text.release()
+                        onCanceled: text.release()
+                        onClicked: text.click()
                     }
                 }
 

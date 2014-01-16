@@ -150,7 +150,7 @@ GeneralView {
             id: presetsRow
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            presets: Internal.getArrayForPresetRow()
+            presets: Internal.getArrayForPresetRow(dataContainer.currentApplication)
             width: parent.width
             property bool clickProcessed
 
