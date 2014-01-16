@@ -137,14 +137,14 @@ void PutFileRequest::Run() {
         if (!application->AddFile(sync_file_name, is_persistent_file,false)) {
           LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
           // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
-          if (!application->UpdateFile(sync_file_name, is_persistent_file,false)) {
+          if (!application->UpdateFile(sync_file_name, is_persistent_file, false)) {
             // If it is impossible to update file, application doesn't know about existing this file
             SendResponse(false,mobile_apis::Result::INVALID_DATA);
             return;
           }
-        }  else {
-          /* if file aded - increment it's count ( may be application->AddFile have to incapsulate it? )
-           *Any way now this method evals not only in "none"*/
+        } else {
+          /* if file added - increment it's count ( may be application->AddFile have to incapsulate it? )
+           * Any way now this method evals not only in "none"*/
           application->increment_put_file_in_none_count();
         }
       }
