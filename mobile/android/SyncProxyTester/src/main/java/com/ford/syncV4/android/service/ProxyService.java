@@ -19,6 +19,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -112,9 +113,9 @@ import java.util.Vector;
 public class ProxyService extends Service implements IProxyListenerALMTesting {
 	static final String TAG = "SyncProxyTester";
 
-    private static final String APPID_BT = "8675309";
-    private static final String APPID_TCP = "8675308";
-    private static final String APPID_USB = "8675310";
+    private static final String APPID_BT = FlavorConst.APPID_BT;
+    private static final String APPID_TCP = FlavorConst.APPID_TCP;
+    private static final String APPID_USB = FlavorConst.APPID_USB;
 
 	private Integer autoIncCorrId = 1;
 	
