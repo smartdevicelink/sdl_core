@@ -1535,7 +1535,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {
-      if (file_size!=offset) {
+      if (file_size != offset) {
           LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
           return mobile_apis::Result::INVALID_DATA;
         }

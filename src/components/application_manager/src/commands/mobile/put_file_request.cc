@@ -134,7 +134,7 @@ void PutFileRequest::Run() {
       }
       if (offset == 0) {
         LOG4CXX_INFO(logger_, "New file downloading");
-        if (!application->AddFile(sync_file_name, is_persistent_file,false)) {
+        if (!application->AddFile(sync_file_name, is_persistent_file, false)) {
           LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
           // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
           if (!application->UpdateFile(sync_file_name, is_persistent_file, false)) {
@@ -150,7 +150,7 @@ void PutFileRequest::Run() {
       }
       if (offset + binary_data.size() == length) {
         LOG4CXX_INFO(logger_, "File is Fully downloaded");
-        if (!application->UpdateFile(sync_file_name, is_persistent_file,true)) {
+        if (!application->UpdateFile(sync_file_name, is_persistent_file, true)) {
           // If it is impossible to update file, application doesn't know about existing this file
           SendResponse(false,mobile_apis::Result::INVALID_DATA);
           return;
