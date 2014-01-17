@@ -311,14 +311,14 @@ if $QNX_TARGET || $INSTALL_ALL; then
 		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
 		QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
 
-		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-		wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
-
 		if [ ${ARCH} == "x64" ]; then
 			QNXSDP_TOOL_REQS="ia32-libs"
 			echo "Installing 32-bit libraries for 64-bit OS"
 			apt-install ${QNXSDP_TOOL_REQS}
 		fi
+
+		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+		wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
