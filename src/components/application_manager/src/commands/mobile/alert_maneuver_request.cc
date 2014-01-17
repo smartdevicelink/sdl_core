@@ -96,32 +96,22 @@ void AlertManeuverRequest::Run() {
     }
   }
 
-  bool soft_buttons_is_ok = false;
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
-    soft_buttons_is_ok = true;
-  }
-
-  // Sending requests to HMI
-  if (soft_buttons_is_ok) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
     msg_params[hmi_request::soft_buttons] =
-            (*message_)[strings::msg_params][strings::soft_buttons];
-
-    SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
-                   &msg_params,
-                   true);
+              (*message_)[strings::msg_params][strings::soft_buttons];
   }
+
+  pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
+  SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
+                     &msg_params,
+                     true);
 
   if (tts_is_ok) {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
-
-    msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
 
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
@@ -169,28 +159,30 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
   if (pending_requests_.IsFinal(event_id)) {
 
-    result_code = (mobile_apis::Result::SUCCESS != tts_speak_result_code_)
-          ? tts_speak_result_code_
-          : navi_alert_maneuver_result_code_;
+    bool result = ((hmi_apis::Common_Result::SUCCESS == tts_speak_result_code_) &&
+                   (hmi_apis::Common_Result::SUCCESS == navi_alert_maneuver_result_code_)) ||
+                   ((hmi_apis::Common_Result::INVALID_ENUM == tts_speak_result_code_) &&
+                   (hmi_apis::Common_Result::SUCCESS == navi_alert_maneuver_result_code_));
 
-    bool result = mobile_apis::Result::SUCCESS == result_code;
+    mobile_apis::Result::eType result_code =
+        static_cast<mobile_apis::Result::eType>(std::max(tts_speak_result_code_,
+                                             navi_alert_maneuver_result_code_));
 
-    if (mobile_apis::Result::INVALID_ENUM != result_code) {
-      const char* return_info = NULL;
+    const char* return_info = NULL;
 
-      if (result) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-            static_cast<hmi_apis::Common_Result::eType>(result_code)) {
-          result_code = mobile_apis::Result::WARNINGS;
-          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
-        }
+    if (result) {
+      if (mobile_apis::Result::INVALID_ENUM != result_) {
+          result_code = result_;
+      } else if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+          static_cast<mobile_apis::Result::eType>(result_code)) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info =
+            std::string("Unsupported phoneme type sent in a prompt").c_str();
       }
-
-      SendResponse(result,
-                   result_code,
-                   return_info,
-                   &(message[strings::msg_params]));
     }
+
+    SendResponse(result, result_code, return_info,
+                 &(message[strings::msg_params]));
   } else {
     LOG4CXX_INFO(logger_,
                 "There are some pending responses from HMI."
