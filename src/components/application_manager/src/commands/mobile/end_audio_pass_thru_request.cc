@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 

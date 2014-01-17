@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <set>
-#include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace hmi {
+/**
+ * @brief AudioStartStreamResponse command class
+ **/
+class AudioStartStreamResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief AudioStartStreamResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStartStreamResponse(const MessageSharedPtr& message);
 
-OnDriverDistractionNotification::OnDriverDistractionNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+  /**
+   * @brief AudioStartStreamResponse class destructor
+   **/
+  virtual ~AudioStartStreamResponse();
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void OnDriverDistractionNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
-
-  const hmi_apis::Common_DriverDistractionState::eType state =
-      static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-          (*message_)[strings::msg_params][hmi_notification::state]
-          .asInt());
-  ApplicationManagerImpl::instance()->set_driver_distraction(state);
-
-  smart_objects::SmartObject* on_driver_distraction =
-      new smart_objects::SmartObject();
-
-  if (NULL == on_driver_distraction) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    return;
-  }
-
-  (*on_driver_distraction)[strings::params][strings::function_id] =
-      mobile_api::FunctionID::OnDriverDistractionID;
-
-  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
-      state;
-
-  SendNotificationToMobile(on_driver_distraction);
-}
-
-}  // namespace hmi
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_RESPONSE_H_

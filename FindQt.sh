@@ -53,6 +53,7 @@ version2int() {
 version_match() {
   v1=$(version2int $1)
   v2=$(version2int $2)
+  # It's bash way to say "if ((version1 < version2) and (major1 == major2))
   if [[ ( $v1 -le $v2 ) && ( $(( ($v1 / 1024) - ($v2 / 1024) )) == 0 ) ]]; then
     return 0;
   else
@@ -100,8 +101,8 @@ else
 fi
 
 ## First attempt - using locate
-if  ! command -v locate > /dev/null; then
-  for searchloc in $CUSTOM_QT_DIR ~ /opt /usr; do
+if command -v locate > /dev/null; then
+  for searchloc in $CUSTOM_QT_DIR ~ /opt /usr/local; do
     qmake_list=$(locate $searchloc/*/bin/qmake)
     for qmake in $qmake_list; do
       if [[ ! -x $qmake || -d $qmake ]]; then
@@ -142,10 +143,10 @@ export -f qmake_data
 export -f version_match
 export -f version2int
 
-qmake=$(find -L ~ -name '.*' -prune \
+qmake=$(find -L $CUSTOM_QT_DIR ~ /opt /usr/local -name '.*' -prune \
         -o -name qmake -type f \
         -executable \
-        -exec /bin/bash -c "version_qt=\$(qmake_data {} 1);version_match $version \$version_qt" {} \; -print -quit)
+        -exec /bin/bash -c "version_qt=\$(qmake_data {} 1);version_match $version \$version_qt" {} \; -print -quit > /dev/null)
 if ! [ $? ]; then
    exit 1;
 fi
@@ -170,4 +171,4 @@ case $type in
     ;;
 esac
 
-exit 0
+exit 1

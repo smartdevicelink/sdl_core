@@ -386,7 +386,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   if (true == profile::Profile::instance()->launch_hmi()) {
     utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
+      MessageHelper::CreateModuleInfoSO(
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
     ManageHMICommand(is_vr_ready);
 
     utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
@@ -1151,7 +1152,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     output.set_binary_data(binaryData);
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  LOG4CXX_INFO(logger_, "Successfully parsed smart object into message");
   return true;
 }
 
@@ -1535,7 +1536,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {
-      if (file_size!=offset) {
+      if (file_size != offset) {
           LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
           return mobile_apis::Result::INVALID_DATA;
         }

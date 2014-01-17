@@ -30,56 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <set>
-#include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/audio_start_stream_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-namespace hmi {
-
-OnDriverDistractionNotification::OnDriverDistractionNotification(
+AudioStartStreamRequest::AudioStartStreamRequest(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    : RequestToHMI(message) {
 }
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
+AudioStartStreamRequest::~AudioStartStreamRequest() {
 }
 
-void OnDriverDistractionNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
+void AudioStartStreamRequest::Run() {
+  LOG4CXX_INFO(logger_, "AudioStartStreamRequest::Run");
 
-  const hmi_apis::Common_DriverDistractionState::eType state =
-      static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-          (*message_)[strings::msg_params][hmi_notification::state]
-          .asInt());
-  ApplicationManagerImpl::instance()->set_driver_distraction(state);
-
-  smart_objects::SmartObject* on_driver_distraction =
-      new smart_objects::SmartObject();
-
-  if (NULL == on_driver_distraction) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
-    return;
-  }
-
-  (*on_driver_distraction)[strings::params][strings::function_id] =
-      mobile_api::FunctionID::OnDriverDistractionID;
-
-  (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
-      state;
-
-  SendNotificationToMobile(on_driver_distraction);
+  SendRequest();
 }
-
-}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
+
 

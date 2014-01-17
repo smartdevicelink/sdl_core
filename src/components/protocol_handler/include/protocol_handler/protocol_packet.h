@@ -113,11 +113,6 @@ const uint8_t SERVICE_TYPE_BULK = 0x0F;
 const uint8_t FRAME_DATA_HEART_BEAT = 0x00;
 
 /**
- *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat ack.
- */
-const uint8_t FRAME_DATA_HEART_BEAT_ACK = 0xFF;
-
-/**
  *\brief If FRAME_TYPE_CONTROL: Constant: Start service frame
  */
 const uint8_t FRAME_DATA_START_SERVICE = 0x01;
@@ -147,6 +142,16 @@ const uint8_t FRAME_DATA_END_SERVICE_ACK = 0x05;
  *\brief If FRAME_TYPE_CONTROL: Constant: End service not acknowledgement frame
  */
 const uint8_t FRAME_DATA_END_SERVICE_NACK = 0x06;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: Service data ACK frame
+ */
+const uint8_t FRAME_DATA_SERVICE_DATA_ACK = 0xFE;
+
+/**
+ *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat ack.
+ */
+const uint8_t FRAME_DATA_HEART_BEAT_ACK = 0xFF;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum of consecutive frame numbers

@@ -244,7 +244,7 @@ bool ApplicationImpl::AddFile(const std::string& file_name,
       return false;
     }
   }
-  AppFile app_file(file_name, is_persistent,is_download_complete);
+  AppFile app_file(file_name, is_persistent, is_download_complete);
   app_files_.push_back(app_file);
   return true;
 }
