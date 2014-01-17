@@ -22,7 +22,7 @@
 
  3.1. To prepare the Linux Host:
     Note: in case Ubuntu/Xubuntu 12.04 is already installed, git repository is cloned and is switched to <Main_Develop> branch, proceed from the step 3.1.6.
-  3.1.1. Install Ubuntu/Xubuntu 12.04 and higher.
+  3.1.1. Install Ubuntu/Xubuntu 12.04 or higher.
   3.1.2. Configure source repositories (check "Canonical Partners" repositories in Update Manager->Settings->SW source).
   3.1.3. Perform "sudo apt-get install git" command in terminal.
   3.1.4. Clone git repository with "git clone git@adc.luxoft.com:applink".
