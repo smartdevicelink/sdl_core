@@ -72,31 +72,31 @@ FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 while test $# -gt 0; do
         case "$1" in
                 -a|--all)
-			INSTALL_ALL=true
-			shift
-                        ;;
+					INSTALL_ALL=true
+					shift
+                    ;;
                 -qt)
-			QT_HMI=true
-			shift
-                        ;;
+					QT_HMI=true
+					shift
+                    ;;
                 -qnx)
-			QNX_TARGET=true
-			shift
-                        ;;
+					QNX_TARGET=true
+					shift
+                    ;;
                 -h|--help|*)
-                        echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
-                        echo "                 core compilation and running." 
-                        echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
-                        echo " "
-                        echo "Usage: setup_env.sh [option] "
-                        echo "Options:"
-                        echo "-h, --help            show brief help"
-                        echo "-a, --all             all mandatory and optional packages will be installed"
-                        echo "-qt                   install additional packages for Qt HMI"
-                        echo "-qnx                  install additional packages for QNX"
+                    echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
+                    echo "                 core compilation and running."
+                    echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
+                    echo " "
+                    echo "Usage: setup_env.sh [option] "
+                    echo "Options:"
+                    echo "-h, --help            show brief help"
+                    echo "-a, --all             all mandatory and optional packages will be installed"
+                    echo "-qt                   install additional packages for Qt HMI"
+                    echo "-qnx                  install additional packages for QNX"
 
-                        exit 0
-                        ;;
+                    exit 0
+                    ;;
         esac
 done
 
@@ -145,7 +145,7 @@ echo "Register gstreamer repository PUBLIC KEY in system"
 sudo apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
-	echo "Apdating repository..."
+	echo "Updating repository..."
 	sudo apt-get update
 	sudo apt-get upgrade --yes --force-yes
 fi
@@ -153,8 +153,8 @@ fi
 #INSTALL_CMAKE_2_8_9 becomes "true" if no cmake  at all or lower version "2.8.9" is present
 INSTALL_CMAKE_2_8_9=false
 
-echo "Checking for installed cmake"
 if dpkg -s cmake | grep installed > /dev/null; then
+	echo "Checking for installed cmake"
 	CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
 	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
 	case ${CMAKE_COMPARE_RESULT} in
@@ -167,9 +167,9 @@ if dpkg -s cmake | grep installed > /dev/null; then
 else 
 	#Check Ubuntu version
 	UBUNTU_VERSION=$(lsb_release -r | sed 's/[^0-9\.]//g')
-	UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py ${UBUNTU_VERSION} "13.00")
+	UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py "13.00" ${UBUNTU_VERSION} )
 	#For Ubuntu 13.0 and higer install cmake from repository
-	if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
+    if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
 		apt-install ${CMAKE_BUILD_SYSTEM}
 	else
 		INSTALL_CMAKE_2_8_9=true
