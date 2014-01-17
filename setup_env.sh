@@ -75,6 +75,7 @@ LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
+LIBXML2="libxml2-dev"
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
 GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -187,6 +188,10 @@ fi
 
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
+echo $OK
+
+echo "Installing libxml2..."
+apt-get install ${LIBXML2}
 echo $OK
 
 echo "Installng GNU C++ compiler"
