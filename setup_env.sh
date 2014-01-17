@@ -100,7 +100,7 @@ while test $# -gt 0; do
 			
                         exit 0
                         ;;
-                -a)
+                -a|--all)
 			INSTALL_ALL=true
 			shift
                         ;;
