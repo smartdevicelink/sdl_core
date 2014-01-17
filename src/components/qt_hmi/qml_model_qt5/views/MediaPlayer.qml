@@ -245,7 +245,7 @@ Item {
             id: presetsRow
             anchors.top: parent.top
             anchors.left: parent.left
-            presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow() : []
+            presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow(dataContainer.currentApplication) : []
             width: parent.width
             property bool clickProcessed
 

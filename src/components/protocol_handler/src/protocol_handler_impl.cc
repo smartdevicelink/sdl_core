@@ -720,7 +720,7 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
                "SendFramesNumber MobileNaviAck for session " << connection_key);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-                        SERVICE_TYPE_NAVI, FRAME_DATA_START_SERVICE_ACK,
+                        SERVICE_TYPE_NAVI, FRAME_DATA_SERVICE_DATA_ACK,
                         connection_key, 0, number_of_frames);
 
   RESULT_CODE send_result = SendFrame(connection_key, packet);

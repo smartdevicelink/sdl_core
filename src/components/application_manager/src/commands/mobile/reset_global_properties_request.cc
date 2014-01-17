@@ -69,11 +69,6 @@ void ResetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  const uint32_t correlation_id =
-    (*message_)[strings::params][strings::correlation_id].asUInt();
-  const uint32_t connection_key =
-    (*message_)[strings::params][strings::connection_key].asUInt();
-
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
                       .length();
 
@@ -126,16 +121,6 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 
   app->set_reset_global_properties_active(true);
-
-  uint32_t chaining_counter = 0;
-  if (vr_help_title || vr_help_items || menu_name || menu_icon
-      || is_key_board_properties) {
-    ++chaining_counter;
-  }
-
-  if (timeout_promt || helpt_promt) {
-    ++chaining_counter;
-  }
 
   if (vr_help_title || vr_help_items || menu_name || menu_icon
       || is_key_board_properties) {

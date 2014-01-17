@@ -55,11 +55,10 @@ uint64_t file_system::GetAvailableDiskSpace() {
   struct statvfs fsInfo;
   memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
   if( statvfs(currentAppPath, &fsInfo) == 0) {
-      return fsInfo.f_bsize * fsInfo.f_bfree;
-    }
-  else{
-      return 0;
-    }
+    return fsInfo.f_bsize * fsInfo.f_bfree;
+  } else {
+    return 0;
+  }
 }
 
 uint32_t file_system::FileSize(const std::string &path) {

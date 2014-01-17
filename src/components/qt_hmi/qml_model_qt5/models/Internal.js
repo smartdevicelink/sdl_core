@@ -30,6 +30,9 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
 
+.pragma library
+.import "../hmi_api/Common.js" as Common
+
 var MenuItemType = {
     MI_NODE: 0,
     MI_SUBMENU: 1,
@@ -63,6 +66,16 @@ var MediaClockRunningMode = {
     MCR_STOPPED: 1
 }
 
+function chooseAppStartScreen(appType, isMediaApplication) {
+    if (checkBit(appType, Common.AppHMIType.NAVIGATION)) {
+        return "./views/SDLNavi.qml"
+    } else if (isMediaApplication) {
+        return "./views/SDLPlayerView.qml"
+    } else {
+        return "./views/SDLNonMediaView.qml"
+    }
+}
+
 function appendVrHelpItem (arrayElement, index, array) {
     this.append({
         text: arrayElement.text,
@@ -75,10 +88,10 @@ function checkBit(value, bitPosition) {
     return (value & (1 << bitPosition))
 }
 
-function getArrayForPresetRow() {
+function getArrayForPresetRow(app) {
     var array = []
-    for (var i = 0; i < dataContainer.currentApplication.customPresets.count; i++) {
-        array.push(dataContainer.currentApplication.customPresets.get(i).text)
+    for (var i = 0; i < app.customPresets.count; i++) {
+        array.push(app.customPresets.get(i).text)
     }
     return array
 }
