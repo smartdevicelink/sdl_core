@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasItemInArray;
  * Created by enikolsky on 2013-12-31.
  */
 public class FrameDataControlFrameTypeTest extends TestCase {
+
     public void testHeartbeatTypeValueShouldBe0x00() {
         assertThat(FrameDataControlFrameType.Heartbeat.getValue(),
                 is((byte) 0x00));
@@ -83,5 +84,19 @@ public class FrameDataControlFrameTypeTest extends TestCase {
 
     public void testFrameDataValuesHasEndSessionACKValue() throws Exception {
         assertTrue("FrameData list should have EndSessionACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSessionACK));
+    }
+
+    public void testMobileNaviACKIs0xFE() throws Exception {
+        assertThat(FrameDataControlFrameType.MobileNaviACK.getValue(),
+                is((byte) 0xFE));
+    }
+
+    public void testEndSessionNACKValueIs0x06() throws Exception {
+        assertThat(FrameDataControlFrameType.EndSessionNACK.getValue(),
+                is((byte) 0x06));
+    }
+
+    public void testFrameDataValuesHasEndSessionNACKValue() throws Exception {
+        assertTrue("FrameData list should have EndSessionNACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSessionNACK));
     }
 }
