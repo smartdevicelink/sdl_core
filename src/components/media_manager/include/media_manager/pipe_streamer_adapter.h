@@ -40,7 +40,7 @@ namespace media_manager {
 class PipeStreamerAdapter : public MediaAdapterImpl {
   public:
     PipeStreamerAdapter();
-    ~PipeStreamerAdapter();
+    virtual ~PipeStreamerAdapter();
     virtual void SendData(int32_t application_key,
                           const protocol_handler::RawMessagePtr& message);
     virtual void StartActivity(int32_t application_key);

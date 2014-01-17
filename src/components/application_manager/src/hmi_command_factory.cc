@@ -231,11 +231,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
 
   bool is_response = false;
   if ((*message)[strings::params][strings::message_type]
-      == static_cast<int>(MessageType::kResponse)) {
+      == static_cast<int>(application_manager::MessageType::kResponse)) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type]
-      == static_cast<int>(MessageType::kErrorResponse)) {
+      == static_cast<int>(application_manager::MessageType::kErrorResponse)) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
   } else {

@@ -100,13 +100,12 @@ while test $# -gt 0; do
                         ;;
                 -a)
 			INSTALL_ALL=true
-			shift
                         ;;
                 -q)
 			QT_HMI=true
-			shift
                         ;;
         esac
+	shift
 done
 
 function apt-install() {
@@ -252,7 +251,7 @@ if $QT_HMI || $INSTALL_ALL; then
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
 	echo "Checking whether Qt5 with QML support is installed"
-	qmlscene_binary=`./FindQt.sh binary qmlscene || true`
+	qmlscene_binary=`./FindQt.sh -v 5.1.0 -b qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
 	  echo "Found Qt5 in "`dirname $qmlscene_binary`
 	  NEED_QT5_INSTALL=false
