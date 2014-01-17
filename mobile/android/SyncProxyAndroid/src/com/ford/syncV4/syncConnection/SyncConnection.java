@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
@@ -44,6 +46,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     IHeartbeatMonitor _heartbeatMonitor;
     private boolean _isHeartbeatTimedout = false;
     private NSDHelper mNSDHelper;
+    private LimitedQueue<String> queue = new LimitedQueue<String>(10);
 
     /**
      * Constructor.
@@ -281,8 +284,40 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
+                if (length == 12 ){
+                    queue.add(byteArrayToHexString(Arrays.copyOfRange(msgBytes,0,3)));
+                }
+                Log.i(TAG + "MSG_QUEUE", "msg queue" + queue);
                 _transport.sendBytes(msgBytes, offset, length);
             }
+        }
+    }
+
+    private static String byteArrayToHexString(byte[] b) {
+        StringBuffer sb = new StringBuffer(b.length * 2);
+        for (int i = 0; i < b.length; i++) {
+            int v = b[i] & 0xff;
+            if (v < 16) {
+                sb.append('0');
+            }
+            sb.append(Integer.toHexString(v));
+        }
+        return sb.toString().toUpperCase();
+    }
+
+    class LimitedQueue<E> extends LinkedList<E> {
+
+        private final int limit;
+
+        public LimitedQueue(int limit) {
+            this.limit = limit;
+        }
+
+        @Override
+        public boolean add(E o) {
+            super.add(o);
+            while (size() > limit) { super.remove(); }
+            return true;
         }
     }
 
