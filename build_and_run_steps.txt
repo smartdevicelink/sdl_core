@@ -30,7 +30,7 @@
   3.1.5. Switch to <Main_Develop> branch: "git checkout <Main_Develop>".
   3.1.6. Run "./setup_env.sh -a" to install all mandatory and optional packages.
 	 Note: read the built-in setup environment help ("./setup_env.sh --help") which provides the description of predefined options:
-	 a) for Web HMI, b) for QML HMI.
+     a) for Web HMI, b) for QML HMI, c) for QNX support.
 
  3.2. To set up QNX cross platform build for Linux:
   3.2.1.  Download and install QNX SDP 6.5.0 SP1 cross platform tools for Linux (http://www.qnx.com/download/download/21179/qnxsdp-6.5.0-201007091524-linux.bin).
