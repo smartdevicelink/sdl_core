@@ -2,11 +2,11 @@
 
 1. General
  1.1. To build SDL for QNX, cross-compiling only shall be used.
- 1.2. To run SDL under Linux with Web HMI please follow     			steps: 3.1; 5; 6.
- 1.3. To run SDL under Linux with QML HMI please follow 				steps: 3.1; 5; 6.
- 1.4. To run SDL under virtualizied QNX with Web HMI under Linux Host please follow  	steps: 3.1; 3.2; 3.3; 4.1; 5; 7; 8.
- 1.5. To run SDL under virtualizied QNX with QML HMI under Linux Host please follow  	steps: 3.1; 3.2; 3.3; 4.2; 5; 9.
- 1.6. To run SDL under virtualizied QNX with QML HMI under QNX Host please follow 	steps: 3.1; 3.2; 3.3; 5; 7.
+ 1.2. To run SDL under Linux with Web HMI please follow         steps: 3.1; 5; 6.
+ 1.3. To run SDL under Linux with QML HMI please follow         steps: 3.1; 5; 6.
+ 1.4. To run SDL under virtualizied QNX with Web HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.1; 5; 7; 8.
+ 1.5. To run SDL under virtualizied QNX with QML HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.2; 5; 9.
+ 1.6. To run SDL under virtualizied QNX with QML HMI under QNX Host please follow     steps: 3.1; 3.2; 3.3; 5; 7.
  1.7. To turn media features (like audio/video streaming) on/off please set DEFAULT_MEDIA_FLAG to ON/OFF (e.g. "cmake -DEFAULT_MEDIA_FLAG=OFF").
       Note: Don’t mix up with BUILD_MEDIA_MANAGER flag.
 
@@ -52,7 +52,7 @@
 	  "./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests"
 	  "make"
 	  "sudo make install"
-	  	  su -c "make installlib"
+	  su -c "make installlib"
 	  tar -xf dbus-1.7.8.tar.gz
 	  cd dbus-1.7.8
 	  ./configure --prefix=/usr LDFLAGS='-L/usr/lib' CFLAGS='-I/usr/include'
@@ -60,7 +60,13 @@
 	  su make install
 	  su -c "chmod +x /usr/bin/dbus-daemon"
 	  run "dbus-daemon"
-
+  3.2.5. Log4cxx installing for QNX
+    3.2.5.1. Download log4cxx development archive "log4cxx.qnx.cross.build.files.zip" and runtime archive "log4cxx.qnx.runtime.files.zip"
+      Note: For development purpose use git folder git@adc.luxoft.com:applink/src/thirdPartyLibs/
+            For releases purpose use delivery svn folder https://adc.luxoft.com/svn/APPLINK/doc/technical/Delivery/{Release_name}/binaries/qnx650
+    3.2.5.2. Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
+    3.2.5.3. Download log4cxx runtime archive to QNX “scp <linuxhost_user>@<linuxhost_ip>:/<Delivery_Package_Path>/ log4cxx.qnx.runtime.files.zip ./”
+    3.2.5.4. Unpack on QNX server log4cxx binary files of log4cxx QNX port “unzip ./log4cxx.qnx.runtime.files.zip -d /” (this file is also located in git)
 
  3.3. To run QNX in virtual machine:
   3.3.1. Download VMWare Player https://my.vmware.com/web/vmware/downloads
@@ -86,7 +92,7 @@
       <allow_anonymous/>"
 	  (e.g. <listen>tcp:host=192.168.177.128,port=8087</listen>
 			<allow_anonymous/>).
-  4.2.2. LinHost: set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.177.128,port=8087").	
+  4.2.2. LinHost: set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.177.128,port=8087").
 
 
 
