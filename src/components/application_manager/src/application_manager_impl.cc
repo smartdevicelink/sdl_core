@@ -628,27 +628,45 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
   protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
-
-  if (protocol_handler::kMovileNav == type) {
-    LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
-
-    // send to HMI startStream request
-    char url[100] = {'\0'};
-    snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
-             profile::Profile::instance()->server_address().c_str(),
-             profile::Profile::instance()->video_streaming_port());
-
-    application_manager::MessageHelper::SendNaviStartStream(
-      url, session_key);
-
-#ifdef MEDIA_MANAGER
-    if (media_manager_) {
-      media_manager_->StartVideoStreaming(session_key);
+  switch (type) {
+    case protocol_handler::kMovileNav: {
+      LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+      // send to HMI startStream request
+      char url[100] = {'\0'};
+      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+               profile::Profile::instance()->server_address().c_str(),
+               profile::Profile::instance()->video_streaming_port());
+      application_manager::MessageHelper::SendNaviStartStream(
+          url, session_key);
+      #ifdef MEDIA_MANAGER
+      if (media_manager_) {
+        media_manager_->StartVideoStreaming(session_key);
+      }
+      #endif
+      // !!!!!!!!!!!!!!!!!!!!!!!
+      // TODO(DK): add check if navi streaming allowed for this app.
+      break;
     }
-#endif
-
-    // !!!!!!!!!!!!!!!!!!!!!!!
-    // TODO(DK): add check if navi streaming allowed for this app.
+    case protocol_handler::kAudio: {
+      LOG4CXX_INFO(logger_, "Audio service is about to be started.");
+      char url_audio[100] = {'\0'};
+      snprintf(url_audio, sizeof(url_audio) / sizeof(url_audio),
+               "http://%s:%d",
+               profile::Profile::instance()->server_address().c_str(),
+               profile::Profile::instance()->audio_streaming_port());
+      application_manager::MessageHelper::SendAudioStartStream(
+          url_audio, session_key);
+      #ifdef MEDIA_MANAGER
+      if (media_manager_) {
+        media_manager_->StartAudioStreaming(session_key);
+      }
+      #endif
+      break;
+    }
+    default: {
+      LOG4CXX_WARN(logger_, "Unknown type of service to be started.");
+      break;
+    }
   }
   return true;
 }
@@ -670,6 +688,14 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
 #ifdef MEDIA_MANAGER
     media_manager_->StopVideoStreaming(session_key);
 #endif
+      break;
+    }
+    case protocol_handler::kAudio:{
+      LOG4CXX_INFO(logger_, "Stop audio service.");
+      application_manager::MessageHelper::SendAudioStopStream(session_key);
+      #ifdef MEDIA_MANAGER
+      media_manager_->StopAudioStreaming(session_key);
+      #endif
       break;
     }
     default:
