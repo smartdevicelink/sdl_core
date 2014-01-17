@@ -38,8 +38,8 @@
 namespace test {
 	namespace app_manager_test {
 
-		AdminAppTest::AdminAppTest():
-		        xmlPathToDir()
+		AdminAppTest::AdminAppTest()
+		        //xmlPathToDir()
 		{		
 		}
 

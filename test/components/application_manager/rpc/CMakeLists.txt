@@ -1,6 +1,6 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
-find_package(LibXML2 REQUIRED)
+#find_package(LibXML2 REQUIRED)
 
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
@@ -30,7 +30,7 @@ include_directories (
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
-  ${LibXML2_INCLUDE_DIR}
+  #${LibXML2_INCLUDE_DIR}
 )
 
 set(LIBRARIES
@@ -63,12 +63,12 @@ set(LIBRARIES
     RequestWatchdog
     MediaManager
     Libusb-1.0.16
-    ${LibXML2_LIBRARIES} -lxml2
+    #${LibXML2_LIBRARIES} -lxml2
 )
 
 
 #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/XmlTests/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/XmlTests/)
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/XmlTests/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/XmlTests/)
 #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_link DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
@@ -94,7 +94,7 @@ add_library("test_App_Manager"
 						#"./src/MobileMessageHandlerTester.cc"
 						#"./src/CkeckMobileMessageHandler.cc"
 						#"./src/testMobile.cc"
-						"./src/xmlParser.cc"
+						#"./src/xmlParser.cc"
 						#"./src/too_many_request_test_case.cc"
 						#"./src/too_many_pending_requests_test_case.cc"
 						"./src/addTest.cc"

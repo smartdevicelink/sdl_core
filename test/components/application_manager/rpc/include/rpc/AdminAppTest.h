@@ -42,7 +42,7 @@
 //Interface class what called in GTestFord
 #include "rpc/addTest.h"
 #include "rpc/testHMI.h"
-#include "rpc/xmlParser.h"
+//#include "rpc/xmlParser.h"
 #include "rpc/ICheckClass.h"
 #include "rpc/initStartData.h"
 #include "rpc/HMIMessageHandlerTester.h"
@@ -58,8 +58,8 @@ using namespace application_manager;
 using namespace std;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace test::app_manager_test::xml_parser;
-namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+//using namespace test::app_manager_test::xml_parser;
+//namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 namespace test {
 	namespace app_manager_test{
@@ -130,15 +130,15 @@ namespace test {
 			/**
 			* @brief path to XML file
 			*/
-			std::string xmlPathToDir;
+			//std::string xmlPathToDir;
 
 		};
 		
 		
 		inline void AdminAppTest::SetXmlPathToDir(const std::string& path)
 		{
-		    xmlPathToDir.clear();
-		    xmlPathToDir.append(path);
+		    //xmlPathToDir.clear();
+		    //xmlPathToDir.append(path);
 		}
 	}
 }
