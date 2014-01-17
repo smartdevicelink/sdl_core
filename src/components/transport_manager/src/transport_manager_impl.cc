@@ -49,7 +49,6 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include "transport_manager/timer.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -248,19 +247,6 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
   return E_SUCCESS;
 }
 
-void TransportManagerImpl::DisconnectFailedRoutine(void* p) {
-  void** param = static_cast<void**>(p);
-  TransportManagerImpl* tm = static_cast<TransportManagerImpl*>(param[0]);
-  ConnectionInternal* c = static_cast<ConnectionInternal*>(param[1]);
-  LOG4CXX_INFO(logger_, "Disconnection failed");
-  tm->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
-                 tm->converter_.UidToHandle(c->device),
-                 DisconnectDeviceError());
-  c->shutDown = false;
-  c->timer.Stop();
-  delete[] param;
-}
-
 int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -289,13 +275,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   if (messages_count > 0) {
     connection->messages_count = messages_count;
     connection->shutDown = true;
-    void** param = new void* [2];
-    param[0] = this;
-    param[1] = &connection;
-    Timer timer(config_.disconnectTimeout, &DisconnectFailedRoutine, &param,
-                true);
-    connection->timer = timer;
-    timer.Start();
+    connection->timer->start(config_.disconnectTimeout);
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                               connection->application);
@@ -766,7 +746,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
-          AddConnection(ConnectionInternal(ta, ++connection_id_counter_,
+          AddConnection(ConnectionInternal(this, ta, ++connection_id_counter_,
                                            device_id, app_handle));
           device_handle = converter_.UidToHandle(device_id);
           RaiseEvent(
@@ -798,7 +778,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_DISCONNECT_FAIL");
-          DeviceHandle device_handle = converter_.UidToHandle(device_id);
+          device_handle = converter_.UidToHandle(device_id);
           RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                      device_handle, DisconnectDeviceError());
           break;
@@ -814,7 +794,7 @@ void TransportManagerImpl::EventListenerThread(void) {
           RaiseEvent(&TransportManagerListener::OnTMMessageSend, data);
           this->RemoveMessage(data);
           if (connection->shutDown && --connection->messages_count == 0) {
-            connection->timer.Stop();
+            connection->timer->stop();
             connection->transport_adapter->Disconnect(connection->device,
                                                       connection->application);
           }

@@ -129,7 +129,7 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
   return false;
 }
 
-void DBusAdapter::MethodReturn(uint id, smart_objects::SmartObject& obj) {
+void DBusAdapter::MethodReturn(uint id, const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj) {
   // TODO(KKolodiy): implement
 }
 
@@ -140,7 +140,7 @@ void DBusAdapter::Error(uint id, const std::string& name,
 
 void DBusAdapter::MethodCall(uint id, const MessageId func_id,
                              const MessageName name,
-                             smart_objects::SmartObject& obj) {
+                             const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj) {
   LOG4CXX_DEBUG(logger_, "Method call " << name.first << "." << name.second);
   if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
@@ -181,7 +181,7 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
 }
 
 void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
-                         smart_objects::SmartObject& obj) {
+                         const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj) {
   LOG4CXX_DEBUG(logger_, "Signal " << name.first << "." << name.second);
   if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");

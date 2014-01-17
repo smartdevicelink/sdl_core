@@ -51,12 +51,12 @@
 #include <memory>
 
 #include "utils/logger.h"
+#include "utils/timer_thread.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include <transport_manager/timer.h>
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
@@ -97,21 +97,37 @@ class TransportManagerImpl : public TransportManager {
    * @brief Structure that contains internal connection parameters
    */
   struct ConnectionInternal: public Connection {
+    TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
-    Timer timer;
+    typedef timer::TimerThread<ConnectionInternal> TimerInternal;
+    typedef utils::SharedPtr<TimerInternal> TimerInternalSharedPointer;
+    TimerInternalSharedPointer timer;
     bool shutDown;
     int messages_count;
 
-    ConnectionInternal(TransportAdapter* transport_adapter,
+    ConnectionInternal(TransportManagerImpl* transport_manager,
+                       TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
                        const ApplicationHandle& app_id)
-        : transport_adapter(transport_adapter),
+        : transport_manager(transport_manager),
+          transport_adapter(transport_adapter),
+          timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
           shutDown(false),
           messages_count(0) {
             Connection::id = id;
             Connection::device = dev_id;
             Connection::application = app_id;
     }
+
+    void DisconnectFailedRoutine() {
+      LOG4CXX_INFO(logger_, "Disconnection failed");
+      transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
+                                    transport_manager->converter_.UidToHandle(device),
+                                    DisconnectDeviceError());
+      shutDown = false;
+      timer->stop();
+    }
+
   };
  public:
 
@@ -151,13 +167,6 @@ class TransportManagerImpl : public TransportManager {
    * @return Code error.
    **/
   virtual int DisconnectDevice(const DeviceHandle& device_id);
-
-  /**
-   * @brief Routine after Disconnect failed.
-   *
-   * @param Pointer to any type.
-   */
-  static void DisconnectFailedRoutine(void* p);
 
   /**
    * @brief Disconnect from applications connected on device by connection
