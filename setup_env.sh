@@ -103,10 +103,10 @@ done
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
-if [ ${uname_result} = "i386" ] || [ ${uname_result} = "i686" ]; then
+if [ ${uname_result} == "i386" ] || [ ${uname_result} == "i686" ]; then
   echo "x86 machine detected"
   ARCH="i386"
-elif [ ${uname_result} = "x86_64" ]; then
+elif [ ${uname_result} == "x86_64" ]; then
   echo "x64 machine detected"
   ARCH="x64"
 else
@@ -258,10 +258,10 @@ if $QT_HMI || $INSTALL_ALL; then
 	apt-install ${SUBVERSION}
 	echo $OK
 	
-	if [ ${ARCH} = "i386" ]; then
+	if [ ${ARCH} == "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-	elif [ ${ARCH} = "x64" ]; then
+	elif [ ${ARCH} == "x64" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
@@ -314,7 +314,7 @@ if $QNX_TARGET || $INSTALL_ALL; then
 		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
 
-		if [ ${ARCH} = "x64" ]; then
+		if [ ${ARCH} == "x64" ]; then
 			QNXSDP_TOOL_REQS="ia32-libs"
 			echo "Installing 32-bit libraries for 64-bit OS"
 			apt-install ${QNXSDP_TOOL_REQS}
