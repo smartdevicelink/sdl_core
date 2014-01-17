@@ -150,6 +150,14 @@ if $UPDATE_SOURCES; then
 	sudo apt-get upgrade --yes --force-yes
 fi
 
+#Check Ubuntu version
+UBUNTU_VERSION=$(lsb_release -r | sed 's/[^0-9\.]//g')
+UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py "13.00" ${UBUNTU_VERSION} )
+UBUNTU_VERSION_13_HIGHER=false
+if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
+	UBUNTU_VERSION_13_HIGHER=true
+fi
+
 #INSTALL_CMAKE_2_8_9 becomes "true" if no cmake  at all or lower version "2.8.9" is present
 INSTALL_CMAKE_2_8_9=false
 
@@ -165,11 +173,8 @@ if dpkg -s cmake | grep installed > /dev/null; then
 	    ;;
 	esac
 else 
-	#Check Ubuntu version
-	UBUNTU_VERSION=$(lsb_release -r | sed 's/[^0-9\.]//g')
-	UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py "13.00" ${UBUNTU_VERSION} )
 	#For Ubuntu 13.0 and higer install cmake from repository
-    if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
+    if ${UBUNTU_VERSION_13_HIGHER} ; then
 		apt-install ${CMAKE_BUILD_SYSTEM}
 	else
 		INSTALL_CMAKE_2_8_9=true
@@ -312,13 +317,21 @@ if $QNX_TARGET || $INSTALL_ALL; then
 		QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
 
 		if [ ${ARCH} == "x64" ]; then
-			QNXSDP_TOOL_REQS="ia32-libs"
 			echo "Installing 32-bit libraries for 64-bit OS"
-			apt-install ${QNXSDP_TOOL_REQS}
+			#For Ubuntu 13.0 and higer install ia32-libs from archive
+		    if ${UBUNTU_VERSION_13_HIGHER} ; then
+	      		IA32_LIBS_DEB="ia32-libs_20090808ubuntu36_amd64.deb"
+	      		IA32_LIBS_DEB_LINK="http://archive.ubuntu.com/ubuntu/pool/universe/i/ia32-libs/"${IA32_LIBS_DEB}
+                wget -P ${TEMP_FOLDER} ${IA32_LIBS_DEB_LINK} -c
+				sudo gdebi --non-interactive ${TEMP_FOLDER}/${IA32_LIBS_DEB}
+			else
+				QNXSDP_TOOL_REQS="ia32-libs"
+				apt-install ${QNXSDP_TOOL_REQS}
+			fi
 		fi
 
 		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-		wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK}
+        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
