@@ -307,39 +307,32 @@ if $QNX_TARGET || $INSTALL_ALL; then
 	QNXSDP_INSTALL_FOLDER="/opt/qnx650"
 	if [[ -d "${QNXSDP_INSTALL_FOLDER}" ]]; then
 		echo "QNX SDP 6.5.0 already installed"
-	else
-	    echo "Installing wget"
-		apt-install wget
+    else
+        if [ ${ARCH} == "x64" ]; then
+            echo "Installing 32-bit libraries for 64-bit OS"
+            #For Ubuntu 13.0 and higer install ia32-libs from archive
+            if ${UBUNTU_VERSION_13_HIGHER} ; then
+                QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
+            else
+                QNXSDP_TOOL_REQS="ia32-libs"
+            fi
+            apt-install ${QNXSDP_TOOL_REQS}
+        fi
+
+        echo "Installing wget"
+        apt-install wget
 
 		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
 		QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
 		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
-		QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
-
-		if [ ${ARCH} == "x64" ]; then
-			echo "Installing 32-bit libraries for 64-bit OS"
-			#For Ubuntu 13.0 and higer install ia32-libs from archive
-		    if ${UBUNTU_VERSION_13_HIGHER} ; then
-				echo "Installing gdebi"
-				apt-install ${GDEBI}
-				echo $OK
-
-	      		IA32_LIBS_DEB="ia32-libs_20090808ubuntu36_amd64.deb"
-	      		IA32_LIBS_DEB_LINK="http://archive.ubuntu.com/ubuntu/pool/universe/i/ia32-libs/"${IA32_LIBS_DEB}
-                wget -P ${TEMP_FOLDER} ${IA32_LIBS_DEB_LINK} -c
-				sudo gdebi --non-interactive ${TEMP_FOLDER}/${IA32_LIBS_DEB}
-			else
-				QNXSDP_TOOL_REQS="ia32-libs"
-				apt-install ${QNXSDP_TOOL_REQS}
-			fi
-		fi
+        QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
 
 		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
         wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
-		sudo ${QNXSDP_TOOL_RUNFILE_BIN}
+        sudo ${QNXSDP_TOOL_RUNFILE_BIN} -silent
 
 		echo "Installing SSH server"
 		SSH_SERVER="openssh-server ssh"
