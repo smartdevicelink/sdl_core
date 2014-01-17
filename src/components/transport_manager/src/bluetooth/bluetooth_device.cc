@@ -65,10 +65,10 @@ std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
   return std::string("BT-") + device_address_string;
 }
 
-BluetoothDevice::BluetoothDevice(const bdaddr_t& address, const char* name,
+BluetoothDevice::BluetoothDevice(const bdaddr_t& device_address, const char* device_name,
                                  const RfcommChannelVector& rfcomm_channels)
-    : Device(name, GetUniqueDeviceId(address)),
-      address_(address),
+    : Device(device_name, GetUniqueDeviceId(device_address)),
+      address_(device_address),
       rfcomm_channels_(rfcomm_channels) {
 }
 

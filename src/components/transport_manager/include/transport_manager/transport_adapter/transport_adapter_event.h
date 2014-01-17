@@ -88,9 +88,9 @@ class TransportAdapterEvent {
   /**
    * @brief Set pointer to the data.
    *
-   * @param data Smart pointer to the raw message.
+   * @param message Smart pointer to the raw message.
    */
-  void set_data(RawMessageSptr data);
+  void set_data(RawMessageSptr message);
 
   /**
    * @brief Set field that responsible for the pointer to error.

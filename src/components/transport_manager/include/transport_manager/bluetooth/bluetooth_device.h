@@ -76,7 +76,7 @@ class BluetoothDevice : public Device {
    * @param name Human-readable device name.
    * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
    **/
-  BluetoothDevice(const bdaddr_t& address, const char* name,
+  BluetoothDevice(const bdaddr_t& device_address, const char* device_name,
                   const RfcommChannelVector& rfcomm_channels);
 
   /**

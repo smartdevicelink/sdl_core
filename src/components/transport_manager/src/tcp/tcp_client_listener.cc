@@ -83,7 +83,9 @@ TransportAdapter::Error TcpClientListener::Init() {
 
 void TcpClientListener::Terminate() {
   shutdown_requested_ = true;
-  StopListening();
+  if (TransportAdapter::OK != StopListening()) {
+    LOG4CXX_ERROR(logger_, "Cannot stop listening TCP");
+  }
 }
 
 bool TcpClientListener::IsInitialised() const {

@@ -55,7 +55,6 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
@@ -73,6 +72,10 @@ enum {
   E_CONNECTION_EXISTS,
   E_INTERNAL_ERROR,
 };
+
+namespace transport_adapter {
+class TransportAdapter;
+}  // namespace transport_adapter
 
 struct TransportManagerAttr {
   unsigned long disconnectTimeout; /**> milliseconds */

@@ -517,8 +517,11 @@ void ConnectionHandlerImpl::ConnectToDevice(
     LOG4CXX_INFO_EXT(logger_,
                      "Connecting to device with handle " << device_handle);
     if (transport_manager_) {
-      // TODO(PV): change this
-      transport_manager_->ConnectDevice(device_handle);
+      if (transport_manager::E_SUCCESS != transport_manager_->ConnectDevice(device_handle)) {
+        LOG4CXX_WARN(logger_, "Can't connect to device");
+      }
+    } else {
+      LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     }
   } else {
     LOG4CXX_ERROR(
