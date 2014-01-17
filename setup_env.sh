@@ -320,6 +320,10 @@ if $QNX_TARGET || $INSTALL_ALL; then
 			echo "Installing 32-bit libraries for 64-bit OS"
 			#For Ubuntu 13.0 and higer install ia32-libs from archive
 		    if ${UBUNTU_VERSION_13_HIGHER} ; then
+				echo "Installing gdebi"
+				apt-install ${GDEBI}
+				echo $OK
+
 	      		IA32_LIBS_DEB="ia32-libs_20090808ubuntu36_amd64.deb"
 	      		IA32_LIBS_DEB_LINK="http://archive.ubuntu.com/ubuntu/pool/universe/i/ia32-libs/"${IA32_LIBS_DEB}
                 wget -P ${TEMP_FOLDER} ${IA32_LIBS_DEB_LINK} -c
