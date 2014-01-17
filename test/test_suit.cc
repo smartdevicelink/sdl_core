@@ -46,16 +46,17 @@ extern "C" void __gcov_flush();
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
-	
+
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   test::app_manager_test::AdminAppTest app;
-  
+ 
   threads::Thread threadAdminAppTest("AdminAppTest", &app);
 
   threadAdminAppTest.start();
   //app.run();
   sleep(60);
+  
   int result = RUN_ALL_TESTS();
 
 #ifdef __cplusplus

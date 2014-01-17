@@ -51,7 +51,7 @@ namespace test{
 			std::string mac_address_test = "255.255.255.0";
 			std::string name_test = "test_DeviceInfo";
 
-			transport_manager::ConnectionUID connection_id_test = 10;
+			transport_manager::ConnectionUID connection_id_test = 1;
 			
 			transport_manager::DeviceInfo device_info_test(device_handler_test, mac_address_test, name_test);
 
@@ -62,8 +62,6 @@ namespace test{
 			
 			connection_handler_->OnConnectionEstablished(device_info_test, connection_id_test);
 			
-			unsigned int connectKey = connection_handler_->OnSessionStartedCallback(connection_id_test,0,
-				protocol_handler::kRpc);
 			
 			//////////////////////////////////////////
 			//HMICapabilities 14.1
@@ -93,18 +91,29 @@ namespace test{
 			////////////////////////////////////////
 			sleep(2);
 			printf("\n\n\n Registration Application \n\n\n");
-			
+			///////////////////////////////////////////////////
+			/*
+			Reg app 
+					
 			utils::SharedPtr<SmartObject> AppRegRequest(new SmartObject);
 
-			(*AppRegRequest)[S_PARAMS][strings::connection_key] = connectKey;
+			(*AppRegRequest)[S_PARAMS][strings::connection_key] = 65537;
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::menu_params][strings::menu_name] = "MenuName";
 			(*AppRegRequest)[S_MSG_PARAMS][strings::app_name] = "SyncProxyTester";
 			
 			
+			
+			(*AppRegRequest)[S_PARAMS][strings::function_id] = mobile_apis::FunctionID::RegisterAppInterfaceID;
+			(*AppRegRequest)[S_PARAMS][strings::message_type] = mobile_apis::messageType::request;
+			(*AppRegRequest)[S_PARAMS][strings::correlation_id] = 1;
+									
+			(*AppRegRequest)[S_MSG_PARAMS][strings::available] = true;
+			Application* appl = app_manager_->RegisterApplication(AppRegRequest); 
+			*/		
 			///////////////////////////////////
 			//add to 23 december
 			
-			
+			utils::SharedPtr<SmartObject> AppRegRequest(new SmartObject);
 			//test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester* mobile_handler_test;
 		    //mobile_handler_test = 
         	//				new test::Mobile_Message_Handler_Tester::MobileMessageHandlerTester;
@@ -118,8 +127,12 @@ namespace test{
 			(*AppRegRequest)[S_PARAMS][strings::function_id] = mobile_apis::FunctionID::RegisterAppInterfaceID;
 			(*AppRegRequest)[S_PARAMS][strings::message_type] = mobile_apis::messageType::request;
 			(*AppRegRequest)[S_PARAMS][strings::correlation_id] = 1;
-									
+			(*AppRegRequest)[S_PARAMS][strings::connection_key] = 65537;
+			
+			
+			(*AppRegRequest)[S_MSG_PARAMS][strings::app_name] = "SyncProxyTester";					
 			(*AppRegRequest)[S_MSG_PARAMS][strings::available] = true;
+			
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::app_id] = "12345";
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::is_media_application] = true;
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::vr_synonyms][0] = "VR SyncProxyTester";
@@ -137,11 +150,11 @@ namespace test{
 			//printf("\n\n\n after MesChain \n\n\n");
 			//app_manager_->AddMessageChain(connectKey,1,16,MesChain, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain  after\n\n\n");
-			//app_manager_->ManageMobileCommand(AppRegRequest);	
+			app_manager_->ManageMobileCommand(AppRegRequest);
 			///////////////////////////////////			
 			
-			Application* appl = app_manager_->RegisterApplication(AppRegRequest); 
-			//Application* appl = app_manager_->application(connectKey);
+			
+			Application* appl = app_manager_->application(65537);
 			
 			////////////////////////////////////////
 			sleep(20);

@@ -135,7 +135,7 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-
+	
     SendRegisterAppInterfaceResponseToMobile(*app);
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     MessageHelper::SendHMIStatusNotification(*app);
