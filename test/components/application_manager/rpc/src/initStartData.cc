@@ -41,6 +41,8 @@ void initStartData()
 	connection_handler::ConnectionHandlerImpl* connection_handler_;
 	application_manager::ApplicationManagerImpl* app_manager_;
 	hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
+  policies::PolicyManagerImpl* policy_manager_;
+
 	media_manager::MediaManagerImpl* media_manager_;
 			
 			
@@ -89,7 +91,8 @@ void initStartData()
 	hmi_handler_ =
 			hmi_message_handler::HMIMessageHandlerImpl::instance();
 	DCHECK(hmi_handler_);		
-
+  policy_manager_ = policies::PolicyManagerImpl::instance();
+  DCHECK(policy_manager_);
 	media_manager_ = media_manager::MediaManagerImpl::instance();
 
 	////////////////////////////////////////
@@ -145,6 +148,8 @@ void initStartData()
 	app_manager_->set_connection_handler(connection_handler_);
 	app_manager_->set_hmi_message_handler(hmi_handler_);
 	app_manager_->set_protocol_handler(protocol_handler_);
+  app_manager_->set_policy_manager(policy_manager_);
+
 	//printf("\n\n\n after init app \n\n\n");			
 	
 	if (profile::Profile::instance()->server_address() ==

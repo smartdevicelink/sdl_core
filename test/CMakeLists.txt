@@ -61,7 +61,7 @@ set(LIBRARIES
     formatters
     RequestWatchdog
     MediaManager
-
+    policies
     ProtocolHandler
     Utils
     ConfigProfile
