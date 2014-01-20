@@ -361,6 +361,8 @@ if $QT5_HMI; then
 fi
 
 if $QT4_HMI; then
+	BUILD_THREADS_COUNT=$(($(nproc)+1))
+
     echo "Installing wget"
     apt-install wget
 
@@ -379,7 +381,7 @@ if $QT4_HMI; then
 	tar -xf ${EXPAT_ARCHIVE}
 	cd ${EXPAT_VERSION}
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
-	make -j4
+	make -j${BUILD_THREADS_COUNT}
 	sudo make installlib
 
     echo "Installing DBUS"
@@ -392,11 +394,11 @@ if $QT4_HMI; then
     tar -xf ${DBUS_ARCHIVE}
 	cd ${DBUS_VERSION}
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
-	make -j4
+	make -j${BUILD_THREADS_COUNT}
 	sudo make install
 
     echo "Installing Qt4"
-   	QT4_VERSION="qt-4.8.5"
+   	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
     QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
 	QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
 	QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
@@ -404,6 +406,8 @@ if $QT4_HMI; then
 	cd ${QT4_DOWNLOAD_DST}
     tar -xf ${QT4_ARCHIVE}
     cd ${QT4_VERSION}
+    ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
+    make -j${BUILD_THREADS_COUNT}
     sudo make install
 
     #Load correct current directory
