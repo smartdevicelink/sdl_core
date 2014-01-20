@@ -183,12 +183,16 @@ fi
 echo $OK
 
 if ${INSTALL_CMAKE_2_8_9}; then
-	echo "Installing Subversion"
-	apt-install ${SUBVERSION}
-	echo $OK
 
+	if [ ${ARCH} == "i386" ]; then
+	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+	elif [ ${ARCH} == "x64" ]; then
+	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+	fi
+	
 	echo "Checking out CMake packages, please be patient"
     wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC}/${CMAKE_DATA_DEB} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC}/${CMAKE_DEB} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
 	echo $OK
 
 	echo "Installing gdebi"
@@ -196,11 +200,6 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	echo $OK
 
 	echo "Installing CMake build system"
-	if [ ${ARCH} == "i386" ]; then
-	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
-	elif [ ${ARCH} == "x64" ]; then
-	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
-	fi
 	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
 	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
@@ -317,9 +316,6 @@ if $INSTALL_QT_HMI; then
 fi
 
 if $QT5_HMI; then
-	echo "Installing Subversion"
-	apt-install ${SUBVERSION}
-	echo $OK
 
 	if [ ${ARCH} == "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
@@ -343,6 +339,9 @@ if $QT5_HMI; then
 	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
 	if $NEED_QT5_INSTALL; then
+		echo "Installing Subversion"
+		apt-install ${SUBVERSION}
+		echo $OK
 
 		echo "Checking out Qt5 installation runfile, please be patient"
 		svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
