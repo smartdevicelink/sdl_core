@@ -288,6 +288,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
     if (transport_manager::E_SUCCESS !=
             transport_manager_->SendMessageToDevice(message_to_send)) {
         LOG4CXX_WARN(logger_, "Cant send message to device");
+        return RESULT_FAIL;
     };
   } else {
     LOG4CXX_WARN(logger_, "No Transport Manager found.");
