@@ -47,7 +47,7 @@ include_directories (
 
 set(LIBRARIES
     test_App_Manager
-    ApplicationManager
+
     
     gtest
     gtest_main
@@ -56,11 +56,14 @@ set(LIBRARIES
 
     
     HMI_API
+    MediaManager
+    ApplicationManager
     v4_protocol_v1_2_no_extra
+
     SmartObjects
     formatters
     RequestWatchdog
-    MediaManager
+
     policies
     ProtocolHandler
     Utils
