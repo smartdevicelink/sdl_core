@@ -46,8 +46,6 @@ class SmartObject;
 
 namespace application_manager {
 
-class MessageChaining;
-
 namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
@@ -133,7 +131,6 @@ class CommandRequestImpl : public CommandImpl,
                              const NsSmart::SmartObject& msg_params) const;
 
  protected:
-  MessageChaining* msg_chaining_;
   unsigned int  default_timeout_;
 
  private:

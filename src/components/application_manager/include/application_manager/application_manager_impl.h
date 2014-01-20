@@ -89,32 +89,6 @@ class CommandNotificationImpl;
 
 namespace application_manager {
 
-/**
- *@brief Typedef for shared pointer
- */
-typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
-
-/**
- *@brief Map representing hmi request
- *
- *@param int32_t hmi correlation ID
- *@param MessageChainPtr Mobile request temporary data
- */
-typedef std::map<uint32_t, MessageChainPtr> HMIRequest;
-
-/**
- *@brief Map representing mobile request and pending HMI requests
- *
- *@param int32_t mobile correlation ID
- *@param HMIRequest Sent HMI request
- */
-typedef std::map<uint32_t, HMIRequest> MobileRequest;
-
-/**
- *@brief Map of application ID and incoming mobile requests
- */
-typedef std::map<uint32_t, MobileRequest> MessageChain;
-
 class ApplicationManagerImpl;
 
 namespace impl {
@@ -475,9 +449,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
-
-    bool RemoveMobileRequestFromMessageChain(uint32_t mobile_correlation_id,
-        uint32_t connection_key);
 
     /*
      * @brief Save unregistered applications info to the file system
