@@ -353,6 +353,12 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
       return result;
     }
+  } else {
+    if (!(it->second)->RemoveService(sessionId, service_type)) {
+      LOG4CXX_ERROR(logger_, "Not possible to remove service!");
+      return result;
+    }
+    result = sessionId;
   }
 
   if (0 != connection_handler_observer_) {
