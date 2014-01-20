@@ -101,12 +101,12 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
-
-  LOG4CXX_TRACE(logger, ".Playing stream");
-  while (true) {
+  LOG4CXX_INFO(logger, ".Playing stream");
+  //LOG4CXX_TRACE(logger, );
+  //while (true) {
     usleep(10000000);
-    LOG4CXX_TRACE(logger, ".");
-  }
+   // LOG4CXX_TRACE(logger, ".");
+  //}
 
   usleep(10000000);
 
