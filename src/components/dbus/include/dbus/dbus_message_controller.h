@@ -77,7 +77,7 @@ class DBusMessageController : public DBusAdapter {
    * \brief sends message to core
    * \param obj
    */
-  virtual void SendMessageToCore(smart_objects::SmartObject& obj) = 0;
+  virtual void SendMessageToCore(const smart_objects::SmartObject& obj) = 0;
 };
 
 }  // namespace dbus

@@ -51,7 +51,6 @@ TransportAdapterEvent::TransportAdapterEvent(
 
 
 TransportAdapterEvent::~TransportAdapterEvent() {
-  //TODO: is event_error_ delleted correctly?  /* delete event_error_;*/
 
 }
 
@@ -61,8 +60,8 @@ void TransportAdapterEvent::set_transport_adapter(
     transport_adapter::TransportAdapter *transport_adapter) {
   transport_adapter_ = transport_adapter;
 }
-void TransportAdapterEvent::set_data(RawMessageSptr data) {
-  event_data_ = data;
+void TransportAdapterEvent::set_data(RawMessageSptr message) {
+  event_data_ = message;
 }
 
 void TransportAdapterEvent::set_error(BaseError *error) {

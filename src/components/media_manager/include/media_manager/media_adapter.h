@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADPATER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADPATER_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_H_
 
 namespace media_manager {
 
@@ -42,8 +42,10 @@ class MediaAdapter {
     virtual void StartActivity(int32_t application_key) = 0;
     virtual void StopActivity(int32_t application_key) = 0;
     virtual bool is_app_performing_activity(int32_t application_key) = 0;
+
+    virtual ~MediaAdapter(){}
 };
 
 }  // namespace media_manager
 
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADPATER_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_H_

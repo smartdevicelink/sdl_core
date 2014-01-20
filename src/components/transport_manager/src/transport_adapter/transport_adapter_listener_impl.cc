@@ -38,7 +38,6 @@
 #include <algorithm>
 
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/common.h"
 
 namespace transport_manager {
 

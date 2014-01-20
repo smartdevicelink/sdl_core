@@ -406,7 +406,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
         message[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS ==
         hmi_apis::Common_Result::eType(hmi_response_code)) {
-      msg_params[strings::trigger_source] = trigger_source_;
+      msg_params[strings::trigger_source] = static_cast<int>(trigger_source_);
       result = true;
     }
 

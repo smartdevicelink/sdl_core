@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -126,7 +127,7 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
         heartbeatMonitor.stop();
     }
 
-    public void testReceivedHeartbeatACKShouldResetHeartbeat()
+    public void testReceivedHeartbeatACKShouldNotResetHeartbeat()
             throws InterruptedException {
         heartbeatMonitor.setListener(listenerMock);
 
@@ -139,7 +140,7 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
         heartbeatMonitor.heartbeatACKReceived();
 
         Thread.sleep(INTERVAL - ACK_DELAY + 10);
-        verify(listenerMock, never()).sendHeartbeat(
+        verify(listenerMock, atLeastOnce()).sendHeartbeat(
                 Matchers.<IHeartbeatMonitor>any());
         verify(listenerMock, timeout(INTERVAL + MAX_TIMER_DRIFT)).sendHeartbeat(
                 heartbeatMonitor);

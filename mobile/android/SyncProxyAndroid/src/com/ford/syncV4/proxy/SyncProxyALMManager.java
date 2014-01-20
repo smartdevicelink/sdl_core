@@ -2624,5 +2624,10 @@ public class SyncProxyALMManager {
         public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID) {
 
         }
+
+        @Override
+        public void onSessionStarted(byte sessionID, String correlationID) {
+
+        }
     }
 }

@@ -113,40 +113,45 @@ const uint8_t SERVICE_TYPE_BULK = 0x0F;
 const uint8_t FRAME_DATA_HEART_BEAT = 0x00;
 
 /**
+ *\brief If FRAME_TYPE_CONTROL: Constant: Start service frame
+ */
+const uint8_t FRAME_DATA_START_SERVICE = 0x01;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: Start service acknowledgement frame
+ */
+const uint8_t FRAME_DATA_START_SERVICE_ACK = 0x02;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: Start service not acknowledgement
+ *\brief frame
+ */
+const uint8_t FRAME_DATA_START_SERVICE_NACK = 0x03;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: End service request frame
+ */
+const uint8_t FRAME_DATA_END_SERVICE = 0x04;
+
+/**
+ * \brief if FRAME_TYPE_CONTROL: Constant: End service acknowledgement frame
+ */
+const uint8_t FRAME_DATA_END_SERVICE_ACK = 0x05;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: End service not acknowledgement frame
+ */
+const uint8_t FRAME_DATA_END_SERVICE_NACK = 0x06;
+
+/**
+ *\brief If FRAME_TYPE_CONTROL: Constant: Service data ACK frame
+ */
+const uint8_t FRAME_DATA_SERVICE_DATA_ACK = 0xFE;
+
+/**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat ack.
  */
 const uint8_t FRAME_DATA_HEART_BEAT_ACK = 0xFF;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start session frame
- */
-const uint8_t FRAME_DATA_START_SESSION = 0x01;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start session acknowledgement frame
- */
-const uint8_t FRAME_DATA_START_SESSION_ACK = 0x02;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start session not acknowledgement
- *\brief frame
- */
-const uint8_t FRAME_DATA_START_SESSION_NACK = 0x03;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: End session request frame
- */
-const uint8_t FRAME_DATA_END_SESSION = 0x04;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: End session not acknowledgement frame
- */
-const uint8_t FRAME_DATA_END_SESSION_NACK = 0x05;
-
-/**
- * \brief if FRAME_TYPE_CONTROL: Constant: Signalizes regular Mobile Navi session Ack
- */
-const uint8_t FRAME_DATA_MOBILE_NAVE_ACK = 0x06;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum of consecutive frame numbers

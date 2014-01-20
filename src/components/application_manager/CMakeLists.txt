@@ -286,6 +286,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_start_stream_response.cc
 ./src/commands/hmi/navi_stop_stream_request.cc
 ./src/commands/hmi/navi_stop_stream_response.cc
+./src/commands/hmi/audio_start_stream_request.cc
+./src/commands/hmi/audio_start_stream_response.cc
+./src/commands/hmi/audio_stop_stream_request.cc
+./src/commands/hmi/audio_stop_stream_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_WEBHMI

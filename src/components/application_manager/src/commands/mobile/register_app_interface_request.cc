@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -134,14 +135,58 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-
+	
     SendRegisterAppInterfaceResponseToMobile(*app);
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     MessageHelper::SendHMIStatusNotification(*app);
-    MessageHelper::SendVrCommandsOnRegisterAppToHMI(app);
-    MessageHelper::SendTTSChunksToHMI(*app);
+    if (app->vr_synonyms()) {
+      SendVrCommandsOnRegisterAppToHMI(*app);
+    }
+    if (app->tts_name()) {
+      SendTTSChunksToHMI(*app);
+    }
   }
 }
+
+void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
+(const Application& application_impl) {
+  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  uint32_t app_id = application_impl.app_id();
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] = (max_cmd_id + app_id);
+  msg_params[strings::vr_commands] = *(application_impl.vr_synonyms());
+  if (0 < app_id) {
+    msg_params[strings::app_id] = app_id;
+  }
+  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
+}
+
+void RegisterAppInterfaceRequest::SendTTSChunksToHMI
+(const Application& application_impl) {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = application_impl.app_id();
+  msg_params[strings::tts_chunks] = *(application_impl.tts_name());
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+}
+
+void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::on_event");
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VR_AddCommand: {
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Speak: {
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      break;
+    }
+  }
+}
+
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const Application& application_impl) {
@@ -278,7 +323,7 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
     // name check
     const std::string &cur_name = (*it)->name();
-    if (app_name == cur_name) {
+    if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -320,8 +365,9 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       std::vector<smart_objects::SmartObject>::const_iterator it_tts_End =
           new_tts->end();
 
-      for (; it_tts != it_tts_End; ++it) {
-        if (cur_name == (*it_tts)[strings::text].asString()) {
+      for (; it_tts != it_tts_End; ++it_tts) {
+        std::string text = (*it_tts)[strings::text].asString();
+        if (!strcasecmp(cur_name.c_str(), text.c_str())){
           LOG4CXX_ERROR(logger_,
                         "Some TTS parameters names are known already.");
           return mobile_apis::Result::DUPLICATE_NAME;
@@ -356,8 +402,9 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       std::vector<smart_objects::SmartObject>::const_iterator it_vr_End =
           new_vr->end();
 
-      for (; it_vr != it_vr_End; ++it) {
-        if (cur_name == it_vr->asString()) {
+      for (; it_vr != it_vr_End; ++it_vr) {
+        std::string vr_synonym = it_vr->asString();
+        if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
           LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
           return mobile_apis::Result::DUPLICATE_NAME;
         }

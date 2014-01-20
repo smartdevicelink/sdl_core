@@ -106,7 +106,7 @@ void UpdateTurnListRequest::Run() {
       msg_params[strings::turn_list][i].erase(hmi_request::navi_text);
       msg_params[strings::turn_list]
                  [i][hmi_request::navi_text][hmi_request::field_name] =
-          hmi_apis::Common_TextFieldName::turnText;
+          static_cast<int>(hmi_apis::Common_TextFieldName::turnText);
       msg_params[strings::turn_list]
                  [i][hmi_request::navi_text][hmi_request::field_text] =
           navigation_text;

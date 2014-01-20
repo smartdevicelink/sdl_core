@@ -58,10 +58,12 @@ class SessionObserver {
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session
      * has to be started.
+     * \param sessionId Identifier of the session to be ended
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       transport_manager::ConnectionUID connection_handle,
+      uint8_t sessionId,
       ServiceType service_type) = 0;
 
     /**

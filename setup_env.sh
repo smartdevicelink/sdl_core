@@ -32,20 +32,6 @@
 
 set -e
 
-echo "Detecting machine architecture"
-uname_result=`uname -i`
-if [ ${uname_result} = "i386" ] || [ ${uname_result} = "i686" ]; then
-  echo "x86 machine detected"
-  ARCH="i386"
-elif [ ${uname_result} = "x86_64" ]; then
-  echo "x64 machine detected"
-  ARCH="x64"
-else
-  echo "unknown architecture - exit"
-  exit
-fi
-echo
-
 CMAKE_BUILD_SYSTEM="cmake"
 SUBVERSION="subversion"
 GDEBI="gdebi"
@@ -61,9 +47,10 @@ APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
-QT5_RUNFILE_DST="/tmp/qt5"
+TEMP_FOLDER="/tmp"
 INSTALL_ALL=false
 QT_HMI=false
+QNX_TARGET=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
@@ -75,6 +62,7 @@ LIB_UDEV="libudev-dev"
 GSTREAMER="gstreamer1.0*"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
+LIBXML2="libxml2-dev"
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
 GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -84,30 +72,47 @@ FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 
 while test $# -gt 0; do
         case "$1" in
-                -h|--help)
-                        echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink core compilation"
-                        echo "                 and running." 
-                        echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
-                        echo " "
-                        echo "$ setup_env.sh [options]"
-                        echo " "
-                        echo "options:"
-                        echo "-h, --help                show brief help"
-                        echo "-a, --all                 all mandatory and optional packages will be installed"
-                        echo "-q                        install additional packages for Qt HMI"
-			
-                        exit 0
-                        ;;
-                -a)
-			INSTALL_ALL=true
-			shift
-                        ;;
-                -q)
-			QT_HMI=true
-			shift
-                        ;;
+                -a|--all)
+                    INSTALL_ALL=true
+                    ;;
+                -qt)
+                    QT_HMI=true
+                    ;;
+                -qnx)
+                    QNX_TARGET=true
+                    ;;
+                -h|--help|*)
+                    echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
+                    echo "                 core compilation and running."
+                    echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
+                    echo " "
+                    echo "Usage: setup_env.sh [option] "
+                    echo "Options:"
+                    echo "-h, --help            show brief help"
+                    echo "-a, --all             all mandatory and optional packages will be installed"
+                    echo "-qt                   install additional packages for Qt HMI"
+                    echo "-qnx                  install additional packages for QNX"
+
+                    exit 0
+                    ;;
         esac
+    shift
 done
+
+
+echo "Detecting machine architecture"
+uname_result=`uname -i`
+if [ ${uname_result} == "i386" ] || [ ${uname_result} == "i686" ]; then
+  echo "x86 machine detected"
+  ARCH="i386"
+elif [ ${uname_result} == "x86_64" ]; then
+  echo "x64 machine detected"
+  ARCH="x64"
+else
+  echo "unknown architecture - exit"
+  exit
+fi
+echo
 
 function apt-install() {
     if [ -z "$1" ];
@@ -139,15 +144,23 @@ echo "Register gstreamer repository PUBLIC KEY in system"
 sudo apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
-	echo "Apdating repository..."
+	echo "Updating repository..."
 	sudo apt-get update
-	sudo apt-get upgrade
+	sudo apt-get upgrade --yes --force-yes
 fi
 
-#INSTALL_CMAKE becomes "true" if no cmake  at all or lower version "2.8.9" is present
-INSTALL_CMAKE=false
+#Check Ubuntu version
+UBUNTU_VERSION=$(lsb_release -r | sed 's/[^0-9\.]//g')
+UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py "13.00" ${UBUNTU_VERSION} )
+UBUNTU_VERSION_13_HIGHER=false
+if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
+	UBUNTU_VERSION_13_HIGHER=true
+fi
 
-if dpkg -s cmake | grep installed > /dev/null; then		
+#INSTALL_CMAKE_2_8_9 becomes "true" if no cmake  at all or lower version "2.8.9" is present
+INSTALL_CMAKE_2_8_9=false
+
+if dpkg -s cmake | grep installed > /dev/null; then
 	echo "Checking for installed cmake"
 	CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
 	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
@@ -155,15 +168,20 @@ if dpkg -s cmake | grep installed > /dev/null; then
 	"equal"|"1 > 2");;
 	"2 > 1") echo "Removing CMake build system"
 	    sudo apt-get remove -y cmake cmake-data
-	    INSTALL_CMAKE=true
+	    INSTALL_CMAKE_2_8_9=true
 	    ;;
 	esac
 else 
-	INSTALL_CMAKE=true
+	#For Ubuntu 13.0 and higer install cmake from repository
+    if ${UBUNTU_VERSION_13_HIGHER} ; then
+		apt-install ${CMAKE_BUILD_SYSTEM}
+	else
+		INSTALL_CMAKE_2_8_9=true
+	fi
 fi
 echo $OK
 
-if ${INSTALL_CMAKE}; then
+if ${INSTALL_CMAKE_2_8_9}; then
 	echo "Installing Subversion"
 	apt-install ${SUBVERSION}
 	echo $OK
@@ -188,6 +206,10 @@ fi
 
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
+echo $OK
+
+echo "Installing libxml2..."
+apt-install ${LIBXML2}
 echo $OK
 
 echo "Installng GNU C++ compiler"
@@ -244,15 +266,15 @@ if $QT_HMI || $INSTALL_ALL; then
 	apt-install ${SUBVERSION}
 	echo $OK
 	
-	if [ ${ARCH} = "i386" ]; then
+	if [ ${ARCH} == "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-	elif [ ${ARCH} = "x64" ]; then
+	elif [ ${ARCH} == "x64" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
 	echo "Checking whether Qt5 with QML support is installed"
-	qmlscene_binary=`./FindQt5.sh binary qmlscene || true`
+    qmlscene_binary=`./FindQt.sh -v 5.1.0 -b qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
 	  echo "Found Qt5 in "`dirname $qmlscene_binary`
 	  NEED_QT5_INSTALL=false
@@ -262,6 +284,7 @@ if $QT_HMI || $INSTALL_ALL; then
 	fi
 	echo $OK
 
+	QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
 	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
 	if $NEED_QT5_INSTALL; then
@@ -273,11 +296,51 @@ if $QT_HMI || $INSTALL_ALL; then
 		echo "Installing Qt5 libraries"
 		chmod +x ${QT5_RUNFILE_BIN}
 		sudo ${QT5_RUNFILE_BIN}
+		sudo updatedb
 		echo $OK
 	fi
 	
 	echo "Installing OpenGL development files"
 	apt-install ${OPENGL_DEV}
+	echo $OK
+fi
+
+if $QNX_TARGET || $INSTALL_ALL; then
+	echo "Checking for installed QNX SDP 6.5.0"
+	QNXSDP_INSTALL_FOLDER="/opt/qnx650"
+	if [[ -d "${QNXSDP_INSTALL_FOLDER}" ]]; then
+		echo "QNX SDP 6.5.0 already installed"
+    else
+        if [ ${ARCH} == "x64" ]; then
+            echo "Installing 32-bit libraries for 64-bit OS"
+            #For Ubuntu 13.0 and higer install ia32-libs from archive
+            if ${UBUNTU_VERSION_13_HIGHER} ; then
+                QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
+            else
+                QNXSDP_TOOL_REQS="ia32-libs"
+            fi
+            apt-install ${QNXSDP_TOOL_REQS}
+        fi
+
+        echo "Installing wget"
+        apt-install wget
+
+		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
+		QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
+		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
+        QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
+
+		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
+
+		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
+        sudo ${QNXSDP_TOOL_RUNFILE_BIN} -silent
+
+		echo "Installing SSH server"
+		SSH_SERVER="openssh-server ssh"
+		apt-install ${SSH_SERVER}
+	fi
 	echo $OK
 fi
 
@@ -299,4 +362,3 @@ if $INSTALL_ALL; then
 	echo $OK
 fi
 echo "Environment configuration successfully done!"
-

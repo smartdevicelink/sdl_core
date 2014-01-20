@@ -46,7 +46,6 @@
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "policies/policy_manager.h"
 
 namespace application_manager {
@@ -321,45 +320,45 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(Application* app) {
   return true;
 }
 
-bool ApplicationManagerImpl::ActivateApplication(Application* applic) {
-  if (!applic) {
+bool ApplicationManagerImpl::ActivateApplication(Application* app) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
     return false;
   }
 
-  bool is_new_app_media = applic->is_media_application();
+  bool is_new_app_media = app->is_media_application();
 
   for (std::set<Application*>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    Application* app = *it;
-    if (app->app_id() == applic->app_id()) {
-      if (app->IsFullscreen()) {
+    Application* curr_app = *it;
+    if (curr_app->app_id() == curr_app->app_id()) {
+      if (curr_app->IsFullscreen()) {
         LOG4CXX_WARN(logger_, "Application is already active.");
         return false;
       }
       if (mobile_api::HMILevel::eType::HMI_LIMITED !=
-          applic->hmi_level()) {
-        if (applic->has_been_activated()) {
-          MessageHelper::SendAppDataToHMI(applic);
+          curr_app->hmi_level()) {
+        if (curr_app->has_been_activated()) {
+          MessageHelper::SendAppDataToHMI(curr_app);
         } else {
-          MessageHelper::SendChangeRegistrationRequestToHMI(applic);
+          MessageHelper::SendChangeRegistrationRequestToHMI(curr_app);
         }
       }
-      if (!applic->MakeFullscreen()) {
+      if (!curr_app->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*applic);
+      MessageHelper::SendHMIStatusNotification(*curr_app);
     } else {
       if (is_new_app_media) {
-        if (app->IsAudible()) {
-          app->MakeNotAudible();
-          MessageHelper::SendHMIStatusNotification(*app);
+        if (curr_app->IsAudible()) {
+          curr_app->MakeNotAudible();
+          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
-      if (app->IsFullscreen()) {
-        MessageHelper::RemoveAppDataFromHMI(app);
+      if (curr_app->IsFullscreen()) {
+        MessageHelper::RemoveAppDataFromHMI(curr_app);
       }
     }
   }
@@ -387,7 +386,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   if (true == profile::Profile::instance()->launch_hmi()) {
     utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
+      MessageHelper::CreateModuleInfoSO(
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
     ManageHMICommand(is_vr_ready);
 
     utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
@@ -623,46 +623,63 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-bool ApplicationManagerImpl::OnSessionStartedCallback(
+
+bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
-  int32_t first_session_key, protocol_handler::ServiceType type) {
+  protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
-
-  if (protocol_handler::kMovileNav == type) {
-    LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
-
-    // send to HMI startStream request
-    char url[100] = {'\0'};
-    snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
-             profile::Profile::instance()->server_address().c_str(),
-             profile::Profile::instance()->navi_server_port());
-
-    application_manager::MessageHelper::SendNaviStartStream(
-      url, session_key);
-
-#ifdef MEDIA_MANAGER
-    if (media_manager_) {
-      media_manager_->StartVideoStreaming(session_key);
+  switch (type) {
+    case protocol_handler::kMovileNav: {
+      LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+      // send to HMI startStream request
+      char url[100] = {'\0'};
+      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+               profile::Profile::instance()->server_address().c_str(),
+               profile::Profile::instance()->video_streaming_port());
+      application_manager::MessageHelper::SendNaviStartStream(
+          url, session_key);
+      #ifdef MEDIA_MANAGER
+      if (media_manager_) {
+        media_manager_->StartVideoStreaming(session_key);
+      }
+      #endif
+      // !!!!!!!!!!!!!!!!!!!!!!!
+      // TODO(DK): add check if navi streaming allowed for this app.
+      break;
     }
-#endif
-
-    // !!!!!!!!!!!!!!!!!!!!!!!
-    // TODO(DK): add check if navi streaming allowed for this app.
+    case protocol_handler::kAudio: {
+      LOG4CXX_INFO(logger_, "Audio service is about to be started.");
+      char url_audio[100] = {'\0'};
+      snprintf(url_audio, sizeof(url_audio) / sizeof(url_audio),
+               "http://%s:%d",
+               profile::Profile::instance()->server_address().c_str(),
+               profile::Profile::instance()->audio_streaming_port());
+      application_manager::MessageHelper::SendAudioStartStream(
+          url_audio, session_key);
+      #ifdef MEDIA_MANAGER
+      if (media_manager_) {
+        media_manager_->StartAudioStreaming(session_key);
+      }
+      #endif
+      break;
+    }
+    default: {
+      LOG4CXX_WARN(logger_, "Unknown type of service to be started.");
+      break;
+    }
   }
   return true;
 }
 
-void ApplicationManagerImpl::OnSessionEndedCallback(int32_t session_key,
-    int32_t first_session_key,
+void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
-    "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << first_session_key << " type " << type);
+    "OnServiceEndedCallback " << type  << " in session " << session_key);
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(first_session_key);
+      UnregisterApplication(session_key);
       break;
     }
     case protocol_handler::kMovileNav: {
@@ -671,6 +688,14 @@ void ApplicationManagerImpl::OnSessionEndedCallback(int32_t session_key,
 #ifdef MEDIA_MANAGER
     media_manager_->StopVideoStreaming(session_key);
 #endif
+      break;
+    }
+    case protocol_handler::kAudio:{
+      LOG4CXX_INFO(logger_, "Stop audio service.");
+      application_manager::MessageHelper::SendAudioStopStream(session_key);
+      #ifdef MEDIA_MANAGER
+      media_manager_->StopAudioStreaming(session_key);
+      #endif
       break;
     }
     default:
@@ -769,8 +794,11 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asInt());
 
+  // Notifications from HMI have no such parameter
   uint32_t correlation_id =
-    (*message)[strings::params][strings::correlation_id].asUInt();
+      (*message)[strings::params].keyExists(strings::correlation_id)
+      ? (*message)[strings::params][strings::correlation_id].asUInt()
+      : 0;
 
   uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();
@@ -1150,7 +1178,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     output.set_binary_data(binaryData);
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  LOG4CXX_INFO(logger_, "Successfully parsed smart object into message");
   return true;
 }
 
@@ -1522,21 +1550,36 @@ void ApplicationManagerImpl::SaveApplications() const {
   file.close();
 }
 
-mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
-                            const std::string& app_name,
-                            const std::vector<uint8_t>& binary_data,
-                            const std::string& save_path) {
-
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
+														    const std::vector<uint8_t>& binary_data,
+                                                            const std::string& save_path,
+                                                            const uint32_t offset) {
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
+						 << binary_data.size());
+  uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
+  std::ofstream* file_stream;
+  if (offset != 0) {
+      if (file_size != offset) {
+          LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+          return mobile_apis::Result::INVALID_DATA;
+        }
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::app);
+    }  else {
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+       // if offset == 0: rewrite file
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::out);
+    }
 
-  LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
-
-  if (!file_system::Write(file_system::FullPath(save_path), binary_data)) {
-    return mobile_apis::Result::GENERIC_ERROR;
-  }
-
+  if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
+      file_stream->close();
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+  file_stream->close();
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }

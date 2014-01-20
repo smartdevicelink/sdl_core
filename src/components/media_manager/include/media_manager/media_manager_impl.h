@@ -58,6 +58,8 @@ class MediaManagerImpl : public MediaManager,
     virtual void StopMicrophoneRecording(int32_t application_key);
     virtual void StartVideoStreaming(int32_t application_key);
     virtual void StopVideoStreaming(int32_t application_key);
+    virtual void StartAudioStreaming(int32_t application_key);
+    virtual void StopAudioStreaming(int32_t application_key);
     virtual void OnMessageReceived(
       const protocol_handler::RawMessagePtr& message);
     virtual void OnMobileMessageSent(
@@ -72,7 +74,9 @@ class MediaManagerImpl : public MediaManager,
     MediaAdapterImpl* from_mic_recorder_;
     MediaListenerPtr from_mic_listener_;
     MediaAdapterImpl* video_streamer_;
+    MediaAdapterImpl* audio_streamer_;
     MediaListenerPtr video_streamer_listener_;
+    MediaListenerPtr audio_streamer_listener_;
 
   private:
     static log4cxx::LoggerPtr logger_;
@@ -80,4 +84,4 @@ class MediaManagerImpl : public MediaManager,
 };
 
 }  //  namespace media_manager
-#endif  //  SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_

@@ -54,9 +54,6 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
-  const std::set<Application*>& app_list = ApplicationManagerImpl::instance()
-      ->applications();
-
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
           (*message_)[strings::msg_params][hmi_notification::state]

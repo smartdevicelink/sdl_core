@@ -42,16 +42,17 @@ QtObject {
     property ApplicationModel currentApplication: ApplicationModel { }
     property SliderModel uiSlider: SliderModel { }
     property PerformAudioPassThruModel uiAudioPassThru: PerformAudioPassThruModel { }
+    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
 
     function getApplication(appId) {
-        console.log("dataContainer getApplication enter");
+        console.log("enter");
         for(var i = 0; i < applicationList.count; i++) {
             if(applicationList.get(i).appId === appId) {
                 console.log("Application found", applicationList.get(i));
                 return applicationList.get(i);
             }
         }
-        console.log("dataContainer getApplication exit");
+        console.log("exit");
     }
 
     onApplicationListChanged: {
@@ -167,7 +168,9 @@ QtObject {
                 currentApplication.turnListSoftButtons = application.turnListSoftButtons
                 currentApplication.mediaClock.updateMode = application.mediaClock.updateMode
                 currentApplication.mediaClock.runningMode = application.mediaClock.runningMode
-                currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
+                if (application.startTimeForProgress !== undefined) {
+                    currentApplication.mediaClock.startTimeForProgress = application.mediaClock.startTimeForProgress
+                }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
                 // This place is for adding new properties
@@ -529,7 +532,6 @@ QtObject {
         console.debug("exit")
     }
     property VehicleInfoModel vehicleInfoModel: VehicleInfoModel { }
-    property ScrollableMessageModel scrollableMessageModel: ScrollableMessageModel { }
     property bool activeVR: false
     property int driverDistractionState: Common.DriverDistractionState.DD_OFF
     onDriverDistractionStateChanged: {

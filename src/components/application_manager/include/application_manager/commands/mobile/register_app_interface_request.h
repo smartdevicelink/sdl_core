@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
+#include <string.h>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
@@ -70,6 +71,13 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   // virtual void cleanUp() = 0;
 
   /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
    * @brief Sends RegisterAppInterface response to mobile
    *
    *@param application_impl application
@@ -79,6 +87,19 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const Application& application_impl);
 
  private:
+  /*
+   * @brief Send addVRcommand request to HMI
+   *
+   * @param application_impl application
+   */
+  void SendVrCommandsOnRegisterAppToHMI(const Application& application_impl);
+
+  /*
+   * @brief Send ttsSpeak request to HMI
+   *
+   * @param application_impl application
+   */
+  void SendTTSChunksToHMI(const Application& application_impl);
 
   /*
    * @brief Check new ID along with known mobile application ID
@@ -124,7 +145,8 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
     {};
 
     bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::text] == newItem_;
+      const std::string text = obj[strings::text].asString();
+      return !(strcasecmp(text.c_str(), newItem_.c_str()));
     };
 
     const std::string &newItem_;
@@ -141,7 +163,8 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       {};
 
       bool operator()(smart_objects::SmartObject obj) {
-        return obj == newItem_;
+        const std::string vr_synonym = obj.asString();
+        return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
       };
 
       const std::string &newItem_;

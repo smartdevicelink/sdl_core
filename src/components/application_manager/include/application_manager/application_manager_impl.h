@@ -221,7 +221,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
-    bool ActivateApplication(Application* applic);
+    bool ActivateApplication(Application* app);
     void DeactivateApplication(Application* app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
@@ -356,13 +356,11 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle device_handle);
-    bool OnSessionStartedCallback(connection_handler::DeviceHandle device_handle,
+    bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int32_t session_key,
-                                  int32_t first_session_key,
                                   protocol_handler::ServiceType type);
 
-    void OnSessionEndedCallback(int32_t session_key,
-                                int32_t first_session_key,
+    void OnServiceEndedCallback(int32_t session_key,
                                 protocol_handler::ServiceType type);
 
     /**
@@ -428,13 +426,15 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param binary file name
      * @param binary data
      * @param path for saving data
+     * @param offset for saving data to existing file with offset. If offset is 0 - create new file ( overrite existing )
      *
      * @return SUCCESS if file was saved, other code otherwise
      */
     mobile_apis::Result::eType SaveBinary(
                                 const std::string& app_name,
                                 const std::vector<uint8_t>& binary_data,
-                                const std::string& save_path);
+                                const std::string& save_path,
+                                const uint32_t offset = 0);
 
   private:
     ApplicationManagerImpl();
