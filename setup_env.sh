@@ -287,7 +287,7 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
         QNXSDP_TOOL_RUNFILE_BIN="${QNXSDP_TOOL_RUNFILE_DST}/${QNXSDP_TOOL_BIN}"
 
 		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
+        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
