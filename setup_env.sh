@@ -188,7 +188,7 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	echo $OK
 
 	echo "Checking out CMake packages, please be patient"
-    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC}/${CMAKE_DATA_DEB} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
 	echo $OK
 
 	echo "Installing gdebi"
