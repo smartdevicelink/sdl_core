@@ -44,13 +44,14 @@ PULSEAUDIO_DEV="libpulse-dev"
 UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
 APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
+APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
 CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 TEMP_FOLDER="/tmp"
 INSTALL_ALL=false
-QT_HMI=false
-QNX_TARGET=false
+INSTALL_QT_HMI=false
+INSTALL_QNX_TOOLS=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
@@ -76,10 +77,10 @@ while test $# -gt 0; do
                     INSTALL_ALL=true
                     ;;
                 -qt)
-                    QT_HMI=true
+                    INSTALL_QT_HMI=true
                     ;;
                 -qnx)
-                    QNX_TARGET=true
+                    INSTALL_QNX_TOOLS=true
                     ;;
                 -h|--help|*)
                     echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
@@ -260,12 +261,66 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
 	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
-if $QT_HMI || $INSTALL_ALL; then
+if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
+	echo "Checking for installed QNX SDP 6.5.0"
+	QNXSDP_INSTALL_FOLDER="/opt/qnx650"
+	if [[ -d "${QNXSDP_INSTALL_FOLDER}" ]]; then
+		echo "QNX SDP 6.5.0 already installed"
+    else
+        if [ ${ARCH} == "x64" ]; then
+            echo "Installing 32-bit libraries for 64-bit OS"
+            #For Ubuntu 13.0 and higer install ia32-libs from archive
+            if ${UBUNTU_VERSION_13_HIGHER} ; then
+                QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
+            else
+                QNXSDP_TOOL_REQS="ia32-libs"
+            fi
+            apt-install ${QNXSDP_TOOL_REQS}
+        fi
 
+        echo "Installing wget"
+        apt-install wget
+
+		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
+		QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
+		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
+        QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
+
+		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
+
+		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
+		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
+        sudo ${QNXSDP_TOOL_RUNFILE_BIN} -silent
+    	#Update system varible QNX_TARGET
+        source /etc/profile
+
+		echo "Installing SSH server"
+		SSH_SERVER="openssh-server ssh"
+		apt-install ${SSH_SERVER}
+	fi
+	echo $OK
+fi
+
+QT5_HMI=false
+QT4_HMI=false
+
+if $INSTALL_QT_HMI; then
+	if $INSTALL_ALL; then
+		QT5_HMI=true
+		QT4_HMI=true
+	elif $INSTALL_QNX_TOOLS; then
+		QT4_HMI=true
+	else
+		QT5_HMI=true
+	fi
+fi
+
+if $QT5_HMI; then
 	echo "Installing Subversion"
 	apt-install ${SUBVERSION}
 	echo $OK
-	
+
 	if [ ${ARCH} == "i386" ]; then
 		QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
@@ -299,48 +354,60 @@ if $QT_HMI || $INSTALL_ALL; then
 		sudo updatedb
 		echo $OK
 	fi
-	
+
 	echo "Installing OpenGL development files"
 	apt-install ${OPENGL_DEV}
 	echo $OK
 fi
 
-if $QNX_TARGET || $INSTALL_ALL; then
-	echo "Checking for installed QNX SDP 6.5.0"
-	QNXSDP_INSTALL_FOLDER="/opt/qnx650"
-	if [[ -d "${QNXSDP_INSTALL_FOLDER}" ]]; then
-		echo "QNX SDP 6.5.0 already installed"
-    else
-        if [ ${ARCH} == "x64" ]; then
-            echo "Installing 32-bit libraries for 64-bit OS"
-            #For Ubuntu 13.0 and higer install ia32-libs from archive
-            if ${UBUNTU_VERSION_13_HIGHER} ; then
-                QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
-            else
-                QNXSDP_TOOL_REQS="ia32-libs"
-            fi
-            apt-install ${QNXSDP_TOOL_REQS}
-        fi
+if $QT4_HMI; then
+    echo "Installing wget"
+    apt-install wget
 
-        echo "Installing wget"
-        apt-install wget
+    #Save current directory
+    pushd .
 
-		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
-		QNXSDP_TOOL_REPO_LINK="http://www.qnx.com/download/download/21179/"${QNXSDP_TOOL_BIN}
-		QNXSDP_TOOL_RUNFILE_DST=${TEMP_FOLDER}"/QNX"
-        QNXSDP_TOOL_RUNFILE_BIN=${QNXSDP_TOOL_RUNFILE_DST}"/"${QNXSDP_TOOL_BIN}
+    THIRDPARTYLIBS_DOWNLOAD_LINK=${APPLINK_FTP_SERVER}"/Distrs/thirdPartyLibs"
 
-		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c
+    echo "Installing expat"
+    EXPAT_VERSION="expat-2.1.0"
+    EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
+	EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
+	EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
+    wget -P ${EXPAT_DOWNLOAD_DST} ${EXPAT_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	cd ${EXPAT_DOWNLOAD_DST}
+	tar -xf ${EXPAT_ARCHIVE}
+	cd ${EXPAT_VERSION}
+	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
+	make -j4
+	sudo make installlib
 
-		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
-        sudo ${QNXSDP_TOOL_RUNFILE_BIN} -silent
+    echo "Installing DBUS"
+   	DBUS_VERSION="dbus-1.7.8"
+    DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
+	DBUS_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${DBUS_ARCHIVE}
+	DBUS_DOWNLOAD_DST=${TEMP_FOLDER}"/dbus"
+    wget -P ${DBUS_DOWNLOAD_DST} ${DBUS_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	cd ${DBUS_DOWNLOAD_DST}
+    tar -xf ${DBUS_ARCHIVE}
+	cd ${DBUS_VERSION}
+	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
+	make -j4
+	sudo make install
 
-		echo "Installing SSH server"
-		SSH_SERVER="openssh-server ssh"
-		apt-install ${SSH_SERVER}
-	fi
+    echo "Installing Qt4"
+   	QT4_VERSION="qt-4.8.5"
+    QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
+	QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
+	QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
+    wget -P ${QT4_DOWNLOAD_DST} ${QT4_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	cd ${QT4_DOWNLOAD_DST}
+    tar -xf ${QT4_ARCHIVE}
+    cd ${QT4_VERSION}
+    sudo make install
+
+    #Load correct current directory
+    popd
 	echo $OK
 fi
 
