@@ -209,7 +209,7 @@ apt-install ${GSTREAMER}
 echo $OK
 
 echo "Installing libxml2..."
-apt-get install ${LIBXML2}
+apt-install ${LIBXML2}
 echo $OK
 
 echo "Installng GNU C++ compiler"
