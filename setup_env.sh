@@ -45,7 +45,7 @@ UPDATE_SOURCES=false
 OPENGL_DEV="libgl1-mesa-dev"
 APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
-CMAKE_DEB_SRC=${APPLINK_SUBVERSION_REPO}"/dist/cmake/deb"
+CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 TEMP_FOLDER="/tmp"
@@ -188,7 +188,7 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	echo $OK
 
 	echo "Checking out CMake packages, please be patient"
-	svn checkout ${CMAKE_DEB_SRC} ${CMAKE_DEB_DST}
+    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
 	echo $OK
 
 	echo "Installing gdebi"
