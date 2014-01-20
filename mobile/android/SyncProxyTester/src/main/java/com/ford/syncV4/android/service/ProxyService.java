@@ -19,6 +19,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -112,9 +113,9 @@ import java.util.Vector;
 public class ProxyService extends Service implements IProxyListenerALMTesting {
     static final String TAG = "SyncProxyTester";
 
-    private static final String APPID_BT = "8675309";
-    private static final String APPID_TCP = "8675308";
-    private static final String APPID_USB = "8675310";
+    private static final String APPID_BT = FlavorConst.APPID_BT;
+    private static final String APPID_TCP = FlavorConst.APPID_TCP;
+    private static final String APPID_USB = FlavorConst.APPID_USB;
 
     private Integer autoIncCorrId = 1;
 
@@ -449,7 +450,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         putFile.setSyncFileName(ICON_SYNC_FILENAME);
         putFile.setCorrelationID(nextCorrID());
         putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-        _msgAdapter.logMessage(putFile, true);
+        try {
+            _msgAdapter.logMessage(putFile, true);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "NullPointerException ", e);
+        }
 
         try {
             awaitingPutFileResponseCorrelationID = putFile.getCorrelationID();
@@ -804,6 +809,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (_msgAdapter != null) {
             _msgAdapter.logMessage("******onProxyError******", Log.ERROR);
             _msgAdapter.logMessage("ERROR: " + info, Log.ERROR, e);
+            _msgAdapter.logMessage(info, true);
         } else {
             Log.e(TAG, "******onProxyError******");
             Log.e(TAG, "ERROR: " + info, e);

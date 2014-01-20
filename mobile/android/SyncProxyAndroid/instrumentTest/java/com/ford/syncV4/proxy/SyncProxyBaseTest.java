@@ -46,6 +46,15 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
+    public void testStopMobileNaviSessionForUnexcitingSessionDontThrowsException() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        try {
+            proxyALM.stopMobileNaviSession();
+        }catch (ArrayIndexOutOfBoundsException e){
+            assertNull("exception should not be thrown", e);
+        }
+    }
+
     private SyncProxyBase getSyncProxyBase() throws SyncException {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
@@ -92,8 +101,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                     }
                 }
             }
-
-
         };
     }
 }

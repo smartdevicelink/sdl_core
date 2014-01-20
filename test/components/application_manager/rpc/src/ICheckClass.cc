@@ -1,7 +1,4 @@
-/*
- * \file timer.h
- * \brief Timer class header file.
- *
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,74 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_
 
-#include <pthread.h>
+#include <rpc/ICheckClass.h>
 
-namespace transport_manager {
 
-typedef void (*Callback)(void* param);
+ICheckClass::ICheckClass(const std::string& inUnitTestName,const std::string& inTestName):
+		unitTestName_(inUnitTestName)
+		,testName_(inTestName)
+{
+}
+	
 
-/**
- * @brief Class in charge of timers.
- */
-class Timer {
- public:
+	
+ICheckClass::~ICheckClass()
+{
+}
+	
 
-  /**
-   * @brief Constructor.
-   */
-  Timer();
 
-  /**
-   * @brief Constructor.
-   *
-   * @param milliseconds value of timer.
-   * @param func Pointer to function that will be launched when timer runs out.
-   * @param params Parameters for Callback function.
-   * @param single_shot If true - timer call function once.
-   * if false - timer call function every time timer runs out.
-   */
-  Timer(unsigned long milliseconds, Callback func, void *params, bool single_shot);
-
-  /**
-   * @brief Constructor.
-   */
-  Timer(const Timer &other);
-
-  /**
-   * @brief Destructor.
-   */
-  ~Timer();
-
-  /**
-   * @brief Overloaded operator "=";
-   */
-  Timer& operator = (const Timer &other);
-
-  /**
-   * @brief Start timer.
-   */
-  void Start();
-
-  /**
-   * @brief Stop timer.
-   */
-  void Stop();
-
- private:
-  pthread_t thread_;
-  pthread_cond_t cond_;
-  pthread_mutex_t mutex_;
-  unsigned long milliseconds_;
-  Callback func_;
-  void *params_;
-  volatile bool single_shot_;
-
-  static void *ThreadRoutine(void* param);
-};
-
-}  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIMER_H_

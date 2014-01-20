@@ -49,9 +49,10 @@ class DBusMessageAdapter
     : public HMIMessageAdapter,
       public dbus::DBusMessageController {
  public:
-  explicit DBusMessageAdapter(HMIMessageHandler* handler);
+  typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+  explicit DBusMessageAdapter(HMIMessageHandler* hmi_message_handler);
   ~DBusMessageAdapter();
-  void SendMessageToHMI(utils::SharedPtr<application_manager::Message> message);
+  void SendMessageToHMI(MessageSharedPointer message);
 
   /**
    * \brief subscribes to signals
@@ -68,31 +69,31 @@ class DBusMessageAdapter
    * \brief sends request to HMI
    * \param obj request
    */
-  void Request(smart_objects::SmartObject& obj);
+  void Request(const smart_objects::SmartObject &obj);
 
   /**
    * \brief sends notification to HMI
    * \param obj notification
    */
-  void Notification(smart_objects::SmartObject& obj);
+  void Notification(const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends response to HMI
    * \param obj response
    */
-  void Response(smart_objects::SmartObject& obj);
+  void Response(const smart_objects::SmartObject &obj);
 
   /**
    * \brief sends error response to HMI
    * \param obj error
    */
-  void ErrorResponse(smart_objects::SmartObject& obj);
+  void ErrorResponse(const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends message to core
    * \param obj
    */
-  void SendMessageToCore(smart_objects::SmartObject& obj);
+  void SendMessageToCore(const smart_objects::SmartObject &obj);
 };
 
 }  // namespace hmi_message_handler

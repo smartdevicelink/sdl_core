@@ -16,7 +16,6 @@ set (SOURCES
   ./src/transport_manager_default.cc
   ./src/transport_adapter/transport_adapter_listener_impl.cc
   ./src/transport_adapter/transport_adapter_impl.cc
-  ./src/timer.cc
   ./src/tcp/tcp_transport_adapter.cc
   ./src/transport_adapter/threaded_socket_connection.cc
   ./src/tcp/tcp_client_listener.cc

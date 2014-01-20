@@ -19,7 +19,8 @@ public class FrameDataControlFrameType extends ByteEnumer {
 	public final static FrameDataControlFrameType StartSessionNACK = new FrameDataControlFrameType((byte)0x03, "StartSessionNACK");
 	public final static FrameDataControlFrameType EndSession = new FrameDataControlFrameType((byte)0x04, "EndSession");
     public final static FrameDataControlFrameType EndSessionACK = new FrameDataControlFrameType((byte)0x05, "EndSessionACK");
-    public final static FrameDataControlFrameType MobileNaviACK = new FrameDataControlFrameType((byte)0x06, "MobileNaviACK");
+    public final static FrameDataControlFrameType EndSessionNACK = new FrameDataControlFrameType((byte)0x06, "EndSessionNACK");
+    public final static FrameDataControlFrameType MobileNaviACK = new FrameDataControlFrameType((byte)0xFE, "MobileNaviACK");
     public final static FrameDataControlFrameType HeartbeatACK = new FrameDataControlFrameType((byte)0xFF, "HeartbeatACK");
 
 	static {
@@ -29,6 +30,7 @@ public class FrameDataControlFrameType extends ByteEnumer {
 		theList.addElement(StartSessionNACK);
 		theList.addElement(EndSession);
         theList.addElement(EndSessionACK);
+        theList.addElement(EndSessionNACK);
         theList.addElement(MobileNaviACK);
         theList.addElement(HeartbeatACK);
     }

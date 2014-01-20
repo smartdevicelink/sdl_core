@@ -10,9 +10,11 @@ add_subdirectory(./thirdPartyLibs)
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
-  ../src/components/formatters/include
+  ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ../src/thirdPartyLibs/MessageBroker/include
   ../src/components/application_manager/include
+  ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
@@ -21,7 +23,7 @@ include_directories (
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
-  ../src/thirdPartyLibs/jsoncpp/include/
+  ../src/components/formatters/include
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
@@ -34,6 +36,7 @@ include_directories (
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager
+  ../test/components/application_manager/rpc/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}
 #  /usr/lib/i386-linux-gnu/glib-2.0/include
@@ -43,30 +46,52 @@ include_directories (
 )
 
 set(LIBRARIES
+    test_App_Manager
+    ApplicationManager
+    
     gtest
     gtest_main
     gmock
     gmock_main
-    RequestWatchdog
-#   MediaManager
-    formatters
+
+    
     HMI_API
+    v4_protocol_v1_2_no_extra
     SmartObjects
-    ApplicationManager
+    formatters
+    RequestWatchdog
+    MediaManager
+    policies
     ProtocolHandler
     Utils
     ConfigProfile
     #test_JSONHandler_v4_protocol_v2_0_revP
-    # test_json_handler
-    test_SmartObjectTest
+    #test_json_handler
+    #test_SmartObjectTest
     #test_FormattersCommandsTest
     #test_UtilsTest
     #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
-    test_JSONCPPTest
+    #test_JSONCPPTest
     #test_MobileMessageHandlerTest
+    
+    
+    
+    connectionHandler
     MOBILE_API
     jsoncpp
+    
+#################################################    
+    TransportManager
+    HMIMessageHandler
+    MessageBroker
+    MessageBrokerClient
+    MessageBrokerServer
+    encryption
+    bluetooth
+    pthread
+    avahi-client
+    avahi-common
 #   rt
    # ${GSTREAMER_gstreamer_LIBRARY}
 )
