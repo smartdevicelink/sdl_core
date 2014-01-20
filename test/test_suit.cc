@@ -53,7 +53,9 @@ int main(int argc, char **argv) {
 
   //threadAdminAppTest.start();
   //app.run();
-
+  
+  threadAdminAppTest.join();
+  //sleep(60);
   
   int result = RUN_ALL_TESTS();
 

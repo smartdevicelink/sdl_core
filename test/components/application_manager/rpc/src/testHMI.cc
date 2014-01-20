@@ -132,6 +132,10 @@ namespace test{
 			
 			(*AppRegRequest)[S_MSG_PARAMS][strings::app_name] = "SyncProxyTester";					
 			(*AppRegRequest)[S_MSG_PARAMS][strings::available] = true;
+			(*AppRegRequest)[S_MSG_PARAMS][strings::language_desired] = hmi_apis::Common_Language::EN_US;
+			(*AppRegRequest)[S_MSG_PARAMS][strings::hmi_display_language_desired] = hmi_apis::Common_Language::EN_US;
+
+			
 			
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::app_id] = "12345";
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::is_media_application] = true;
@@ -150,6 +154,8 @@ namespace test{
 			//printf("\n\n\n after MesChain \n\n\n");
 			//app_manager_->AddMessageChain(connectKey,1,16,MesChain, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain  after\n\n\n");
+			
+			//app_manager_->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
 			app_manager_->ManageMobileCommand(AppRegRequest);
 			///////////////////////////////////			
 			
@@ -227,7 +233,7 @@ namespace test{
 
 			appl->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
 
-			app_manager_->ManageMobileCommand(HMIRequest);
+			//app_manager_->ManageMobileCommand(HMIRequest);
 
 			
 			sleep(20);
