@@ -24,6 +24,9 @@ import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.converter.IRPCRequestConverter;
+import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
+import com.ford.syncV4.proxy.converter.SyncRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerBase;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -266,6 +269,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private TimerTask _currentReconnectTimerTask = null;
     private List<Byte> servicePool = new ArrayList<Byte>();
+
+    private IRPCRequestConverterFactory rpcRequestConverterFactory =
+            new SyncRPCRequestConverterFactory();
 
     /**
      * Constructor.
@@ -1345,34 +1351,30 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         try {
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 
-            byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
-            Log.d(TAG, "Version: " + _wiproVersion + " | msg: " + new String(msgBytes));
+            final IRPCRequestConverter converter =
+                    rpcRequestConverterFactory.getConverterForFunctionName(
+                            request.getFunctionName());
+            if (converter != null) {
+                List<ProtocolMessage> protocolMessages =
+                        converter.getProtocolMessages(request, _rpcSessionID,
+                                _jsonRPCMarshaller, _wiproVersion);
 
-            ProtocolMessage pm = createProtocolMessage(request, msgBytes);
-
-            // Queue this outgoing message
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-                if (_outgoingProxyMessageDispatcher != null) {
-                    _outgoingProxyMessageDispatcher.queueMessage(pm);
+                // Queue this outgoing message
+                synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+                    if (_outgoingProxyMessageDispatcher != null) {
+                        for (ProtocolMessage pm : protocolMessages) {
+                            _outgoingProxyMessageDispatcher.queueMessage(pm);
+                        }
+                    }
                 }
+            } else {
+                Log.w(TAG,
+                        "Unknown function name " + request.getFunctionName());
             }
         } catch (OutOfMemoryError e) {
             SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
             throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
         }
-    }
-
-    private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setData(msgBytes);
-        pm.setSessionID(_rpcSessionID);
-        pm.setMessageType(MessageType.RPC);
-        pm.setSessionType(SessionType.RPC);
-        pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-        pm.setCorrID(request.getCorrelationID());
-        if (request.getBulkData() != null)
-            pm.setBulkData(request.getBulkData());
-        return pm;
     }
 
     private void handleRPCMessage(Hashtable hash) {
@@ -3518,5 +3520,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onMobileNavAckReceived(int frameReceivedNumber) {
             handleMobileNavAck(frameReceivedNumber);
         }
+    }
+
+    public IRPCRequestConverterFactory getRpcRequestConverterFactory() {
+        return rpcRequestConverterFactory;
+    }
+
+    public void setRpcRequestConverterFactory(
+            IRPCRequestConverterFactory rpcRequestConverterFactory) {
+        this.rpcRequestConverterFactory = rpcRequestConverterFactory;
     }
 } // end-class
