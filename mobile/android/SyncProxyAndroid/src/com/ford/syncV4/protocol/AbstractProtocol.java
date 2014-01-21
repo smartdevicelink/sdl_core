@@ -160,8 +160,6 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
-
-
     // This method handles protocol errors. A callback is sent to the protocol
     // listener.
     protected void handleProtocolError(String string, Exception ex) {
