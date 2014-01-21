@@ -33,7 +33,7 @@
 #Exit immediately if a command exits with a non-zero status.
 set -e
 
-if [[ $EUID -eq 0 ]]; then
+if [ $EUID != 0 ]; then
     echo "This script should not be run using sudo or as the root user"
     exit 1
 fi
