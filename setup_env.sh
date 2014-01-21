@@ -120,7 +120,7 @@ else
   echo "unknown architecture - exit"
   exit
 fi
-echo
+echo " "
 
 function apt-install() {
     if [ -z "$1" ];
@@ -224,7 +224,7 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 	fi
 
-	echo "Checking out CMake packages, please be patient"
+	echo "Loading CMake packages"
 	load-from-ftp ${CMAKE_DEB_SRC}/${CMAKE_DATA_DEB} ${CMAKE_DEB_DST}
 	load-from-ftp ${CMAKE_DEB_SRC}/${CMAKE_DEB} 	 ${CMAKE_DEB_DST}
 	echo $OK
@@ -410,17 +410,19 @@ if $QT4_HMI; then
 	    #Save current directory
 	    pushd .
 
-	    THIRDPARTYLIBS_DOWNLOAD_LINK=${APPLINK_FTP_SERVER}"/Distrs/thirdPartyLibs"
+	    THIRDPARTYLIBS_DOWNLOAD_LINK="${APPLINK_FTP_SERVER}/Distrs/thirdPartyLibs"
 		BUILD_THREADS_COUNT=$(($(nproc)+1))
 
 	    EXPAT_VERSION="expat-2.1.0"
-	    EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
-		EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
-		EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
+	    EXPAT_ARCHIVE="${EXPAT_VERSION}.tar.gz"
+		EXPAT_DOWNLOAD_LINK="${THIRDPARTYLIBS_DOWNLOAD_LINK}/${EXPAT_ARCHIVE}"
+		EXPAT_DOWNLOAD_DST="${TEMP_FOLDER}/expat"
+	    echo "111111111"
 		load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
+	    echo "111111111"
 		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
 		{
-	    echo "Installing expat..."
+	    echo "Installing expat, please be patient."
         echo "All aditinal buil information will be saved to ${EXPAT_BUILD_LOG}."
 		cd ${EXPAT_DOWNLOAD_DST}
 		tar -xf ${EXPAT_ARCHIVE}
@@ -432,13 +434,13 @@ if $QT4_HMI; then
 		} &> ${EXPAT_BUILD_LOG}
 
 	   	DBUS_VERSION="dbus-1.7.8"
-	    DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
-		DBUS_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${DBUS_ARCHIVE}
-		DBUS_DOWNLOAD_DST=${TEMP_FOLDER}"/dbus"
+	    DBUS_ARCHIVE="${DBUS_VERSION}.tar.gz"
+		DBUS_DOWNLOAD_LINK="${THIRDPARTYLIBS_DOWNLOAD_LINK}/${DBUS_ARCHIVE}"
+		DBUS_DOWNLOAD_DST="${TEMP_FOLDER}/dbus"
 		load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
 		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
 		{
-	    echo "Installing DBUS..."
+	    echo "Installing DBUS, please be patient."
         echo "All aditinal buil information will be saved to ${DBUS_BUILD_LOG}."
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xf ${DBUS_ARCHIVE}
@@ -450,13 +452,13 @@ if $QT4_HMI; then
 		} &> ${DBUS_BUILD_LOG}
 
 	   	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
-	    QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
-		QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
-		QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
+	    QT4_ARCHIVE="${QT4_VERSION}.tar.gz"
+		QT4_DOWNLOAD_LINK="$APPLINK_FTP_SERVER/Distrs/Qt4.8.5/${QT4_ARCHIVE}"
+		QT4_DOWNLOAD_DST="${TEMP_FOLDER}/qt4"
 		load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
 		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
 		{
-        echo "Installing Qt4..."
+        echo "Installing Qt4, please be patient."
         echo "All aditinal buil information will be saved to ${QT4_BUILD_LOG}."
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xf ${QT4_ARCHIVE}
