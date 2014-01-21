@@ -174,11 +174,10 @@ sudo apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
 	echo "Updating repository..."
-	{
 	sudo apt-get update
+	echo "Upgrade repository..."
 	sudo apt-get upgrade --yes --force-yes
-	#hide outpute of update/upgrade
-	} > /dev/null;
+	echo $OK
 fi
 
 #Check Ubuntu version
@@ -214,7 +213,6 @@ fi
 echo $OK
 
 if ${INSTALL_CMAKE_2_8_9}; then
-
 	if [ ${ARCH} == "i386" ]; then
 	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
 	elif [ ${ARCH} == "x64" ]; then
@@ -361,6 +359,7 @@ if $QT5_HMI; then
 		QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
 	fi
 	echo "Checking whether Qt5 with QML support is installed"
+
     qmlscene_binary=`./FindQt.sh -v 5.1.0 -b qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
 	  echo "Found Qt5 in "`dirname $qmlscene_binary`
@@ -400,19 +399,23 @@ if $QT4_HMI; then
 
     THIRDPARTYLIBS_DOWNLOAD_LINK=${APPLINK_FTP_SERVER}"/Distrs/thirdPartyLibs"
 
+	{
     echo "Installing expat"
     EXPAT_VERSION="expat-2.1.0"
     EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
 	EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
 	EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
-	load-from-ftp ${EXPAT_DOWNLOAD_LINK}  ${EXPAT_DOWNLOAD_DST}
+	load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
 	cd ${EXPAT_DOWNLOAD_DST}
 	tar -xf ${EXPAT_ARCHIVE}
 	cd ${EXPAT_VERSION}
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
 	make -j${BUILD_THREADS_COUNT}
 	sudo make installlib
+	#save all output in log file
+	} > "${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
 
+	{
     echo "Installing DBUS"
    	DBUS_VERSION="dbus-1.7.8"
     DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
@@ -425,6 +428,8 @@ if $QT4_HMI; then
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
 	make -j${BUILD_THREADS_COUNT}
 	sudo make install
+	#save all output in log file
+	} > "${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
 
     echo "Installing Qt4"
    	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
@@ -436,8 +441,12 @@ if $QT4_HMI; then
     tar -xf ${QT4_ARCHIVE}
     cd ${QT4_VERSION}
     ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
-    make -j${BUILD_THREADS_COUNT}
+    #Echo info and sudo timestamp_timeout reset
+    sudo echo "Qt4 configured"
+	make -j${BUILD_THREADS_COUNT}
     sudo make install
+	#save all output in log file
+	} > "${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
 
     #Load correct current directory
     popd
