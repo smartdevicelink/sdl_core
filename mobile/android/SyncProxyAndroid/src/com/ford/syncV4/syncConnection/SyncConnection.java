@@ -9,7 +9,7 @@ import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
 import com.ford.syncV4.streaming.AbstractPacketizer;
@@ -138,7 +138,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (sendFinishMessages && (_transport != null) &&
                         _transport.getIsConnected()) {
-                    _protocol.EndProtocolSession(SessionType.RPC, rpcSessionID);
+                    _protocol.EndProtocolSession(ServiceType.RPC, rpcSessionID);
                 }
                 if (!keepConnection) {
                     _protocol = null;
@@ -175,7 +175,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (_transport != null && _transport.getIsConnected()) {
-                    _protocol.EndProtocolSession(SessionType.Mobile_Nav, mobileNavSessionId);
+                    _protocol.EndProtocolSession(ServiceType.Mobile_Nav, mobileNavSessionId);
                 }
             } // end-if
         }
@@ -223,7 +223,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void startMobileNavSession(byte sessionID) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(SessionType.Mobile_Nav, sessionID);
+                _protocol.StartProtocolSession(ServiceType.Mobile_Nav, sessionID);
             }
         }
     }
@@ -248,7 +248,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(SessionType.RPC);
+                _protocol.StartProtocolSession(ServiceType.RPC);
             }
         }
     }
@@ -327,16 +327,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(SessionType sessionType,
+    public void onProtocolSessionStarted(ServiceType serviceType,
                                          byte sessionID, byte version, String correlationID) {
-        _connectionListener.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+        _connectionListener.onProtocolSessionStarted(serviceType, sessionID, version, correlationID);
     }
 
     @Override
-    public void onProtocolSessionEnded(SessionType sessionType, byte sessionID,
+    public void onProtocolSessionEnded(ServiceType serviceType, byte sessionID,
                                        String correlationID) {
-        _connectionListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
-        if ( _transport != null && sessionType.equals(SessionType.RPC)){
+        _connectionListener.onProtocolSessionEnded(serviceType, sessionID, correlationID);
+        if ( _transport != null && serviceType.equals(ServiceType.RPC)){
             _transport.stopReading();
         }
     }
@@ -384,7 +384,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
         Log.d(TAG, "Asked to send heartbeat");
         final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeat(SessionType.RPC,
+                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.RPC,
                         (byte) 2);
         final byte[] bytes = heartbeat.assembleHeaderBytes();
         onProtocolMessageBytesToSend(bytes, 0, bytes.length);

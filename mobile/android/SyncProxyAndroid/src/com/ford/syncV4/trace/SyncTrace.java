@@ -9,7 +9,7 @@ import android.os.Process;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -233,7 +233,7 @@ public class SyncTrace {
 		} // end-if
 
         // do not log mobile navi data frames
-        if (frameHeader.getSessionType() == SessionType.Mobile_Nav && frameHeader.getFrameType() == FrameType.Single) {
+        if (frameHeader.getServiceType() == ServiceType.Mobile_Nav && frameHeader.getFrameType() == FrameType.Single) {
             return;
         }
 
@@ -268,11 +268,11 @@ public class SyncTrace {
 		return "Unknown";
 	} // end-method
 
-	private static String getProtocolSessionType(SessionType serviceType) {
+	private static String getProtocolSessionType(ServiceType serviceType) {
 		String s;
-		if (serviceType == SessionType.RPC )
+		if (serviceType == ServiceType.RPC )
 			s = "rpc";
-		else if (serviceType == SessionType.Bulk_Data)
+		else if (serviceType == ServiceType.Bulk_Data)
 			s = "bulk";
 		else
 			s = "Unknown";
@@ -289,7 +289,7 @@ public class SyncTrace {
 		sb.append("</cmp><ft>");
 		sb.append(getProtocolFrameType(hdr.getFrameType()));
 		sb.append("</ft><st>");
-		sb.append(getProtocolSessionType(hdr.getSessionType()));
+		sb.append(getProtocolSessionType(hdr.getServiceType()));
 		sb.append("</st><sid>");
 		sb.append(hdr.getSessionID());
 		sb.append("</sid><sz>");

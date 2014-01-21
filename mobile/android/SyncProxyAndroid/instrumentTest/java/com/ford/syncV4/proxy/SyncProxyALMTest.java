@@ -5,7 +5,7 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -114,13 +114,13 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
     public void testVideoFrameShouldGetRightSessionIDAfterOnProtocolSessionStarted() throws Exception {
         final byte[] testRTP = new byte[10];
-        sut.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, (byte) 23, (byte) 2, "");
+        sut.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, (byte) 23, (byte) 2, "");
         ProtocolMessage result = sut.createMobileNavSessionProtocolMessage(testRTP);
         assertTrue(Arrays.equals(testRTP, result.getData()));
         assertEquals(sut.getMobileNavSessionID(), result.getSessionID());
         assertEquals(MessageType.VIDEO, result.getMessageType());
         assertEquals(sut.getWiProVersion(), result.getVersion());
-        assertEquals(SessionType.Mobile_Nav, result.getSessionType());
+        assertEquals(ServiceType.Mobile_Nav, result.getSessionType());
     }
 
     public void testMobileNavProtocolMessageCreation() throws Exception {
@@ -130,7 +130,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         assertEquals(sut.getMobileNavSessionID(), message.getSessionID());
         assertEquals(MessageType.VIDEO, message.getMessageType());
         assertEquals(sut.getWiProVersion(), message.getVersion());
-        assertEquals(SessionType.Mobile_Nav, message.getSessionType());
+        assertEquals(ServiceType.Mobile_Nav, message.getSessionType());
     }
 
     public void testOnMobileNavSessionStarted() throws Exception {
@@ -190,7 +190,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 assertEquals("Session ID should be equal", _mobileNavSessionID, (byte) 48);
             }
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, (byte) 48, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, (byte) 48, (byte) 2, "");
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -246,7 +246,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             protected void handleMobileNavMessage(ProtocolMessage message) {
                 super.handleMobileNavMessage(message);
-                assertEquals(message.getSessionType(), SessionType.Mobile_Nav);
+                assertEquals(message.getSessionType(), ServiceType.Mobile_Nav);
                 assertEquals(message.getVersion(), (byte) 2);
                 assertTrue(message.getSessionID() == (byte) 48);
             }
@@ -254,7 +254,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ProtocolMessage message = new ProtocolMessage();
         message.setVersion((byte) 2);
         message.setSessionID((byte) 48);
-        message.setSessionType(SessionType.Mobile_Nav);
+        message.setSessionType(ServiceType.Mobile_Nav);
         proxyALM.dispatchIncomingMessage(message);
     }
 
@@ -308,12 +308,12 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-        ArgumentCaptor<SessionType> sessionTypeCaptor = ArgumentCaptor.forClass(SessionType.class);
+        ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.handleEndSessionAck(SessionType.RPC, SESSION_ID, "correlationID");
+        proxyALM.handleEndSessionAck(ServiceType.RPC, SESSION_ID, "correlationID");
         Mockito.verify(listenerALM).onProtocolSessionEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
-        assertEquals(SessionType.RPC, sessionTypeCaptor.getValue());
+        assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());
     }
@@ -369,11 +369,11 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-        ArgumentCaptor<SessionType> sessionTypeCaptor = ArgumentCaptor.forClass(SessionType.class);
+        ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.RPC, SESSION_ID, (byte) 0x2, "correlationID");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.RPC, SESSION_ID, (byte) 0x2, "correlationID");
         Mockito.verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());

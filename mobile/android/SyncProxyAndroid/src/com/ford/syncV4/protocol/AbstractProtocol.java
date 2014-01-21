@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
@@ -52,14 +52,14 @@ public abstract class AbstractProtocol {
     // This method starts a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionStarted() method will be made when the protocol
     // session has been established.
-    public abstract void StartProtocolSession(SessionType sessionType);
+    public abstract void StartProtocolSession(ServiceType serviceType);
 
-    public abstract void StartProtocolSession(SessionType sessionType, byte sessionID);
+    public abstract void StartProtocolSession(ServiceType serviceType, byte sessionID);
 
     // This method ends a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionEnded() method will be made when the protocol
     // session has ended.
-    public abstract void EndProtocolSession(SessionType sessionType, byte sessionID);
+    public abstract void EndProtocolSession(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -96,7 +96,7 @@ public abstract class AbstractProtocol {
     }
 
     private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
-        if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
+        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             Log.d("MobileNaviSession", "ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
                 Log.d("MobileNaviSession", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
@@ -116,7 +116,7 @@ public abstract class AbstractProtocol {
     }
 
     private void writeToSdCard(ProtocolFrameHeader header, byte[] data) {
-        if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
+        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             if (header.getFrameType().equals(FrameType.Single)) {
                 try {
                     if (fos != null) {
@@ -146,16 +146,16 @@ public abstract class AbstractProtocol {
 
     // This method handles the end of a protocol session. A callback is
     // sent to the protocol listener.
-    protected void handleProtocolSessionEnded(SessionType sessionType,
+    protected void handleProtocolSessionEnded(ServiceType serviceType,
                                               byte sessionID, String correlationID) {
-        _protocolListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
+        _protocolListener.onProtocolSessionEnded(serviceType, sessionID, correlationID);
     }
 
     // This method handles the startup of a protocol session. A callback is sent
     // to the protocol listener.
-    protected void handleProtocolSessionStarted(SessionType sessionType,
+    protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
-        _protocolListener.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+        _protocolListener.onProtocolSessionStarted(serviceType, sessionID, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

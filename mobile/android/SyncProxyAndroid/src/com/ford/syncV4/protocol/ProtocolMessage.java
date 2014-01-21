@@ -1,11 +1,11 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 public class ProtocolMessage {
 	private byte version = 1;
-	private SessionType _sessionType = SessionType.RPC;
+	private ServiceType _serviceType = ServiceType.RPC;
 	private MessageType _messageType = MessageType.UNDEFINED;
 	private byte _sessionID = 0;
 	private byte _rpcType;
@@ -68,12 +68,12 @@ public class ProtocolMessage {
 		//this._bulkData = bulkData;
 	}
 
-	public SessionType getSessionType() {
-		return _sessionType;
+	public ServiceType getSessionType() {
+		return _serviceType;
 	}
 
-	public void setSessionType(SessionType sessionType) {
-		this._sessionType = sessionType;
+	public void setSessionType(ServiceType serviceType) {
+		this._serviceType = serviceType;
 	}
 
 	public MessageType getMessageType() {

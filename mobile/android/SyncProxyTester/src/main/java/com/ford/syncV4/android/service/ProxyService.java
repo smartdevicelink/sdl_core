@@ -26,7 +26,7 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -1629,9 +1629,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onProtocolSessionEnded(final SessionType sessionType, final Byte version, final String correlationID) {
+    public void onProtocolSessionEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "EndSession Ack received; Session Type " + sessionType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
+        String response = "EndSession Ack received; Session Type " + serviceType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
         if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
         else Log.i(TAG, "" + response);
 
@@ -1640,7 +1640,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mainActivity.onProtocolSessionEnded(sessionType, version, correlationID);
+                    mainActivity.onProtocolSessionEnded(serviceType, version, correlationID);
                 }
             });
         }

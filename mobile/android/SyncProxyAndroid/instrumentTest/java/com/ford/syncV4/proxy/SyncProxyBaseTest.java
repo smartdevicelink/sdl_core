@@ -3,7 +3,7 @@ package com.ford.syncV4.proxy;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -28,20 +28,20 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testMobileNavSessionAddedToServicePoolOnStart() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
         assertTrue("service pool should have mobile nav service", proxyALM.getServicePool().contains(new Byte(sessionID)));
     }
 
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
         proxyALM.stopMobileNaviSession();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
     public void testMobileNavSessionEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }

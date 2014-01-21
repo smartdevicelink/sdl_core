@@ -1,6 +1,6 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import junit.framework.TestCase;
 
@@ -22,13 +22,13 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(SessionType sessionType,
+            public void onProtocolSessionStarted(ServiceType sessionType,
                                                  byte sessionID, byte version,
                                                  String correlationID) {
             }
 
             @Override
-            public void onProtocolSessionEnded(SessionType sessionType,
+            public void onProtocolSessionEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
@@ -90,13 +90,13 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(SessionType sessionType,
+            public void onProtocolSessionStarted(ServiceType sessionType,
                                                  byte sessionID, byte version,
                                                  String correlationID) {
             }
 
             @Override
-            public void onProtocolSessionEnded(SessionType sessionType,
+            public void onProtocolSessionEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }

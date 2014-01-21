@@ -1,7 +1,7 @@
 package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 public interface ISyncConnectionListener {
 	public void onTransportDisconnected(String info);
@@ -12,10 +12,10 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(SessionType sessionType,
+	public void onProtocolSessionStarted(ServiceType serviceType,
 			byte sessionID, byte version, String correlationID);
 	
-	public void onProtocolSessionEnded(SessionType sessionType,
+	public void onProtocolSessionEnded(ServiceType serviceType,
 			byte sessionID, String correlationID);
 	
 	public void onProtocolError(String info, Exception e);

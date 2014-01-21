@@ -18,7 +18,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -1171,7 +1171,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
             // Dispatching logic
-            if (message.getSessionType().equals(SessionType.RPC)) {
+            if (message.getSessionType().equals(ServiceType.RPC)) {
                 try {
                     if (_wiproVersion == 1) {
                         if (message.getVersion() == 2) setWiProVersion(message.getVersion());
@@ -1367,7 +1367,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         pm.setData(msgBytes);
         pm.setSessionID(_rpcSessionID);
         pm.setMessageType(MessageType.RPC);
-        pm.setSessionType(SessionType.RPC);
+        pm.setSessionType(ServiceType.RPC);
         pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
         pm.setCorrID(request.getCorrelationID());
         if (request.getBulkData() != null)
@@ -2516,18 +2516,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleEndSessionAck(final SessionType sessionType, final byte sessionId, final String correlationID) {
-        Log.i(TAG, "EndSession Ack received; Session Type " + sessionType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
+    protected void handleEndSessionAck(final ServiceType serviceType, final byte sessionId, final String correlationID) {
+        Log.i(TAG, "EndSession Ack received; Session Type " + serviceType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onProtocolSessionEnded(sessionType, sessionId, correlationID);
+                    _proxyListener.onProtocolSessionEnded(serviceType, sessionId, correlationID);
                 }
             });
         } else {
-            _proxyListener.onProtocolSessionEnded(sessionType, sessionId, correlationID);
+            _proxyListener.onProtocolSessionEnded(serviceType, sessionId, correlationID);
         }
     }
 
@@ -2641,7 +2641,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         pm.setSessionID(_mobileNavSessionID);
         pm.setVersion(getWiProVersion());
         pm.setMessageType(MessageType.VIDEO);
-        pm.setSessionType(SessionType.Mobile_Nav);
+        pm.setSessionType(ServiceType.Mobile_Nav);
         return pm;
     }
 
@@ -3486,15 +3486,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolSessionStarted(SessionType sessionType,
+        public void onProtocolSessionStarted(ServiceType serviceType,
                                              byte sessionID, byte version, String correlationID) {
             if (_wiproVersion == 1) {
                 if (version == 2) setWiProVersion(version);
             }
-            if (sessionType.eq(SessionType.RPC)) {
+            if (serviceType.eq(ServiceType.RPC)) {
                 startRPCProtocolSession(sessionID, correlationID);
             } else if (_wiproVersion == 2) {
-                if (sessionType.equals(SessionType.Mobile_Nav)) {
+                if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNavSession(sessionID, correlationID);
                 } else {
                     //If version 2 then don't need to specify a Session Type
@@ -3504,9 +3504,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolSessionEnded(SessionType sessionType,
+        public void onProtocolSessionEnded(ServiceType serviceType,
                                            byte sessionID, String correlationID) {
-            handleEndSessionAck(sessionType, sessionID, correlationID);
+            handleEndSessionAck(serviceType, sessionID, correlationID);
         }
 
         @Override
