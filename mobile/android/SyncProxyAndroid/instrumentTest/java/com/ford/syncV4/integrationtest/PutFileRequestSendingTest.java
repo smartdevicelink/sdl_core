@@ -1,14 +1,15 @@
 package com.ford.syncV4.integrationtest;
 
+import android.test.InstrumentationTestCase;
+
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.SyncTransport;
-
-import junit.framework.TestCase;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -29,7 +30,13 @@ import static org.mockito.Mockito.when;
  *
  * Created by enikolsky on 2014-01-20.
  */
-public class PutFileRequestSendingTest extends TestCase {
+public class PutFileRequestSendingTest extends InstrumentationTestCase {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        TestCommon.setupMocking(this);
+    }
+
     public void testBigPutFileRequestShouldBeSplitIntoFirstAndConsecutiveFrames()
             throws Exception {
         final byte[] startSessionACKBytes =
