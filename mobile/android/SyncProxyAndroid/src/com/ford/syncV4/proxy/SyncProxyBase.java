@@ -266,6 +266,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private TimerTask _currentReconnectTimerTask = null;
     private List<Byte> servicePool = new ArrayList<Byte>();
+    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
+
 
     /**
      * Constructor.
@@ -686,6 +688,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         DebugTool.disableDebugTool();
     }
 
+    public static void setHeartBeatInterval(int heartBeatInterval) {
+        SyncProxyBase.heartBeatInterval = heartBeatInterval;
+    }
+
+    public static int getHeartBeatInterval() {
+        return heartBeatInterval;
+    }
+
     public SyncConnection getSyncConnection() {
         return _syncConnection;
     }
@@ -946,7 +956,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
                 final HeartbeatMonitor heartbeatMonitor =
                         new HeartbeatMonitor();
-                heartbeatMonitor.setInterval(HEARTBEAT_INTERVAL);
+                heartbeatMonitor.setInterval(heartBeatInterval);
                 _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
             }
             WiProProtocol protocol = (WiProProtocol) _syncConnection.getWiProProtocol();

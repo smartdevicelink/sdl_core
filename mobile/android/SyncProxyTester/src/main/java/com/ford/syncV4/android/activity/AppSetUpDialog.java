@@ -21,6 +21,8 @@ import android.widget.ToggleButton;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 /**
@@ -55,7 +57,7 @@ public class AppSetUpDialog extends DialogFragment {
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
         langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -194,7 +196,11 @@ public class AppSetUpDialog extends DialogFragment {
                         if (!success) {
                             Log.w(logTag, "Can't save selected protocol properties");
                         }
-
+                        if ( isHearBeat.isChecked() ){
+                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
+                        }else{
+                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
+                        }
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();

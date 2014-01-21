@@ -2700,6 +2700,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final Context mContext = adapter.getContext();
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
+
                             View layout = inflater.inflate(R.layout.performinteraction,
                                     (ViewGroup) findViewById(R.id.performinteraction_Root));
 
@@ -3539,6 +3540,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.registerappinterface_useVRSynonyms);
         final EditText vrSynonyms = (EditText) layout
                 .findViewById(R.id.registerappinterface_vrSynonyms);
+
         final CheckBox isMediaApp = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_isMediaApp);
         final CheckBox useDesiredLang = (CheckBox) layout

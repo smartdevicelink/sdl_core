@@ -116,7 +116,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private static final String APPID_BT = FlavorConst.APPID_BT;
     private static final String APPID_TCP = FlavorConst.APPID_TCP;
     private static final String APPID_USB = FlavorConst.APPID_USB;
-
+    public static final int HEARTBEAT_INTERVAL = 5000;
+    public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
     private Integer autoIncCorrId = 1;
 
     private static final String ICON_SYNC_FILENAME = "icon.png";
@@ -141,6 +142,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private ProxyServiceEvent mServiceDestroyEvent;
 
     private int awaitingPutFileResponseCorrelationID;
+
 
     public void onCreate() {
         super.onCreate();
