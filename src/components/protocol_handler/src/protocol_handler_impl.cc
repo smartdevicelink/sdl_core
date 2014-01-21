@@ -39,7 +39,7 @@
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "utils/macro.h"
-
+#include "config_profile/profile.h"
 namespace protocol_handler {
 
 log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
@@ -53,7 +53,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       kPeriodForNaviAck(5),
       raw_ford_messages_from_mobile_(
           "MessagesFromMobileAppHandler", this,
-          threads::ThreadOptions(threads::Thread::kMinStackSize)),
+          threads::ThreadOptions(
+                                 profile::Profile::instance()->thread_min_stach_size()
+          )),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,
           threads::ThreadOptions(threads::Thread::kMinStackSize)) {

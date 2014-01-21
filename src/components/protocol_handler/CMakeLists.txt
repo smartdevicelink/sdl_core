@@ -3,6 +3,7 @@ include_directories (
   ../utils/include/
   ../transport_manager/include/
   ../connection_handler/include/
+  ../config_profile/include/
 )
 
 set (SOURCES

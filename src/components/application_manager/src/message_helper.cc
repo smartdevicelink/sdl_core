@@ -976,6 +976,7 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
 
 void MessageHelper::SendNaviStartStream(
   const std::string& url, int32_t connection_key) {
+  LOG4CXX_INFO(g_logger, "MessageHelper::SendNaviStartStream");
   smart_objects::SmartObject* start_stream =
     new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
