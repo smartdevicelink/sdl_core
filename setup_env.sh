@@ -413,56 +413,54 @@ if $QT4_HMI; then
 	    THIRDPARTYLIBS_DOWNLOAD_LINK="${APPLINK_FTP_SERVER}/Distrs/thirdPartyLibs"
 		BUILD_THREADS_COUNT=$(($(nproc)+1))
 
-	    EXPAT_VERSION="expat-2.1.0"
-	    EXPAT_ARCHIVE="${EXPAT_VERSION}.tar.gz"
+	    EXPAT_FOLDER="expat-2.1.0"
+	    EXPAT_ARCHIVE="${EXPAT_FOLDER}.tar.gz"
 		EXPAT_DOWNLOAD_LINK="${THIRDPARTYLIBS_DOWNLOAD_LINK}/${EXPAT_ARCHIVE}"
 		EXPAT_DOWNLOAD_DST="${TEMP_FOLDER}/expat"
-	    echo "111111111"
 		load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
-	    echo "111111111"
-		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
-		{
+		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_FOLDER}_build.log"
 	    echo "Installing expat, please be patient."
         echo "All aditinal buil information will be saved to ${EXPAT_BUILD_LOG}."
+		{
 		cd ${EXPAT_DOWNLOAD_DST}
 		tar -xf ${EXPAT_ARCHIVE}
-		cd ${EXPAT_VERSION}
+		cd ${EXPAT_FOLDER}
 		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
 		make -j${BUILD_THREADS_COUNT}
 		make installlib
 		#save configure and make output in log file
 		} &> ${EXPAT_BUILD_LOG}
 
-	   	DBUS_VERSION="dbus-1.7.8"
-	    DBUS_ARCHIVE="${DBUS_VERSION}.tar.gz"
+	   	DBUS_FOLDER="dbus-1.7.8"
+	    DBUS_ARCHIVE="${DBUS_FOLDER}.tar.gz"
 		DBUS_DOWNLOAD_LINK="${THIRDPARTYLIBS_DOWNLOAD_LINK}/${DBUS_ARCHIVE}"
 		DBUS_DOWNLOAD_DST="${TEMP_FOLDER}/dbus"
 		load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
-		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
-		{
+		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_FOLDER}_build.log"
 	    echo "Installing DBUS, please be patient."
         echo "All aditinal buil information will be saved to ${DBUS_BUILD_LOG}."
+		{
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xf ${DBUS_ARCHIVE}
-		cd ${DBUS_VERSION}
+		cd ${DBUS_FOLDER}
 		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
 		make -j${BUILD_THREADS_COUNT}
 		make install
 		#save configure and make output in log file
 		} &> ${DBUS_BUILD_LOG}
 
-	   	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
-	    QT4_ARCHIVE="${QT4_VERSION}.tar.gz"
+	   	QT4_FOLDER="qt-everywhere-opensource-src-4.8.5"
+	    QT4_ARCHIVE="${QT4_FOLDER}.tar.gz"
 		QT4_DOWNLOAD_LINK="$APPLINK_FTP_SERVER/Distrs/Qt4.8.5/${QT4_ARCHIVE}"
 		QT4_DOWNLOAD_DST="${TEMP_FOLDER}/qt4"
 		load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
-		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
-		{
+		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_FOLDER}_build.log"
         echo "Installing Qt4, please be patient."
         echo "All aditinal buil information will be saved to ${QT4_BUILD_LOG}."
+		{
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xf ${QT4_ARCHIVE}
-	    cd ${QT4_VERSION}
+	    cd ${QT4_FOLDER}
 	    ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
 		make -j${BUILD_THREADS_COUNT}
 	    make install
