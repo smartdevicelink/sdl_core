@@ -30,7 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+#Exit immediately if a command exits with a non-zero status.
 set -e
+
+if [[ $EUID -eq 0 ]]; then
+    echo "This script should not be run using sudo or as the root user"
+    exit 1
+fi
 
 CMAKE_BUILD_SYSTEM="cmake"
 SUBVERSION="subversion"
@@ -123,7 +129,7 @@ function apt-install() {
         return 1;
     fi
     set -x #Show install command to user"
-    sudo apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
+    apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
     set +x
 }
 
@@ -135,48 +141,47 @@ echo $OK
 function load-from-ftp() {
     if [ -z "$1" ];
     then
-        echo "warning: load-from-ftp() function called without DOWNLOAD_LINK parameters"
+        echo "warning: load-from-ftp() function called without DOWNLOAD_LINK parameter ($1)"
         return 1;
     fi
     DOWNLOAD_LINK="$1"
 
     if [ -z "$2" ];
     then
-        echo "warning: load-from-ftp() function called without DOWNLOAD_DST parameters"
+        echo "warning: load-from-ftp() function called without DOWNLOAD_DST parameter ($2)"
         return 2;
     fi
-
     DOWNLOAD_DST="$2"
 
     FTP_USER="sdl_user"
     FTP_PASS="sdl_user"
-    wget ${DOWNLOAD_LINK}  -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c
+    wget ${DOWNLOAD_LINK} -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c
 }
 
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
+cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
+	sed -i "\$i$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list
 	UPDATE_SOURCES=true
 fi
 
 if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer sources to /etc/apt/sources.list"
-	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
+	sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
 	UPDATE_SOURCES=true
 fi
 #hide outpute
 
 echo "Register gstreamer repository PUBLIC KEY in system"
-#sudo apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
-sudo apt-key add ./gstreamer.key.pub
+#apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
+apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
 	echo "Updating repository..."
-	sudo apt-get update
+	apt-get update
 	echo "Upgrade repository..."
-	sudo apt-get upgrade --yes --force-yes
+	apt-get upgrade --yes --force-yes
 	echo $OK
 fi
 
@@ -198,7 +203,7 @@ if dpkg -s cmake | grep installed > /dev/null; then
 	case ${CMAKE_COMPARE_RESULT} in
 	"equal"|"1 > 2");;
 	"2 > 1") echo "Removing CMake build system"
-	    sudo apt-get remove -y cmake cmake-data
+	    apt-get remove -y cmake cmake-data
 	    INSTALL_CMAKE_2_8_9=true
 	    ;;
 	esac
@@ -229,8 +234,8 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	echo $OK
 
 	echo "Installing CMake build system"
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
-	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
+	gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
+	gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
 
 echo "Installing Subversion"
@@ -288,13 +293,13 @@ echo $OK
 echo "Setting up USB permissions..."
 if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
 	echo "Create permission file"
-	sudo touch /etc/udev/rules.d/90-usbpermission.rules
-	sudo echo -e "\n" | sudo tee /etc/udev/rules.d/90-usbpermission.rules
+	touch /etc/udev/rules.d/90-usbpermission.rules
+	echo -e "\n" | tee /etc/udev/rules.d/90-usbpermission.rules
 fi
 
 if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; then
 	echo "Adding permissions..."
-	sudo sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
+	sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
 
 if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
@@ -324,7 +329,7 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
-        sudo ${QNXSDP_TOOL_RUNFILE_BIN} -silent
+        ${QNXSDP_TOOL_RUNFILE_BIN} -silent
     	#Update system varible QNX_TARGET
         source /etc/profile
 
@@ -381,8 +386,8 @@ if $QT5_HMI; then
 
 		echo "Installing Qt5 libraries"
 		chmod +x ${QT5_RUNFILE_BIN}
-		sudo ${QT5_RUNFILE_BIN}
-		sudo updatedb
+		${QT5_RUNFILE_BIN}
+		updatedb
 		echo $OK
 	fi
 
@@ -411,7 +416,7 @@ if $QT4_HMI; then
 	cd ${EXPAT_VERSION}
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
 	make -j${BUILD_THREADS_COUNT}
-	sudo make installlib
+	make installlib
 	#save all output in log file
 	} > "${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
 
@@ -427,7 +432,7 @@ if $QT4_HMI; then
 	cd ${DBUS_VERSION}
 	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
 	make -j${BUILD_THREADS_COUNT}
-	sudo make install
+	make install
 	#save all output in log file
 	} > "${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
 
@@ -441,10 +446,8 @@ if $QT4_HMI; then
     tar -xf ${QT4_ARCHIVE}
     cd ${QT4_VERSION}
     ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
-    #Echo info and sudo timestamp_timeout reset
-    sudo echo "Qt4 configured"
 	make -j${BUILD_THREADS_COUNT}
-    sudo make install
+    make install
 	#save all output in log file
 	} > "${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
 
