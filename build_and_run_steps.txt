@@ -15,7 +15,6 @@
  2.1. Web HMI does not display icons in case it is running on distant computer (the reason: SDL sends absolute paths on local computer).
  2.2. Bluetooth does not work under QNX (the reason: BT stack absence for QNX).
 
-
 ==========================================================================================================
 3. Preparation steps.
   Note: see '1. General' to determine which of the below steps must be used.
@@ -76,7 +75,6 @@
  3.4. To set up Android Simulator for using instead of real device:
   3.4.1. Install and configure the Android Simulator in keeping with the following instructions https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+and+setup+android+emulator+on+Ubuntu
 
-
 ==========================================================================================================
 4. Configuration steps.
   Note: see '1. General' to determine which of the below steps must be used.
@@ -94,8 +92,6 @@
 			<allow_anonymous/>).
   4.2.2. LinHost: set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.177.128,port=8087").
 
-
-
 ==========================================================================================================
 5. Build SDL from source.
  5.1. LinHost: create a build folder <Project_Root_Bin> somewhere at a disk.
@@ -107,20 +103,18 @@
     Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
  5.3. LinHost: run build process “make install”.
 
-
 ==========================================================================================================
 6. Common run on Linux host (SDL + HMI).
  6.1. Go to the binary folder "cd <Project_Root_Bin>/bin".
  6.2. Run SDL "./smartDeviceLinkCore".
     Note: HMI shall be started automatically. Type of started HMI depends on build options described in 5.2.
 
-
 ==========================================================================================================
 7. Common run on QNX host.
  7.1. QnxServ: run terminal.
  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
  7.3. QnxServ: start SDL “./smartDeviceLinkCore”.
-
+    Note: For usage USB transport start SDL undo root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.
