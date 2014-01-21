@@ -395,8 +395,11 @@ int TransportManagerImpl::AddTransportAdapter(
                             << transport_adapter << "["
                             << transport_adapter->GetDeviceType() << "]");
 
-  transport_adapter_listeners_[transport_adapter] =
-      new TransportAdapterListenerImpl(this, transport_adapter);
+  if (transport_adapter_listeners_.find(transport_adapter) ==
+          transport_adapter_listeners_.end()) {
+      transport_adapter_listeners_[transport_adapter] =
+          new TransportAdapterListenerImpl(this, transport_adapter);
+  }
   transport_adapter->AddListener(
       transport_adapter_listeners_[transport_adapter]);
 
