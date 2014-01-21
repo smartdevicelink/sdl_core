@@ -436,6 +436,7 @@ if $QT4_HMI; then
 	#save all output in log file
 	} > "${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
 
+	{
     echo "Installing Qt4"
    	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
     QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
