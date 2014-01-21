@@ -12,6 +12,7 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
@@ -220,10 +221,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startMobileNavSession(byte sessionID) {
+    public void startMobileNavSession(Session session) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(ServiceType.Mobile_Nav, sessionID);
+                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
             }
         }
     }
@@ -248,7 +249,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(ServiceType.RPC);
+                _protocol.StartProtocolSession();
             }
         }
     }

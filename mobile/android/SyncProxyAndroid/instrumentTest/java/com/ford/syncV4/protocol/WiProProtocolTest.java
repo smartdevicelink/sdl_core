@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 
 import junit.framework.Assert;
@@ -463,13 +464,17 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 assertEquals("Session ID should be same", id, header.getSessionID());
             }
         };
-        protocol.StartProtocolSession(ServiceType.Mobile_Nav, id);
+        Session session = new Session();
+        session.setSessionId(id);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
     }
 
     public void testStartSessionNavigationWith0SessionIDThrowsExp() throws Exception {
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
         try {
-            protocol.StartProtocolSession(ServiceType.Mobile_Nav);
+            Session session = new Session();
+            session.setSessionId((byte) 0);
+            protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
             assertTrue("Should not get here", false);
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);

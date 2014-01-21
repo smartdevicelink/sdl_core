@@ -133,6 +133,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
@@ -332,7 +333,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
-    private byte rpcSessionID = -1;
+    private Session rpcSession = new Session();
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -4119,7 +4120,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void startMobileNaviSession() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should start mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSessionID);
+
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSession);
         }
     }
 
@@ -4298,6 +4300,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onSesionStarted(byte sessionID, String correlationID) {
-        rpcSessionID = sessionID;
+        rpcSession.setSessionId(sessionID);
     }
 }

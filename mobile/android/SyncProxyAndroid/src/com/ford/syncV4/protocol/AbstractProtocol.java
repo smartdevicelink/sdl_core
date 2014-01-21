@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
@@ -52,9 +53,9 @@ public abstract class AbstractProtocol {
     // This method starts a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionStarted() method will be made when the protocol
     // session has been established.
-    public abstract void StartProtocolSession(ServiceType serviceType);
+    public abstract void StartProtocolSession();
 
-    public abstract void StartProtocolSession(ServiceType serviceType, byte sessionID);
+    public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
     // This method ends a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionEnded() method will be made when the protocol

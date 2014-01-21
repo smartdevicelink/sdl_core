@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
@@ -59,17 +60,17 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    public void StartProtocolSession(ServiceType serviceType) {
-        if (!serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Only PRC session may be started with this method. Use StartProtocolSession(ServiceType serviceType, byte sessionID) instead");
-        }
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, 0x00, _version);
+    public void StartProtocolSession() {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC, 0x00, _version);
         sendFrameToTransport(header);
     } // end-method
 
-    public void StartProtocolSession(ServiceType serviceType, byte sessionID) {
+    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException{
+        if ( session.getSessionId() == 0 ){
+            throw new IllegalArgumentException("session id 0 should be used to start session only");
+        }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, 0, _version);
-        header.setSessionID(sessionID);
+        header.setSessionID(session.getSessionId());
         sendFrameToTransport(header);
     } // end-method
 

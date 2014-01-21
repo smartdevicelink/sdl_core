@@ -6,6 +6,7 @@ import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
@@ -51,6 +52,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testStartMobileNavSessionShouldSendAppropriateBytes() throws Exception {
         byte sessionID = 0x0A;
+        Session session = new Session();
+        session.setSessionId(sessionID);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, 0x00, VERSION);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
@@ -67,7 +70,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.startMobileNavSession(sessionID);
+        connection.startMobileNavSession(session);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {

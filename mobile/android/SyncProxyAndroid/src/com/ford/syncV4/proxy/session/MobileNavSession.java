@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.session;
 
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 /**
  * Created by Andrew Batutin on 8/20/13.
@@ -20,7 +21,7 @@ public class MobileNavSession {
         _protocol = protocol;
     }
 
-    public void startSession(byte sessionID) {
-        _protocol.StartProtocolSession(ServiceType.Mobile_Nav, sessionID);
+    public void startSession(Session session) {
+        _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
     }
 }
