@@ -89,7 +89,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (_syncConnection != null) {
-                        _syncConnection.closeConnection(_rpcSessionID, false);
+                        _syncConnection.closeConnection(session.getSessionId(), false);
                         _syncConnection = null;
                     }
                     _syncConnection = mock(SyncConnection.class);

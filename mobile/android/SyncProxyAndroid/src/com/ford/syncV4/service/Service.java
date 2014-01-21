@@ -1,21 +1,22 @@
 package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 /**
  * Created by Andrew Batutin on 1/21/14.
  */
 public class Service {
 
-    private byte sessionID;
+    private Session session;
     private ServiceType serviceType;
 
-    public void setSessionID(byte sessionID) {
-        this.sessionID = sessionID;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
-    public byte getSessionID() {
-        return sessionID;
+    public Session getSession() {
+        return session;
     }
 
     public void setServiceType(ServiceType serviceType) {
@@ -24,5 +25,13 @@ public class Service {
 
     public ServiceType getServiceType() {
         return serviceType;
+    }
+
+    @Override
+    public String toString() {
+        return "Service{" +
+                "session=" + session +
+                ", serviceType=" + serviceType +
+                '}';
     }
 }

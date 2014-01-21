@@ -3,6 +3,7 @@ package com.ford.syncV4.service;
 import android.test.AndroidTestCase;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 /**
  * Created by Andrew Batutin on 1/21/14.
@@ -16,8 +17,9 @@ public class ServiceTest extends AndroidTestCase {
 
     public void testServiceIdIsSet() throws Exception {
         Service service = new Service();
-        service.setSessionID((byte) 1);
-        assertEquals("service id should be 1", (byte)1, service.getSessionID());
+        Session session = new Session();
+        service.setSession(session);
+        assertEquals("service id should be 1", session, service.getSession());
     }
 
     public void testServiceTypeIsSet() throws Exception {
@@ -26,7 +28,4 @@ public class ServiceTest extends AndroidTestCase {
         ServiceType serviceType = service.getServiceType();
         assertEquals("Service type should be RPC", ServiceType.RPC, serviceType);
     }
-
-
-
 }

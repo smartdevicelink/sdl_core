@@ -123,6 +123,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.trace.SyncTrace;
@@ -220,7 +221,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     SyncConnection _syncConnection;
     // RPC Session ID
-    byte _rpcSessionID = 0;
+    Session session = new Session();
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
@@ -962,7 +963,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void closeSyncConnection(boolean keepConnection) {
         if (_syncConnection != null) {
-            _syncConnection.closeConnection(_rpcSessionID, keepConnection);
+            _syncConnection.closeConnection(session.getSessionId(), keepConnection);
             if (!keepConnection) {
                 _syncConnection = null;
             }
@@ -1365,7 +1366,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setData(msgBytes);
-        pm.setSessionID(_rpcSessionID);
+        pm.setSessionID(session.getSessionId());
         pm.setMessageType(MessageType.RPC);
         pm.setSessionType(ServiceType.RPC);
         pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
@@ -2472,7 +2473,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
-        _rpcSessionID = sessionID;
+        session.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started" + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
