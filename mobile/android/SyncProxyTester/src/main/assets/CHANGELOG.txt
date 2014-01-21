@@ -3,7 +3,6 @@
 + SyncProxyTester: Different apk flavors have different app id by default.
 + Add Network Service Discovery functionality.
 
-
 [CW2]
 + SyncProxyAndroid SDK: Add EndSessionACK handling logic.
 

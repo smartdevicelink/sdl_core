@@ -46,6 +46,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             while (!Thread.interrupted()) {
                 try {
                     doDataReading();
+
                 } catch (IllegalArgumentException e) {
                     Log.e(TAG, e.toString());
                     break;
