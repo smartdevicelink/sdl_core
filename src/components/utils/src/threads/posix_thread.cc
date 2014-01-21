@@ -120,6 +120,8 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
+  pthread_setname_np(thread_handle_, name_.c_str());
+  LOG4CXX_INFO(logger_,"Created thread: " << name_);
   ThreadManager::instance().RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
