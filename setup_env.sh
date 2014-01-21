@@ -262,6 +262,10 @@ echo "Installng BlueZ Bluetooth protocol stack implementation"
 apt-install ${BLUEZ_PROTOCOL_STACK}
 echo $OK
 
+echo "Installing bluez tools"
+apt-install ${BLUEZ_TOOLS}
+echo $OK
+
 echo "Installing log4cxx library"
 apt-install ${LOG4CXX_LIBRARY}
 echo $OK
@@ -284,10 +288,6 @@ echo $OK
 
 echo "Installing Libudev-dev library"
 apt-install ${LIB_UDEV}
-echo $OK
-
-echo "Installing bluez tools"
-apt-install ${BLUEZ_TOOLS}
 echo $OK
 
 echo "Setting up USB permissions..."
@@ -400,13 +400,12 @@ if $QT4_HMI; then
 	NEED_QT4_INSTALL=false
     qmlscene_binary=`./FindQt.sh -v 4.8.5 -b qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
-	  echo "Found Qt4 in "`dirname $qmlscene_binary`
+		echo "Found Qt4 in "`dirname $qmlscene_binary`
 	else
-	  NEED_QT4_INSTALL=true
+		NEED_QT4_INSTALL=true
 	fi
 
 	if $NEED_QT5_INSTALL; then
-
 	    #Save current directory
 	    pushd .
 
@@ -422,8 +421,8 @@ if $QT4_HMI; then
 		EXPAT_DOWNLOAD_DST="${TEMP_FOLDER}/expat"
 		load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
 		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_FOLDER}_build.log"
-	    echo "Installing expat, please be patient."
-        echo "All aditinal buil information will be saved to ${EXPAT_BUILD_LOG}."
+	    echo "Installing EXPAT, please be patient."
+        echo "Additional configure and build information will be saved to ${EXPAT_BUILD_LOG}."
 		{
 		cd ${EXPAT_DOWNLOAD_DST}
 		tar -xf ${EXPAT_ARCHIVE}
@@ -441,7 +440,7 @@ if $QT4_HMI; then
 		load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
 		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_FOLDER}_build.log"
 	    echo "Installing DBUS, please be patient."
-        echo "All aditinal buil information will be saved to ${DBUS_BUILD_LOG}."
+        echo "Additional configure and build information will be saved to ${DBUS_BUILD_LOG}."
 		{
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xf ${DBUS_ARCHIVE}
@@ -459,7 +458,7 @@ if $QT4_HMI; then
 		load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
 		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_FOLDER}_build.log"
         echo "Installing Qt4, please be patient."
-        echo "All aditinal buil information will be saved to ${QT4_BUILD_LOG}."
+        echo "Additional configure and build information will be saved to ${QT4_BUILD_LOG}."
 		{
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xf ${QT4_ARCHIVE}
@@ -489,7 +488,7 @@ if $INSTALL_ALL; then
 	apt-install ${DOXYGEN}
 	echo $OK
 
-	echo "Installing Graphviz for doxygen"
+	echo "Installing Graphviz for Doxygen"
 	apt-install ${GRAPHVIZ}
 	echo $OK
 
