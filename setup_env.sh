@@ -55,7 +55,7 @@ APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
 CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
-TEMP_FOLDER="/tmp"
+TEMP_FOLDER="/tmp/APPLINK"
 INSTALL_ALL=false
 INSTALL_QT_HMI=false
 INSTALL_QNX_TOOLS=false
@@ -365,20 +365,19 @@ if $QT5_HMI; then
 	fi
 	echo "Checking whether Qt5 with QML support is installed"
 
+	NEED_QT5_INSTALL=false
     qmlscene_binary=`./FindQt.sh -v 5.1.0 -b qmlscene || true`
 	if [ -n "$qmlscene_binary" ]; then
-	  echo "Found Qt5 in "`dirname $qmlscene_binary`
-	  NEED_QT5_INSTALL=false
+  		echo "Found Qt5 in "`dirname $qmlscene_binary`
 	else
-	  echo "Qt5 installation not found, you can specify it by setting environment variable CUSTOM_QT5_DIR"
-	  NEED_QT5_INSTALL=true
+		NEED_QT5_INSTALL=true
 	fi
 	echo $OK
 
-	QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
-	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
-
 	if $NEED_QT5_INSTALL; then
+
+		QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
+		QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
 		echo "Download Qt5 installation runfile, please be patient"
 		load-from-ftp ${QT5_RUNFILE_SRC}/${QT5_RUNFILE}  ${QT5_RUNFILE_DST}
@@ -397,63 +396,84 @@ if $QT5_HMI; then
 fi
 
 if $QT4_HMI; then
-	BUILD_THREADS_COUNT=$(($(nproc)+1))
 
-    #Save current directory
-    pushd .
+	NEED_QT4_INSTALL=false
+    qmlscene_binary=`./FindQt.sh -v 4.8.5 -b qmlscene || true`
+	if [ -n "$qmlscene_binary" ]; then
+	  echo "Found Qt4 in "`dirname $qmlscene_binary`
+	else
+	  NEED_QT4_INSTALL=true
+	fi
 
-    THIRDPARTYLIBS_DOWNLOAD_LINK=${APPLINK_FTP_SERVER}"/Distrs/thirdPartyLibs"
+	if $NEED_QT5_INSTALL; then
 
-	{
-    echo "Installing expat"
-    EXPAT_VERSION="expat-2.1.0"
-    EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
-	EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
-	EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
-	load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
-	cd ${EXPAT_DOWNLOAD_DST}
-	tar -xf ${EXPAT_ARCHIVE}
-	cd ${EXPAT_VERSION}
-	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
-	make -j${BUILD_THREADS_COUNT}
-	make installlib
-	#save all output in log file
-	} > "${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
+	    #Save current directory
+	    pushd .
 
-	{
-    echo "Installing DBUS"
-   	DBUS_VERSION="dbus-1.7.8"
-    DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
-	DBUS_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${DBUS_ARCHIVE}
-	DBUS_DOWNLOAD_DST=${TEMP_FOLDER}"/dbus"
-	load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
-	cd ${DBUS_DOWNLOAD_DST}
-    tar -xf ${DBUS_ARCHIVE}
-	cd ${DBUS_VERSION}
-	./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
-	make -j${BUILD_THREADS_COUNT}
-	make install
-	#save all output in log file
-	} > "${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
+	    THIRDPARTYLIBS_DOWNLOAD_LINK=${APPLINK_FTP_SERVER}"/Distrs/thirdPartyLibs"
+		BUILD_THREADS_COUNT=$(($(nproc)+1))
 
-	{
-    echo "Installing Qt4"
-   	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
-    QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
-	QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
-	QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
-	load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
-	cd ${QT4_DOWNLOAD_DST}
-    tar -xf ${QT4_ARCHIVE}
-    cd ${QT4_VERSION}
-    ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
-	make -j${BUILD_THREADS_COUNT}
-    make install
-	#save all output in log file
-	} > "${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
+	    EXPAT_VERSION="expat-2.1.0"
+	    EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
+		EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
+		EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
+		load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
+		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_VERSION}_build.log"
+		{
+	    echo "Installing expat..."
+        echo "All aditinal buil information will be saved to ${EXPAT_BUILD_LOG}."
+		cd ${EXPAT_DOWNLOAD_DST}
+		tar -xf ${EXPAT_ARCHIVE}
+		cd ${EXPAT_VERSION}
+		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
+		make -j${BUILD_THREADS_COUNT}
+		make installlib
+		#save configure and make output in log file
+		} &> ${EXPAT_BUILD_LOG}
 
-    #Load correct current directory
-    popd
+	   	DBUS_VERSION="dbus-1.7.8"
+	    DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
+		DBUS_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${DBUS_ARCHIVE}
+		DBUS_DOWNLOAD_DST=${TEMP_FOLDER}"/dbus"
+		load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
+		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_VERSION}_build.log"
+		{
+	    echo "Installing DBUS..."
+        echo "All aditinal buil information will be saved to ${DBUS_BUILD_LOG}."
+		cd ${DBUS_DOWNLOAD_DST}
+	    tar -xf ${DBUS_ARCHIVE}
+		cd ${DBUS_VERSION}
+		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
+		make -j${BUILD_THREADS_COUNT}
+		make install
+		#save configure and make output in log file
+		} &> ${DBUS_BUILD_LOG}
+
+	   	QT4_VERSION="qt-everywhere-opensource-src-4.8.5"
+	    QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
+		QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
+		QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
+		load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
+		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_VERSION}_build.log"
+		{
+        echo "Installing Qt4..."
+        echo "All aditinal buil information will be saved to ${QT4_BUILD_LOG}."
+		cd ${QT4_DOWNLOAD_DST}
+	    tar -xf ${QT4_ARCHIVE}
+	    cd ${QT4_VERSION}
+	    ./configure -prefix /usr/local -xplatform qws/qnx-i386-g++ -embedded x86 -release -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
+		make -j${BUILD_THREADS_COUNT}
+	    make install
+	    cd tools/qml
+		../../bin/qmake
+		make -j${BUILD_THREADS_COUNT}
+	    make install
+		#save configure and make output in log file
+		} &> ${QT4_BUILD_LOG}
+
+	    #Load correct current directory
+	    popd
+	fi
 	echo $OK
 fi
 
