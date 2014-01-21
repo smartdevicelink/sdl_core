@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 
@@ -52,8 +53,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolSessionStarted(ServiceType serviceType,
-                                                     byte sessionID,
+                public void onProtocolSessionStarted(Session session,
                                                      byte version,
                                                      String correlationID) {
                 }
@@ -400,8 +400,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(ServiceType sessionType,
-                                                 byte sessionID, byte version,
+            public void onProtocolSessionStarted(Session session,
+                                                 byte version,
                                                  String correlationID) {
             }
 
@@ -479,5 +479,56 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);
         }
+    }
+
+    public void testHandleProtocolSessionStartedYieldsService() throws Exception {
+        final boolean[] passed = {false};
+        WiProProtocol protocol = new WiProProtocol(new IProtocolListener() {
+            @Override
+            public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset, int length) {
+
+            }
+
+            @Override
+            public void onProtocolMessageReceived(ProtocolMessage msg) {
+
+            }
+
+            @Override
+            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
+                assertEquals("session id should be SESSION_ID", SESSION_ID, session.getSessionId());
+                Service service = session.getServiceList().get(0);
+                assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
+                assertEquals("service should belong to the session", session, service.getSession());
+                passed[0] = true;
+            }
+
+            @Override
+            public void onProtocolSessionEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+
+            }
+
+            @Override
+            public void onProtocolHeartbeatACK() {
+
+            }
+
+            @Override
+            public void onProtocolError(String info, Exception e) {
+
+            }
+
+            @Override
+            public void onMobileNavAckReceived(int frameReceivedNumber) {
+
+            }
+
+            @Override
+            public void onProtocolAppUnregistered() {
+
+            }
+        });
+        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
+        assertTrue("test should pass", passed[0]);
     }
 }

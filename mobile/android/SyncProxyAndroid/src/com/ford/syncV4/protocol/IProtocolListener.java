@@ -1,6 +1,7 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.protocol.enums.*;
+import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 public interface IProtocolListener {
 	// Called to indicate that these bytes are to be sent as part of a message.
@@ -12,7 +13,7 @@ public interface IProtocolListener {
 	void onProtocolMessageReceived(ProtocolMessage msg);
 
 	// Called to indicate that a protocol session has been started (from either side)
-	void onProtocolSessionStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
+	void onProtocolSessionStarted(Session session, byte version, String correlationID);
 
 	// Called to indicate that a protocol session has ended (from either side)
 	void onProtocolSessionEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);

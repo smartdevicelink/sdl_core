@@ -50,7 +50,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertNotNull("should not be null", connection);
     }
 
-    public void testStartMobileNavSessionShouldSendAppropriateBytes() throws Exception {
+    public void testStartMobileNavServiceShouldSendAppropriateBytes() throws Exception {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
@@ -70,7 +70,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.startMobileNavSession(session);
+        connection.startMobileNavService(session);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
@@ -78,11 +78,11 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
-            public void onProtocolSessionStarted(ServiceType sessionType, byte sessionID, byte version, String correlationID) {
-                super.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
+                super.onProtocolSessionStarted(session, version, correlationID);
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
-                assertEquals("ServiceType should be equal.", header.getServiceType(), sessionType);
-                assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
+                assertEquals("ServiceType should be equal.", header.getServiceType(), session.getServiceList().get(0).getServiceType());
+                assertEquals("Frame headers should be equal.", header.getSessionID(), session.getSessionId());
                 assertEquals("Version should be equal.", header.getVersion(), version);
             }
         };

@@ -221,7 +221,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startMobileNavSession(Session session) {
+    public void startMobileNavService(Session session) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
@@ -328,9 +328,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(ServiceType serviceType,
-                                         byte sessionID, byte version, String correlationID) {
-        _connectionListener.onProtocolSessionStarted(serviceType, sessionID, version, correlationID);
+    public void onProtocolSessionStarted(Session session,
+                                         byte version, String correlationID) {
+
+        _connectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
     @Override

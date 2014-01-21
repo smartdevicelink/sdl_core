@@ -123,6 +123,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
@@ -2472,7 +2473,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
+    private void startRPCProtocolService(final byte sessionID, final String correlationID) {
         session.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started" + correlationID);
         if (_callbackToUIThread) {
@@ -2548,7 +2549,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startMobileNavSession(byte sessionID, String correlationID) {
+    protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
         servicePool.add(sessionID);
         _mobileNavSessionID = sessionID;
@@ -3487,19 +3488,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolSessionStarted(ServiceType serviceType,
-                                             byte sessionID, byte version, String correlationID) {
+        public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
             if (_wiproVersion == 1) {
                 if (version == 2) setWiProVersion(version);
             }
-            if (serviceType.eq(ServiceType.RPC)) {
-                startRPCProtocolSession(sessionID, correlationID);
+            Service service = session.getServiceList().get(0);
+            if (service.getServiceType().eq(ServiceType.RPC)) {
+                startRPCProtocolService(session.getSessionId(), correlationID);
             } else if (_wiproVersion == 2) {
-                if (serviceType.equals(ServiceType.Mobile_Nav)) {
-                    startMobileNavSession(sessionID, correlationID);
+                if (service.getServiceType().equals(ServiceType.Mobile_Nav)) {
+                    startMobileNaviService(session.getSessionId(), correlationID);
                 } else {
                     //If version 2 then don't need to specify a Session Type
-                    startRPCProtocolSession(sessionID, correlationID);
+                    startRPCProtocolService(session.getSessionId(), correlationID);
                 }
             }
         }

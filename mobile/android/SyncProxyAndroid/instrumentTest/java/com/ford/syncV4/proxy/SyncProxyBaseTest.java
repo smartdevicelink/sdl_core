@@ -8,6 +8,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     private static byte sessionID = (byte) 1;
+    public static final byte VERSION = (byte) 2;
 
     public void testSyncProxyBaseHasServicePoolField() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
@@ -28,20 +30,20 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testMobileNavSessionAddedToServicePoolOnStart() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.Mobile_Nav, sessionID),VERSION ,"");
         assertTrue("service pool should have mobile nav service", proxyALM.getServicePool().contains(new Byte(sessionID)));
     }
 
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.Mobile_Nav, sessionID),VERSION ,"");
         proxyALM.stopMobileNaviSession();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
     public void testMobileNavSessionEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.Mobile_Nav, sessionID),VERSION ,"");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }

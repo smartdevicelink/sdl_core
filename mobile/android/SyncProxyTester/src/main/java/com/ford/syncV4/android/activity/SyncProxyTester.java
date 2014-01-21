@@ -4117,11 +4117,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviSession() {
+    public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should start mobile nav session", true);
-
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSession);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavService(rpcSession);
         }
     }
 

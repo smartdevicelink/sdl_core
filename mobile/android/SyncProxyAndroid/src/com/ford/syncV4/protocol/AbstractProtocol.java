@@ -156,8 +156,11 @@ public abstract class AbstractProtocol {
     // to the protocol listener.
     protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
-        _protocolListener.onProtocolSessionStarted(serviceType, sessionID, version, correlationID);
+        Session session = Session.createSession(serviceType, sessionID);
+        _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
+
+
 
     // This method handles protocol errors. A callback is sent to the protocol
     // listener.

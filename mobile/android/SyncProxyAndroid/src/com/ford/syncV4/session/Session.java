@@ -1,5 +1,6 @@
 package com.ford.syncV4.session;
 
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.service.Service;
 
 import java.util.ArrayList;
@@ -9,6 +10,19 @@ import java.util.List;
  * Created by Andrew Batutin on 1/21/14.
  */
 public class Session {
+
+    public static Session createSession(ServiceType serviceType,
+                                         byte sessionID) {
+        Session session = new Session();
+        session.setSessionId(sessionID);
+        Service service = new Service();
+        service.setSession(session);
+        service.setServiceType(serviceType);
+        session.addService(service);
+        return session;
+    }
+
+
     private byte sessionId;
     private List<Service> serviceList = new ArrayList<Service>();
 
