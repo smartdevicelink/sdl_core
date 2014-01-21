@@ -34,6 +34,7 @@ set -e
 
 CMAKE_BUILD_SYSTEM="cmake"
 SUBVERSION="subversion"
+GIT="git"
 GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
@@ -126,6 +127,32 @@ function apt-install() {
     set +x
 }
 
+echo "Installing wget"
+apt-install wget
+echo $OK
+
+#Load from FTP
+function load-from-ftp() {
+    if [ -z "$1" ];
+    then
+        echo "warning: load-from-ftp() function called without DOWNLOAD_LINK parameters"
+        return 1;
+    fi
+    DOWNLOAD_LINK="$1"
+
+    if [ -z "$2" ];
+    then
+        echo "warning: load-from-ftp() function called without DOWNLOAD_DST parameters"
+        return 2;
+    fi
+
+    DOWNLOAD_DST="$2"
+
+    FTP_USER="sdl_user"
+    FTP_PASS="sdl_user"
+    wget ${DOWNLOAD_LINK}  -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c
+}
+
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
@@ -139,6 +166,7 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	sudo sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
 	UPDATE_SOURCES=true
 fi
+#hide outpute
 
 echo "Register gstreamer repository PUBLIC KEY in system"
 #sudo apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
@@ -146,8 +174,11 @@ sudo apt-key add ./gstreamer.key.pub
 
 if $UPDATE_SOURCES; then
 	echo "Updating repository..."
+	{
 	sudo apt-get update
 	sudo apt-get upgrade --yes --force-yes
+	#hide outpute of update/upgrade
+	} > /dev/null;
 fi
 
 #Check Ubuntu version
@@ -189,10 +220,10 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	elif [ ${ARCH} == "x64" ]; then
 	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
 	fi
-	
+
 	echo "Checking out CMake packages, please be patient"
-    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC}/${CMAKE_DATA_DEB} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
-    wget -P ${CMAKE_DEB_DST} ${CMAKE_DEB_SRC}/${CMAKE_DEB} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	load-from-ftp ${CMAKE_DEB_SRC}/${CMAKE_DATA_DEB} ${CMAKE_DEB_DST}
+	load-from-ftp ${CMAKE_DEB_SRC}/${CMAKE_DEB} 	 ${CMAKE_DEB_DST}
 	echo $OK
 
 	echo "Installing gdebi"
@@ -203,6 +234,14 @@ if ${INSTALL_CMAKE_2_8_9}; then
 	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
 	sudo gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
+
+echo "Installing Subversion"
+apt-install ${SUBVERSION}
+echo $OK
+
+echo "Installing Git"
+apt-install ${GIT}
+echo $OK
 
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
@@ -277,16 +316,13 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
             apt-install ${QNXSDP_TOOL_REQS}
         fi
 
-        echo "Installing wget"
-        apt-install wget
-
 		QNXSDP_TOOL_BIN="qnxsdp-6.5.0-201007091524-linux.bin"
 		QNXSDP_TOOL_REPO_LINK="${APPLINK_FTP_SERVER}/Distrs/QNX/${QNXSDP_TOOL_BIN}"
 		QNXSDP_TOOL_RUNFILE_DST="${TEMP_FOLDER}/QNX"
         QNXSDP_TOOL_RUNFILE_BIN="${QNXSDP_TOOL_RUNFILE_DST}/${QNXSDP_TOOL_BIN}"
 
 		echo "Loading QNX SDP 6.5.0 SP1 cross platform tools for Linux"
-        wget -P ${QNXSDP_TOOL_RUNFILE_DST} ${QNXSDP_TOOL_REPO_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+		load-from-ftp ${QNXSDP_TOOL_REPO_LINK}  ${QNXSDP_TOOL_RUNFILE_DST}
 
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
@@ -339,12 +375,9 @@ if $QT5_HMI; then
 	QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
 	if $NEED_QT5_INSTALL; then
-		echo "Installing Subversion"
-		apt-install ${SUBVERSION}
-		echo $OK
 
-		echo "Checking out Qt5 installation runfile, please be patient"
-		svn checkout ${QT5_RUNFILE_SRC} ${QT5_RUNFILE_DST}
+		echo "Download Qt5 installation runfile, please be patient"
+		load-from-ftp ${QT5_RUNFILE_SRC}/${QT5_RUNFILE}  ${QT5_RUNFILE_DST}
 		echo $OK
 
 		echo "Installing Qt5 libraries"
@@ -362,9 +395,6 @@ fi
 if $QT4_HMI; then
 	BUILD_THREADS_COUNT=$(($(nproc)+1))
 
-    echo "Installing wget"
-    apt-install wget
-
     #Save current directory
     pushd .
 
@@ -375,7 +405,7 @@ if $QT4_HMI; then
     EXPAT_ARCHIVE=${EXPAT_VERSION}".tar.gz"
 	EXPAT_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${EXPAT_ARCHIVE}
 	EXPAT_DOWNLOAD_DST=${TEMP_FOLDER}"/expat"
-    wget -P ${EXPAT_DOWNLOAD_DST} ${EXPAT_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	load-from-ftp ${EXPAT_DOWNLOAD_LINK}  ${EXPAT_DOWNLOAD_DST}
 	cd ${EXPAT_DOWNLOAD_DST}
 	tar -xf ${EXPAT_ARCHIVE}
 	cd ${EXPAT_VERSION}
@@ -388,7 +418,7 @@ if $QT4_HMI; then
     DBUS_ARCHIVE=${DBUS_VERSION}".tar.gz"
 	DBUS_DOWNLOAD_LINK=${THIRDPARTYLIBS_DOWNLOAD_LINK}"/"${DBUS_ARCHIVE}
 	DBUS_DOWNLOAD_DST=${TEMP_FOLDER}"/dbus"
-    wget -P ${DBUS_DOWNLOAD_DST} ${DBUS_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
 	cd ${DBUS_DOWNLOAD_DST}
     tar -xf ${DBUS_ARCHIVE}
 	cd ${DBUS_VERSION}
@@ -401,7 +431,7 @@ if $QT4_HMI; then
     QT4_ARCHIVE=${QT4_VERSION}".tar.gz"
 	QT4_DOWNLOAD_LINK=$APPLINK_FTP_SERVER"/Distrs/Qt4.8.5/"${QT4_ARCHIVE}
 	QT4_DOWNLOAD_DST=${TEMP_FOLDER}"/qt4"
-    wget -P ${QT4_DOWNLOAD_DST} ${QT4_DOWNLOAD_LINK} -c --ftp-user='sdl_user' --ftp-password='sdl_user' --no-proxy
+	load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
 	cd ${QT4_DOWNLOAD_DST}
     tar -xf ${QT4_ARCHIVE}
     cd ${QT4_VERSION}
