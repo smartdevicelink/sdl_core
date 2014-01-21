@@ -330,13 +330,13 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
 		echo "Installing QNX SDP 6.5.0 SP1 cross platform tools for Linux"
 		chmod +x ${QNXSDP_TOOL_RUNFILE_BIN}
         ${QNXSDP_TOOL_RUNFILE_BIN} -silent
-    	#Update system varible QNX_TARGET
-        source /etc/profile
 
 		echo "Installing SSH server"
 		SSH_SERVER="openssh-server ssh"
 		apt-install ${SSH_SERVER}
 	fi
+	#Update system varible QNX_TARGET
+	source /etc/profile
 	echo $OK
 fi
 
@@ -409,6 +409,9 @@ if $QT4_HMI; then
 
 	    #Save current directory
 	    pushd .
+
+		#Load system varible QNX_TARGET to root for correct cross-build
+		source /etc/profile
 
 	    THIRDPARTYLIBS_DOWNLOAD_LINK="${APPLINK_FTP_SERVER}/Distrs/thirdPartyLibs"
 		BUILD_THREADS_COUNT=$(($(nproc)+1))
