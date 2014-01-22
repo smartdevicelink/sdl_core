@@ -15,6 +15,12 @@ public class PutFile extends RPCRequest {
     public PutFile(Hashtable hash) {
         super(hash);
     }
+
+    public PutFile(PutFile that) {
+        // FIXME test this!
+        super(that);
+    }
+
     public void setSyncFileName(String syncFileName) {
         if (syncFileName != null) {
             parameters.put(Names.syncFileName, syncFileName);
