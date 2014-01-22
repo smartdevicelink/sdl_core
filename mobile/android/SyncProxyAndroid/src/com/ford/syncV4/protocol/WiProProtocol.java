@@ -65,8 +65,8 @@ public class WiProProtocol extends AbstractProtocol {
         sendFrameToTransport(header);
     } // end-method
 
-    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException{
-        if ( session.getSessionId() == 0 ){
+    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
+        if (session.getSessionId() == 0) {
             throw new IllegalArgumentException("session id 0 should be used to start session only");
         }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, 0, _version);
@@ -362,9 +362,9 @@ public class WiProProtocol extends AbstractProtocol {
             if (header.getFrameData() == FrameDataControlFrameType.HeartbeatACK.getValue()) {
                 handleProtocolHeartbeatACK(header, data);
                 // TODO heartbeat messages currently are not handled
-            } else if (header.getFrameData() == FrameDataControlFrameType.StartSession.getValue()) {
+            } else if (header.getFrameData() == FrameDataControlFrameType.StartService.getValue()) {
                 sendStartProtocolSessionACK(header.getServiceType(), header.getSessionID());
-            } else if (header.getFrameData() == FrameDataControlFrameType.StartSessionACK.getValue()) {
+            } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceACK.getValue()) {
                 // Use this sessionID to create a message lock
                 Object messageLock = _messageLocks.get(header.getSessionID());
                 if (messageLock == null) {
@@ -375,18 +375,27 @@ public class WiProProtocol extends AbstractProtocol {
                 if (_version == 2) {
                     hashID = header.getMessageID();
                 }
-                handleProtocolSessionStarted(header.getServiceType(),
-                        header.getSessionID(), _version, "");
-            } else if (header.getFrameData() == FrameDataControlFrameType.StartSessionNACK.getValue()) {
-                handleProtocolError("Got StartSessionNACK for protocol sessionID=" + header.getSessionID(), null);
-            } else if (header.getFrameData() == FrameDataControlFrameType.EndSession.getValue()) {
+                inspectStartServiceACKHeader(header);
+            } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceNACK.getValue()) {
+                handleProtocolError("Got StartServiceNACK for protocol sessionID=" + header.getSessionID(), null);
+            } else if (header.getFrameData() == FrameDataControlFrameType.EndService.getValue()) {
                 handleEndSessionFrame(header);
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(header);
-            } else if (header.getFrameData() == FrameDataControlFrameType.EndSessionACK.getValue()) {
+            } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceACK.getValue()) {
                 handleEndSessionFrame(header);
             }
         } // end-method
+
+        private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
+            if (header.getSessionID() == 0 && header.getServiceType().equals(ServiceType.RPC)){
+                handleProtocolSessionStarted(header.getServiceType(),
+                        header.getSessionID(), _version, "");
+            }else{
+                handleProtocolServiceStarted(header.getServiceType(),
+                        header.getSessionID(), _version, "");
+            }
+        }
 
         private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
             _protocolListener.onMobileNavAckReceived(header.getMessageID());
@@ -434,6 +443,7 @@ public class WiProProtocol extends AbstractProtocol {
                     (message.getFunctionID() == FunctionID
                             .getFunctionID(Names.UnregisterAppInterface));
         }
+
     } // end-class
 
     private void handleEndSessionFrame(ProtocolFrameHeader header) {

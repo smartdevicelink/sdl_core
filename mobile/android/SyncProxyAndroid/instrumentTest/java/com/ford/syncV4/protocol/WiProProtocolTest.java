@@ -81,6 +81,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 public void onProtocolAppUnregistered() {
 
                 }
+
+                @Override
+                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
+                }
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
@@ -428,6 +433,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onProtocolAppUnregistered() {
 
             }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
+            }
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -438,7 +448,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testEndSessionACKFrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
-        frameHeader.setFrameData(FrameDataControlFrameType.EndSessionACK.getValue());
+        frameHeader.setFrameData(FrameDataControlFrameType.EndServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
         frameHeader.setServiceType(ServiceType.RPC);
@@ -527,8 +537,96 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onProtocolAppUnregistered() {
 
             }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
+            }
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
         assertTrue("test should pass", passed[0]);
+    }
+
+
+    public void testStartServiceACK_RPC_FrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID((byte) 0);
+        frameHeader.setServiceType(ServiceType.RPC);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol(mock).new MessageFrameAssembler();
+        ArgumentCaptor<Session> sessionTypeCaptor = ArgumentCaptor.forClass(Session.class);
+        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+        Mockito.verify(mock).onProtocolSessionStarted(sessionTypeCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        assertEquals(0, sessionTypeCaptor.getValue().getSessionId());
+        assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue().getServiceList().get(0).getServiceType());
+    }
+
+    public void testStartServiceACK_Mobile_Nav_FrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(mock);
+        protocol.setVersion((byte) 2);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
+        assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
+        assertEquals(2, versionCaptor.getValue().byteValue());
+        assertEquals("", correlationIdCaptor.getValue());
+    }
+
+    public void testStartServiceACK_RPC_SessionIDNot0_thorwExp() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.RPC);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(mock);
+        protocol.setVersion((byte) 2);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        try {
+            messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+            assertTrue(" should not get here",false);
+        }catch (IllegalArgumentException exp){
+            assertNotNull(exp);
+        }
+    }
+
+    public void testStartServiceACK_Navi_SessionID0_thorwExp() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID((byte) 0);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(mock);
+        protocol.setVersion((byte) 2);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        try {
+            messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+            assertTrue(" should not get here",false);
+        }catch (IllegalArgumentException exp){
+            assertNotNull(exp);
+        }
     }
 }

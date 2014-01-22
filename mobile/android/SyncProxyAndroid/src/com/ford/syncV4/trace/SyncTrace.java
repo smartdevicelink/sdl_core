@@ -299,14 +299,14 @@ public class SyncTrace {
 		int frameData = hdr.getFrameData();
 		if (hdr.getFrameType() == FrameType.Control) {
 			sb.append("<ca>");
-			if (frameData == FrameDataControlFrameType.StartSession.getValue()) 
-				sb.append("StartSession");
-			else if (frameData == FrameDataControlFrameType.StartSessionACK.getValue())
-				sb.append("StartSessionACK");
-			else if (frameData == FrameDataControlFrameType.StartSessionNACK.getValue())
-				sb.append("StartSessionNACK");
-			else if (frameData == FrameDataControlFrameType.EndSession.getValue())
-				sb.append("EndSession");
+			if (frameData == FrameDataControlFrameType.StartService.getValue())
+				sb.append("StartService");
+			else if (frameData == FrameDataControlFrameType.StartServiceACK.getValue())
+				sb.append("StartServiceACK");
+			else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue())
+				sb.append("StartServiceNACK");
+			else if (frameData == FrameDataControlFrameType.EndService.getValue())
+				sb.append("EndService");
 			sb.append("</ca>");
 		} else if (hdr.getFrameType() == FrameType.Consecutive ) {
 			sb.append("<fsn>");

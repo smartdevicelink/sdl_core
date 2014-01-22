@@ -14,23 +14,23 @@ public class FrameDataControlFrameType extends ByteEnumer {
 
 	protected FrameDataControlFrameType(byte value, String name) {super(value, name);}
 	public final static FrameDataControlFrameType Heartbeat = new FrameDataControlFrameType((byte)0x0, "Heartbeat");
-	public final static FrameDataControlFrameType StartSession = new FrameDataControlFrameType((byte)0x01, "StartSession");
-	public final static FrameDataControlFrameType StartSessionACK = new FrameDataControlFrameType((byte)0x02, "StartSessionACK");
-	public final static FrameDataControlFrameType StartSessionNACK = new FrameDataControlFrameType((byte)0x03, "StartSessionNACK");
-	public final static FrameDataControlFrameType EndSession = new FrameDataControlFrameType((byte)0x04, "EndSession");
-    public final static FrameDataControlFrameType EndSessionACK = new FrameDataControlFrameType((byte)0x05, "EndSessionACK");
-    public final static FrameDataControlFrameType EndSessionNACK = new FrameDataControlFrameType((byte)0x06, "EndSessionNACK");
+	public final static FrameDataControlFrameType StartService = new FrameDataControlFrameType((byte)0x01, "StartService");
+	public final static FrameDataControlFrameType StartServiceACK = new FrameDataControlFrameType((byte)0x02, "StartServiceACK");
+	public final static FrameDataControlFrameType StartServiceNACK = new FrameDataControlFrameType((byte)0x03, "StartServiceNACK");
+	public final static FrameDataControlFrameType EndService = new FrameDataControlFrameType((byte)0x04, "EndService");
+    public final static FrameDataControlFrameType EndServiceACK = new FrameDataControlFrameType((byte)0x05, "EndServiceACK");
+    public final static FrameDataControlFrameType EndServiceNACK = new FrameDataControlFrameType((byte)0x06, "EndServiceNACK");
     public final static FrameDataControlFrameType MobileNaviACK = new FrameDataControlFrameType((byte)0xFE, "MobileNaviACK");
     public final static FrameDataControlFrameType HeartbeatACK = new FrameDataControlFrameType((byte)0xFF, "HeartbeatACK");
 
 	static {
 		theList.addElement(Heartbeat);
-		theList.addElement(StartSession);
-		theList.addElement(StartSessionACK);
-		theList.addElement(StartSessionNACK);
-		theList.addElement(EndSession);
-        theList.addElement(EndSessionACK);
-        theList.addElement(EndSessionNACK);
+		theList.addElement(StartService);
+		theList.addElement(StartServiceACK);
+		theList.addElement(StartServiceNACK);
+		theList.addElement(EndService);
+        theList.addElement(EndServiceACK);
+        theList.addElement(EndServiceNACK);
         theList.addElement(MobileNaviACK);
         theList.addElement(HeartbeatACK);
     }

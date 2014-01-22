@@ -160,6 +160,17 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
+    protected void handleProtocolServiceStarted(ServiceType serviceType,
+                                                byte sessionID, byte version, String correlationID) {
+        if (serviceType.equals(ServiceType.RPC)) {
+            throw new IllegalArgumentException("Can't create RPC service without creating session. serviceType" + serviceType + ";sessionID " + sessionID);
+        }
+        if (sessionID == 0) {
+            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
+        }
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID , version, correlationID);
+    }
+
     // This method handles protocol errors. A callback is sent to the protocol
     // listener.
     protected void handleProtocolError(String string, Exception ex) {

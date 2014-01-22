@@ -29,4 +29,6 @@ public interface IProtocolListener {
     void onMobileNavAckReceived(int frameReceivedNumber);
 
     void onProtocolAppUnregistered();
+
+    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
 } // end-interfCe

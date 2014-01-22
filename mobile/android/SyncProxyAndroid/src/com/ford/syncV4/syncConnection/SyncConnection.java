@@ -361,6 +361,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+        // TODO implement int
+    }
+
+    @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
         _connectionListener.onMobileNavAckReceived(frameReceivedNumber);
     }

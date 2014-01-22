@@ -25,7 +25,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getServiceType(), ServiceType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
         assertEquals(header.getFrameData(),
-                FrameDataControlFrameType.StartSession.getValue());
+                FrameDataControlFrameType.StartService.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);
@@ -56,7 +56,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getServiceType(), ServiceType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
         assertEquals(header.getFrameData(),
-                FrameDataControlFrameType.StartSessionACK.getValue());
+                FrameDataControlFrameType.StartServiceACK.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);
@@ -71,7 +71,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getServiceType(), ServiceType.Mobile_Nav);
         assertEquals(header.getFrameType(), FrameType.Control);
         assertEquals(header.getFrameData(),
-                FrameDataControlFrameType.EndSession.getValue());
+                FrameDataControlFrameType.EndService.getValue());
         assertEquals(header.getVersion(), (byte) 2);
         assertEquals(header.isCompressed(), false);
         assertEquals(header.getDataSize(), 0x00);

@@ -50,6 +50,11 @@ public class WiProProtocolUSBTest extends TestCase {
             public void onProtocolAppUnregistered() {
                 requiredMethodCalled = true;
             }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
+            }
         };
 
         requiredMethodCalled = false;
@@ -119,6 +124,11 @@ public class WiProProtocolUSBTest extends TestCase {
                 assertFalse(
                         "Incoming UnregisterAppInterface request shouldn't " +
                                 "trigger the method", true);
+            }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
             }
         };
 

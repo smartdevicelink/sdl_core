@@ -1631,7 +1631,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onProtocolSessionEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "EndSession Ack received; Session Type " + serviceType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
+        String response = "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
         if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
         else Log.i(TAG, "" + response);
 

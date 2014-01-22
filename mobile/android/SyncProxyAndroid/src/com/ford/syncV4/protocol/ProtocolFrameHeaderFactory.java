@@ -12,7 +12,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(ServiceType.Mobile_Nav);
-        msg.setFrameData(FrameDataControlFrameType.StartSession.value());
+        msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(messageID);
         msg.setSessionID(sessionID);
         msg.setCompressed(false);
@@ -25,7 +25,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
-        msg.setFrameData(FrameDataControlFrameType.StartSession.value());
+        msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(messageID);
 
         return msg;
@@ -37,7 +37,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
         msg.setSessionID(sessionID);
-        msg.setFrameData(FrameDataControlFrameType.StartSessionACK.value());
+        msg.setFrameData(FrameDataControlFrameType.StartServiceACK.value());
         msg.setMessageID(messageID);
 
         return msg;
@@ -49,7 +49,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
         msg.setSessionID(sessionID);
-        msg.setFrameData(FrameDataControlFrameType.StartSessionNACK.value());
+        msg.setFrameData(FrameDataControlFrameType.StartServiceNACK.value());
         msg.setMessageID(messageID);
 
         return msg;
@@ -64,7 +64,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
         msg.setSessionID(sessionID);
-        msg.setFrameData(FrameDataControlFrameType.EndSession.value());
+        msg.setFrameData(FrameDataControlFrameType.EndService.value());
         msg.setMessageID(messageID);
         msg.setDataSize(dataLength);
 
