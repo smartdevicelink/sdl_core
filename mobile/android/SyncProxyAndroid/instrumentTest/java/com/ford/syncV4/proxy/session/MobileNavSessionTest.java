@@ -40,7 +40,7 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
 
     public void testMobileNavigationSessionCreation() throws Exception {
         MobileNavSession mobileNavSessionSession = new MobileNavSession(_protocol);
-        assertNotNull("mobile Nav session should be created", mobileNavSessionSession);
+        assertNotNull("mobile Nav currentSession should be created", mobileNavSessionSession);
     }
 
     public void testMobileNavigationStartSession() throws Exception {

@@ -14,13 +14,13 @@ public class SessionTest extends AndroidTestCase{
 
     public void testSessionIsCreated() throws Exception {
         Session session = new Session();
-        assertNotNull("session object should be created",session);
+        assertNotNull("currentSession object should be created",session);
     }
 
     public void testSessionIdShouldBeSet() throws Exception {
         Session session = new Session();
         session.setSessionId((byte)1);
-        assertEquals("session id should be 1", (byte)1, session.getSessionId());
+        assertEquals("currentSession id should be 1", (byte)1, session.getSessionId());
     }
 
     public void testServiceAddedToServiceList() throws Exception {
@@ -43,8 +43,8 @@ public class SessionTest extends AndroidTestCase{
     public void testInitialSessionCreationCreatesRPCService() throws Exception {
         Session session = Session.createSession(ServiceType.RPC, (byte) 0);
         Service service = session.getServiceList().get(0);
-        assertEquals("session id should be SESSION_ID", (byte) 0, session.getSessionId());
+        assertEquals("currentSession id should be SESSION_ID", (byte) 0, session.getSessionId());
         assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-        assertEquals("service should belong to the session", session, service.getSession());
+        assertEquals("service should belong to the currentSession", session, service.getSession());
     }
 }

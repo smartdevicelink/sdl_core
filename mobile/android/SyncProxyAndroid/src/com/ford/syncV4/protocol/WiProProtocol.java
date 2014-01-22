@@ -67,7 +67,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
         if (session.getSessionId() == 0) {
-            throw new IllegalArgumentException("session id 0 should be used to start session only");
+            throw new IllegalArgumentException("currentSession id 0 should be used to start currentSession only");
         }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, 0, _version);
         header.setSessionID(session.getSessionId());
@@ -104,7 +104,7 @@ public class WiProProtocol extends AbstractProtocol {
         serviceType = protocolMessageConverter.getSessionType();
 
 
-        // Get the message lock for this protocol session
+        // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",

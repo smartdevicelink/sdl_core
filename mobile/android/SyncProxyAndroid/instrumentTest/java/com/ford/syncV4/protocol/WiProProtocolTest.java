@@ -506,10 +506,10 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                assertEquals("session id should be SESSION_ID", SESSION_ID, session.getSessionId());
+                assertEquals("currentSession id should be SESSION_ID", SESSION_ID, session.getSessionId());
                 Service service = session.getServiceList().get(0);
                 assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-                assertEquals("service should belong to the session", session, service.getSession());
+                assertEquals("service should belong to the currentSession", session, service.getSession());
                 passed[0] = true;
             }
 

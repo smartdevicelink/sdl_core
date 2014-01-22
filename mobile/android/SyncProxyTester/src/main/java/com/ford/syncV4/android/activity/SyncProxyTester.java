@@ -630,7 +630,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     try {
                         proxyInstance.openSession();
                     } catch (SyncException e) {
-                        Log.e(LOG_TAG, "Can't open session", e);
+                        Log.e(LOG_TAG, "Can't open currentSession", e);
                     }
                 }
             } else {
@@ -4119,7 +4119,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should start mobile nav session", true);
+            _msgAdapter.logMessage("Should start mobile nav currentSession", true);
             ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavService(rpcSession);
         }
     }
@@ -4163,7 +4163,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void stopMobileNavSession() {
         if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should stop mobile nav session", true);
+            _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
             closeMobileNaviOutputStream();
         }
@@ -4295,7 +4295,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     };
 
     public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID){
-        // TODO - need to handle end session logic
+        // TODO - need to handle end currentSession logic
     }
 
     public void onSesionStarted(byte sessionID, String correlationID) {

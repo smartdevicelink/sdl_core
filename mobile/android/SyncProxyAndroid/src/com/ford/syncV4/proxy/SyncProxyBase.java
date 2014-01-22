@@ -221,7 +221,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     SyncConnection _syncConnection;
     // RPC Session ID
-    protected Session session = new Session();
+    protected Session currentSession = new Session();
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
@@ -962,11 +962,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void closeSyncConnection(boolean keepConnection) {
         if (_syncConnection != null) {
-            _syncConnection.closeConnection(session.getSessionId(), keepConnection);
+            _syncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
+            stopSession();
             if (!keepConnection) {
                 _syncConnection = null;
             }
         }
+    }
+
+    private void stopSession() {
+
     }
 
     @Deprecated
@@ -1024,7 +1029,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol session, and frees any resources used by the proxy.
+     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol currentSession, and frees any resources used by the proxy.
      */
     public void dispose() throws SyncException {
         if (_proxyDisposed) {
@@ -1087,7 +1092,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Unregisters the application from SYNC, and closes the session.
+     * Unregisters the application from SYNC, and closes the currentSession.
      * Optionally, closes the transport connection.
      */
     public void closeSession(boolean keepConnection) {
@@ -1150,7 +1155,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Opens a session, and registers the application. The connection must be
+     * Opens a currentSession, and registers the application. The connection must be
      * already opened.
      *
      * @throws SyncException if a transport connection is not opened
@@ -1365,7 +1370,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setData(msgBytes);
-        pm.setSessionID(session.getSessionId());
+        pm.setSessionID(currentSession.getSessionId());
         pm.setMessageType(MessageType.RPC);
         pm.setSessionType(ServiceType.RPC);
         pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
@@ -2472,7 +2477,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void startRPCProtocolService(final byte sessionID, final String correlationID) {
-        session.setSessionId(sessionID);
+        currentSession.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started" + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2550,10 +2555,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
 
-        if (sessionID != session.getSessionId()) {
+        if (sessionID != currentSession.getSessionId()) {
             throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
         }
-        session.createService(ServiceType.Mobile_Nav);
+        currentSession.createService(ServiceType.Mobile_Nav);
 
         _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
@@ -2580,7 +2585,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
             if (service.getSession().getSessionId() == sessionID) {
-                session.removeService(service);
+                currentSession.removeService(service);
                 return true;
             }
         }
@@ -3448,7 +3453,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public List<Service> getServicePool() {
-        return session.getServiceList();
+        return currentSession.getServiceList();
     }
 
     // Private Class to Interface with SyncConnection
@@ -3504,6 +3509,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (_wiproVersion == 1) {
                 if (version == 2) setWiProVersion(version);
             }
+            currentSession = session;
             Service service = session.getServiceList().get(0);
             if (service.getServiceType().eq(ServiceType.RPC)) {
                 startRPCProtocolService(session.getSessionId(), correlationID);

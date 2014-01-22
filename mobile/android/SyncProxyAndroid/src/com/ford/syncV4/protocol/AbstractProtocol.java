@@ -46,20 +46,20 @@ public abstract class AbstractProtocol {
     // it for transmission over the transport.  The results of this processing will
     // be sent to the onProtocolMessageBytesToSend() method on protocol listener
     // interface.  Note that the ProtocolMessage itself contains information
-    // about the type of message (e.g. RPC, BULK, etc.) and the protocol session
+    // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
 
-    // This method starts a protocol session.  A corresponding call to the protocol
+    // This method starts a protocol currentSession.  A corresponding call to the protocol
     // listener onProtocolSessionStarted() method will be made when the protocol
-    // session has been established.
+    // currentSession has been established.
     public abstract void StartProtocolSession();
 
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
-    // This method ends a protocol session.  A corresponding call to the protocol
+    // This method ends a protocol currentSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
-    // session has ended.
+    // currentSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
@@ -145,14 +145,14 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolMessageReceived(message);
     }
 
-    // This method handles the end of a protocol session. A callback is
+    // This method handles the end of a protocol currentSession. A callback is
     // sent to the protocol listener.
     protected void handleProtocolServiceEnded(ServiceType serviceType,
                                               byte sessionID, String correlationID) {
         _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
     }
 
-    // This method handles the startup of a protocol session. A callback is sent
+    // This method handles the startup of a protocol currentSession. A callback is sent
     // to the protocol listener.
     protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
@@ -163,7 +163,7 @@ public abstract class AbstractProtocol {
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating session. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);

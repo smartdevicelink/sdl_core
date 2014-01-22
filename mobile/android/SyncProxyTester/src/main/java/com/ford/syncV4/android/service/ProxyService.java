@@ -1650,8 +1650,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSessionStarted(final byte sessionID, final String correlationID) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) {
-            _msgAdapter.logMessage("Session Started; session id " + sessionID, true);
-        } else Log.i(TAG, "Session Started; session id " + sessionID);
+            _msgAdapter.logMessage("Session Started; currentSession id " + sessionID, true);
+        } else Log.i(TAG, "Session Started; currentSession id " + sessionID);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
             mainActivity.runOnUiThread(new Runnable() {

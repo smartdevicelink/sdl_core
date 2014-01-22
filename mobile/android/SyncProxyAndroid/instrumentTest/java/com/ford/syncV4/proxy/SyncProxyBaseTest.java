@@ -9,6 +9,7 @@ import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
@@ -48,6 +49,21 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testMobileNavServiceEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
+        proxyALM.dispose();
+        assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
+    }
+
+    public void testRPCServiceAddedToPoolOnStart() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        assertEquals("pool should has RPC service", 1, proxyALM.getServicePool().size());
+    }
+
+    public void testRPCServiceEndedOnDispose() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
@@ -95,7 +111,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (_syncConnection != null) {
-                        _syncConnection.closeConnection(session.getSessionId(), false);
+                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
                         _syncConnection = null;
                     }
                     _syncConnection = mock(SyncConnection.class);
@@ -106,7 +122,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                         _syncConnection.startTransport();
                     }
                 }
-                session.setSessionId(sessionID);
+                currentSession.setSessionId(sessionID);
             }
         };
     }

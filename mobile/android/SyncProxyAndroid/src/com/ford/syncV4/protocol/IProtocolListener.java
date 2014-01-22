@@ -12,10 +12,10 @@ public interface IProtocolListener {
 	// received.  This call includes the message.
 	void onProtocolMessageReceived(ProtocolMessage msg);
 
-	// Called to indicate that a protocol session has been started (from either side)
+	// Called to indicate that a protocol currentSession has been started (from either side)
 	void onProtocolSessionStarted(Session session, byte version, String correlationID);
 
-	// Called to indicate that a protocol session has ended (from either side)
+	// Called to indicate that a protocol currentSession has ended (from either side)
 	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);
 
     /**

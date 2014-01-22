@@ -30,7 +30,7 @@ public class Service {
     @Override
     public String toString() {
         return "Service{" +
-                "session=" + session +
+                "currentSession=" + session +
                 ", serviceType=" + serviceType +
                 '}';
     }
