@@ -1666,6 +1666,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onAudioServiceStart() {
+        
+    }
+
+    @Override
     public void onOnTBTClientState(OnTBTClientState notification) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
