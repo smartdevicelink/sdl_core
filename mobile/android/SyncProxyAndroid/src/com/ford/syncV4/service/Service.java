@@ -35,8 +35,25 @@ public class Service {
                 '}';
     }
 
-    public static Service createService(ServiceType mobile_nav, byte sessionID) {
-        Service service = new Service();
-        return null;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Service service = (Service) o;
+
+        if (serviceType != null ? !serviceType.equals(service.serviceType) : service.serviceType != null)
+            return false;
+        if (session != null ? !session.equals(service.session) : service.session != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = session != null ? session.hashCode() : 0;
+        result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
+        return result;
     }
 }
