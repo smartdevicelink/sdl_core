@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.StringUtils;
+import com.ford.syncV4.android.utils.StringUtils;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
