@@ -53,15 +53,11 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#ifdef MEDIA_MANAGER
 #if defined(DEFAULT_MEDIA)
 #include <gst/gst.h>
 #endif
-#endif
 
-#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
-#endif
 // ----------------------------------------------------------------------------
 // Third-Party includes
 #include "networking.h"  // cpplint: Include the directory when naming .h files

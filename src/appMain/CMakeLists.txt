@@ -39,6 +39,7 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   RequestWatchdog
+  MediaManager
   policies
   apr-1
   aprutil-1
@@ -46,11 +47,6 @@ set(LIBRARIES
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
-endif()
-
-
-if (BUILD_MEDIA_MANAGER)
-	LIST(APPEND LIBRARIES MediaManager)
 endif()
 
 if (BUILD_BT_SUPPORT)
