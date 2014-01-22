@@ -1,3 +1,6 @@
+[CW4]
++ SyncProxyAndroid SDK: added getter and setter for heartbeat.
+
 [CW3]
 + SyncProxyAndroid SDK: Heartbeat is sent every 5 seconds unconditionally.
 + SyncProxyTester: Different apk flavors have different app id by default.
