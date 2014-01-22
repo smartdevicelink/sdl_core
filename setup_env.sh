@@ -425,7 +425,7 @@ if $QT4_HMI; then
         echo "Additional configure and build information will be saved to ${EXPAT_BUILD_LOG}."
 		{
 		cd ${EXPAT_DOWNLOAD_DST}
-		tar -xf ${EXPAT_ARCHIVE}
+		tar -xzf ${EXPAT_ARCHIVE}
 		cd ${EXPAT_FOLDER}
 		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc
 		make -j${BUILD_THREADS_COUNT}
@@ -443,7 +443,7 @@ if $QT4_HMI; then
         echo "Additional configure and build information will be saved to ${DBUS_BUILD_LOG}."
 		{
 		cd ${DBUS_DOWNLOAD_DST}
-	    tar -xf ${DBUS_ARCHIVE}
+	    tar -xzf ${DBUS_ARCHIVE}
 		cd ${DBUS_FOLDER}
 		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
 		make -j${BUILD_THREADS_COUNT}
@@ -461,7 +461,7 @@ if $QT4_HMI; then
         echo "Additional configure and build information will be saved to ${QT4_BUILD_LOG}."
 		{
 		cd ${QT4_DOWNLOAD_DST}
-	    tar -xf ${QT4_ARCHIVE}
+	    tar -xzf ${QT4_ARCHIVE}
 	    cd ${QT4_FOLDER}
 	    ./configure  -prefix $QNX_TARGET/usr/local/Qt-4.8.5 -xplatform qws/qnx-i386-g++ -embedded x86 -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
 		make -j${BUILD_THREADS_COUNT}
@@ -484,7 +484,7 @@ if $QT4_HMI; then
         echo "Additional configure and build information will be saved to ${LOG4CXX_BUILD_LOG}."
 		{
 		cd ${LOG4CXX_DOWNLOAD_DST}
-		tar -xf ${LOG4CXX_ARCHIVE}
+		tar -xzf ${LOG4CXX_ARCHIVE}
 		#Apply fix pathc for kernel 2.6.29.6+
 		patch -p 1 < log4cxx.patch
 		patch -p 1 < cppFolder_stringInclude.patch
