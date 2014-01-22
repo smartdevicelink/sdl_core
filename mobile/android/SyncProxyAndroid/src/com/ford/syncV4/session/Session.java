@@ -65,4 +65,9 @@ public class Session {
         serviceList.add(service);
         return service;
     }
+
+    public void stopSession() {
+        serviceList.clear();
+        sessionId = 0;
+    }
 }

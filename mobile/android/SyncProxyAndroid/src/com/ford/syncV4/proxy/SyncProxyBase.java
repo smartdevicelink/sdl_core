@@ -971,7 +971,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void stopSession() {
-
+        currentSession.stopSession();
     }
 
     @Deprecated

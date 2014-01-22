@@ -590,7 +590,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("", correlationIdCaptor.getValue());
     }
 
-    public void testStartServiceACK_RPC_SessionIDNot0_thorwExp() throws Exception {
+    public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
@@ -604,9 +604,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-            assertTrue(" should not get here",false);
         }catch (IllegalArgumentException exp){
-            assertNotNull(exp);
+            assertTrue(" should not get here",false);
         }
     }
 
