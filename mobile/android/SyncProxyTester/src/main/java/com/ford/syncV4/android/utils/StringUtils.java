@@ -1,4 +1,4 @@
-package com.ford.syncV4.android;
+package com.ford.syncV4.android.utils;
 
 import java.util.Vector;
 
