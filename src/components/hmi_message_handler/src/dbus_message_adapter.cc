@@ -32,8 +32,6 @@
 
 #include "hmi_message_handler/dbus_message_adapter.h"
 
-#include <string>
-
 #include "formatters/CSmartFactory.hpp"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -56,8 +54,8 @@ std::vector<std::string> &split(const std::string &s, char delim,
     return elems;
 }
 
-DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_message_handler)
-    : HMIMessageAdapter(hmi_message_handler),
+DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
+    : HMIMessageAdapter(hmi_msg_handler),
       DBusMessageController(SDL_SERVICE_NAME, SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME, HMI_OBJECT_PATH) {
   LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");
