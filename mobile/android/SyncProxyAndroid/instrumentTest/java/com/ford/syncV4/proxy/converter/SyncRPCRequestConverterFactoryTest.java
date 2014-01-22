@@ -2,7 +2,7 @@ package com.ford.syncV4.proxy.converter;
 
 import junit.framework.TestCase;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,8 +27,14 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
                 nullValue());
     }
 
-    public void testGetConverterShouldReturnNotNullForKnownName() {
-        assertThat(factory.getConverterForFunctionName("Show"), notNullValue());
+    public void testGetConverterShouldReturnDefaultConverterForKnownName() {
+        assertThat(factory.getConverterForFunctionName("Show"),
+                instanceOf(DefaultRPCRequestConverter.class));
+    }
+
+    public void testGetConverterShouldReturnSpecificConverterForPutFile() {
+        assertThat(factory.getConverterForFunctionName("PutFile"),
+                instanceOf(PutFileRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldCacheConverterForTheSameName() {

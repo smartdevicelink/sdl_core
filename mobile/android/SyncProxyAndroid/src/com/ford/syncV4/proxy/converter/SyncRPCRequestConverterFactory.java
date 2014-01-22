@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy.converter;
 
 import com.ford.syncV4.protocol.enums.FunctionID;
+import com.ford.syncV4.proxy.constants.Names;
 
 /**
  * The default Sync factory.
@@ -10,15 +11,26 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 public class SyncRPCRequestConverterFactory
         implements IRPCRequestConverterFactory {
     private IRPCRequestConverter defaultConverter;
+    private IRPCRequestConverter putFileConverter;
 
     @Override
     public IRPCRequestConverter getConverterForFunctionName(
             String functionName) {
+        IRPCRequestConverter converter = null;
+
         if (isFunctionNameKnown(functionName)) {
-            return getDefaultConverter();
+            if (Names.PutFile.equals(functionName)) {
+                if (putFileConverter == null) {
+                    putFileConverter = new PutFileRPCRequestConverter();
+                }
+
+                converter = putFileConverter;
+            } else {
+                converter = getDefaultConverter();
+            }
         }
 
-        return null;
+        return converter;
     }
 
     private boolean isFunctionNameKnown(String functionName) {
