@@ -463,13 +463,13 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 assertEquals("Session ID should be same", id, header.getSessionID());
             }
         };
-        protocol.StartProtocolSession(SessionType.Mobile_Nav, id);
+        protocol.startProtocolSession(SessionType.Mobile_Nav, id);
     }
 
     public void testStartSessionNavigationWith0SessionIDThrowsExp() throws Exception {
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
         try {
-            protocol.StartProtocolSession(SessionType.Mobile_Nav);
+            protocol.startProtocolSession(SessionType.Mobile_Nav);
             assertTrue("Should not get here", false);
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);

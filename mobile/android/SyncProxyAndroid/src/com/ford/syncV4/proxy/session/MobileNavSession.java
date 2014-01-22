@@ -21,6 +21,6 @@ public class MobileNavSession {
     }
 
     public void startSession(byte sessionID) {
-        _protocol.StartProtocolSession(SessionType.Mobile_Nav, sessionID);
+        _protocol.startProtocolSession(SessionType.Mobile_Nav, sessionID);
     }
 }

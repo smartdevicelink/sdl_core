@@ -223,7 +223,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void startMobileNavSession(byte sessionID) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(SessionType.Mobile_Nav, sessionID);
+                _protocol.startProtocolSession(SessionType.Mobile_Nav, sessionID);
             }
         }
     }
@@ -248,7 +248,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession(SessionType.RPC);
+                _protocol.startProtocolSession(SessionType.RPC);
             }
         }
     }

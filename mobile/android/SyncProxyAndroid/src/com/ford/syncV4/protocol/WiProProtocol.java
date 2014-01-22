@@ -59,15 +59,15 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    public void StartProtocolSession(SessionType sessionType) {
+    public void startProtocolSession(SessionType sessionType) {
         if (!sessionType.equals(SessionType.RPC)) {
-            throw new IllegalArgumentException("Only PRC session may be started with this method. Use StartProtocolSession(SessionType sessionType, byte sessionID) instead");
+            throw new IllegalArgumentException("Only PRC session may be started with this method. Use startProtocolSession(SessionType sessionType, byte sessionID) instead");
         }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0x00, _version);
         sendFrameToTransport(header);
     } // end-method
 
-    public void StartProtocolSession(SessionType sessionType, byte sessionID) {
+    public void startProtocolSession(SessionType sessionType, byte sessionID) {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0, _version);
         header.setSessionID(sessionID);
         sendFrameToTransport(header);

@@ -2422,7 +2422,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
-        if (!_appInterfaceRegisterd && request.getFunctionName() != Names.RegisterAppInterface) {
+        if (!_appInterfaceRegisterd && !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
                 SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
                 throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
@@ -2430,8 +2430,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         if (_advancedLifecycleManagementEnabled) {
-            if (request.getFunctionName() == Names.RegisterAppInterface
-                    || request.getFunctionName() == Names.UnregisterAppInterface) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface)
+                    || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
                     SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
                     throw new SyncException("The RPCRequest, " + request.getFunctionName() +

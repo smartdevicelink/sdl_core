@@ -52,9 +52,9 @@ public abstract class AbstractProtocol {
     // This method starts a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionStarted() method will be made when the protocol
     // session has been established.
-    public abstract void StartProtocolSession(SessionType sessionType);
+    public abstract void startProtocolSession(SessionType sessionType);
 
-    public abstract void StartProtocolSession(SessionType sessionType, byte sessionID);
+    public abstract void startProtocolSession(SessionType sessionType, byte sessionID);
 
     // This method ends a protocol session.  A corresponding call to the protocol
     // listener onProtocolSessionEnded() method will be made when the protocol
