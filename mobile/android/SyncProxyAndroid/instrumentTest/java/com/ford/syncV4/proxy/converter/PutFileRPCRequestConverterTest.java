@@ -19,7 +19,6 @@ import org.json.JSONObject;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -71,7 +70,7 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
             throws Exception {
         final int correlationID = 1;
         final byte sessionID = (byte) 0;
-        final byte[] data = getRandomBytes(32);
+        final byte[] data = TestCommon.getRandomBytes(32);
 
         PutFile msg = new PutFile();
         msg.setSyncFileName("file");
@@ -130,7 +129,7 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
         final int extraDataSize = 10;
         final int maxDataSize = converter.getMaxDataSize();
         final int dataSize = maxDataSize + extraDataSize;
-        final byte[] data = getRandomBytes(dataSize);
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
 
         PutFile msg = new PutFile();
         msg.setBulkData(data);
@@ -175,7 +174,7 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
         final int maxDataSize = converter.getMaxDataSize();
         final int N = 2;
         final int dataSize = maxDataSize * N;
-        final byte[] data = getRandomBytes(dataSize);
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
 
         PutFile msg = new PutFile();
         msg.setBulkData(data);
@@ -218,7 +217,7 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
         final int dataCopies = 12;
         final int extraDataSize = 20;
         final int dataSize = (maxDataSize * dataCopies) + extraDataSize;
-        final byte[] data = getRandomBytes(dataSize);
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
 
         PutFile msg = new PutFile();
         msg.setBulkData(data);
@@ -258,12 +257,5 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
         assertThat(protocolMessage.getVersion(), is(PROTOCOL_VERSION));
         assertThat(protocolMessage.getFunctionID(), is(PUTFILE_FUNCTIONID));
         assertThat(protocolMessage.getMessageType(), is(MessageType.RPC));
-    }
-
-    private byte[] getRandomBytes(int dataSize) {
-        // to simplify matching if bytes mess up
-        final byte[] data = new byte[dataSize];
-        new Random().nextBytes(data);
-        return data;
     }
 }

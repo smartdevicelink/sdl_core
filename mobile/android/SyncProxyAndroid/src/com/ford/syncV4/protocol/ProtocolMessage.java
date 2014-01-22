@@ -22,6 +22,23 @@ public class ProtocolMessage {
 
 	public ProtocolMessage() {}
 
+    public ProtocolMessage(ProtocolMessage that) {
+        this.version = that.version;
+        this._sessionType = that._sessionType;
+        this._messageType = that._messageType;
+        this._sessionID = that._sessionID;
+        this._rpcType = that._rpcType;
+        this._functionID = that._functionID;
+        this._correlationID = that._correlationID;
+        this._jsonSize = that._jsonSize;
+        if (null != that._data) {
+            this._data = that._data.clone();
+        }
+        if (null != that._bulkData) {
+            this._bulkData = that._bulkData.clone();
+        }
+    }
+
 	public byte getVersion() {
 		return version;
 	}
