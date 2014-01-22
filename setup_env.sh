@@ -54,7 +54,6 @@ APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
 APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
 CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
-CMAKE_DATA_DEB="cmake-data_2.8.9-0ubuntu1_all.deb"
 TEMP_FOLDER="/tmp/APPLINK"
 INSTALL_ALL=false
 INSTALL_QT_HMI=false
@@ -193,18 +192,18 @@ if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
 	UBUNTU_VERSION_13_HIGHER=true
 fi
 
-#INSTALL_CMAKE_2_8_9 becomes "true" if no cmake  at all or lower version "2.8.9" is present
-INSTALL_CMAKE_2_8_9=false
+#INSTALL_CMAKE_2_8_11_2 becomes "true" if no cmake  at all or lower version "2.8.11.2" is present
+INSTALL_CMAKE_2_8_11_2=false
 
 if dpkg -s cmake | grep installed > /dev/null; then
 	echo "Checking for installed cmake"
 	CMAKE_INSTALLED_VERSION=$(dpkg -s cmake | grep "^Version:" | sed "s/Version: \(.*\)/\1/")
-	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.9")
+	CMAKE_COMPARE_RESULT=$(./compare_versions.py ${CMAKE_INSTALLED_VERSION} "2.8.11.2")
 	case ${CMAKE_COMPARE_RESULT} in
 	"equal"|"1 > 2");;
 	"2 > 1") echo "Removing CMake build system"
 	    apt-get remove -y cmake cmake-data
-	    INSTALL_CMAKE_2_8_9=true
+	    INSTALL_CMAKE_2_8_11_2=true
 	    ;;
 	esac
 else 
@@ -212,16 +211,18 @@ else
     if ${UBUNTU_VERSION_13_HIGHER} ; then
 		apt-install ${CMAKE_BUILD_SYSTEM}
 	else
-		INSTALL_CMAKE_2_8_9=true
+		INSTALL_CMAKE_2_8_11_2=true
 	fi
 fi
 echo $OK
 
-if ${INSTALL_CMAKE_2_8_9}; then
+if ${INSTALL_CMAKE_2_8_11_2}; then
+
+	CMAKE_DATA_DEB="cmake-data_2.8.11-2_all.deb"
 	if [ ${ARCH} == "i386" ]; then
-	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_i386.deb"
+	      CMAKE_DEB="cmake_2.8.11-2_i386.deb"
 	elif [ ${ARCH} == "x64" ]; then
-	      CMAKE_DEB="cmake_2.8.9-0ubuntu1_amd64.deb"
+	      CMAKE_DEB="cmake_2.8.11-2_amd64.deb"
 	fi
 
 	echo "Loading CMake packages"
