@@ -493,6 +493,7 @@ if $QT4_HMI; then
 		make -j${BUILD_THREADS_COUNT}
 		make check
 	    make install
+		updatedb
 		#save configure and make output in log file
 		} &> ${LOG4CXX_BUILD_LOG}
 
