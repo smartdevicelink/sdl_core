@@ -1609,7 +1609,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
         Log.i(TAG, "OnRegisterAppRequest: " + msg.toString());
-        Log.d("TRACE", "OnRegisterAppRequest");
         //final  RegisterAppInterface event = msg;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) _msgAdapter.logMessage(msg, true);

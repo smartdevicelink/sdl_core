@@ -2396,7 +2396,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.
      *
-     * @param msg
      * @throws SyncException
      */
     public void sendRPCRequest(RPCRequest request) throws SyncException {
@@ -2483,7 +2482,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
         _rpcSessionID = sessionID;
-        Log.i(TAG, "RPC Session started" + correlationID);
+        Log.i(TAG, "RPC Session started " + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2500,7 +2499,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void restartRPCProtocolSession() {
-        // Set Proxy Lifecyclek Available
+        // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
 
             try {
@@ -3079,7 +3078,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             String appID, String autoActivateID, Integer correlationID)
             throws SyncException {
 
-        final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
+        RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID);
 

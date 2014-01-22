@@ -106,8 +106,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
-	 * @param appName - Name of the application displayed on SYNC. 
+	 * @param appName - Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName - Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms - A vector of strings, all of which can be used as voice commands to 
@@ -193,8 +192,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
-	 * @param appName - Name of the application displayed on SYNC. 
+	 * @param appName - Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName - Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms - A vector of strings, all of which can be used as voice commands to 
@@ -347,8 +345,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
 	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext Context of the application. Used to access application specific resources.
-	 * @param appName Name of the application displayed on SYNC. 
+	 * @param appName Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands to 
@@ -438,8 +435,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
 	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext Context of the application. Used to access application specific resources.
-	 * @param appName Name of the application displayed on SYNC. 
+	 * @param appName Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters.
 	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands too
