@@ -266,7 +266,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Currently scheduled proxy reconnect task, if any.
      */
     private TimerTask _currentReconnectTimerTask = null;
-    private List<Byte> servicePool = new ArrayList<Byte>();
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
 
 
