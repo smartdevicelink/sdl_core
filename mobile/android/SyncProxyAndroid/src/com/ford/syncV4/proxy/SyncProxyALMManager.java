@@ -2628,5 +2628,10 @@ public class SyncProxyALMManager {
         public void onSessionStarted(byte sessionID, String correlationID) {
 
         }
+
+        @Override
+        public void onAudioServiceStart() {
+
+        }
     }
 }

@@ -229,6 +229,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    public void startAudioService(Session session) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+            }
+        }
+    }
+
     @Override
     public void onTransportBytesReceived(byte[] receivedBytes,
                                          int receivedBytesLength) {

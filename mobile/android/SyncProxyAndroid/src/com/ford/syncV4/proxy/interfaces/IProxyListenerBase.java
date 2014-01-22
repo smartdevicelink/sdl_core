@@ -313,4 +313,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
     public void onSessionStarted(byte sessionID, String correlationID);
+
+    public void onAudioServiceStart();
 }

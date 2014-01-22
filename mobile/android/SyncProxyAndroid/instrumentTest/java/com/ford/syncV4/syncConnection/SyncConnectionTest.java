@@ -148,4 +148,31 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         verify(connection._transport, never()).stopReading();
 
     }
+
+    public void testStartAudioServiceShouldSendAppropriateBytes() throws Exception {
+        final boolean[] isPassed = {false};
+        byte sessionID = 0x0A;
+        Session session = new Session();
+        session.setSessionId(sessionID);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, 0x00, VERSION);
+        header.setSessionID(sessionID);
+        final ProtocolFrameHeader realHeader = header;
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
+
+            @Override
+            public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
+                                                     int length) {
+                super.onProtocolMessageBytesToSend(msgBytes, offset, length);
+                isPassed[0] = true;
+                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
+                assertEquals("Offset should be 0", offset, 0);
+                assertEquals("Length should be 12", length, 12);
+            }
+        };
+        WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
+        protocol.setVersion(VERSION);
+        connection.startAudioService(session);
+        assertTrue(isPassed[0]);
+    }
+
 }

@@ -2555,10 +2555,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
 
-        if (sessionID != currentSession.getSessionId()) {
-            throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
-        }
-        currentSession.createService(ServiceType.Mobile_Nav);
+        createService(sessionID, ServiceType.Mobile_Nav);
 
         _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
@@ -2572,6 +2569,29 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } else {
             _proxyListener.onMobileNaviStart();
         }
+    }
+
+    protected void startAudioService(byte sessionID, String correlationID){
+        Log.i(TAG, "Audio_Service started  " + sessionID);
+        createService(sessionID, ServiceType.Audio_Service);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onAudioServiceStart();
+                }
+            });
+        } else {
+            _proxyListener.onAudioServiceStart();
+        }
+    }
+
+    private void createService(byte sessionID, ServiceType serviceType) {
+        if (sessionID != currentSession.getSessionId()) {
+            throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
+        }
+        currentSession.createService(serviceType);
     }
 
     public void stopMobileNaviSession() {
@@ -3537,6 +3557,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (_wiproVersion == 2) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
+                    return;
+                }
+                if (serviceType.equals(ServiceType.Audio_Service)){
+                    startAudioService(sessionID, correlationID);
+                    return;
                 }
             }
         }

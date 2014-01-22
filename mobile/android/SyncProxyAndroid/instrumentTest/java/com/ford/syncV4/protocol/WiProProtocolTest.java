@@ -628,4 +628,30 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertNotNull(exp);
         }
     }
+
+
+    public void testStartServiceACK_AudioService_FrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Audio_Service);
+        frameHeader.setDataSize(0);
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(mock);
+        protocol.setVersion((byte) 2);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
+        assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
+        assertEquals(2, versionCaptor.getValue().byteValue());
+        assertEquals("", correlationIdCaptor.getValue());
+    }
+
 }

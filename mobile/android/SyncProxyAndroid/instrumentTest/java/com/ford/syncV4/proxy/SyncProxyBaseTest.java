@@ -126,4 +126,15 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
             }
         };
     }
+
+    public void testOnAudioServiceStartServiceAddedToPool() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
+        Service audioService = new Service();
+        audioService.setSession(session);
+        audioService.setServiceType(ServiceType.Audio_Service);
+        assertTrue("pool should have AudioService ", proxyALM.getServicePool().contains(audioService));
+    }
 }
