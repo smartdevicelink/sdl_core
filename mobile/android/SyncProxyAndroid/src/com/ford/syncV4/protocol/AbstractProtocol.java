@@ -58,9 +58,9 @@ public abstract class AbstractProtocol {
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
     // This method ends a protocol session.  A corresponding call to the protocol
-    // listener onProtocolSessionEnded() method will be made when the protocol
+    // listener onProtocolServiceEnded() method will be made when the protocol
     // session has ended.
-    public abstract void EndProtocolSession(ServiceType serviceType, byte sessionID);
+    public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -147,9 +147,9 @@ public abstract class AbstractProtocol {
 
     // This method handles the end of a protocol session. A callback is
     // sent to the protocol listener.
-    protected void handleProtocolSessionEnded(ServiceType serviceType,
+    protected void handleProtocolServiceEnded(ServiceType serviceType,
                                               byte sessionID, String correlationID) {
-        _protocolListener.onProtocolSessionEnded(serviceType, sessionID, correlationID);
+        _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
     }
 
     // This method handles the startup of a protocol session. A callback is sent

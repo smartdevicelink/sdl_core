@@ -4294,7 +4294,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     };
 
-    public void onProtocolSessionEnded(ServiceType serviceType, Byte version, String correlationID){
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID){
         // TODO - need to handle end session logic
     }
 

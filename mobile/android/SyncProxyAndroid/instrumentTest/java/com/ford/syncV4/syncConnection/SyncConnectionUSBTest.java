@@ -73,7 +73,7 @@ public class SyncConnectionUSBTest extends TestCase {
         final SyncConnection connection =
                 new SyncConnection(mock(ISyncConnectionListener.class), new BTTransportConfig());
         connection._transport = fakeTransport;
-        connection.onProtocolSessionEnded(ServiceType.RPC, (byte) 0, "");
+        connection.onProtocolServiceEnded(ServiceType.RPC, (byte) 0, "");
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }
 }

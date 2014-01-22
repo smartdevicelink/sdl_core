@@ -310,7 +310,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
 
-    public void onProtocolSessionEnded(ServiceType serviceType, Byte version, String correlationID);
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
     public void onSessionStarted(byte sessionID, String correlationID);
 }

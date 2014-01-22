@@ -313,8 +313,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.handleEndSessionAck(ServiceType.RPC, SESSION_ID, "correlationID");
-        Mockito.verify(listenerALM).onProtocolSessionEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID, "correlationID");
+        Mockito.verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());

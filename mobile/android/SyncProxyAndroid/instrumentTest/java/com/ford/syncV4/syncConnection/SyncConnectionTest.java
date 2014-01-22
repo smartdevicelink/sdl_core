@@ -131,7 +131,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             }
         };
         connection.getIsConnected();
-        connection.onProtocolSessionEnded(ServiceType.RPC, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.RPC, SESSION_ID, "");
         verify(connection._transport, times(1)).stopReading();
     }
 
@@ -144,7 +144,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             }
         };
         connection.getIsConnected();
-        connection.onProtocolSessionEnded(ServiceType.Mobile_Nav, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.Mobile_Nav, SESSION_ID, "");
         verify(connection._transport, never()).stopReading();
 
     }

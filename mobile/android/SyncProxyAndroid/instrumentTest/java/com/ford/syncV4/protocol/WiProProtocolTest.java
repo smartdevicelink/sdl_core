@@ -59,7 +59,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolSessionEnded(ServiceType serviceType,
+                public void onProtocolServiceEnded(ServiceType serviceType,
                                                    byte sessionID,
                                                    String correlationID) {
                 }
@@ -411,7 +411,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionEnded(ServiceType sessionType,
+            public void onProtocolServiceEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
@@ -443,7 +443,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
         protocol.hashID = 0xCDEF1234;
         protocol._version = 2;
-        protocol.EndProtocolSession(ServiceType.RPC, (byte) 0x01);
+        protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
     }
 
     public void testEndSessionACKFrameReceived() throws Exception {
@@ -459,7 +459,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolSessionEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
@@ -514,7 +514,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID) {
 
             }
 

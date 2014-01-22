@@ -16,7 +16,7 @@ public interface IProtocolListener {
 	void onProtocolSessionStarted(Session session, byte version, String correlationID);
 
 	// Called to indicate that a protocol session has ended (from either side)
-	void onProtocolSessionEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);
+	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);
 
     /**
      * Called when a protocol heartbeat ACK message has been received from SYNC.

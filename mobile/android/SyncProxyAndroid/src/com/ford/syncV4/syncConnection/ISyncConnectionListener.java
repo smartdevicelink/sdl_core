@@ -15,8 +15,8 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
 	
-	public void onProtocolSessionEnded(ServiceType serviceType,
-			byte sessionID, String correlationID);
+	public void onProtocolServiceEnded(ServiceType serviceType,
+                                       byte sessionID, String correlationID);
 	
 	public void onProtocolError(String info, Exception e);
 

@@ -2620,7 +2620,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onProtocolSessionEnded(ServiceType serviceType, Byte version, String correlationID) {
+        public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
 
         }
 

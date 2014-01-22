@@ -87,7 +87,7 @@ public class WiProProtocol extends AbstractProtocol {
         _heartbeatReceiveInterval_ms = heartbeatReceiveInterval_ms;
     } // end-method
 
-    public void EndProtocolSession(ServiceType serviceType, byte sessionID) {
+    public void EndProtocolService(ServiceType serviceType, byte sessionID) {
         byte[] data = BitConverter.intToByteArray(hashID);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(
                 serviceType, sessionID, hashID, _version, data.length);
@@ -449,10 +449,10 @@ public class WiProProtocol extends AbstractProtocol {
     private void handleEndSessionFrame(ProtocolFrameHeader header) {
         if (_version == 2) {
             if (hashID == header.getMessageID()) {
-                handleProtocolSessionEnded(header.getServiceType(), header.getSessionID(), "");
+                handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
             }
         } else {
-            handleProtocolSessionEnded(header.getServiceType(), header.getSessionID(), "");
+            handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
         }
     }
 } // end-class

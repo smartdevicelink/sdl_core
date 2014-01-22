@@ -2516,18 +2516,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleEndSessionAck(final ServiceType serviceType, final byte sessionId, final String correlationID) {
+    protected void handleEndServiceAck(final ServiceType serviceType, final byte sessionId, final String correlationID) {
         Log.i(TAG, "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onProtocolSessionEnded(serviceType, sessionId, correlationID);
+                    _proxyListener.onProtocolServiceEnded(serviceType, sessionId, correlationID);
                 }
             });
         } else {
-            _proxyListener.onProtocolSessionEnded(serviceType, sessionId, correlationID);
+            _proxyListener.onProtocolServiceEnded(serviceType, sessionId, correlationID);
         }
     }
 
@@ -3511,9 +3511,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolSessionEnded(ServiceType serviceType,
+        public void onProtocolServiceEnded(ServiceType serviceType,
                                            byte sessionID, String correlationID) {
-            handleEndSessionAck(serviceType, sessionID, correlationID);
+            handleEndServiceAck(serviceType, sessionID, correlationID);
         }
 
         @Override

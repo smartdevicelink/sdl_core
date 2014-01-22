@@ -139,7 +139,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (sendFinishMessages && (_transport != null) &&
                         _transport.getIsConnected()) {
-                    _protocol.EndProtocolSession(ServiceType.RPC, rpcSessionID);
+                    _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                 }
                 if (!keepConnection) {
                     _protocol = null;
@@ -176,7 +176,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (_transport != null && _transport.getIsConnected()) {
-                    _protocol.EndProtocolSession(ServiceType.Mobile_Nav, mobileNavSessionId);
+                    _protocol.EndProtocolService(ServiceType.Mobile_Nav, mobileNavSessionId);
                 }
             } // end-if
         }
@@ -335,9 +335,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionEnded(ServiceType serviceType, byte sessionID,
+    public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
                                        String correlationID) {
-        _connectionListener.onProtocolSessionEnded(serviceType, sessionID, correlationID);
+        _connectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
         if ( _transport != null && serviceType.equals(ServiceType.RPC)){
             _transport.stopReading();
         }

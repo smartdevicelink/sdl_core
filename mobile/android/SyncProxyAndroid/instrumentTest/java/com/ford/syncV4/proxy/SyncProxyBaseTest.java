@@ -45,7 +45,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
-    public void testMobileNavSessionEndedOnDispose() throws Exception {
+    public void testMobileNavServiceEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
         proxyALM.dispose();

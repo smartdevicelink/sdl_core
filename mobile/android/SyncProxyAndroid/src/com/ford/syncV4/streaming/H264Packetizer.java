@@ -105,7 +105,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     private MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
         int length = readDataFromStream(data);
         if (length == -1) {
-            return MobileNaviDataFrame.createEndOfSessionFrame();
+            return MobileNaviDataFrame.createEndOfServiceFrame();
         } else {
             MobileNaviDataFrame frame = null;
             if (data.length == length) {

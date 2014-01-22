@@ -29,7 +29,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionEnded(ServiceType sessionType,
+            public void onProtocolServiceEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
@@ -102,7 +102,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionEnded(ServiceType sessionType,
+            public void onProtocolServiceEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
