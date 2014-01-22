@@ -3495,13 +3495,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             Service service = session.getServiceList().get(0);
             if (service.getServiceType().eq(ServiceType.RPC)) {
                 startRPCProtocolService(session.getSessionId(), correlationID);
-            } else if (_wiproVersion == 2) {
-                if (service.getServiceType().equals(ServiceType.Mobile_Nav)) {
-                    startMobileNaviService(session.getSessionId(), correlationID);
-                } else {
-                    //If version 2 then don't need to specify a Session Type
-                    startRPCProtocolService(session.getSessionId(), correlationID);
-                }
             }
         }
 
@@ -3519,6 +3512,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onMobileNavAckReceived(int frameReceivedNumber) {
             handleMobileNavAck(frameReceivedNumber);
+        }
+
+        @Override
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            if (_wiproVersion == 2) {
+                if (serviceType.equals(ServiceType.Mobile_Nav)) {
+                    startMobileNaviService(sessionID, correlationID);
+                }
+            }
         }
     }
 } // end-class

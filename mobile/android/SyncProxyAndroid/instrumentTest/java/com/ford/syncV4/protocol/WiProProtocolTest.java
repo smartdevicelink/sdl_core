@@ -335,7 +335,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         final ByteArrayOutputStream StartSessionACKMessageStream =
                 new ByteArrayOutputStream(12);
 
-        final byte[] msgFirstBytes = new byte[]{0x20, 0x07, 0x02, 0x01};
+        final byte[] msgFirstBytes = new byte[]{0x20, 0x07, 0x02, 0x00};
         StartSessionACKMessageStream.write(msgFirstBytes);
         final byte[] msgDataSize = new byte[]{0x00, 0x00, 0x00, 0x00};
         StartSessionACKMessageStream.write(msgDataSize);
