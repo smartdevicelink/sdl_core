@@ -961,6 +961,10 @@ void TransportManagerImpl::MessageQueueThread(void) {
             active_msg->set_waiting(true);
           } else {
             LOG4CXX_ERROR(logger_, "Data sent error");
+	    RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+	             DataSendError("Send failed - message removed"),
+		     active_msg);
+            message_queue_.remove(active_msg);
           }
         }
       }

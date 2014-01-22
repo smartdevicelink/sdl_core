@@ -7,7 +7,7 @@ import android.widget.TextView;
 import android.widget.TwoLineListItem;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.StringUtils;
+import com.ford.syncV4.android.utils.StringUtils;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
