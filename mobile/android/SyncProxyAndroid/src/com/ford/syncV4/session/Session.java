@@ -50,11 +50,19 @@ public class Session {
     public String toString() {
         return "Session{" +
                 "sessionId=" + sessionId +
-                ", serviceList=" + serviceList +
+                ", serviceList size=" + serviceList.size() +
                 '}';
     }
 
     public boolean removeService(Service service) {
         return serviceList.remove(service);
+    }
+
+    public Service createService(ServiceType serviceType) {
+        Service service = new Service();
+        service.setServiceType(serviceType);
+        service.setSession(this);
+        serviceList.add(service);
+        return service;
     }
 }

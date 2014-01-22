@@ -154,7 +154,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
@@ -222,7 +221,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     SyncConnection _syncConnection;
     // RPC Session ID
-    Session session = new Session();
+    protected Session session = new Session();
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
@@ -267,7 +266,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Currently scheduled proxy reconnect task, if any.
      */
     private TimerTask _currentReconnectTimerTask = null;
-    private List<Byte> servicePool = new ArrayList<Byte>();
 
     /**
      * Constructor.
@@ -1020,7 +1018,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void stopAllServices() {
-        if (servicePool.size() > 0) {
+        if (getServicePool().size() > 0) {
             stopMobileNaviSession();
         }
     }
@@ -2551,7 +2549,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
-        servicePool.add(sessionID);
+
+        if (sessionID != session.getSessionId()) {
+            throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
+        }
+        session.createService(ServiceType.Mobile_Nav);
+
         _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2567,12 +2570,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void stopMobileNaviSession() {
-        int index = servicePool.indexOf(_mobileNavSessionID);
-        if (index != -1) {
+        if (removeServiceFromSession(_mobileNavSessionID)) {
             Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
-            servicePool.remove(index);
             getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
         }
+    }
+
+    private boolean removeServiceFromSession(byte sessionID) {
+        List<Service> servicePool = getServicePool();
+        for (Service service : servicePool) {
+            if (service.getSession().getSessionId() == sessionID) {
+                session.removeService(service);
+                return true;
+            }
+        }
+        return false;
     }
 
     // Queue internal callback message
@@ -3435,8 +3447,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         restartRPCProtocolSession();
     }
 
-    public List<Byte> getServicePool() {
-        return servicePool;
+    public List<Service> getServicePool() {
+        return session.getServiceList();
     }
 
     // Private Class to Interface with SyncConnection

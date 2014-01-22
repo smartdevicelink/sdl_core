@@ -34,4 +34,9 @@ public class Service {
                 ", serviceType=" + serviceType +
                 '}';
     }
+
+    public static Service createService(ServiceType mobile_nav, byte sessionID) {
+        Service service = new Service();
+        return null;
+    }
 }
