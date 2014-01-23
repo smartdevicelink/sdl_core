@@ -50,7 +50,7 @@ static void* threadFunc(void* closure) {
 }
 
 namespace threads {
-size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
+size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 log4cxx::LoggerPtr Thread::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::Thread"));
 
