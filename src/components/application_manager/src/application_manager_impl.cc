@@ -1540,7 +1540,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
-						 << binary_data.size());
+               << binary_data.size() << " offset = " << offset);
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {

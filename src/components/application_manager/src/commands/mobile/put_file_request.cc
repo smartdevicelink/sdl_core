@@ -95,12 +95,13 @@ void PutFileRequest::Run() {
       (*message_)[strings::params][strings::binary_data].asBinary();
 
   uint32_t offset = 0;
-  if ((*message_)[strings::params].keyExists(strings::offset)) {
-      offset =
-            (*message_)[strings::msg_params][strings::offset].asInt();
-    }
+  bool offset_exist = (*message_)[strings::msg_params].keyExists(strings::offset);
+
+  if (offset_exist) {
+    offset = (*message_)[strings::msg_params][strings::offset].asInt();
+  }
   uint32_t length = binary_data.size();
-  if ((*message_)[strings::params].keyExists(strings::length)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
       length =
             (*message_)[strings::msg_params][strings::length].asInt();
      }
