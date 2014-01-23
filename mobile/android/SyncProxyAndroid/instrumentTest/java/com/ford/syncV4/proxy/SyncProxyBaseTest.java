@@ -43,16 +43,16 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testMobileNavSessionAddedToServicePoolOnStart() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID,VERSION ,"");
-        List<Service > serviceList =  proxyALM.getServicePool();
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
+        List<Service> serviceList = proxyALM.getServicePool();
         assertEquals("service pool should have mobile nav service", ServiceType.Mobile_Nav, serviceList.get(0).getServiceType());
-        assertEquals(sessionID,serviceList.get(0).getSession().getSessionId() );
+        assertEquals(sessionID, serviceList.get(0).getSession().getSessionId());
     }
 
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
-        proxyALM.stopMobileNaviSession();
+        proxyALM.stopMobileNaviService();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
@@ -66,14 +66,24 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testRPCServiceAddedToPoolOnStart() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         Session session = Session.createSession(ServiceType.RPC, sessionID);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         assertEquals("pool should has RPC service", 1, proxyALM.getServicePool().size());
     }
 
     public void testRPCServiceEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         Session session = Session.createSession(ServiceType.RPC, sessionID);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.dispose();
+        assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
+    }
+
+    public void testAllServicesEndedOnDispose() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, VERSION, "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
@@ -81,8 +91,8 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testStopMobileNaviSessionForUnexcitingSessionDontThrowsException() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         try {
-            proxyALM.stopMobileNaviSession();
-        }catch (ArrayIndexOutOfBoundsException e){
+            proxyALM.stopMobileNaviService();
+        } catch (ArrayIndexOutOfBoundsException e) {
             assertNull("exception should not be thrown", e);
         }
     }
@@ -140,7 +150,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testOnAudioServiceStartServiceAddedToPool() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         Session session = Session.createSession(ServiceType.RPC, sessionID);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         Service audioService = new Service();
         audioService.setSession(session);
@@ -151,8 +161,25 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testOnAudioServiceStartServiceCallbackCalled() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         Session session = Session.createSession(ServiceType.RPC, sessionID);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         Mockito.verify(listenerALM, times(1)).onAudioServiceStart();
+    }
+
+    public void testAudioServiceRemovedFromPoolOnStopAudioService() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, session.getSessionId(), VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
+        proxyALM.stopAudioService();
+        Service mobileNaviService = new Service();
+        mobileNaviService.setSession(session);
+        mobileNaviService.setServiceType(ServiceType.Mobile_Nav);
+        assertTrue("pool should have Mobile nav service ", proxyALM.getServicePool().contains(mobileNaviService));
+        Service audioService = new Service();
+        audioService.setSession(session);
+        audioService.setServiceType(ServiceType.Audio_Service);
+        assertFalse("pool should not have Audio service ", proxyALM.getServicePool().contains(audioService));
     }
 }

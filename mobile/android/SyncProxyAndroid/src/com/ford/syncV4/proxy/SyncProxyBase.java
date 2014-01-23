@@ -1033,7 +1033,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void stopAllServices() {
         if (getServicePool().size() > 0) {
-            stopMobileNaviSession();
+            stopMobileNaviService();
+            stopAudioService();
         }
     }
 
@@ -2613,17 +2614,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         currentSession.createService(serviceType);
     }
 
-    public void stopMobileNaviSession() {
-        if (removeServiceFromSession(currentSession.getSessionId())) {
+    public void stopMobileNaviService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
             Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
             getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
         }
     }
 
-    private boolean removeServiceFromSession(byte sessionID) {
+    public void stopAudioService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
+            Log.i(TAG, "Audio service is going to stop" + currentSession.getSessionId());
+            getSyncConnection().closeAudioService(currentSession.getSessionId());
+        }
+    }
+
+    private boolean removeServiceFromSession(byte sessionID, ServiceType serviceType) {
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
-            if (service.getSession().getSessionId() == sessionID) {
+            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType())) ) {
                 currentSession.removeService(service);
                 return true;
             }

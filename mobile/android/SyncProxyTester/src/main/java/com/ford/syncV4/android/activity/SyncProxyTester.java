@@ -4165,7 +4165,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void stopMobileNavSession() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
-            ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
+            ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
             closeMobileNaviOutputStream();
         }
     }
@@ -4179,7 +4179,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null) {
+        if (ProxyService.getInstance().getProxyInstance().stopAudioService();
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4192,6 +4192,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onAudioServiceStarted() {
 
+    }
+
+    public void startAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should start audio service", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+        }
+    }
+
+    public void stopAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should stop audio service", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+        }
     }
 
     public void onTouchEventReceived(OnTouchEvent notification) {

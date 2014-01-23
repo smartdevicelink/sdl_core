@@ -19,8 +19,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
-        android:id="@+id/file_streaming"
-        android:layout_below="@+id/audioButton"
+        android:id="@+id/audio_file_streaming"
+        android:layout_below="@+id/audioServiceCheckBox"
         android:enabled="false"
         android:layout_centerHorizontal="true" />
 

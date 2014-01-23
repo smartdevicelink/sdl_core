@@ -11,10 +11,10 @@ import java.io.OutputStream;
 public class FileStreamingLogic {
     private StaticFileReader staticFileReader;
     private OutputStream outputStream;
-    private MobileNavPreviewFragment context;
+    private ServicePreviewFragmentInterface context;
     private Integer fileResID;
 
-    public FileStreamingLogic(MobileNavPreviewFragment mobileNavPreviewFragment) {
+    public FileStreamingLogic(ServicePreviewFragmentInterface mobileNavPreviewFragment) {
         context = mobileNavPreviewFragment;
     }
 
