@@ -13,9 +13,12 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
+import org.mockito.Mockito;
+
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 /**
@@ -25,6 +28,13 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     private static byte sessionID = (byte) 1;
     public static final byte VERSION = (byte) 2;
+    private IProxyListenerALM listenerALM;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        listenerALM = mock(IProxyListenerALM.class);
+    }
 
     public void testSyncProxyBaseHasServicePoolField() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
@@ -82,7 +92,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         syncMsgVersion.setMajorVersion(2);
         syncMsgVersion.setMinorVersion(2);
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
-        final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
+
         return new SyncProxyALM(listenerALM,
                                 /*sync proxy configuration resources*/null,
                                 /*enable advanced lifecycle management true,*/
@@ -136,5 +146,13 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         audioService.setSession(session);
         audioService.setServiceType(ServiceType.Audio_Service);
         assertTrue("pool should have AudioService ", proxyALM.getServicePool().contains(audioService));
+    }
+
+    public void testOnAudioServiceStartServiceCallbackCalled() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION , "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
+        Mockito.verify(listenerALM, times(1)).onAudioServiceStart();
     }
 }
