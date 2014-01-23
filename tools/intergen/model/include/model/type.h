@@ -71,8 +71,6 @@ class TypeCodeGenerator {
  */
 class Type {
  public:
-  // Tells whether type is array.
-  virtual bool IsArray() const { return false; }
   // Accepts |code_generator| visitor calling one of it's methods
   // (depending on exact type) with this object
   virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const = 0;

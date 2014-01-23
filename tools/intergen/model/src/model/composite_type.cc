@@ -69,10 +69,6 @@ bool Array::operator <(const Array& that) const {
   return range_.max() < that.range_.max();
 }
 
-bool Array::IsArray() const {
-  return true;
-}
-
 TypeCodeGenerator* Array::Apply(TypeCodeGenerator* code_generator) const {
   code_generator->GenerateCodeForArray(this);
   return code_generator;
