@@ -13,7 +13,15 @@ public class RPCMessage extends RPCStruct  {
 	}
 	
 	protected RPCMessage(RPCMessage rpcm) {
-		this(rpcm.store);
+//		this(rpcm.store);
+        // FIXME test this!
+        this.store = new Hashtable<String, Object>();
+        this.messageType = rpcm.messageType;
+        this.function = (Hashtable) rpcm.function.clone();
+        this.store.put(messageType, function);
+        this.parameters = (Hashtable) rpcm.parameters.clone();
+        this.function.put(Names.parameters, this.parameters);
+        this.function.put(Names.function_name, rpcm.getFunctionName());
 	}
 	
 	protected RPCMessage(RPCStruct rpcs) {
