@@ -4144,6 +4144,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
+        MobileNavPreviewFragment audioFragement = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+        audioFragement.setMobileNaviStateOff();
+        closeAudioOutputStream();
     }
 
     public void logError(final Exception e) {
@@ -4159,6 +4162,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (ProxyService.getInstance().getProxyInstance() != null) {
             SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
             proxy.stopH264();
+        }
+    }
+
+    private void closeAudioOutputStream() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            proxy.stopAudioDataTransfer();
         }
     }
 
@@ -4190,10 +4200,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     }
 
-    public void onAudioServiceStarted() {
-
-    }
-
     public void startAudioService() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should start audio service", true);
@@ -4205,6 +4211,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop audio service", true);
             ProxyService.getInstance().getProxyInstance().stopAudioService();
+        }
+    }
+
+    public void onAudioServiceStarted() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            OutputStream stream = proxy.startAudioDataTransfer();
+            MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setMobileNaviStateOn(stream);
         }
     }
 

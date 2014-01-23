@@ -13,12 +13,16 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.OutputStream;
+import java.io.PipedOutputStream;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -181,5 +185,27 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         audioService.setSession(session);
         audioService.setServiceType(ServiceType.Audio_Service);
         assertFalse("pool should not have Audio service ", proxyALM.getServicePool().contains(audioService));
+    }
+
+    public void testStartAudioDataTransferClassConnectionMethod() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        proxyALM._syncConnection = mock(SyncConnection.class);
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
+        proxyALM.startAudioDataTransfer();
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        verify(proxyALM._syncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
+    }
+
+    public void testStartAudioDataTransferReturnsStream() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        proxyALM._syncConnection = mock(SyncConnection.class);
+        when(proxyALM._syncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
+        OutputStream stream = proxyALM.startAudioDataTransfer();
+        assertNotNull("stream should not be null" ,stream);
     }
 }

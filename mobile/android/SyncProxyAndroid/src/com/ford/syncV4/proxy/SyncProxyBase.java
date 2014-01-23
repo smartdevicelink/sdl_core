@@ -2671,6 +2671,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    public OutputStream startAudioDataTransfer() {
+        OutputStream stream = null;
+        if (_syncConnection != null) {
+            stream = _syncConnection.startAudioDataTransfer(currentSession.getSessionId());
+        }
+        return stream;
+    }
+
+    public void stopAudioDataTransfer() {
+        if (_syncConnection != null) {
+            _syncConnection.stopAudioDataTransfer();
+        }
+    }
+
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
