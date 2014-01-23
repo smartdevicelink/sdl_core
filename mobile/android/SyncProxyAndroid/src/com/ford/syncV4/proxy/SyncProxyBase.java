@@ -2604,7 +2604,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void stopMobileNaviSession() {
         if (removeServiceFromSession(currentSession.getSessionId())) {
             Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
-            getSyncConnection().closeMobileNavSession(currentSession.getSessionId());
+            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
         }
     }
 

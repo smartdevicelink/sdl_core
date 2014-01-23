@@ -13,6 +13,8 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
+import org.mockito.ArgumentCaptor;
+
 import java.io.OutputStream;
 import java.util.Arrays;
 
@@ -101,10 +103,10 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             private int count = 0;
 
             @Override
-            public void closeMobileNavSession(byte rpcSessionID) {
+            public void closeMobileNaviService(byte rpcSessionID) {
                 _transport = mock(SyncTransport.class);
                 when(_transport.getIsConnected()).thenReturn(true);
-                super.closeMobileNavSession(rpcSessionID);
+                super.closeMobileNaviService(rpcSessionID);
             }
 
             @Override
@@ -121,7 +123,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.closeMobileNavSession(SESSION_ID);
+        connection.closeMobileNaviService(SESSION_ID);
     }
 
     public void testStopTransportIsCalledForRPCService() throws Exception {
@@ -208,5 +210,18 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.mAudioPacketizer = mock(H264Packetizer.class);
         connection.stopAudioDataTransfer();
         verify(connection.mAudioPacketizer, times(1)).stop();
+    }
+
+    public void testCloseAudioServiceSendEndServiceMessage() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        connection._protocol = mock(WiProProtocol.class);
+        connection._transport = mock(SyncTransport.class);
+        when(connection._transport.getIsConnected()).thenReturn(true);
+        connection.closeAudioService(SESSION_ID);
+        ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        verify(connection._protocol, times(1)).EndProtocolService(serviceTypeCaptor.capture(), sessionIDCaptor.capture());
+        assertEquals("should end audio service", ServiceType.Audio_Service, serviceTypeCaptor.getValue());
+        assertEquals("should end session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
     }
 }

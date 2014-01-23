@@ -170,12 +170,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void closeMobileNavSession(byte mobileNavSessionId) {
+    public void closeMobileNaviService(byte mobileNavSessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
                 if (_transport != null && _transport.getIsConnected()) {
                     _protocol.EndProtocolService(ServiceType.Mobile_Nav, mobileNavSessionId);
+                }
+            } // end-if
+        }
+    }
+
+    public void closeAudioService(byte sessionID) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                // If transport is still connected, sent EndProtocolSessionMessage
+                if (_transport != null && _transport.getIsConnected()) {
+                    _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
                 }
             } // end-if
         }
@@ -398,4 +409,5 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         closeConnection((byte) 0, false, false);
         _connectionListener.onHeartbeatTimedOut();
     }
+
 }
