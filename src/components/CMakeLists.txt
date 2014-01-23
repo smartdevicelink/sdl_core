@@ -46,6 +46,9 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
+# --- Validated types
+add_subdirectory(./rpc_base)
+
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 

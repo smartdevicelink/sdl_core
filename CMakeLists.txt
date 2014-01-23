@@ -193,6 +193,9 @@ ENDIF (${HMI2})
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
 
+# --- Tools
+add_subdirectory(./tools)
+
 # --- Components
 add_subdirectory(./src/components)
 
