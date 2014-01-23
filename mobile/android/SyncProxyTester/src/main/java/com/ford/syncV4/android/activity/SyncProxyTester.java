@@ -4179,7 +4179,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (ProxyService.getInstance().getProxyInstance().stopAudioService();
+        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null){
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4204,7 +4204,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void stopAudioService() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop audio service", true);
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+            ProxyService.getInstance().getProxyInstance().stopAudioService();
         }
     }
 
