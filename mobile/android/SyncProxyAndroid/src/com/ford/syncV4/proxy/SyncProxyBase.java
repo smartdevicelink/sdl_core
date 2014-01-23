@@ -190,8 +190,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
-    // Mobile Nav Session ID
-    protected byte _mobileNavSessionID = 100;
+
     // SyncProxy Advanced Lifecycle Management
     protected Boolean _advancedLifecycleManagementEnabled = false;
     // Proxy State Variables
@@ -709,7 +708,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public byte getMobileNavSessionID() {
-        return _mobileNavSessionID;
+        return currentSession.getSessionId();
     }
 
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
@@ -2566,8 +2565,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
 
         createService(sessionID, ServiceType.Mobile_Nav);
-
-        _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2605,9 +2602,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void stopMobileNaviSession() {
-        if (removeServiceFromSession(_mobileNavSessionID)) {
-            Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
-            getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+        if (removeServiceFromSession(currentSession.getSessionId())) {
+            Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
+            getSyncConnection().closeMobileNavSession(currentSession.getSessionId());
         }
     }
 
@@ -2643,7 +2640,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startH264() {
         OutputStream stream = null;
         if (_syncConnection != null) {
-            stream = _syncConnection.startH264(_mobileNavSessionID);
+            stream = _syncConnection.startH264(currentSession.getSessionId());
         }
         return stream;
     }
@@ -2652,46 +2649,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (_syncConnection != null) {
             _syncConnection.stopH264();
         }
-    }
-
-    public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
-        if (rtpPacket == null) {
-            throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);
-        }
-        checkSyncConnection();
-        return sendRTPPacket(rtpPacket);
-    }
-
-    private boolean sendRTPPacket(byte[] rtpPacket) throws SyncException {
-        ProtocolMessage pm = createMobileNavSessionProtocolMessage(rtpPacket);
-        try {
-            // Queue this outgoing message
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-                if (_outgoingProxyMessageDispatcher != null) {
-                    _outgoingProxyMessageDispatcher.queueMessage(pm);
-                } else {
-                    return false;
-                }
-            }
-        } catch (OutOfMemoryError e) {
-            SyncTrace.logProxyEvent("OutOfMemory exception while sending RTP packet", SYNC_LIB_TRACE_KEY);
-            throw new SyncException("OutOfMemory exception while sending RTP packet ", e, SyncExceptionCause.INVALID_ARGUMENT);
-        }
-        return true;
-    }
-
-    public ProtocolMessage createMobileNavSessionProtocolMessage(byte[] rtpPacket) {
-        return createProtocolMessage(rtpPacket);
-    }
-
-    private ProtocolMessage createProtocolMessage(byte[] rtpPacket) {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setData(rtpPacket);
-        pm.setSessionID(_mobileNavSessionID);
-        pm.setVersion(getWiProVersion());
-        pm.setMessageType(MessageType.VIDEO);
-        pm.setSessionType(ServiceType.Mobile_Nav);
-        return pm;
     }
 
     /**

@@ -4,7 +4,6 @@ import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
@@ -17,8 +16,6 @@ import com.ford.syncV4.transport.TransportType;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -104,37 +101,6 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         assertNotNull("Sync Proxy should not be null", syncProxy);
     }
 
-    public void testSendVideoFrameShouldAddFrameToQueue() throws Exception {
-        final byte[] testRTP = new byte[10];
-        try {
-            boolean result = sut.sendVideoFrame(testRTP);
-            assertTrue("Failed to queue message", result);
-        } catch (SyncException e) {
-            assertNull("Should not get here", e);
-        }
-    }
-
-    public void testVideoFrameShouldGetRightSessionIDAfterOnProtocolSessionStarted() throws Exception {
-        final byte[] testRTP = new byte[10];
-        sut.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID), VERSION, "");
-        ProtocolMessage result = sut.createMobileNavSessionProtocolMessage(testRTP);
-        assertTrue(Arrays.equals(testRTP, result.getData()));
-        assertEquals(sut.getMobileNavSessionID(), result.getSessionID());
-        assertEquals(MessageType.VIDEO, result.getMessageType());
-        assertEquals(sut.getWiProVersion(), result.getVersion());
-        assertEquals(ServiceType.Mobile_Nav, result.getSessionType());
-    }
-
-    public void testMobileNavProtocolMessageCreation() throws Exception {
-        final byte[] testRTP = new byte[10];
-        ProtocolMessage message = sut.createMobileNavSessionProtocolMessage(testRTP);
-        assertTrue(Arrays.equals(testRTP, message.getData()));
-        assertEquals(sut.getMobileNavSessionID(), message.getSessionID());
-        assertEquals(MessageType.VIDEO, message.getMessageType());
-        assertEquals(sut.getWiProVersion(), message.getVersion());
-        assertEquals(ServiceType.Mobile_Nav, message.getSessionType());
-    }
-
     public void testOnMobileNavSessionStarted() throws Exception {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
         syncMsgVersion.setMajorVersion(2);
@@ -189,7 +155,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             protected void startMobileNaviService(byte sessionID, String correlationID) {
                 super.startMobileNaviService(sessionID, correlationID);
-                assertEquals("Session ID should be equal", _mobileNavSessionID, (byte) 48);
+                assertEquals("Session ID should be equal", currentSession.getSessionId(), (byte) 48);
             }
         };
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID), VERSION, "");

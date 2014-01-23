@@ -1551,6 +1551,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onAudioServiceStart() {
+
+    }
+
+    @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
         final int fNumber = frameReceivedNumber;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -1663,11 +1668,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             });
         }
-    }
-
-    @Override
-    public void onAudioServiceStart() {
-        
     }
 
     @Override

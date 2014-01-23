@@ -4153,7 +4153,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 _msgAdapter.logMessage(e.getMessage(), true);
             }
         });
-
     }
 
     private void closeMobileNaviOutputStream() {
@@ -4168,16 +4167,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
             closeMobileNaviOutputStream();
-        }
-    }
-
-    public void sendMobileNaviData(byte[] data, boolean addToUI) {
-        if (isProxyReadyForWork()) {
-            try {
-                ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
-            } catch (SyncException e) {
-                onMobileNaviError(e.getMessage(), false);
-            }
         }
     }
 
