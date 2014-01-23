@@ -46,22 +46,25 @@ include_directories (
 )
 
 set(LIBRARIES
+    
     test_App_Manager
+    ApplicationManager
+    MediaManager
 
     
     gtest
     gtest_main
     gmock
     gmock_main
-
     
+    formatters
     HMI_API
-    MediaManager
-    ApplicationManager
+    
+    
     v4_protocol_v1_2_no_extra
 
     SmartObjects
-    formatters
+    
     RequestWatchdog
 
     policies
