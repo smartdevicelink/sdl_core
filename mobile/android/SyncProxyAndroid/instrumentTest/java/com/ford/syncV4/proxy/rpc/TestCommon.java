@@ -9,6 +9,8 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Random;
+
 /**
  * Common methods for testing classes.
  *
@@ -41,5 +43,12 @@ public class TestCommon {
             protected void initializeProxy() throws SyncException {
             }
         };
+    }
+
+    public static byte[] getRandomBytes(int dataSize) {
+        // to simplify matching if bytes mess up
+        final byte[] data = new byte[dataSize];
+        new Random().nextBytes(data);
+        return data;
     }
 }

@@ -15,6 +15,12 @@ public class PutFile extends RPCRequest {
     public PutFile(Hashtable hash) {
         super(hash);
     }
+
+    public PutFile(PutFile that) {
+        // FIXME test this!
+        super(that);
+    }
+
     public void setSyncFileName(String syncFileName) {
         if (syncFileName != null) {
             parameters.put(Names.syncFileName, syncFileName);
@@ -66,5 +72,56 @@ public class PutFile extends RPCRequest {
     }
     public byte[] getFileData() {
         return (byte[]) parameters.get(Names.bulkData);
+    }
+
+    public void setSystemFile(Boolean systemFile) {
+        if (systemFile != null) {
+            parameters.put(Names.systemFile, systemFile);
+        } else {
+            parameters.remove(Names.systemFile);
+        }
+    }
+
+    public Boolean getSystemFile() {
+        final Object o = parameters.get(Names.systemFile);
+        if (o instanceof Boolean) {
+            return (Boolean) o;
+        }
+
+        return null;
+    }
+
+    public void setOffset(Integer offset) {
+        if (offset != null) {
+            parameters.put(Names.offset, offset);
+        } else {
+            parameters.remove(Names.offset);
+        }
+    }
+
+    public Integer getOffset() {
+        final Object o = parameters.get(Names.offset);
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+
+        return null;
+    }
+
+    public void setLength(Integer length) {
+        if (length != null) {
+            parameters.put(Names.length, length);
+        } else {
+            parameters.remove(Names.length);
+        }
+    }
+
+    public Integer getLength() {
+        final Object o = parameters.get(Names.length);
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+
+        return null;
     }
 }
