@@ -4190,6 +4190,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     }
 
+    public void onAudioServiceStarted() {
+
+    }
+
     public void onTouchEventReceived(OnTouchEvent notification) {
 
     }
@@ -4292,4 +4296,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onSesionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
     }
+
+
 }

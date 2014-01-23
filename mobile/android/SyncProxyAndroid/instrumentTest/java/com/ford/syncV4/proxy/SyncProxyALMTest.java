@@ -214,7 +214,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             protected void handleMobileNavMessage(ProtocolMessage message) {
                 super.handleMobileNavMessage(message);
-                assertEquals(message.getSessionType(), ServiceType.Mobile_Nav);
+                assertEquals(message.getServiceType(), ServiceType.Mobile_Nav);
                 assertEquals(message.getVersion(), (byte) 2);
                 assertTrue(message.getSessionID() == (byte) 48);
             }

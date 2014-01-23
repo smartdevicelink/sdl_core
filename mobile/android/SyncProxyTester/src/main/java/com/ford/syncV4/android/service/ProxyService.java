@@ -1534,10 +1534,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onMobileNaviStart() {
-        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "Mobile Navi Started";
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        logEvent("Mobile Navi Started");
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
@@ -1552,7 +1549,23 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAudioServiceStart() {
+        logEvent("Audio Service Started");
 
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.onAudioServiceStarted();
+                }
+            });
+        }
+    }
+
+    private void logEvent(String message) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, "" + message);
     }
 
     @Override

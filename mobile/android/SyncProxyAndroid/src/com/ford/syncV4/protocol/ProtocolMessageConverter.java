@@ -26,7 +26,7 @@ public class ProtocolMessageConverter {
 
     public ProtocolMessageConverter generate() {
         _data = null;
-        _serviceType = _protocolMsg.getSessionType();
+        _serviceType = _protocolMsg.getServiceType();
         // TODO - get rid of this ugly if statements
         if (_serviceType == ServiceType.Mobile_Nav && _version ==2){
             _data = _protocolMsg.getData();

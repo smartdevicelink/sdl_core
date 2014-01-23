@@ -27,6 +27,7 @@ import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
@@ -40,7 +41,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
-    AbstractPacketizer mPacketizer = null;
+    AbstractPacketizer mVideoPacketizer = null;
+    AbstractPacketizer mAudioPacketizer = null;
     // Thread safety locks
     Object TRANSPORT_REFERENCE_LOCK = new Object();
     Object PROTOCOL_REFERENCE_LOCK = new Object();
@@ -186,8 +188,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mPacketizer = new H264Packetizer(this, is, rpcSessionID);
-            mPacketizer.start();
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav);
+            mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
             Log.e(TAG, "Unable to start H.264 streaming:" + e.toString());
@@ -196,8 +198,27 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopH264() {
-        if (mPacketizer != null) {
-            mPacketizer.stop();
+        if (mVideoPacketizer != null) {
+            mVideoPacketizer.stop();
+        }
+    }
+
+    public OutputStream startAudioDataTransfer(byte rpcSessionID) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service);
+            mAudioPacketizer.start();
+            return os;
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to start audio streaming:" + e.toString());
+        }
+        return null;
+    }
+
+    public void stopAudioDataTransfer() {
+        if (mAudioPacketizer != null) {
+            mAudioPacketizer.stop();
         }
     }
 

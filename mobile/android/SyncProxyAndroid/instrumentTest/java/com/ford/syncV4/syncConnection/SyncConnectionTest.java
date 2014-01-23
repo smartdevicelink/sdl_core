@@ -7,11 +7,13 @@ import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
@@ -175,4 +177,36 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertTrue(isPassed[0]);
     }
 
+    public void testStartAudioDataTransferReturnsOutputStream() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        assertNotNull("output stream should be created", stream);
+    }
+
+    public void testStartAudioDataTransferCreatesAudioPacketizer() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
+    }
+
+    public void testStartAudioDataTransferStartsPacetizer() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
+        assertEquals(Thread.State.RUNNABLE, packetizer.getThread().getState());
+    }
+
+    public void testStartAudioDataTransferSetsSessionID() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
+        assertEquals("session id should be equal SESSION_ID", SESSION_ID, packetizer.getSessionID());
+    }
+
+    public void testStopAudioDataTransferStopPacketizer() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config);
+        connection.mAudioPacketizer = mock(H264Packetizer.class);
+        connection.stopAudioDataTransfer();
+        verify(connection.mAudioPacketizer, times(1)).stop();
+    }
 }

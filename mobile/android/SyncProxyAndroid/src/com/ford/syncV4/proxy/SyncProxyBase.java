@@ -1185,7 +1185,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
             // Dispatching logic
-            if (message.getSessionType().equals(ServiceType.RPC)) {
+            if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
                     if (_wiproVersion == 1) {
                         if (message.getVersion() == 2) setWiProVersion(message.getVersion());
