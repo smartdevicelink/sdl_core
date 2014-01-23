@@ -118,6 +118,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
@@ -1388,6 +1389,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    /**
+     * Handles a response that is a part of partial request (i.e., split into
+     * multiple protocol messages) if it is.
+     *
+     * @param response response from the SDL
+     * @return true if the response has been handled; false when the
+     * corresponding request is not partial or in case of an error
+     */
+    private boolean handlePartialRPCResponse(RPCResponse response) {
+        boolean success = false;
+        final Integer responseCorrelationID = response.getCorrelationID();
+        if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
+            if (Result.SUCCESS == response.getResultCode()) {
+                final ProtocolMessage pm = protocolMessageHolder.popNextMessage(
+                        responseCorrelationID);
+                queueOutgoingMessage(pm);
+
+                success = true;
+            } else {
+                protocolMessageHolder.clearMessages(responseCorrelationID);
+            }
+        }
+
+        return success;
+    }
+
     private void handleRPCMessage(Hashtable hash) {
         RPCMessage rpcMsg = new RPCMessage(hash);
         String functionName = rpcMsg.getFunctionName();
@@ -1398,11 +1425,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationID();
-            if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
-                final ProtocolMessage pm = protocolMessageHolder.popNextMessage(
-                        responseCorrelationID);
-                queueOutgoingMessage(pm);
-            } else {
+            if (!handlePartialRPCResponse(response)) {
 
                 // Check to ensure response is not from an internal message (reserved correlation ID)
                 if (isCorrelationIDProtected(responseCorrelationID)) {
