@@ -438,4 +438,6 @@ public class Names {
     public static final String systemFile = "systemFile";
     public static final String offset = "offset";
     public static final String length = "length";
+    public static final String SystemRequest = "SystemRequest";
+    public static final String OnSystemRequest = "OnSystemRequest";
 }
