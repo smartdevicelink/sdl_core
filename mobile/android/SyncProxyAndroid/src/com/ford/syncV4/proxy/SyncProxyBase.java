@@ -194,8 +194,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
-    // Mobile Nav Session ID
-    protected byte _mobileNavSessionID = 100;
+
     // SyncProxy Advanced Lifecycle Management
     protected Boolean _advancedLifecycleManagementEnabled = false;
     // Proxy State Variables
@@ -719,7 +718,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public byte getMobileNavSessionID() {
-        return _mobileNavSessionID;
+        return currentSession.getSessionId();
     }
 
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
@@ -1044,7 +1043,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void stopAllServices() {
         if (getServicePool().size() > 0) {
-            stopMobileNaviSession();
+            stopMobileNaviService();
+            stopAudioService();
         }
     }
 
@@ -1196,7 +1196,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
             // Dispatching logic
-            if (message.getSessionType().equals(ServiceType.RPC)) {
+            if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
                     if (_wiproVersion == 1) {
                         if (message.getVersion() == 2) setWiProVersion(message.getVersion());
@@ -2498,6 +2498,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
                         }
+                    }else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF){
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                        }
                     } else {
                         // This requires the proxy to be cycled
                         if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
@@ -2738,8 +2750,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         Log.i(TAG, "Mobile Nav Session started" + correlationID);
 
         createService(sessionID, ServiceType.Mobile_Nav);
-
-        _mobileNavSessionID = sessionID;
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2776,17 +2786,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         currentSession.createService(serviceType);
     }
 
-    public void stopMobileNaviSession() {
-        if (removeServiceFromSession(_mobileNavSessionID)) {
-            Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
-            getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+    public void stopMobileNaviService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
+            Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
+            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
         }
     }
 
-    private boolean removeServiceFromSession(byte sessionID) {
+    public void stopAudioService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
+            Log.i(TAG, "Audio service is going to stop" + currentSession.getSessionId());
+            getSyncConnection().closeAudioService(currentSession.getSessionId());
+        }
+    }
+
+    private boolean removeServiceFromSession(byte sessionID, ServiceType serviceType) {
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
-            if (service.getSession().getSessionId() == sessionID) {
+            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType())) ) {
                 currentSession.removeService(service);
                 return true;
             }
@@ -2815,7 +2832,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startH264() {
         OutputStream stream = null;
         if (_syncConnection != null) {
-            stream = _syncConnection.startH264(_mobileNavSessionID);
+            stream = _syncConnection.startH264(currentSession.getSessionId());
         }
         return stream;
     }
@@ -2826,44 +2843,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
-        if (rtpPacket == null) {
-            throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);
+    public OutputStream startAudioDataTransfer() {
+        OutputStream stream = null;
+        if (_syncConnection != null) {
+            stream = _syncConnection.startAudioDataTransfer(currentSession.getSessionId());
         }
-        checkSyncConnection();
-        return sendRTPPacket(rtpPacket);
+        return stream;
     }
 
-    private boolean sendRTPPacket(byte[] rtpPacket) throws SyncException {
-        ProtocolMessage pm = createMobileNavSessionProtocolMessage(rtpPacket);
-        try {
-            // Queue this outgoing message
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-                if (_outgoingProxyMessageDispatcher != null) {
-                    _outgoingProxyMessageDispatcher.queueMessage(pm);
-                } else {
-                    return false;
-                }
-            }
-        } catch (OutOfMemoryError e) {
-            SyncTrace.logProxyEvent("OutOfMemory exception while sending RTP packet", SYNC_LIB_TRACE_KEY);
-            throw new SyncException("OutOfMemory exception while sending RTP packet ", e, SyncExceptionCause.INVALID_ARGUMENT);
+    public void stopAudioDataTransfer() {
+        if (_syncConnection != null) {
+            _syncConnection.stopAudioDataTransfer();
         }
-        return true;
-    }
-
-    public ProtocolMessage createMobileNavSessionProtocolMessage(byte[] rtpPacket) {
-        return createProtocolMessage(rtpPacket);
-    }
-
-    private ProtocolMessage createProtocolMessage(byte[] rtpPacket) {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setData(rtpPacket);
-        pm.setSessionID(_mobileNavSessionID);
-        pm.setVersion(getWiProVersion());
-        pm.setMessageType(MessageType.VIDEO);
-        pm.setSessionType(ServiceType.Mobile_Nav);
-        return pm;
     }
 
     /**

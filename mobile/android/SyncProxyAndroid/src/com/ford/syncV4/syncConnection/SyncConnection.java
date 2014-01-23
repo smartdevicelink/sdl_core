@@ -27,12 +27,11 @@ import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Arrays;
-import java.util.LinkedList;
 
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
@@ -40,14 +39,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
-    AbstractPacketizer mPacketizer = null;
+    AbstractPacketizer mVideoPacketizer = null;
+    AbstractPacketizer mAudioPacketizer = null;
     // Thread safety locks
     Object TRANSPORT_REFERENCE_LOCK = new Object();
     Object PROTOCOL_REFERENCE_LOCK = new Object();
     IHeartbeatMonitor _heartbeatMonitor;
     private boolean _isHeartbeatTimedout = false;
     private NSDHelper mNSDHelper;
-    private LimitedQueue<String> queue = new LimitedQueue<String>(10);
 
     /**
      * Constructor.
@@ -171,7 +170,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void closeMobileNavSession(byte mobileNavSessionId) {
+    public void closeMobileNaviService(byte mobileNavSessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
@@ -182,12 +181,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    public void closeAudioService(byte sessionID) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                // If transport is still connected, sent EndProtocolSessionMessage
+                if (_transport != null && _transport.getIsConnected()) {
+                    _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
+                }
+            } // end-if
+        }
+    }
+
     public OutputStream startH264(byte rpcSessionID) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mPacketizer = new H264Packetizer(this, is, rpcSessionID);
-            mPacketizer.start();
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav);
+            mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
             Log.e(TAG, "Unable to start H.264 streaming:" + e.toString());
@@ -196,8 +206,27 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopH264() {
-        if (mPacketizer != null) {
-            mPacketizer.stop();
+        if (mVideoPacketizer != null) {
+            mVideoPacketizer.stop();
+        }
+    }
+
+    public OutputStream startAudioDataTransfer(byte rpcSessionID) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service);
+            mAudioPacketizer.start();
+            return os;
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to start audio streaming:" + e.toString());
+        }
+        return null;
+    }
+
+    public void stopAudioDataTransfer() {
+        if (mAudioPacketizer != null) {
+            mAudioPacketizer.stop();
         }
     }
 
@@ -293,40 +322,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
-                if (length == 12 ){
-                    queue.add(byteArrayToHexString(Arrays.copyOfRange(msgBytes,0,3)));
-                }
-                Log.i(TAG + "MSG_QUEUE", "msg queue" + queue);
                 _transport.sendBytes(msgBytes, offset, length);
             }
-        }
-    }
-
-    private static String byteArrayToHexString(byte[] b) {
-        StringBuffer sb = new StringBuffer(b.length * 2);
-        for (int i = 0; i < b.length; i++) {
-            int v = b[i] & 0xff;
-            if (v < 16) {
-                sb.append('0');
-            }
-            sb.append(Integer.toHexString(v));
-        }
-        return sb.toString().toUpperCase();
-    }
-
-    class LimitedQueue<E> extends LinkedList<E> {
-
-        private final int limit;
-
-        public LimitedQueue(int limit) {
-            this.limit = limit;
-        }
-
-        @Override
-        public boolean add(E o) {
-            super.add(o);
-            while (size() > limit) { super.remove(); }
-            return true;
         }
     }
 
@@ -412,4 +409,5 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         closeConnection((byte) 0, false, false);
         _connectionListener.onHeartbeatTimedOut();
     }
+
 }

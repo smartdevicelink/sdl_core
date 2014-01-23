@@ -13,18 +13,25 @@ import java.util.Arrays;
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public final static String TAG = "H264Packetizer";
     private static byte[] tail = null;
-    private Thread t = null;
+
+    private Thread thread = null;
+
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
 
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
+    public Thread getThread() {
+        return thread;
+    }
+
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType) throws IOException {
         super(streamListener, is, rpcSessionID);
+        _serviceType = serviceType;
     }
 
     public void start() throws IOException {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
+        if (thread == null) {
+            thread = new Thread(this);
+            thread.start();
         }
     }
 
@@ -35,9 +42,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             }
         } catch (IOException ignore) {
         }
-        if (t != null) {
-            t.interrupt();
-            t = null;
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
         }
     }
 
@@ -71,7 +78,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setSessionID(_rpcSessionID);
-        pm.setSessionType(ServiceType.Mobile_Nav);
+        pm.setSessionType(_serviceType);
         pm.setFunctionID(0);
         pm.setCorrID(0);
         pm.setData(frameData, frameData.length);
