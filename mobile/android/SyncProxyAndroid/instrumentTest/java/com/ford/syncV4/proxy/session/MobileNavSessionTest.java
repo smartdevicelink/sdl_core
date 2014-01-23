@@ -3,7 +3,8 @@ package com.ford.syncV4.proxy.session;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.protocol.WiProProtocol;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 import org.mockito.Mockito;
 
@@ -31,17 +32,21 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
 
     private WiProProtocol createMockWiProProtocol(){
         WiProProtocol wiProProtocol = mock(WiProProtocol.class);
-        Mockito.doThrow(new IllegalArgumentException("Can't call this method")).when(wiProProtocol).startProtocolSession(SessionType.Mobile_Nav);
+        Session session = new Session();
+        session.setSessionId((byte) 0x01);
+        Mockito.doThrow(new IllegalArgumentException("Can't call this method")).when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav, session);
         return wiProProtocol;
     }
 
     public void testMobileNavigationSessionCreation() throws Exception {
         MobileNavSession mobileNavSessionSession = new MobileNavSession(_protocol);
-        assertNotNull("mobile Nav session should be created", mobileNavSessionSession);
+        assertNotNull("mobile Nav currentSession should be created", mobileNavSessionSession);
     }
 
     public void testMobileNavigationStartSession() throws Exception {
-        _sut.startSession((byte)0x0A);
+        Session session = new Session();
+        session.setSessionId((byte)0x0A);
+        _sut.startSession(session);
         assertTrue("should get here",true);
     }
 }

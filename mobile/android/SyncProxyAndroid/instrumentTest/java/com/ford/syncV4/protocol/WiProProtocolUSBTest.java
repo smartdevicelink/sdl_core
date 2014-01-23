@@ -1,6 +1,7 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 import junit.framework.TestCase;
 
@@ -22,13 +23,13 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(SessionType sessionType,
-                                                 byte sessionID, byte version,
+            public void onProtocolSessionStarted(Session session,
+                                                 byte version,
                                                  String correlationID) {
             }
 
             @Override
-            public void onProtocolSessionEnded(SessionType sessionType,
+            public void onProtocolServiceEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
@@ -48,6 +49,11 @@ public class WiProProtocolUSBTest extends TestCase {
             @Override
             public void onProtocolAppUnregistered() {
                 requiredMethodCalled = true;
+            }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
             }
         };
 
@@ -90,13 +96,13 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(SessionType sessionType,
-                                                 byte sessionID, byte version,
+            public void onProtocolSessionStarted(Session session,
+                                                 byte version,
                                                  String correlationID) {
             }
 
             @Override
-            public void onProtocolSessionEnded(SessionType sessionType,
+            public void onProtocolServiceEnded(ServiceType sessionType,
                                                byte sessionID,
                                                String correlationID) {
             }
@@ -118,6 +124,11 @@ public class WiProProtocolUSBTest extends TestCase {
                 assertFalse(
                         "Incoming UnregisterAppInterface request shouldn't " +
                                 "trigger the method", true);
+            }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
             }
         };
 

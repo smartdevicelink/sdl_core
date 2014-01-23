@@ -57,7 +57,7 @@ public class MobileNavPreviewFragment extends Fragment{
         if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mobileNavSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviSession();
+            tester.startMobileNaviService();
         } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavSession();

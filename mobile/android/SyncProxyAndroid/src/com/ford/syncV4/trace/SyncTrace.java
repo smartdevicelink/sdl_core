@@ -9,7 +9,7 @@ import android.os.Process;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -233,7 +233,7 @@ public class SyncTrace {
 		} // end-if
 
         // do not log mobile navi data frames
-        if (frameHeader.getSessionType() == SessionType.Mobile_Nav && frameHeader.getFrameType() == FrameType.Single) {
+        if (frameHeader.getServiceType() == ServiceType.Mobile_Nav && frameHeader.getFrameType() == FrameType.Single) {
             return;
         }
 
@@ -268,11 +268,11 @@ public class SyncTrace {
 		return "Unknown";
 	} // end-method
 
-	private static String getProtocolSessionType(SessionType serviceType) {
+	private static String getProtocolSessionType(ServiceType serviceType) {
 		String s;
-		if (serviceType == SessionType.RPC )
+		if (serviceType == ServiceType.RPC )
 			s = "rpc";
-		else if (serviceType == SessionType.Bulk_Data)
+		else if (serviceType == ServiceType.Bulk_Data)
 			s = "bulk";
 		else
 			s = "Unknown";
@@ -289,7 +289,7 @@ public class SyncTrace {
 		sb.append("</cmp><ft>");
 		sb.append(getProtocolFrameType(hdr.getFrameType()));
 		sb.append("</ft><st>");
-		sb.append(getProtocolSessionType(hdr.getSessionType()));
+		sb.append(getProtocolSessionType(hdr.getServiceType()));
 		sb.append("</st><sid>");
 		sb.append(hdr.getSessionID());
 		sb.append("</sid><sz>");
@@ -299,14 +299,14 @@ public class SyncTrace {
 		int frameData = hdr.getFrameData();
 		if (hdr.getFrameType() == FrameType.Control) {
 			sb.append("<ca>");
-			if (frameData == FrameDataControlFrameType.StartSession.getValue()) 
-				sb.append("StartSession");
-			else if (frameData == FrameDataControlFrameType.StartSessionACK.getValue())
-				sb.append("StartSessionACK");
-			else if (frameData == FrameDataControlFrameType.StartSessionNACK.getValue())
-				sb.append("StartSessionNACK");
-			else if (frameData == FrameDataControlFrameType.EndSession.getValue())
-				sb.append("EndSession");
+			if (frameData == FrameDataControlFrameType.StartService.getValue())
+				sb.append("StartService");
+			else if (frameData == FrameDataControlFrameType.StartServiceACK.getValue())
+				sb.append("StartServiceACK");
+			else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue())
+				sb.append("StartServiceNACK");
+			else if (frameData == FrameDataControlFrameType.EndService.getValue())
+				sb.append("EndService");
 			sb.append("</ca>");
 		} else if (hdr.getFrameType() == FrameType.Consecutive ) {
 			sb.append("<fsn>");

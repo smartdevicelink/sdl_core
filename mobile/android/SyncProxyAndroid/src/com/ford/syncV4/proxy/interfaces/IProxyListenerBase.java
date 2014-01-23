@@ -1,6 +1,6 @@
 package com.ford.syncV4.proxy.interfaces;
 
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -310,7 +310,9 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
 
-    public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID);
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
     public void onSessionStarted(byte sessionID, String correlationID);
+
+    public void onAudioServiceStart();
 }

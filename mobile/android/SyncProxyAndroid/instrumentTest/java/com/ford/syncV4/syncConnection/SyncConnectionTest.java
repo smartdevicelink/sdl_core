@@ -5,7 +5,8 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
@@ -49,9 +50,11 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertNotNull("should not be null", connection);
     }
 
-    public void testStartMobileNavSessionShouldSendAppropriateBytes() throws Exception {
+    public void testStartMobileNavServiceShouldSendAppropriateBytes() throws Exception {
         byte sessionID = 0x0A;
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(SessionType.Mobile_Nav, 0x00, VERSION);
+        Session session = new Session();
+        session.setSessionId(sessionID);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, 0x00, VERSION);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
@@ -67,19 +70,19 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.startMobileNavSession(sessionID);
+        connection.startMobileNavService(session);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(SessionType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
+        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(ServiceType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
-            public void onProtocolSessionStarted(SessionType sessionType, byte sessionID, byte version, String correlationID) {
-                super.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
+                super.onProtocolSessionStarted(session, version, correlationID);
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
-                assertEquals("SessionType should be equal.", header.getSessionType(), sessionType);
-                assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
+                assertEquals("ServiceType should be equal.", header.getServiceType(), session.getServiceList().get(0).getServiceType());
+                assertEquals("Frame headers should be equal.", header.getSessionID(), session.getSessionId());
                 assertEquals("Version should be equal.", header.getVersion(), version);
             }
         };
@@ -90,7 +93,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
         byte[] data = BitConverter.intToByteArray(0);
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(SessionType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
+        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(ServiceType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             private int count = 0;
@@ -128,7 +131,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             }
         };
         connection.getIsConnected();
-        connection.onProtocolSessionEnded(SessionType.RPC, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.RPC, SESSION_ID, "");
         verify(connection._transport, times(1)).stopReading();
     }
 
@@ -141,8 +144,35 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             }
         };
         connection.getIsConnected();
-        connection.onProtocolSessionEnded(SessionType.Mobile_Nav, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.Mobile_Nav, SESSION_ID, "");
         verify(connection._transport, never()).stopReading();
 
     }
+
+    public void testStartAudioServiceShouldSendAppropriateBytes() throws Exception {
+        final boolean[] isPassed = {false};
+        byte sessionID = 0x0A;
+        Session session = new Session();
+        session.setSessionId(sessionID);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, 0x00, VERSION);
+        header.setSessionID(sessionID);
+        final ProtocolFrameHeader realHeader = header;
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
+
+            @Override
+            public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
+                                                     int length) {
+                super.onProtocolMessageBytesToSend(msgBytes, offset, length);
+                isPassed[0] = true;
+                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
+                assertEquals("Offset should be 0", offset, 0);
+                assertEquals("Length should be 12", length, 12);
+            }
+        };
+        WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
+        protocol.setVersion(VERSION);
+        connection.startAudioService(session);
+        assertTrue(isPassed[0]);
+    }
+
 }

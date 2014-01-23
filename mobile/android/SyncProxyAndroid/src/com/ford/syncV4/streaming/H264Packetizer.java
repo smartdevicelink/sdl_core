@@ -3,7 +3,7 @@ package com.ford.syncV4.streaming;
 import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,7 +71,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setSessionID(_rpcSessionID);
-        pm.setSessionType(SessionType.Mobile_Nav);
+        pm.setSessionType(ServiceType.Mobile_Nav);
         pm.setFunctionID(0);
         pm.setCorrID(0);
         pm.setData(frameData, frameData.length);
@@ -105,7 +105,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     private MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
         int length = readDataFromStream(data);
         if (length == -1) {
-            return MobileNaviDataFrame.createEndOfSessionFrame();
+            return MobileNaviDataFrame.createEndOfServiceFrame();
         } else {
             MobileNaviDataFrame frame = null;
             if (data.length == length) {
