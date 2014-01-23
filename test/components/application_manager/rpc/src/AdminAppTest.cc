@@ -63,13 +63,15 @@ namespace test {
 			//Start init dependence appManagerImpl,HMIImpl,transport...
 			initStartData();
 			
-			sleep(20);
+			sleep(5);
 			printf("\n\n\n after init in Admin \n\n\n");
 			//////////////////////////////////////////////
 			//Test AddCommand
 			
 			testHMI();
+
 			app_manager_->UnregisterAllApplications();
+
 			//////////////////////////////////////////////
 			//Test Mobile
 			

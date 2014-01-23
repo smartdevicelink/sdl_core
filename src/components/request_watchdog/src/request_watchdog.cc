@@ -48,23 +48,24 @@ const int32_t RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
-
+/*
 Watchdog* RequestWatchdog::instance() {
   static RequestWatchdog instnc;
   return &instnc;
 }
-
+*/
 RequestWatchdog::RequestWatchdog()
   : queueDispatcherThread("RequestQueueThread",
-                          new QueueDispatcherThreadDelegate()) {
+                          new QueueDispatcherThreadDelegate(this)) {
   LOG4CXX_TRACE_ENTER(logger_);
   queueDispatcherThread.start();
 }
 
 RequestWatchdog::~RequestWatchdog() {
+  //printf("\n\n\n after begin \n\n\n");
   LOG4CXX_INFO(logger_, "RequestWatchdog destructor.");
   stopDispatcherThreadIfNeeded();
-  queueDispatcherThread.join();
+  //printf("\n\n\n after join \n\n\n");
 }
 
 void RequestWatchdog::AddListener(WatchdogSubscriber* subscriber) {
@@ -284,9 +285,12 @@ void RequestWatchdog::stopDispatcherThreadIfNeeded() {
   queueDispatcherThread.stop();
 }
 
-RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate()
+RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate(RequestWatchdog* inRequestWatchdog)
   : threads::ThreadDelegate()
-{}
+  , stop_flag_(false)
+  ,requestWatchdog_(inRequestWatchdog)
+{
+}
 
 void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -297,33 +301,33 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   int32_t cycleDuration;
   TimevalStruct cycleStartTime;
 
-  RequestWatchdog* instnc = static_cast<RequestWatchdog*>(
-                                RequestWatchdog::instance());
-  if (!instnc) {
+  //RequestWatchdog* instnc = static_cast<RequestWatchdog*>(
+  //                              RequestWatchdog::instance());
+  if (!requestWatchdog_) {
     LOG4CXX_INFO(logger_, "Cannot get instance of RequestWatchdog.");
     return;
   }
 
-  while (true) {
+  while (!stop_flag_) {
     usleep(cycleSleepInterval);
 
     cycleStartTime = date_time::DateTime::getCurrentTime();
 
     {
-      AutoLock auto_lock(instnc->requestsLock_);
+      AutoLock auto_lock(requestWatchdog_->requestsLock_);
 
-      it = instnc->requests_.begin();
+      it = requestWatchdog_->requests_.begin();
 
-      while (it != instnc->requests_.end()) {
+      while (it != requestWatchdog_->requests_.end()) {
         if (it->first->delayed_delete_) {
-          if (instnc->requests_.begin() == it) {
+          if (requestWatchdog_->requests_.begin() == it) {
             delete it->first;
-            instnc->requests_.erase(it);
-            it = instnc->requests_.begin();
+            requestWatchdog_->requests_.erase(it);
+            it = requestWatchdog_->requests_.begin();
           } else {
             it_temp = --it;
             delete(++it)->first;
-            instnc->requests_.erase(it);
+            requestWatchdog_->requests_.erase(it);
             it = ++it_temp;
           }
           continue;
@@ -350,7 +354,7 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
 
           {
             AutoUnlock auto_unlock(auto_lock);
-            instnc->notifySubscribers(*(it->first));
+            requestWatchdog_->notifySubscribers(*(it->first));
           }
 
         }
@@ -362,6 +366,11 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
     cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
                           (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
   }
+}
+
+bool RequestWatchdog::QueueDispatcherThreadDelegate::exitThreadMain() {
+  stop_flag_ = true;
+  return true;
 }
 
 }  //  namespace request_watchdog

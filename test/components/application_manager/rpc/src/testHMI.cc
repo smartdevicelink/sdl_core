@@ -163,7 +163,7 @@ namespace test{
 			Application* appl = app_manager_->application(65537);
 			
 			////////////////////////////////////////
-			sleep(20);
+			sleep(5);
 			
 			
 			
@@ -181,7 +181,7 @@ namespace test{
 			//mobile_apis::FunctionID::RegisterAppInterfaceID;
 
 			
-			(*HMIRequest)[strings::params][strings::function_id] 		= mobile_apis::FunctionID::AddCommandID;
+			(*HMIRequest)[S_PARAMS][strings::function_id] 		= mobile_apis::FunctionID::AddCommandID;
 			(*HMIRequest)[S_PARAMS][strings::correlation_id] 	= 1;
 			(*HMIRequest)[S_PARAMS][strings::message_type] 		= mobile_apis::messageType::request;
 			(*HMIRequest)[S_PARAMS][strings::protocol_type] 	= 0;
@@ -231,12 +231,12 @@ namespace test{
 			//if (appRegistr)
 			//	printf("\n\n\n blablabla \n\n\n");
 
-			appl->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
+			//appl->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
 
-			//app_manager_->ManageMobileCommand(HMIRequest);
+			app_manager_->ManageMobileCommand(HMIRequest);
 
 			
-			sleep(20);
+			sleep(5);
 		}
 	}//namespace app_manager_test
 }//namespace test

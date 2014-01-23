@@ -46,7 +46,7 @@ log4cxx::LoggerPtr logger_ =
 RequestController::RequestController()
   : watchdog_(NULL) {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
-  watchdog_ = request_watchdog::RequestWatchdog::instance();
+  watchdog_ = new request_watchdog::RequestWatchdog;
   watchdog_->AddListener(this);
 }
 
@@ -56,7 +56,8 @@ RequestController::~RequestController() {
 
   if (watchdog_) {
     watchdog_->RemoveListener(this);
-    watchdog_->~Watchdog();
+    delete watchdog_; 
+    watchdog_ = NULL;
   }
 }
 

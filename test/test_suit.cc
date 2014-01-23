@@ -47,6 +47,28 @@ int main(int argc, char **argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
+
+  //test::app_manager_test::AdminAppTest app;
+ 
+  //threads::Thread threadAdminAppTest("AdminAppTest", &app);
+
+  //threadAdminAppTest.start();
+
+  //app.run();
+  
+  //threadAdminAppTest.join();
+  //sleep(60);
+
+  //app.run();
+
+  //sleep(20);
+
+  //app.run();
+  
+  //threadAdminAppTest.join();
+  //sleep(60);
+  
+
   int result = RUN_ALL_TESTS();
 
 #ifdef __cplusplus
