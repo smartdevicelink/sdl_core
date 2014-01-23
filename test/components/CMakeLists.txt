@@ -32,6 +32,9 @@ add_subdirectory(./utils)
 # --- policies (Policy Manager)
 add_subdirectory(./policies)
 
+# -- rpc_base
+add_subdirectory(./rpc_base)
+
 # --- DBus
 IF (${QT_HMI})
     add_subdirectory(./dbus)

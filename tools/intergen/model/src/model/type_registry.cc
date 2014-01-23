@@ -1,0 +1,276 @@
+/**
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "model/type_registry.h"
+
+#include <iostream>
+#include <utility>
+
+#include "model/builtin_type_registry.h"
+#include "model/constant.h"
+#include "model/scope.h"
+#include "pugixml.hpp"
+#include "utils/string_utils.h"
+#include "utils/xml_utils.h"
+
+namespace {
+const char* kFunctionIdEnumName = "FunctionID";
+}
+
+namespace codegen {
+
+TypeRegistry::TypeRegistry(BuiltinTypeRegistry* builtin_type_registry)
+    : builtin_type_registry_(builtin_type_registry),
+      enums_deleter_(&enums_),
+      structs_deleter_(&structs_) {
+}
+
+bool TypeRegistry::init(const pugi::xml_node& xml) {
+  if (!AddEnums(xml) || !AddStructs(xml))
+    return false;
+  return true;
+}
+
+bool TypeRegistry::GetType(const pugi::xml_node& params, const Type** type) {
+  pugi::xml_attribute array = params.attribute("array");
+  if (array && array.as_bool(false)) {
+    return GetArray(params, type);
+  } else {
+    return GetNonArray(params, type);
+  }
+}
+
+const TypeRegistry::EnumList& TypeRegistry::enums() const {
+  return enums_;
+}
+
+const TypeRegistry::StructList& TypeRegistry::structs() const {
+  return structs_;
+}
+
+const Enum* TypeRegistry::GetFunctionIDEnum() const {
+  EnumByName::const_iterator res = enum_by_name_.find(kFunctionIdEnumName);
+  if (res != enum_by_name_.end()) {
+    return res->second;
+  } else {
+    std::cerr << "FunctionID enum is not defined" << std::endl;
+    return NULL;
+  }
+}
+
+TypeRegistry::~TypeRegistry() {
+}
+
+// static
+bool TypeRegistry::IsMandatoryParam(const pugi::xml_node& param) {
+  bool mandatory = param.attribute("mandatory").as_bool("true");
+  if (param.attribute("array").as_bool(false)) {
+    mandatory = param.attribute("minsize").as_int(0) > 0;
+  }
+  return mandatory;
+}
+
+bool TypeRegistry::AddEnums(const pugi::xml_node& xml) {
+  for (pugi::xml_node i = xml.child("enum"); i; i = i.next_sibling("enum")) {
+    std::string name = i.attribute("name").value();
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    InternalScope internal_scope = InternalScopeFromLiteral(
+        i.attribute("internal_scope").value());
+    Description description = CollectDescription(i);
+    if (IsRegisteredEnum(name)) {
+      std::cerr << "Duplicate enum: " << name << std::endl;
+      return false;
+    }
+    enums_.push_back(new Enum(name, scope, internal_scope, description));
+    enum_by_name_[name] = enums_.back();
+    if (!AddEnumConstants(enums_.back(), i))
+      return false;
+  }
+  return true;
+}
+
+bool TypeRegistry::AddStructs(const pugi::xml_node& xml) {
+  for (pugi::xml_node i = xml.child("struct"); i;
+      i = i.next_sibling("struct")) {
+    std::string name = i.attribute("name").value();
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    Description description = CollectDescription(i);
+    if (IsRegisteredStruct(name)) {
+      std::cerr << "Duplicate structure: " << name << std::endl;
+      return false;
+    }
+    structs_.push_back(new Struct(name, scope, description));
+    struct_by_name_[name] = structs_.back();
+    if (!AddStructureFields(structs_.back(), i))
+      return false;
+  }
+  return true;
+}
+
+bool TypeRegistry::GetArray(const pugi::xml_node& params, const Type** type) {
+  const Type* array_type = NULL;
+  if (!GetNonArray(params, &array_type)) {
+    return false;
+  }
+  assert(array_type);
+  std::string minsize_str = params.attribute("minsize").as_string("0");
+  std::string maxsize_str = params.attribute("maxsize").as_string("0");
+  int64_t minsize, maxsize;
+  if (StringToNumber(minsize_str, &minsize)
+      && StringToNumber(maxsize_str, &maxsize)) {
+    *type = &*arrays_.insert(Array(array_type, Array::Range(minsize, maxsize)))
+        .first;
+    return true;
+  } else {
+    std::cerr << "Incorrect array size range: " << minsize_str << ", "
+              << maxsize_str << std::endl;
+    return false;
+  }
+}
+
+bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
+                               const Type** type) {
+  pugi::xml_attribute type_name = params.attribute("type");
+  if (type_name) {
+    std::string type_name_str = type_name.value();
+    BuiltinTypeRegistry::BuiltInType builtin_type = builtin_type_registry_
+        ->BuiltInTypeByName(type_name_str);
+    if (BuiltinTypeRegistry::kNotABuiltInType != builtin_type) {
+      return builtin_type_registry_->GetType(builtin_type, params, type);
+    } else if (IsRegisteredEnum(type_name_str)) {
+      return GetEnum(type_name_str, type);
+    } else if (IsRegisteredStruct(type_name_str)) {
+      return GetStruct(type_name_str, type);
+    } else {
+      std::cerr << "Unregistered type: " << type_name_str << std::endl;
+      return false;
+    }
+  } else {
+    std::cerr << "Absent type name" << std::endl;
+    return false;
+  }
+}
+
+bool TypeRegistry::GetEnum(const std::string& name, const Type** type) {
+  EnumByName::iterator i = enum_by_name_.find(name);
+  if (i != enum_by_name_.end()) {
+    *type = i->second;
+    return true;
+  } else {
+    std::cerr << "Unregistered enum " << name << std::endl;
+    return false;
+  }
+}
+
+bool TypeRegistry::GetStruct(const std::string& name, const Type** type) {
+  StructByName::iterator i = struct_by_name_.find(name);
+  if (i != struct_by_name_.end()) {
+    *type = i->second;
+    return true;
+  } else {
+    std::cerr << "Unregistered struct " << name << std::endl;
+    return false;
+  }
+}
+
+bool TypeRegistry::IsRegisteredEnum(const std::string& enum_name) {
+  return enum_by_name_.find(enum_name) != enum_by_name_.end();
+}
+
+bool TypeRegistry::IsRegisteredStruct(const std::string& struct_name) {
+  return struct_by_name_.find(struct_name) != struct_by_name_.end();
+}
+
+bool TypeRegistry::AddEnumConstants(Enum* enm, const pugi::xml_node& xml_enum) {
+  for (pugi::xml_node i = xml_enum.child("element"); i;
+      i = i.next_sibling("element")) {
+    std::string name = i.attribute("name").value();
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    std::string internal_name = i.attribute("internal_name").value();
+    Description description = CollectDescription(i);
+    std::string design_description = i.child_value("designdescription");
+    pugi::xml_attribute xml_value = i.attribute("value");
+    if (xml_value) {
+      int64_t val;
+      if (!StringToNumber(xml_value.value(), &val)) {
+        std::cerr << "Non-numeric value of enum constant " << name << std::endl;
+      }
+      if (!enm->AddConstant(name, val, scope, internal_name, description,
+                            design_description)) {
+        return false;
+      }
+    } else {
+      if (!enm->AddConstant(name, scope, internal_name, description,
+                            design_description)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool TypeRegistry::AddStructureFields(Struct* strct,
+                                      const pugi::xml_node& xml_struct) {
+  for (pugi::xml_node i = xml_struct.child("param"); i;
+      i = i.next_sibling("param")) {
+    std::string type_name = i.attribute("type").value();
+    const Type* type = NULL;
+    if (!GetType(i, &type)) {
+      std::cerr << "Failed to get field type for struct " << strct->name()
+                << std::endl;
+      return false;
+    }
+    std::string name = i.attribute("name").value();
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    std::string defvalue = i.attribute("defvalue").value();
+    bool mandatory = IsMandatoryParam(i);
+    const Constant* defvalue_constant = NULL;
+    if (!defvalue.empty()) {
+      const ConstantsCreator* const_creator = type->SupportsConstants();
+      if (!const_creator) {
+        std::cerr << "Default value can not be provided for " << type_name
+                  << std::endl;
+        return false;
+      } else {
+        defvalue_constant = const_creator->ConstantFor(defvalue);
+      }
+    }
+    Description description = CollectDescription(i);
+    Platform platform = PlatformFromLiteral(i.attribute("platform").value());
+    strct->AddField(type, name, mandatory, scope, defvalue_constant,
+                    description, platform);
+  }
+  return true;
+}
+
+}  // namespace codegen
+

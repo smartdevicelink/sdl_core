@@ -7,6 +7,7 @@ find_package(Glib-2.0 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
+add_subdirectory(./tools)
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.6.0/include
