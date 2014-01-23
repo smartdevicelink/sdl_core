@@ -8,7 +8,9 @@ public class FrameDataControlFrameType extends ByteEnumer {
     private static Vector<FrameDataControlFrameType> theList =
             new Vector<FrameDataControlFrameType>();
 
-    public static Vector getList() { return theList; }
+    public static Vector<FrameDataControlFrameType> getList() {
+        return theList;
+    }
 
 	private byte _i = 0x00;
 
