@@ -21,6 +21,7 @@ import java.io.PipedOutputStream;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -207,5 +208,12 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         OutputStream stream = proxyALM.startAudioDataTransfer();
         assertNotNull("stream should not be null" ,stream);
+    }
+
+    public void testStopAudioDataTransferFiresCallback() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.stopAudioDataTransfer();
+        verify(proxyALM._syncConnection, timeout(1)).stopAudioDataTransfer();
     }
 }

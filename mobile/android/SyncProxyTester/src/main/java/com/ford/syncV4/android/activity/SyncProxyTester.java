@@ -42,6 +42,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -4144,8 +4145,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
-        MobileNavPreviewFragment audioFragement = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-        audioFragement.setMobileNaviStateOff();
+        AudioServicePreviewFragment audioFragement = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+        audioFragement.setAudioServiceStateOff();
         closeAudioOutputStream();
     }
 
@@ -4218,8 +4219,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (ProxyService.getInstance().getProxyInstance() != null) {
             SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
             OutputStream stream = proxy.startAudioDataTransfer();
-            MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-            fr.setMobileNaviStateOn(stream);
+            AudioServicePreviewFragment fr = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setAudioServiceStateOn(stream);
         }
     }
 
