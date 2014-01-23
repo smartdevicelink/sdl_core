@@ -42,28 +42,30 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     ISyncConnectionListener _connectionListener = null;
     AbstractPacketizer mPacketizer = null;
     // Thread safety locks
-    Object TRANSPORT_REFERENCE_LOCK = new Object();
-    Object PROTOCOL_REFERENCE_LOCK = new Object();
+    private static final Object TRANSPORT_REFERENCE_LOCK = new Object();
+    private static final Object PROTOCOL_REFERENCE_LOCK = new Object();
     IHeartbeatMonitor _heartbeatMonitor;
     private boolean _isHeartbeatTimedout = false;
     private NSDHelper mNSDHelper;
     private LimitedQueue<String> queue = new LimitedQueue<String>(10);
 
+    // Id of the current active session
+    private byte mSessionId = Session.DEFAULT_SESSION_ID;
+
     /**
      * Constructor.
      *
      * @param listener        Sync connection listener.
-     * @param transportConfig Transport configuration for this connection.
      */
-    public SyncConnection(ISyncConnectionListener listener, BaseTransportConfig transportConfig) {
-        this(listener, transportConfig, null);
+    public SyncConnection(ISyncConnectionListener listener) {
+        _connectionListener = listener;
     }
 
-    public SyncConnection(ISyncConnectionListener listener,
-                          BaseTransportConfig transportConfig,
-                          SyncTransport transport) {
-        _connectionListener = listener;
+    public void init(BaseTransportConfig transportConfig) {
+        init(transportConfig, null);
+    }
 
+    public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             // Ensure transport is null
@@ -104,7 +106,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol != null) {
                 _protocol = null;
             }
-
             _protocol = new WiProProtocol(this);
         }
     }
@@ -257,7 +258,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolSession();
+                Log.d(TAG, "StartProtocolSession, id:" + mSessionId);
+                _protocol.StartProtocolSession(mSessionId);
             }
         }
     }
@@ -411,5 +413,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _isHeartbeatTimedout = true;
         closeConnection((byte) 0, false, false);
         _connectionListener.onHeartbeatTimedOut();
+    }
+
+    /**
+     * Set ID of the current active session
+     * @param sessionId
+     */
+    public void setSessionId(byte sessionId) {
+        mSessionId = sessionId;
+        Log.d(TAG, "SetSessionId:" + mSessionId);
     }
 }

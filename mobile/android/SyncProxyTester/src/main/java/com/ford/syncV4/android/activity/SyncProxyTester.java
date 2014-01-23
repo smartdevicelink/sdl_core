@@ -4166,7 +4166,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void stopMobileNavSession() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
-            ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
+            ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
             closeMobileNaviOutputStream();
         }
     }

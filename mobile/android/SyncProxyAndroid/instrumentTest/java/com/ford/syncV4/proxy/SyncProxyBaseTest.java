@@ -42,7 +42,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
-        proxyALM.stopMobileNaviSession();
+        proxyALM.stopMobileNaviService();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
@@ -71,7 +71,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testStopMobileNaviSessionForUnexcitingSessionDontThrowsException() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         try {
-            proxyALM.stopMobileNaviSession();
+            proxyALM.stopMobileNaviService();
         }catch (ArrayIndexOutOfBoundsException e){
             assertNull("exception should not be thrown", e);
         }

@@ -50,10 +50,13 @@ public abstract class AbstractProtocol {
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
 
-    // This method starts a protocol currentSession.  A corresponding call to the protocol
-    // listener onProtocolSessionStarted() method will be made when the protocol
-    // currentSession has been established.
-    public abstract void StartProtocolSession();
+    /**
+     * This method starts a protocol currentSession. A corresponding call to the protocol
+     * listener onProtocolSessionStarted() method will be made when the protocol
+     * currentSession has been established.
+     * @param sessionId ID of the current active session
+     */
+    public abstract void StartProtocolSession(byte sessionId);
 
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
