@@ -446,7 +446,8 @@ if $QT4_HMI; then
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xzf ${DBUS_ARCHIVE}
 		cd ${DBUS_FOLDER}
-		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
+		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc \
+			LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
 		make -j${BUILD_THREADS_COUNT}
 		make install
 		#save configure and make output in log file
@@ -474,30 +475,6 @@ if $QT4_HMI; then
 		echo "Installing zip and gzip"
         apt-install gzip zip
 		echo $OK
-
-	    LOG4CXX_FOLDER="apache-log4cxx-0.10.0"
-	    LOG4CXX_ARCHIVE="${LOG4CXX_FOLDER}.tar.gz"
-		LOG4CXX_DOWNLOAD_LINK="${THIRDPARTYLIBS_DOWNLOAD_LINK}/${LOG4CXX_ARCHIVE}"
-		LOG4CXX_DOWNLOAD_DST="${TEMP_FOLDER}/log4cxx"
-		load-from-ftp ${LOG4CXX_DOWNLOAD_LINK} ${LOG4CXX_DOWNLOAD_DST}
-		LOG4CXX_BUILD_LOG="${LOG4CXX_DOWNLOAD_DST}/${LOG4CXX_FOLDER}_build.log"
-	    echo "Installing Log4cxx, please be patient."
-        echo "Additional configure and build information will be saved to ${LOG4CXX_BUILD_LOG}."
-		{
-		cd ${LOG4CXX_DOWNLOAD_DST}
-		tar -xzf ${LOG4CXX_ARCHIVE}
-		#Apply fix pathc for kernel 2.6.29.6+
-		patch -p 1 < log4cxx.patch
-		patch -p 1 < cppFolder_stringInclude.patch
-		cd ${LOG4CXX_FOLDER}
-		./configure --prefix=${QNX_TARGET}/usr --host=x86-nto CC=ntox86-gcc LDFLAGS='-L${QNX_TARGET}/usr/lib' CFLAGS='-I${QNX_TARGET}/usr/include' --disable-tests
-		make -j${BUILD_THREADS_COUNT}
-		make check
-	    make install
-		updatedb
-		#save configure and make output in log file
-		} &> ${LOG4CXX_BUILD_LOG}
-
 
 	    #Load correct current directory
 	    popd
