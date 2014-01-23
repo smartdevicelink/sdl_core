@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 //#include "config_profile/profile.h"
-//#include "utils/file_system_tests.h"
-//#include "utils/prioritized_queue_tests.h"
-//#include "protocol_handler/protocol_handler_tm_test.h"
+#include "utils/file_system_tests.h"
+#include "utils/prioritized_queue_tests.h"
+#include "protocol_handler/protocol_handler_tm_test.h"
 //#include "request_watchdog/request_watchdog_test.h"
-//#include "application_manager/formatters_commands.h"
+#include "application_manager/formatters_commands.h"
 //#include "media_manager/media_manager_impl_test.h"
 //#include "SmartObjectDraftTest.h"
 //#include "SmartObjectInvalidTest.h"
@@ -42,12 +42,15 @@
 extern "C" void __gcov_flush();
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {printf("\n\n\n after init in Admin \n\n\n");
   ::testing::InitGoogleMock(&argc, argv);
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-
+	application_manager::ApplicationManagerImpl* app_manager_ = 
+										application_manager::ApplicationManagerImpl::instance();
+										
+	printf("\n\n\n after init in Admin \n\n\n");
   //test::app_manager_test::AdminAppTest app;
  
   //threads::Thread threadAdminAppTest("AdminAppTest", &app);
