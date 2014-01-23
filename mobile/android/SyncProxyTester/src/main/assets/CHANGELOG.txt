@@ -1,4 +1,5 @@
 [CW4]
++ SyncProxyAndroid SDK: added audio streaming service support
 + SyncProxyAndroid SDK: added getter and setter for heartbeat.
 
 [CW3]
