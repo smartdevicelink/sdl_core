@@ -4212,6 +4212,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop audio service", true);
             ProxyService.getInstance().getProxyInstance().stopAudioService();
+            closeAudioOutputStream();
         }
     }
 
