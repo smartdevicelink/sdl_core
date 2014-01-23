@@ -88,6 +88,7 @@ import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -2616,6 +2617,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+
+        }
+
+        @Override
+        public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason) {
 
         }
 

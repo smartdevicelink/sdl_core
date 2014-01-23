@@ -90,6 +90,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -1646,6 +1647,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         _syncProxy.resetLanguagesDesired(msg.getLanguage(),
                 msg.getHmiDisplayLanguage());
+    }
+
+    @Override
+    public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason){
+        Log.i(TAG, "onAppUnregisteredAfterIgnitionOff " +reason);
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        final String message = "onAppUnregisteredAfterIgnitionOff " +reason;
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, message);
     }
 
     @Override

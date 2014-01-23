@@ -2325,6 +2325,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
                         }
+                    }else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF){
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                        }
                     } else {
                         // This requires the proxy to be cycled
                         if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
