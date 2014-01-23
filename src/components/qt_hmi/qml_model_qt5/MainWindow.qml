@@ -76,6 +76,11 @@ Rectangle {
         source: "res/initial.wav"
     }
 
+    Audio {
+        id: stream
+        source: "/home/amelnik/Downloads/Media-Convert_test2_PCM_Mono_VBR_8SS_48000Hz.wav"
+    }
+
     SettingsStorage {
         id: settingsContainer
     }

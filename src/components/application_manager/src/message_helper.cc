@@ -1055,6 +1055,7 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 
 void MessageHelper::SendAudioStartStream(
   const std::string& url, int32_t connection_key) {
+
   smart_objects::SmartObject* start_stream =
     new smart_objects::SmartObject(smart_objects::SmartType_Map);
 

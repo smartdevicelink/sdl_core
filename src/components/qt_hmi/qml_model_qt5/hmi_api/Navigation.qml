@@ -179,6 +179,14 @@ Item {
         }
     }
 
+    function startAudioStream(url, appID) {
+        stream.play()
+    }
+
+    function stopAudioStream(appID) {
+        stream.stop()
+    }
+
     function fillSoftButtons(element, index, array) {
         this.append({
                         type: element.type,
