@@ -34,6 +34,14 @@ public interface IProtocolMessageHolder {
     boolean hasMessages(Integer correlationID);
 
     /**
+     * Returns the next message for the correlation ID.
+     *
+     * @param correlationID correlation ID
+     * @return next message in the sequence, or null if none
+     */
+    ProtocolMessage peekNextMessage(Integer correlationID);
+
+    /**
      * Returns the next message for the correlation ID and removes it from the
      * sequence.
      *

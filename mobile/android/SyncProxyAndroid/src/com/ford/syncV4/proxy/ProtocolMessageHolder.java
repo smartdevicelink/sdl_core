@@ -36,6 +36,16 @@ public class ProtocolMessageHolder implements IProtocolMessageHolder {
     }
 
     @Override
+    public ProtocolMessage peekNextMessage(Integer correlationID) {
+        if (hasMessages(correlationID)) {
+            final List<ProtocolMessage> messages = array.get(correlationID);
+            return messages.get(0);
+        }
+
+        return null;
+    }
+
+    @Override
     public ProtocolMessage popNextMessage(Integer correlationID) {
         if (hasMessages(correlationID)) {
             final List<ProtocolMessage> messages = array.get(correlationID);

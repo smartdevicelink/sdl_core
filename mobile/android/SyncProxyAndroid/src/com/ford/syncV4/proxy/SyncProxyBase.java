@@ -1402,11 +1402,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         final Integer responseCorrelationID = response.getCorrelationID();
         if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
             if (Result.SUCCESS == response.getResultCode()) {
-                final ProtocolMessage pm = protocolMessageHolder.popNextMessage(
-                        responseCorrelationID);
-                queueOutgoingMessage(pm);
+                final ProtocolMessage pm =
+                        protocolMessageHolder.peekNextMessage(
+                                responseCorrelationID);
+                if (pm.getFunctionID() ==
+                        FunctionID.getFunctionID(response.getFunctionName())) {
+                    protocolMessageHolder.popNextMessage(responseCorrelationID);
+                    queueOutgoingMessage(pm);
 
-                success = true;
+                    success = true;
+                }
             } else {
                 protocolMessageHolder.clearMessages(responseCorrelationID);
             }

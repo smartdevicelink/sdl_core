@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.converter.PutFileRPCRequestConverter;
@@ -15,6 +16,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
+import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.syncConnection.SyncConnection;
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.when;
 public class PutFileRequestSendingTest extends InstrumentationTestCase {
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final int PUTFILE_FUNCTIONID = 32;
+    private static final int SHOW_FUNCTIONID = 13;
     private static final String OFFSET = "offset";
     private static final String LENGTH = "length";
     private static final int WAIT_TIMEOUT = 20;
@@ -112,7 +115,8 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         response.setCorrelationID(correlationID);
 
         ProtocolMessage incomingPM0 =
-                createResponseProtocolMessage(response, correlationID);
+                createResponseProtocolMessage(response, correlationID,
+                        PUTFILE_FUNCTIONID);
         emulateIncomingMessage(proxy, incomingPM0);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -181,7 +185,8 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         response.setCorrelationID(correlationID);
 
         ProtocolMessage incomingPM0 =
-                createResponseProtocolMessage(response, correlationID);
+                createResponseProtocolMessage(response, correlationID,
+                        PUTFILE_FUNCTIONID);
         emulateIncomingMessage(proxy, incomingPM0);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -241,7 +246,8 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         errorResponse.setCorrelationID(correlationID);
 
         ProtocolMessage incomingPM0 =
-                createResponseProtocolMessage(errorResponse, correlationID);
+                createResponseProtocolMessage(errorResponse, correlationID,
+                        PUTFILE_FUNCTIONID);
         emulateIncomingMessage(proxy, incomingPM0);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -273,7 +279,8 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         successResponse.setCorrelationID(correlationID);
 
         ProtocolMessage incomingPM1 =
-                createResponseProtocolMessage(successResponse, correlationID);
+                createResponseProtocolMessage(successResponse, correlationID,
+                        PUTFILE_FUNCTIONID);
         emulateIncomingMessage(proxy, incomingPM1);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -291,6 +298,57 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         assertThat(putFileResponse.getCorrelationID(), is(correlationID));
     }
 
+    public void testBigPutFileRequestShouldNotContinueAfterDifferentSuccessResponseWithSameCorrelationID()
+            throws Exception {
+        final int extraDataSize = 10;
+        final int dataSize = maxDataSize + extraDataSize;
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
+        final int correlationID = 0;
+
+        PutFile msg = new PutFile();
+        msg.setBulkData(data);
+        msg.setCorrelationID(correlationID);
+        proxy.sendRPCRequest(msg);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // we expect only the first frame of PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> pmCaptor0 =
+                ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock, times(1)).sendMessage(pmCaptor0.capture());
+
+        final ProtocolMessage pm0 = pmCaptor0.getValue();
+        checkOffsetAndLengthInJSON(pm0.getData(), 0, maxDataSize);
+        final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
+        assertThat(pm0.getBulkData(), is(data0));
+
+
+        SyncConnection connectionMock2 = createNewSyncConnectionMock();
+        setSyncConnection(proxy, connectionMock2);
+
+        // emulate incoming success Show response
+        ShowResponse errorResponse = new ShowResponse();
+        errorResponse.setResultCode(Result.SUCCESS);
+        errorResponse.setCorrelationID(correlationID);
+
+        ProtocolMessage incomingPM0 =
+                createResponseProtocolMessage(errorResponse, correlationID,
+                        SHOW_FUNCTIONID);
+        emulateIncomingMessage(proxy, incomingPM0);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // the second frame must not be sent
+        verify(connectionMock2, never()).sendMessage(
+                any(ProtocolMessage.class));
+
+        // the listener should not be called
+        verify(proxyListenerMock, never()).onPutFileResponse(
+                any(PutFileResponse.class));
+        verify(proxyListenerMock, times(1)).onShowResponse(
+                any(ShowResponse.class));
+    }
+
     private SyncConnection createNewSyncConnectionMock() {
         SyncConnection connectionMock2 = mock(SyncConnection.class);
         when(connectionMock2.getIsConnected()).thenReturn(true);
@@ -298,8 +356,9 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         return connectionMock2;
     }
 
-    private ProtocolMessage createResponseProtocolMessage(
-            PutFileResponse response, int correlationID) {
+    private ProtocolMessage createResponseProtocolMessage(RPCResponse response,
+                                                          int correlationID,
+                                                          int functionID) {
         ProtocolMessage incomingPM0 = new ProtocolMessage();
         incomingPM0.setVersion(PROTOCOL_VERSION);
         byte[] msgBytes = marshaller.marshall(response, PROTOCOL_VERSION);
@@ -307,7 +366,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         incomingPM0.setJsonSize(msgBytes.length);
         incomingPM0.setMessageType(MessageType.RPC);
         incomingPM0.setSessionType(SessionType.RPC);
-        incomingPM0.setFunctionID(PUTFILE_FUNCTIONID);
+        incomingPM0.setFunctionID(functionID);
         incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_RESPONSE);
         incomingPM0.setCorrID(correlationID);
         return incomingPM0;
@@ -341,9 +400,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         proxyListener.set(proxy, listener);
     }
 
-    // TODO what if correlation id is different?
     // TODO is the request saved after reconnect?
-    // TODO what if corr id is correct, but response is not PutFile?
 
     private void checkOffsetAndLengthInJSON(byte[] data, int offset, int length)
             throws JSONException {
