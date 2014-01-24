@@ -61,6 +61,9 @@ void TypeCodeGenerator::GenerateCodeForEnum(const Enum* enm) {
 void TypeCodeGenerator::GenerateCodeForArray(const Array* array) {
 }
 
+void TypeCodeGenerator::GenerateCodeForMap(const Map* map) {
+}
+
 void TypeCodeGenerator::GenerateCodeForStruct(const Struct* strct) {
 }
 

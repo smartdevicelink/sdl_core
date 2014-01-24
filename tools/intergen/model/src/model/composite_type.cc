@@ -64,6 +64,9 @@ const Array::Range& Array::range() const {
 }
 
 bool Array::operator <(const Array& that) const {
+  if (type_ != that.type_) {
+    return size_t(type_) < size_t(that.type_);
+  }
   if (range_.min() == that.range_.min())
     return range_.min() < that.range_.min();
   return range_.max() < that.range_.max();
@@ -75,6 +78,43 @@ TypeCodeGenerator* Array::Apply(TypeCodeGenerator* code_generator) const {
 }
 
 const ConstantsCreator* Array::SupportsConstants() const {
+  return NULL;
+}
+
+/*
+ * Map type
+ */
+Map::Map(const Type* type, const Range& range)
+    : type_(type),
+      range_(range) {
+}
+
+Map::~Map() {
+}
+
+const Type* Map::type() const {
+  return type_;
+}
+
+const Map::Range& Map::range() const {
+  return range_;
+}
+
+bool Map::operator <(const Map& that) const {
+  if (type_ != that.type_) {
+    return size_t(type_) < size_t(that.type_);
+  }
+  if (range_.min() == that.range_.min())
+    return range_.min() < that.range_.min();
+  return range_.max() < that.range_.max();
+}
+
+TypeCodeGenerator* Map::Apply(TypeCodeGenerator* code_generator) const {
+  code_generator->GenerateCodeForMap(this);
+  return code_generator;
+}
+
+const ConstantsCreator* Map::SupportsConstants() const {
   return NULL;
 }
 

@@ -48,10 +48,10 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
@@ -395,6 +395,11 @@ int TransportManagerImpl::AddTransportAdapter(
                             << transport_adapter << "["
                             << transport_adapter->GetDeviceType() << "]");
 
+  if (transport_adapter_listeners_.find(transport_adapter) !=
+          transport_adapter_listeners_.end()) {
+      LOG4CXX_ERROR(logger_, "Adapter already exists.");
+      return E_ADAPTER_EXISTS;
+  }
   transport_adapter_listeners_[transport_adapter] =
       new TransportAdapterListenerImpl(this, transport_adapter);
   transport_adapter->AddListener(

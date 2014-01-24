@@ -52,6 +52,16 @@ void CompositeType::WriteJsonField(const char* field_name,
 }
 
 // static
+template<class T, size_t minsize, size_t maxsize>
+void CompositeType::WriteJsonField(const char* field_name,
+                    const Map<T, minsize, maxsize>& field,
+                    Json::Value* json_value) {
+  if (field.is_initialized()) {
+    (*json_value)[field_name] = field.ToJsonValue();
+  }
+}
+
+// static
 template<class T>
 void CompositeType::WriteJsonField(const char* field_name,
                                    const Optional<T>& field,
@@ -186,6 +196,30 @@ Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
     array[i] = (this->operator [](i)).ToJsonValue();
   }
   return array;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+Map<T, minsize, maxsize>::Map(const Json::Value& value) {
+  if (value.isObject()) {
+    for (Json::Value::const_iterator i = value.begin(); i != value.end(); ++i) {
+      this->insert(typename MapType::value_type(i.key().asString(), T(*i)));
+    }
+  } else if (value.isNull()) {
+    // Do nothing, keep array empty and uninitialized
+  } else {
+    // In case of non-array value initialize array with null value
+    // so it handled as initialized but invalid
+    this->insert(typename MapType::value_type("", T(Json::Value())));
+  }
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+Json::Value Map<T, minsize, maxsize>::ToJsonValue() const {
+  Json::Value map;
+  for (typename MapType::const_iterator i = this->begin(); i != this->end(); ++i) {
+    map[i->first] = i->second.ToJsonValue();
+  }
+  return map;
 }
 
 template<typename T>
