@@ -400,7 +400,7 @@ fi
 if $QT4_HMI; then
 
 	NEED_QT4_INSTALL=false
-    qmlscene_binary=`./FindQt.sh -v 4.8.5 || true`
+    qmlscene_binary=`./FindQt.sh -v 4.8.5 -b qmlviewer || true`
 	if [ -n "$qmlscene_binary" ]; then
 		echo "Found Qt4 in "`dirname $qmlscene_binary`
 	else
@@ -475,7 +475,7 @@ if $QT4_HMI; then
 	    cd tools/qml
 		../../bin/qmake
 		make
-		cp qmlscene $QNX_TARGET/usr/bin/
+		cp ../../bin/qmlviewer $QNX_TARGET/usr/bin/
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
 
