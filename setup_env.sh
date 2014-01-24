@@ -218,11 +218,11 @@ echo $OK
 
 if ${INSTALL_CMAKE_2_8_11_2}; then
 
-	CMAKE_DATA_DEB="cmake-data_2.8.11-2_all.deb"
+	CMAKE_DATA_DEB="cmake-data_2.8.11.2-1_all.deb"
 	if [ ${ARCH} == "i386" ]; then
-	      CMAKE_DEB="cmake_2.8.11-2_i386.deb"
+	      CMAKE_DEB="cmake_2.8.11.2-1_i386.deb"
 	elif [ ${ARCH} == "x64" ]; then
-	      CMAKE_DEB="cmake_2.8.11-2_amd64.deb"
+	      CMAKE_DEB="cmake_2.8.11.2-1_amd64.deb"
 	fi
 
 	echo "Loading CMake packages"
