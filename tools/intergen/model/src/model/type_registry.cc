@@ -39,8 +39,11 @@
 #include "model/constant.h"
 #include "model/scope.h"
 #include "pugixml.hpp"
+#include "utils/safeformat.h"
 #include "utils/string_utils.h"
 #include "utils/xml_utils.h"
+
+using typesafe_format::strmfmt;
 
 namespace {
 const char* kFunctionIdEnumName = "FunctionID";
@@ -62,8 +65,16 @@ bool TypeRegistry::init(const pugi::xml_node& xml) {
 
 bool TypeRegistry::GetType(const pugi::xml_node& params, const Type** type) {
   pugi::xml_attribute array = params.attribute("array");
-  if (array && array.as_bool(false)) {
-    return GetArray(params, type);
+  pugi::xml_attribute map = params.attribute("map");
+  if (array && map) {
+    strmfmt(std::cerr, "Parameter {0} has both map and array attributes specified",
+            params.attribute("name").as_string(""));
+    return false;
+  }
+  if (map && map.as_bool(false)) {
+    return GetContainer(params, type, false);
+  } else if (array && array.as_bool(false)) {
+    return GetContainer(params, type, true);
   } else {
     return GetNonArray(params, type);
   }
@@ -136,25 +147,30 @@ bool TypeRegistry::AddStructs(const pugi::xml_node& xml) {
   return true;
 }
 
-bool TypeRegistry::GetArray(const pugi::xml_node& params, const Type** type) {
-  const Type* array_type = NULL;
-  if (!GetNonArray(params, &array_type)) {
-    return false;
+bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
+                                bool get_array) {
+  const Type* element_type = NULL;
+  if (GetNonArray(params, &element_type)) {
+    assert(element_type);
+    std::string minsize_str = params.attribute("minsize").as_string("0");
+    std::string maxsize_str = params.attribute("maxsize").as_string("0");
+    int64_t minsize, maxsize;
+    if (StringToNumber(minsize_str, &minsize)
+        && StringToNumber(maxsize_str, &maxsize)) {
+      if (get_array) {
+        *type = &*arrays_.insert(
+            Array(element_type, Array::Range(minsize, maxsize))).first;
+      } else {
+        *type = &*maps_.insert(Map(element_type, Map::Range(minsize, maxsize)))
+            .first;
+      }
+      return true;
+    } else {
+      std::cerr << "Incorrect array size range: " << minsize_str << ", "
+                << maxsize_str << std::endl;
+    }
   }
-  assert(array_type);
-  std::string minsize_str = params.attribute("minsize").as_string("0");
-  std::string maxsize_str = params.attribute("maxsize").as_string("0");
-  int64_t minsize, maxsize;
-  if (StringToNumber(minsize_str, &minsize)
-      && StringToNumber(maxsize_str, &maxsize)) {
-    *type = &*arrays_.insert(Array(array_type, Array::Range(minsize, maxsize)))
-        .first;
-    return true;
-  } else {
-    std::cerr << "Incorrect array size range: " << minsize_str << ", "
-              << maxsize_str << std::endl;
-    return false;
-  }
+  return false;
 }
 
 bool TypeRegistry::GetNonArray(const pugi::xml_node& params,

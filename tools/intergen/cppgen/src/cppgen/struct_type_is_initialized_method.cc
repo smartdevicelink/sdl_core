@@ -62,7 +62,7 @@ void StructTypeIsInitializedMethod::DefineBody(std::ostream* os) const {
       *os << endl;
     }
   }
-  *os << "true;" << endl;
+  *os << "false;" << endl;
 }
 
 }  // namespace codegen

@@ -962,11 +962,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
-                _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+                _syncConnection = new SyncConnection(_interfaceBroker);
                 final HeartbeatMonitor heartbeatMonitor =
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
+
+                // TODO: Set default ID (until opposite not specified)
+                currentSession.setSessionId(Session.DEFAULT_SESSION_ID);
+
+                _syncConnection.setSessionId(currentSession.getSessionId());
+                _syncConnection.init(_transportConfig);
             }
             WiProProtocol protocol = (WiProProtocol) _syncConnection.getWiProProtocol();
             protocol.setVersion(_wiproVersion);
@@ -982,7 +988,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void closeSyncConnection(boolean keepConnection) {
         if (_syncConnection != null) {
             _syncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
-            stopSession();
             if (!keepConnection) {
                 _syncConnection = null;
             }
@@ -999,7 +1004,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void cleanProxy(SyncDisconnectedReason disconnectedReason,
-                            boolean keepConnection) throws SyncException {
+                            boolean keepConnection, boolean keepSession) throws SyncException {
         try {
 
             // ALM Specific Cleanup
@@ -1031,7 +1036,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
             // Clean up SYNC Connection
             synchronized (CONNECTION_REFERENCE_LOCK) {
-                stopAllServices();
+                if (!keepSession) {
+                    stopAllServices();
+                    stopSession();
+                }
                 closeSyncConnection(keepConnection);
             }
         } catch (SyncException e) {
@@ -1062,7 +1070,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         try {
             // Clean the proxy
-            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false);
+            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false, false);
 
             clearReconnectTimer();
 
@@ -1100,8 +1108,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // Method to cycle the proxy, only called in ALM
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
+        Log.d(TAG, "CycleProxy, disconnectedReason:" + disconnectedReason);
         try {
-            cleanProxy(disconnectedReason, false);
+            cleanProxy(disconnectedReason, false, true);
             scheduleInitializeProxy();
             notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
         } catch (SyncException e) {
@@ -1116,9 +1125,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Optionally, closes the transport connection.
      */
     public void closeSession(boolean keepConnection) {
+        Log.d(TAG, "Close Session, keepConnection:" + keepConnection);
         try {
             cleanProxy(
-                    SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection);
+                    SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection, false);
             notifyProxyClosed("Sync Proxy Cycled",
                     new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
         } catch (SyncException e) {
@@ -1158,7 +1168,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 try {
                     Log.d(TAG, "Reconnect task is running, clearing reference");
                     setCurrentReconnectTimerTask(null);
-                    closeSyncConnection(false);
                     initializeProxy();
                 } catch (SyncException e) {
                     Log.e(TAG, "Cycling the proxy failed.", e);
@@ -2585,7 +2594,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.
      *
-     * @param msg
      * @throws SyncException
      */
     public void sendRPCRequest(RPCRequest request) throws SyncException {
@@ -2672,7 +2680,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void startRPCProtocolService(final byte sessionID, final String correlationID) {
         currentSession.setSessionId(sessionID);
-        Log.i(TAG, "RPC Session started" + correlationID);
+        _syncConnection.setSessionId(sessionID);
+        Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {

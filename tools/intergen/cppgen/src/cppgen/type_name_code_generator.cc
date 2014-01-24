@@ -119,6 +119,18 @@ void TypeNameGenerator::GenerateCodeForArray(const Array* array) {
   os_ << vect_decl_end;
 }
 
+void TypeNameGenerator::GenerateCodeForMap(const Map* map) {
+  const char* map_decl_begin =
+      prefer_reference_type_ ?
+          "const std::map<std::string, " : "std::map<std::string, ";
+  const char* map_decl_end = prefer_reference_type_ ? ">&" : ">";
+  // Map can not contain references too
+  prefer_reference_type_ = false;
+  os_ << map_decl_begin;
+  map->type()->Apply(this);
+  os_ << map_decl_end;
+}
+
 void TypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
   const char* struct_decl_begin = prefer_reference_type_ ? "const " : "";
   const char* struct_decl_end = prefer_reference_type_ ? "&" : "";
@@ -197,6 +209,13 @@ void RpcTypeNameGenerator::GenerateCodeForArray(const Array* array) {
   os_ << "Array    < ";
   array->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", array->range().min(), array->range().max());
+}
+
+void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
+  wrap_with_mandatory_ = false;
+  os_ << "Map      < ";
+  map->type()->Apply(this);
+  strmfmt(os_, ", {0}, {1} >", map->range().min(), map->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {

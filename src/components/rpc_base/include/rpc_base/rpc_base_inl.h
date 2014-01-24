@@ -263,6 +263,61 @@ bool Array<T, minsize, maxsize>::is_initialized() const {
 }
 
 /*
+ * Map class
+ */
+template<typename T, size_t minsize, size_t maxsize>
+Map<T, minsize, maxsize>::Map() {
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+template<typename U>
+Map<T, minsize, maxsize>::Map(const U& value) {
+  for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
+      ++i) {
+    // Explicitly convert that value to T because all rpc_types have explicit
+    // constructors
+    insert(typename MapType::value_type(i->first, T(i->second)));
+  }
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+template<typename U>
+Map<T, minsize, maxsize>&
+Map<T, minsize, maxsize>::operator=(const U& that) {
+  this->clear();
+  for (typename U::const_iterator i = that.begin(), e = that.end(); i != e;
+      ++i) {
+    // Explicitly convert that value to T because all rpc_types have explicit
+    // constructors
+    insert(typename MapType::value_type(i->first, T(i->second)));
+  }
+  return *this;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+template<typename U>
+void Map<T, minsize, maxsize>::insert(const std::pair<std::string, U>& value) {
+  MapType::insert(typename MapType::value_type(value.first, T(value.second)));
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+bool Map<T, minsize, maxsize>::is_valid() const {
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
+    return false;
+  for (typename Map::const_iterator i = this->begin();
+      i != this->end(); ++i) {
+    if (!i->second.is_valid())
+      return false;
+  }
+  return true;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+bool Map<T, minsize, maxsize>::is_initialized() const {
+  return !this->empty();
+}
+
+/*
  * Mandatory class
  */
 template<typename T>

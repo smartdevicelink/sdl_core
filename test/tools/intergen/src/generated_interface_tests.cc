@@ -29,9 +29,9 @@ TEST_F(GeneratedInterfaceTests, ScrollableMessageTest) {
   ASSERT_EQ(org_json, serialized);
 }
 
-TEST_F(GeneratedInterfaceTests, OnAudioPassThru) {
+TEST_F(GeneratedInterfaceTests, FunctionWithoutParams) {
   notification::OnAudioPassThru oapt;
-  ASSERT_TRUE(oapt.is_initialized());
+  ASSERT_FALSE(oapt.is_initialized());
   ASSERT_TRUE(oapt.is_valid());
 }
 
@@ -45,6 +45,24 @@ TEST_F(GeneratedInterfaceTests, DefValueTest) {
 
   std::string serialized = writer.write(aasm.ToJsonValue());
   ASSERT_EQ(awaited_json, serialized);
+}
+
+TEST_F(GeneratedInterfaceTests, MapTest) {
+  const char* expected_json =
+  "{\"choiceID\":1,\"menuName\":\"Menu name\",\"vrCommands\":{\"one\":\"First value\",\"two\":\"Second value\"}}\n";
+
+  Choice choice;
+  ASSERT_FALSE(choice.is_initialized());
+  ASSERT_FALSE(choice.is_valid());
+  std::map<std::string, std::string> init_map;
+  init_map.insert(std::make_pair("one", "First value"));
+  init_map.insert(std::make_pair("two", "Second value"));
+  choice = Choice(1, "Menu name", init_map);
+  ASSERT_TRUE(choice.is_initialized());
+  ASSERT_TRUE(choice.is_valid());
+
+  std::string serialized = writer.write(choice.ToJsonValue());
+  ASSERT_EQ(expected_json, serialized);
 }
 
 }  // namespace test

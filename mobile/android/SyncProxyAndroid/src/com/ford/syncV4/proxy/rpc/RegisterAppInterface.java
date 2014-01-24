@@ -12,7 +12,7 @@ import com.ford.syncV4.util.DebugTool;
 public class RegisterAppInterface extends RPCRequest {
 
     public RegisterAppInterface() {
-        super("RegisterAppInterface");
+        super(Names.RegisterAppInterface);
     }
     public RegisterAppInterface(Hashtable hash) {
         super(hash);

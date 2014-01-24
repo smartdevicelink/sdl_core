@@ -60,8 +60,8 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    public void StartProtocolSession() {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC, 0x00, _version);
+    public void StartProtocolSession(byte sessionId) {
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC, sessionId, _version);
         sendFrameToTransport(header);
     } // end-method
 

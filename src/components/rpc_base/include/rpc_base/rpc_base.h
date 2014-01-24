@@ -34,6 +34,7 @@
 #define VALIDATED_TYPES_H_
 
 #include <stdint.h>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,7 @@ template<int64_t minnum, int64_t maxnum,
 template<size_t maxlen> class String;
 template<typename T> class Enum;
 template<typename T, size_t minsize, size_t maxsize> class Array;
+template<typename T, size_t minsize, size_t maxsize> class Map;
 template<typename T> class Mandatory;
 template<typename T> class Optional;
 
@@ -92,6 +94,10 @@ class CompositeType {
   template<class T, size_t minsize, size_t maxsize>
   static void WriteJsonField(const char* field_name,
                              const Array<T, minsize, maxsize>& field,
+                             Json::Value* json_value);
+  template<class T, size_t minsize, size_t maxsize>
+  static void WriteJsonField(const char* field_name,
+                             const Map<T, minsize, maxsize>& field,
                              Json::Value* json_value);
   template<class T>
   static void WriteJsonField(const char* field_name, const Optional<T>& field,
@@ -212,6 +218,28 @@ class Array : public std::vector<T>, public CompositeType {
   using ArrayType::push_back;
   template<typename U>
   void push_back(const U& value);
+  Json::Value ToJsonValue() const;
+
+  bool is_valid() const;
+  bool is_initialized() const;
+};
+
+template<typename T, size_t minsize, size_t maxsize>
+class Map : public std::map<std::string, T>, public CompositeType {
+ public:
+  // Types
+  typedef std::map<std::string, T> MapType;
+ public:
+  // Methods
+  Map();
+  explicit Map(const Json::Value& value);
+  template<typename U>
+  explicit Map(const U& value);
+  template<typename U>
+  Map& operator=(const U& that);
+  using MapType::insert;
+  template<typename U>
+  void insert(const std::pair<std::string, U>& value);
   Json::Value ToJsonValue() const;
 
   bool is_valid() const;

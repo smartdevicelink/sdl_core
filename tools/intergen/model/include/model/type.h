@@ -42,6 +42,7 @@ class Float;
 class String;
 class Enum;
 class Array;
+class Map;
 class Struct;
 
 class ConstantsCreator;
@@ -62,6 +63,7 @@ class TypeCodeGenerator {
   virtual void GenerateCodeForString(const String* string);
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
+  virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual ~TypeCodeGenerator();
 };

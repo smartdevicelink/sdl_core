@@ -68,6 +68,27 @@ class Array : public Type {
   Range range_;
 };
 
+class Map : public Type {
+ public:
+  // Types
+  typedef BasicRange<int64_t> Range;
+ public:
+  // Methods
+  Map(const Type* type, const Range& range);
+  ~Map();
+  const Type* type() const;
+  const Range& range() const;
+  bool operator<(const Map& that) const;
+  // codegen::Type methods
+  virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
+  virtual const ConstantsCreator* SupportsConstants() const;
+
+ private:
+  // Fields
+  const Type* type_;
+  Range range_;
+};
+
 class Enum : public Type, public ConstantsCreator {
  public:
   // Types

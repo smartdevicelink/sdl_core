@@ -376,6 +376,14 @@ class SmartObject {
   std::string asString() const;
 
   /**
+   * @brief Returns char array from SmartObject data if exist. Otherwise returns
+   *        empty string
+   *
+   * @return const char*
+   **/
+  const char* asCharArray() const;
+
+  /**
    * @brief Assignment operator for type: string
    *
    * @param  NewValue New object value

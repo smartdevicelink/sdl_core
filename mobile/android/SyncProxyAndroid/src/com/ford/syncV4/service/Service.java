@@ -8,6 +8,7 @@ import com.ford.syncV4.session.Session;
  */
 public class Service {
 
+    // TODO: Reconsider this field, probably, as alternative, create 'sessionId' field here
     private Session session;
     private ServiceType serviceType;
 

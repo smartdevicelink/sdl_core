@@ -88,7 +88,11 @@ class TypeRegistry {
   bool AddStructs(const pugi::xml_node& xml);
   bool AddEnumConstants(Enum* enm, const pugi::xml_node& xml_enum);
   bool AddStructureFields(Struct* strct, const pugi::xml_node& xml_struct);
-  bool GetArray(const pugi::xml_node& params, const Type** type);
+  // Create container (map or array) |type| object based on xml |params|
+  // if |get_array| is true array is created, otherwise map is created
+  // Returns false and prints to cerr on error
+  bool GetContainer(const pugi::xml_node& params, const Type** type,
+                    bool get_array);
   bool GetNonArray(const pugi::xml_node& params, const Type** type);
   bool GetEnum(const std::string& name, const Type** type);
   bool GetStruct(const std::string& name, const Type** type);
@@ -98,6 +102,7 @@ class TypeRegistry {
   // fields
   BuiltinTypeRegistry* builtin_type_registry_;
   std::set<Array> arrays_;
+  std::set<Map> maps_;
   EnumList enums_;
   utils::StdContainerDeleter<EnumList> enums_deleter_;
   EnumByName enum_by_name_;
