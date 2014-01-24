@@ -3,12 +3,14 @@ package com.ford.syncV4.proxy.rpc;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Hashtable;
 import java.util.Random;
 
 /**
@@ -50,5 +52,11 @@ public class TestCommon {
         final byte[] data = new byte[dataSize];
         new Random().nextBytes(data);
         return data;
+    }
+
+    static Hashtable<String, Object> deserializeJSONRequestObject(
+            JSONObject jsonObject) throws JSONException {
+        return JsonRPCMarshaller.deserializeJSONObject(
+                paramsToRequestObject(jsonObject));
     }
 }

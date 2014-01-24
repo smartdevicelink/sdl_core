@@ -440,4 +440,6 @@ public class Names {
     public static final String length = "length";
     public static final String SystemRequest = "SystemRequest";
     public static final String OnSystemRequest = "OnSystemRequest";
+    public static final String requestType = "requestType";
+    public static final String url = "url";
 }
