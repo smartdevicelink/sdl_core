@@ -4128,8 +4128,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onMobileNaviStarted() {
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+        SyncProxyALM proxy = ProxyService.getProxyInstance();
+        if (proxy != null) {
             OutputStream stream = proxy.startH264();
             MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
             fr.setMobileNaviStateOn(stream);

@@ -68,7 +68,7 @@ public class MobileNavPreviewFragment extends Fragment implements ServicePreview
         }
     }
 
-    public void setMobileNaviStateOff(){
+    public void setMobileNaviStateOff() {
         mobileNavSessionCheckBoxState.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
         box.setChecked(false);
@@ -77,13 +77,17 @@ public class MobileNavPreviewFragment extends Fragment implements ServicePreview
         dataStreamingButton.setEnabled(false);
     }
 
-    public void setMobileNaviStateOn(OutputStream stream){
+    public void setMobileNaviStateOn(OutputStream stream) {
         mobileNavSessionCheckBoxState.setStateOn();
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(true);
         dataStreamingButton.setEnabled(true);
+
         fileStreamingLogic.setOutputStream(stream);
         fileStreamingLogic.createStaticFileReader();
+        if (!fileStreamingLogic.isStreamingComplete()) {
+            startFileStreaming();
+        }
     }
 
     @Override
@@ -142,5 +146,4 @@ public class MobileNavPreviewFragment extends Fragment implements ServicePreview
             startFileStreaming();
         }
     }
-
 }
