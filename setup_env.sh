@@ -121,7 +121,7 @@ else
 fi
 echo " "
 
-#Indicatiion functions for long-time operations
+#Indication functions for long-time operations
 progress_indicator_id=0
 function progress_indicator() {
 	sleep_time=0.2
