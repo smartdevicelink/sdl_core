@@ -18,7 +18,7 @@ import java.io.OutputStream;
  */
 public class AudioServicePreviewFragment extends Fragment implements ServicePreviewFragmentInterface {
     private static final String TAG =
-            MobileNavPreviewFragment.class.getSimpleName();
+            AudioServicePreviewFragment.class.getSimpleName();
     private CheckBoxState mobileNavSessionCheckBoxState;
     private Button dataStreamingButton;
     private FileStreamingLogic fileStreamingLogic;
@@ -45,7 +45,7 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
         dataStreamingButton.setOnClickListener(new VideoActionListener());
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.audioServiceCheckBox);
         checkBox.setOnClickListener(new MobileNaviSessionCheckBoxOnClickListener());
-        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
+        mobileNavSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
         mobileNavSessionCheckBoxState.setStateOff();
     }
 

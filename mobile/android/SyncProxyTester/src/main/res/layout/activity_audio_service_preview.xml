@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:checked="false"
         android:enabled="false"
-        android:hint="@string/audio_service_hint"
+        android:hint="Turn On Audio Service"
         />
 
     <Button

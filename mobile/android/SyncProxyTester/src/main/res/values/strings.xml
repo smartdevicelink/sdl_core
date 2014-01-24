@@ -179,7 +179,8 @@
     <string name="video_streaming_hint">Turn On Video Streaming</string>
     <string name="mobile_navi_hint">Turn On Mobile Service</string>
     <string name="audio_service_hint">Turn On Audio Service</string>
-    <string name="mobile_navi_check_box_on">Mobile Session Running</string>
+    <string name="mobile_navi_check_box_on">Mobile Service Running</string>
+    <string name="audio_service_on">Audio Service Running</string>
     <string name="video_check_box_on">Video Streaming running</string>
     <string name="mobileNavi">MobileNavi (video source:)</string>
 
