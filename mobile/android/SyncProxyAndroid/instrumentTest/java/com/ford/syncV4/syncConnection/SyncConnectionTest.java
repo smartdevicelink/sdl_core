@@ -55,6 +55,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     }
 
     public void testStartMobileNavServiceShouldSendAppropriateBytes() throws Exception {
+        final boolean[] passed = {false};
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
@@ -70,29 +71,34 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
                 assertEquals("Offset should be 0", offset, 0);
                 assertEquals("Length should be 12", length, 12);
+                passed[0] = true;
             }
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
         connection.startMobileNavService(session);
+        assertTrue(passed[0]);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
+        final boolean[] passed = {false};
         final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(ServiceType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class), config) {
 
             @Override
-            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                super.onProtocolSessionStarted(session, version, correlationID);
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
-                assertEquals("ServiceType should be equal.", header.getServiceType(), session.getServiceList().get(0).getServiceType());
-                assertEquals("Frame headers should be equal.", header.getSessionID(), session.getSessionId());
+                assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
+                assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
                 assertEquals("Version should be equal.", header.getVersion(), version);
+                passed[0] = true;
             }
         };
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
         connection.onTransportBytesReceived(header.assembleHeaderBytes(), header.assembleHeaderBytes().length);
+        assertTrue(passed[0]);
     }
 
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
