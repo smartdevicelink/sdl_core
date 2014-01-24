@@ -206,7 +206,7 @@ class TransportAdapterListenerImpl
    * @param devic Device unique identifier.
    */
   virtual void OnDisconnectDeviceDone(const TransportAdapter* adapter,
-                                      const DeviceUID& devic);
+                                      const DeviceUID& device);
 
   /**
    * @brief

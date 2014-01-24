@@ -56,7 +56,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -70,7 +70,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -82,7 +82,7 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -96,7 +96,7 @@ void TransportAdapterListenerImpl::OnConnectDone(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -110,7 +110,7 @@ void TransportAdapterListenerImpl::OnConnectFailed(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -123,7 +123,7 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -137,7 +137,7 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -157,7 +157,7 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -171,7 +171,7 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -184,7 +184,7 @@ void TransportAdapterListenerImpl::OnDataSendDone(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -199,7 +199,7 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -218,7 +218,7 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
@@ -231,7 +231,7 @@ void TransportAdapterListenerImpl::OnCommunicationError(
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed receive event from device");
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
 
