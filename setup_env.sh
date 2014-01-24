@@ -479,11 +479,6 @@ if $QT4_HMI; then
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
 
-		#Install log4cxx dependencies
-		echo "Installing zip and gzip"
-        apt-install gzip zip
-		echo $OK
-
 	    #Load correct current directory
 	    popd
 
