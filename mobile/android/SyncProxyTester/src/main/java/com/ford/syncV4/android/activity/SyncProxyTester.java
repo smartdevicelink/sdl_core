@@ -42,6 +42,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -4144,6 +4145,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
+        AudioServicePreviewFragment audioFragement = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+        audioFragement.setAudioServiceStateOff();
+        closeAudioOutputStream();
     }
 
     public void logError(final Exception e) {
@@ -4153,7 +4157,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 _msgAdapter.logMessage(e.getMessage(), true);
             }
         });
-
     }
 
     private void closeMobileNaviOutputStream() {
@@ -4163,21 +4166,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
+    private void closeAudioOutputStream() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            proxy.stopAudioDataTransfer();
+        }
+    }
+
     public void stopMobileNavSession() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
             closeMobileNaviOutputStream();
-        }
-    }
-
-    public void sendMobileNaviData(byte[] data, boolean addToUI) {
-        if (isProxyReadyForWork()) {
-            try {
-                ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
-            } catch (SyncException e) {
-                onMobileNaviError(e.getMessage(), false);
-            }
         }
     }
 
@@ -4190,7 +4190,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null) {
+        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null){
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4199,6 +4199,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onMobileNavAckReceived(int frameReceived) {
 
+    }
+
+    public void startAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should start audio service", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+        }
+    }
+
+    public void stopAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should stop audio service", true);
+            ProxyService.getInstance().getProxyInstance().stopAudioService();
+            closeAudioOutputStream();
+        }
+    }
+
+    public void onAudioServiceStarted() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            OutputStream stream = proxy.startAudioDataTransfer();
+            AudioServicePreviewFragment fr = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setAudioServiceStateOn(stream);
+        }
     }
 
     public void onTouchEventReceived(OnTouchEvent notification) {
@@ -4303,4 +4327,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onSesionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
     }
+
+
 }

@@ -247,35 +247,22 @@ Item {
             anchors.left: parent.left
             presets: mediaPlayerView.playerType === "SDL" ? Internal.getArrayForPresetRow(dataContainer.currentApplication) : []
             width: parent.width
-            property bool clickProcessed
-
-            Timer {
-                id: timer
-                interval: Constants.presetButtonTimer
-                repeat: false
-                triggeredOnStart: false
-                onTriggered: {
-                    console.log("preset button hold")
-                    presetsRow.clickProcessed = true
-                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + presetsRow.selectedIndex, Common.ButtonPressMode.LONG, undefined)
-                }
-            }
 
             onPresetButtonPressed: {
-                console.log("preset button pressed")
-                timer.start()
-                clickProcessed  = false
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONDOWN, undefined)
             }
 
             onPresetButtonReleased: {
-                console.log("preset button released")
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
-                timer.stop()
-                if (!clickProcessed) {
-                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
-                }
             }
+
+	    onPresetButtonClicked: {
+	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
+	    }
+
+	    onPresetButtonHold: {
+	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
+	    }
         }
     }
 

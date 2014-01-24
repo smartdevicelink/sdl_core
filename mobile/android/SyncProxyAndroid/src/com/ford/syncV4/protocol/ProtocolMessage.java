@@ -85,7 +85,7 @@ public class ProtocolMessage {
 		//this._bulkData = bulkData;
 	}
 
-	public ServiceType getSessionType() {
+	public ServiceType getServiceType() {
 		return _serviceType;
 	}
 

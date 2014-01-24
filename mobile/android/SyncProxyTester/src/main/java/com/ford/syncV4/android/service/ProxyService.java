@@ -90,6 +90,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -1534,10 +1535,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onMobileNaviStart() {
-        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "Mobile Navi Started";
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        logEvent("Mobile Navi Started");
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
@@ -1548,6 +1546,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             });
         }
+    }
+
+    @Override
+    public void onAudioServiceStart() {
+        logEvent("Audio Service Started");
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.onAudioServiceStarted();
+                }
+            });
+        }
+    }
+
+    private void logEvent(String message) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, "" + message);
     }
 
     @Override
@@ -1630,6 +1649,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason){
+        Log.i(TAG, "onAppUnregisteredAfterIgnitionOff " +reason);
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        final String message = "onAppUnregisteredAfterIgnitionOff " +reason;
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, message);
+    }
+
+    @Override
     public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         String response = "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
@@ -1662,11 +1690,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             });
         }
-    }
-
-    @Override
-    public void onAudioServiceStart() {
-        
     }
 
     @Override

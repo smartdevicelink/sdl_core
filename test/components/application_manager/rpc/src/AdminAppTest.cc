@@ -57,6 +57,8 @@ namespace test {
 
 		void AdminAppTest::run()
 		{
+			application_manager::ApplicationManagerImpl* app_manager_ = 
+						application_manager::ApplicationManagerImpl::instance();
 			
 			//Start init dependence appManagerImpl,HMIImpl,transport...
 			initStartData();
@@ -67,7 +69,9 @@ namespace test {
 			//Test AddCommand
 			
 			testHMI();
-			//app_manager_->UnregisterAllApplications();
+
+			app_manager_->UnregisterAllApplications();
+
 			//////////////////////////////////////////////
 			//Test Mobile
 			
