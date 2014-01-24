@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -78,7 +78,60 @@ Rectangle {
 
     Audio {
         id: stream
-        source: "/home/amelnik/Downloads/Media-Convert_test2_PCM_Mono_VBR_8SS_48000Hz.wav"
+
+        property real bufferProgress: 0.0
+
+        Component.onCompleted: {
+            audioNotifier.start()
+        }
+        onStopped: {
+            audioNotifier.start()
+        }
+        onErrorChanged:
+        {
+            console.debug("Error: ", error)
+            console.debug(errorString)
+
+            switch ( error )
+            {
+                case Audio.NoError:
+                    console.debug("there is no current error.")
+                    break
+                case Audio.ResourceError:
+                    console.debug("the audio cannot be played due to a problem allocating resources.")
+                    break
+                case Audio.FormatError:
+                    console.debug("the audio format is not supported.")
+                    break
+                case Audio.NetworkError:
+                    console.debug("the audio cannot be played due to network issues.")
+                    break
+                case Audio.AccessDenied:
+                    console.debug("the audio cannot be played due to insufficient permissions.")
+                    break
+                case Audio.ServiceMissing:
+                    console.debug("the audio cannot be played because the media service could not be instantiated.")
+                    break
+
+                default:
+                    console.debug("GEBASZ!!!")
+            }
+        }
+    }
+
+    NamedPipeNotifier {
+        id: audioNotifier
+        // we need absolute path here
+        // because relative paths differ for Video and NamedPipeNotifier
+        // we use url.toString() to obtain absolute path
+        // and we use substring() to remove "file://" prefix
+        property url pipeAudio: "/tmp/audio_stream_pipe"
+        name: pipeAudio.toString().substring(7)
+        onReadyRead: {
+            stream.source = pipeAudio.toString().substring(7)
+            console.log(stream.source)
+            stream.play()
+        }
     }
 
     SettingsStorage {
@@ -108,7 +161,7 @@ Rectangle {
             height: parent.height * 0.90
             width: parent.width
             anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter                       
+            anchors.horizontalCenter: parent.horizontalCenter
 
             Video {
                 id: player

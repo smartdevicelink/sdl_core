@@ -180,11 +180,16 @@ Item {
     }
 
     function startAudioStream(url, appID) {
-        stream.play()
+        console.log("Message Received - {method: 'Navigation.StartAudioStream', params:{ " +
+                    "url: '" + url + "'" +
+                    "appID: " + appID +
+                    "}}")
     }
 
     function stopAudioStream(appID) {
-        stream.stop()
+        console.log("Message Received - {method: 'Navigation.StopAudioStream', params:{ " +
+                    "appID: " + appID +
+                    "}}")
     }
 
     function fillSoftButtons(element, index, array) {
