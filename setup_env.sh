@@ -507,8 +507,8 @@ if $QT4_HMI; then
 	    make install
 	    cd tools/qml
 		../../bin/qmake
-		make
-		cp ../../bin/qmlviewer ${QNX_TARGET}/usr/bin/
+		make || true
+		cp ../../bin/qmlviewer ${QNX_TARGET}/usr/local/Qt-4.8.5/bin/
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
 		stop_progress_indicator $progress_indicator_id
