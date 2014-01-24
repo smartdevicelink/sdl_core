@@ -38,12 +38,16 @@
 #include "protocol_handler/protocol_handler.h"  //YK: temp solution until B1.0 release
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener.h"
-#include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
+
+class TransportAdapterEvent;
+class TransportManagerListener;
+
+namespace transport_adapter {
+class TransportAdapter;
+}  // namespace transport_adapter
+
 /**
  * @brief Interface of transport manager.
  **/

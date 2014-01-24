@@ -48,10 +48,10 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
@@ -966,6 +966,10 @@ void TransportManagerImpl::MessageQueueThread(void) {
             active_msg->set_waiting(true);
           } else {
             LOG4CXX_ERROR(logger_, "Data sent error");
+	    RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+	             DataSendError("Send failed - message removed"),
+		     active_msg);
+            message_queue_.remove(active_msg);
           }
         }
       }

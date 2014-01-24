@@ -39,19 +39,19 @@ public class MobileNaviDataFrameTest extends AndroidTestCase {
         }
     }
 
-    public void testMobileNaviEndSessionFrameWasCreated() throws Exception {
-        MobileNaviDataFrame endFrame = MobileNaviDataFrame.createEndOfSessionFrame();
+    public void testMobileNaviEndServiceFrameWasCreated() throws Exception {
+        MobileNaviDataFrame endFrame = MobileNaviDataFrame.createEndOfServiceFrame();
         assertNotNull(endFrame);
     }
 
-    public void testMobileNaviEndSessionFrameDataIsByteArrayWithNegOne() throws Exception {
+    public void testMobileNaviEndServiceFrameDataIsByteArrayWithNegOne() throws Exception {
         byte[] endData = new byte[]{-1};
-        MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfSessionFrame();
-        assertTrue("end of session array should have only single -1 value in it", Arrays.equals(endData, frame.getData()));
+        MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfServiceFrame();
+        assertTrue("end of currentSession array should have only single -1 value in it", Arrays.equals(endData, frame.getData()));
     }
 
-    public void testMobileNaviEndSessionWasCreatedWithEndSessionType() throws Exception {
-        MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfSessionFrame();
+    public void testMobileNaviEndServiceWasCreatedWithEndSessionType() throws Exception {
+        MobileNaviDataFrame frame = MobileNaviDataFrame.createEndOfServiceFrame();
         MobileNaviDataFrameType type = frame.getType();
         assertEquals("frame should have END_OS_SESSION_TYPE", type, MobileNaviDataFrameType.END_OS_SESSION_TYPE);
     }

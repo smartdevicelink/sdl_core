@@ -7,6 +7,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.DataReaderListener;
 import com.ford.syncV4.android.activity.mobilenav.StaticFileReader;
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
 
@@ -44,7 +45,7 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
     public void testStaticFileReader() throws Exception {
         OutputStream os = new PipedOutputStream();
         InputStream is = new PipedInputStream((PipedOutputStream) os);
-        mPacketizer = new H264Packetizer(this, is, (byte) 0);
+        mPacketizer = new H264Packetizer(this, is, (byte) 0, ServiceType.Mobile_Nav);
         mPacketizer.start();
 
         StaticFileReader staticFileReader = new StaticFileReader(getActivity(), new DataReaderListener() {

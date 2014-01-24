@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.interfaces.ISyncALMLifeCycleListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAddSubMenuResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAlertResponseListener;
@@ -84,11 +84,11 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
-import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -2621,12 +2621,22 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID) {
+        public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason) {
+
+        }
+
+        @Override
+        public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
 
         }
 
         @Override
         public void onSessionStarted(byte sessionID, String correlationID) {
+
+        }
+
+        @Override
+        public void onAudioServiceStart() {
 
         }
     }

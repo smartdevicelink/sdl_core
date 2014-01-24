@@ -75,11 +75,11 @@ class TransportAdapterListenerImpl
   /**
    * @brief Constructor.
    *
-   * @param tm Pointer to the transport manager implementation class.
-   * @param ta Pointer to the transport adapter associated with listener.
+   * @param manager Pointer to the transport manager implementation class.
+   * @param adapter Pointer to the transport adapter associated with listener.
    */
-  TransportAdapterListenerImpl(transport_manager::TransportManagerImpl* tm,
-                               TransportAdapter* ta);
+  TransportAdapterListenerImpl(TransportManagerImpl* manager,
+                               TransportAdapter* adapter);
 
   /**
    * @brief Dectructor.
@@ -91,28 +91,28 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available,
    * launch event ON_SEARCH_DONE in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    */
-  virtual void OnSearchDeviceDone(const TransportAdapter* transport_adapter);
+  virtual void OnSearchDeviceDone(const TransportAdapter* adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available, create search device error,
    * launch event ON_SEARCH_FAIL in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param error Error class with information about possible reason of search
    *device failure.
    */
-  virtual void OnSearchDeviceFailed(const TransportAdapter* transport_adapter,
+  virtual void OnSearchDeviceFailed(const TransportAdapter* adapter,
                                     const SearchDeviceError& error);
 
   /**
    * @brief Passes notification to TransportManagerImpl
    *
-   * @param transport_adapter Transport adapter that sent notification
+   * @param adapter Transport adapter that sent notification
    */
-  virtual void OnDeviceListUpdated(const TransportAdapter* transport_adapter);
+  virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -123,7 +123,7 @@ class TransportAdapterListenerImpl
    * @param device_handle Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void OnConnectDone(const TransportAdapter* transport_adapter,
+  virtual void OnConnectDone(const TransportAdapter* adapter,
                              const DeviceUID& device_handle,
                              const ApplicationHandle& app_id);
 
@@ -132,13 +132,13 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available,
    * launch event ON_CONNECT_FAIL in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of connect
    *failure.
    */
-  virtual void OnConnectFailed(const TransportAdapter* transport_adapter,
+  virtual void OnConnectFailed(const TransportAdapter* adapter,
                                const DeviceUID& device,
                                const ApplicationHandle& app_id,
                                const ConnectError& error);
@@ -146,11 +146,11 @@ class TransportAdapterListenerImpl
   /**
    * @brief
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void OnConnectRequested(const TransportAdapter* transport_adapter,
+  virtual void OnConnectRequested(const TransportAdapter* adapter,
                                   const DeviceUID& device_handle,
                                   const ApplicationHandle& app_handle);
 
@@ -159,13 +159,13 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available,
    * launch event ON_UNEXPECTED_DISCONNECT in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of
    *unexpected Disconnect.
    */
-  virtual void OnUnexpectedDisconnect(const TransportAdapter* transport_adapter,
+  virtual void OnUnexpectedDisconnect(const TransportAdapter* adapter,
                                       const DeviceUID& device,
                                       const ApplicationHandle& app_id,
                                       const CommunicationError& error);
@@ -175,11 +175,11 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available,
    * launch event ON_DISCONNECT_DONE in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param devcie_id Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void OnDisconnectDone(const TransportAdapter* transport_adapter,
+  virtual void OnDisconnectDone(const TransportAdapter* adapter,
                                 const DeviceUID& device_id,
                                 const ApplicationHandle& app_id);
 
@@ -188,13 +188,13 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available, create Disconnect error,
    * launch event ON_DISCONNECT_FAIL in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of
    *Disconnect failure.
    */
-  virtual void OnDisconnectFailed(const TransportAdapter* transport_adapter,
+  virtual void OnDisconnectFailed(const TransportAdapter* adapter,
                                   const DeviceUID& device,
                                   const ApplicationHandle& app_id,
                                   const DisconnectError& error);
@@ -202,67 +202,66 @@ class TransportAdapterListenerImpl
   /**
    * @brief
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param devic Device unique identifier.
    */
-  virtual void OnDisconnectDeviceDone(
-      const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& devic);
+  virtual void OnDisconnectDeviceDone(const TransportAdapter* adapter,
+                                      const DeviceUID& device);
 
   /**
    * @brief
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param error Error class with information about possible reason of
    *Disconnect from device failure.
    */
-  virtual void OnDisconnectDeviceFailed(
-      const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device, const DisconnectDeviceError& error);
+  virtual void OnDisconnectDeviceFailed(const TransportAdapter* adapter,
+                                        const DeviceUID& device,
+                                        const DisconnectDeviceError& error);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available, create error,
    * launch event ON_RECEIVED_DONE in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param devcie Device unique identifier.
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataReceiveDone(
-      const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device, const ApplicationHandle& app_id,
-      const RawMessageSptr data_container);
+  virtual void OnDataReceiveDone(const TransportAdapter* adapter,
+                                 const DeviceUID& device,
+                                 const ApplicationHandle& app_id,
+                                 const RawMessageSptr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available, create data receive error,
    * launch event ON_RECEIVED_DONE in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    * @param error Error class with information about possible reason of data
    *receive failure.
    */
-  virtual void OnDataReceiveFailed(
-      const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device, const ApplicationHandle& app_id,
-      const DataReceiveError& error);
+  virtual void OnDataReceiveFailed(const TransportAdapter* adapter,
+                                   const DeviceUID& device,
+                                   const ApplicationHandle& app_id,
+                                   const DataReceiveError& error);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available, create error,
    * launch event ON_SEND_DONE in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataSendDone(const TransportAdapter* transport_adapter,
+  virtual void OnDataSendDone(const TransportAdapter* adapter,
                               const DeviceUID& device,
                               const ApplicationHandle& app_id,
                               const RawMessageSptr data_container);
@@ -272,7 +271,7 @@ class TransportAdapterListenerImpl
    * to device adapters to be sure it is available, create data send error,
    * launch event ON_SEND_FAIL in transport manager.
    */
-  virtual void OnDataSendFailed(const TransportAdapter* transport_adapter,
+  virtual void OnDataSendFailed(const TransportAdapter* adapter,
                                 const DeviceUID& device,
                                 const ApplicationHandle& app_id,
                                 const RawMessageSptr data_container,
@@ -283,13 +282,13 @@ class TransportAdapterListenerImpl
    *to device adapters to be sure it is available, create error,
    * launch event ON_COMMUNICATION_ERROR in transport manager.
    *
-   * @param transport_adapter Pointer to the device adapter.
+   * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
    */
-  virtual void OnCommunicationError(
-      const transport_adapter::TransportAdapter* transport_adapter,
-      const DeviceUID& device, const ApplicationHandle& app_id);
+  virtual void OnCommunicationError(const TransportAdapter* adapter,
+                                    const DeviceUID& device,
+                                    const ApplicationHandle& app_id);
 
  private:
   /**

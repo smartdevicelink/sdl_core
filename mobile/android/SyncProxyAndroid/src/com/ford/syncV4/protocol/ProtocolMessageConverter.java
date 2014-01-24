@@ -1,6 +1,6 @@
 package com.ford.syncV4.protocol;
 
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 /**
 * Created by Andrew Batutin on 8/21/13.
@@ -8,7 +8,7 @@ import com.ford.syncV4.protocol.enums.SessionType;
 public class ProtocolMessageConverter {
     private ProtocolMessage _protocolMsg;
     private byte[] _data;
-    private SessionType _sessionType;
+    private ServiceType _serviceType;
     private int _version = 1;
 
     public ProtocolMessageConverter(ProtocolMessage protocolMsg, int version) {
@@ -20,22 +20,22 @@ public class ProtocolMessageConverter {
         return _data;
     }
 
-    public SessionType getSessionType() {
-        return _sessionType;
+    public ServiceType getSessionType() {
+        return _serviceType;
     }
 
     public ProtocolMessageConverter generate() {
         _data = null;
-        _sessionType = _protocolMsg.getSessionType();
+        _serviceType = _protocolMsg.getServiceType();
         // TODO - get rid of this ugly if statements
-        if (_sessionType == SessionType.Mobile_Nav && _version ==2){
+        if (_serviceType == ServiceType.Mobile_Nav && _version ==2){
             _data = _protocolMsg.getData();
             return this;
         }
         if (_version == 2) {
             if (_protocolMsg.getBulkData() != null) {
                 _data = new byte[12 + _protocolMsg.getJsonSize() + _protocolMsg.getBulkData().length];
-                _sessionType = SessionType.Bulk_Data;
+                _serviceType = ServiceType.Bulk_Data;
             } else {
                 _data = new byte[12 + _protocolMsg.getJsonSize()];
             }

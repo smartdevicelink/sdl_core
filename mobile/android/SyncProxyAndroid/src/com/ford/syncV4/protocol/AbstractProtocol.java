@@ -5,7 +5,8 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
@@ -45,21 +46,24 @@ public abstract class AbstractProtocol {
     // it for transmission over the transport.  The results of this processing will
     // be sent to the onProtocolMessageBytesToSend() method on protocol listener
     // interface.  Note that the ProtocolMessage itself contains information
-    // about the type of message (e.g. RPC, BULK, etc.) and the protocol session
+    // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
 
-    // This method starts a protocol session.  A corresponding call to the protocol
-    // listener onProtocolSessionStarted() method will be made when the protocol
-    // session has been established.
-    public abstract void StartProtocolSession(SessionType sessionType);
+    /**
+     * This method starts a protocol currentSession. A corresponding call to the protocol
+     * listener onProtocolSessionStarted() method will be made when the protocol
+     * currentSession has been established.
+     * @param sessionId ID of the current active session
+     */
+    public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolSession(SessionType sessionType, byte sessionID);
+    public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
-    // This method ends a protocol session.  A corresponding call to the protocol
-    // listener onProtocolSessionEnded() method will be made when the protocol
-    // session has ended.
-    public abstract void EndProtocolSession(SessionType sessionType, byte sessionID);
+    // This method ends a protocol currentSession.  A corresponding call to the protocol
+    // listener onProtocolServiceEnded() method will be made when the protocol
+    // currentSession has ended.
+    public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -96,7 +100,7 @@ public abstract class AbstractProtocol {
     }
 
     private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
-        if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
+        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             Log.d("MobileNaviSession", "ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
                 Log.d("MobileNaviSession", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
@@ -116,7 +120,7 @@ public abstract class AbstractProtocol {
     }
 
     private void writeToSdCard(ProtocolFrameHeader header, byte[] data) {
-        if (header.getSessionType().equals(SessionType.Mobile_Nav)) {
+        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             if (header.getFrameType().equals(FrameType.Single)) {
                 try {
                     if (fos != null) {
@@ -144,18 +148,30 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolMessageReceived(message);
     }
 
-    // This method handles the end of a protocol session. A callback is
+    // This method handles the end of a protocol currentSession. A callback is
     // sent to the protocol listener.
-    protected void handleProtocolSessionEnded(SessionType sessionType,
+    protected void handleProtocolServiceEnded(ServiceType serviceType,
                                               byte sessionID, String correlationID) {
-        _protocolListener.onProtocolSessionEnded(sessionType, sessionID, correlationID);
+        _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
     }
 
-    // This method handles the startup of a protocol session. A callback is sent
+    // This method handles the startup of a protocol currentSession. A callback is sent
     // to the protocol listener.
-    protected void handleProtocolSessionStarted(SessionType sessionType,
+    protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
-        _protocolListener.onProtocolSessionStarted(sessionType, sessionID, version, correlationID);
+        Session session = Session.createSession(serviceType, sessionID);
+        _protocolListener.onProtocolSessionStarted(session, version, correlationID);
+    }
+
+    protected void handleProtocolServiceStarted(ServiceType serviceType,
+                                                byte sessionID, byte version, String correlationID) {
+        if (serviceType.equals(ServiceType.RPC)) {
+            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
+        }
+        if (sessionID == 0) {
+            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
+        }
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID , version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

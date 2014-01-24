@@ -50,7 +50,7 @@ namespace request_watchdog {
 class RequestWatchdog : public Watchdog {
   public:
 
-    static Watchdog* instance();
+    //static Watchdog* instance();
 
     virtual void AddListener(WatchdogSubscriber* subscriber);
     virtual void RemoveListener(WatchdogSubscriber* subscriber);
@@ -126,10 +126,10 @@ class RequestWatchdog : public Watchdog {
     virtual int32_t getRegesteredRequestsNumber();
 
     ~RequestWatchdog();
-
+		
+		RequestWatchdog();
+		
   private:
-
-    RequestWatchdog();
 
     void notifySubscribers(const RequestInfo& requestInfo);
 
@@ -141,11 +141,15 @@ class RequestWatchdog : public Watchdog {
 
     class QueueDispatcherThreadDelegate : public threads::ThreadDelegate {
       public:
-        QueueDispatcherThreadDelegate();
+        explicit QueueDispatcherThreadDelegate(RequestWatchdog *inRequestWatchdog);
 
         void threadMain();
+        
+        virtual bool exitThreadMain();
 
       private:
+      	volatile bool stop_flag_;
+      	RequestWatchdog* requestWatchdog_;
         DISALLOW_COPY_AND_ASSIGN(QueueDispatcherThreadDelegate);
     };
 

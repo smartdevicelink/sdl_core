@@ -46,7 +46,7 @@
 namespace test  {
 namespace components  {
 namespace protocol_handler_test {
-
+/*
 //	using namespace transport_manager::TransportManager;
 	using namespace protocol_handler;
 
@@ -88,7 +88,7 @@ namespace protocol_handler_test {
 		EXPECT_CALL(tm, sendFrame(1, 0, 0, 0))
             .Times(1);*/
 
-	}
+//	}
 }
 }
 }

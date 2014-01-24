@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,10 +18,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 /**
@@ -49,13 +53,13 @@ public class AppSetUpDialog extends DialogFragment {
         Context context = getActivity();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 getActivity().LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.selectprotocol,
+        final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
 
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
         langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -73,6 +77,8 @@ public class AppSetUpDialog extends DialogFragment {
         final LinearLayout portLayout = (LinearLayout) view.findViewById(R.id.port_layout);
         final ToggleButton mNSDUseToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
 
+        final boolean mIsNSDSupported = Build.VERSION.SDK_INT >= Const.JELLYBEAN_API_LEVEL;
+
         final CheckBox autoSetAppIconCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkAutoSetAppIcon);
 
@@ -87,6 +93,9 @@ public class AppSetUpDialog extends DialogFragment {
                 ipAddressLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
                 portLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
                 nsdUseLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
+                if (!mIsNSDSupported) {
+                    showNSDUnsupportedView(view);
+                }
             }
         });
 
@@ -173,12 +182,13 @@ public class AppSetUpDialog extends DialogFragment {
 
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
 
+                        boolean mNSDPrefValue = mIsNSDSupported && mNSDUseToggle.isChecked();
                         // save the configs
                         boolean success = prefs
                                 .edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
-                                .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDUseToggle.isChecked())
+                                .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)
                                 .putInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE, videoSource)
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)
@@ -194,9 +204,23 @@ public class AppSetUpDialog extends DialogFragment {
                         if (!success) {
                             Log.w(logTag, "Can't save selected protocol properties");
                         }
-
+                        if (isHearBeat.isChecked()) {
+                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
+                        } else {
+                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
+                        }
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();
+    }
+
+    private void showNSDUnsupportedView(View view) {
+        TextView mNSDUnsupportedView = (TextView) view.findViewById(R.id.nsd_unsupported_api_label_view);
+        TextView mNSDLabelView = (TextView) view.findViewById(R.id.nsd_label_view);
+        ToggleButton mNSDToggleButtonView = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
+
+        mNSDLabelView.setEnabled(false);
+        mNSDToggleButtonView.setEnabled(false);
+        mNSDUnsupportedView.setVisibility(View.VISIBLE);
     }
 }

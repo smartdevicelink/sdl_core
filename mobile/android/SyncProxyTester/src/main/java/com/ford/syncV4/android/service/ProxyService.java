@@ -26,7 +26,7 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -90,6 +90,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -116,7 +117,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private static final String APPID_BT = FlavorConst.APPID_BT;
     private static final String APPID_TCP = FlavorConst.APPID_TCP;
     private static final String APPID_USB = FlavorConst.APPID_USB;
-
+    public static final int HEARTBEAT_INTERVAL = 5000;
+    public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
     private Integer autoIncCorrId = 1;
 
     private static final String ICON_SYNC_FILENAME = "icon.png";
@@ -141,6 +143,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private ProxyServiceEvent mServiceDestroyEvent;
 
     private int awaitingPutFileResponseCorrelationID;
+
 
     public void onCreate() {
         super.onCreate();
@@ -1532,10 +1535,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onMobileNaviStart() {
-        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "Mobile Navi Started";
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        logEvent("Mobile Navi Started");
 
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
@@ -1546,6 +1546,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             });
         }
+    }
+
+    @Override
+    public void onAudioServiceStart() {
+        logEvent("Audio Service Started");
+
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.onAudioServiceStarted();
+                }
+            });
+        }
+    }
+
+    private void logEvent(String message) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, "" + message);
     }
 
     @Override
@@ -1607,7 +1628,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
         Log.i(TAG, "OnRegisterAppRequest: " + msg.toString());
-        Log.d("TRACE", "OnRegisterAppRequest");
         //final  RegisterAppInterface event = msg;
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) _msgAdapter.logMessage(msg, true);
@@ -1629,9 +1649,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onProtocolSessionEnded(final SessionType sessionType, final Byte version, final String correlationID) {
+    public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason){
+        Log.i(TAG, "onAppUnregisteredAfterIgnitionOff " +reason);
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        String response = "EndSession Ack received; Session Type " + sessionType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
+        final String message = "onAppUnregisteredAfterIgnitionOff " +reason;
+        if (_msgAdapter != null) _msgAdapter.logMessage(message, true);
+        else Log.i(TAG, message);
+    }
+
+    @Override
+    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        String response = "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + version + "; Correlation ID " + correlationID;
         if (_msgAdapter != null) _msgAdapter.logMessage(response, false);
         else Log.i(TAG, "" + response);
 
@@ -1640,7 +1669,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mainActivity.onProtocolSessionEnded(sessionType, version, correlationID);
+                    mainActivity.onProtocolServiceEnded(serviceType, version, correlationID);
                 }
             });
         }
@@ -1650,8 +1679,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSessionStarted(final byte sessionID, final String correlationID) {
         if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
         if (_msgAdapter != null) {
-            _msgAdapter.logMessage("Session Started; session id " + sessionID, true);
-        } else Log.i(TAG, "Session Started; session id " + sessionID);
+            _msgAdapter.logMessage("Session Started; currentSession id " + sessionID, true);
+        } else Log.i(TAG, "Session Started; currentSession id " + sessionID);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
             mainActivity.runOnUiThread(new Runnable() {

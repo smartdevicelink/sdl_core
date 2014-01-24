@@ -42,6 +42,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -56,7 +57,7 @@ import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceEvent;
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -133,6 +134,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
@@ -332,7 +334,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
-    private byte rpcSessionID = -1;
+    private Session rpcSession = new Session();
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -629,7 +631,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     try {
                         proxyInstance.openSession();
                     } catch (SyncException e) {
-                        Log.e(LOG_TAG, "Can't open session", e);
+                        Log.e(LOG_TAG, "Can't open currentSession", e);
                     }
                 }
             } else {
@@ -2700,6 +2702,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final Context mContext = adapter.getContext();
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
+
                             View layout = inflater.inflate(R.layout.performinteraction,
                                     (ViewGroup) findViewById(R.id.performinteraction_Root));
 
@@ -3539,6 +3542,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.registerappinterface_useVRSynonyms);
         final EditText vrSynonyms = (EditText) layout
                 .findViewById(R.id.registerappinterface_vrSynonyms);
+
         final CheckBox isMediaApp = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_isMediaApp);
         final CheckBox useDesiredLang = (CheckBox) layout
@@ -4116,10 +4120,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviSession() {
+    public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should start mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSessionID);
+            _msgAdapter.logMessage("Should start mobile nav currentSession", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavService(rpcSession);
         }
     }
 
@@ -4141,6 +4145,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
+        AudioServicePreviewFragment audioFragement = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+        audioFragement.setAudioServiceStateOff();
+        closeAudioOutputStream();
     }
 
     public void logError(final Exception e) {
@@ -4150,7 +4157,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 _msgAdapter.logMessage(e.getMessage(), true);
             }
         });
-
     }
 
     private void closeMobileNaviOutputStream() {
@@ -4160,21 +4166,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
-    public void stopMobileNavSession() {
-        if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should stop mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
-            closeMobileNaviOutputStream();
+    private void closeAudioOutputStream() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            proxy.stopAudioDataTransfer();
         }
     }
 
-    public void sendMobileNaviData(byte[] data, boolean addToUI) {
+    public void stopMobileNavSession() {
         if (isProxyReadyForWork()) {
-            try {
-                ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
-            } catch (SyncException e) {
-                onMobileNaviError(e.getMessage(), false);
-            }
+            _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
+            ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
+            closeMobileNaviOutputStream();
         }
     }
 
@@ -4187,7 +4190,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null) {
+        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null){
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4196,6 +4199,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onMobileNavAckReceived(int frameReceived) {
 
+    }
+
+    public void startAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should start audio service", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+        }
+    }
+
+    public void stopAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should stop audio service", true);
+            ProxyService.getInstance().getProxyInstance().stopAudioService();
+            closeAudioOutputStream();
+        }
+    }
+
+    public void onAudioServiceStarted() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            OutputStream stream = proxy.startAudioDataTransfer();
+            AudioServicePreviewFragment fr = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setAudioServiceStateOn(stream);
+        }
     }
 
     public void onTouchEventReceived(OnTouchEvent notification) {
@@ -4293,11 +4320,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     };
 
-    public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID){
-        // TODO - need to handle end session logic
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID){
+        // TODO - need to handle end currentSession logic
     }
 
     public void onSesionStarted(byte sessionID, String correlationID) {
-        rpcSessionID = sessionID;
+        rpcSession.setSessionId(sessionID);
     }
+
+
 }

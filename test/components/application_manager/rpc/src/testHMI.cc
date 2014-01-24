@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <unistd.h>
 #include "rpc/testHMI.h"
 
 namespace test{
@@ -132,6 +133,10 @@ namespace test{
 			
 			(*AppRegRequest)[S_MSG_PARAMS][strings::app_name] = "SyncProxyTester";					
 			(*AppRegRequest)[S_MSG_PARAMS][strings::available] = true;
+			(*AppRegRequest)[S_MSG_PARAMS][strings::language_desired] = hmi_apis::Common_Language::EN_US;
+			(*AppRegRequest)[S_MSG_PARAMS][strings::hmi_display_language_desired] = hmi_apis::Common_Language::EN_US;
+
+			
 			
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::app_id] = "12345";
 			//(*AppRegRequest)[S_MSG_PARAMS][strings::is_media_application] = true;
@@ -150,6 +155,8 @@ namespace test{
 			//printf("\n\n\n after MesChain \n\n\n");
 			//app_manager_->AddMessageChain(connectKey,1,16,MesChain, &(*AppRegRequest) );
 			//printf("\n\n\n after MesChain  after\n\n\n");
+			
+			//app_manager_->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
 			app_manager_->ManageMobileCommand(AppRegRequest);
 			///////////////////////////////////			
 			
@@ -157,7 +164,7 @@ namespace test{
 			Application* appl = app_manager_->application(65537);
 			
 			////////////////////////////////////////
-			sleep(20);
+			sleep(5);
 			
 			
 			
@@ -175,7 +182,7 @@ namespace test{
 			//mobile_apis::FunctionID::RegisterAppInterfaceID;
 
 			
-			(*HMIRequest)[strings::params][strings::function_id] 		= mobile_apis::FunctionID::AddCommandID;
+			(*HMIRequest)[S_PARAMS][strings::function_id] 		= mobile_apis::FunctionID::AddCommandID;
 			(*HMIRequest)[S_PARAMS][strings::correlation_id] 	= 1;
 			(*HMIRequest)[S_PARAMS][strings::message_type] 		= mobile_apis::messageType::request;
 			(*HMIRequest)[S_PARAMS][strings::protocol_type] 	= 0;
@@ -225,12 +232,12 @@ namespace test{
 			//if (appRegistr)
 			//	printf("\n\n\n blablabla \n\n\n");
 
-			appl->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
+			//appl->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
 
 			app_manager_->ManageMobileCommand(HMIRequest);
 
 			
-			sleep(20);
+			sleep(5);
 		}
 	}//namespace app_manager_test
 }//namespace test

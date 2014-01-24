@@ -33,8 +33,8 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncTransport transportMock = mock(SyncTransport.class);
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
 
-        SyncConnection connection =
-                spy(new SyncConnection(null, null, transportMock));
+        SyncConnection connection = spy(new SyncConnection(null));
+        connection.init(null, transportMock);
 
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
@@ -58,8 +58,8 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncTransport transportMock = mock(SyncTransport.class);
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
 
-        SyncConnection connection =
-                spy(new SyncConnection(null, null, transportMock));
+        SyncConnection connection = spy(new SyncConnection(null));
+        connection.init(null, transportMock);
 
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
@@ -78,8 +78,8 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncTransport transportMock = mock(SyncTransport.class);
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
 
-        SyncConnection connection =
-                spy(new SyncConnection(null, null, transportMock));
+        SyncConnection connection = spy(new SyncConnection(null));
+        connection.init(null, transportMock);
 
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,

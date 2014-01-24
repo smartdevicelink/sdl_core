@@ -17,7 +17,7 @@ public class MobileNaviDataFrame {
         this.data = data;
     }
 
-    public static MobileNaviDataFrame createEndOfSessionFrame() {
+    public static MobileNaviDataFrame createEndOfServiceFrame() {
         MobileNaviDataFrame frame = new MobileNaviDataFrame(new byte[]{-1});
         frame.type = MobileNaviDataFrameType.END_OS_SESSION_TYPE;
         return frame;

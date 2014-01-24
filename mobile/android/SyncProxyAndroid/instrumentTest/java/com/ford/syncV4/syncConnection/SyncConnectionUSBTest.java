@@ -1,7 +1,7 @@
 package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SyncTransport;
@@ -70,10 +70,10 @@ public class SyncConnectionUSBTest extends TestCase {
                     }
                 };
 
-        final SyncConnection connection =
-                new SyncConnection(mock(ISyncConnectionListener.class), new BTTransportConfig());
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.init(new BTTransportConfig());
         connection._transport = fakeTransport;
-        connection.onProtocolSessionEnded(SessionType.Mobile_Nav, (byte) 0, "");
+        connection.onProtocolServiceEnded(ServiceType.RPC, (byte) 0, "");
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }
 }

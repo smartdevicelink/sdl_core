@@ -16,7 +16,7 @@ import com.ford.syncV4.android.constants.Const;
 
 import java.io.OutputStream;
 
-public class MobileNavPreviewFragment extends Fragment{
+public class MobileNavPreviewFragment extends Fragment implements ServicePreviewFragmentInterface {
     private static final String TAG =
             MobileNavPreviewFragment.class.getSimpleName();
     private CheckBoxState mobileNavSessionCheckBoxState;
@@ -57,7 +57,7 @@ public class MobileNavPreviewFragment extends Fragment{
         if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mobileNavSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviSession();
+            tester.startMobileNaviService();
         } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavSession();
@@ -86,11 +86,13 @@ public class MobileNavPreviewFragment extends Fragment{
         fileStreamingLogic.createStaticFileReader();
     }
 
+    @Override
     public void dataStreamingStarted() {
         dataStreamingButton.setEnabled(false);
         dataStreamingButton.setText("Data is streaming");
     }
 
+    @Override
     public void dataStreamingStopped() {
         if (mobileNavSessionCheckBoxState.getState() == CheckBoxStateValue.ON){
             dataStreamingButton.setEnabled(true);
