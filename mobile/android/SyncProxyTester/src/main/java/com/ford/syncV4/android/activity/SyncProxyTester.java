@@ -4320,13 +4320,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     };
 
-    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID){
-        // TODO - need to handle end currentSession logic
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
+        if (serviceType == ServiceType.Audio_Service) {
+            _msgAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            _msgAdapter.logMessage("Navi service stopped", true);
+        }
     }
 
     public void onSesionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
     }
-
-
 }

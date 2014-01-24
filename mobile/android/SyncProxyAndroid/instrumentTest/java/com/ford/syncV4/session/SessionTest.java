@@ -62,4 +62,39 @@ public class SessionTest extends AndroidTestCase{
         assertEquals("service list should be 0",  0, session.getServiceList().size());
         assertEquals("session id should be 0",0, session.getSessionId());
     }
+
+    public void testEmptyServicesList() {
+        Session session = new Session();
+        assertTrue(session.isServicesEmpty());
+    }
+
+    public void testEmptyServicesListWithNonEmptyList() {
+        Session session = new Session();
+        session.addService(session.createService(ServiceType.Audio_Service));
+        assertFalse(session.isServicesEmpty());
+    }
+
+    public void testHasServiceByCorrectType() {
+        Session session = new Session();
+        Service service = session.createService(ServiceType.Audio_Service);
+        session.addService(service);
+        assertTrue(session.hasService(ServiceType.Audio_Service));
+    }
+
+    public void testHasServiceByIncorrectType() {
+        Session session = new Session();
+        session.createService(ServiceType.Audio_Service);
+        assertFalse(session.hasService(ServiceType.Mobile_Nav));
+    }
+
+    public void testPreventAddServiceWithSameType() {
+        Session session = new Session();
+        Service service_A = session.createService(ServiceType.Audio_Service);
+        Service service_B = session.createService(ServiceType.Audio_Service);
+        Service service_C = session.createService(ServiceType.Audio_Service);
+        session.addService(service_A);
+        session.addService(service_B);
+        session.addService(service_C);
+        assertEquals(1, session.getServicesNumber());
+    }
 }
