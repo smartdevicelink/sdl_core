@@ -59,7 +59,6 @@ class Array : public Type {
   const Range& range() const;
   bool operator<(const Array& that) const;
   // codegen::Type methods
-  virtual bool IsArray() const;
   virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
   virtual const ConstantsCreator* SupportsConstants() const;
 
