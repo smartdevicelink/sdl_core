@@ -3608,8 +3608,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         restartRPCProtocolSession();
     }
 
+    // TODO: Need to refactor it
     public List<Service> getServicePool() {
         return currentSession.getServiceList();
+    }
+
+    public boolean hasServiceInServicesPool(ServiceType serviceType) {
+        return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
     // Private Class to Interface with SyncConnection
@@ -3644,8 +3649,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onHeartbeatTimedOut() {
             final String msg = "Heartbeat timeout";
             DebugTool.logInfo(msg);
-            notifyProxyClosed(msg, new SyncException(msg,
-                    SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
         @Override
@@ -3653,10 +3657,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             try {
                 if (msg.getData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
             try {
                 if (msg.getBulkData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
         }
 
@@ -3687,15 +3693,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
+                                             String correlationID) {
             if (_wiproVersion == 2) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
-                    return;
-                }
-                if (serviceType.equals(ServiceType.Audio_Service)){
+                } else if (serviceType.equals(ServiceType.Audio_Service)){
                     startAudioService(sessionID, correlationID);
-                    return;
                 }
             }
         }
