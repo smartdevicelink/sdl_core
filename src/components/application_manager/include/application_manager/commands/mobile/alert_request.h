@@ -115,9 +115,10 @@ class AlertRequest : public CommandRequestImpl {
   bool                        awaiting_tts_speak_response_;
   bool                        awaiting_tts_stop_speaking_response_;
   bool                        response_success_;
+  bool                        flag_other_component_sent_;
   mobile_apis::Result::eType  response_result_;
-  std::string                 response_info_;
   smart_objects::SmartObject  response_params_;
+  mobile_apis::Result::eType  tts_speak_response_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

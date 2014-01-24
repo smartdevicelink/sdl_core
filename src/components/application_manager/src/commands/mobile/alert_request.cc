@@ -50,7 +50,9 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
       awaiting_tts_speak_response_(false),
       awaiting_tts_stop_speaking_response_(false),
       response_success_(false),
-      response_result_(mobile_apis::Result::SUCCESS) {
+      flag_other_component_sent_(false),
+      response_result_(mobile_apis::Result::SUCCESS),
+      tts_speak_response_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
@@ -118,19 +120,13 @@ void AlertRequest::on_event(const event_engine::Event& event) {
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
       }
 
-      hmi_apis::Common_Result::eType result_code =
-          static_cast<hmi_apis::Common_Result::eType>(
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       // Mobile Alert request is successful when UI_Alert is successful
-      response_success_ = hmi_apis::Common_Result::SUCCESS == result_code;
+      response_success_ = mobile_apis::Result::SUCCESS == result_code;
       if (!response_success_) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
-          response_result_ = mobile_apis::Result::WARNINGS;
-          response_info_ = "Unsupported phoneme type sent in a prompt";
-        } else {
-          response_result_ =
-              static_cast<mobile_apis::Result::eType>(result_code);
-        }
+        response_result_ = result_code;
       }
       response_params_ = message[strings::msg_params];
       break;
@@ -139,6 +135,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       DCHECK(awaiting_tts_speak_response_);
       awaiting_tts_speak_response_ = false;
+      tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
@@ -152,10 +150,26 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
-
   if (!HasHmiResponsesToWait()) {
+    std::string response_info("");
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
+        !flag_other_component_sent_ && response_success_) {
+      response_success_ = false;
+      response_result_ = mobile_apis::Result::WARNINGS;
+      response_info = "Unsupported phoneme type sent in a prompt";
+    } else if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
+        mobile_apis::Result::UNSUPPORTED_RESOURCE == response_result_ &&
+        response_success_) {
+      response_result_ = mobile_apis::Result::WARNINGS;
+      response_info = "Unsupported phoneme type sent in a prompt and "
+          "unsupported image sent in soft buttons";
+    } else if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
+        response_success_) {
+      response_result_ = mobile_apis::Result::WARNINGS;
+            response_info = "Unsupported phoneme type sent in a prompt";
+    }
     SendResponse(response_success_, response_result_,
-                 response_info_.empty() ? NULL : response_info_.c_str(),
+                 response_info.empty() ? NULL : response_info.c_str(),
                  &response_params_);
   }
 }
@@ -242,7 +256,10 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     msg_params[strings::progress_indicator] =
       (*message_)[strings::msg_params][strings::progress_indicator];
   }
-
+  if (msg_params[hmi_request::alert_strings].length() > 0 ||
+      msg_params.keyExists(hmi_request::soft_buttons)) {
+    flag_other_component_sent_ = true;
+  }
   SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
