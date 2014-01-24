@@ -298,8 +298,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
   std::map<RequestInfo*, TimevalStruct>::iterator it_temp;
 
   int32_t cycleSleepInterval = DEFAULT_CYCLE_TIMEOUT;
-  int32_t cycleDuration;
-  TimevalStruct cycleStartTime;
 
   //RequestWatchdog* instnc = static_cast<RequestWatchdog*>(
   //                              RequestWatchdog::instance());
@@ -310,8 +308,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
 
   while (!stop_flag_) {
     usleep(cycleSleepInterval);
-
-    cycleStartTime = date_time::DateTime::getCurrentTime();
 
     {
       AutoLock auto_lock(requestWatchdog_->requestsLock_);
@@ -332,12 +328,12 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
           }
           continue;
         }
-        LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
+/*        LOG4CXX_INFO(logger_, "Checking timeout for the following request :"
                      << "\n ConnectionID : " << (*it).first->connectionID_
                      << "\n CorrelationID : " << (*it).first->correlationID_
                      << "\n FunctionID : " << (*it).first->functionID_
                      << "\n CustomTimeOut : " << (*it).first->customTimeout_
-                     << "\n");
+                     << "\n");*/
 
         if ((*it).first->customTimeout_ <
             date_time::DateTime::calculateTimeSpan((*it).second)) {
@@ -362,9 +358,6 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
       }
     }
 
-    cycleDuration = date_time::DateTime::calculateTimeSpan(cycleStartTime);
-    cycleSleepInterval += DEFAULT_CYCLE_TIMEOUT *
-                          (cycleDuration / DEFAULT_CYCLE_TIMEOUT + 1);
   }
 }
 
