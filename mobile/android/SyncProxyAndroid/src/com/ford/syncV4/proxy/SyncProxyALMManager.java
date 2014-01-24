@@ -46,6 +46,7 @@ import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
@@ -84,6 +85,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
@@ -2591,6 +2593,10 @@ public class SyncProxyALMManager {
 		}
 
         @Override
+        public void onSystemRequestResponse(SystemRequestResponse response) {
+        }
+
+        @Override
         public void onMobileNaviStart() {
 
         }
@@ -2608,6 +2614,10 @@ public class SyncProxyALMManager {
         @Override
         public void onKeyboardInput(OnKeyboardInput msg) {
 
+        }
+
+        @Override
+        public void onOnSystemRequest(OnSystemRequest notification) {
         }
 
         @Override

@@ -67,6 +67,7 @@ import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
@@ -100,6 +101,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
@@ -2179,6 +2181,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _proxyListener.onUpdateTurnListResponse(
                                 (UpdateTurnListResponse) msg);
                     }
+                } else if (functionName.equals(Names.SystemRequest)) {
+                    final SystemRequestResponse msg =
+                            new SystemRequestResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSystemRequestResponse(msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSystemRequestResponse(msg);
+                    }
                 } else {
                     if (_syncMsgVersion != null) {
                         DebugTool.logError("Unrecognized response Message: " +
@@ -2437,6 +2453,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     });
                 } else {
                     _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
+                }
+            } else if (functionName.equals(Names.OnSystemRequest)) {
+                final OnSystemRequest msg = new OnSystemRequest(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onOnSystemRequest(msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onOnSystemRequest(msg);
                 }
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered

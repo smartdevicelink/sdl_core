@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -45,6 +46,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
@@ -299,6 +301,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
 
+    public void onSystemRequestResponse(SystemRequestResponse response);
+
     public void onMobileNaviStart();
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
@@ -306,6 +310,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onOnTouchEvent(OnTouchEvent notification);
 
     public void onKeyboardInput(OnKeyboardInput msg);
+
+    public void onOnSystemRequest(OnSystemRequest notification);
 
     void onRegisterAppRequest(RegisterAppInterface msg);
 
