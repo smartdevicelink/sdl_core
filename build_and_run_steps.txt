@@ -97,9 +97,10 @@
  5.1. LinHost: create a build folder <Project_Root_Bin> somewhere at a disk.
  5.1. LinHost: enter the <Project_Root_Bin> directory.
  5.2. LinHost: create the build files choosing the appropriate step among the following depending on the target OS:
-  5.2.1. for QNX: “cmake -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake  <Project_Root_Src>”.
-  5.2.2. for Linux with Web HMI: "cmake -DDEFAULT_MEDIA_FLAG=ON <Project_Root_Src>".
-  5.2.3. for Linux with QML HMI: "cmake -DDEFAULT_MEDIA_FLAG=ON -DHMI2=ON <Project_Root_Src>".
+  5.2.1. for QNX with Web HMI:   “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake ”.
+  5.2.2. for QNX with QML HMI:   “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON”.
+  5.2.3. for Linux with Web HMI: "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON".
+  5.2.4. for Linux with QML HMI: "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON -DHMI2=ON".
     Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
  5.3. LinHost: run build process “make install”.
 
