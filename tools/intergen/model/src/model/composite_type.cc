@@ -64,6 +64,9 @@ const Array::Range& Array::range() const {
 }
 
 bool Array::operator <(const Array& that) const {
+  if (type_ != that.type_) {
+    return size_t(type_) < size_t(that.type_);
+  }
   if (range_.min() == that.range_.min())
     return range_.min() < that.range_.min();
   return range_.max() < that.range_.max();
@@ -98,6 +101,9 @@ const Map::Range& Map::range() const {
 }
 
 bool Map::operator <(const Map& that) const {
+  if (type_ != that.type_) {
+    return size_t(type_) < size_t(that.type_);
+  }
   if (range_.min() == that.range_.min())
     return range_.min() < that.range_.min();
   return range_.max() < that.range_.max();
