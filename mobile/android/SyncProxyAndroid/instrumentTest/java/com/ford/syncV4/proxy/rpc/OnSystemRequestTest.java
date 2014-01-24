@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Tests for OnOnSystemRequest class.
+ * Tests for OnSystemRequest class.
  *
  * Created by enikolsky on 2014-01-24.
  */
