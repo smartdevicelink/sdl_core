@@ -115,7 +115,7 @@
  7.1. QnxServ: run terminal.
  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
  7.3. QnxServ: start SDL “./smartDeviceLinkCore”.
-    Note: For usage USB transport start SDL undo root “su -c ./smartDeviceLinkCore”.
+    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.
