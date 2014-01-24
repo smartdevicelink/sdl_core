@@ -236,7 +236,7 @@ bool CreateInteractionChoiceSetRequest::compareStr(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
 
-  return 0 == strcasecmp(str1.asString().c_str(), str2.asString().c_str());
+  return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
 

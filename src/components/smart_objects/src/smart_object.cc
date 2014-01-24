@@ -489,6 +489,14 @@ std::string SmartObject::asString() const {
   return convert_string();
 }
 
+const char* SmartObject::asCharArray() const {
+  if (m_data.str_value != NULL) {
+    return m_data.str_value->c_str();
+  }
+
+  return "";
+}
+
 SmartObject& SmartObject::operator=(const std::string& NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_string(NewValue);
