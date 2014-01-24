@@ -42,6 +42,9 @@
 
 namespace transport_manager {
 
+log4cxx::LoggerPtr TransportAdapterListenerImpl::logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
+
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
