@@ -32,6 +32,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public static final byte VERSION = (byte) 2;
     public static final byte SESSION_ID = (byte) 48;
     public static final int MESSAGE_ID = 48;
+
+    private static final String LOG_TAG = "SyncConnectionTest";
+
     private SyncConnection sut;
     private TCPTransportConfig config;
 
@@ -237,5 +240,20 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         verify(connection._protocol, times(1)).EndProtocolService(serviceTypeCaptor.capture(), sessionIDCaptor.capture());
         assertEquals("should end audio service", ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals("should end session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
+    }
+
+    public void testStartSessionWithCorrectId() throws Exception {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setSessionId(SESSION_ID);
+        connection.init(config);
+        connection._protocol = mock(WiProProtocol.class);
+        connection._transport = mock(SyncTransport.class);
+        when(connection._transport.getIsConnected()).thenReturn(true);
+
+        connection.onTransportConnected();
+
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        verify(connection._protocol, times(1)).StartProtocolSession(sessionIDCaptor.capture());
+        assertEquals("Should start session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
     }
 }
