@@ -34,7 +34,7 @@
 set -e
 
 if [ $EUID != 0 ]; then
-    echo "This script should not be run using sudo or as the root user"
+    echo "This script should be run using sudo or as the root user"
     exit 1
 fi
 
@@ -387,6 +387,7 @@ if $QT5_HMI; then
 		echo "Installing Qt5 libraries"
 		chmod +x ${QT5_RUNFILE_BIN}
 		${QT5_RUNFILE_BIN}
+		#Update location of Qt
 		updatedb
 		echo $OK
 	fi
@@ -399,14 +400,14 @@ fi
 if $QT4_HMI; then
 
 	NEED_QT4_INSTALL=false
-    qmlscene_binary=`./FindQt.sh -v 4.8.5 -b qmlscene || true`
+    qmlscene_binary=`./FindQt.sh -v 4.8.5 || true`
 	if [ -n "$qmlscene_binary" ]; then
 		echo "Found Qt4 in "`dirname $qmlscene_binary`
 	else
 		NEED_QT4_INSTALL=true
-	fi
+    fi
 
-	if $NEED_QT5_INSTALL; then
+	if $NEED_QT4_INSTALL; then
 	    #Save current directory
 	    pushd .
 
@@ -423,7 +424,7 @@ if $QT4_HMI; then
 		load-from-ftp ${EXPAT_DOWNLOAD_LINK} ${EXPAT_DOWNLOAD_DST}
 		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_FOLDER}_build.log"
 	    echo "Installing EXPAT, please be patient."
-        echo "Additional configure and build information will be saved to ${EXPAT_BUILD_LOG}."
+        echo "Additional configure and build information will be saved to ${EXPAT_BUILD_LOG}"
 		{
 		cd ${EXPAT_DOWNLOAD_DST}
 		tar -xzf ${EXPAT_ARCHIVE}
@@ -441,7 +442,7 @@ if $QT4_HMI; then
 		load-from-ftp ${DBUS_DOWNLOAD_LINK}  ${DBUS_DOWNLOAD_DST}
 		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_FOLDER}_build.log"
 	    echo "Installing DBUS, please be patient."
-        echo "Additional configure and build information will be saved to ${DBUS_BUILD_LOG}."
+        echo "Additional configure and build information will be saved to ${DBUS_BUILD_LOG}"
 		{
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xzf ${DBUS_ARCHIVE}
@@ -460,14 +461,21 @@ if $QT4_HMI; then
 		load-from-ftp ${QT4_DOWNLOAD_LINK}  ${QT4_DOWNLOAD_DST}
 		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_FOLDER}_build.log"
         echo "Installing Qt4, please be patient."
-        echo "Additional configure and build information will be saved to ${QT4_BUILD_LOG}."
+        echo "Additional configure and build information will be saved to ${QT4_BUILD_LOG}"
 		{
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xzf ${QT4_ARCHIVE}
 	    cd ${QT4_FOLDER}
-	    ./configure  -prefix $QNX_TARGET/usr/local/Qt-4.8.5 -xplatform qws/qnx-i386-g++ -embedded x86 -no-gfx-linuxfb -no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license -no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos -L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/
+	    ./configure  -prefix $QNX_TARGET/usr/local/Qt-4.8.5 -xplatform qws/qnx-i386-g++ -embedded x86 -no-gfx-linuxfb \
+	    	-no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license \
+	    	-no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos \
+	    	-L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/ 
 		make -j${BUILD_THREADS_COUNT}
 	    make install
+	    cd tools/qml
+		../../bin/qmake
+		make
+		cp qmlscene $QNX_TARGET/usr/bin/
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
 
@@ -478,6 +486,9 @@ if $QT4_HMI; then
 
 	    #Load correct current directory
 	    popd
+
+		#Update location of Qt
+		updatedb
 	fi
 	echo $OK
 fi
