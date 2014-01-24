@@ -4324,9 +4324,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         // TODO - need to handle end currentSession logic
     }
 
-    public void onSesionStarted(byte sessionID, String correlationID) {
+    public void onSessionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
     }
-
-
 }

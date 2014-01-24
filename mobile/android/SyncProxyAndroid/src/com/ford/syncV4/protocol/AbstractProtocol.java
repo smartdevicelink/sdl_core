@@ -31,7 +31,6 @@ public abstract class AbstractProtocol {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
 
-
         _protocolListener = protocolListener;
     }// end-ctor
 
@@ -97,16 +96,16 @@ public abstract class AbstractProtocol {
     }
 
     private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
-        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
-            Log.d("MobileNaviSession", "ProtocolFrameHeader: " + header.toString());
+        if (header.getServiceType().equals(ServiceType.Audio_Service)) {
+            Log.d("AUDIO SERVCIE", "ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
-                Log.d("MobileNaviSession", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
+                Log.d("AUDIO SERVCIE", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
             }
         }
     }
 
     private void initVideoDumpStream() {
-        String filename = "ford_video.mp4";
+        String filename = "ford_audio.wav";
         file = new File(Environment.getExternalStorageDirectory(), filename);
 
         try {
@@ -117,7 +116,7 @@ public abstract class AbstractProtocol {
     }
 
     private void writeToSdCard(ProtocolFrameHeader header, byte[] data) {
-        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
+        if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             if (header.getFrameType().equals(FrameType.Single)) {
                 try {
                     if (fos != null) {

@@ -23,4 +23,14 @@ public class ProtocolMessageConverterTest extends AndroidTestCase {
         byte[] result = converter.generate().getData();
         assertTrue("for mobile nav data should be same as ProtocolMessage.data", Arrays.equals(result, frame));
     }
+
+    public void  testAudioServiceDataPayloadCreation() throws Exception {
+        byte [] frame = new byte[]{1,2,3,4,5,7};
+        ProtocolMessage message = new ProtocolMessage();
+        message.setData(frame);
+        message.setSessionType(ServiceType.Audio_Service);
+        ProtocolMessageConverter converter = new ProtocolMessageConverter(message, 2);
+        byte[] result = converter.generate().getData();
+        assertTrue("for audio service data should be same as ProtocolMessage.data", Arrays.equals(result, frame));
+    }
 }

@@ -161,6 +161,7 @@ public class WiProProtocol extends AbstractProtocol {
                 messageID++;
                 ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID, data.length, messageID, _version);
                 handleProtocolFrameToSend(header, data, 0, data.length);
+
             }
         }
     }
