@@ -395,11 +395,13 @@ int TransportManagerImpl::AddTransportAdapter(
                             << transport_adapter << "["
                             << transport_adapter->GetDeviceType() << "]");
 
-  if (transport_adapter_listeners_.find(transport_adapter) ==
+  if (transport_adapter_listeners_.find(transport_adapter) !=
           transport_adapter_listeners_.end()) {
-      transport_adapter_listeners_[transport_adapter] =
-          new TransportAdapterListenerImpl(this, transport_adapter);
+      LOG4CXX_ERROR(logger_, "Adapter already exists.");
+      return E_ADAPTER_EXISTS;
   }
+  transport_adapter_listeners_[transport_adapter] =
+      new TransportAdapterListenerImpl(this, transport_adapter);
   transport_adapter->AddListener(
       transport_adapter_listeners_[transport_adapter]);
 
