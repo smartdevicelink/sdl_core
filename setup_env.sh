@@ -121,6 +121,34 @@ else
 fi
 echo " "
 
+#Indicatiion functions for long-time operations
+progress_indicator_id=0
+function progress_indicator() {
+	sleep_time=0.2
+	echo -ne "|"
+	while true;  do
+		echo -ne "\b|"
+		sleep $sleep_time
+		echo -ne "\b/"
+		sleep $sleep_time
+		echo -ne "\b-"
+		sleep $sleep_time
+		echo -ne "\b\\"
+		sleep $sleep_time
+	done
+}
+function stop_progress_indicator {
+	exec 2>/dev/null
+	kill $1
+	echo -e "\b+"
+}
+function start_progress_indicator {
+	echo -en "$1"
+	progress_indicator &
+	progress_indicator_id=$!
+	trap "stop_progress_indicator $progress_indicator_id; exit" INT TERM EXIT
+}
+#apt-get install wrapper function
 function apt-install() {
     if [ -z "$1" ];
     then
@@ -136,7 +164,7 @@ echo "Installing wget"
 apt-install wget
 echo $OK
 
-#Load from FTP
+#Load by wget from FTP function
 function load-from-ftp() {
     if [ -z "$1" ];
     then
@@ -425,6 +453,7 @@ if $QT4_HMI; then
 		EXPAT_BUILD_LOG="${EXPAT_DOWNLOAD_DST}/${EXPAT_FOLDER}_build.log"
 	    echo "Installing EXPAT, please be patient."
         echo "Additional configure and build information will be saved to ${EXPAT_BUILD_LOG}"
+		start_progress_indicator
 		{
 		cd ${EXPAT_DOWNLOAD_DST}
 		tar -xzf ${EXPAT_ARCHIVE}
@@ -434,6 +463,7 @@ if $QT4_HMI; then
 		make installlib
 		#save configure and make output in log file
 		} &> ${EXPAT_BUILD_LOG}
+		stop_progress_indicator $progress_indicator_id
 
 	   	DBUS_FOLDER="dbus-1.7.8"
 	    DBUS_ARCHIVE="${DBUS_FOLDER}.tar.gz"
@@ -443,6 +473,7 @@ if $QT4_HMI; then
 		DBUS_BUILD_LOG="${DBUS_DOWNLOAD_DST}/${DBUS_FOLDER}_build.log"
 	    echo "Installing DBUS, please be patient."
         echo "Additional configure and build information will be saved to ${DBUS_BUILD_LOG}"
+		start_progress_indicator
 		{
 		cd ${DBUS_DOWNLOAD_DST}
 	    tar -xzf ${DBUS_ARCHIVE}
@@ -453,6 +484,7 @@ if $QT4_HMI; then
 		make install
 		#save configure and make output in log file
 		} &> ${DBUS_BUILD_LOG}
+		stop_progress_indicator $progress_indicator_id
 
 	   	QT4_FOLDER="qt-everywhere-opensource-src-4.8.5"
 	    QT4_ARCHIVE="${QT4_FOLDER}.tar.gz"
@@ -462,6 +494,7 @@ if $QT4_HMI; then
 		QT4_BUILD_LOG="${QT4_DOWNLOAD_DST}/${QT4_FOLDER}_build.log"
         echo "Installing Qt4, please be patient."
         echo "Additional configure and build information will be saved to ${QT4_BUILD_LOG}"
+		start_progress_indicator
 		{
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xzf ${QT4_ARCHIVE}
@@ -478,6 +511,7 @@ if $QT4_HMI; then
 		cp ../../bin/qmlviewer ${QNX_TARGET}/usr/bin/
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
+		stop_progress_indicator $progress_indicator_id
 
 	    #Load correct current directory
 	    popd
