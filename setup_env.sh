@@ -198,7 +198,7 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	sed -i "\$i$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list
 	UPDATE_SOURCES=true
 fi
-#hide outpute
+#hide output
 
 echo "Register gstreamer repository PUBLIC KEY in system"
 #apt-key adv --recv-keys  --keyserver-options http-proxy="http://ods-proxy.kiev.luxoft.com:8080/" --keyserver keyserver.ubuntu.com C0B56813051D8B58
@@ -235,7 +235,7 @@ if dpkg -s cmake | grep installed > /dev/null; then
 	    ;;
 	esac
 else 
-	#For Ubuntu 13.0 and higer install cmake from repository
+	#For Ubuntu 13.0 and higher install cmake from repository
     if ${UBUNTU_VERSION_13_HIGHER} ; then
 		apt-install ${CMAKE_BUILD_SYSTEM}
 	else
@@ -339,7 +339,7 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
     else
         if [ ${ARCH} == "x64" ]; then
             echo "Installing 32-bit libraries for 64-bit OS"
-            #For Ubuntu 13.0 and higer install ia32-libs from archive
+            #For Ubuntu 13.0 and higher install ia32-libs from archive
             if ${UBUNTU_VERSION_13_HIGHER} ; then
                 QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
             else
@@ -364,7 +364,7 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
 		SSH_SERVER="openssh-server ssh"
 		apt-install ${SSH_SERVER}
 	fi
-	#Update system varible QNX_TARGET
+	#Update system variable QNX_TARGET
 	source /etc/profile
 	echo $OK
 fi
@@ -439,7 +439,7 @@ if $QT4_HMI; then
 	    #Save current directory
 	    pushd .
 
-		#Load system varible QNX_TARGET to root for correct cross-build
+		#Load system variable QNX_TARGET to root for correct cross-build
 		source /etc/profile
 
 	    THIRDPARTYLIBS_DOWNLOAD_LINK="${APPLINK_FTP_SERVER}/Distrs/thirdPartyLibs"
