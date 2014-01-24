@@ -176,6 +176,27 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   ASSERT_TRUE(arr.is_valid());
 }
 
+TEST(ValidatedTypes, TestMap) {
+  Map<String<6>, 2, 10> map;
+  ASSERT_FALSE(map.is_initialized());
+  ASSERT_FALSE(map.is_valid());
+  map["a"] = "Hello";
+  map["b"] = "World";
+  ASSERT_TRUE(map.is_initialized());
+  ASSERT_TRUE(map.is_valid());
+  map["c"] = "Too long";
+  ASSERT_FALSE(map.is_valid());
+}
+
+TEST(ValidatedTypes, TestMapInitializingConstructor) {
+  std::map< std::string, std::string > init_map;
+  init_map["a"] = "Hello";
+  init_map["b"] = "World";
+  Map<String<6>, 2, 10 > map(init_map);
+  ASSERT_TRUE(map.is_initialized());
+  ASSERT_TRUE(map.is_valid());
+}
+
 TEST(ValidatedTypes, TestEnumConstructor) {
   Enum<TestEnum> te;
   ASSERT_FALSE(te.is_initialized());

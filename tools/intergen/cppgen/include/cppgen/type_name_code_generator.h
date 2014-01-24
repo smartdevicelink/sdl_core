@@ -64,6 +64,7 @@ class TypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForString(const String* string);
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
+  virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
  private:
   bool prefer_reference_type_;
@@ -91,6 +92,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForString(const String* string);
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
+  virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
  private:
   // Wraps type declaration with "Mandatory" or "Optional" templates

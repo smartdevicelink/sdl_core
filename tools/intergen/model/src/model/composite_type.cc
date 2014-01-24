@@ -79,6 +79,40 @@ const ConstantsCreator* Array::SupportsConstants() const {
 }
 
 /*
+ * Map type
+ */
+Map::Map(const Type* type, const Range& range)
+    : type_(type),
+      range_(range) {
+}
+
+Map::~Map() {
+}
+
+const Type* Map::type() const {
+  return type_;
+}
+
+const Map::Range& Map::range() const {
+  return range_;
+}
+
+bool Map::operator <(const Map& that) const {
+  if (range_.min() == that.range_.min())
+    return range_.min() < that.range_.min();
+  return range_.max() < that.range_.max();
+}
+
+TypeCodeGenerator* Map::Apply(TypeCodeGenerator* code_generator) const {
+  code_generator->GenerateCodeForMap(this);
+  return code_generator;
+}
+
+const ConstantsCreator* Map::SupportsConstants() const {
+  return NULL;
+}
+
+/*
  * Enum type
  */
 Enum::Enum(const std::string& name, Scope scope, InternalScope internal_scope,
