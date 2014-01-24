@@ -466,16 +466,16 @@ if $QT4_HMI; then
 		cd ${QT4_DOWNLOAD_DST}
 	    tar -xzf ${QT4_ARCHIVE}
 	    cd ${QT4_FOLDER}
-	    ./configure  -prefix $QNX_TARGET/usr/local/Qt-4.8.5 -xplatform qws/qnx-i386-g++ -embedded x86 -no-gfx-linuxfb \
+	    ./configure  -prefix ${QNX_TARGET}/usr/local/Qt-4.8.5 -xplatform qws/qnx-i386-g++ -embedded x86 -no-gfx-linuxfb \
 	    	-no-mouse-linuxtp -no-kbd-tty -no-qt3support -qt-gfx-qnx -qt-mouse-qnx -qt-kbd-qnx -opensource -confirm-license \
 	    	-no-webkit -dbus -opengl es2 -no-openvg -nomake examples -nomake demos \
-	    	-L $QNX_TARGET/usr/lib/ -ldbus-1 -I $QNX_TARGET/usr/lib/dbus-1.0/include/ -I $QNX_TARGET/usr/include/dbus-1.0/ 
+	    	-L ${QNX_TARGET}/usr/lib/ -ldbus-1 -I ${QNX_TARGET}/usr/lib/dbus-1.0/include/ -I ${QNX_TARGET}/usr/include/dbus-1.0/ 
 		make -j${BUILD_THREADS_COUNT}
 	    make install
 	    cd tools/qml
 		../../bin/qmake
 		make
-		cp ../../bin/qmlviewer $QNX_TARGET/usr/bin/
+		cp ../../bin/qmlviewer ${QNX_TARGET}/usr/bin/
 		#save configure and make output in log file
 		} &> ${QT4_BUILD_LOG}
 
