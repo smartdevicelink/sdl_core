@@ -1795,13 +1795,13 @@
         <description>Flag to indicate if application may be resumed in future</description>
       </param>
     </function>
-    <function name="OnAppUnregistered" messagetype="notification">
+    <function name="OnResumeResult" messagetype="notification">
       <description>Issued by HMI to notify SDL about application resumption check.</description>
       <param name="appID" type="Integer" mandatory="true">
-        <description>ID of the application unregistered</description>
+        <description>ID of the registered application that will be resumed</description>
       </param>
       <param name="result" type="Boolean" mandatory="true">
-        <description>Flag to indicate if application may be resumed in future</description>
+        <description>Flag to indicate if applications data check was successfull</description>
       </param>
     </function>
     <function name="OnExitApplication" messagetype="notification">
