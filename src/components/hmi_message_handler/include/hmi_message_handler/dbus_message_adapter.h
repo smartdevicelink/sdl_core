@@ -38,9 +38,9 @@
 #include "dbus/dbus_message_controller.h"
 #include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace hmi_message_handler {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /**
  * \brief adapter for DBus
