@@ -35,6 +35,7 @@
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "application_manager/message_helper.h"
+#include "utils/file_system.h"
 #if defined(DEFAULT_MEDIA)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
