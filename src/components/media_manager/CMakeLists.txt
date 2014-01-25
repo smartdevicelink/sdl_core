@@ -50,6 +50,7 @@ include_directories (
   ../request_watchdog/include/
   ../formatters/include
   ../config_profile/include/
+  ../../thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/components/
   ${default_includes}
 )

@@ -71,6 +71,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
+#include "json/json.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -448,10 +449,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
-    /*
-     * @brief Save unregistered applications info to the file system
-     */
-    void SaveApplications() const;
+
+
 
     // threads::MessageLoopThread<*>::Handler implementations
     /*
@@ -471,8 +470,47 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
   private:
+    class ResumeCtrl {
+      public:
+        ResumeCtrl();
+        ~ResumeCtrl();
+        ResumeCtrl(ApplicationManagerImpl* application_manager);
+        /*
+         * @brief Save all applications info to the file system
+         */
+        void SaveAllApplications() ;
+
+        /*
+         * @brief Save application persistent info for future resuming
+         * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will saveto to file system
+         */
+        void SaveApplication(Application *application);
+        /*
+         * @brief Load unregistered applications info from the file system
+         */
+        void LoadApplications();
+
+        /*
+         * @brief Add to application saved persistent data (if exist)
+         * @return 0 if succes
+         */
+        bool RestoreApplicationFiles(Application *application, bool only_persistent = true);
+
+      private:
+
+        std::vector<Json::Value> saved_applications_vector;
+        ApplicationManagerImpl *application_manager_;
+        std::string GetMacAddress(Application *application);
+    };
 
     // members
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_controler;
     /**
      * @brief Map of connection keys and associated applications
      */

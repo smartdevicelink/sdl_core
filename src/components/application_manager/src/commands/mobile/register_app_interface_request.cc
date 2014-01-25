@@ -104,7 +104,6 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
        msg_params[strings::app_name].asString() << "  hasn't been registered!");
   } else {
-    app->set_mobile_app_id(msg_params[strings::app_id]);
     app->set_is_media_application(
         msg_params[strings::is_media_application].asBool());
 

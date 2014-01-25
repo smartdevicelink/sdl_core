@@ -67,6 +67,17 @@ struct Version {
   }
 };
 
+struct AppFile {
+  AppFile(const std::string& name, bool persistent, bool download_complete)
+      : is_persistent(persistent),
+        is_download_complete(download_complete),
+        file_name(name) {
+  }
+  std::string file_name;
+  bool is_persistent;
+  bool is_download_complete;
+};
+
 class InitialApplicationData {
   public:
     virtual ~InitialApplicationData() {
@@ -364,6 +375,8 @@ class Application : public virtual InitialApplicationData,
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
 
     virtual bool AddFile(const std::string& file_name, bool is_persistent, bool is_download_complete) = 0;
+    virtual const std::vector<AppFile>& getAppFiles() const = 0;
+
     /**
      * @brief Updates fields of existing file
      * @param file_name File name, that need to update
