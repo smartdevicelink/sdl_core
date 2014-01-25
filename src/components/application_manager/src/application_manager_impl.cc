@@ -626,13 +626,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   switch (type) {
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
-      // send to HMI startStream request
-      char url[100] = {'\0'};
-      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->video_streaming_port());
-      application_manager::MessageHelper::SendNaviStartStream(
-          url, session_key);
       if (media_manager_) {
         media_manager_->StartVideoStreaming(session_key);
       }
@@ -642,13 +635,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     }
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
-      char url_audio[100] = {'\0'};
-      snprintf(url_audio, sizeof(url_audio) / sizeof(url_audio),
-               "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->audio_streaming_port());
-      application_manager::MessageHelper::SendAudioStartStream(
-          url_audio, session_key);
       if (media_manager_) {
         media_manager_->StartAudioStreaming(session_key);
       }
@@ -675,14 +661,16 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     }
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
-      application_manager::MessageHelper::SendNaviStopStream(session_key);
-      media_manager_->StopVideoStreaming(session_key);
+      if (media_manager_) {
+        media_manager_->StopVideoStreaming(session_key);
+      }
       break;
     }
     case protocol_handler::kAudio:{
       LOG4CXX_INFO(logger_, "Stop audio service.");
-      application_manager::MessageHelper::SendAudioStopStream(session_key);
-      media_manager_->StopAudioStreaming(session_key);
+      if (media_manager_) {
+        media_manager_->StopAudioStreaming(session_key);
+      }
       break;
     }
     default:

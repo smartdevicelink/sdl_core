@@ -197,6 +197,10 @@ const std::string& Profile::video_stream_file() const {
   return video_stream_file_;
 }
 
+const std::string& Profile::audio_stream_file() const {
+  return audio_stream_file_;
+}
+
 const uint32_t& Profile::app_time_scale() const {
   return app_requests_time_scale_;
 }
@@ -353,6 +357,14 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     video_stream_file_ = value;
     LOG4CXX_INFO(logger_, "Set video stream file to " << video_stream_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "AudioStreamFile", value))
+      && ('\0' != *value)) {
+    audio_stream_file_ = value;
+    LOG4CXX_INFO(logger_, "Set audio stream file to " << audio_stream_file_);
   }
 
   *value = '\0';

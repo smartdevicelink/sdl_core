@@ -62,7 +62,7 @@ void VideoStreamToFileAdapter::SendData(
     ++messsages_for_session;
 
     LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-                 << messsages_for_session << "th message for "
+                 << messsages_for_session << "the message for "
                  << application_key);
     for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
          media_listeners_.end() != it;
