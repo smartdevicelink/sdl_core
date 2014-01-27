@@ -275,6 +275,10 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   return false;
 }
 
+const std::vector<AppFile>& ApplicationImpl::getAppFiles() const {
+  return this->app_files_;
+}
+
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.insert(btn_name);

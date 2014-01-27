@@ -146,7 +146,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-                        0x0, FRAME_DATA_END_SERVICE_NACK, session_id, 0, 0);
+                        service_type, FRAME_DATA_END_SERVICE_NACK, session_id, 0, 0);
 
   if (RESULT_OK == SendFrame(connection_id, packet)) {
     LOG4CXX_INFO(logger_, "SendEndSessionNAck() - write OK");
@@ -530,7 +530,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       ProtocolPacket* completePacket = it->second;
       RawMessage* rawMessage = new RawMessage(
           key, completePacket->version(), completePacket->data(),
-          completePacket->total_data_bytes());
+          completePacket->total_data_bytes(), completePacket->service_type());
 
       NotifySubscribers(rawMessage);
 

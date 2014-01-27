@@ -1686,7 +1686,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mainActivity.onSesionStarted(sessionID, correlationID);
+                    mainActivity.onSessionStarted(sessionID, correlationID);
                 }
             });
         }

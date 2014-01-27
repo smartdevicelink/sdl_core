@@ -27,8 +27,8 @@ public class ProtocolMessageConverter {
     public ProtocolMessageConverter generate() {
         _data = null;
         _serviceType = _protocolMsg.getServiceType();
-        // TODO - get rid of this ugly if statements
-        if (_serviceType == ServiceType.Mobile_Nav && _version ==2){
+        // TODO - get rid of this ugly if statements. FAST!
+        if ((_serviceType == ServiceType.Mobile_Nav || _serviceType == ServiceType.Audio_Service )  && _version ==2){
             _data = _protocolMsg.getData();
             return this;
         }

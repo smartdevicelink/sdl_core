@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/application_manager_impl.h"
+
 #include <climits>
 #include <string>
 #include <fstream>
@@ -78,10 +80,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL)
+    media_manager_(NULL),
+    resume_controler(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-
+  resume_controler.LoadApplications();
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -294,6 +297,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
+  application->set_mobile_app_id(message[strings::msg_params][strings::app_id]);
+
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   applications_.insert(std::pair<int32_t, Application*>(app_id, application));
@@ -302,7 +307,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // TODO(PV): add asking user to allow application
   // BasicCommunication_AllowApp
   // application->set_app_allowed(result);
-
+  this->resume_controler.RestoreApplicationFiles(application);
   return application;
 }
 
@@ -621,13 +626,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   switch (type) {
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
-      // send to HMI startStream request
-      char url[100] = {'\0'};
-      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->video_streaming_port());
-      application_manager::MessageHelper::SendNaviStartStream(
-          url, session_key);
       if (media_manager_) {
         media_manager_->StartVideoStreaming(session_key);
       }
@@ -637,13 +635,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     }
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
-      char url_audio[100] = {'\0'};
-      snprintf(url_audio, sizeof(url_audio) / sizeof(url_audio),
-               "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->audio_streaming_port());
-      application_manager::MessageHelper::SendAudioStartStream(
-          url_audio, session_key);
       if (media_manager_) {
         media_manager_->StartAudioStreaming(session_key);
       }
@@ -670,14 +661,16 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     }
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
-      application_manager::MessageHelper::SendNaviStopStream(session_key);
-      media_manager_->StopVideoStreaming(session_key);
+      if (media_manager_) {
+        media_manager_->StopVideoStreaming(session_key);
+      }
       break;
     }
     case protocol_handler::kAudio:{
       LOG4CXX_INFO(logger_, "Stop audio service.");
-      application_manager::MessageHelper::SendAudioStopStream(session_key);
-      media_manager_->StopAudioStreaming(session_key);
+      if (media_manager_) {
+        media_manager_->StopAudioStreaming(session_key);
+      }
       break;
     }
     default:
@@ -1326,7 +1319,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   hmi_cooperating_ = false;
 
   // Saving unregistered app.info to the file system before
-  SaveApplications();
+  resume_controler.SaveAllApplications();
 
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
@@ -1449,88 +1442,6 @@ void ApplicationManagerImpl::Unmute() {
   }
 }
 
-void ApplicationManagerImpl::SaveApplications() const {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveApplications()");
-
-  std::map<int32_t, Application*>::const_iterator it = applications_.begin();
-  std::map<int32_t, Application*>::const_iterator it_end = applications_.end();
-
-  std::string app_data;
-  for (; it != it_end; ++it) {
-    if (0 == connection_handler_) {
-      LOG4CXX_ERROR(logger_,
-                    "Unable to get necessary parameters during saving "
-                    "applications information.");
-      return;
-    }
-
-    connection_handler::ConnectionHandlerImpl* conn_handler =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_);
-
-    uint32_t device_id = 0;
-    std::string mac_adddress;
-    if (-1 != conn_handler->GetDataOnSessionKey(
-          it->first,
-          NULL,
-          NULL,
-          &device_id)) {
-
-      if (-1 != conn_handler->GetDataOnDeviceID(
-            device_id,
-            NULL,
-            NULL,
-            &mac_adddress)) {
-
-        LOG4CXX_ERROR(logger_,
-                      "There is an error occurs during getting of device MAC.");
-      }
-    }
-
-    const Application* app = it->second;
-
-    int32_t print_result = 0;
-    size_t msg_size = 256;
-
-    do {
-      char message[msg_size];
-
-      print_result = snprintf(
-        message,
-        msg_size,
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%s;",
-        strings::app_id, app->mobile_app_id()->asInt(),
-        strings::connection_key, it->first,
-        strings::hmi_level, static_cast<int32_t>(app->hmi_level()),
-        "mac_address", mac_adddress.c_str());
-
-      msg_size += msg_size;
-      app_data = message;
-
-    } while (print_result >= msg_size);
-  }  // end of app.list
-
-  const std::string& storage =
-    profile::Profile::instance()->app_info_storage();
-
-  std::ofstream file(file_system::FullPath(storage).c_str(),
-                     std::ios::out);
-
-  if (file.is_open()) {
-    file_system::Write(
-      &file,
-      reinterpret_cast<const uint8_t*>(app_data.c_str()),
-      app_data.size());
-  } else {
-    LOG4CXX_ERROR(logger_,
-                  "There is an error occurs during saving application info.");
-  }
-
-  file.close();
-}
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
 														    const std::vector<uint8_t>& binary_data,
@@ -1564,6 +1475,189 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   file_stream->close();
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
+}
+
+ApplicationManagerImpl::ResumeCtrl::ResumeCtrl()
+  :application_manager_(NULL) {
+}
+
+ApplicationManagerImpl::ResumeCtrl::~ResumeCtrl() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::~ResumeCtrl");
+  const std::string& storage =
+    profile::Profile::instance()->app_info_storage();
+  std::ofstream file(file_system::FullPath(storage).c_str(),
+                     std::ios::out);
+  Json::Value to_save;
+  for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
+       it != saved_applications_vector.end(); it++) {
+    if ((*it)["ing_off_count"].asInt() < 3) {
+      (*it)["ing_off_count"] = (*it)["ing_off_count"].asInt() + 1;
+      to_save.append(*it);
+    }
+  }
+  if (file.is_open()) {
+    file << to_save.toStyledString();
+  } else {
+    LOG4CXX_ERROR(logger_,
+                  "There is an error occurs during saving application info.");
+  }
+  file.close();
+}
+
+ApplicationManagerImpl::ResumeCtrl::ResumeCtrl(ApplicationManagerImpl *application_manager)
+  :application_manager_(application_manager) {
+}
+
+void ApplicationManagerImpl::ResumeCtrl::SaveAllApplications() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::SaveApplications()");
+  if (!this->application_manager_) {
+    LOG4CXX_ERROR(logger_, "application_manager_ is NULL");
+    return ;
+  }
+  std::set<Application*>::iterator it = application_manager_->application_list_.begin();
+  std::set<Application*>::iterator it_end = application_manager_->application_list_.end();
+  for (; it != it_end; ++it) {
+    this->SaveApplication(*it);
+  }  // end of app.list
+}
+
+void ApplicationManagerImpl::ResumeCtrl::SaveApplication(Application *application) {
+
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::SaveApplication");
+
+  std::string mac_adddress = this->GetMacAddress(application);
+  if(mac_adddress == "") {
+    LOG4CXX_INFO(logger_, "ResumeCtrl there were error during getting mac adress with appID(connectionKey) = "
+                  <<application->app_id());
+    return;
+  }
+  Json::Value *curr_app = NULL;
+  uint32_t app_id = application->mobile_app_id()->asInt();
+  for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
+            it != saved_applications_vector.end(); it++) {
+    if ((*it)[strings::app_id].asInt() == app_id) {
+      curr_app = &(*it);
+      LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id is already exist ( update info ) " << app_id);
+      break;
+    }
+  }
+  if(curr_app == NULL) {
+    LOG4CXX_INFO(logger_, "ResumeCtrl Application with this ID does not exists. Add new"
+                  << app_id);
+    saved_applications_vector.push_back(Json::Value());
+    curr_app = &(saved_applications_vector.back());
+  }
+  (*curr_app)[strings::app_id] = app_id;
+  (*curr_app)[strings::connection_key] = application->app_id();
+  (*curr_app)[strings::hmi_level] = static_cast<int32_t>(application->hmi_level());
+  (*curr_app)["mac_address"] = mac_adddress; // in case of Wifi it is IP adress
+  Json::Value app_files_data;
+  const std::vector<AppFile> &app_files = application->getAppFiles();
+  for(std::vector<AppFile>::const_iterator file_it = app_files.begin();
+                                file_it != app_files.end(); file_it++) {
+    if ((*file_it).is_persistent) {
+      Json::Value file_data;
+      file_data["is_persistent"] = (*file_it).is_persistent;
+      file_data["is_download_complete"] = (*file_it).is_download_complete;
+      file_data["file_name"] = (*file_it).file_name;
+      app_files_data.append(file_data);
+    }
+  }
+  (*curr_app)["app_files"] = app_files_data;
+  (*curr_app)["ing_off_count"] = 0;
+}
+
+void ApplicationManagerImpl::ResumeCtrl::LoadApplications() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::LoadApplications");
+  if (!this->application_manager_) {
+    LOG4CXX_ERROR(logger_, "application_manager_ is NULL");
+    return;
+  }
+  const std::string& storage =
+    profile::Profile::instance()->app_info_storage();
+  Json::Value root;
+  Json::Reader m_reader;
+  std::ifstream file(file_system::FullPath(storage).c_str(),
+                     std::ios::in);
+  if (!file.is_open()) {
+    LOG4CXX_ERROR(logger_, "Error while opening file");
+    return;
+  }
+  m_reader.parse(file, root);
+  if (root.isNull()) {
+    LOG4CXX_INFO(logger_, "There are no Saved applications");
+    return;
+  }
+  for (Json::Value::iterator it = root.begin(); it != root.end(); it++) {
+    Json::Value cur_app_data = (*it);
+    LOG4CXX_INFO(logger_, "Restored Application: "<<cur_app_data.toStyledString());
+    this->saved_applications_vector.push_back(cur_app_data);
+  }
+}
+
+bool ApplicationManagerImpl::ResumeCtrl::RestoreApplicationFiles(Application *application,
+                                                                 bool only_persistent) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::RestoreApplicationPercictentData");
+  for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
+            it != saved_applications_vector.end(); it++) {
+    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+      std::string relative_file_path =
+          file_system::CreateDirectory(application->name());
+      relative_file_path += "/";
+      for (Json::Value::iterator files_it = (*it)["app_files"].begin();
+          files_it != (*it)["app_files"].end(); files_it++) {
+        if (!file_system::FileExists(relative_file_path + (*files_it)["file_name"].asString())) {
+          continue;
+        }
+        if ( !only_persistent | (*files_it)["is_persistent"].asBool()) {
+          if (application->AddFile((*files_it)["file_name"].asString(),
+                                   (*files_it)["is_persistent"].asBool(),
+                                   (*files_it)["is_download_complete"].asBool())) {
+            LOG4CXX_INFO(logger_,"File restored: " << (*files_it).toStyledString() <<
+                         "For application " <<  application->mobile_app_id()->asInt());
+          }
+        }
+      }
+      saved_applications_vector.erase(it);
+      LOG4CXX_INFO(logger_,"Restore Succesfull!");
+      break;
+    }
+  }
+  LOG4CXX_INFO(logger_,"Couldn't Restore!");
+  return false;
+}
+
+
+std::string ApplicationManagerImpl::ResumeCtrl::GetMacAddress(Application *application) {
+   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ResumeCtrl::GetMacAddress");
+   if (0 == this->application_manager_->connection_handler_) {
+     LOG4CXX_ERROR(logger_,
+                   "Unable to get necessary parameters during saving "
+                   "applications information.");
+     return "";
+   }
+   connection_handler::ConnectionHandlerImpl* conn_handler =
+     static_cast<connection_handler::ConnectionHandlerImpl*>(
+       application_manager_->connection_handler_);
+   uint32_t device_id = 0;
+   std::string mac_adddress = "";
+   if (-1 != conn_handler->GetDataOnSessionKey(
+         application->app_id(),
+         NULL,
+         NULL,
+         &device_id)) {
+
+     if (-1 != conn_handler->GetDataOnDeviceID(
+           device_id,
+           NULL,
+           NULL,
+           &mac_adddress)) {
+
+       LOG4CXX_ERROR(logger_,
+                     "There is an error occurs during getting of device MAC.");
+     }
+   }
+  return mac_adddress;
 }
 
 }  // namespace application_manager

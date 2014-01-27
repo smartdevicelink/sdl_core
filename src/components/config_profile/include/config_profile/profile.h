@@ -172,7 +172,7 @@ class Profile {
     const std::string& named_video_pipe_path() const;
 
      /**
-      * @brief Returns the video pipe path
+      * @brief Returns the audio pipe path
       */
      const std::string& named_audio_pipe_path() const;
 
@@ -186,6 +186,11 @@ class Profile {
       * @brief Returns path to testing file to which redirects video stream
       */
     const std::string& video_stream_file() const;
+
+    /**
+      * @brief Returns path to testing file to which redirects audio stream
+      */
+    const std::string& audio_stream_file() const;
 
     /**
      * @brief Returns allowable max amount of requests per time scale for
@@ -337,23 +342,24 @@ class Profile {
     uint64_t                        min_tread_stack_size_;
     bool                            is_mixing_audio_supported_;
     bool                            is_redecoding_enabled_;
-    uint32_t                    max_cmd_id_;
-    uint32_t                    default_timeout_;
+    uint32_t                        max_cmd_id_;
+    uint32_t                        default_timeout_;
     std::string                     vr_help_title_;
-    uint32_t                    app_dir_quota_;
+    uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;
     std::string                     audio_consumer_type_;
     std::string                     named_video_pipe_path_;
     std::string                     named_audio_pipe_path_;
-    uint32_t                    app_hmi_level_none_time_scale_max_requests_;
-    uint32_t                    app_hmi_level_none_requests_time_scale_;
+    uint32_t                        app_hmi_level_none_time_scale_max_requests_;
+    uint32_t                        app_hmi_level_none_requests_time_scale_;
     std::string                     video_stream_file_;
-    uint32_t                    app_time_scale_max_requests_;
-    uint32_t                    app_requests_time_scale_;
-    uint32_t                    pending_requests_amount_;
-    uint32_t                    put_file_in_none_;
-    uint32_t                    delete_file_in_none_;
-    uint32_t                    list_files_in_none_;
+    std::string                     audio_stream_file_;
+    uint32_t                        app_time_scale_max_requests_;
+    uint32_t                        app_requests_time_scale_;
+    uint32_t                        pending_requests_amount_;
+    uint32_t                        put_file_in_none_;
+    uint32_t                        delete_file_in_none_;
+    uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
 
