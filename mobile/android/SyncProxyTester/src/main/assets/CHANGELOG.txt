@@ -1,3 +1,7 @@
+[CW5]
++ SyncProxyAndroid SDK: Application resumption, restore session and all service.
++ Streaming resumption (Navi Service / Audio Service)
+
 [CW4]
 * SyncProxyAndroid SDK: Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation.
 + SyncProxyAndroid SDK: added audio streaming service support
