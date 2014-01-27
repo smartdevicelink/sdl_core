@@ -32,10 +32,11 @@
  */
 
 #include "application_manager/commands/mobile/alert_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
+#include <interfaces/HMI_API.h>
 
 namespace application_manager {
 
@@ -44,11 +45,12 @@ namespace commands {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 AlertRequest::AlertRequest(const MessageSharedPtr& message)
-: CommandRequestImpl(message),
-  is_ui_alert_send_(false),
-  ui_alert_result_(mobile_apis::Result::INVALID_ENUM),
-  is_tts_speak_send_(false),
-  is_tts_speak_received_(false) {
+    : CommandRequestImpl(message),
+      awaiting_ui_alert_response_(false),
+      awaiting_tts_speak_response_(false),
+      awaiting_tts_stop_speaking_response_(false),
+      response_success_(false),
+      response_result_(mobile_apis::Result::SUCCESS) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
@@ -75,12 +77,96 @@ void AlertRequest::Run() {
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asInt();
+
+  if (!Validate(app_id)) {
+    // Invalid command, abort execution
+    return;
+  }
+
+  awaiting_ui_alert_response_ = true;
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
+      awaiting_tts_speak_response_ = true;
+    }
+  }
+  SendAlertRequest(app_id);
+  SendPlayToneNotification(app_id);
+  if (awaiting_tts_speak_response_) {
+    SendSpeakRequest(app_id);
+  }
+}
+
+void AlertRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "AlertRequest::on_event");
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_OnResetTimeout: {
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event " << awaiting_tts_speak_response_ << " "
+                   << awaiting_tts_stop_speaking_response_ << " " << awaiting_ui_alert_response_);
+      ApplicationManagerImpl::instance()->updateRequestTimeout(
+          connection_key(), correlation_id(), default_timeout());
+      break;
+    }
+    case hmi_apis::FunctionID::UI_Alert: {
+      LOG4CXX_INFO(logger_, "Received UI_Alert event");
+      DCHECK(awaiting_ui_alert_response_);
+      awaiting_ui_alert_response_ = false;
+
+      if (awaiting_tts_speak_response_) {
+        awaiting_tts_stop_speaking_response_ = true;
+        SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
+      }
+
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      // Mobile Alert request is successful when UI_Alert is successful
+      response_success_ = hmi_apis::Common_Result::SUCCESS == result_code;
+      if (!response_success_) {
+        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) {
+          response_result_ = mobile_apis::Result::WARNINGS;
+          response_info_ = "Unsupported phoneme type sent in a prompt";
+        } else {
+          response_result_ =
+              static_cast<mobile_apis::Result::eType>(result_code);
+        }
+      }
+      response_params_ = message[strings::msg_params];
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      DCHECK(awaiting_tts_speak_response_);
+      awaiting_tts_speak_response_ = false;
+      break;
+    }
+    case hmi_apis::FunctionID::TTS_StopSpeaking: {
+      LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
+      DCHECK(awaiting_tts_stop_speaking_response_);
+      awaiting_tts_stop_speaking_response_ = false;
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
+
+  if (!HasHmiResponsesToWait()) {
+    SendResponse(response_success_, response_result_,
+                 response_info_.empty() ? NULL : response_info_.c_str(),
+                 &response_params_);
+  }
+}
+
+bool AlertRequest::Validate(uint32_t app_id) {
   Application* app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (NULL == app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
+    return false;
   }
 
   mobile_apis::Result::eType processing_result =
@@ -90,11 +176,11 @@ void AlertRequest::Run() {
     if (mobile_apis::Result::INVALID_DATA == processing_result) {
       LOG4CXX_ERROR(logger_, "INVALID_DATA!");
       SendResponse(false, processing_result);
-      return;
+      return false;
     }
     if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
       LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      ui_alert_result_ = processing_result;
+      response_result_ = processing_result;
     }
   }
 
@@ -107,78 +193,10 @@ void AlertRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "Mandatory parameters are missing");
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
                  "Mandatory parameters are missing");
-    return;
+    return false;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
-      is_tts_speak_send_ = true;
-    }
-  }
-
-  SendAlertRequest(app->app_id());
-  SendPlayToneNotification(app->app_id());
-  if (is_tts_speak_send_) {
-    SendSpeakRequest(app->app_id());
-  }
-}
-
-void AlertRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AlertRequest::on_event");
-  const smart_objects::SmartObject& message = event.smart_object();
-
-  switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-        correlation_id(),
-      default_timeout());
-      break;
-    }
-    case hmi_apis::FunctionID::UI_Alert: {
-      LOG4CXX_INFO(logger_, "Received UI_Alert event");
-
-      if (is_tts_speak_send_ != is_tts_speak_received_) {
-        SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking);
-      }
-
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != ui_alert_result_ && result) {
-        result_code = ui_alert_result_;
-      }
-
-      const char* return_info = NULL;
-
-      if (result) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-            static_cast<mobile_apis::Result::eType>(result_code)) {
-          result_code = mobile_apis::Result::WARNINGS;
-          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
-        }
-      }
-
-      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                  return_info, &(message[strings::msg_params]));
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      is_tts_speak_received_ = true;
-
-      tts_speak_result_code_ = static_cast<mobile_apis::Result::eType>(
-            message[strings::params][hmi_response::code].asInt());
-
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
-      return;
-    }
-  }
+  return true;
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
@@ -256,6 +274,11 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
                             msg_params);
     }
   }
+}
+
+bool AlertRequest::HasHmiResponsesToWait() {
+  return awaiting_ui_alert_response_ || awaiting_tts_speak_response_
+      || awaiting_tts_stop_speaking_response_;
 }
 
 }  // namespace commands

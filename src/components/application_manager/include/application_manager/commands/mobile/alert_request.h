@@ -80,6 +80,12 @@ class AlertRequest : public CommandRequestImpl {
 
  private:
   /*
+   * @brief Checks if request parameters are valid
+   * @param app_id Id of application requested this RPC
+   * @returns true if request is valid and should be processed
+   */
+  bool Validate(uint32_t app_id);
+  /*
    * @brief Sends UI Alert request
    *
    * @param app_id Id of application requested this RPC
@@ -100,13 +106,20 @@ class AlertRequest : public CommandRequestImpl {
    */
   void SendPlayToneNotification(int32_t app_id);
 
-  DISALLOW_COPY_AND_ASSIGN(AlertRequest);
+  /*
+   * @brief Tells if there are sent requests without responses
+   */
+  bool HasHmiResponsesToWait();
 
-  bool                        is_ui_alert_send_;
-  mobile_apis::Result::eType  ui_alert_result_;
-  bool                        is_tts_speak_send_;
-  bool                        is_tts_speak_received_;
-  mobile_apis::Result::eType  tts_speak_result_code_;
+  bool                        awaiting_ui_alert_response_;
+  bool                        awaiting_tts_speak_response_;
+  bool                        awaiting_tts_stop_speaking_response_;
+  bool                        response_success_;
+  mobile_apis::Result::eType  response_result_;
+  std::string                 response_info_;
+  smart_objects::SmartObject  response_params_;
+
+  DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };
 
 }  // namespace commands
