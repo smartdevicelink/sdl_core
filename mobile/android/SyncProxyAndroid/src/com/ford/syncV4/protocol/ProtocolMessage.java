@@ -22,6 +22,11 @@ public class ProtocolMessage {
 
 	public ProtocolMessage() {}
 
+    /**
+     * Copy constructor. Makes a deep copy of the given ProtocolMessage object.
+     *
+     * @param that object to copy
+     */
     public ProtocolMessage(ProtocolMessage that) {
         this.version = that.version;
         this._serviceType = that._serviceType;
