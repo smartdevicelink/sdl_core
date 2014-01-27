@@ -68,7 +68,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    public void doDataReading() throws IOException, IllegalArgumentException {
+    public synchronized void doDataReading() throws IOException, IllegalArgumentException {
         byte[] frameData = readFrameData(byteBuffer, dataBuffer);
         if (frameData != null && frameData.length > 0) {
             createProtocolMessage(frameData);
@@ -124,7 +124,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    private synchronized int readDataFromStream(byte[] data) throws IOException {
+    private int readDataFromStream(byte[] data) throws IOException {
         checkPreconditions(data);
         return is.read(data);
     }
