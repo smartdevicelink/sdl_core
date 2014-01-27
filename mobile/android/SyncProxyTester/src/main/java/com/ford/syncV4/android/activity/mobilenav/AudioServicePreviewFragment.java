@@ -59,6 +59,7 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startAudioService();
         } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            fileStreamingLogic.cancelStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopAudioService();
             mobileNavSessionCheckBoxState.setStateOff();

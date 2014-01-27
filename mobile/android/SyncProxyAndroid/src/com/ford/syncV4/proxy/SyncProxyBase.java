@@ -17,7 +17,6 @@ import com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
-import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
@@ -2507,7 +2506,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
                         }
-                    }else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF){
+                    } else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF) {
                         if (_callbackToUIThread) {
                             // Run in UI thread
                             _mainUIHandler.post(new Runnable() {
@@ -2772,7 +2771,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startAudioService(byte sessionID, String correlationID){
+    protected void startAudioService(byte sessionID, String correlationID) {
         Log.i(TAG, "Audio_Service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service);
         if (_callbackToUIThread) {
@@ -2798,21 +2797,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
             Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
-            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+            if (getSyncConnection() != null) {
+                getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+            }
         }
     }
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
             Log.i(TAG, "Audio service is going to stop" + currentSession.getSessionId());
-            getSyncConnection().closeAudioService(currentSession.getSessionId());
+            if (getSyncConnection() != null) {
+                getSyncConnection().closeAudioService(currentSession.getSessionId());
+            }
         }
     }
 
     private boolean removeServiceFromSession(byte sessionID, ServiceType serviceType) {
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
-            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType())) ) {
+            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType()))) {
                 currentSession.removeService(service);
                 return true;
             }
@@ -3741,7 +3744,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     startMobileNaviService(sessionID, correlationID);
                     return;
                 }
-                if (serviceType.equals(ServiceType.Audio_Service)){
+                if (serviceType.equals(ServiceType.Audio_Service)) {
                     startAudioService(sessionID, correlationID);
                     return;
                 }

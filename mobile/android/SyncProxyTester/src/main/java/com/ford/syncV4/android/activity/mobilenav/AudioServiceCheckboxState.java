@@ -13,7 +13,7 @@ public class AudioServiceCheckboxState extends CheckBoxState {
     public AudioServiceCheckboxState(CheckBox item, Context context) {
         super(item, context);
         hintString = getResources().getString(R.string.audio_service_hint);
-        textString = getResources().getString(R.string.mobile_navi_check_box_on);
+        textString = getResources().getString(R.string.audio_service_on);
         setStateOff();
     }
 }

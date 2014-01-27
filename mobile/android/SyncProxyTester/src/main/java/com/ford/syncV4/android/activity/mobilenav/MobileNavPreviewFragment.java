@@ -59,6 +59,7 @@ public class MobileNavPreviewFragment extends Fragment implements ServicePreview
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startMobileNaviService();
         } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            fileStreamingLogic.cancelStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavSession();
             mobileNavSessionCheckBoxState.setStateOff();
