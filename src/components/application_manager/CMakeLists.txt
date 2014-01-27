@@ -27,6 +27,7 @@ set (SOURCES
 ./src/hmi_capabilities.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/resume_ctrl.cpp
 ./src/mobile_message_handler.cc
 )
 
@@ -257,6 +258,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
 ./src/commands/hmi/navi_show_constant_tbt_response.cc
 ./src/commands/hmi/on_ready_notification.cc
+./src/commands/hmi/on_resuming_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
 ./src/commands/hmi/on_update_device_list.cc

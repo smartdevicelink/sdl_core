@@ -273,6 +273,8 @@ const char prndl[] = "prndl";
 const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
+const char result[] = "result";
+
 }  // namespace hmi_notification
 
 }  // namespace application_manager
