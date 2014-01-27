@@ -3,7 +3,6 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
-
     <CheckBox
         android:id="@+id/mobileNavCheckBox"
         android:layout_width="fill_parent"
@@ -15,7 +14,6 @@
         android:hint="@string/mobile_navi_hint"
         />
 
-
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -24,7 +22,7 @@
         android:id="@+id/videobutton"
         android:layout_below="@+id/mobileNavCheckBox"
         android:layout_alignParentLeft="true"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_alignParentRight="true" />
 
     <Button
@@ -35,6 +33,5 @@
         android:layout_below="@+id/videobutton"
         android:enabled="false"
         android:layout_centerHorizontal="true" />
-
 
 </RelativeLayout>

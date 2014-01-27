@@ -6,6 +6,6 @@ package com.ford.syncV4.android.listener;
  * Date: 1/27/14
  * Time: 10:44 AM
  */
-public class ConnectionListener {
-
+public interface ConnectionListener {
+    void onProxyClosed();
 }

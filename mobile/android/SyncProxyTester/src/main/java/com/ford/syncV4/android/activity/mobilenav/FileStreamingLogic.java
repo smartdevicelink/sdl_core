@@ -1,6 +1,7 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.ford.syncV4.android.activity.SyncProxyTester;
 
@@ -9,15 +10,19 @@ import java.io.OutputStream;
 
 public class FileStreamingLogic {
 
+    private static final String TAG = "FileStreamingLogic";
+
     private StaticFileReader staticFileReader;
     private OutputStream outputStream;
     private ServicePreviewFragmentInterface context;
     private Integer fileResID;
-    private boolean mIsStreamingComplete = true;
+    /**
+     * Indicates whether stream is completed or not.
+     */
+    private boolean mIsStreamingInProgress;
 
     public FileStreamingLogic(ServicePreviewFragmentInterface mobileNavPreviewFragment) {
         context = mobileNavPreviewFragment;
-        mIsStreamingComplete = true;
     }
 
     public OutputStream getOutputStream() {
@@ -37,22 +42,25 @@ public class FileStreamingLogic {
     }
 
     public void cancelStreaming() {
-        mIsStreamingComplete = true;
         if (staticFileReader != null) {
             staticFileReader.cancel(true);
         }
     }
 
+    public void resetStreaming() {
+        mIsStreamingInProgress = false;
+        cancelStreaming();
+    }
+
     public void startFileStreaming() {
-        mIsStreamingComplete = false;
         if (staticFileReader == null || staticFileReader.getStatus() == AsyncTask.Status.FINISHED){
             createStaticFileReader();
         }
         staticFileReader.execute(fileResID);
     }
 
-    public boolean isStreamingComplete() {
-        return mIsStreamingComplete;
+    public boolean isStreamingInProgress() {
+        return mIsStreamingInProgress;
     }
 
     public void createStaticFileReader() {
@@ -61,6 +69,8 @@ public class FileStreamingLogic {
 
             @Override
             public void onStartReading() {
+                Log.d(TAG, "On Start reading");
+                mIsStreamingInProgress = true;
                 context.dataStreamingStarted();
             }
 
@@ -68,6 +78,7 @@ public class FileStreamingLogic {
             public void onDataReceived(final byte[] data) {
                 if (outputStream != null && data != null) {
                     try {
+                        Log.d(TAG, "On read data:" + data);
                         outputStream.write(data);
                     } catch (IOException e) {
                        cancelStreaming();
@@ -79,13 +90,14 @@ public class FileStreamingLogic {
 
             @Override
             public void onCancelReading() {
-                mIsStreamingComplete = true;
+                Log.d(TAG, "On Cancel reading");
                 context.dataStreamingStopped();
             }
 
             @Override
             public void onEndReading() {
-                mIsStreamingComplete = true;
+                Log.d(TAG, "On Complete reading");
+                mIsStreamingInProgress = false;
                 context.dataStreamingStopped();
             }
         });
