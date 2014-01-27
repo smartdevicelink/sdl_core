@@ -2780,8 +2780,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             choiceSetIDs.add(_choiceSetAdapter.getItem(i));
                                         }
                                     }
+                                    sendPerformInteractionRequest(choiceSetIDs);
+                                }
 
-                                    if (choiceSetIDs.size() > 0) {
+                                private void sendPerformInteractionRequest(Vector<Integer> choiceSetIDs) {
+
                                         PerformInteraction msg = new PerformInteraction();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setInitialText(initialText.getText().toString());
@@ -2856,9 +2859,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
-                                    } else {
-                                        Toast.makeText(mContext, "No interaction choice set selected", Toast.LENGTH_LONG).show();
-                                    }
+
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
