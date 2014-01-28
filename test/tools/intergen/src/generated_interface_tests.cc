@@ -65,4 +65,17 @@ TEST_F(GeneratedInterfaceTests, MapTest) {
   ASSERT_EQ(expected_json, serialized);
 }
 
+TEST_F(GeneratedInterfaceTests, TypedefTest) {
+  const char* expected_json =
+  "{\"optionalResArrMap\":{\"World\":[\"INVALID_DATA\"]},\"resArrMap\":{\"Hello\":[\"SUCCESS\"]}}\n";
+
+  TdStruct ts;
+  ts.resArrMap["Hello"].push_back(R_SUCCESS);
+  (*ts.optionalResArrMap)["World"].push_back(R_INVALID_DATA);
+  ASSERT_TRUE(ts.is_initialized());
+  ASSERT_TRUE(ts.is_valid());
+  std::string serialized = writer.write(ts.ToJsonValue());
+  ASSERT_EQ(expected_json, serialized);
+}
+
 }  // namespace test

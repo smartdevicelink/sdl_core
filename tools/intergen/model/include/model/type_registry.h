@@ -61,6 +61,8 @@ class TypeRegistry {
   typedef std::map<std::string, const Enum*> EnumByName;
   typedef std::list<Struct*> StructList;
   typedef std::map<std::string, const Struct*> StructByName;
+  typedef std::list<Typedef*> TypedefList;
+  typedef std::map<std::string, const Typedef*> TypedefByName;
  public:
   // Methods
   TypeRegistry(BuiltinTypeRegistry* builtin_type_registry);
@@ -80,12 +82,18 @@ class TypeRegistry {
   // Returns list of all structs keeping order of definitions in xml
   const StructList& structs() const;
 
+  // Returns list of all typedefs keeping order of definitions in xml
+  const TypedefList& typedefs() const;
+
   static bool IsMandatoryParam(const pugi::xml_node& param);
 
  private:
   // methods
   bool AddEnums(const pugi::xml_node& xml);
-  bool AddStructs(const pugi::xml_node& xml);
+  bool AddStructsAndTypedefs(const pugi::xml_node& xml);
+  bool AddEnum(const pugi::xml_node& xml_enum);
+  bool AddStruct(const pugi::xml_node& xml_struct);
+  bool AddTypedef(const pugi::xml_node& xml_typedef);
   bool AddEnumConstants(Enum* enm, const pugi::xml_node& xml_enum);
   bool AddStructureFields(Struct* strct, const pugi::xml_node& xml_struct);
   // Create container (map or array) |type| object based on xml |params|
@@ -96,8 +104,10 @@ class TypeRegistry {
   bool GetNonArray(const pugi::xml_node& params, const Type** type);
   bool GetEnum(const std::string& name, const Type** type);
   bool GetStruct(const std::string& name, const Type** type);
+  bool GetTypedef(const std::string& name, const Type** type);
   bool IsRegisteredEnum(const std::string& enum_name);
   bool IsRegisteredStruct(const std::string& struct_name);
+  bool IsRegisteredTypedef(const std::string& typedef_name);
  private:
   // fields
   BuiltinTypeRegistry* builtin_type_registry_;
@@ -109,6 +119,9 @@ class TypeRegistry {
   StructList structs_;
   utils::StdContainerDeleter<StructList> structs_deleter_;
   StructByName struct_by_name_;
+  TypedefList typedefs_;
+  utils::StdContainerDeleter<TypedefList> typedefs_deleter_;
+  TypedefByName typedef_by_name_;
  private:
   DISALLOW_COPY_AND_ASSIGN(TypeRegistry);
 };

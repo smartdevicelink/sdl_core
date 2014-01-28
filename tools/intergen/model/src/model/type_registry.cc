@@ -54,11 +54,12 @@ namespace codegen {
 TypeRegistry::TypeRegistry(BuiltinTypeRegistry* builtin_type_registry)
     : builtin_type_registry_(builtin_type_registry),
       enums_deleter_(&enums_),
-      structs_deleter_(&structs_) {
+      structs_deleter_(&structs_),
+      typedefs_deleter_(&typedefs_) {
 }
 
 bool TypeRegistry::init(const pugi::xml_node& xml) {
-  if (!AddEnums(xml) || !AddStructs(xml))
+  if (!AddEnums(xml) || !AddStructsAndTypedefs(xml))
     return false;
   return true;
 }
@@ -67,7 +68,7 @@ bool TypeRegistry::GetType(const pugi::xml_node& params, const Type** type) {
   pugi::xml_attribute array = params.attribute("array");
   pugi::xml_attribute map = params.attribute("map");
   if (array && map) {
-    strmfmt(std::cerr, "Parameter {0} has both map and array attributes specified",
+    strmfmt(std::cerr, "Entity {0} has both map and array attributes specified",
             params.attribute("name").as_string(""));
     return false;
   }
@@ -86,6 +87,10 @@ const TypeRegistry::EnumList& TypeRegistry::enums() const {
 
 const TypeRegistry::StructList& TypeRegistry::structs() const {
   return structs_;
+}
+
+const TypeRegistry::TypedefList& TypeRegistry::typedefs() const {
+  return typedefs_;
 }
 
 const Enum* TypeRegistry::GetFunctionIDEnum() const {
@@ -112,38 +117,81 @@ bool TypeRegistry::IsMandatoryParam(const pugi::xml_node& param) {
 
 bool TypeRegistry::AddEnums(const pugi::xml_node& xml) {
   for (pugi::xml_node i = xml.child("enum"); i; i = i.next_sibling("enum")) {
-    std::string name = i.attribute("name").value();
-    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
-    InternalScope internal_scope = InternalScopeFromLiteral(
-        i.attribute("internal_scope").value());
-    Description description = CollectDescription(i);
-    if (IsRegisteredEnum(name)) {
-      std::cerr << "Duplicate enum: " << name << std::endl;
+    if (!AddEnum(i)) {
       return false;
     }
-    enums_.push_back(new Enum(name, scope, internal_scope, description));
-    enum_by_name_[name] = enums_.back();
-    if (!AddEnumConstants(enums_.back(), i))
-      return false;
   }
   return true;
 }
 
-bool TypeRegistry::AddStructs(const pugi::xml_node& xml) {
+bool TypeRegistry::AddStructsAndTypedefs(const pugi::xml_node& xml) {
   for (pugi::xml_node i = xml.child("struct"); i;
-      i = i.next_sibling("struct")) {
-    std::string name = i.attribute("name").value();
-    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
-    Description description = CollectDescription(i);
-    if (IsRegisteredStruct(name)) {
-      std::cerr << "Duplicate structure: " << name << std::endl;
-      return false;
+      i = i.next_sibling()) {
+    if (std::string("struct") == i.name()) {
+      if (!AddStruct(i)) {
+        return false;
+      }
+    } else if (std::string("typedef") == i.name()) {
+      if (!AddTypedef(i)) {
+        return false;
+      }
     }
-    structs_.push_back(new Struct(name, scope, description));
-    struct_by_name_[name] = structs_.back();
-    if (!AddStructureFields(structs_.back(), i))
-      return false;
   }
+  return true;
+}
+
+bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
+  std::string name = xml_enum.attribute("name").value();
+  Scope scope = ScopeFromLiteral(xml_enum.attribute("scope").value());
+  InternalScope internal_scope = InternalScopeFromLiteral(
+      xml_enum.attribute("internal_scope").value());
+  Description description = CollectDescription(xml_enum);
+  if (IsRegisteredEnum(name)) {
+    std::cerr << "Duplicate enum: " << name << std::endl;
+    return false;
+  }
+  enums_.push_back(new Enum(name, scope, internal_scope, description));
+  enum_by_name_[name] = enums_.back();
+  if (!AddEnumConstants(enums_.back(), xml_enum)) {
+    return false;
+  }
+  return true;
+}
+
+bool TypeRegistry::AddStruct(const pugi::xml_node& xml_struct) {
+  std::string name = xml_struct.attribute("name").value();
+  Scope scope = ScopeFromLiteral(xml_struct.attribute("scope").value());
+  Description description = CollectDescription(xml_struct);
+  if (IsRegisteredStruct(name)) {
+    std::cerr << "Duplicate structure: " << name << std::endl;
+    return false;
+  }
+  structs_.push_back(new Struct(name, scope, description));
+  struct_by_name_[name] = structs_.back();
+  if (!AddStructureFields(structs_.back(), xml_struct)) {
+    return false;
+  }
+  return true;
+}
+
+bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
+  std::string name = xml_typedef.attribute("name").value();
+  if (name.empty()) {
+    std::cerr << "Typedef with empty name found" << std::endl;
+    return false;
+  }
+  const Type* type = NULL;
+  if (!GetType(xml_typedef, &type)) {
+    return false;
+  }
+  Description description = CollectDescription(xml_typedef);
+  if (IsRegisteredTypedef(name)) {
+    std::cerr << "Duplicate typedef: " << name << std::endl;
+    return false;
+  }
+  typedefs_.push_back(new Typedef(name, type, description));
+  typedef_by_name_[name] = typedefs_.back();
+
   return true;
 }
 
@@ -186,6 +234,8 @@ bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
       return GetEnum(type_name_str, type);
     } else if (IsRegisteredStruct(type_name_str)) {
       return GetStruct(type_name_str, type);
+    } else if (IsRegisteredTypedef(type_name_str)){
+      return GetTypedef(type_name_str, type);
     } else {
       std::cerr << "Unregistered type: " << type_name_str << std::endl;
       return false;
@@ -214,6 +264,17 @@ bool TypeRegistry::GetStruct(const std::string& name, const Type** type) {
     return true;
   } else {
     std::cerr << "Unregistered struct " << name << std::endl;
+    return false;
+  }
+}
+
+bool TypeRegistry::GetTypedef(const std::string& name, const Type** type) {
+  TypedefByName::const_iterator i = typedef_by_name_.find(name);
+  if (i != typedef_by_name_.end()) {
+    *type = i->second;
+    return true;
+  } else {
+    std::cerr<< "Unregistered typedef " << name << std::endl;
     return false;
   }
 }
@@ -286,6 +347,10 @@ bool TypeRegistry::AddStructureFields(Struct* strct,
                     description, platform);
   }
   return true;
+}
+
+bool TypeRegistry::IsRegisteredTypedef(const std::string& typedef_name) {
+  return typedef_by_name_.find(typedef_name) != typedef_by_name_.end();
 }
 
 }  // namespace codegen

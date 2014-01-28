@@ -56,6 +56,7 @@ class DeclarationGenerator {
   // Methods that generate code for different code model entities
   void GenerateCodeForEnum(const Enum* enm);
   void GenerateCodeForStruct(const Struct* strct);
+  void GenerateCodeForTypedef(const Typedef* tdef);
   void GenerateCodeForFunction(const Function& function);
   void GenerateCodeForResponse(const Response& response);
   void GenerateCodeForNotification(const Notification& notification);
@@ -72,6 +73,28 @@ class DeclarationGenerator {
  private:
   // Fields
   ModuleManager* module_manager_;
+};
+
+/*
+ * This class is used to add forward declaration of specific type
+ * to file's namespace
+ */
+class TypeForwardDeclarator : public TypeCodeGenerator {
+ public:
+  // Creates objec and automatically forward declares |type| in namespace
+  // |ns|
+  TypeForwardDeclarator(Namespace* ns, const Type* type);
+ private:
+  // TypeCodeGenerator interface
+
+  // Only structs can be forward declared but they can be part of array declaration
+  // All other types don't need forward declaration
+  virtual void GenerateCodeForArray(const Array* array);
+  virtual void GenerateCodeForMap(const Map* map);
+  virtual void GenerateCodeForStruct(const Struct* strct);
+ private:
+  // Fields
+  Namespace* ns_;
 };
 
 }  // namespace codegen
