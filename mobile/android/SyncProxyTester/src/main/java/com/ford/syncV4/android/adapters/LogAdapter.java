@@ -5,12 +5,12 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class logAdapter extends MessageAdapter {
+public class LogAdapter extends MessageAdapter {
 	private String logTag;
 	boolean fullUIDebug;
 	Activity activity;
 
-	public logAdapter(String logTag, boolean fullUIDebug, Activity activity, int textViewResourceId, ArrayList<Object> items) {
+	public LogAdapter(String logTag, boolean fullUIDebug, Activity activity, int textViewResourceId, ArrayList<Object> items) {
 		super(activity, textViewResourceId, items);
 		this.activity = activity;
 		this.logTag = logTag;
