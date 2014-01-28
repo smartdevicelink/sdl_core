@@ -28,7 +28,7 @@ import android.util.Pair;
 import android.util.Xml;
 
 import com.ford.syncV4.android.activity.SyncProxyTester;
-import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
 import com.ford.syncV4.android.marshaller.CustomJsonRPCMarshaller;
 import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
@@ -225,8 +225,8 @@ public class ModuleTest {
 	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
 	private static ModuleTest _instance;
-	private SyncProxyTester _mainInstance;
-	private logAdapter _msgAdapter;
+	private SyncProxyTester mActivityInstance;
+	private LogAdapter mLogAdapter;
 	private static Runnable threadContext;
 	private static ModuleTest DialogThreadContext;
 	private Thread mainThread;
@@ -250,14 +250,15 @@ public class ModuleTest {
 
 	/** Full path to XML test file or directory with test files. */
 	private String mFilePath;
-	
-	public ModuleTest() {
-		this._mainInstance = SyncProxyTester.getInstance();
-		this._msgAdapter = SyncProxyTester.getMessageAdapter();
+
+    // TODO : Reconsider!
+	public ModuleTest(LogAdapter logAdapter) {
+		mActivityInstance = SyncProxyTester.getInstance();
+		mLogAdapter = logAdapter;
 		
 		// Set this's instance
 		_instance = this;
-		_mainInstance.setTesterMain(_instance);
+		mActivityInstance.setTesterMain(_instance);
 		
 		mainThread = makeThread();
 	}
@@ -309,8 +310,8 @@ public class ModuleTest {
 							if (filenames.length > 0) {
 								List<String> paths = new ArrayList<String>();
 								for (String filename : filenames) {
-									_msgAdapter.logMessage("Processing "
-											+ filename, Log.INFO, true);
+									mLogAdapter.logMessage("Processing "
+                                            + filename, Log.INFO, true);
 									try {
 										String fullPath = mFilePath
 												+ File.separator + filename;
@@ -321,26 +322,26 @@ public class ModuleTest {
 											paths.add(testErrorsFilename);
 										}
 									} catch (Exception e) {
-										_msgAdapter
+										mLogAdapter
 												.logMessage("Parser Failed!!",
-														Log.ERROR, e);
+                                                        Log.ERROR, e);
 									}
 								}
-								_msgAdapter.logMessage("All tests finished",
-										Log.INFO, true);
+								mLogAdapter.logMessage("All tests finished",
+                                        Log.INFO, true);
 
 								if (paths.size() > 0) {
 									sendReportEmail(paths);
 								}
 							} else {
-								_msgAdapter.logMessage(
-										"No test files found in " + mFilePath,
-										Log.INFO, true);
+								mLogAdapter.logMessage(
+                                        "No test files found in " + mFilePath,
+                                        Log.INFO, true);
 							}
 						} else {
-							_msgAdapter.logMessage(
-									"Couldn't list files in directory",
-									Log.ERROR, true);
+							mLogAdapter.logMessage(
+                                    "Couldn't list files in directory",
+                                    Log.ERROR, true);
 						}
 					} else {
 						try {
@@ -354,8 +355,8 @@ public class ModuleTest {
 							}
 							sendReportEmail(paths);
 						} catch (Exception e) {
-							_msgAdapter.logMessage("Parser Failed!!",
-									Log.ERROR, e);
+							mLogAdapter.logMessage("Parser Failed!!",
+                                    Log.ERROR, e);
 						}
 					}
 				} else {
@@ -397,8 +398,8 @@ public class ModuleTest {
 						break;
 					}
 
-					_mainInstance.startActivity(Intent.createChooser(email,
-							"Choose an Email client :"));
+					mActivityInstance.startActivity(Intent.createChooser(email,
+                            "Choose an Email client :"));
 				}
 			}
 
@@ -408,7 +409,7 @@ public class ModuleTest {
 				XmlPullParser parser = Xml.newPullParser();
 				RPCRequest rpc;
 				try {
-					if (_mainInstance.getDisableLockFlag()) {
+					if (mActivityInstance.getDisableLockFlag()) {
 						acquireWakeLock();
 					}
 					
@@ -444,7 +445,7 @@ public class ModuleTest {
 						case XmlPullParser.START_TAG:
 							name = parser.getName();
 							if (name.equalsIgnoreCase("test")) {
-								_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
+								mLogAdapter.logMessage("test " + parser.getAttributeValue(0), true);
 								
 								long pause = 0;
 								String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
@@ -686,11 +687,11 @@ public class ModuleTest {
 
 										writer.write(resultLine + EOL);
 										Log.i(TAG, resultLine);
-										_msgAdapter.logMessage(resultLine, true);
+										mLogAdapter.logMessage(resultLine, true);
 									}
 								} catch (Exception e) {
 									if (currentTest != null) {
-										_msgAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
+										mLogAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
 									}
 								}
 							}
@@ -931,7 +932,7 @@ public class ModuleTest {
 				eventType = parser.next();
 			}
 		} catch (Exception e) {
-			_msgAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
+			mLogAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
 		}
 		
 		logParserDebugInfo("Returning at end of setParams function");
@@ -967,7 +968,7 @@ public class ModuleTest {
                             customMarshaller.setStubbedValue(customJSON);
                         }
 
-                        _msgAdapter.logMessage(rpc, true);
+                        mLogAdapter.logMessage(rpc, true);
                         IJsonRPCMarshaller currentMarshaller =
                                 (customJSON != null) ? customMarshaller :
                                         (generateInvalidJSON ?
@@ -978,7 +979,7 @@ public class ModuleTest {
                         try {
                             ProxyService.getProxyInstance().sendRPCRequest(rpc);
                         } catch (SyncException e) {
-                            _msgAdapter
+                            mLogAdapter
                                     .logMessage("Error sending RPC", Log.ERROR,
                                             e, true);
                         }
@@ -998,7 +999,7 @@ public class ModuleTest {
                                     this.wait(pause);
                                 }
                             } catch (InterruptedException e) {
-                                _msgAdapter.logMessage("InterruptedException",
+                                mLogAdapter.logMessage("InterruptedException",
                                         true);
                             }
                         } else {
@@ -1018,7 +1019,7 @@ public class ModuleTest {
                                 this.wait(pause);
                             }
                         } catch (InterruptedException e) {
-                            _msgAdapter
+                            mLogAdapter
                                     .logMessage("InterruptedException", true);
                         }
                     } else {
@@ -1031,7 +1032,7 @@ public class ModuleTest {
                             this.wait(100);
                         }
                     } catch (InterruptedException e) {
-                        _msgAdapter.logMessage("InterruptedException", true);
+                        mLogAdapter.logMessage("InterruptedException", true);
                     }
 
                     ProxyService.waiting(false);
@@ -1039,11 +1040,11 @@ public class ModuleTest {
                     if (expecting.equals(responses)) {
                         pass = true;
                         if (integration) {
-                            _mainInstance.runOnUiThread(new Runnable() {
+                            mActivityInstance.runOnUiThread(new Runnable() {
                                 public void run() {
                                     AlertDialog.Builder alert =
                                             new AlertDialog.Builder(
-                                                    _mainInstance);
+                                                    mActivityInstance);
                                     alert.setMessage(userPrompt);
                                     alert.setPositiveButton("Yes",
                                             new DialogInterface.OnClickListener() {
@@ -1078,7 +1079,7 @@ public class ModuleTest {
                                     this.wait();
                                 }
                             } catch (InterruptedException e) {
-                                _msgAdapter.logMessage("InterruptedException",
+                                mLogAdapter.logMessage("InterruptedException",
                                         true);
                             }
                         }
@@ -1103,7 +1104,7 @@ public class ModuleTest {
 		try {
 			synchronized (this) { this.wait();}
 		} catch (InterruptedException e) {
-			_msgAdapter.logMessage("InterruptedException", true);
+			mLogAdapter.logMessage("InterruptedException", true);
 		}
 		
 		newThread.interrupt();
@@ -1141,7 +1142,7 @@ public class ModuleTest {
 		}
 		
 		try {
-			PowerManager pm = (PowerManager) _mainInstance
+			PowerManager pm = (PowerManager) mActivityInstance
 					.getSystemService(Context.POWER_SERVICE);
 			wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
 					| PowerManager.ACQUIRE_CAUSES_WAKEUP
