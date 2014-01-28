@@ -19,18 +19,21 @@ import java.io.IOException;
 public abstract class AbstractProtocol {
     private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
     protected IProtocolListener _protocolListener = null;
-    private FileOutputStream fos;
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
     private Object _frameLock = new Object();
-    private File file;
+    private File audioFile;
+    private File videoFile;
+    private FileOutputStream audioOutputFileStream;
+    private FileOutputStream videoOutputFileStream;
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
         if (protocolListener == null) {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
-
+        initAudioDumpStream();
+        initVideoDumpStream();
         _protocolListener = protocolListener;
     }// end-ctor
 
@@ -53,6 +56,7 @@ public abstract class AbstractProtocol {
      * This method starts a protocol currentSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
      * currentSession has been established.
+     *
      * @param sessionId ID of the current active session
      */
     public abstract void StartProtocolSession(byte sessionId);
@@ -92,6 +96,10 @@ public abstract class AbstractProtocol {
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
 
             if (data != null) {
+                synchronized (this) {
+                    writeToSdCardAudioFile(header, data);
+                    writeToSdCardVideoFile(header, data);
+                }
                 handleProtocolMessageBytesToSend(data, offset, length);
             }
 
@@ -108,23 +116,51 @@ public abstract class AbstractProtocol {
     }
 
     private void initVideoDumpStream() {
-        String filename = "ford_audio.wav";
-        file = new File(Environment.getExternalStorageDirectory(), filename);
+        String filename = "ford_video.mp4";
+        videoFile = new File(Environment.getExternalStorageDirectory(), filename);
 
         try {
-            fos = new FileOutputStream(file);
+            videoOutputFileStream = new FileOutputStream(videoFile);
         } catch (FileNotFoundException e) {
             // handle exception
         }
     }
 
-    private void writeToSdCard(ProtocolFrameHeader header, byte[] data) {
+    private void initAudioDumpStream() {
+        String filename = "ford_audio.wav";
+        audioFile = new File(Environment.getExternalStorageDirectory(), filename);
+
+        try {
+            audioOutputFileStream = new FileOutputStream(audioFile);
+        } catch (FileNotFoundException e) {
+            // handle exception
+        }
+    }
+
+    private void writeToSdCardAudioFile(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             if (header.getFrameType().equals(FrameType.Single)) {
                 try {
-                    if (fos != null) {
-                        fos.write(data);
-                        fos.flush();
+                    if (audioOutputFileStream != null) {
+                        audioOutputFileStream.write(data);
+                        audioOutputFileStream.flush();
+                    }
+                } catch (IOException e) {
+                    Log.w("SyncProxyTester", e.toString());
+                }
+            } else {
+                Log.w("SyncProxyTester", "wrong frame type for video streaming");
+            }
+        }
+    }
+
+    private void writeToSdCardVideoFile(ProtocolFrameHeader header, byte[] data) {
+        if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
+            if (header.getFrameType().equals(FrameType.Single)) {
+                try {
+                    if (videoOutputFileStream != null) {
+                        videoOutputFileStream.write(data);
+                        videoOutputFileStream.flush();
                     }
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
@@ -170,7 +206,7 @@ public abstract class AbstractProtocol {
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID , version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

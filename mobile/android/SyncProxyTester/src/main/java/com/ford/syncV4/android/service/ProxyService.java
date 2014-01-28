@@ -1891,7 +1891,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             synchronized (_testerMain.getThreadContext()) {
                 _testerMain.getThreadContext().notify();
             }
-            ;
         }
 
     }
