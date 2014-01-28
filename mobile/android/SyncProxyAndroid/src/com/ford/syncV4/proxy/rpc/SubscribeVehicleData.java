@@ -316,6 +316,23 @@ public class SubscribeVehicleData extends RPCRequest {
     public Boolean getAccPedalPosition() {
         return (Boolean) parameters.get(Names.accPedalPosition);
     }
+
+    public void setSteeringWheelAngle(Boolean steeringWheelAngle) {
+        if (steeringWheelAngle != null) {
+            parameters.put(Names.steeringWheelAngle, steeringWheelAngle);
+        } else {
+            parameters.remove(Names.steeringWheelAngle);
+        }
+    }
+
+    public Boolean getSteeringWheelAngle() {
+        final Object o = parameters.get(Names.steeringWheelAngle);
+        if (o instanceof Boolean) {
+            return (Boolean) o;
+        }
+        return null;
+    }
+
     public void setClutchPedalPosition(Boolean clutchPedalPosition) {
         if (clutchPedalPosition != null) {
             parameters.put(Names.clutchPedalPosition, clutchPedalPosition);

@@ -53,6 +53,7 @@
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
+#include "application_manager/commands/hmi/on_resuming_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -553,6 +554,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
       command.reset(new commands::OnAppActivatedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnResumeResult: {
+      command.reset(new commands::OnResumingNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {

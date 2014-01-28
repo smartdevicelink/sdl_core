@@ -44,6 +44,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/resume_ctrl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
@@ -71,7 +72,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
-#include "json/json.h"
+
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -152,6 +153,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler,
   public impl::ToHmiQueue::Handler {
+  friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -192,6 +194,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
+    /*
+     * @brief Set application HMI Level as saved in resuming_controller
+     * @param application is applicatint whitch HMI Level is need to restore
+     * @return true if succes, otherwise return false
+     * this method agregete to resuming_controller.RestoreApplicationHMILevel(application)
+     */
+    bool RestoreApplicationHMILevel(Application *application);
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
     bool ActivateApplication(Application* app);
@@ -470,38 +479,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
   private:
-    class ResumeCtrl {
-      public:
-        ResumeCtrl();
-        ~ResumeCtrl();
-        ResumeCtrl(ApplicationManagerImpl* application_manager);
-        /*
-         * @brief Save all applications info to the file system
-         */
-        void SaveAllApplications() ;
 
-        /*
-         * @brief Save application persistent info for future resuming
-         * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will saveto to file system
-         */
-        void SaveApplication(Application *application);
-        /*
-         * @brief Load unregistered applications info from the file system
-         */
-        void LoadApplications();
-
-        /*
-         * @brief Add to application saved persistent data (if exist)
-         * @return 0 if succes
-         */
-        bool RestoreApplicationFiles(Application *application, bool only_persistent = true);
-
-      private:
-
-        std::vector<Json::Value> saved_applications_vector;
-        ApplicationManagerImpl *application_manager_;
-        std::string GetMacAddress(Application *application);
-    };
 
     // members
 
@@ -510,7 +488,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * about persistent application data on disk, and save session ID for resuming
      * application in case INGITION_OFF or MASTER_RESSET
      */
-    ResumeCtrl resume_controler;
+    ResumeCtrl resume_controler; // TODO: use UniquePtr
     /**
      * @brief Map of connection keys and associated applications
      */

@@ -88,6 +88,9 @@ const char media_track[] = "mediaTrack";
 const char properties[] = "properties";
 const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
 const char vr_commands[] = "vrCommands";
 const char position[] = "position";
 const char num_ticks[] = "numTicks";
@@ -273,6 +276,8 @@ const char prndl[] = "prndl";
 const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
+const char result[] = "result";
+
 }  // namespace hmi_notification
 
 }  // namespace application_manager

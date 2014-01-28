@@ -115,7 +115,7 @@ if(NOT PYTHONINTERP_FOUND)
 endif(NOT PYTHONINTERP_FOUND)
 
 if (${HMI2})
-    cmake_minimum_required(VERSION 2.8.9)
+    cmake_minimum_required(VERSION 2.8.11)
     if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
         set(qt_version "4.8.5")
     else ()

@@ -29,30 +29,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 
-#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/hmi/on_resuming_notification.h"
 
+#include "application_manager/application_manager_impl.h"
+#include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/message_helper.h"
 namespace application_manager {
 
 namespace commands {
 
-TTSStopSpeakingResponse::TTSStopSpeakingResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+OnResumingNotification::OnResumingNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
-TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
+OnResumingNotification::~OnResumingNotification() {
 }
 
-void TTSStopSpeakingResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run");
+void OnResumingNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnResumingNotification::Run");
+  const hmi_apis::Common_Result::eType result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_notification::result].asInt());
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_StopSpeaking);
-  event.set_smart_object(*message_);
-  event.raise();
+  if (hmi_apis::Common_Result::SUCCESS == result) {
+    int32_t correlation_id = (*message_)[strings::params][strings::app_id].asInt();
+    const uint32_t app_id = ApplicationManagerImpl::instance()->
+        application_id(correlation_id);
+    if (!app_id) {
+      LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
+      return;
+    }
+    Application* application = ApplicationManagerImpl::instance()->application(app_id);
+    if (application) {
+      if (ApplicationManagerImpl::instance()->RestoreApplicationHMILevel(application)) {
+        if (application->hmi_level() == mobile_apis::HMILevel::HMI_FULL) {
+          MessageHelper::SendActivateAppToHMI(app_id);
+        }
+        MessageHelper::SendHMIStatusNotification(*application);
+      }
+    } else {
+      LOG4CXX_ERROR(logger_, "Application cannot be resumed");
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Error result code"<<code);
+  }
 }
-
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -29,30 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 
-#include "application_manager/event_engine/event.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSStopSpeakingResponse::TTSStopSpeakingResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+/**
+ * @brief OnReadyNotification command class
+ **/
+class OnResumingNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnResumingNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnResumingNotification(const MessageSharedPtr& message);
 
-TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
-}
+  /**
+   * @brief OnResumingNotification class destructor
+   **/
+  virtual ~OnResumingNotification();
 
-void TTSStopSpeakingResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_StopSpeaking);
-  event.set_smart_object(*message_);
-  event.raise();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnResumingNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_READY_NOTIFICATION_H_

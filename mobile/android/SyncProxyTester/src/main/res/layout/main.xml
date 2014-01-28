@@ -69,7 +69,7 @@
         <TableRow
             android:id="@+id/LinearLayout06"
             android:layout_width="fill_parent"
-            android:paddingTop="25dip"
+            android:paddingTop="5dip"
             android:layout_height="wrap_content">
             <fragment
                 android:id="@+id/audioFragment"
