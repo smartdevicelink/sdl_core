@@ -223,7 +223,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     SyncConnection _syncConnection;
     // RPC Session ID
-    protected Session currentSession = new Session();
+    protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID);
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
@@ -1473,7 +1473,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
 
                         //_autoActivateIdReturned = msg.getAutoActivateID();
-                    /*Place holder for legacy support*/
+                        /*Place holder for legacy support*/
                         _autoActivateIdReturned = "8675309";
                         _buttonCapabilities = msg.getButtonCapabilities();
                         _displayCapabilities = msg.getDisplayCapabilities();
@@ -1503,30 +1503,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                             SyncExceptionCause.SYNC_REGISTRATION_ERROR));
                         }
 
-                        if (_callbackToUIThread) {
-                            // Run in UI thread
-                            _mainUIHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (_proxyListener instanceof IProxyListener) {
-                                        ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(
-                                                msg);
-                                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                                        ((IProxyListenerALMTesting) _proxyListener)
-                                                .onRegisterAppInterfaceResponse(
-                                                        msg);
-                                    }
-                                }
-                            });
-                        } else {
-                            if (_proxyListener instanceof IProxyListener) {
-                                ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(
-                                        msg);
-                            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                                ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(
-                                        msg);
-                            }
-                        }
+                        processRegisterAppInterfaceResponse(msg);
                     } else if (
                             responseCorrelationID == POLICIES_CORRELATION_ID &&
                                     functionName.equals(
@@ -1598,29 +1575,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                             SyncExceptionCause.SYNC_REGISTRATION_ERROR));
                         }
                     }
-                    if (_callbackToUIThread) {
-                        // Run in UI thread
-                        _mainUIHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (_proxyListener instanceof IProxyListener) {
-                                    ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(
-                                            msg);
-                                } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                                    ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(
-                                            msg);
-                                }
-                            }
-                        });
-                    } else {
-                        if (_proxyListener instanceof IProxyListener) {
-                            ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(
-                                    msg);
-                        } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                            ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(
-                                    msg);
-                        }
-                    }
+                    processRegisterAppInterfaceResponse(msg);
                 } else if (functionName.equals(Names.Speak)) {
                     // SpeakResponse
 
@@ -2755,8 +2710,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void startMobileNaviService(byte sessionID, String correlationID) {
-        Log.i(TAG, "Mobile Nav Session started" + correlationID);
-
+        Log.i(TAG, "Mobile Nav Session started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2791,24 +2745,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (sessionID != currentSession.getSessionId()) {
             throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
         }
-        currentSession.createService(serviceType);
+        Service service = currentSession.createService(serviceType);
+        currentSession.addService(service);
     }
 
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
-            Log.i(TAG, "Mobile Nav Session is going to stop" + currentSession.getSessionId());
-            if (getSyncConnection() != null) {
-                getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
-            }
+            Log.i(TAG, "Mobile Nav Session is going to stop " + currentSession.getSessionId());
+            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
         }
     }
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
-            Log.i(TAG, "Audio service is going to stop" + currentSession.getSessionId());
-            if (getSyncConnection() != null) {
-                getSyncConnection().closeAudioService(currentSession.getSessionId());
-            }
+            Log.i(TAG, "Audio service is going to stop " + currentSession.getSessionId());
+            getSyncConnection().closeAudioService(currentSession.getSessionId());
         }
     }
 
@@ -3657,8 +3608,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         restartRPCProtocolSession();
     }
 
+    // TODO: Need to refactor it
     public List<Service> getServicePool() {
         return currentSession.getServiceList();
+    }
+
+    public boolean hasServiceInServicesPool(ServiceType serviceType) {
+        return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
     // Private Class to Interface with SyncConnection
@@ -3693,8 +3649,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onHeartbeatTimedOut() {
             final String msg = "Heartbeat timeout";
             DebugTool.logInfo(msg);
-            notifyProxyClosed(msg, new SyncException(msg,
-                    SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
         @Override
@@ -3702,10 +3657,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             try {
                 if (msg.getData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
             try {
                 if (msg.getBulkData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
         }
 
@@ -3714,9 +3671,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (_wiproVersion == 1) {
                 if (version == 2) setWiProVersion(version);
             }
-            currentSession = session;
-            Service service = session.getServiceList().get(0);
-            if (service.getServiceType().eq(ServiceType.RPC)) {
+            if (session.hasService(ServiceType.RPC)) {
                 startRPCProtocolService(session.getSessionId(), correlationID);
             }
         }
@@ -3738,15 +3693,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
+                                             String correlationID) {
             if (_wiproVersion == 2) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
-                    return;
-                }
-                if (serviceType.equals(ServiceType.Audio_Service)) {
+                } else if (serviceType.equals(ServiceType.Audio_Service)){
                     startAudioService(sessionID, correlationID);
-                    return;
                 }
             }
         }
@@ -3760,4 +3713,37 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             IRPCRequestConverterFactory rpcRequestConverterFactory) {
         this.rpcRequestConverterFactory = rpcRequestConverterFactory;
     }
-} // end-class
+
+    private void processRegisterAppInterfaceResponse(final RegisterAppInterfaceResponse response) {
+        // Create callback
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (_proxyListener instanceof IProxyListener) {
+                        ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
+                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                        ((IProxyListenerALMTesting) _proxyListener)
+                                .onRegisterAppInterfaceResponse(response);
+                    }
+                }
+            });
+        } else {
+            if (_proxyListener instanceof IProxyListener) {
+                ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
+            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(response);
+            }
+        }
+        // Restore Services
+        if (!currentSession.isServicesEmpty() && _syncConnection.getIsConnected()) {
+            if (currentSession.hasService(ServiceType.Mobile_Nav)) {
+                _syncConnection.startMobileNavService(currentSession);
+            }
+            if (currentSession.hasService(ServiceType.Audio_Service)) {
+                _syncConnection.startAudioService(currentSession);
+            }
+        }
+    }
+}

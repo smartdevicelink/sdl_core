@@ -31,6 +31,8 @@
  */
 #include "application_manager/commands/hmi/tts_stop_speaking_response.h"
 
+#include "application_manager/event_engine/event.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -46,7 +48,9 @@ TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
 void TTSStopSpeakingResponse::Run() {
   LOG4CXX_INFO(logger_, "TTSStopSpeakingResponse::Run");
 
-  // TODO(VS): Process response from HMI
+  event_engine::Event event(hmi_apis::FunctionID::TTS_StopSpeaking);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

@@ -37,9 +37,9 @@
 #include <map>
 #include "dbus/dbus_adapter.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace dbus {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class DBusMessageController : public DBusAdapter {
  public:

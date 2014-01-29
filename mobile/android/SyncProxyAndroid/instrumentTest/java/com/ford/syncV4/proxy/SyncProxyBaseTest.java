@@ -50,7 +50,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
         List<Service> serviceList = proxyALM.getServicePool();
-        assertEquals("service pool should have mobile nav service", ServiceType.Mobile_Nav, serviceList.get(0).getServiceType());
+        assertTrue(proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
         assertEquals(sessionID, serviceList.get(0).getSession().getSessionId());
     }
 
@@ -58,7 +58,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, VERSION, "");
         proxyALM.stopMobileNaviService();
-        assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
+        assertEquals("pool should be empty", false, proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
     }
 
     public void testMobileNavServiceEndedOnDispose() throws Exception {
@@ -160,7 +160,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         Service audioService = new Service();
         audioService.setSession(session);
         audioService.setServiceType(ServiceType.Audio_Service);
-        assertTrue("pool should have AudioService ", proxyALM.getServicePool().contains(audioService));
+        assertTrue("pool should have AudioService ", proxyALM.hasServiceInServicesPool(ServiceType.Audio_Service));
     }
 
     public void testOnAudioServiceStartServiceCallbackCalled() throws Exception {
@@ -181,7 +181,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         Service mobileNaviService = new Service();
         mobileNaviService.setSession(session);
         mobileNaviService.setServiceType(ServiceType.Mobile_Nav);
-        assertTrue("pool should have Mobile nav service ", proxyALM.getServicePool().contains(mobileNaviService));
+        assertTrue("pool should have Mobile nav service ", proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
         Service audioService = new Service();
         audioService.setSession(session);
         audioService.setServiceType(ServiceType.Audio_Service);

@@ -40,6 +40,10 @@ public class Session {
     }
 
     public void addService(Service service) {
+        Log.i(TAG, "Add " + service + ", contains:" + serviceList.contains(service));
+        if (serviceList.contains(service)) {
+            return;
+        }
         serviceList.add(service);
     }
 
@@ -51,6 +55,26 @@ public class Session {
         this.serviceList = serviceList;
     }
 
+    public boolean hasService(ServiceType serviceType) {
+        if (serviceList == null || serviceList.isEmpty()) {
+            return false;
+        }
+        for (Service service : serviceList) {
+            if (service.getServiceType() == serviceType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getServicesNumber() {
+        return serviceList != null ? serviceList.size() : 0;
+    }
+
+    public boolean isServicesEmpty() {
+        return serviceList != null && serviceList.isEmpty();
+    }
+
     @Override
     public String toString() {
         return "Session{" +
@@ -60,15 +84,16 @@ public class Session {
     }
 
     public boolean removeService(Service service) {
-        return serviceList.remove(service);
+        boolean result = serviceList.remove(service);
+        Log.i(TAG, "Remove " + service.getServiceType() + ", complete:" + result);
+        return result;
     }
 
     public Service createService(ServiceType serviceType) {
+        Log.i(TAG, "Create " + serviceType);
         Service service = new Service();
         service.setServiceType(serviceType);
         service.setSession(this);
-        // TODO: method 'create' must not do additional actions, such as add to collection
-        serviceList.add(service);
         return service;
     }
 

@@ -218,4 +218,24 @@ public class OnVehicleData extends RPCNotification {
     public String getSatRadioESN() {
     	return (String) store.get(Names.satRadioESN);
     }
+
+    public void setSteeringWheelAngle(Float steeringWheelAngle) {
+        if (steeringWheelAngle != null) {
+            parameters.put(Names.steeringWheelAngle, steeringWheelAngle);
+        } else {
+            parameters.remove(Names.steeringWheelAngle);
+        }
+    }
+
+    public Float getSteeringWheelAngle() {
+        final Object o = parameters.get(Names.steeringWheelAngle);
+        if (o instanceof Float) {
+            return (Float) o;
+        }
+        if (o instanceof Double) {
+            return ((Double) o).floatValue();
+        }
+        return null;
+    }
+
 }

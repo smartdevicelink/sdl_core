@@ -20,6 +20,7 @@ import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
+import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -112,6 +113,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
+
     static final String TAG = "SyncProxyTester";
 
     private static final String APPID_BT = FlavorConst.APPID_BT;
@@ -144,9 +146,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     private int awaitingPutFileResponseCorrelationID;
 
+    private ConnectionListenersManager mConnectionListenersManager;
 
     public void onCreate() {
         super.onCreate();
+
+        // Init Listener managers (ConnectionListenersManager, etc ...)
+        mConnectionListenersManager = new ConnectionListenersManager();
 
         IntentFilter mediaIntentFilter = new IntentFilter();
         mediaIntentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
@@ -745,17 +751,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         prevHMILevel = HMILevel.HMI_NONE;
 
         if (wasConnected) {
-            final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-            if (mainActivity != null) {
-                mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mainActivity.onProxyClosed(info);
-                    }
-                });
-            } else {
-                Log.w(TAG, "mainActivity not found");
-            }
+            mConnectionListenersManager.dispatch();
         }
 
         if (!isModuleTesting()) {
@@ -769,10 +765,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 reset();
             }
 
-            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) &&
-                    (_msgAdapter != null)) {
-                _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e,
-                        true);
+            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && (_msgAdapter != null)) {
+                _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e, true);
             }
         }
     }

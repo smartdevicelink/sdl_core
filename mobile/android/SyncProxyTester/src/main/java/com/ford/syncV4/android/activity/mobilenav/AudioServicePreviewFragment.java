@@ -10,13 +10,16 @@ import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.android.listener.ConnectionListener;
+import com.ford.syncV4.android.listener.ConnectionListenersManager;
 
 import java.io.OutputStream;
 
 /**
  * Created by Andrew Batutin on 1/23/14.
  */
-public class AudioServicePreviewFragment extends Fragment implements ServicePreviewFragmentInterface {
+public class AudioServicePreviewFragment extends Fragment implements ServicePreviewFragmentInterface,
+        ConnectionListener {
     private static final String TAG =
             AudioServicePreviewFragment.class.getSimpleName();
     private CheckBoxState mobileNavSessionCheckBoxState;
@@ -25,10 +28,16 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
     private SyncProxyTester context;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        addListeners();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_audio_service_preview,
-                container, true);
+        View view = inflater.inflate(R.layout.activity_audio_service_preview, container, true);
         context = (SyncProxyTester) getActivity();
         fileStreamingLogic = new FileStreamingLogic(this);
         return view;
@@ -38,6 +47,20 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initiateVideoCheckBox(view);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        removeListeners();
+    }
+
+    @Override
+    public void onProxyClosed() {
+        if (fileStreamingLogic != null && fileStreamingLogic.isStreamingInProgress()) {
+            fileStreamingLogic.cancelStreaming();
+        }
     }
 
     private void initiateVideoCheckBox(View view) {
@@ -59,7 +82,7 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startAudioService();
         } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
-            fileStreamingLogic.cancelStreaming();
+            fileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopAudioService();
             mobileNavSessionCheckBoxState.setStateOff();
@@ -77,15 +100,21 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
     public void setAudioServiceStateOn(OutputStream stream) {
         mobileNavSessionCheckBoxState.setStateOn();
         dataStreamingButton.setEnabled(true);
+
         fileStreamingLogic.setOutputStream(stream);
         fileStreamingLogic.createStaticFileReader();
+        if (fileStreamingLogic.isStreamingInProgress()) {
+            startFileStreaming();
+        }
     }
 
+    @Override
     public void dataStreamingStarted() {
         dataStreamingButton.setEnabled(false);
         dataStreamingButton.setText("Data is streaming");
     }
 
+    @Override
     public void dataStreamingStopped() {
         if (mobileNavSessionCheckBoxState.getState() == CheckBoxStateValue.ON) {
             dataStreamingButton.setEnabled(true);
@@ -116,4 +145,17 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
         }
     }
 
+    /**
+     * Add all necessary listeners
+     */
+    private void addListeners() {
+        ConnectionListenersManager.addConnectionListener(this);
+    }
+
+    /**
+     * Remove all subscribed listeners
+     */
+    private void removeListeners() {
+        ConnectionListenersManager.removeConnectionListener(this);
+    }
 }

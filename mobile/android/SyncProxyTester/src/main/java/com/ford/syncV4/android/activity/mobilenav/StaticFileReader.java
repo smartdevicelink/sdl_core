@@ -66,6 +66,4 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
         super.onCancelled();
         mListener.onCancelReading();
     }
-
-
 }
